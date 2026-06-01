@@ -18,7 +18,8 @@
     "test-playwright": "./scripts/test_playwright.sh",
     "test-unit": "vitest run --testTimeout 10000",
     "test": "npm run test-unit && npm run test-playwright",
-    "prepare": "husky"
+    "prepare": "husky",
+    "upgrade": "npm-check-updates -u; rm -r node_modules; rm package-lock.json; npm install"
   },
   "dependencies": {
     "@versatiles/style": "^5.12.0",
@@ -40,6 +41,7 @@
     "globals": "^17.6.0",
     "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
+    "npm-check-updates": "^22.2.1",
     "playwright": "^1.60.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^3.5.2",
