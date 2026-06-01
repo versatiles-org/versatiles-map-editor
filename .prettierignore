@@ -3,4 +3,3 @@ node_modules/
 package-lock.json
 package.json
 playwright-tests/__snapshots__/
-src/lib/components/BBoxMap/bboxes.json

@@ -1,45 +1,37 @@
-[![NPM version](https://img.shields.io/npm/v/%40versatiles%2Fsvelte)](https://www.npmjs.com/package/@versatiles/svelte)
-[![NPM downloads](https://img.shields.io/npm/dy/%40versatiles%2Fsvelte)](https://www.npmjs.com/package/@versatiles/svelte)
-[![Code coverage](https://codecov.io/gh/versatiles-org/node-versatiles-svelte/branch/main/graph/badge.svg?token=DaJDN0E3Ae)](https://codecov.io/gh/versatiles-org/node-versatiles-svelte)
-[![CI status](https://img.shields.io/github/actions/workflow/status/versatiles-org/node-versatiles-svelte/ci.yml)](https://github.com/versatiles-org/node-versatiles-svelte/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+# VersaTiles Map Editor
 
-# Svelte Components for VersaTiles
+A standalone, embeddable map editor for [VersaTiles](https://versatiles.org). Draw and style markers, lines, circles and polygons on a vector map and share the result via a self-contained URL hash.
 
-Play with them: https://versatiles.org/node-versatiles-svelte/
+This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLibre GL](https://maplibre.org/) and [`@versatiles/style`](https://github.com/versatiles-org/versatiles-style). It was extracted from [`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte) to be developed on its own.
 
-## Install
+## Development
 
 ```bash
-npm i @versatiles/svelte
+npm install
+npm run dev      # start the dev server
+npm run build    # build the static site (adapter-static)
+npm run preview  # preview the production build
 ```
 
-## Components
+### Quality checks
 
-<table>
-	<tr>
-		<th>Name</th>
-		<th>Light Mode</th>
-		<th>Dark Mode</th>
-	</tr>
-	<tr>
-		<th>BasicMap</th>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/basic-map-light.png"></td>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/basic-map-dark.png"></td>
-	</tr>
-	<tr>
-		<th>BBoxMap</th>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/bbox-map-light.png"></td>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/bbox-map-dark.png"></td>
-	</tr>
-	<tr>
-		<th>LocatorMap</th>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/locator-map-light.png"></td>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/locator-map-dark.png"></td>
-	</tr>
-	<tr>
-		<th>MapEditor</th>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/map-editor-light.png"></td>
-		<td><img width="512" src="https://versatiles.org/node-versatiles-svelte/screenshots/map-editor-dark.png"></td>
-	</tr>
-</table>
+```bash
+npm run lint            # ESLint
+npm run format:check    # Prettier
+npm run test-unit       # Vitest unit tests
+npm run test-playwright # Playwright visual/e2e tests
+```
+
+## Embedding
+
+The editor reads its state from the URL hash, so it can be embedded in an `<iframe>`:
+
+```html
+<iframe src="https://your-host/#<state-hash>" style="width: 600px; height: 600px;"></iframe>
+```
+
+When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
