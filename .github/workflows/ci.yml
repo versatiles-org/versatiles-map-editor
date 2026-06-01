@@ -5,9 +5,6 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  IMAGE_NAME: ghcr.io/versatiles-org/versatiles-map-editor-playwright-testing:latest
-
 jobs:
   test:
     name: Test
@@ -57,45 +54,29 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 22
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Prepare Playwright
-        uses: docker/build-push-action@v7
+      - name: Init cache
+        uses: actions/cache@v5
         with:
-          context: .
-          push: true
-          load: true
-          tags: ${{ env.IMAGE_NAME }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          file: docker/stable-slim.Dockerfile
+          path: node_modules
+          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
 
       - name: Test Playwright
-        run: |
-          set -eo pipefail
-          docker run \
-            -v $(pwd)/src:/code/src \
-            -v $(pwd)/static:/code/static \
-            -v $(pwd)/playwright-tests:/code/playwright-tests \
-            -v $(pwd)/test-results:/code/test-results \
-            --ipc=host \
-            --rm ${{ env.IMAGE_NAME }} \
-            /bin/bash -c "set -e; npx playwright test"
+        run: npx playwright test
 
       - name: Upload Playwright Test Results
         uses: actions/upload-artifact@v7

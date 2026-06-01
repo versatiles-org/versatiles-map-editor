@@ -15,7 +15,7 @@
     "lint": "eslint --color .",
     "preview": "vite preview",
     "test-coverage": "vitest run --coverage",
-    "test-playwright": "./scripts/test_playwright.sh",
+    "test-playwright": "playwright test",
     "test-unit": "vitest run --testTimeout 10000",
     "test": "npm run test-unit && npm run test-playwright",
     "prepare": "husky",
