@@ -6,7 +6,7 @@
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
-	import { StateReader } from '$lib/codec/reader.js';
+	import { decodeState } from '$lib/codec/index.js';
 
 	let {
 		onMapLoad
@@ -83,8 +83,7 @@
 
 		function readHash(hash: string) {
 			if (!geometryManager) return;
-			const stateReader = StateReader.fromBase64(hash);
-			geometryManager.loadState(stateReader.readRoot());
+			geometryManager.loadState(decodeState(hash));
 		}
 	}
 </script>

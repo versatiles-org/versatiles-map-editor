@@ -1,7 +1,5 @@
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import { StateReader } from '$lib/codec/reader.js';
-import { StateWriter } from '$lib/codec/writer.js';
-import type { StateMetadata } from '$lib/codec/types.js';
+import { encodeState, decodeState, type StateMetadata } from '$lib/codec/index.js';
 import { StateHistory } from './history.js';
 
 export class StateManager {
@@ -15,7 +13,6 @@ export class StateManager {
 	}
 
 	public getHash(additionalMeta?: StateMetadata): string {
-		const writer = new StateWriter();
 		const state = this.geometryManager.getState();
 
 		if (additionalMeta) {
@@ -27,14 +24,13 @@ export class StateManager {
 			}
 		}
 
-		writer.writeRoot(state);
-		return writer.asBase64();
+		return encodeState(state);
 	}
 
 	public setHash(hash: string) {
 		if (!hash) return;
 		try {
-			const state = StateReader.fromBase64(hash).readRoot();
+			const state = decodeState(hash);
 
 			this.disableLogging = true;
 			this.geometryManager.setState(state);
