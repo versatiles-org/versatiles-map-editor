@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getSymbol, getSymbolIndexByName, SymbolLibrary } from './symbols.js';
-import { MockMap } from '../../../__mocks__/map.js';
+import { MockMap } from '$lib/__mocks__/map.js';
 
 describe('getSymbol', () => {
 	it('should return the correct symbol for a given index', () => {

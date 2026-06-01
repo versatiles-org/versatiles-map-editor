@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock, type Mocked } from 'vitest';
 import { writable, type Writable } from 'svelte/store';
 import { SelectionHandler } from './selection.js';
-import { MockMap } from '../../../__mocks__/map.js';
+import { MockMap } from '$lib/__mocks__/map.js';
 import type maplibregl from 'maplibre-gl';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { Cursor } from './cursor.js';

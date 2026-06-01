@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MapEditor } from '$lib/index.js';
+	import MapEditor from '$lib/MapEditor.svelte';
 </script>
 
 <div class="wrapper">

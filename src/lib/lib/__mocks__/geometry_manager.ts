@@ -3,7 +3,7 @@ import type { StateRoot } from '../state/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { writable, type Writable } from 'svelte/store';
 import { vi } from 'vitest';
-import { MockMap } from '../../../../__mocks__/map.js';
+import { MockMap } from '$lib/__mocks__/map.js';
 import { MockCursor } from './cursor.js';
 import { StateManager } from '../state/manager.js';
 

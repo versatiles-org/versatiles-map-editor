@@ -1,6 +1,6 @@
 <script lang="ts">
 	const src =
-		'/map-editor#FlFcU1RCXQyUhNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAJTLHGIKHCCo6lKwwoqgAABiqAAAA';
+		'/#FlFcU1RCXQyUhNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAJTLHGIKHCCo6lKwwoqgAABiqAAAA';
 </script>
 
 <table>

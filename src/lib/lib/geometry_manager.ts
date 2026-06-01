@@ -4,7 +4,7 @@ import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { StateRoot } from './state/types.js';
 import { get, writable, type Writable } from 'svelte/store';
-import { getMapStyle } from '../../../utils/map_style.js';
+import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
 import { MarkerElement } from './element/marker.js';

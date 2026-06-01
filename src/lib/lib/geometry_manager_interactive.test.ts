@@ -3,7 +3,7 @@ import { GeometryManagerInteractive, type ExtendedGeoJSON } from './geometry_man
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
-import { LngLat, MockMap, type MaplibreMap } from '../../../__mocks__/map.js';
+import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import { get } from 'svelte/store';
 import type { GeoPath, GeoPoint } from './utils/types.js';
 
