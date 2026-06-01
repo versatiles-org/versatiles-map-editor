@@ -1,7 +1,8 @@
 name: Pages
 
 on:
-  workflow_call:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -9,12 +10,9 @@ permissions:
 
 jobs:
   build:
-    name: Build Svelte and Generate Screenshots
-    runs-on: macos-latest
+    name: Build Svelte
+    runs-on: ubuntu-latest
     steps:
-      - name: Install Dependencies
-        run: brew install pngquant optipng
-
       - name: Checkout repository
         uses: actions/checkout@v6
 
@@ -32,31 +30,8 @@ jobs:
       - name: Install
         run: npm install
 
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-
       - name: Build the project
         run: npm run build
-
-      - name: Generate screenshots
-        run: npm run screenshots
-
-      - name: Check screenshots folder
-        run: |
-          if [ $(du -k screenshots | cut -f1) -lt 1024 ]; then
-            echo "Screenshots folder is less than 1MB"
-            echo "Maybe the screenshots are not generated correctly"
-            exit 1
-          fi
-
-      - name: pngquant
-        run: pngquant screenshots/*.png --ext .png --force --nofs
-
-      - name: optipng
-        run: optipng screenshots/*.png
-
-      - name: Add screenshots to build
-        run: mv screenshots build/
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v5

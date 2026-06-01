@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ghcr.io/versatiles-org/versatiles-svelte-playwright-testing:latest
+  IMAGE_NAME: ghcr.io/versatiles-org/versatiles-map-editor-playwright-testing:latest
 
 jobs:
   test:

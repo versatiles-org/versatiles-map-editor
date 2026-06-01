@@ -6,7 +6,7 @@ test.use({ viewport: { width: 903, height: 903 }, deviceScaleFactor: 1 });
 test('works in iframe1', async ({ page }) => {
 	const tracker = await trackServerRequests(page);
 
-	await page.goto('/map-editor/iframe-test');
+	await page.goto('/iframe-test');
 	await waitForMapIsReady(page, 3);
 	await page.waitForTimeout(3000); // be more patient
 

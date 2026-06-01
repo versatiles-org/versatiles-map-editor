@@ -2,7 +2,7 @@ import { expect, test } from './lib/test.js';
 import { checkScreenshot, trackServerRequests, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
-	'/map-editor#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
+	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
 
 const ariaResult = `- region "Map"
 - group:
@@ -50,13 +50,13 @@ const ariaResult = `- region "Map"
 - paragraph:
   - text: Submit bugs and feature requests as
   - link "Repository on GitHub":
-    - /url: https://github.com/versatiles-org/node-versatiles-svelte/issues
+    - /url: https://github.com/versatiles-org/versatiles-map-editor/issues
     - text: GitHub Issues`;
 
 test('empty map', async ({ page }) => {
 	const tracker = await trackServerRequests(page);
 
-	await page.goto('/map-editor');
+	await page.goto('/');
 	await waitForMapIsReady(page);
 
 	expect(await page.locator('.wrapper').count()).toBe(1);

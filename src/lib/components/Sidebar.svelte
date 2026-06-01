@@ -109,7 +109,7 @@
 				Submit bugs and feature requests as
 				<a
 					id="github_link"
-					href="https://github.com/versatiles-org/node-versatiles-svelte/issues"
+					href="https://github.com/versatiles-org/versatiles-map-editor/issues"
 					target="_blank"
 					aria-label="Repository on GitHub">GitHub Issues</a
 				>
