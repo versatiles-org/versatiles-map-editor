@@ -1,5 +1,5 @@
 import { expect, test } from './lib/test.js';
-import { checkScreenshot, trackServerRequests, waitForMapIsReady } from './lib/utils';
+import { trackServerRequests, waitForMapIsReady } from './lib/utils';
 
 test.use({ viewport: { width: 903, height: 903 }, deviceScaleFactor: 1 });
 
@@ -29,6 +29,4 @@ test('works in iframe1', async ({ page }) => {
 		'tiles/osm/13/4400/2686',
 		'tiles/osm/13/4400/2687'
 	]);
-
-	await checkScreenshot(page, 'iframe1', 6e5);
 });

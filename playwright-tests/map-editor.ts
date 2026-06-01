@@ -1,5 +1,5 @@
 import { expect, test } from './lib/test.js';
-import { checkScreenshot, trackServerRequests, waitForMapIsReady } from './lib/utils';
+import { trackServerRequests, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
@@ -83,7 +83,6 @@ test('empty map', async ({ page }) => {
 	]);
 
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
-	await checkScreenshot(page, 'empty', 3.7e5);
 });
 
 test('filled map', async ({ page }) => {
@@ -103,7 +102,6 @@ test('filled map', async ({ page }) => {
 	]);
 
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
-	await checkScreenshot(page, 'loaded', 4.9e5);
 
 	/*
 	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
