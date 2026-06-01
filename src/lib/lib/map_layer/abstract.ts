@@ -127,6 +127,4 @@ export abstract class MapLayer<T extends LayerSpec> {
 	}
 
 	abstract getState(): StateStyle | undefined;
-	abstract getGeoJSONProperties(): GeoJSON.GeoJsonProperties;
-	abstract setGeoJSONProperties(properties: GeoJSON.GeoJsonProperties): void;
 }

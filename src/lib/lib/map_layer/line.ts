@@ -69,24 +69,4 @@ export class MapLayerLine extends MapLayer<LayerLine> {
 		if (state.visible) this.visible.set(state.visible);
 		if (state.width) this.width.set(state.width);
 	}
-
-	getGeoJSONProperties(): GeoJSON.GeoJsonProperties {
-		return {
-			'stroke-color': get(this.color),
-			'stroke-style': dashArrays.get(get(this.dashed))?.name,
-			'stroke-width': get(this.width),
-			'stroke-visibility': get(this.visible)
-		};
-	}
-
-	setGeoJSONProperties(properties: GeoJSON.GeoJsonProperties): void {
-		if (properties == null) return;
-		if (properties['stroke-color']) this.color.set(properties['stroke-color']);
-		if (properties['stroke-style']) {
-			const dash = dashArrays.entries().find(([, { name }]) => name === properties['stroke-style']);
-			if (dash) this.dashed.set(dash[0]);
-		}
-		if (properties['stroke-width']) this.width.set(properties['stroke-width']);
-		if (properties['stroke-visibility']) this.visible.set(properties['stroke-visibility']);
-	}
 }

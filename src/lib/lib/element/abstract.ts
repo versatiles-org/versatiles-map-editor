@@ -58,12 +58,8 @@ export abstract class AbstractElement {
 		this.destroy();
 	}
 
-	public getGeoJSON(): GeoJSON.Feature {
-		return this.getFeature(true);
-	}
-
 	abstract destroy(): void;
-	abstract getFeature(includeProperties?: boolean): GeoJSON.Feature;
+	abstract getFeature(): GeoJSON.Feature;
 	abstract getSelectionNodes(): SelectionNode[];
 	abstract getSelectionNodeUpdater(properties?: Record<string, unknown>): SelectionNodeUpdater | undefined;
 	abstract getState(): StateElement;

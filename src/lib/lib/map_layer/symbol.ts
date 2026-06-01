@@ -4,7 +4,7 @@ import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
-import { getSymbol, getSymbolIndexByName } from '../symbols.js';
+import { getSymbol } from '../symbols.js';
 import { removeDefaultFields } from '../state/utils.js';
 
 interface LabelAlign {
@@ -133,32 +133,6 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 		if (state.pattern) this.symbolIndex.set(state.pattern);
 		if (state.label) this.label.set(state.label);
 		if (state.align) this.labelAlign.set(lookupLabelAlign(state.align).index);
-	}
-
-	getGeoJSONProperties(): GeoJSON.GeoJsonProperties {
-		return {
-			'symbol-color': get(this.color),
-			'symbol-halo-width': get(this.halo),
-			'symbol-rotate': get(this.rotate),
-			'symbol-size': get(this.size),
-			'symbol-pattern': get(this.symbolInfo).name,
-			'symbol-label': get(this.label),
-			'symbol-label-align': lookupLabelAlign(this.labelAlign).name
-		};
-	}
-
-	setGeoJSONProperties(properties: GeoJSON.GeoJsonProperties): void {
-		if (properties == null) return;
-		if (properties['symbol-color']) this.color.set(properties['symbol-color']);
-		if (properties['symbol-halo-width']) this.halo.set(properties['symbol-halo-width']);
-		if (properties['symbol-rotate']) this.rotate.set(properties['symbol-rotate']);
-		if (properties['symbol-size']) this.size.set(properties['symbol-size']);
-		if (properties['symbol-label']) this.label.set(properties['symbol-label']);
-		if (properties['symbol-label-align']) this.labelAlign.set(lookupLabelAlign(properties['symbol-label-align']).index);
-		if (properties['symbol-pattern']) {
-			const index = getSymbolIndexByName(properties['symbol-pattern']);
-			if (index != null) this.symbolIndex.set(index);
-		}
 	}
 }
 
