@@ -3,7 +3,7 @@ import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import type { GeoPoint } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
-import type { StateElementCircle } from '../state/types.js';
+import type { StateElementCircle } from '$lib/codec/types.js';
 import { AbstractElement } from './abstract.js';
 import { circle, distance } from '../utils/geometry.js';
 

@@ -1,7 +1,7 @@
 import type { LayerFill, LayerLine, LayerSymbol } from './types.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '../state/types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 type LayerSpec = LayerFill | LayerLine | LayerSymbol;

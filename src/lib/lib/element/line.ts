@@ -2,7 +2,7 @@ import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../utils/types.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
-import type { StateElementLine } from '../state/types.js';
+import type { StateElementLine } from '$lib/codec/types.js';
 
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;

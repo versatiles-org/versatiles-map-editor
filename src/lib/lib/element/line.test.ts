@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { LineElement } from './line.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementLine } from '../state/types.js';
+import type { StateElementLine } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
 
 describe('LineElement', () => {

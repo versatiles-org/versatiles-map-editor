@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { PolygonElement } from './polygon.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementPolygon } from '../state/types.js';
+import type { StateElementPolygon } from '$lib/codec/types.js';
 import { get } from 'svelte/store';
 import type { GeoPath } from '../utils/types.js';
 

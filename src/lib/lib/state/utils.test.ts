@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { removeDefaultFields } from './utils.js';
-import type { StateStyle } from './types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 
 describe('removeDefaultFields', () => {
 	it('should return undefined if all fields match the default', () => {

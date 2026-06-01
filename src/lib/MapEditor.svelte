@@ -6,7 +6,7 @@
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
-	import { StateReader } from './lib/state/reader.js';
+	import { StateReader } from '$lib/codec/reader.js';
 
 	let {
 		onMapLoad

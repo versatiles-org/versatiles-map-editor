@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { CircleElement } from './circle.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementCircle } from '../state/types.js';
+import type { StateElementCircle } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
 import type { Point } from 'geojson';
 

@@ -2,7 +2,7 @@ import type { AbstractElement } from './element/abstract.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
-import type { StateRoot } from './state/types.js';
+import type { StateRoot } from '$lib/codec/types.js';
 import { get, writable, type Writable } from 'svelte/store';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';

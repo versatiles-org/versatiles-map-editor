@@ -1,4 +1,4 @@
-import type { StateStyle } from './types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 
 export function removeDefaultFields(value: StateStyle, def: StateStyle): Partial<StateStyle> | undefined {
 	const entries = Object.entries(value).filter(([k, v]) => {

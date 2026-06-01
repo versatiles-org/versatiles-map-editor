@@ -1,7 +1,7 @@
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import { StateReader } from './reader.js';
-import { StateWriter } from './writer.js';
-import type { StateMetadata } from './types.js';
+import { StateReader } from '$lib/codec/reader.js';
+import { StateWriter } from '$lib/codec/writer.js';
+import type { StateMetadata } from '$lib/codec/types.js';
 import { StateHistory } from './history.js';
 
 export class StateManager {

@@ -3,7 +3,7 @@ import type { LayerSymbol } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '../state/types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 import { getSymbol, getSymbolIndexByName } from '../symbols.js';
 import { removeDefaultFields } from '../state/utils.js';
 

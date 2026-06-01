@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementMarker } from '../state/types.js';
+import type { StateElementMarker } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
 
 describe('MarkerElement', () => {

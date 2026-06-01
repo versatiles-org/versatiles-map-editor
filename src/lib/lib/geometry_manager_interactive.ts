@@ -9,7 +9,7 @@ import { SelectionHandler } from './selection.js';
 import { flatten } from './utils/geometry.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
-import type { StateRoot } from './state/types.js';
+import type { StateRoot } from '$lib/codec/types.js';
 
 export type ExtendedGeoJSON = GeoJSON.FeatureCollection & {
 	map?: { center: [number, number]; zoom: number };

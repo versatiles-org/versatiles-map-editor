@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import type { StateRoot } from './types.js';
+import type { StateRoot } from '$lib/codec/types.js';
 import { get } from 'svelte/store';
 import { MockMap } from '$lib/__mocks__/map.js';
 

@@ -3,7 +3,7 @@ import type { GeoPath } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
-import type { StateElementPolygon } from '../state/types.js';
+import type { StateElementPolygon } from '$lib/codec/types.js';
 
 export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
