@@ -4,16 +4,12 @@ import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
 import { MarkerElement } from './element/marker.js';
 import { PolygonElement } from './element/polygon.js';
-import { GeometryManager } from './geometry_manager.js';
+import { GeometryManager, elementFromState } from './geometry_manager.js';
 import { SelectionHandler } from './selection.js';
-import { flatten } from './utils/geometry.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
+import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from '$lib/codec/index.js';
 import type { StateRoot } from '$lib/codec/types.js';
-
-export type ExtendedGeoJSON = GeoJSON.FeatureCollection & {
-	map?: { center: [number, number]; zoom: number };
-};
 
 export class GeometryManagerInteractive extends GeometryManager {
 	public readonly selection: SelectionHandler;
@@ -59,16 +55,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 		return element;
 	}
 
-	public getGeoJSON(): GeoJSON.FeatureCollection {
-		const center = this.map.getCenter();
-		return {
-			type: 'FeatureCollection',
-			map: {
-				center: [center.lng, center.lat],
-				zoom: this.map.getZoom()
-			},
-			features: get(this.elements).map((element) => element.getGeoJSON())
-		} as GeoJSON.FeatureCollection;
+	public getGeoJSON(): GeoJSONDocument {
+		return stateToGeoJSON(this.getState());
 	}
 
 	public getState(): StateRoot {
@@ -89,40 +77,11 @@ export class GeometryManagerInteractive extends GeometryManager {
 		};
 	}
 
-	public addGeoJSON(geojson: ExtendedGeoJSON) {
-		if ('map' in geojson && geojson.map) {
-			const { map } = geojson;
-			if (typeof map.zoom === 'number') {
-				this.map.setZoom(map.zoom);
-			}
-			if (Array.isArray(map.center)) {
-				const [lng, lat] = map.center;
-				if (typeof lng === 'number' && typeof lat === 'number') {
-					this.map.setCenter({ lng, lat });
-				}
-			}
-		}
-
-		for (const feature of flatten(geojson.features)) {
-			let element: AbstractElement;
-			const p = feature.properties;
-
-			switch (feature.geometry.type) {
-				case 'Point':
-					if (p && p.subType == 'Circle' && p.radius != null) {
-						element = CircleElement.fromGeoJSON(this, feature as GeoJSON.Feature<GeoJSON.Point, { radius: number }>);
-						break;
-					}
-					element = MarkerElement.fromGeoJSON(this, feature as GeoJSON.Feature<GeoJSON.Point>);
-					break;
-				case 'LineString':
-					element = LineElement.fromGeoJSON(this, feature as GeoJSON.Feature<GeoJSON.LineString>);
-					break;
-				case 'Polygon':
-					element = PolygonElement.fromGeoJSON(this, feature as GeoJSON.Feature<GeoJSON.Polygon>);
-					break;
-			}
-			this.appendElement(element);
+	public addGeoJSON(doc: GeoJSONDocument) {
+		const state = stateFromGeoJSON(doc);
+		if (state.map) this.fitViewport(state.map);
+		for (const element of state.elements) {
+			this.appendElement(elementFromState(this, element));
 		}
 	}
 }

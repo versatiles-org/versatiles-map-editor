@@ -1,8 +1,9 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { GeometryManagerInteractive, type ExtendedGeoJSON } from './geometry_manager_interactive.js';
+import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
+import { CircleElement } from './element/circle.js';
 import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import { get } from 'svelte/store';
 import type { GeoPath, GeoPoint } from './utils/types.js';
@@ -154,140 +155,90 @@ describe('GeometryManager', () => {
 	});
 
 	describe('GeoJSON', () => {
-		it('should return correct GeoJSON', () => {
-			const center = new LngLat(10, 20);
-			vi.spyOn(mockMap, 'getCenter').mockReturnValue(center);
-			vi.spyOn(mockMap, 'getZoom').mockReturnValue(5);
-
-			const marker = manager.addNewElement('marker');
-			vi.spyOn(marker, 'getFeature').mockReturnValue({
-				type: 'Feature',
-				geometry: { type: 'Point', coordinates: [10, 20] },
-				properties: {}
-			});
+		it('returns a FeatureCollection delegating to the codec', () => {
+			vi.spyOn(mockMap, 'getCenter').mockReturnValue(new LngLat(10, 20));
+			manager.addNewElement('marker');
 
 			const geojson = manager.getGeoJSON();
-			expect(geojson).toEqual({
-				type: 'FeatureCollection',
-				map: {
-					center: [center.lng, center.lat],
-					zoom: 5
-				},
-				features: [
-					{
-						type: 'Feature',
-						geometry: { type: 'Point', coordinates: [10, 20] },
-						properties: {}
-					}
-				]
-			});
+			expect(geojson.type).toBe('FeatureCollection');
+			expect(geojson.features).toHaveLength(1);
+			expect(geojson.features[0].geometry.type).toBe('Point');
+			expect(geojson.map?.center).toEqual([10, 20]);
+			expect(typeof geojson.map?.radius).toBe('number');
 		});
 
-		it('should add GeoJSON with map properties', () => {
-			const geojson: ExtendedGeoJSON = {
+		it('applies the viewport from an imported document', () => {
+			manager.addGeoJSON({
 				type: 'FeatureCollection',
-				map: {
-					center: [10, 20],
-					zoom: 5
-				},
+				map: { center: [10, 20], radius: 1000 },
 				features: []
-			};
-
-			manager.addGeoJSON(geojson);
-
-			expect(mockMap.setCenter).toHaveBeenCalledWith({ lng: 10, lat: 20 });
-			expect(mockMap.setZoom).toHaveBeenCalledWith(5);
+			});
+			expect(mockMap.fitBounds).toHaveBeenCalled();
 		});
 
-		it('should add GeoJSON with Point feature', () => {
-			const geojson: ExtendedGeoJSON = {
+		it('imports Point, Circle, LineString and Polygon features', () => {
+			manager.addGeoJSON({
 				type: 'FeatureCollection',
 				features: [
+					{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } },
 					{
 						type: 'Feature',
-						geometry: { type: 'Point', coordinates: [10, 20] },
-						properties: {}
-					}
-				]
-			};
-
-			const spy = vi.spyOn(MarkerElement, 'fromGeoJSON').mockReturnValue(new MarkerElement(manager));
-
-			manager.addGeoJSON(geojson);
-
-			expect(spy).toHaveBeenCalled();
-			expect(manager.elements).toBeDefined();
-		});
-
-		it('should add GeoJSON with LineString feature', () => {
-			const geojson: ExtendedGeoJSON = {
-				type: 'FeatureCollection',
-				features: [
+						properties: { subType: 'Circle', radius: 500 },
+						geometry: { type: 'Point', coordinates: [1, 2] }
+					},
 					{
 						type: 'Feature',
+						properties: {},
 						geometry: {
 							type: 'LineString',
 							coordinates: [
-								[10, 20],
-								[30, 40]
+								[0, 0],
+								[1, 1]
 							]
-						},
-						properties: {}
-					}
-				]
-			};
-
-			const spy = vi.spyOn(LineElement, 'fromGeoJSON').mockReturnValue(new LineElement(manager));
-
-			manager.addGeoJSON(geojson);
-
-			expect(spy).toHaveBeenCalled();
-			expect(manager.elements).toBeDefined();
-		});
-
-		it('should add GeoJSON with Polygon feature', () => {
-			const geojson: ExtendedGeoJSON = {
-				type: 'FeatureCollection',
-				features: [
+						}
+					},
 					{
 						type: 'Feature',
+						properties: {},
 						geometry: {
 							type: 'Polygon',
 							coordinates: [
 								[
-									[10, 20],
-									[30, 40],
-									[50, 60],
-									[10, 20]
+									[0, 0],
+									[1, 0],
+									[1, 1],
+									[0, 0]
 								]
 							]
-						},
-						properties: {}
+						}
 					}
 				]
-			};
+			});
 
-			const spy = vi.spyOn(PolygonElement, 'fromGeoJSON').mockReturnValue(new PolygonElement(manager));
-
-			manager.addGeoJSON(geojson);
-
-			expect(spy).toHaveBeenCalled();
-			expect(manager.elements).toBeDefined();
+			const elements = get(manager.elements);
+			expect(elements[0]).toBeInstanceOf(MarkerElement);
+			expect(elements[1]).toBeInstanceOf(CircleElement);
+			expect(elements[2]).toBeInstanceOf(LineElement);
+			expect(elements[3]).toBeInstanceOf(PolygonElement);
 		});
 
-		it('should throw an error for unknown geometry type', () => {
-			const geojson = {
+		it('appends imported elements to the existing ones', () => {
+			manager.addNewElement('marker');
+			manager.addGeoJSON({
 				type: 'FeatureCollection',
-				features: [
-					{
-						type: 'Feature',
-						geometry: { type: 'Unknown', coordinates: [] },
-						properties: {}
-					}
-				]
-			} as unknown as ExtendedGeoJSON;
+				features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } }]
+			});
+			expect(get(manager.elements)).toHaveLength(2);
+		});
 
-			expect(() => manager.addGeoJSON(geojson)).toThrow('Unknown geometry type "Unknown"');
+		it('ignores features it cannot map without throwing', () => {
+			expect(() =>
+				manager.addGeoJSON({
+					type: 'FeatureCollection',
+					features: [{ type: 'Feature', properties: {}, geometry: { type: 'GeometryCollection', geometries: [] } }]
+				})
+			).not.toThrow();
+			expect(get(manager.elements)).toHaveLength(0);
 		});
 	});
 });

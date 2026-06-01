@@ -2,13 +2,29 @@ import type { AbstractElement } from './element/abstract.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateRoot, StateElement } from '$lib/codec/types.js';
 import { get, writable, type Writable } from 'svelte/store';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
 import { MarkerElement } from './element/marker.js';
 import { PolygonElement } from './element/polygon.js';
+
+/** Build a live editor element from its serialized state. */
+export function elementFromState(manager: GeometryManager, element: StateElement): AbstractElement {
+	switch (element.type) {
+		case 'marker':
+			return MarkerElement.fromState(manager, element);
+		case 'line':
+			return LineElement.fromState(manager, element);
+		case 'polygon':
+			return PolygonElement.fromState(manager, element);
+		case 'circle':
+			return CircleElement.fromState(manager, element);
+		default:
+			throw new Error('Unknown element type');
+	}
+}
 
 export class GeometryManager {
 	public readonly elements: Writable<AbstractElement[]>;
@@ -73,42 +89,31 @@ export class GeometryManager {
 		this.state?.history.reset(state);
 	}
 
+	/** Move the map to show the given viewport (center + radius in meters). */
+	public fitViewport(viewport: NonNullable<StateRoot['map']>) {
+		const { center, radius } = viewport;
+		const dy = (radius * 360) / 40074000;
+		const dx = dy / Math.cos((center[1] * Math.PI) / 180);
+		const bounds: [[number, number], [number, number]] = [
+			[center[0] - dx, center[1] - dy],
+			[center[0] + dx, center[1] + dy]
+		];
+		this.map.fitBounds(bounds, { animate: false });
+	}
+
 	public async setState(state: StateRoot) {
 		if (!state) return;
 
 		this.clear();
 
-		if (state.map) {
-			const { center, radius } = state.map;
-			const dy = (radius * 360) / 40074000;
-			const dx = dy / Math.cos((center[1] * Math.PI) / 180);
-			const bounds: [[number, number], [number, number]] = [
-				[center[0] - dx, center[1] - dy],
-				[center[0] + dx, center[1] + dy]
-			];
-			this.map.fitBounds(bounds, { animate: false });
-		}
+		if (state.map) this.fitViewport(state.map);
 
 		if (!this.map.isStyleLoaded()) {
 			await new Promise((r) => this.map.once('styledata', r));
 		}
 
 		if (state.elements) {
-			const elements = state.elements.map((element) => {
-				switch (element.type) {
-					case 'marker':
-						return MarkerElement.fromState(this, element);
-					case 'line':
-						return LineElement.fromState(this, element);
-					case 'polygon':
-						return PolygonElement.fromState(this, element);
-					case 'circle':
-						return CircleElement.fromState(this, element);
-					default:
-						throw new Error('Unknown element type');
-				}
-			});
-			this.elements.set(elements);
+			this.elements.set(state.elements.map((element) => elementFromState(this, element)));
 		}
 	}
 
