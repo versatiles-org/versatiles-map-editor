@@ -1,3 +1,4 @@
+import type * as maplibregl from 'maplibre-gl';
 import { symbolEntries as entries } from '$lib/codec/symbols.js';
 
 export interface SymbolInfo {
