@@ -36,11 +36,11 @@ compressed wire form; GeoJSON is a human-readable adapter.
 
 ## Representations
 
-| Representation | Owner | Notes |
-| --- | --- | --- |
-| `MapState` | canonical | viewport (`center` + `radius` m) + `elements[]` with diffed `StateStyle` |
-| base64 | `writer.ts` / `reader.ts` | bespoke bit-packed format, versioned (v0); **backward compatible** |
-| GeoJSON | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` foreign member |
+| Representation | Owner                       | Notes                                                                    |
+| -------------- | --------------------------- | ------------------------------------------------------------------------ |
+| `MapState`     | canonical                   | viewport (`center` + `radius` m) + `elements[]` with diffed `StateStyle` |
+| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned (v0); **backward compatible**       |
+| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` foreign member                               |
 
 ## GeoJSON profile (`profile.ts`)
 
