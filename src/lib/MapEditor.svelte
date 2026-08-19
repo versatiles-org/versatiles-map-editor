@@ -2,6 +2,9 @@
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
+	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
+	// bundle after a build. Let Vite bundle and fingerprint the worker instead.
+	import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 	import Sidebar from './components/Sidebar.svelte';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
@@ -26,6 +29,8 @@
 
 	function init(): void {
 		if (map) return;
+
+		maplibre.setWorkerUrl(maplibreWorkerUrl);
 
 		container.style.setProperty('--bg-color', '#fff');
 		container.style.setProperty('--fg-color', '#000');
