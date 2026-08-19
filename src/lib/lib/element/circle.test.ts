@@ -2,9 +2,8 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { CircleElement } from './circle.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementCircle } from '../state/types.js';
+import type { StateElementCircle } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
-import type { Point } from 'geojson';
 
 describe('CircleElement', () => {
 	let manager: GeometryManager;
@@ -50,25 +49,6 @@ describe('CircleElement', () => {
 		});
 	});
 
-	describe('GeoJSON', () => {
-		it('should return GeoJSON feature with properties', () => {
-			const feature = circleElement.getFeature(true);
-			expect(feature.type).toBe('Feature');
-			expect(feature.geometry.type).toBe('Polygon');
-			expect(feature.properties).toHaveProperty('circle-center-x', 10);
-			expect(feature.properties).toHaveProperty('circle-center-y', 20);
-			expect(feature.properties).toHaveProperty('circle-radius', 300000);
-		});
-
-		it('should return GeoJSON representation', () => {
-			const geoJSON = circleElement.getGeoJSON();
-			expect(geoJSON.type).toBe('Feature');
-			expect(geoJSON.geometry.type).toBe('Point');
-			expect(geoJSON.geometry.coordinates).toEqual([10, 20]);
-			expect(geoJSON.properties).toHaveProperty('radius', 300000);
-		});
-	});
-
 	it('should destroy layers and source on destroy', () => {
 		const fillLayerDestroySpy = vi.spyOn(circleElement.fillLayer, 'destroy');
 		const strokeLayerDestroySpy = vi.spyOn(circleElement.strokeLayer, 'destroy');
@@ -101,16 +81,5 @@ describe('CircleElement', () => {
 		const element = CircleElement.fromState(manager, state);
 		expect(element.point).toEqual([30, 40]);
 		expect(element.radius).toBe(10);
-	});
-
-	it('should create CircleElement from GeoJSON', () => {
-		const feature: GeoJSON.Feature<Point, { radius: number }> = {
-			type: 'Feature',
-			properties: { radius: 15 },
-			geometry: { type: 'Point', coordinates: [50, 60] }
-		};
-		const element = CircleElement.fromGeoJSON(manager, feature);
-		expect(element.point).toEqual([50, 60]);
-		expect(element.radius).toBe(15);
 	});
 });

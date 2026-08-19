@@ -1,22 +1,13 @@
 import { MapLayer } from './abstract.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { LayerFill } from './types.js';
-import type { StateStyle } from '../state/types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { GeometryManager } from '../geometry_manager.js';
 
 class TestLayer extends MapLayer<LayerFill> {
 	getState(): StateStyle {
 		return { halo: 1 };
-	}
-	getProperties(): GeoJSON.GeoJsonProperties {
-		return { 'fill-color': 'red' };
-	}
-	getGeoJSONProperties(): GeoJSON.GeoJsonProperties {
-		return {};
-	}
-	setGeoJSONProperties(): void {
-		// Mock setGeoJSONProperties
 	}
 }
 

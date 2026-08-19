@@ -1,12 +1,15 @@
+import type * as maplibregl from 'maplibre-gl';
 import type { LayerFill, LayerLine, LayerSymbol } from './types.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '../state/types.js';
+import type { StateStyle } from '$lib/codec/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 type LayerSpec = LayerFill | LayerLine | LayerSymbol;
 type Events = 'click' | 'mousedown' | 'mousemove' | 'mouseup';
 type MouseEventHandler = (event: maplibregl.MapMouseEvent) => void;
+type PaintKey = keyof maplibregl.AllPaintProperties;
+type LayoutKey = keyof maplibregl.AllLayoutProperties;
 
 export abstract class MapLayer<T extends LayerSpec> {
 	private layout = {} as T['layout'];
@@ -100,7 +103,7 @@ export abstract class MapLayer<T extends LayerSpec> {
 		if (value instanceof Color) value = value.asString() as V;
 
 		if (this.paint[key] == value) return;
-		this.map.setPaintProperty(this.id, key as string, value);
+		this.map.setPaintProperty(this.id, key as PaintKey, value as maplibregl.AllPaintProperties[PaintKey]);
 		this.paint[key] = value;
 	}
 
@@ -109,7 +112,7 @@ export abstract class MapLayer<T extends LayerSpec> {
 	updateLayout<K extends keyof T['layout'], V extends T['layout'][K]>(arg1: K | T['layout'], arg2?: V) {
 		if (typeof arg1 === 'string') {
 			if (this.layout[arg1] == arg2) return;
-			this.map.setLayoutProperty(this.id, arg1 as string, arg2);
+			this.map.setLayoutProperty(this.id, arg1 as LayoutKey, arg2 as maplibregl.AllLayoutProperties[LayoutKey]);
 			if (arg2 == null) {
 				delete this.layout[arg1];
 			} else {
@@ -127,6 +130,4 @@ export abstract class MapLayer<T extends LayerSpec> {
 	}
 
 	abstract getState(): StateStyle | undefined;
-	abstract getGeoJSONProperties(): GeoJSON.GeoJsonProperties;
-	abstract setGeoJSONProperties(properties: GeoJSON.GeoJsonProperties): void;
 }

@@ -1,9 +1,10 @@
+import type * as maplibregl from 'maplibre-gl';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { AbstractPathElement } from './abstract_path.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode } from './types.js';
-import type { StateElement } from '../state/types.js';
+import type { StateElement } from '$lib/codec/types.js';
 import { getMiddlePoint } from '../utils/geometry.js';
 
 class TestPathElement extends AbstractPathElement {

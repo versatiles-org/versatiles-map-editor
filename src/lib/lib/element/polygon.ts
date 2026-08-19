@@ -3,7 +3,7 @@ import type { GeoPath } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
-import type { StateElementPolygon } from '../state/types.js';
+import type { StateElementPolygon } from '$lib/codec/types.js';
 
 export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
@@ -32,12 +32,10 @@ export class PolygonElement extends AbstractPathElement {
 		this.strokeLayer.isSelected = value;
 	}
 
-	getFeature(includeProperties = false): GeoJSON.Feature<GeoJSON.Polygon> {
+	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
 		return {
 			type: 'Feature',
-			properties: includeProperties
-				? { ...this.fillLayer.getGeoJSONProperties(), ...this.strokeLayer.getGeoJSONProperties() }
-				: {},
+			properties: {},
 			geometry: { type: 'Polygon', coordinates: [[...this.path, this.path[0]]] }
 		};
 	}
@@ -61,14 +59,6 @@ export class PolygonElement extends AbstractPathElement {
 		const element = new PolygonElement(manager, state.points);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
-		return element;
-	}
-
-	static fromGeoJSON(manager: GeometryManager, feature: GeoJSON.Feature<GeoJSON.Polygon>) {
-		const coordinates = feature.geometry.coordinates[0].slice(0, -1) as GeoPath;
-		const element = new PolygonElement(manager, coordinates as GeoPath);
-		element.fillLayer.setGeoJSONProperties(feature.properties);
-		element.strokeLayer.setGeoJSONProperties(feature.properties);
 		return element;
 	}
 }

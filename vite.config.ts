@@ -11,6 +11,10 @@ export default defineConfig({
 			reporter: ['lcov', 'text']
 		}
 	},
+	// maplibre-gl's worker is an ES module and imports ./maplibre-gl-shared.mjs
+	worker: {
+		format: 'es'
+	},
 	build: {
 		target: 'esnext',
 		chunkSizeWarningLimit: 1500,

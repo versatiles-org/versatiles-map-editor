@@ -1,3 +1,4 @@
+import type * as maplibregl from 'maplibre-gl';
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
@@ -25,7 +26,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 			y0 = y;
 			x0 = lng;
 			this.path = this.path.map(([x, y]) => [x + dx, mercator2lat(lat2mercator(y) + dy)]);
-			this.source.setData(this.getFeature(false));
+			this.source.setData(this.getFeature());
 			this.manager.selection?.updateSelectionNodes();
 			e.preventDefault();
 		};
@@ -69,7 +70,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 			update: (lng: number, lat: number) => {
 				point[0] = lng;
 				point[1] = lat;
-				this.source.setData(this.getFeature(false));
+				this.source.setData(this.getFeature());
 			},
 			delete: () => {
 				if (this.isLine) {
@@ -79,7 +80,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 				}
 
 				this.path.splice(index, 1);
-				this.source.setData(this.getFeature(false));
+				this.source.setData(this.getFeature());
 			}
 		};
 	}

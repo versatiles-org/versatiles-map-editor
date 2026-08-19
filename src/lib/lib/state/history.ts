@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { StateRoot } from './types.js';
+import type { StateRoot } from '$lib/codec/types.js';
 
 const MAXLENGTH = 100;
 

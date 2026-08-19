@@ -1,7 +1,8 @@
+import type * as maplibregl from 'maplibre-gl';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import type { GeoPoint } from '../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElement } from '../state/types.js';
+import type { StateElement } from '$lib/codec/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 export abstract class AbstractElement {
@@ -58,12 +59,8 @@ export abstract class AbstractElement {
 		this.destroy();
 	}
 
-	public getGeoJSON(): GeoJSON.Feature {
-		return this.getFeature(true);
-	}
-
 	abstract destroy(): void;
-	abstract getFeature(includeProperties?: boolean): GeoJSON.Feature;
+	abstract getFeature(): GeoJSON.Feature;
 	abstract getSelectionNodes(): SelectionNode[];
 	abstract getSelectionNodeUpdater(properties?: Record<string, unknown>): SelectionNodeUpdater | undefined;
 	abstract getState(): StateElement;

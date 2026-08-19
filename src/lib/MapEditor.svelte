@@ -1,12 +1,15 @@
 <script lang="ts">
 	import 'maplibre-gl/dist/maplibre-gl.css';
-	import maplibre from 'maplibre-gl';
+	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
+	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
+	// bundle after a build. Let Vite bundle and fingerprint the worker instead.
+	import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 	import Sidebar from './components/Sidebar.svelte';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
-	import { StateReader } from './lib/state/reader.js';
+	import { decodeState } from '$lib/codec/index.js';
 
 	let {
 		onMapLoad
@@ -26,6 +29,8 @@
 
 	function init(): void {
 		if (map) return;
+
+		maplibre.setWorkerUrl(maplibreWorkerUrl);
 
 		container.style.setProperty('--bg-color', '#fff');
 		container.style.setProperty('--fg-color', '#000');
@@ -83,8 +88,7 @@
 
 		function readHash(hash: string) {
 			if (!geometryManager) return;
-			const stateReader = StateReader.fromBase64(hash);
-			geometryManager.loadState(stateReader.readRoot());
+			geometryManager.loadState(decodeState(hash));
 		}
 	}
 </script>

@@ -8,19 +8,12 @@ export default defineConfig({
 	testDir: 'playwright-tests',
 	testMatch: /\.ts$/,
 	testIgnore: ['**/lib/**'],
-	expect: {
-		toMatchSnapshot: {
-			maxDiffPixelRatio: 1e-5,
-			threshold: 0.01
-		}
-	},
 	use: {
 		ignoreHTTPSErrors: true,
 		viewport: { width: 1280, height: 720 },
 		deviceScaleFactor: 1,
 		timezoneId: 'Europe/Berlin'
 	},
-	snapshotDir: 'playwright-tests/__snapshots__',
 	projects: [
 		{
 			name: 'chromium',

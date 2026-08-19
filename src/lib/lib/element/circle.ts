@@ -3,7 +3,7 @@ import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import type { GeoPoint } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
-import type { StateElementCircle } from '../state/types.js';
+import type { StateElementCircle } from '$lib/codec/types.js';
 import { AbstractElement } from './abstract.js';
 import { circle, distance } from '../utils/geometry.js';
 
@@ -45,7 +45,7 @@ export class CircleElement extends AbstractElement {
 				update: (lng: number, lat: number) => {
 					this.point[0] = lng;
 					this.point[1] = lat;
-					this.source.setData(this.getFeature(false));
+					this.source.setData(this.getFeature());
 				},
 				delete: () => this.delete()
 			};
@@ -53,7 +53,7 @@ export class CircleElement extends AbstractElement {
 			return {
 				update: (lng: number, lat: number) => {
 					this.radius = distance([lng, lat], this.point);
-					this.source.setData(this.getFeature(false));
+					this.source.setData(this.getFeature());
 				},
 				delete: () => this.delete()
 			};
@@ -66,35 +66,14 @@ export class CircleElement extends AbstractElement {
 		this.strokeLayer.isSelected = value;
 	}
 
-	getFeature(includeProperties = false): GeoJSON.Feature<GeoJSON.Polygon> {
+	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
 		const coordinates = circle(this.point, this.radius, 72);
 		coordinates.push(coordinates[0]); // Close the circle
 
 		return {
 			type: 'Feature',
-			properties: includeProperties
-				? {
-						...this.fillLayer.getGeoJSONProperties(),
-						...this.strokeLayer.getGeoJSONProperties(),
-						'circle-center-x': this.point[0],
-						'circle-center-y': this.point[1],
-						'circle-radius': this.radius
-					}
-				: {},
+			properties: {},
 			geometry: { type: 'Polygon', coordinates: [coordinates] }
-		};
-	}
-
-	getGeoJSON(): GeoJSON.Feature<GeoJSON.Point> {
-		return {
-			type: 'Feature',
-			properties: {
-				...this.fillLayer.getGeoJSONProperties(),
-				...this.strokeLayer.getGeoJSONProperties(),
-				subType: 'Circle',
-				radius: this.radius
-			},
-			geometry: { type: 'Point', coordinates: this.point }
 		};
 	}
 
@@ -118,25 +97,6 @@ export class CircleElement extends AbstractElement {
 		const element = new CircleElement(manager, state.point, state.radius);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
-		return element;
-	}
-
-	static fromGeoJSON(
-		manager: GeometryManager,
-		feature: GeoJSON.Feature<
-			GeoJSON.Point,
-			{
-				radius: number;
-			}
-		>
-	) {
-		const properties = feature.properties;
-		const center = feature.geometry.coordinates as GeoPoint;
-		const radius = feature.properties.radius;
-
-		const element = new CircleElement(manager, center, radius);
-		element.fillLayer.setGeoJSONProperties(properties);
-		element.strokeLayer.setGeoJSONProperties(properties);
 		return element;
 	}
 }

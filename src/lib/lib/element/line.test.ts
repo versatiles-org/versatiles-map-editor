@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { LineElement } from './line.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementLine } from '../state/types.js';
+import type { StateElementLine } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
 
 describe('LineElement', () => {
@@ -71,28 +71,5 @@ describe('LineElement', () => {
 
 		expect(restoredElement.path).toEqual(state.points);
 		expect(restoredElement.layer.getState()?.color).toBe('#00ff00');
-	});
-
-	it('should restore from GeoJSON correctly', () => {
-		const feature0: GeoJSON.Feature<GeoJSON.LineString> = {
-			type: 'Feature',
-			properties: {
-				'stroke-color': '#111111',
-				'stroke-style': 'dashed',
-				'stroke-width': 3,
-				'stroke-visibility': true
-			},
-			geometry: {
-				type: 'LineString',
-				coordinates: [
-					[0, 0],
-					[10, 10]
-				]
-			}
-		};
-		const restoredElement = LineElement.fromGeoJSON(mockManager, feature0);
-		const feature1 = restoredElement.getFeature(true);
-
-		expect(feature0).toStrictEqual(feature1);
 	});
 });

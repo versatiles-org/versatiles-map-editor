@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManager } from './geometry_manager.js';
 import { get } from 'svelte/store';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import type { StateRoot } from './state/types.js';
+import type { StateRoot } from '$lib/codec/types.js';
 import type { AbstractElement } from './element/abstract.js';
 
 describe('GeometryManager', () => {
