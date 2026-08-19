@@ -51,7 +51,10 @@ jobs:
 
   playwright:
     name: Playwright
-    runs-on: ubuntu-latest
+    # macOS: headless Firefox on the Linux runners cannot create a WebGL context
+    # ("AllowWebgl2:false restricts context creation on this system"), so MapLibre
+    # never renders and every Firefox test times out.
+    runs-on: macos-latest
     permissions:
       contents: read
     steps:
@@ -73,7 +76,7 @@ jobs:
         run: npm install
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install
 
       - name: Test Playwright
         run: npx playwright test
