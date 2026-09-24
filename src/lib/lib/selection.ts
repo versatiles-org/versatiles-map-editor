@@ -14,10 +14,11 @@ export class SelectionHandler {
 		const map = this.manager.map;
 
 		map.on('mousedown', 'selection_nodes', (e) => {
-			const element = get(this.selectedElement)!;
+			const element = get(this.selectedElement);
 			if (element == null) return;
 
 			const feature = map.queryRenderedFeatures(e.point, { layers: ['selection_nodes'] })[0];
+			if (feature == null) return;
 			const selectedNode = element.getSelectionNodeUpdater(feature.properties);
 			if (selectedNode == null) return;
 

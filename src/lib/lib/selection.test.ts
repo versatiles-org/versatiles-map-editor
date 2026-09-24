@@ -168,6 +168,16 @@ describe('SelectionHandler', () => {
 			handler.selectedElement.set(undefined);
 			const event = { point: {}, originalEvent: { shiftKey: false }, preventDefault: vi.fn() };
 			mockMap.emit('mousedown', event);
+			expect(element.getSelectionNodeUpdater).not.toHaveBeenCalled();
+			expect(event.preventDefault).not.toHaveBeenCalled();
+		});
+
+		it('should do nothing if no selection node is found at the mouse position', () => {
+			mockMap.queryRenderedFeatures.mockReturnValue([]);
+			const event = { point: {}, originalEvent: { shiftKey: false }, preventDefault: vi.fn() };
+			expect(() => mockMap.emit('mousedown', event)).not.toThrow();
+			expect(element.getSelectionNodeUpdater).not.toHaveBeenCalled();
+			expect(event.preventDefault).not.toHaveBeenCalled();
 		});
 
 		it('should do nothing if getSelectionNodeUpdater returns null', () => {
