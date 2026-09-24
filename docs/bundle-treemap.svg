@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="480" viewBox="0 0 880 480">
+<title>Bundle composition</title>
+<style>
+	.background { fill: #ffffff; }
+	text { font-family: Helvetica, Arial, 'Liberation Sans', sans-serif; }
+	.group-label { fill: #1b2220; font-weight: 600; font-size: 12px; }
+	.leaf-label { fill: #1b2220; font-size: 11px; text-anchor: middle; }
+	.leaf-size { fill: #66736d; font-size: 11px; text-anchor: middle; }
+	.group-box, .leaf-box { stroke-width: 1; }
+	.leaf:hover .leaf-box { stroke-width: 2; }
+	.c0 .group-box { fill: hsl(210 38% 84%); stroke: hsl(210 30% 62%); }
+	.c0 .leaf-box { fill: hsl(210 50% 95%); stroke: hsl(210 30% 72%); }
+	.c1 .group-box { fill: hsl(28 38% 84%); stroke: hsl(28 30% 62%); }
+	.c1 .leaf-box { fill: hsl(28 50% 95%); stroke: hsl(28 30% 72%); }
+	.c2 .group-box { fill: hsl(140 38% 84%); stroke: hsl(140 30% 62%); }
+	.c2 .leaf-box { fill: hsl(140 50% 95%); stroke: hsl(140 30% 72%); }
+	.c3 .group-box { fill: hsl(275 38% 84%); stroke: hsl(275 30% 62%); }
+	.c3 .leaf-box { fill: hsl(275 50% 95%); stroke: hsl(275 30% 72%); }
+	.c4 .group-box { fill: hsl(350 38% 84%); stroke: hsl(350 30% 62%); }
+	.c4 .leaf-box { fill: hsl(350 50% 95%); stroke: hsl(350 30% 72%); }
+	.c5 .group-box { fill: hsl(180 38% 84%); stroke: hsl(180 30% 62%); }
+	.c5 .leaf-box { fill: hsl(180 50% 95%); stroke: hsl(180 30% 72%); }
+	.c6 .group-box { fill: hsl(48 38% 84%); stroke: hsl(48 30% 62%); }
+	.c6 .leaf-box { fill: hsl(48 50% 95%); stroke: hsl(48 30% 72%); }
+	.c7 .group-box { fill: hsl(320 38% 84%); stroke: hsl(320 30% 62%); }
+	.c7 .leaf-box { fill: hsl(320 50% 95%); stroke: hsl(320 30% 72%); }
+	.c8 .group-box { fill: hsl(95 38% 84%); stroke: hsl(95 30% 62%); }
+	.c8 .leaf-box { fill: hsl(95 50% 95%); stroke: hsl(95 30% 72%); }
+	.c9 .group-box { fill: hsl(245 38% 84%); stroke: hsl(245 30% 62%); }
+	.c9 .leaf-box { fill: hsl(245 50% 95%); stroke: hsl(245 30% 72%); }
+	@media (prefers-color-scheme: dark) {
+		.background { fill: #0d1117; }
+		.group-label, .leaf-label { fill: #e6edf3; }
+		.leaf-size { fill: #8b949e; }
+		.c0 .group-box { fill: hsl(210 22% 22%); stroke: hsl(210 20% 38%); }
+		.c0 .leaf-box { fill: hsl(210 25% 14%); stroke: hsl(210 20% 32%); }
+		.c1 .group-box { fill: hsl(28 22% 22%); stroke: hsl(28 20% 38%); }
+		.c1 .leaf-box { fill: hsl(28 25% 14%); stroke: hsl(28 20% 32%); }
+		.c2 .group-box { fill: hsl(140 22% 22%); stroke: hsl(140 20% 38%); }
+		.c2 .leaf-box { fill: hsl(140 25% 14%); stroke: hsl(140 20% 32%); }
+		.c3 .group-box { fill: hsl(275 22% 22%); stroke: hsl(275 20% 38%); }
+		.c3 .leaf-box { fill: hsl(275 25% 14%); stroke: hsl(275 20% 32%); }
+		.c4 .group-box { fill: hsl(350 22% 22%); stroke: hsl(350 20% 38%); }
+		.c4 .leaf-box { fill: hsl(350 25% 14%); stroke: hsl(350 20% 32%); }
+		.c5 .group-box { fill: hsl(180 22% 22%); stroke: hsl(180 20% 38%); }
+		.c5 .leaf-box { fill: hsl(180 25% 14%); stroke: hsl(180 20% 32%); }
+		.c6 .group-box { fill: hsl(48 22% 22%); stroke: hsl(48 20% 38%); }
+		.c6 .leaf-box { fill: hsl(48 25% 14%); stroke: hsl(48 20% 32%); }
+		.c7 .group-box { fill: hsl(320 22% 22%); stroke: hsl(320 20% 38%); }
+		.c7 .leaf-box { fill: hsl(320 25% 14%); stroke: hsl(320 20% 32%); }
+		.c8 .group-box { fill: hsl(95 22% 22%); stroke: hsl(95 20% 38%); }
+		.c8 .leaf-box { fill: hsl(95 25% 14%); stroke: hsl(95 20% 32%); }
+		.c9 .group-box { fill: hsl(245 22% 22%); stroke: hsl(245 20% 38%); }
+		.c9 .leaf-box { fill: hsl(245 25% 14%); stroke: hsl(245 20% 32%); }
+	}
+</style>
+<rect class="background" width="880" height="480"/>
+<g class="group c0"><title>node_modules: 1 MB (88.4%)</title>
+<rect class="group-box" x="1" y="1" width="776.11" height="478" rx="2"/>
+<text class="group-label" x="5" y="15" textLength="116.03" lengthAdjust="spacingAndGlyphs">node_modules 1 MB</text>
+</g>
+<g class="group c0"><title>node_modules/maplibre-gl: 969.8 KB (79.9%)</title>
+<rect class="group-box" x="5" y="22" width="693.49" height="453" rx="2"/>
+<text class="group-label" x="9" y="36" textLength="117.38" lengthAdjust="spacingAndGlyphs">maplibre-gl 969.8 KB</text>
+</g>
+<g class="group c0"><title>node_modules/maplibre-gl/dist: 969.8 KB (79.9%)</title>
+<rect class="group-box" x="9" y="43" width="685.49" height="428" rx="2"/>
+<text class="group-label" x="13" y="57" textLength="74.04" lengthAdjust="spacingAndGlyphs">dist 969.8 KB</text>
+</g>
+<g class="leaf c0"><title>node_modules/maplibre-gl/dist/maplibre-gl.mjs: 502.3 KB (41.4%)</title>
+<rect class="leaf-box" x="13" y="64" width="349.91" height="403" rx="2"/>
+<text class="leaf-label" x="187.95" y="263.5" textLength="74.56" lengthAdjust="spacingAndGlyphs">maplibre-gl.mjs</text>
+<text class="leaf-size" x="187.95" y="277.5" textLength="45.25" lengthAdjust="spacingAndGlyphs">502.3 KB</text>
+</g>
+<g class="leaf c0"><title>node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs: 467.6 KB (38.5%)</title>
+<rect class="leaf-box" x="364.91" y="64" width="325.58" height="403" rx="2"/>
+<text class="leaf-label" x="527.7" y="263.5" textLength="111.85" lengthAdjust="spacingAndGlyphs">maplibre-gl-shared.mjs</text>
+<text class="leaf-size" x="527.7" y="277.5" textLength="45.25" lengthAdjust="spacingAndGlyphs">467.6 KB</text>
+</g>
+<g class="group c0"><title>node_modules/@versatiles: 104 KB (8.6%)</title>
+<rect class="group-box" x="700.49" y="22" width="72.62" height="453" rx="2"/>
+<text class="group-label" x="704.49" y="36" textLength="62.04" lengthAdjust="spacingAndGlyphs">@versatiles</text>
+</g>
+<g class="group c0"><title>node_modules/@versatiles/style: 104 KB (8.6%)</title>
+<rect class="group-box" x="704.49" y="43" width="64.62" height="428" rx="2"/>
+<text class="group-label" x="708.49" y="57" textLength="27.35" lengthAdjust="spacingAndGlyphs">style</text>
+</g>
+<g class="leaf c0"><title>node_modules/@versatiles/style/dist/chunks/satellite-ClgWqGRA.js: 95.3 KB (7.8%)</title>
+<rect class="leaf-box" x="708.49" y="64" width="56.62" height="368.98" rx="2"/>
+<text class="leaf-label" x="736.8" y="246.49" textLength="44.02" lengthAdjust="spacingAndGlyphs">dist/chu…</text>
+<text class="leaf-size" x="736.8" y="260.49" textLength="39.14" lengthAdjust="spacingAndGlyphs">95.3 KB</text>
+</g>
+<g class="leaf c0"><title>node_modules/@versatiles/style/dist/index.js: 6.3 KB (0.5%)</title>
+<rect class="leaf-box" x="708.49" y="434.98" width="39.95" height="32.02" rx="2"/>
+<text class="leaf-label" x="728.46" y="454.99" textLength="28.73" lengthAdjust="spacingAndGlyphs">dist/i…</text>
+</g>
+<g class="leaf c0"><title>node_modules/@versatiles/style/other (2 files): 2.5 KB (0.2%)</title>
+<rect class="leaf-box" x="750.44" y="434.98" width="14.67" height="32.02" rx="2"/>
+</g>
+<g class="group c1"><title>src: 71.2 KB (5.9%)</title>
+<rect class="group-box" x="779.11" y="1" width="99.89" height="240.89" rx="2"/>
+<text class="group-label" x="783.11" y="15" textLength="64.04" lengthAdjust="spacingAndGlyphs">src 71.2 KB</text>
+</g>
+<g class="group c1"><title>src/lib: 71 KB (5.9%)</title>
+<rect class="group-box" x="783.11" y="22" width="91.89" height="215.55" rx="2"/>
+<text class="group-label" x="787.11" y="36" textLength="50.03" lengthAdjust="spacingAndGlyphs">lib 71 KB</text>
+</g>
+<g class="leaf c1"><title>src/lib/lib/other (19 files): 21.5 KB (1.8%)</title>
+<rect class="leaf-box" x="787.11" y="43" width="83.89" height="56.32" rx="2"/>
+<text class="leaf-label" x="829.05" y="69.16" textLength="75.2" lengthAdjust="spacingAndGlyphs">lib/other (19 fil…</text>
+<text class="leaf-size" x="829.05" y="83.16" textLength="39.14" lengthAdjust="spacingAndGlyphs">21.5 KB</text>
+</g>
+<g class="group c1"><title>src/lib/codec: 16.9 KB (1.4%)</title>
+<rect class="group-box" x="787.11" y="101.32" width="83.89" height="43.83" rx="2"/>
+<text class="group-label" x="791.11" y="115.32" textLength="34.68" lengthAdjust="spacingAndGlyphs">codec</text>
+</g>
+<g class="leaf c1"><title>src/lib/codec/other (5 files): 8.1 KB (0.7%)</title>
+<rect class="leaf-box" x="791.11" y="122.32" width="35.48" height="18.83" rx="2"/>
+<text class="leaf-label" x="808.85" y="135.73" textLength="21.41" lengthAdjust="spacingAndGlyphs">oth…</text>
+</g>
+<g class="leaf c1"><title>src/lib/codec/reader.ts: 4.5 KB (0.4%)</title>
+<rect class="leaf-box" x="828.59" y="122.32" width="18.59" height="18.83" rx="2"/>
+</g>
+<g class="leaf c1"><title>src/lib/codec/symbols.ts: 4.3 KB (0.4%)</title>
+<rect class="leaf-box" x="849.17" y="122.32" width="17.83" height="18.83" rx="2"/>
+</g>
+<g class="leaf c1"><title>src/lib/components/other (12 files): 16.4 KB (1.4%)</title>
+<rect class="leaf-box" x="787.11" y="147.15" width="83.89" height="42.54" rx="2"/>
+<text class="leaf-label" x="829.05" y="166.42" textLength="75.21" lengthAdjust="spacingAndGlyphs">components/o…</text>
+<text class="leaf-size" x="829.05" y="180.42" textLength="39.14" lengthAdjust="spacingAndGlyphs">16.4 KB</text>
+</g>
+<g class="group c1"><title>src/lib/utils: 15.1 KB (1.2%)</title>
+<rect class="group-box" x="787.11" y="191.69" width="78.23" height="41.87" rx="2"/>
+<text class="group-label" x="791.11" y="205.69" textLength="24.67" lengthAdjust="spacingAndGlyphs">utils</text>
+</g>
+<g class="leaf c1"><title>src/lib/utils/zones.ts: 9.7 KB (0.8%)</title>
+<rect class="leaf-box" x="791.11" y="212.69" width="44.13" height="16.87" rx="2"/>
+</g>
+<g class="leaf c1"><title>src/lib/utils/location.ts: 4.5 KB (0.4%)</title>
+<rect class="leaf-box" x="837.24" y="212.69" width="19.63" height="16.87" rx="2"/>
+</g>
+<g class="leaf c1"><title>src/lib/utils/other (2 files): 958 B (0.1%)</title>
+<rect class="leaf-box" x="858.87" y="212.69" width="2.47" height="16.87" rx="2"/>
+</g>
+<g class="leaf c1"><title>src/lib/MapEditor.svelte: 1.1 KB (0.1%)</title>
+<rect class="leaf-box" x="867.34" y="191.69" width="3.66" height="41.87" rx="2"/>
+</g>
+<g class="leaf c2"><title>(unmapped): 69.5 KB (5.7%)</title>
+<rect class="leaf-box" x="779.11" y="243.89" width="99.89" height="235.11" rx="2"/>
+<text class="leaf-label" x="829.05" y="359.44" textLength="59.3" lengthAdjust="spacingAndGlyphs">(unmapped)</text>
+<text class="leaf-size" x="829.05" y="373.44" textLength="39.14" lengthAdjust="spacingAndGlyphs">69.5 KB</text>
+</g>
+</svg>

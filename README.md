@@ -22,6 +22,28 @@ npm run test-unit       # Vitest unit tests
 npm run test-playwright # Playwright visual/e2e tests
 ```
 
+### Documentation
+
+```bash
+npm run doc             # regenerate the sections below
+npm run doc-bundle      # bundle treemap only
+npm run doc-graph       # dependency graph only
+```
+
+### Bundle Composition
+
+<!--- This chapter is generated automatically --->
+
+[![Bundle composition](docs/bundle-treemap.svg)](docs/bundle-treemap.svg?raw=true)
+
+Sized by the bundle's own source map: **1214.5 KB** raw, **331.8 KB** gzipped, across 50 modules.
+
+### Dependency Graph
+
+<!--- This chapter is generated automatically --->
+
+[![Dependency graph](docs/dependency-graph.svg)](docs/dependency-graph.svg?raw=true)
+
 ## Embedding
 
 The editor reads its state from the URL hash, so it can be embedded in an `<iframe>`:
