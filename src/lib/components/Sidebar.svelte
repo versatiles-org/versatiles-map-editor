@@ -8,6 +8,7 @@
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
 
+	const uid = $props.id();
 	let panelShareMap: DialogShareMap | null = null;
 	const history = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
@@ -74,13 +75,13 @@
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Import/Export" open={false}>
-			<label
-				>GeoJSON:
+			<div role="group" aria-labelledby="{uid}-geojson">
+				<span id="{uid}-geojson">GeoJSON:</span>
 				<div class="grid2">
 					<button class="btn" onclick={importGeoJSON}>Import</button>
 					<button class="btn" onclick={exportGeoJSON} data-testid="btnExportGeoJSON">Export</button>
 				</div>
-			</label>
+			</div>
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Add new">

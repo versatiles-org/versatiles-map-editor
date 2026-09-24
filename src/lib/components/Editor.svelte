@@ -13,6 +13,7 @@
 
 	const { element }: { element: AbstractElement | undefined } = $props();
 
+	const uid = $props.id();
 	const noElement = $derived(!element);
 	const strokeVisible = $derived.by(() => {
 		if (element instanceof PolygonElement || element instanceof CircleElement) return element.strokeLayer.visible;
@@ -33,9 +34,9 @@
 				<EditorFill layer={element.fillLayer} />
 				<hr />
 
-				<InputRow id="showStroke" label="Draw Outline">
+				<InputRow id="{uid}-showStroke" label="Draw Outline">
 					<input
-						id="showStroke"
+						id="{uid}-showStroke"
 						type="checkbox"
 						bind:checked={$strokeVisible}
 						onchange={() => element.manager.state?.log()}

@@ -5,7 +5,7 @@
 </script>
 
 <div class="row">
-	<label class="label" for={id}>{label}</label>
+	<label class="label" for={id} id="{id}-label">{label}</label>
 	{@render children()}
 </div>
 

@@ -10,7 +10,7 @@
 	const listIconSize = 32;
 	const retina = window.devicePixelRatio || 1;
 
-	let { symbolIndex = $bindable(), map }: { symbolIndex: number; map: MaplibreMap } = $props();
+	let { symbolIndex = $bindable(), map, id }: { symbolIndex: number; map: MaplibreMap; id?: string } = $props();
 
 	const symbolLibrary = $derived(new SymbolLibrary(map));
 
@@ -23,7 +23,12 @@
 	}
 </script>
 
-<button onclick={() => dialog?.open()} style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px">
+<button
+	{id}
+	aria-labelledby={id ? `${id}-label ${id}` : undefined}
+	onclick={() => dialog?.open()}
+	style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px"
+>
 	{#key symbolIndex}
 		<canvas
 			width={buttonIconSize * retina}

@@ -27,9 +27,10 @@ const ariaResult = `- region "Map"
 - button "Import/Export":
   - text: Import/Export
   - img
-- text: "GeoJSON:"
-- 'button "GeoJSON: Export ✓"': Import ✓
-- button "Export ✓"
+- group "GeoJSON:":
+  - text: "GeoJSON:"
+  - button "Import ✓"
+  - button "Export ✓"
 - separator
 - button "Add new":
   - text: Add new
@@ -189,4 +190,27 @@ test('selecting a symbol closes the symbol picker', async ({ page }) => {
 	await dialog.getByRole('button', { name: 'airplane', exact: true }).click();
 	await expect(dialog).toBeHidden();
 	await expect(page.getByRole('button', { name: 'airplane' })).toBeVisible();
+});
+
+test('style editor controls have unique ids and labels', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	async function expectUniqueIds() {
+		const ids = await page.locator('.sidebar [id]').evaluateAll((els) => els.map((el) => el.id));
+		expect(ids.length).toBeGreaterThan(0);
+		expect(new Set(ids).size).toBe(ids.length);
+	}
+
+	// polygon: fill and outline editors are shown together
+	await page.getByRole('button', { name: 'Polygon' }).click();
+	await expectUniqueIds();
+	await expect(page.getByLabel('Color')).toHaveCount(2);
+	await expect(page.getByLabel('Width')).toHaveCount(1);
+
+	// marker: symbol button and label field are labelled separately
+	await page.getByRole('button', { name: 'Marker' }).click();
+	await expectUniqueIds();
+	await expect(page.getByRole('button', { name: 'Symbol flag' })).toBeVisible();
+	await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible();
 });
