@@ -17,7 +17,6 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 		addControl = vi.fn();
 		fitBounds = vi.fn();
 		setStyle = vi.fn();
-		isStyleLoaded = vi.fn(() => true);
 		loaded = vi.fn(() => true);
 		remove = vi.fn();
 		constructor() {

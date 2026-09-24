@@ -6,7 +6,14 @@ import { fileURLToPath } from 'url';
 
 const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '.request-cache');
 
-export async function waitForMapIsReady(page: Page, count: number = 1): Promise<void> {
+/**
+ * Wait until `count` maps have reported "map_ready". Other console messages are printed,
+ * except those matching `expectedMessages`, which a test triggers on purpose.
+ */
+export async function waitForMapIsReady(
+	page: Page,
+	{ count = 1, expectedMessages = [] }: { count?: number; expectedMessages?: RegExp[] } = {}
+): Promise<void> {
 	await new Promise<void>((resolve) => {
 		page.on('console', (msg) => {
 			const text = msg.text();
@@ -15,6 +22,7 @@ export async function waitForMapIsReady(page: Page, count: number = 1): Promise<
 				if (count < 1) setTimeout(resolve, 100);
 				return;
 			}
+			if (expectedMessages.some((pattern) => pattern.test(text))) return;
 			if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
 			if (text.includes('GPU stall due to ReadPixels')) return;
 			console.log(process.platform + ': ' + text);

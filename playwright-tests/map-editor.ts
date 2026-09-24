@@ -115,11 +115,14 @@ test('filled map', async ({ page }) => {
 test('invalid hash', async ({ page }) => {
 	const pageErrors: Error[] = [];
 	page.on('pageerror', (error) => pageErrors.push(error));
+	const consoleErrors: string[] = [];
+	page.on('console', (msg) => msg.type() === 'error' && consoleErrors.push(msg.text()));
 
 	await page.goto('/#this-is-not-a-valid-state');
-	await waitForMapIsReady(page);
+	await waitForMapIsReady(page, { expectedMessages: [/^Invalid map state in URL hash/] });
 
 	expect(pageErrors).toStrictEqual([]);
+	expect(consoleErrors).toStrictEqual([expect.stringMatching(/^Invalid map state in URL hash/)]);
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
 });
 

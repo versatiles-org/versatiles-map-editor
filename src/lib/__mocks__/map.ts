@@ -59,8 +59,7 @@ export class MockMap {
 		return bounds;
 	});
 	fitBounds = vi.fn();
-	setStyle = vi.fn();
-	isStyleLoaded = vi.fn(() => true);
+	setStyle = vi.fn(() => this.emit('style.load'));
 }
 
 function parseListenerArgs(args: unknown[]): { layerId?: string; callback: Callback } {
