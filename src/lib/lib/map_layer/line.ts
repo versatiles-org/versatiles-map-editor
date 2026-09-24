@@ -64,9 +64,9 @@ export class MapLayerLine extends MapLayer<LayerLine> {
 	}
 
 	setState(state: StateStyle) {
-		if (state.color) this.color.set(state.color);
-		if (state.pattern) this.dashed.set(state.pattern);
-		if (state.visible) this.visible.set(state.visible);
-		if (state.width) this.width.set(state.width);
+		if (state.color != null) this.color.set(state.color);
+		if (state.pattern != null) this.dashed.set(state.pattern);
+		if (state.visible != null) this.visible.set(state.visible);
+		if (state.width != null) this.width.set(state.width);
 	}
 }

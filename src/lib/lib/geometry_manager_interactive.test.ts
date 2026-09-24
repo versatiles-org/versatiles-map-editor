@@ -157,6 +157,19 @@ describe('GeometryManager', () => {
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
+
+		it('should restore falsy style values', async () => {
+			const polygon = manager.addNewElement('polygon');
+			polygon.fillLayer.opacity.set(0);
+			polygon.strokeLayer.visible.set(false);
+			const marker = manager.addNewElement('marker');
+			marker.layer.halo.set(0);
+
+			manager.state.setHash(manager.state.getHash());
+			const [restoredPolygon, restoredMarker] = get(manager.elements).map((e) => e.getState());
+			expect(restoredPolygon).toMatchObject({ style: { opacity: 0 }, strokeStyle: { visible: false } });
+			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });
+		});
 	});
 
 	describe('GeoJSON', () => {

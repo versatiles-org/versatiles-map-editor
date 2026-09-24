@@ -95,8 +95,8 @@ export class MapLayerFill extends MapLayer<LayerFill> {
 	}
 
 	setState(state: StateStyle) {
-		if (state.color) this.color.set(state.color);
-		if (state.opacity) this.opacity.set(state.opacity);
-		if (state.pattern) this.pattern.set(state.pattern);
+		if (state.color != null) this.color.set(state.color);
+		if (state.opacity != null) this.opacity.set(state.opacity);
+		if (state.pattern != null) this.pattern.set(state.pattern);
 	}
 }

@@ -118,4 +118,14 @@ describe('MapLayerSymbol', () => {
 		expect(get(layer.label)).toBe('New Label');
 		expect(get(layer.labelAlign)).toBe(2);
 	});
+
+	it('should restore falsy values', () => {
+		layer.setState({ halo: 0, rotate: 90, label: 'Label', align: 2 });
+		layer.setState({ rotate: 0, label: '', align: 0 });
+
+		expect(get(layer.halo)).toBe(0);
+		expect(get(layer.rotate)).toBe(0);
+		expect(get(layer.label)).toBe('');
+		expect(get(layer.labelAlign)).toBe(0);
+	});
 });

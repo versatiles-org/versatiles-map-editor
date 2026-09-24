@@ -78,4 +78,12 @@ describe('MapLayerFill', () => {
 		expect(get(layer.opacity)).toBe(0.8);
 		expect(get(layer.pattern)).toBe(2);
 	});
+
+	it('should restore falsy values', () => {
+		layer.setState({ opacity: 0, pattern: 1 });
+		layer.setState({ pattern: 0 });
+
+		expect(get(layer.opacity)).toBe(0);
+		expect(get(layer.pattern)).toBe(0);
+	});
 });

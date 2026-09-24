@@ -83,4 +83,12 @@ describe('MapLayerLine', () => {
 		expect(get(layer.dashed)).toBe(2);
 		expect(get(layer.width)).toBe(3);
 	});
+
+	it('should restore falsy values', () => {
+		layer.setState({ visible: false, pattern: 1 });
+		layer.setState({ pattern: 0 });
+
+		expect(get(layer.visible)).toBe(false);
+		expect(get(layer.dashed)).toBe(0);
+	});
 });

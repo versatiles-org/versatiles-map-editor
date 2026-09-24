@@ -126,13 +126,13 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 	}
 
 	setState(state: StateStyle) {
-		if (state.color) this.color.set(state.color);
-		if (state.rotate) this.rotate.set(state.rotate);
-		if (state.size) this.size.set(state.size);
-		if (state.halo) this.halo.set(state.halo);
-		if (state.pattern) this.symbolIndex.set(state.pattern);
-		if (state.label) this.label.set(state.label);
-		if (state.align) this.labelAlign.set(lookupLabelAlign(state.align).index);
+		if (state.color != null) this.color.set(state.color);
+		if (state.rotate != null) this.rotate.set(state.rotate);
+		if (state.size != null) this.size.set(state.size);
+		if (state.halo != null) this.halo.set(state.halo);
+		if (state.pattern != null) this.symbolIndex.set(state.pattern);
+		if (state.label != null) this.label.set(state.label);
+		if (state.align != null) this.labelAlign.set(lookupLabelAlign(state.align).index);
 	}
 }
 
