@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
+import { decodeState } from '../src/lib/codec/index.js';
 import { trackServerRequests, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
@@ -256,4 +257,22 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	await dialog.getByRole('button', { name: 'OK' }).click();
 	await expect(dialog).toBeHidden();
 	await expect(deleteButton).toBeHidden();
+});
+
+test('keeps the map in the URL across reloads', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Marker' }).click();
+
+	// the hash is written shortly after the last change
+	const elementsInUrl = () => decodeState(new URL(page.url()).hash.slice(1)).elements.map((e) => e.type);
+	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
+
+	await page.reload();
+	await waitForMapIsReady(page);
+
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
+	const doc = JSON.parse(readFileSync(await download.path(), 'utf-8'));
+	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
 });

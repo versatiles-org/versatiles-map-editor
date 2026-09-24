@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import type { StateRoot } from '$lib/codec/types.js';
@@ -144,6 +144,36 @@ describe('StateManager', () => {
 
 			expect(stateManager.history['history'].length).toBeLessThanOrEqual(100);
 			expect(getStatus()).toStrictEqual([true, false, 100, 0, 102, 1]);
+		});
+	});
+
+	describe('change event', () => {
+		let onChange: Mock<() => void>;
+
+		beforeEach(() => {
+			onChange = vi.fn<() => void>();
+			stateManager.events.on('change', onChange);
+		});
+
+		it('fires once per logged change', () => {
+			vi.mocked(geometryManager.getState).mockReturnValueOnce(state1);
+			stateManager.log();
+			expect(onChange).toHaveBeenCalledTimes(1);
+		});
+
+		it('does not fire if nothing changed', () => {
+			vi.mocked(geometryManager.getState).mockReturnValueOnce(state1).mockReturnValueOnce(state1);
+			stateManager.log();
+			stateManager.log();
+			expect(onChange).toHaveBeenCalledTimes(1);
+		});
+
+		it('fires after undo and redo', async () => {
+			vi.mocked(geometryManager.getState).mockReturnValueOnce(state1);
+			stateManager.log();
+			await stateManager.undo();
+			await stateManager.redo();
+			expect(onChange).toHaveBeenCalledTimes(3);
 		});
 	});
 });

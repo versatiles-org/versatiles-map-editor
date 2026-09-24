@@ -26,12 +26,13 @@ export class StateHistory {
 		this.push(state);
 	}
 
-	public push(state: StateRoot) {
+	/** Add a state to the history. Returns false if it equals the current state. */
+	public push(state: StateRoot): boolean {
 		// The viewport is not part of the history, so panning the map is not undoable
 		const entry = JSON.stringify({ ...state, map: undefined });
 
 		// Nothing changed (e.g. a click without drag), so there is nothing to undo
-		if (entry === this.history[this.index]) return;
+		if (entry === this.history[this.index]) return false;
 
 		if (this.index > 0) {
 			this.history.splice(0, this.index);
@@ -44,6 +45,7 @@ export class StateHistory {
 			this.history.length = MAXLENGTH;
 		}
 		this.updateButtons();
+		return true;
 	}
 
 	private get(): StateRoot {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { replaceState } from '$app/navigation';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
@@ -31,10 +32,27 @@
 	});
 
 	function destroy(): void {
+		clearTimeout(persistTimeout);
 		removeEventListener('hashchange', onHashChange);
 		geometryManager = undefined;
 		map?.remove();
 		map = undefined;
+	}
+
+	// Keep the URL hash in sync with the edited map, so a reload keeps the work and the
+	// address bar always holds a shareable link. replaceState does not fire "hashchange".
+	let persistTimeout: ReturnType<typeof setTimeout> | undefined;
+	function persistState() {
+		clearTimeout(persistTimeout);
+		persistTimeout = setTimeout(() => {
+			if (!geometryManager?.isInteractive()) return;
+			try {
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
+				replaceState('#' + geometryManager.state.getHash(), {});
+			} catch (error) {
+				console.error('Failed to store the map state in the URL', error);
+			}
+		}, 300);
 	}
 
 	function onHashChange() {
@@ -95,7 +113,10 @@
 		map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-left');
 
 		if (showSidebar) {
-			geometryManager = new GeometryManagerInteractive(map);
+			const manager = new GeometryManagerInteractive(map);
+			manager.state.events.on('change', persistState);
+			map.on('moveend', persistState);
+			geometryManager = manager;
 		} else {
 			geometryManager = new GeometryManager(map);
 		}

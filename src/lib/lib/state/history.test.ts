@@ -73,8 +73,8 @@ describe('StateHistory', () => {
 	});
 
 	it('should not push a state that equals the current one', () => {
-		history.push(state2);
-		history.push(structuredClone(state2));
+		expect(history.push(state2)).toBe(true);
+		expect(history.push(structuredClone(state2))).toBe(false);
 		expect(history['history'].length).toBe(2);
 		expect(get(history.undoEnabled)).toBe(true);
 	});
