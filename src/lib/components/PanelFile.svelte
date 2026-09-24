@@ -7,9 +7,7 @@
 
 	const defaultFilename = 'default.mapjson';
 	let filename = defaultFilename;
-	const useFileAPI = false;
 	let dialog: Dialog | undefined = undefined;
-	const disabledSave = $state(false);
 
 	async function newFile(): Promise<void> {
 		if (!(await dialog?.askCreateNew())) return;
@@ -45,8 +43,6 @@
 		fileInput.click();
 	}
 
-	async function saveFile(): Promise<void> {}
-
 	async function downloadFile(): Promise<void> {
 		if (!dialog) return;
 		const response = await dialog.askDownloadFilename(filename);
@@ -55,7 +51,6 @@
 
 		downloadJSON(manager.getState(), filename);
 	}
-	async function saveFileAs(): Promise<void> {}
 </script>
 
 <div class="grid2">
@@ -63,13 +58,6 @@
 	<button class="btn" onclick={openFile}>Open…</button>
 </div>
 <Dialog bind:this={dialog} />
-{#if useFileAPI}
-	<div class="grid2">
-		<button class="btn" onclick={saveFile} disabled={disabledSave}>Save</button>
-		<button class="btn" onclick={saveFileAs}>Save As…</button>
-	</div>
-{:else}
-	<div class="grid1">
-		<button class="btn" onclick={downloadFile}>Download</button>
-	</div>
-{/if}
+<div class="grid1">
+	<button class="btn" onclick={downloadFile}>Download</button>
+</div>

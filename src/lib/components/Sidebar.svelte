@@ -11,7 +11,7 @@
 
 	const uid = $props.id();
 	let panelShareMap: DialogShareMap | null = null;
-	const history = $derived(geometryManager.state);
+	const stateManager = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
 	const activeElement = $derived(geometryManager.selection.selectedElement);
@@ -56,8 +56,8 @@
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
 		<div class="grid2">
-			<button class="btn" onclick={() => history.undo()} disabled={!$undoEnabled}>Undo</button>
-			<button class="btn" onclick={() => history.redo()} disabled={!$redoEnabled}>Redo</button>
+			<button class="btn" onclick={() => stateManager.undo()} disabled={!$undoEnabled}>Undo</button>
+			<button class="btn" onclick={() => stateManager.redo()} disabled={!$redoEnabled}>Redo</button>
 		</div>
 		<hr class="thick" />
 		<SidebarPanel title="Map">

@@ -7,9 +7,9 @@
 	let mode: Mode = $state(null);
 	let dialog: Dialog | null = null;
 	let input: HTMLInputElement | null = $state(null);
-	let eventHandler = new EventHandler<{
-		A: void;
-		B: void;
+	const eventHandler = new EventHandler<{
+		confirm: void;
+		cancel: void;
 	}>();
 
 	async function openDialog(newMode: Mode) {
@@ -36,44 +36,38 @@
 	export async function askDownloadFilename(initialFilename: string): Promise<string | null> {
 		if (!dialog) return null;
 		await openDialog('download');
-		initInput(initialFilename);
-		const { response, value } = await getResponse(true);
-		return (response && value?.trim()) || null;
+		if (input) input.value = initialFilename;
+		const { confirmed, value } = await getResponse();
+		return (confirmed && value?.trim()) || null;
 	}
 
 	export async function askCreateNew(): Promise<boolean> {
 		if (!dialog) return false;
 		await openDialog('new');
-		const { response } = await getResponse(false);
-		return response;
+		const { confirmed } = await getResponse();
+		return confirmed;
 	}
 
-	async function getResponse(defaultValue: boolean): Promise<{ response: boolean; value: string | null }> {
-		const response = await new Promise<boolean>((resolve) => {
+	async function getResponse(): Promise<{ confirmed: boolean; value: string | null }> {
+		const confirmed = await new Promise<boolean>((resolve) => {
 			if (!dialog) return resolve(false);
-			dialog!.eventHandler.on('close', () => resolve(false));
-			eventHandler.on('A', () => resolve(!defaultValue));
-			eventHandler.on('B', () => resolve(defaultValue));
+			dialog.eventHandler.on('close', () => resolve(false));
+			eventHandler.on('confirm', () => resolve(true));
+			eventHandler.on('cancel', () => resolve(false));
 		});
 		const value = input?.value ?? null;
 		await closeDialog();
-		return { response, value };
+		return { confirmed, value };
 	}
 
-	function emitA() {
-		eventHandler.emit('A');
-	}
+	const confirm = () => eventHandler.emit('confirm');
+	const cancel = () => eventHandler.emit('cancel');
 
-	function emitB() {
-		eventHandler.emit('B');
-	}
-
-	function initInput(value: string) {
-		if (!input) return;
-		input.value = value;
-		input.addEventListener('keypress', (e) => {
-			if (e.key === 'Enter') eventHandler.emit('B');
-		});
+	function onFilenameKeydown(e: KeyboardEvent) {
+		if (e.key !== 'Enter') return;
+		// Otherwise the same key press would click the button that gets the focus back after closing
+		e.preventDefault();
+		confirm();
 	}
 </script>
 
@@ -82,19 +76,19 @@
 		<h2>Download File</h2>
 		<label>
 			File name:
-			<input type="text" bind:this={input} spellcheck="false" />
+			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<div class="grid2">
-			<button class="btn" onclick={emitA}>Cancel</button>
-			<button class="btn" onclick={emitB} data-focus>Download</button>
+			<button class="btn" onclick={cancel}>Cancel</button>
+			<button class="btn" onclick={confirm} data-focus>Download</button>
 		</div>
 	{/if}
 	{#if mode == 'new'}
 		<h2>New Map</h2>
 		<p>Do you want to create a new map?</p>
 		<div class="grid2">
-			<button class="btn" onclick={emitA}>OK</button>
-			<button class="btn" onclick={emitB} data-focus>Cancel</button>
+			<button class="btn" onclick={confirm}>OK</button>
+			<button class="btn" onclick={cancel} data-focus>Cancel</button>
 		</div>
 	{/if}
 </Dialog>

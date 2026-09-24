@@ -229,3 +229,31 @@ test('downloads the map as GeoJSON and as map file', async ({ page }) => {
 	const state = JSON.parse(readFileSync(await mapFile.path(), 'utf-8'));
 	expect(state.elements.map((e: { type: string }) => e.type)).toStrictEqual(['marker']);
 });
+
+test('file dialogs confirm and cancel', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Marker' }).click();
+	const dialog = page.getByRole('dialog');
+	const deleteButton = page.getByRole('button', { name: 'Delete' });
+
+	// "New" → Cancel keeps the map
+	await page.getByRole('button', { name: /^New/ }).click();
+	await dialog.getByRole('button', { name: 'Cancel' }).click();
+	await expect(dialog).toBeHidden();
+	await expect(deleteButton).toBeVisible();
+
+	// "Download" → Enter in the file name field confirms
+	await page.getByRole('button', { name: 'Download' }).click();
+	const fileName = dialog.getByRole('textbox', { name: 'File name:' });
+	await fileName.fill('my-map.mapjson');
+	const [download] = await Promise.all([page.waitForEvent('download'), fileName.press('Enter')]);
+	expect(download.suggestedFilename()).toBe('my-map.mapjson');
+	await expect(dialog).toBeHidden();
+
+	// "New" → OK clears the map
+	await page.getByRole('button', { name: /^New/ }).click();
+	await dialog.getByRole('button', { name: 'OK' }).click();
+	await expect(dialog).toBeHidden();
+	await expect(deleteButton).toBeHidden();
+});

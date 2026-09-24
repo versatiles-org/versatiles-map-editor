@@ -78,13 +78,6 @@ describe('GeometryManager', () => {
 		expect(map.fitBounds).toHaveBeenCalled();
 	});
 
-	it('should return an element by index', () => {
-		const element = { id: 'test-element' } as unknown as AbstractElement;
-		get(geometryManager.elements).push(element);
-		const result = geometryManager.getElement(0);
-		expect(result).toBe(element);
-	});
-
 	it('should identify as non-interactive', () => {
 		expect(geometryManager.isInteractive()).toBe(false);
 	});

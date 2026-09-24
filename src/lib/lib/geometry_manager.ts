@@ -4,7 +4,7 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { StateRoot, StateElement } from '$lib/codec/types.js';
-import { get, writable, type Writable } from 'svelte/store';
+import { writable, type Writable } from 'svelte/store';
 import { inlineSources } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
@@ -124,9 +124,5 @@ export class GeometryManager {
 		if (state.elements) {
 			this.elements.set(state.elements.map((element) => elementFromState(this, element)));
 		}
-	}
-
-	public getElement(index: number): AbstractElement {
-		return get(this.elements)[index];
 	}
 }

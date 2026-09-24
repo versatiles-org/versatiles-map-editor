@@ -2,8 +2,8 @@
 	import type { Snippet } from 'svelte';
 	import { EventHandler } from '$lib/utils/event_handler.js';
 
-	let {
-		children = $bindable(),
+	const {
+		children,
 		size,
 		onopen,
 		onclose
