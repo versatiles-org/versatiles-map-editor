@@ -116,13 +116,15 @@ export class StateWriter {
 	}
 
 	writeMap(map: StateRoot['map']) {
-		if (!map) {
+		// A degenerate viewport (e.g. from a zero-sized map container) is not worth storing
+		if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) {
 			return this.writeBit(false);
 		}
 
 		this.writeBit(true);
 
-		const value = Math.round(Math.log2(map.radius) * 40);
+		// The radius is log-encoded in 10 bits: 1 m … 2^(1023/40) m ≈ 49,000 km
+		const value = Math.min(1023, Math.max(0, Math.round(Math.log2(map.radius) * 40)));
 		const radius = Math.pow(2, value / 40);
 		this.writeInteger(value, 10);
 		// effective resolution of coordinates is 1000 times the visible radius

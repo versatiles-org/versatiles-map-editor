@@ -103,6 +103,31 @@ describe('StateWriter', () => {
 		expect(writer.asBase64()).toBe('owDLD4DzOSE');
 	});
 
+	describe('writeMap edge cases', () => {
+		function roundTrip(map: { radius: number; center: [number, number] }) {
+			const writer = new StateWriter();
+			writer.writeMap(map);
+			return new StateReader(writer.bits).readMap();
+		}
+
+		it('should skip degenerate viewports', () => {
+			for (const radius of [0, -5, NaN, Infinity]) {
+				expect(roundTrip({ radius, center: [5, 6] })).toBeUndefined();
+			}
+			expect(roundTrip({ radius: 100, center: [NaN, 6] })).toBeUndefined();
+		});
+
+		it('should clamp tiny radii to 1 m', () => {
+			expect(roundTrip({ radius: 0.5, center: [5, 6] })?.radius).toBe(1);
+		});
+
+		it('should clamp huge radii to the largest encodable value', () => {
+			const map = roundTrip({ radius: 1e12, center: [5, 6] });
+			expect(map?.radius).toBeCloseTo(Math.pow(2, 1023 / 40));
+			expect(map?.center).toStrictEqual([5, 6]);
+		});
+	});
+
 	describe('writeMetadata', () => {
 		function test(metadata: StateMetadata, expected: string) {
 			const writer = new StateWriter();
