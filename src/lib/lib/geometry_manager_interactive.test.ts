@@ -46,6 +46,20 @@ describe('GeometryManager', () => {
 		expect(manager.elements).toBeDefined();
 	});
 
+	it('should not accumulate map listeners on undo/redo', () => {
+		manager.addNewElement('polygon');
+		manager.state.log();
+		manager.addNewElement('marker');
+		manager.state.log();
+		const count = mockMap.listenerCount();
+
+		for (let i = 0; i < 5; i++) {
+			manager.state.undo();
+			manager.state.redo();
+		}
+		expect(mockMap.listenerCount()).toBe(count);
+	});
+
 	it('should delete an element', () => {
 		const element = manager.addNewElement('marker');
 		const { selection } = manager;

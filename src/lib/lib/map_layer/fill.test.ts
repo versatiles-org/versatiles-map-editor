@@ -63,6 +63,15 @@ describe('MapLayerFill', () => {
 		expect(mockManager.map.addImage).toHaveBeenCalled();
 	});
 
+	it('should remove the pattern image on destroy', () => {
+		layer.pattern.set(1);
+		mockManager.map.hasImage.mockReturnValue(true);
+		layer.destroy();
+
+		expect(mockManager.map.removeLayer).toHaveBeenCalledWith('test-layer');
+		expect(mockManager.map.removeImage).toHaveBeenCalledWith('fill-pattern-test-layer');
+	});
+
 	it('should return correct state object', () => {
 		layer.color.set('#00ff00');
 		layer.opacity.set(0.5);

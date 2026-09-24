@@ -8,6 +8,8 @@ import type { GeometryManagerInteractive } from '../geometry_manager_interactive
 type LayerSpec = LayerFill | LayerLine | LayerSymbol;
 type Events = 'click' | 'mousedown' | 'mousemove' | 'mouseup';
 type MouseEventHandler = (event: maplibregl.MapMouseEvent) => void;
+type MapLayerEvent = Events | 'mouseenter' | 'mouseleave';
+type MapLayerEventHandler = (event: maplibregl.MapLayerMouseEvent) => void;
 type PaintKey = keyof maplibregl.AllPaintProperties;
 type LayoutKey = keyof maplibregl.AllLayoutProperties;
 
@@ -20,6 +22,8 @@ export abstract class MapLayer<T extends LayerSpec> {
 	protected readonly map: maplibregl.Map;
 
 	public eventHandlers = new Map<Events, MouseEventHandler[]>();
+	// Listeners registered on the map, so they can be removed in destroy()
+	private mapListeners: [MapLayerEvent, MapLayerEventHandler][] = [];
 	public isSelected = false;
 
 	constructor(manager: GeometryManager, id: string) {
@@ -67,30 +71,35 @@ export abstract class MapLayer<T extends LayerSpec> {
 		if (handlers) handlers.forEach((handler) => handler(e));
 	}
 
+	private listen(event: MapLayerEvent, handler: MapLayerEventHandler) {
+		this.map.on(event, this.id, handler);
+		this.mapListeners.push([event, handler]);
+	}
+
 	private addEvents() {
 		const manager = this.manager;
 		if (manager.isInteractive()) {
-			this.map.on('mouseenter', this.id, () => {
+			this.listen('mouseenter', () => {
 				if (this.isSelected) manager.cursor.toggleGrab(this.id);
 				manager.cursor.toggleHover(this.id);
 			});
-			this.map.on('mouseleave', this.id, () => {
+			this.listen('mouseleave', () => {
 				if (this.isSelected) manager.cursor.toggleGrab(this.id, false);
 				manager.cursor.toggleHover(this.id, false);
 			});
-			this.map.on('click', this.id, (e) => {
+			this.listen('click', (e) => {
 				this.dispatchEvent('click', e);
 				if (this.isSelected) manager.cursor.toggleGrab(this.id);
 				manager.cursor.toggleHover(this.id);
 				e.preventDefault();
 			});
-			this.map.on('mousedown', this.id, (e) => {
+			this.listen('mousedown', (e) => {
 				if (manager.cursor.isPrecise()) return;
 				this.dispatchEvent('mousedown', e);
 			});
 		}
-		this.map.on('mouseup', this.id, (e) => this.dispatchEvent('mouseup', e));
-		this.map.on('mousemove', this.id, (e) => this.dispatchEvent('mousemove', e));
+		this.listen('mouseup', (e) => this.dispatchEvent('mouseup', e));
+		this.listen('mousemove', (e) => this.dispatchEvent('mousemove', e));
 	}
 
 	setPaint(paint: T['paint']) {
@@ -126,6 +135,17 @@ export abstract class MapLayer<T extends LayerSpec> {
 	}
 
 	destroy(): void {
+		for (const [event, handler] of this.mapListeners) this.map.off(event, this.id, handler);
+		this.mapListeners = [];
+		this.eventHandlers.clear();
+
+		// The layer may be destroyed while hovered (e.g. on undo), which would leave the cursor stuck
+		const manager = this.manager;
+		if (manager.isInteractive()) {
+			manager.cursor.toggleHover(this.id, false);
+			manager.cursor.toggleGrab(this.id, false);
+		}
+
 		this.map.removeLayer(this.id);
 	}
 

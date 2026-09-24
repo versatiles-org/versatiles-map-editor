@@ -72,7 +72,7 @@ export class MapLayerFill extends MapLayer<LayerFill> {
 				}
 			}
 
-			const name = 'fill-pattern-' + this.id;
+			const name = this.patternImageName;
 			if (this.map.hasImage(name)) this.map.removeImage(name);
 			this.map.addImage(name, { width: size, height: size, data });
 			this.updatePaint('fill-pattern', name);
@@ -81,6 +81,15 @@ export class MapLayerFill extends MapLayer<LayerFill> {
 		this.color.subscribe(() => updatePattern());
 		this.pattern.subscribe(() => updatePattern());
 		this.opacity.subscribe((value) => this.updatePaint('fill-opacity', value));
+	}
+
+	private get patternImageName(): string {
+		return 'fill-pattern-' + this.id;
+	}
+
+	destroy(): void {
+		super.destroy();
+		if (this.map.hasImage(this.patternImageName)) this.map.removeImage(this.patternImageName);
 	}
 
 	getState(): StateStyle | undefined {

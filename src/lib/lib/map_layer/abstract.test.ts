@@ -49,6 +49,21 @@ describe('MapLayer', () => {
 		expect(mockManager.map.removeLayer).toHaveBeenCalledWith('test-layer');
 	});
 
+	it('should unregister all map listeners on destroy', () => {
+		layer.addLayer('source', 'fill', {}, {});
+		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(6);
+
+		layer.destroy();
+		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(0);
+	});
+
+	it('should reset the cursor on destroy', () => {
+		layer.addLayer('source', 'fill', {}, {});
+		layer.destroy();
+		expect(mockManager.cursor.toggleHover).toHaveBeenCalledWith('test-layer', false);
+		expect(mockManager.cursor.toggleGrab).toHaveBeenCalledWith('test-layer', false);
+	});
+
 	it('should return state object', () => {
 		expect(layer.getState()).toEqual({ halo: 1 });
 	});

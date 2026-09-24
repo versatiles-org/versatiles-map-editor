@@ -1,7 +1,8 @@
 import { vi } from 'vitest';
 
 export class MockCursor {
-	grab = vi.fn();
-	hover = vi.fn();
-	precise = vi.fn();
+	toggleHover = vi.fn();
+	toggleGrab = vi.fn();
+	togglePrecise = vi.fn();
+	isPrecise = vi.fn(() => false);
 }
