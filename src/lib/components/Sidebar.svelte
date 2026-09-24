@@ -54,6 +54,7 @@
 
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
 		activeElement.set(geometryManager.addNewElement(type));
+		geometryManager.state.log();
 	}
 </script>
 

@@ -160,3 +160,19 @@ test('dragging a slider creates a single undo step', async ({ page }) => {
 	});
 	expect(await countUndoSteps()).toBe(baseline + 1);
 });
+
+test('adding an element creates an undo step', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	const undo = page.getByRole('button', { name: 'Undo' });
+	const redo = page.getByRole('button', { name: 'Redo' });
+	await expect(undo).toBeDisabled();
+
+	await page.getByRole('button', { name: 'Marker' }).click();
+	await expect(undo).toBeEnabled();
+
+	await undo.click();
+	await expect(undo).toBeDisabled();
+	await expect(redo).toBeEnabled();
+});
