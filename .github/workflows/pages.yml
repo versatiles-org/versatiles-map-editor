@@ -20,15 +20,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 22
-
-      - name: Init cache
-        uses: actions/cache@v6
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          cache: npm
 
       - name: Install
-        run: npm install
+        run: npm ci
 
       - name: Build the project
         run: npm run build
