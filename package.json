@@ -19,6 +19,7 @@
     "preview": "vite preview",
     "test-coverage": "vitest run --coverage",
     "test-playwright": "playwright test",
+    "test-playwright-docker": "./scripts/test_playwright_docker.sh",
     "test-unit": "vitest run --testTimeout 10000",
     "test": "npm run test-unit && npm run test-playwright",
     "prepare": "husky",
