@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
-const { maps } = vi.hoisted(() => ({ maps: [] as { remove: () => void }[] }));
+const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock }[] }));
 
 // A minimal stand-in for maplibre's Map: happy-dom has no WebGL
 vi.mock('maplibre-gl', async (importOriginal) => {
@@ -29,6 +29,7 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
+const { GeometryManagerInteractive } = await import('./lib/geometry_manager_interactive.js');
 
 describe('MapEditor', () => {
 	afterEach(() => {
@@ -58,5 +59,18 @@ describe('MapEditor', () => {
 		expect(removeListener).toHaveBeenCalledWith('hashchange', handler);
 		addListener.mockRestore();
 		removeListener.mockRestore();
+	});
+
+	it('destroys the geometry manager before removing the map', () => {
+		const destroy = vi.spyOn(GeometryManagerInteractive.prototype, 'destroy');
+		const component = mount(MapEditor, { target: document.body });
+		flushSync();
+
+		unmount(component);
+		flushSync();
+
+		expect(destroy).toHaveBeenCalledTimes(1);
+		expect(destroy.mock.invocationCallOrder[0]).toBeLessThan(maps[0].remove.mock.invocationCallOrder[0]);
+		destroy.mockRestore();
 	});
 });

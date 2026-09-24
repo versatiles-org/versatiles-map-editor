@@ -34,6 +34,8 @@
 	function destroy(): void {
 		clearTimeout(persistTimeout);
 		removeEventListener('hashchange', onHashChange);
+		// before map.remove(), so the elements can still remove their layers
+		geometryManager?.destroy();
 		geometryManager = undefined;
 		map?.remove();
 		map = undefined;

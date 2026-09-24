@@ -34,6 +34,8 @@ export class GeometryManager {
 	public readonly canvas: HTMLElement;
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
+	private destroyed = false;
+	private readonly abortController = new AbortController();
 
 	constructor(map: maplibregl.Map) {
 		this.elements = writable([]);
@@ -63,13 +65,25 @@ export class GeometryManager {
 		});
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
-		inlineSources(style).then(
-			(inlined) => map.setStyle(inlined),
+		// The download is aborted and its result ignored once the manager is destroyed.
+		const signal = this.abortController.signal;
+		inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) }).then(
+			(inlined) => {
+				if (!this.destroyed) map.setStyle(inlined);
+			},
 			(error) => {
+				if (this.destroyed) return; // includes the AbortError caused by destroy()
 				console.error('Failed to inline map style sources', error);
 				map.setStyle(style);
 			}
 		);
+	}
+
+	/** Stop pending work and remove all elements. Call before removing the map. */
+	public destroy() {
+		this.destroyed = true;
+		this.abortController.abort();
+		this.clear();
 	}
 
 	public isInteractive(): this is GeometryManagerInteractive {
@@ -119,6 +133,7 @@ export class GeometryManager {
 
 		if (!this.map.isStyleLoaded()) {
 			await new Promise((r) => this.map.once('styledata', r));
+			if (this.destroyed) return;
 		}
 
 		if (state.elements) {

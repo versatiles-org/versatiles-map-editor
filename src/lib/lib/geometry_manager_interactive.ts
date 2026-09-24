@@ -29,6 +29,11 @@ export class GeometryManagerInteractive extends GeometryManager {
 		super.clear();
 	}
 
+	public destroy() {
+		super.destroy();
+		this.state.events.clear();
+	}
+
 	public isInteractive(): this is GeometryManagerInteractive {
 		return true;
 	}
