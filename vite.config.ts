@@ -8,6 +8,7 @@ export default defineConfig({
 	test: {
 		environment: 'happy-dom',
 		include: ['src/**/*.{test,spec}.{js,ts}'],
+		setupFiles: ['src/vitest.setup.ts'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['lcov', 'text']

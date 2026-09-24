@@ -5,11 +5,6 @@ import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import type { StateRoot } from '$lib/codec/types.js';
 import type { AbstractElement } from './element/abstract.js';
 
-vi.mock('@versatiles/style', async (importOriginal) => ({
-	...(await importOriginal<typeof import('@versatiles/style')>()),
-	inlineSources: vi.fn(async (style) => style)
-}));
-
 describe('GeometryManager', () => {
 	let map: MockMap;
 	let geometryManager: GeometryManager;

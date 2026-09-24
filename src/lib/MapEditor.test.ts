@@ -27,11 +27,6 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 	return { ...original, Map, setWorkerUrl: vi.fn(), AttributionControl: vi.fn() };
 });
 
-vi.mock('@versatiles/style', async (importOriginal) => ({
-	...(await importOriginal<typeof import('@versatiles/style')>()),
-	inlineSources: vi.fn(async (style) => style)
-}));
-
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
 
