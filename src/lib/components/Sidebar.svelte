@@ -4,6 +4,7 @@
 	import SidebarPanel from './SidebarPanel.svelte';
 	import DialogShareMap from './DialogShare.svelte';
 	import PanelFile from './PanelFile.svelte';
+	import { downloadJSON } from '$lib/utils/download.js';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
@@ -43,14 +44,7 @@
 	}
 
 	function exportGeoJSON() {
-		const geoJSON = geometryManager.getGeoJSON();
-		const blob = new Blob([JSON.stringify(geoJSON)], { type: 'application/geo+json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.setAttribute('href', url);
-		a.setAttribute('download', 'map.geojson');
-		a.click();
-		URL.revokeObjectURL(url);
+		downloadJSON(geometryManager.getGeoJSON(), 'map.geojson', 'application/geo+json');
 	}
 
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {

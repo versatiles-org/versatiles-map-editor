@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { trackServerRequests, waitForMapIsReady } from './lib/utils';
 
@@ -108,14 +109,6 @@ test('filled map', async ({ page }) => {
 	]);
 
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
-
-	/*
-	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
-	const content = JSON.parse(readFileSync(await download.path(), 'utf-8'));
-	expect(content).toStrictEqual({
-		type: 'FeatureCollection'
-	});
-	*/
 });
 
 test('invalid hash', async ({ page }) => {
@@ -213,4 +206,26 @@ test('style editor controls have unique ids and labels', async ({ page }) => {
 	await expectUniqueIds();
 	await expect(page.getByRole('button', { name: 'Symbol flag' })).toBeVisible();
 	await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible();
+});
+
+test('downloads the map as GeoJSON and as map file', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Marker' }).click();
+
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const [geojson] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
+	expect(geojson.suggestedFilename()).toBe('map.geojson');
+	const doc = JSON.parse(readFileSync(await geojson.path(), 'utf-8'));
+	expect(doc.type).toBe('FeatureCollection');
+	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
+
+	await page.getByRole('button', { name: 'Download' }).click();
+	const [mapFile] = await Promise.all([
+		page.waitForEvent('download'),
+		page.getByRole('dialog').getByRole('button', { name: 'Download' }).click()
+	]);
+	expect(mapFile.suggestedFilename()).toBe('default.mapjson');
+	const state = JSON.parse(readFileSync(await mapFile.path(), 'utf-8'));
+	expect(state.elements.map((e: { type: string }) => e.type)).toStrictEqual(['marker']);
 });

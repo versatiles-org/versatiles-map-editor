@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 	import Dialog from './DialogFile.svelte';
+	import { downloadJSON } from '$lib/utils/download.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
@@ -52,14 +53,7 @@
 		if (!response) return;
 		filename = response;
 
-		const state = manager.getState();
-		const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.setAttribute('href', url);
-		a.setAttribute('download', filename);
-		a.click();
-		URL.revokeObjectURL(url);
+		downloadJSON(manager.getState(), filename);
 	}
 	async function saveFileAs(): Promise<void> {}
 </script>
