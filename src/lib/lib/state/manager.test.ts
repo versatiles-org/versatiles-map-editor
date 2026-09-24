@@ -95,12 +95,13 @@ describe('StateManager', () => {
 			stateManager.log();
 			expect(getStatus()).toStrictEqual([true, false, 3, 0, 3, 0]);
 
+			// the viewport is not part of the history
 			stateManager.undo();
-			expect(geometryManager.setState).toHaveBeenCalledWith(state1);
+			expect(geometryManager.setState).toHaveBeenCalledWith({ ...state1, map: undefined });
 			expect(getStatus()).toStrictEqual([true, true, 3, 1, 3, 1]);
 
 			stateManager.redo();
-			expect(geometryManager.setState).toHaveBeenCalledWith(state2);
+			expect(geometryManager.setState).toHaveBeenCalledWith({ ...state2, map: undefined });
 			expect(getStatus()).toStrictEqual([true, false, 3, 0, 3, 2]);
 		});
 
@@ -126,10 +127,18 @@ describe('StateManager', () => {
 			expect(getStatus()).toStrictEqual([true, false, 2, 0, 2, 1]);
 		});
 
+		it('should not add a history entry if nothing changed', () => {
+			geometryManager.setState(state1);
+			stateManager.log();
+			stateManager.log();
+			expect(getStatus()).toStrictEqual([true, false, 2, 0, 3, 1]);
+		});
+
 		it('should trim history if it exceeds the maximum length', () => {
 			geometryManager.setState(state1);
 
 			for (let i = 0; i < 101; i++) {
+				vi.mocked(geometryManager.getState).mockReturnValueOnce({ elements: [{ type: 'marker', point: [i, i] }] });
 				stateManager.log();
 			}
 

@@ -27,12 +27,17 @@ export class StateHistory {
 	}
 
 	public push(state: StateRoot) {
-		state.map = undefined; // Remove map state from history
+		// The viewport is not part of the history, so panning the map is not undoable
+		const entry = JSON.stringify({ ...state, map: undefined });
+
+		// Nothing changed (e.g. a click without drag), so there is nothing to undo
+		if (entry === this.history[this.index]) return;
+
 		if (this.index > 0) {
 			this.history.splice(0, this.index);
 			this.index = 0;
 		}
-		this.history.unshift(JSON.stringify(state));
+		this.history.unshift(entry);
 
 		// Remove old history
 		if (this.history.length > MAXLENGTH) {

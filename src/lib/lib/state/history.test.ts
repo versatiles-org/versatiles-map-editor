@@ -72,9 +72,36 @@ describe('StateHistory', () => {
 		expect(get(history.redoEnabled)).toBe(false);
 	});
 
+	it('should not push a state that equals the current one', () => {
+		history.push(state2);
+		history.push(structuredClone(state2));
+		expect(history['history'].length).toBe(2);
+		expect(get(history.undoEnabled)).toBe(true);
+	});
+
+	it('should ignore viewport changes', () => {
+		history.push({ ...state1, map: { center: [7, 8], radius: 99 } });
+		expect(history['history'].length).toBe(1);
+		expect(get(history.undoEnabled)).toBe(false);
+	});
+
+	it('should keep the redo stack when pushing the current state after undo', () => {
+		history.push(state2);
+		history.undo();
+		history.push(state1);
+		expect(get(history.redoEnabled)).toBe(true);
+		expect(history.redo()).toEqual({ ...state2, map: undefined });
+	});
+
+	it('should not modify the pushed state', () => {
+		const state: StateRoot = { map: { center: [5, 6], radius: 100 }, elements: [] };
+		history.push(state);
+		expect(state).toStrictEqual({ map: { center: [5, 6], radius: 100 }, elements: [] });
+	});
+
 	it('should not exceed the maximum history length', () => {
 		for (let i = 0; i < 150; i++) {
-			history.push({ elements: [], map: { center: [i, i], radius: i } });
+			history.push({ elements: [{ type: 'marker', point: [i, i] }] });
 		}
 		expect(history['history'].length).toBe(100);
 	});
