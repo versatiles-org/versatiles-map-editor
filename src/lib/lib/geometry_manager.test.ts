@@ -80,6 +80,17 @@ describe('GeometryManager', () => {
 			vi.unstubAllGlobals();
 		});
 
+		it('creates elements only once the style is loaded', async () => {
+			const { manager, resolve } = deferInlineSources();
+			const loading = manager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
+			await new Promise((r) => setTimeout(r, 0));
+			expect(get(manager.elements)).toHaveLength(0);
+
+			resolve({ version: 8, sources: {}, layers: [] });
+			await loading;
+			expect(get(manager.elements)).toHaveLength(1);
+		});
+
 		it('removes all elements', () => {
 			const element = { destroy: vi.fn() } as unknown as AbstractElement;
 			geometryManager['appendElement'](element);

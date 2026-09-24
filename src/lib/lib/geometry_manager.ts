@@ -36,11 +36,14 @@ export class GeometryManager {
 	public readonly selection: SelectionHandler | null = null;
 	private destroyed = false;
 	private readonly abortController = new AbortController();
+	// The map has no style until inlineSources() finishes, so elements must wait for it
+	private styleLoaded = false;
 
 	constructor(map: maplibregl.Map) {
 		this.elements = writable([]);
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
+		this.map.once('style.load', () => (this.styleLoaded = true));
 
 		const style = getMapStyle({ darkMode: false });
 		style.transition = { duration: 0, delay: 0 };
@@ -131,8 +134,8 @@ export class GeometryManager {
 
 		if (state.map) this.fitViewport(state.map);
 
-		if (!this.map.isStyleLoaded()) {
-			await new Promise((r) => this.map.once('styledata', r));
+		if (!this.styleLoaded) {
+			await new Promise((r) => this.map.once('style.load', r));
 			if (this.destroyed) return;
 		}
 
