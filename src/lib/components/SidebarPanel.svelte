@@ -57,7 +57,7 @@
 				width: 1em;
 
 				svg {
-					fill: var(--color-fg);
+					fill: var(--color-text);
 					height: 100%;
 					rotate: 0deg;
 					transform-origin: 40% 50%;

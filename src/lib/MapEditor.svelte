@@ -32,9 +32,6 @@
 
 		maplibre.setWorkerUrl(maplibreWorkerUrl);
 
-		container.style.setProperty('--bg-color', '#fff');
-		container.style.setProperty('--fg-color', '#000');
-
 		// The editor starts without a style; geometry_manager sets the actual map style.
 		map = new maplibre.Map({
 			container,
@@ -149,14 +146,14 @@
 		outline: none !important;
 	}
 	.map :global(.maplibregl-ctrl-attrib) {
-		background-color: color-mix(in srgb, var(--bg-color) 50%, transparent) !important;
-		color: var(--fg-color) !important;
+		background-color: color-mix(in srgb, var(--color-bg) 50%, transparent) !important;
+		color: var(--color-text) !important;
 		opacity: 0.5;
 		font-size: 0.85em;
 		line-height: normal !important;
 	}
 	.map :global(.maplibregl-ctrl-attrib a) {
-		color: var(--fg-color) !important;
+		color: var(--color-text) !important;
 	}
 
 	:global(.maplibregl-ctrl-attrib) {

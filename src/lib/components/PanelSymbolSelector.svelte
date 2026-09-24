@@ -55,7 +55,7 @@
 	</div>
 </Dialog>
 
-<style type="text/scss">
+<style lang="scss">
 	.list {
 		width: 100%;
 		height: 100%;

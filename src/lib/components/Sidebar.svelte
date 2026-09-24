@@ -132,6 +132,6 @@
 	}
 
 	a {
-		color: var(--fg-color);
+		color: var(--color-text);
 	}
 </style>

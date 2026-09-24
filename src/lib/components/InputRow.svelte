@@ -15,7 +15,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		color: var(--fg-color);
+		color: var(--color-text);
 		& > label {
 			flex-grow: 0;
 		}

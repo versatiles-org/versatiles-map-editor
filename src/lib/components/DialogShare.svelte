@@ -26,7 +26,7 @@
 	}
 
 	function getEmbedCode() {
-		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh" frameborder="0"></iframe>`;
+		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh; border:0"></iframe>`;
 	}
 
 	function update(delay: number = 500) {
@@ -122,7 +122,7 @@
 	</div>
 </Dialog>
 
-<style type="text/scss">
+<style lang="scss">
 	.grid {
 		display: grid;
 		grid-template-columns: 1fr auto;
