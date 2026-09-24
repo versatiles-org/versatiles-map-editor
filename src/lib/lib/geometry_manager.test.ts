@@ -64,6 +64,11 @@ describe('GeometryManager', () => {
 		expect(geometryManager.state?.history.reset).toHaveBeenCalledWith(state);
 	});
 
+	it('should propagate errors while loading a state', async () => {
+		const state = { elements: [{ type: 'unknown' }] } as unknown as StateRoot;
+		await expect(geometryManager.loadState(state)).rejects.toThrow('Unknown element type');
+	});
+
 	it('should set a state and fit map bounds', async () => {
 		const state: StateRoot = {
 			map: { center: [0, 0], radius: 1000 },

@@ -77,18 +77,25 @@
 
 		let hash = location.hash.slice(1);
 		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
-		if (hash) {
-			readHash(hash);
-		} else {
+		if (!hash || !readHash(hash)) {
 			const bbox = getCountryBoundingBox();
 			if (bbox) map.fitBounds(bbox, { animate: false });
 		}
 
 		addEventListener('hashchange', () => readHash(location.hash.slice(1)));
 
-		function readHash(hash: string) {
-			if (!geometryManager) return;
-			geometryManager.loadState(decodeState(hash));
+		/** Load the state from a hash. Returns false if the hash could not be decoded. */
+		function readHash(hash: string): boolean {
+			if (!geometryManager) return false;
+			let state;
+			try {
+				state = decodeState(hash);
+			} catch (error) {
+				console.error('Invalid map state in URL hash', error);
+				return false;
+			}
+			geometryManager.loadState(state).catch((error) => console.error('Failed to load map state', error));
+			return true;
 		}
 	}
 </script>

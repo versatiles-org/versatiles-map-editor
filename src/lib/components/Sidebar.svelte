@@ -17,9 +17,10 @@
 	function importGeoJSON() {
 		const input = document.createElement('input');
 		input.type = 'file';
-		input.onchange = (_) => {
-			if (!input.files) return alert('No file selected.');
-			const file = input.files[0];
+		input.accept = '.geojson,.json,application/geo+json,application/json';
+		input.onchange = () => {
+			const file = input.files?.[0];
+			if (!file) return;
 			const reader = new FileReader();
 			reader.onload = (evt) => {
 				try {

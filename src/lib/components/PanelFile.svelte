@@ -26,11 +26,19 @@
 			const target = event.target as HTMLInputElement;
 			if (!target.files || target.files.length === 0) return;
 			const file = target.files[0];
-			filename = file.name;
 			const reader = new FileReader();
-			reader.onload = () => {
-				manager.loadState(JSON.parse(reader.result as string));
+			reader.onload = async () => {
+				try {
+					const state = JSON.parse(reader.result as string);
+					if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
+					await manager.loadState(state);
+					filename = file.name;
+				} catch (error) {
+					console.error(error);
+					alert('Failed to open the map. Please check the file format.');
+				}
 			};
+			reader.onerror = () => alert('Failed to read file. Please try again.');
 			reader.readAsText(file);
 		};
 		fileInput.click();

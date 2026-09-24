@@ -116,3 +116,14 @@ test('filled map', async ({ page }) => {
 	});
 	*/
 });
+
+test('invalid hash', async ({ page }) => {
+	const pageErrors: Error[] = [];
+	page.on('pageerror', (error) => pageErrors.push(error));
+
+	await page.goto('/#this-is-not-a-valid-state');
+	await waitForMapIsReady(page);
+
+	expect(pageErrors).toStrictEqual([]);
+	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+});
