@@ -33,11 +33,17 @@ export class SymbolLibrary {
 		return symbols.get(index) ?? defaultSymbol!;
 	}
 
-	drawSymbol(canvas: HTMLCanvasElement, index: number, halo = 0): void {
+	drawSymbol(canvas: HTMLCanvasElement, index: number, halo = 0, retry = true): void {
 		const symbol = this.getSymbol(index);
 		if (!symbol.image) return;
 
-		const { sdf, data: imageDataSrc } = this.map.getImage(symbol.image);
+		const image = this.map.getImage(symbol.image);
+		if (!image) {
+			// The sprite is not loaded yet: try once more when the map has settled
+			if (retry) this.map.once('idle', () => this.drawSymbol(canvas, index, halo, false));
+			return;
+		}
+		const { sdf, data: imageDataSrc } = image;
 		const { data: dataSrc, width: widthSrc, height: heightSrc } = imageDataSrc;
 
 		const { width: widthDst, height: heightDst } = canvas;

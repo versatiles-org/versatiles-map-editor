@@ -90,6 +90,40 @@ describe('SymbolLibrary', () => {
 		expect(ctx.putImageData).toBeCalledWith(expect.any(MyImageData), 0, 0);
 	});
 
+	describe('when the sprite is not loaded yet', () => {
+		let ctx: CanvasRenderingContext2D;
+		let canvas: HTMLCanvasElement;
+		const image = {
+			sdf: false,
+			data: { data: new Uint8ClampedArray(10 * 10 * 4), width: 10, height: 10 }
+		};
+
+		beforeEach(() => {
+			ctx = { putImageData: vi.fn() } as unknown as CanvasRenderingContext2D;
+			canvas = { getContext: vi.fn(() => ctx), width: 20, height: 20 } as unknown as HTMLCanvasElement;
+			// @ts-expect-error Mocking globalThis
+			globalThis.ImageData = class {};
+		});
+
+		it('should not throw and draw nothing', () => {
+			expect(() => symbolLibrary.drawSymbol(canvas, 1)).not.toThrow();
+			expect(ctx.putImageData).not.toHaveBeenCalled();
+		});
+
+		it('should draw once the map is idle', () => {
+			symbolLibrary.drawSymbol(canvas, 1);
+			vi.spyOn(map, 'getImage').mockReturnValue(image);
+			map.emit('idle');
+			expect(ctx.putImageData).toHaveBeenCalledTimes(1);
+		});
+
+		it('should retry only once', () => {
+			symbolLibrary.drawSymbol(canvas, 1);
+			map.emit('idle');
+			expect(map.listenerCount('idle')).toBe(0);
+		});
+	});
+
 	it('should return the list of all symbols', () => {
 		const symbols = symbolLibrary.asList();
 		expect(symbols.length).toBeGreaterThan(0);

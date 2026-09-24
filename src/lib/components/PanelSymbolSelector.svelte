@@ -4,7 +4,7 @@
 	import { SymbolLibrary } from '../lib/symbols.js';
 	import Dialog from './Dialog.svelte';
 
-	let dialog: Dialog;
+	let dialog: Dialog | undefined;
 	const buttonIconSize = 20;
 	const listItemSize = 48;
 	const listIconSize = 32;
@@ -14,9 +14,13 @@
 
 	const symbolLibrary = $derived(new SymbolLibrary(map));
 
+	const drawIcon: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index);
 	const drawIconHalo: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index, 3);
 
-	const drawIcon: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index, 3);
+	function selectSymbol(index: number) {
+		symbolIndex = index;
+		dialog?.close();
+	}
 </script>
 
 <button onclick={() => dialog?.open()} style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px">
@@ -38,7 +42,7 @@
 <Dialog bind:this={dialog}>
 	<div class="list" style="--list-icon-size: {listIconSize}px; --list-item-size: {listItemSize}px">
 		{#each symbolLibrary.asList() as symbol (symbol.index)}
-			<button class="item" onclick={() => (symbolIndex = symbol.index)}
+			<button class="item" onclick={() => selectSymbol(symbol.index)}
 				><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={symbol.index}
 				></canvas><br />{symbol.name}</button
 			>

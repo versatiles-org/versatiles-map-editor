@@ -176,3 +176,17 @@ test('adding an element creates an undo step', async ({ page }) => {
 	await expect(undo).toBeDisabled();
 	await expect(redo).toBeEnabled();
 });
+
+test('selecting a symbol closes the symbol picker', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	await page.getByRole('button', { name: 'Marker' }).click();
+	await page.getByRole('button', { name: 'flag' }).click();
+	const dialog = page.getByRole('dialog');
+	await expect(dialog).toBeVisible();
+
+	await dialog.getByRole('button', { name: 'airplane', exact: true }).click();
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole('button', { name: 'airplane' })).toBeVisible();
+});
