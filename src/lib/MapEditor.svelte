@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
@@ -23,9 +24,36 @@
 	let showSidebar = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
 
-	$effect(() => {
-		if (container) init();
+	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
+	onMount(() => {
+		init();
+		return destroy;
 	});
+
+	function destroy(): void {
+		removeEventListener('hashchange', onHashChange);
+		geometryManager = undefined;
+		map?.remove();
+		map = undefined;
+	}
+
+	function onHashChange() {
+		readHash(location.hash.slice(1));
+	}
+
+	/** Load the state from a hash. Returns false if the hash could not be decoded. */
+	function readHash(hash: string): boolean {
+		if (!geometryManager) return false;
+		let state;
+		try {
+			state = decodeState(hash);
+		} catch (error) {
+			console.error('Invalid map state in URL hash', error);
+			return false;
+		}
+		geometryManager.loadState(state).catch((error) => console.error('Failed to load map state', error));
+		return true;
+	}
 
 	function init(): void {
 		if (map) return;
@@ -79,21 +107,7 @@
 			if (bbox) map.fitBounds(bbox, { animate: false });
 		}
 
-		addEventListener('hashchange', () => readHash(location.hash.slice(1)));
-
-		/** Load the state from a hash. Returns false if the hash could not be decoded. */
-		function readHash(hash: string): boolean {
-			if (!geometryManager) return false;
-			let state;
-			try {
-				state = decodeState(hash);
-			} catch (error) {
-				console.error('Invalid map state in URL hash', error);
-				return false;
-			}
-			geometryManager.loadState(state).catch((error) => console.error('Failed to load map state', error));
-			return true;
-		}
+		addEventListener('hashchange', onHashChange);
 	}
 </script>
 

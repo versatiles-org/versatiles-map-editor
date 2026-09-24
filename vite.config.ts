@@ -3,6 +3,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	plugins: [sveltekit()],
+	// Component tests need Svelte's client build, which is only resolved with the browser condition
+	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
 		environment: 'happy-dom',
 		include: ['src/**/*.{test,spec}.{js,ts}'],
