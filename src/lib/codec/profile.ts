@@ -1,3 +1,4 @@
+import { Color } from '@versatiles/style';
 import type { StateStyle } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
 
@@ -39,6 +40,52 @@ function indexOf(table: string[], name: unknown): number | undefined {
 	return index < 0 ? undefined : index;
 }
 
+// ----- sanitizers for foreign GeoJSON property values -----
+// Imported GeoJSON may contain anything; these return undefined for values the
+// encoder cannot represent, so the corresponding default is used instead.
+
+/** A finite number (numeric strings are accepted), clamped to [min, max]. */
+export function sanitizeNumber(value: unknown, min = -Infinity, max = Infinity): number | undefined {
+	if (typeof value === 'string' && value.trim() !== '') value = Number(value);
+	if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+	return Math.min(max, Math.max(min, value));
+}
+
+/** A rotation in whole degrees, normalized to [-180, 180). */
+export function sanitizeRotation(value: unknown): number | undefined {
+	const n = sanitizeNumber(value);
+	if (n === undefined) return undefined;
+	return ((((Math.round(n) + 180) % 360) + 360) % 360) - 180;
+}
+
+/** A parseable color, normalized to lowercase hex (#rrggbb or #rrggbbaa). */
+export function sanitizeColor(value: unknown): string | undefined {
+	if (typeof value !== 'string') return undefined;
+	try {
+		return Color.parse(value).asHex().toLowerCase();
+	} catch {
+		return undefined;
+	}
+}
+
+export function sanitizeString(value: unknown): string | undefined {
+	if (typeof value === 'string') return value;
+	if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+	return undefined;
+}
+
+export function sanitizeBoolean(value: unknown): boolean | undefined {
+	if (typeof value === 'boolean') return value;
+	if (value === 'true') return true;
+	if (value === 'false') return false;
+	return undefined;
+}
+
+/** Assign `value` to `style[key]` unless it is undefined. */
+function set<K extends keyof StateStyle>(style: StateStyle, key: K, value: StateStyle[K] | undefined) {
+	if (value !== undefined) style[key] = value;
+}
+
 /**
  * Remove fields whose value equals the corresponding default (or is undefined),
  * mirroring the editor's `removeDefaultFields`. Returns undefined when nothing
@@ -68,10 +115,9 @@ export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
 	const s: StateStyle = { ...FILL_DEFAULTS };
 	if (p) {
-		if (p['fill-color'] != null) s.color = p['fill-color'];
-		if (p['fill-opacity'] != null) s.opacity = p['fill-opacity'];
-		const pattern = indexOf(FILL_PATTERN_NAMES, p['fill-pattern']);
-		if (pattern != null) s.pattern = pattern;
+		set(s, 'color', sanitizeColor(p['fill-color']));
+		set(s, 'opacity', sanitizeNumber(p['fill-opacity'], 0, 1));
+		set(s, 'pattern', indexOf(FILL_PATTERN_NAMES, p['fill-pattern']));
 	}
 	return removeDefaultFields(s, FILL_DEFAULTS);
 }
@@ -91,11 +137,10 @@ export function strokePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
 	const s: StateStyle = { ...LINE_DEFAULTS };
 	if (p) {
-		if (p['stroke-color'] != null) s.color = p['stroke-color'];
-		const pattern = indexOf(STROKE_STYLE_NAMES, p['stroke-style']);
-		if (pattern != null) s.pattern = pattern;
-		if (p['stroke-width'] != null) s.width = p['stroke-width'];
-		if (p['stroke-visibility'] != null) s.visible = p['stroke-visibility'];
+		set(s, 'color', sanitizeColor(p['stroke-color']));
+		set(s, 'pattern', indexOf(STROKE_STYLE_NAMES, p['stroke-style']));
+		set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
+		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
 	}
 	return removeDefaultFields(s, LINE_DEFAULTS);
 }
@@ -118,17 +163,13 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
 	const s: StateStyle = { ...SYMBOL_DEFAULTS };
 	if (p) {
-		if (p['symbol-color'] != null) s.color = p['symbol-color'];
-		if (p['symbol-halo-width'] != null) s.halo = p['symbol-halo-width'];
-		if (p['symbol-rotate'] != null) s.rotate = p['symbol-rotate'];
-		if (p['symbol-size'] != null) s.size = p['symbol-size'];
-		if (p['symbol-label'] != null) s.label = p['symbol-label'];
-		const align = indexOf(LABEL_ALIGN_NAMES, p['symbol-label-align']);
-		if (align != null) s.align = align;
-		if (typeof p['symbol-pattern'] === 'string') {
-			const pattern = symbolIndexByName(p['symbol-pattern']);
-			if (pattern != null) s.pattern = pattern;
-		}
+		set(s, 'color', sanitizeColor(p['symbol-color']));
+		set(s, 'halo', sanitizeNumber(p['symbol-halo-width'], 0));
+		set(s, 'rotate', sanitizeRotation(p['symbol-rotate']));
+		set(s, 'size', sanitizeNumber(p['symbol-size'], 0));
+		set(s, 'label', sanitizeString(p['symbol-label']));
+		set(s, 'align', indexOf(LABEL_ALIGN_NAMES, p['symbol-label-align']));
+		if (typeof p['symbol-pattern'] === 'string') set(s, 'pattern', symbolIndexByName(p['symbol-pattern']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);
 }

@@ -9,6 +9,7 @@ import type {
 import {
 	fillPropsFromStyle,
 	fillStyleFromProps,
+	sanitizeNumber,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
 	symbolPropsFromStyle,
@@ -129,11 +130,12 @@ function featureToElement(feature: GeoJSON.Feature): StateElement | undefined {
 	switch (g.type) {
 		case 'Point': {
 			const point = g.coordinates as Point;
-			if (p.subType === 'Circle' && p.radius != null) {
+			const radius = sanitizeNumber(p.radius, 0);
+			if (p.subType === 'Circle' && radius !== undefined) {
 				return {
 					type: 'circle',
 					point,
-					radius: p.radius,
+					radius,
 					style: fillStyleFromProps(p),
 					strokeStyle: strokeStyleFromProps(p)
 				};

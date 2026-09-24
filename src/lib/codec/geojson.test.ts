@@ -172,3 +172,57 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 		expect(encodeGeoJSON(decoded)).toBe(base64);
 	});
 });
+
+describe('stateFromGeoJSON with foreign property values', () => {
+	const point = (properties: GeoJSON.GeoJsonProperties): GeoJSONDocument => ({
+		type: 'FeatureCollection',
+		features: [{ type: 'Feature', properties, geometry: { type: 'Point', coordinates: [13.4, 52.5] } }]
+	});
+	const styleOf = (properties: GeoJSON.GeoJsonProperties) => stateFromGeoJSON(point(properties)).elements[0];
+
+	it('rounds and normalizes symbol rotation', () => {
+		expect(styleOf({ 'symbol-rotate': 12.5 })).toMatchObject({ style: { rotate: 13 } });
+		expect(styleOf({ 'symbol-rotate': 270 })).toMatchObject({ style: { rotate: -90 } });
+	});
+
+	it('clamps negative sizes and out-of-range opacity', () => {
+		const circle = styleOf({ subType: 'Circle', radius: 100, 'stroke-width': -1, 'fill-opacity': 1.5 });
+		expect(circle).toEqual({ type: 'circle', point: [13.4, 52.5], radius: 100, strokeStyle: { width: 0 } });
+	});
+
+	it('normalizes parseable colors and drops unparseable ones', () => {
+		expect(styleOf({ 'symbol-color': 'rgb(1,2,3)' })).toMatchObject({ style: { color: '#010203' } });
+		expect(styleOf({ 'symbol-color': '#FF0000' })).toEqual({ type: 'marker', point: [13.4, 52.5] });
+		expect(styleOf({ 'symbol-color': 'notacolor' })).toEqual({ type: 'marker', point: [13.4, 52.5] });
+		expect(styleOf({ 'symbol-color': 42 })).toEqual({ type: 'marker', point: [13.4, 52.5] });
+	});
+
+	it('coerces numeric strings, labels and boolean strings', () => {
+		expect(styleOf({ 'symbol-size': '2', 'symbol-label': 7 })).toMatchObject({ style: { size: 2, label: '7' } });
+		expect(styleOf({ subType: 'Circle', radius: '50', 'stroke-visibility': 'false' })).toMatchObject({
+			radius: 50,
+			strokeStyle: { visible: false }
+		});
+	});
+
+	it('ignores invalid values', () => {
+		expect(
+			styleOf({ 'symbol-size': 'big', 'symbol-halo-width': null, 'symbol-label': {}, 'symbol-rotate': NaN })
+		).toEqual({ type: 'marker', point: [13.4, 52.5] });
+	});
+
+	it('treats a circle with an invalid radius as a marker', () => {
+		expect(styleOf({ subType: 'Circle', radius: 'wide' })).toMatchObject({ type: 'marker' });
+	});
+
+	it('always produces encodable documents', () => {
+		for (const properties of [
+			{ 'symbol-rotate': 12.5 },
+			{ subType: 'Circle', radius: 100.7, 'stroke-width': -1 },
+			{ 'symbol-color': 'notacolor' },
+			{ 'symbol-size': Infinity, 'symbol-halo-width': -3 }
+		]) {
+			expect(() => encodeGeoJSON(point(properties))).not.toThrow();
+		}
+	});
+});
