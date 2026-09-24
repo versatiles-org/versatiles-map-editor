@@ -53,6 +53,13 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
 
+On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
+`Multi*` geometries and `GeometryCollection`s are split into single elements;
+features without geometry, with invalid coordinates, lines with fewer than 2
+points and polygons with fewer than 3 vertices are skipped. Altitudes and
+polygon holes are dropped. Style values are sanitized (clamped, rounded,
+colors normalized to lowercase hex) or fall back to the defaults.
+
 Enum values use human-readable names (`fill-pattern`, `stroke-style`,
 `symbol-label-align`, `symbol-pattern`) whose index↔name tables live here
 (`symbols.ts` for the symbol vocabulary). The editor's `MapLayer` classes hold

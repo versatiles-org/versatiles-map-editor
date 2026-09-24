@@ -165,7 +165,8 @@ export class StateReader {
 						root.elements.push(this.readElementCircle());
 						break;
 					default:
-						console.warn(`Unknown state key: ${key}`);
+						// The element's length is unknown, so the rest of the stream cannot be read reliably
+						throw new Error(`Unknown element key: ${key}`);
 				}
 			}
 		} catch (cause) {

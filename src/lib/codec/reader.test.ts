@@ -269,6 +269,20 @@ describe('StateReader', () => {
 	});
 
 	describe('readRoot', () => {
+		it('should reject unknown element keys', () => {
+			const writer = new StateWriter();
+			writer.writeInteger(0, 3); // version
+			writer.writeBit(false); // no map
+			writer.writeBit(false); // no metadata
+			writer.writeInteger(5, 3); // unknown element key
+			writer.writeInteger(0, 3);
+
+			const reader = StateReader.fromBase64(writer.asBase64());
+			expect(() => reader.readRoot()).toThrow(
+				expect.objectContaining({ cause: expect.objectContaining({ message: 'Unknown element key: 5' }) })
+			);
+		});
+
 		it('should read a root state', () => {
 			const reader = StateReader.fromBitString('000000000000000000000000000000000');
 			const root = reader.readRoot();

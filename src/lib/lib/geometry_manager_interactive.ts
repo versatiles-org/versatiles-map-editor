@@ -78,7 +78,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		};
 	}
 
-	public addGeoJSON(doc: GeoJSONDocument) {
+	public addGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON) {
 		const state = stateFromGeoJSON(doc);
 		if (state.map) this.fitViewport(state.map);
 		for (const element of state.elements) {

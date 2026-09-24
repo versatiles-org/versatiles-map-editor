@@ -226,3 +226,118 @@ describe('stateFromGeoJSON with foreign property values', () => {
 		}
 	});
 });
+
+describe('stateFromGeoJSON with unusual input', () => {
+	const collection = (...features: GeoJSON.Feature[]): GeoJSONDocument => ({ type: 'FeatureCollection', features });
+	const feature = (geometry: GeoJSON.Geometry | null): GeoJSON.Feature =>
+		({ type: 'Feature', properties: {}, geometry }) as GeoJSON.Feature;
+	const lowercaseType = { type: 'point', coordinates: [1, 2] };
+
+	it('skips features without geometry', () => {
+		const state = stateFromGeoJSON(collection(feature(null), feature({ type: 'Point', coordinates: [1, 2] })));
+		expect(state.elements).toEqual([{ type: 'marker', point: [1, 2] }]);
+	});
+
+	it('accepts a single feature', () => {
+		const state = stateFromGeoJSON(feature({ type: 'Point', coordinates: [1, 2] }));
+		expect(state.elements).toEqual([{ type: 'marker', point: [1, 2] }]);
+	});
+
+	it('accepts a bare geometry', () => {
+		const state = stateFromGeoJSON({
+			type: 'LineString',
+			coordinates: [
+				[1, 2],
+				[3, 4]
+			]
+		});
+		expect(state.elements).toEqual([
+			{
+				type: 'line',
+				points: [
+					[1, 2],
+					[3, 4]
+				]
+			}
+		]);
+	});
+
+	it('rejects non-GeoJSON input', () => {
+		expect(() => stateFromGeoJSON({} as GeoJSONDocument)).toThrow('Not a GeoJSON object');
+		expect(() => stateFromGeoJSON(lowercaseType as unknown as GeoJSONDocument)).toThrow('Not a GeoJSON object');
+		expect(() => stateFromGeoJSON(null as unknown as GeoJSONDocument)).toThrow('Not a GeoJSON object');
+	});
+
+	it('drops altitudes and skips invalid coordinates', () => {
+		const state = stateFromGeoJSON(
+			collection(
+				feature({ type: 'Point', coordinates: [1, 2, 300] }),
+				feature({ type: 'Point', coordinates: [1] }),
+				feature({ type: 'Point', coordinates: ['1', 2] } as unknown as GeoJSON.Point),
+				feature({
+					type: 'LineString',
+					coordinates: [
+						[1, 2],
+						[NaN, 4]
+					]
+				})
+			)
+		);
+		expect(state.elements).toEqual([{ type: 'marker', point: [1, 2] }]);
+	});
+
+	it('skips degenerate lines and polygons', () => {
+		const state = stateFromGeoJSON(
+			collection(
+				feature({ type: 'LineString', coordinates: [[1, 2]] }),
+				feature({
+					type: 'Polygon',
+					coordinates: [
+						[
+							[0, 0],
+							[1, 1],
+							[0, 0]
+						]
+					]
+				}),
+				feature({ type: 'Polygon', coordinates: [] })
+			)
+		);
+		expect(state.elements).toEqual([]);
+	});
+
+	it('keeps all vertices of an unclosed polygon ring', () => {
+		const ring: Point[] = [
+			[0, 0],
+			[1, 0],
+			[1, 1]
+		];
+		const state = stateFromGeoJSON(collection(feature({ type: 'Polygon', coordinates: [ring] })));
+		expect(state.elements).toEqual([{ type: 'polygon', points: ring }]);
+	});
+
+	it('ignores an invalid viewport', () => {
+		const doc: GeoJSONDocument = { ...collection(), map: { center: [1, 2], radius: 'far' as unknown as number } };
+		expect(stateFromGeoJSON(doc).map).toBeUndefined();
+	});
+
+	it('always produces encodable documents', () => {
+		const doc = collection(
+			feature(null),
+			feature({ type: 'Point', coordinates: [1, 2, 3] }),
+			feature({
+				type: 'Polygon',
+				coordinates: [
+					[
+						[0, 0],
+						[1, 0],
+						[1, 1]
+					]
+				]
+			})
+		);
+		expect(() => encodeGeoJSON(doc)).not.toThrow();
+	});
+});
+
+type Point = [number, number];
