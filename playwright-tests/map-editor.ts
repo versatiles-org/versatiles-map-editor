@@ -127,3 +127,36 @@ test('invalid hash', async ({ page }) => {
 	expect(pageErrors).toStrictEqual([]);
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
 });
+
+test('dragging a slider creates a single undo step', async ({ page }) => {
+	const undo = page.getByRole('button', { name: 'Undo' });
+
+	async function addPolygon() {
+		await page.goto('/');
+		await waitForMapIsReady(page);
+		await page.getByRole('button', { name: 'Polygon' }).click();
+	}
+
+	async function countUndoSteps(): Promise<number> {
+		let steps = 0;
+		while (await undo.isEnabled()) {
+			await undo.click();
+			steps++;
+		}
+		return steps;
+	}
+
+	await addPolygon();
+	const baseline = await countUndoSteps();
+
+	await addPolygon();
+	// a slider drag fires many input events, but only one change event on release
+	await page.getByLabel('Opacity').evaluate((input: HTMLInputElement) => {
+		for (const value of ['0.9', '0.8', '0.7', '0.6', '0.5']) {
+			input.value = value;
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+		}
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+	});
+	expect(await countUndoSteps()).toBe(baseline + 1);
+});

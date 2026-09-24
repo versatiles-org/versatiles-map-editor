@@ -37,13 +37,8 @@
 					<input
 						id="showStroke"
 						type="checkbox"
-						bind:checked={
-							() => $strokeVisible,
-							(visible) => {
-								$strokeVisible = visible;
-								element.manager.state?.log();
-							}
-						}
+						bind:checked={$strokeVisible}
+						onchange={() => element.manager.state?.log()}
 					/>
 				</InputRow>
 
