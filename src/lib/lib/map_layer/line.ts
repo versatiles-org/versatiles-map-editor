@@ -4,21 +4,21 @@ import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
-import { removeDefaultFields } from '../state/utils.js';
+import { LINE_DEFAULTS, STROKE_STYLE_NAMES, removeDefaultFields } from '$lib/codec/profile.js';
 
-export const dashArrays = new Map<number, { name: string; array: number[] | undefined }>([
-	[0, { name: 'solid', array: [100] }],
-	[1, { name: 'dashed', array: [2, 4] }],
-	[2, { name: 'dotted', array: [0, 2] }]
-]);
+// Dash array per stroke style index; the names come from the codec
+const arrays: number[][] = [
+	[100], // solid
+	[2, 4], // dashed
+	[0, 2] // dotted
+];
+
+export const dashArrays = new Map<number, { name: string; array: number[] | undefined }>(
+	STROKE_STYLE_NAMES.map((name, index) => [index, { name, array: arrays[index] }])
+);
 
 export class MapLayerLine extends MapLayer<LayerLine> {
-	static readonly defaultStyle: StateStyle = {
-		color: '#ff0000',
-		pattern: 0,
-		visible: true,
-		width: 2
-	};
+	static readonly defaultStyle = LINE_DEFAULTS;
 
 	color = writable(MapLayerLine.defaultStyle.color);
 	dashed = writable(MapLayerLine.defaultStyle.pattern);

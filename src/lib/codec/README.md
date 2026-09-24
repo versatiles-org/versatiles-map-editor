@@ -62,8 +62,9 @@ colors normalized to lowercase hex) or fall back to the defaults.
 
 Enum values use human-readable names (`fill-pattern`, `stroke-style`,
 `symbol-label-align`, `symbol-pattern`) whose index↔name tables live here
-(`symbols.ts` for the symbol vocabulary). The editor's `MapLayer` classes hold
-the matching defaults/tables; `profile.test.ts` guards against drift.
+(`symbols.ts` for the symbol vocabulary). The editor's `MapLayer` classes take
+their defaults and enum names from here and only add rendering data;
+`profile.test.ts` checks that every enum value can be rendered.
 
 ## Backward compatibility
 

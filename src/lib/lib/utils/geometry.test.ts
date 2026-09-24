@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { circle, distance, flatten, getMiddlePoint, lat2mercator, mercator2lat } from './geometry.js';
+import { circle, distance, getMiddlePoint, lat2mercator, mercator2lat } from './geometry.js';
 import type { GeoPoint } from './types.js';
 import { degreesToRadians, radiansToDegrees } from './geometry.js';
 
@@ -49,94 +49,5 @@ describe('Geometry Utils', () => {
 			expect(Array.isArray(pt)).toBe(true);
 			expect(pt.length).toBe(2);
 		});
-	});
-
-	it('should flatten simple and complex GeoJSON features', () => {
-		const point = (n: number): GeoPoint => [n, n + 1];
-		const path = (n: number): [GeoPoint, GeoPoint] => [
-			[n, n + 1],
-			[n + 2, n + 3]
-		];
-
-		function feature<T extends GeoJSON.Geometry>(type: T['type'], index: number, name?: string): GeoJSON.Feature<T> {
-			let coordinates;
-			switch (type) {
-				case 'Point':
-					coordinates = point(index);
-					name ??= 'point';
-					break;
-				case 'LineString':
-					coordinates = path(index);
-					name ??= 'linestring';
-					break;
-				case 'Polygon':
-					coordinates = [path(index), path(index + 1000)];
-					name ??= 'polygon';
-					break;
-				case 'MultiPoint':
-					coordinates = [point(index), point(index + 1000)];
-					name ??= 'point';
-					break;
-				case 'MultiLineString':
-					coordinates = [path(index), path(index + 1000)];
-					name ??= 'linestring';
-					break;
-				case 'MultiPolygon':
-					coordinates = [
-						[path(index), path(index + 1000)],
-						[path(index + 2000), path(index + 3000)]
-					];
-					name ??= 'polygon';
-					break;
-			}
-			return {
-				type: 'Feature',
-				properties: { name },
-				geometry: { type, coordinates }
-			} as unknown as GeoJSON.Feature<T>;
-		}
-
-		const features: GeoJSON.Feature[] = [
-			feature('Point', 1),
-			feature('MultiPoint', 2),
-			{
-				type: 'Feature',
-				properties: { name: 'geometrycollection' },
-				geometry: {
-					type: 'GeometryCollection',
-					geometries: [
-						{ type: 'Point', coordinates: point(3) },
-						{ type: 'LineString', coordinates: path(4) }
-					]
-				}
-			},
-			feature('MultiLineString', 5),
-			feature('MultiPolygon', 6),
-			feature('Polygon', 7),
-			feature('LineString', 8)
-		];
-		const flat = flatten(features);
-		expect(flat).toStrictEqual([
-			feature('Point', 1),
-			feature('Point', 2),
-			feature('Point', 1002),
-			feature('Point', 3, 'geometrycollection'),
-			feature('LineString', 4, 'geometrycollection'),
-			feature('LineString', 5),
-			feature('LineString', 1005),
-			feature('Polygon', 6),
-			feature('Polygon', 2006),
-			feature('Polygon', 7),
-			feature('LineString', 8)
-		]);
-	});
-
-	it('should throw on unknown geometry type in flatten', () => {
-		const badFeature = {
-			type: 'Feature',
-			properties: {},
-			geometry: { type: 'UnknownType', coordinates: [] }
-		} as unknown as GeoJSON.Feature;
-		expect(() => flatten([badFeature])).toThrow(/Unknown geometry type/);
 	});
 });

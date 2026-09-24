@@ -147,6 +147,75 @@ describe('stateFromGeoJSON', () => {
 		const state = stateFromGeoJSON(doc);
 		expect(state.elements.map((e) => e.type)).toEqual(['polygon', 'polygon']);
 	});
+
+	it('flattens MultiPoint, MultiLineString and GeometryCollection, keeping the properties', () => {
+		const properties = { 'stroke-width': 4, 'symbol-size': 2 };
+		const doc: GeoJSONDocument = {
+			type: 'FeatureCollection',
+			features: [
+				{
+					type: 'Feature',
+					properties,
+					geometry: {
+						type: 'MultiPoint',
+						coordinates: [
+							[1, 2],
+							[3, 4]
+						]
+					}
+				},
+				{
+					type: 'Feature',
+					properties,
+					geometry: {
+						type: 'MultiLineString',
+						coordinates: [
+							[
+								[0, 0],
+								[1, 1]
+							],
+							[
+								[2, 2],
+								[3, 3]
+							]
+						]
+					}
+				},
+				{
+					type: 'Feature',
+					properties,
+					geometry: {
+						type: 'GeometryCollection',
+						geometries: [
+							{ type: 'Point', coordinates: [5, 6] },
+							{
+								type: 'GeometryCollection',
+								geometries: [
+									{
+										type: 'LineString',
+										coordinates: [
+											[7, 8],
+											[9, 10]
+										]
+									}
+								]
+							}
+						]
+					}
+				}
+			]
+		};
+		const elements = stateFromGeoJSON(doc).elements;
+		expect(elements.map((e) => e.type)).toEqual(['marker', 'marker', 'line', 'line', 'marker', 'line']);
+		expect(elements.map((e) => e.style)).toEqual([
+			{ size: 2 },
+			{ size: 2 },
+			{ width: 4 },
+			{ width: 4 },
+			{ size: 2 },
+			{ width: 4 }
+		]);
+	});
 });
 
 describe('encodeGeoJSON / decodeGeoJSON', () => {

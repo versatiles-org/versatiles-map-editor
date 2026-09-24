@@ -4,7 +4,7 @@ import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
-import { removeDefaultFields } from '../state/utils.js';
+import { FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '$lib/codec/profile.js';
 
 const size = 32;
 
@@ -14,22 +14,23 @@ interface Fill {
 	pattern: string;
 }
 
-export const fillPatterns = new Map<number, { name: string; fill: Fill | undefined }>([
-	[0, { name: 'solid', fill: undefined }],
-	[1, { name: 'diagonal', fill: { xf: 1, yf: 1, pattern: '00002552' } }],
-	[2, { name: 'diagonal-thin', fill: { xf: 1, yf: 1, pattern: '0252' } }]
-]);
+// Rendering data per fill pattern index; the names come from the codec
+const fills: (Fill | undefined)[] = [
+	undefined, // solid
+	{ xf: 1, yf: 1, pattern: '00002552' }, // diagonal
+	{ xf: 1, yf: 1, pattern: '0252' } // diagonal-thin
+];
+
+export const fillPatterns = new Map<number, { name: string; fill: Fill | undefined }>(
+	FILL_PATTERN_NAMES.map((name, index) => [index, { name, fill: fills[index] }])
+);
 
 export class MapLayerFill extends MapLayer<LayerFill> {
-	color = writable('#ff0000');
-	opacity = writable(1);
-	pattern = writable(0);
+	static readonly defaultStyle = FILL_DEFAULTS;
 
-	static readonly defaultStyle: StateStyle = {
-		color: '#ff0000',
-		opacity: 1,
-		pattern: 0
-	};
+	color = writable(MapLayerFill.defaultStyle.color);
+	opacity = writable(MapLayerFill.defaultStyle.opacity);
+	pattern = writable(MapLayerFill.defaultStyle.pattern);
 
 	constructor(manager: GeometryManager, id: string, source: string) {
 		super(manager, id);

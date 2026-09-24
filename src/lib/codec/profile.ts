@@ -8,14 +8,20 @@ import { symbolName, symbolIndexByName } from './symbols.js';
 // The editor keeps the live values in MapLayer stores and projects them to two
 // shapes: a numeric, default-stripped `StateStyle` (for State/base64) and a
 // human-readable GeoJSON property bag. This module owns the mapping between the
-// two so the codec is the single source of truth. The default styles and enum
-// name tables here must match the editor's MapLayer definitions — `profile.test`
-// guards against drift.
+// two so the codec is the single source of truth: the editor's MapLayer classes
+// take their default styles and enum names from here.
 // ---------------------------------------------------------------------------
 
-export const FILL_DEFAULTS: StateStyle = { color: '#ff0000', opacity: 1, pattern: 0 };
-export const LINE_DEFAULTS: StateStyle = { color: '#ff0000', pattern: 0, visible: true, width: 2 };
-export const SYMBOL_DEFAULTS: StateStyle = {
+type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
+
+export const FILL_DEFAULTS: Defaults<'color' | 'opacity' | 'pattern'> = { color: '#ff0000', opacity: 1, pattern: 0 };
+export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> = {
+	color: '#ff0000',
+	pattern: 0,
+	visible: true,
+	width: 2
+};
+export const SYMBOL_DEFAULTS: Defaults<'color' | 'rotate' | 'size' | 'halo' | 'pattern' | 'label' | 'align'> = {
 	color: '#ff0000',
 	rotate: 0,
 	size: 1,
@@ -87,9 +93,9 @@ function set<K extends keyof StateStyle>(style: StateStyle, key: K, value: State
 }
 
 /**
- * Remove fields whose value equals the corresponding default (or is undefined),
- * mirroring the editor's `removeDefaultFields`. Returns undefined when nothing
- * remains, so `StateElement.style` stays absent for fully-default styles.
+ * Remove fields whose value equals the corresponding default (or is undefined).
+ * Returns undefined when nothing remains, so `StateElement.style` stays absent
+ * for fully-default styles.
  */
 export function removeDefaultFields(value: StateStyle, def: StateStyle): StateStyle | undefined {
 	const entries = Object.entries(value).filter(([k, v]) => {

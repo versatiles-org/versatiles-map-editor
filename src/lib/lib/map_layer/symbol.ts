@@ -5,34 +5,35 @@ import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
 import { getSymbol } from '../symbols.js';
-import { removeDefaultFields } from '../state/utils.js';
+import { LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '$lib/codec/profile.js';
+
+type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
 
 interface LabelAlign {
-	index: 0 | 1 | 2 | 3 | 4;
+	index: number;
 	name: string;
-	anchor?: 'center' | 'left' | 'right' | 'bottom' | 'top';
+	anchor?: TextAnchor;
 }
 
-export const labelPositions: LabelAlign[] = [
-	{ index: 0, name: 'auto' },
-	{ index: 1, name: 'right', anchor: 'left' },
-	{ index: 2, name: 'left', anchor: 'right' },
-	{ index: 3, name: 'top', anchor: 'bottom' },
-	{ index: 4, name: 'bottom', anchor: 'top' }
+// Text anchor per label alignment index ("auto" uses variable anchors); the names come from the codec
+const anchors: (TextAnchor | undefined)[] = [
+	undefined, // auto
+	'left', // right
+	'right', // left
+	'bottom', // top
+	'top' // bottom
 ];
+
+export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) => ({
+	index,
+	name,
+	anchor: anchors[index]
+}));
 
 type TextVariableAnchor = LayerSymbol['layout']['text-variable-anchor'];
 
 export class MapLayerSymbol extends MapLayer<LayerSymbol> {
-	static readonly defaultStyle: StateStyle = {
-		color: '#ff0000',
-		rotate: 0,
-		size: 1,
-		halo: 1,
-		pattern: 38,
-		label: '',
-		align: 0
-	};
+	static readonly defaultStyle = SYMBOL_DEFAULTS;
 
 	color = writable(MapLayerSymbol.defaultStyle.color);
 	halo = writable(MapLayerSymbol.defaultStyle.halo);
