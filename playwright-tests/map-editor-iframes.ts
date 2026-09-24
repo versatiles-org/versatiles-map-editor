@@ -14,12 +14,12 @@ test('works in iframe1', async ({ page }) => {
 		'assets/glyphs/noto_sans_regular/0-255.pbf',
 		'assets/glyphs/noto_sans_regular/0-255.pbf',
 		'assets/glyphs/noto_sans_regular/0-255.pbf',
-		'assets/sprites/basics/sprites.json',
-		'assets/sprites/basics/sprites.json',
-		'assets/sprites/basics/sprites.json',
-		'assets/sprites/basics/sprites.png',
-		'assets/sprites/basics/sprites.png',
-		'assets/sprites/basics/sprites.png',
+		'assets/sprites/base.json',
+		'assets/sprites/base.json',
+		'assets/sprites/base.json',
+		'assets/sprites/base.png',
+		'assets/sprites/base.png',
+		'assets/sprites/base.png',
 		'tiles/osm/12/2199/1343',
 		'tiles/osm/12/2199/1343',
 		'tiles/osm/12/2200/1343',
@@ -27,6 +27,9 @@ test('works in iframe1', async ({ page }) => {
 		'tiles/osm/13/4399/2686',
 		'tiles/osm/13/4399/2687',
 		'tiles/osm/13/4400/2686',
-		'tiles/osm/13/4400/2687'
+		'tiles/osm/13/4400/2687',
+		'tiles/osm/tiles.json',
+		'tiles/osm/tiles.json',
+		'tiles/osm/tiles.json'
 	]);
 });

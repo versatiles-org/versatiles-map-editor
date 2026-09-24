@@ -8,6 +8,11 @@ import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import { get } from 'svelte/store';
 import type { GeoPath, GeoPoint } from './utils/types.js';
 
+vi.mock('@versatiles/style', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@versatiles/style')>()),
+	inlineSources: vi.fn(async (style) => style)
+}));
+
 describe('GeometryManager', () => {
 	let mockMap: MockMap;
 	let manager: GeometryManagerInteractive;
@@ -17,10 +22,10 @@ describe('GeometryManager', () => {
 		manager = new GeometryManagerInteractive(mockMap as unknown as MaplibreMap);
 	});
 
-	it('should initialize correctly', () => {
+	it('should initialize correctly', async () => {
 		expect(manager).toBeDefined();
 		expect(mockMap.getCanvasContainer).toHaveBeenCalled();
-		expect(mockMap.setStyle).toHaveBeenCalled();
+		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 	});
 
 	it('should add a new marker', () => {

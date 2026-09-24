@@ -5,6 +5,7 @@ import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { StateRoot, StateElement } from '$lib/codec/types.js';
 import { get, writable, type Writable } from 'svelte/store';
+import { inlineSources } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
@@ -61,7 +62,14 @@ export class GeometryManager {
 			}
 		});
 
-		map.setStyle(style);
+		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
+		inlineSources(style).then(
+			(inlined) => map.setStyle(inlined),
+			(error) => {
+				console.error('Failed to inline map style sources', error);
+				map.setStyle(style);
+			}
+		);
 	}
 
 	public isInteractive(): this is GeometryManagerInteractive {

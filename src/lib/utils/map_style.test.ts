@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getMapStyle, isDarkMode } from './map_style.js';
-import { styles } from '@versatiles/style';
+import { osm } from '@versatiles/style';
 import { getLanguage } from './location.js';
 
 vi.mock('@versatiles/style', { spy: true });
@@ -15,47 +15,44 @@ describe('src/lib/utils/map_style.ts', () => {
 	});
 
 	describe('getMapStyle', () => {
-		it('should call styles.colorful with dark mode options', () => {
+		it('should call osm with dark mode options', () => {
 			vi.mocked(getLanguage).mockReturnValue('en');
 			getMapStyle({ darkMode: true });
 
-			expect(styles.colorful).toHaveBeenCalledWith({
-				baseUrl: 'https://tiles.versatiles.org',
-				language: 'en',
-				darkMode: true,
-				recolor: {
-					invertBrightness: true,
-					gamma: 0.5
-				}
+			expect(osm).toHaveBeenCalledWith({
+				urls: { base: 'https://tiles.versatiles.org' },
+				text: { language: 'en' },
+				theme: 'colorful-dark',
+				projection: 'mercator'
 			});
 		});
 
-		it('should call styles.colorful with light mode options', () => {
+		it('should call osm with light mode options', () => {
 			vi.mocked(getLanguage).mockReturnValue('de');
 			getMapStyle({ darkMode: false });
-			expect(styles.colorful).toHaveBeenCalledWith({
-				baseUrl: 'https://tiles.versatiles.org',
-				language: 'de',
-				darkMode: false,
-				recolor: {
-					invertBrightness: false,
-					gamma: 1
-				}
+			expect(osm).toHaveBeenCalledWith({
+				urls: { base: 'https://tiles.versatiles.org' },
+				text: { language: 'de' },
+				theme: 'colorful',
+				projection: 'mercator'
 			});
 		});
 
-		it('should handle missing styleOptions gracefully', () => {
+		it('should fall back to local language if none is detected', () => {
 			vi.mocked(getLanguage).mockReturnValue(null);
 			getMapStyle({ darkMode: true });
-			expect(styles.colorful).toHaveBeenCalledWith({
-				baseUrl: 'https://tiles.versatiles.org',
-				language: null,
-				darkMode: true,
-				recolor: {
-					invertBrightness: true,
-					gamma: 0.5
-				}
+			expect(osm).toHaveBeenCalledWith({
+				urls: { base: 'https://tiles.versatiles.org' },
+				text: { language: 'local' },
+				theme: 'colorful-dark',
+				projection: 'mercator'
 			});
+		});
+
+		it('should set the transition duration', () => {
+			vi.mocked(getLanguage).mockReturnValue('en');
+			const style = getMapStyle({ darkMode: false, transitionDuration: 100 });
+			expect(style.transition).toEqual({ duration: 100, delay: 0 });
 		});
 	});
 

@@ -1,24 +1,22 @@
-import { styles, type StyleBuilderOptions } from '@versatiles/style';
+import { osm, type OsmOptions } from '@versatiles/style';
 import { getLanguage } from './location.js';
 
 export function getMapStyle(
-	styleOptions: StyleBuilderOptions & {
+	styleOptions: OsmOptions & {
 		darkMode?: boolean;
 		transitionDuration?: number;
 	} = {}
 ) {
-	const darkMode = styleOptions.darkMode ?? isDarkMode();
-	const style = styles.colorful({
-		baseUrl: 'https://tiles.versatiles.org',
-		language: getLanguage(),
-		recolor: {
-			invertBrightness: darkMode,
-			gamma: darkMode ? 0.5 : 1
-		},
-		...styleOptions
+	const { darkMode = isDarkMode(), transitionDuration, ...osmOptions } = styleOptions;
+	const style = osm({
+		urls: { base: 'https://tiles.versatiles.org' },
+		text: { language: getLanguage() ?? 'local' },
+		theme: darkMode ? 'colorful-dark' : 'colorful',
+		projection: 'mercator',
+		...osmOptions
 	});
-	if (styleOptions.transitionDuration != null) {
-		style.transition = { duration: styleOptions.transitionDuration, delay: 0 };
+	if (transitionDuration != null) {
+		style.transition = { duration: transitionDuration, delay: 0 };
 	}
 	return style;
 }

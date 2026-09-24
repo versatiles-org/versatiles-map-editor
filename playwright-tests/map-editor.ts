@@ -6,10 +6,13 @@ const mapUrl =
 
 const ariaResult = `- region "Map"
 - group:
-  - text: ©
-  - link "OpenStreetMap":
+  - link "© OpenStreetMap contributors":
     - /url: https://www.openstreetmap.org/copyright
-  - text: contributors
+  - text: ·
+  - link "CC BY 4.0":
+    - /url: http://creativecommons.org/licenses/by/4.0/
+  - link "ESA WorldCover 2021":
+    - /url: https://esa-worldcover.org/en/data-access
 - button "Undo ✓" [disabled]
 - button "Redo ✓" [disabled]
 - separator
@@ -72,14 +75,15 @@ test('empty map', async ({ page }) => {
 		'assets/glyphs/noto_sans_regular/256-511.pbf',
 		'assets/glyphs/noto_sans_regular/512-767.pbf',
 		'assets/glyphs/noto_sans_regular/8192-8447.pbf',
-		'assets/sprites/basics/sprites.json',
-		'assets/sprites/basics/sprites.png',
+		'assets/sprites/base.json',
+		'assets/sprites/base.png',
 		'tiles/osm/5/16/10',
 		'tiles/osm/5/16/11',
 		'tiles/osm/5/17/10',
 		'tiles/osm/5/17/11',
 		'tiles/osm/5/18/10',
-		'tiles/osm/5/18/11'
+		'tiles/osm/5/18/11',
+		'tiles/osm/tiles.json'
 	]);
 
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
@@ -93,12 +97,13 @@ test('filled map', async ({ page }) => {
 
 	expect(tracker()).toStrictEqual([
 		'assets/glyphs/noto_sans_regular/0-255.pbf',
-		'assets/sprites/basics/sprites.json',
-		'assets/sprites/basics/sprites.png',
+		'assets/sprites/base.json',
+		'assets/sprites/base.png',
 		'tiles/osm/13/4399/2686',
 		'tiles/osm/13/4399/2687',
 		'tiles/osm/13/4400/2686',
-		'tiles/osm/13/4400/2687'
+		'tiles/osm/13/4400/2687',
+		'tiles/osm/tiles.json'
 	]);
 
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
