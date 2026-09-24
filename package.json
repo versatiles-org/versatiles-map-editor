@@ -19,9 +19,10 @@
     "test-unit": "vitest run --testTimeout 10000",
     "test": "npm run test-unit && npm run test-playwright",
     "prepare": "husky",
-    "upgrade": "npm-check-updates -u; rm -r node_modules; rm package-lock.json; npm install"
+    "upgrade": "vrt deps-upgrade"
   },
   "dependencies": {
+    "@versatiles/release-tool": "^2.17.0",
     "@versatiles/style": "^5.13.1",
     "maplibre-gl": "^6.4.1"
   },
