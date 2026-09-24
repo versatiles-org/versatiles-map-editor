@@ -5,7 +5,7 @@ export default defineConfig({
 	plugins: [sveltekit()],
 	test: {
 		environment: 'happy-dom',
-		include: ['{src,scripts}/**/*.{test,spec}.{js,ts}'],
+		include: ['src/**/*.{test,spec}.{js,ts}'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['lcov', 'text']

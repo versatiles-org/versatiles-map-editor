@@ -8,7 +8,7 @@ type Callback = (data: unknown) => void;
 export class MockMap {
 	private zoom = 5;
 	private center = new LngLat(1, 2);
-	private events: { event: string; callback: Callback }[] = [];
+	private events: { event: string; layerId?: string; callback: Callback; once?: boolean }[] = [];
 
 	constructor() {}
 	getCanvasContainer = vi.fn(() => mockedCanvas);
@@ -16,13 +16,23 @@ export class MockMap {
 	removeSource = vi.fn();
 	getSource = vi.fn(() => ({ setData: vi.fn() }) as unknown) as Mock<MaplibreMap['getSource']>;
 	addLayer = vi.fn();
-	on = vi.fn((event: string, ...rest: unknown[]) => this.events.push({ event, callback: rest.pop() as Callback }));
-	once = vi.fn((event: string, ...rest: unknown[]) => this.events.push({ event, callback: rest.pop() as Callback }));
-	off = vi.fn(
-		(event: string, callback: Callback) =>
-			(this.events = this.events.filter((e) => e.event !== event && e.callback !== callback))
+	// Mirrors maplibre's signatures: on(event, callback) and on(event, layerId, callback)
+	on = vi.fn((event: string, ...rest: unknown[]) => this.events.push({ event, ...parseListenerArgs(rest) }));
+	once = vi.fn((event: string, ...rest: unknown[]) =>
+		this.events.push({ event, ...parseListenerArgs(rest), once: true })
 	);
-	emit = vi.fn((event: string, data?: unknown) => this.events.forEach((e) => e.event === event && e.callback(data)));
+	off = vi.fn((event: string, ...rest: unknown[]) => {
+		const { layerId, callback } = parseListenerArgs(rest);
+		this.events = this.events.filter((e) => !(e.event === event && e.layerId === layerId && e.callback === callback));
+	});
+	listenerCount = (event?: string, layerId?: string): number =>
+		this.events.filter((e) => (event == null || e.event === event) && (layerId == null || e.layerId === layerId))
+			.length;
+	emit = vi.fn((event: string, data?: unknown) => {
+		const listeners = this.events.filter((e) => e.event === event);
+		this.events = this.events.filter((e) => !(e.once && e.event === event));
+		listeners.forEach((e) => e.callback(data));
+	});
 	setZoom = vi.fn((zoom) => (this.zoom = zoom));
 	getZoom = vi.fn(() => this.zoom);
 	setCenter = vi.fn((center: maplibre.LngLat) => (this.center = center));
@@ -51,6 +61,12 @@ export class MockMap {
 	fitBounds = vi.fn();
 	setStyle = vi.fn();
 	isStyleLoaded = vi.fn(() => true);
+}
+
+function parseListenerArgs(args: unknown[]): { layerId?: string; callback: Callback } {
+	const callback = args.pop() as Callback;
+	const layerId = typeof args[0] === 'string' ? args[0] : undefined;
+	return { layerId, callback };
 }
 
 export type MaplibreMap = maplibre.Map;
