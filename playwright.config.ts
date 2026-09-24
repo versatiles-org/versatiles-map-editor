@@ -12,7 +12,10 @@ export default defineConfig({
 		ignoreHTTPSErrors: true,
 		viewport: { width: 1280, height: 720 },
 		deviceScaleFactor: 1,
-		timezoneId: 'Europe/Berlin'
+		// The default viewport depends on the timezone and the label language on the locale,
+		// both of which determine the requested tiles and glyphs
+		timezoneId: 'Europe/Berlin',
+		locale: 'en-US'
 	},
 	projects: [
 		{
