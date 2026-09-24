@@ -1,0 +1,380 @@
+{
+	"icon-airfield": {
+		"sdf": true
+	},
+	"icon-airport": {
+		"sdf": true
+	},
+	"icon-alcohol_shop": {
+		"sdf": true
+	},
+	"icon-amusement_park": {
+		"sdf": true
+	},
+	"icon-art_gallery": {
+		"sdf": true
+	},
+	"icon-artwork": {
+		"sdf": true
+	},
+	"icon-atm": {
+		"sdf": true
+	},
+	"icon-bakery": {
+		"sdf": true
+	},
+	"icon-bank": {
+		"sdf": true
+	},
+	"icon-bar": {
+		"sdf": true
+	},
+	"icon-beauty": {
+		"sdf": true
+	},
+	"icon-beer_mug": {
+		"sdf": true
+	},
+	"icon-bench": {
+		"sdf": true
+	},
+	"icon-beverages": {
+		"sdf": true
+	},
+	"icon-bicycle_share": {
+		"sdf": true
+	},
+	"icon-books": {
+		"sdf": true
+	},
+	"icon-bus": {
+		"sdf": true
+	},
+	"icon-butcher": {
+		"sdf": true
+	},
+	"icon-cafe": {
+		"sdf": true
+	},
+	"icon-campsite": {
+		"sdf": true
+	},
+	"icon-car_rental": {
+		"sdf": true
+	},
+	"icon-car_wash": {
+		"sdf": true
+	},
+	"icon-caravan": {
+		"sdf": true
+	},
+	"icon-castle": {
+		"sdf": true
+	},
+	"icon-cemetery": {
+		"sdf": true
+	},
+	"icon-chalet": {
+		"sdf": true
+	},
+	"icon-cinema": {
+		"sdf": true
+	},
+	"icon-clothes": {
+		"sdf": true
+	},
+	"icon-college": {
+		"sdf": true
+	},
+	"icon-community": {
+		"sdf": true
+	},
+	"icon-defibrillator": {
+		"sdf": true
+	},
+	"icon-dentist": {
+		"sdf": true
+	},
+	"icon-dharma_wheel": {
+		"sdf": true
+	},
+	"icon-do_it_yourself": {
+		"sdf": true
+	},
+	"icon-doctor": {
+		"sdf": true
+	},
+	"icon-dog": {
+		"sdf": true
+	},
+	"icon-drinking_water": {
+		"sdf": true
+	},
+	"icon-dry_cleaning": {
+		"sdf": true
+	},
+	"icon-embassy": {
+		"sdf": true
+	},
+	"icon-emergency_access": {
+		"sdf": true
+	},
+	"icon-emergency_phone": {
+		"sdf": true
+	},
+	"icon-fast_food": {
+		"sdf": true
+	},
+	"icon-fire_station": {
+		"sdf": true
+	},
+	"icon-florist": {
+		"sdf": true
+	},
+	"icon-fountain": {
+		"sdf": true
+	},
+	"icon-fuel_pump": {
+		"sdf": true
+	},
+	"icon-furniture": {
+		"sdf": true
+	},
+	"icon-garden_center": {
+		"sdf": true
+	},
+	"icon-gift": {
+		"sdf": true
+	},
+	"icon-golf": {
+		"sdf": true
+	},
+	"icon-greengrocer": {
+		"sdf": true
+	},
+	"icon-hardware": {
+		"sdf": true
+	},
+	"icon-historic": {
+		"sdf": true
+	},
+	"icon-hospital": {
+		"sdf": true
+	},
+	"icon-hunting_stand": {
+		"sdf": true
+	},
+	"icon-hydrant": {
+		"sdf": true
+	},
+	"icon-ice_rink": {
+		"sdf": true
+	},
+	"icon-justice": {
+		"sdf": true
+	},
+	"icon-khanda": {
+		"sdf": true
+	},
+	"icon-latin_cross": {
+		"sdf": true
+	},
+	"icon-laundry": {
+		"sdf": true
+	},
+	"icon-library": {
+		"sdf": true
+	},
+	"icon-lighthouse": {
+		"sdf": true
+	},
+	"icon-lodging": {
+		"sdf": true
+	},
+	"icon-marketplace": {
+		"sdf": true
+	},
+	"icon-monument": {
+		"sdf": true
+	},
+	"icon-newsagent": {
+		"sdf": true
+	},
+	"icon-newspaper": {
+		"sdf": true
+	},
+	"icon-nightclub": {
+		"sdf": true
+	},
+	"icon-nursing_home": {
+		"sdf": true
+	},
+	"icon-observation_tower": {
+		"sdf": true
+	},
+	"icon-om": {
+		"sdf": true
+	},
+	"icon-optician": {
+		"sdf": true
+	},
+	"icon-outdoor": {
+		"sdf": true
+	},
+	"icon-person_kneeling_and_praying": {
+		"sdf": true
+	},
+	"icon-picnic_site": {
+		"sdf": true
+	},
+	"icon-pill": {
+		"sdf": true
+	},
+	"icon-pint_glass": {
+		"sdf": true
+	},
+	"icon-pitch": {
+		"sdf": true
+	},
+	"icon-police_officer": {
+		"sdf": true
+	},
+	"icon-post": {
+		"sdf": true
+	},
+	"icon-postbox": {
+		"sdf": true
+	},
+	"icon-prison": {
+		"sdf": true
+	},
+	"icon-rail": {
+		"sdf": true
+	},
+	"icon-recycling": {
+		"sdf": true
+	},
+	"icon-restaurant": {
+		"sdf": true
+	},
+	"icon-restrooms": {
+		"sdf": true
+	},
+	"icon-ring": {
+		"sdf": true
+	},
+	"icon-rocking_horse": {
+		"sdf": true
+	},
+	"icon-school": {
+		"sdf": true
+	},
+	"icon-scissors_and_comb": {
+		"sdf": true
+	},
+	"icon-seesaw": {
+		"sdf": true
+	},
+	"icon-shelter": {
+		"sdf": true
+	},
+	"icon-shoes": {
+		"sdf": true
+	},
+	"icon-shop": {
+		"sdf": true
+	},
+	"icon-shrine": {
+		"sdf": true
+	},
+	"icon-sports": {
+		"sdf": true
+	},
+	"icon-stadium": {
+		"sdf": true
+	},
+	"icon-star_and_crescent": {
+		"sdf": true
+	},
+	"icon-star_of_david": {
+		"sdf": true
+	},
+	"icon-stationery": {
+		"sdf": true
+	},
+	"icon-surveillance": {
+		"sdf": true
+	},
+	"icon-swimming": {
+		"sdf": true
+	},
+	"icon-telephone": {
+		"sdf": true
+	},
+	"icon-theater": {
+		"sdf": true
+	},
+	"icon-town_hall": {
+		"sdf": true
+	},
+	"icon-travel_agent": {
+		"sdf": true
+	},
+	"icon-tube_and_toothbrush": {
+		"sdf": true
+	},
+	"icon-vending_machine": {
+		"sdf": true
+	},
+	"icon-veterinary": {
+		"sdf": true
+	},
+	"icon-video": {
+		"sdf": true
+	},
+	"icon-viewpoint": {
+		"sdf": true
+	},
+	"icon-waste_basket": {
+		"sdf": true
+	},
+	"icon-wastewater": {
+		"sdf": true
+	},
+	"icon-water_park": {
+		"sdf": true
+	},
+	"icon-watermill": {
+		"sdf": true
+	},
+	"icon-waterworks": {
+		"sdf": true
+	},
+	"icon-windmill": {
+		"sdf": true
+	},
+	"icon-yin_yang": {
+		"sdf": true
+	},
+	"icon-zoo": {
+		"sdf": true
+	},
+	"marking-oneway": {
+		"sdf": true
+	},
+	"pattern-hatched": {
+		"sdf": false
+	},
+	"pattern-hatched_thin": {
+		"sdf": false
+	},
+	"pattern-striped": {
+		"sdf": false
+	},
+	"transport-information": {
+		"sdf": true
+	},
+	"transport-tram": {
+		"sdf": true
+	}
+}

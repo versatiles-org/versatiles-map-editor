@@ -2,6 +2,9 @@ import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getSymbol, getSymbolIndexByName, SymbolLibrary } from './symbols.js';
 import { MockMap } from '$lib/__mocks__/map.js';
+// Icon names of the "base" sprite that @versatiles/style loads. To update:
+// curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
+import spriteBase from './__fixtures__/sprite-base.json' with { type: 'json' };
 
 describe('getSymbol', () => {
 	it('should return the correct symbol for a given index', () => {
@@ -9,7 +12,7 @@ describe('getSymbol', () => {
 		expect(symbol).toEqual({
 			index: 1,
 			name: 'airplane',
-			image: 'basics:icon-airfield'
+			image: 'base:icon-airfield'
 		});
 	});
 
@@ -18,9 +21,25 @@ describe('getSymbol', () => {
 		expect(symbol).toEqual({
 			index: 38,
 			name: 'flag',
-			image: 'basics:icon-embassy',
+			image: 'base:icon-embassy',
 			offset: [0, 0]
 		});
+	});
+});
+
+describe('symbol images', () => {
+	const icons = spriteBase as Record<string, { sdf: boolean }>;
+
+	it('should all exist in the base sprite and be recolorable', () => {
+		const symbols = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map).asList();
+		const invalid = symbols
+			.filter((s) => s.image != null)
+			.filter((s) => {
+				const [sprite, icon] = s.image!.split(':');
+				return sprite !== 'base' || !icons[icon]?.sdf;
+			})
+			.map((s) => `${s.name}: ${s.image}`);
+		expect(invalid).toStrictEqual([]);
 	});
 });
 
@@ -50,7 +69,7 @@ describe('SymbolLibrary', () => {
 		expect(symbol).toEqual({
 			index: 1,
 			name: 'airplane',
-			image: 'basics:icon-airfield'
+			image: 'base:icon-airfield'
 		});
 	});
 
@@ -85,7 +104,7 @@ describe('SymbolLibrary', () => {
 		});
 
 		symbolLibrary.drawSymbol(canvas, 1);
-		expect(map.getImage).toBeCalledWith('basics:icon-airfield');
+		expect(map.getImage).toBeCalledWith('base:icon-airfield');
 		expect(canvas.getContext).toBeCalledWith('2d');
 		expect(ctx.putImageData).toBeCalledWith(expect.any(MyImageData), 0, 0);
 	});
