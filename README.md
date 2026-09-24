@@ -17,6 +17,7 @@ npm run preview  # preview the production build
 
 ```bash
 npm run lint            # ESLint
+npm run check-types     # svelte-check (TypeScript + Svelte)
 npm run format:check    # Prettier
 npm run test-unit       # Vitest unit tests
 npm run test-playwright # Playwright visual/e2e tests
