@@ -4,6 +4,9 @@ import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '$lib/codec/types.js';
+import type { Measurement } from './types.js';
+import { polygonArea } from '../utils/geometry.js';
+import { formatArea } from '../utils/format.js';
 
 export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
@@ -23,7 +26,7 @@ export class PolygonElement extends AbstractPathElement {
 		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
 		this.strokeLayer.on('click', () => this.manager.selection?.selectElement(this));
 
-		this.source.setData(this.getFeature());
+		this.updateSource();
 	}
 
 	public select(value: boolean) {
@@ -38,6 +41,10 @@ export class PolygonElement extends AbstractPathElement {
 			properties: {},
 			geometry: { type: 'Polygon', coordinates: [[...this.path, this.path[0]]] }
 		};
+	}
+
+	protected getMeasurements(): Measurement[] {
+		return [{ label: 'Area', value: formatArea(polygonArea(this.path)) }];
 	}
 
 	destroy(): void {

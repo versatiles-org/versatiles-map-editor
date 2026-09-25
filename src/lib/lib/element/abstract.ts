@@ -1,5 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { SelectionNode, SelectionNodeUpdater } from './types.js';
+import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.js';
+import { writable, type Writable } from 'svelte/store';
 import type { GeoPoint } from '../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateElement } from '$lib/codec/types.js';
@@ -14,6 +15,7 @@ export abstract class AbstractElement {
 
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
 	public readonly sourceId = 'source' + this.slug;
+	public readonly measurements: Writable<Measurement[]> = writable([]);
 
 	constructor(manager: GeometryManager | GeometryManagerInteractive) {
 		this.manager = manager;
@@ -52,6 +54,15 @@ export abstract class AbstractElement {
 		const width = bounds.getEast() - bounds.getWest();
 		const height = bounds.getNorth() - bounds.getSouth();
 		return Math.sqrt(width * height) * 10000;
+	}
+
+	protected updateSource() {
+		this.source.setData(this.getFeature());
+		this.measurements.set(this.getMeasurements());
+	}
+
+	protected getMeasurements(): Measurement[] {
+		return [];
 	}
 
 	public delete() {

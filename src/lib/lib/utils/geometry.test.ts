@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { circle, distance, getMiddlePoint, lat2mercator, mercator2lat } from './geometry.js';
+import {
+	circle,
+	circleArea,
+	distance,
+	EARTH_RADIUS,
+	getMiddlePoint,
+	lat2mercator,
+	mercator2lat,
+	pathLength,
+	polygonArea
+} from './geometry.js';
 import type { GeoPoint } from './types.js';
 import { degreesToRadians, radiansToDegrees } from './geometry.js';
 
@@ -49,5 +59,37 @@ describe('Geometry Utils', () => {
 			expect(Array.isArray(pt)).toBe(true);
 			expect(pt.length).toBe(2);
 		});
+	});
+
+	it('should calculate the length of a path', () => {
+		expect(pathLength([])).toBe(0);
+		expect(pathLength([[0, 0]])).toBe(0);
+		expect(
+			pathLength([
+				[0, 0],
+				[1, 0],
+				[1, 1]
+			])
+		).toBeCloseTo(222390.16, 1);
+	});
+
+	it('should calculate the area of a polygon', () => {
+		const square: GeoPoint[] = [
+			[0, 0],
+			[1, 0],
+			[1, 1],
+			[0, 1]
+		];
+		expect(polygonArea(square)).toBeCloseTo(12363718145, -1);
+		// independent of the winding order
+		expect(polygonArea([...square].reverse())).toBeCloseTo(12363718145, -1);
+		expect(polygonArea(square.slice(0, 2))).toBe(0);
+	});
+
+	it('should calculate the area of a circle', () => {
+		expect(circleArea(0)).toBe(0);
+		expect(circleArea(1000)).toBeCloseTo(Math.PI * 1000 * 1000, 0);
+		// a hemisphere
+		expect(circleArea((Math.PI / 2) * EARTH_RADIUS)).toBeCloseTo(2 * Math.PI * EARTH_RADIUS ** 2, -3);
 	});
 });

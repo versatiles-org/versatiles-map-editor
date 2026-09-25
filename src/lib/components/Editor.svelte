@@ -19,6 +19,7 @@
 		if (element instanceof PolygonElement || element instanceof CircleElement) return element.strokeLayer.visible;
 		return writable(false);
 	});
+	const measurements = $derived(element?.measurements ?? writable([]));
 </script>
 
 {#key element}
@@ -49,6 +50,11 @@
 			{/if}
 			{#if element instanceof LineElement || element instanceof PolygonElement || element instanceof CircleElement}
 				<hr />
+				{#each $measurements as { label, value }, i (label)}
+					<InputRow id="{uid}-measurement-{i}" {label}>
+						<output id="{uid}-measurement-{i}">{value}</output>
+					</InputRow>
+				{/each}
 				<p class="label" style="margin: 0.5em 0 1em;">
 					Drag points to move.<br />Drag a midpoint to add.<br />Shift-click to delete a point.
 				</p>

@@ -16,7 +16,7 @@ export class MarkerElement extends AbstractElement {
 
 		this.layer = new MapLayerSymbol(manager, 'symbol' + this.slug, this.sourceId);
 		this.layer.on('click', () => this.manager.selection?.selectElement(this));
-		this.source.setData(this.getFeature());
+		this.updateSource();
 	}
 
 	public select(value: boolean) {
@@ -44,7 +44,7 @@ export class MarkerElement extends AbstractElement {
 			update: (lng, lat) => {
 				this.point[0] = lng;
 				this.point[1] = lat;
-				this.source.setData(this.getFeature());
+				this.updateSource();
 			},
 			delete: () => this.delete()
 		};

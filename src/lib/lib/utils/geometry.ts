@@ -59,3 +59,28 @@ export function circle(center: GeoPoint, radius: number, steps: number): GeoPath
 	}
 	return result;
 }
+
+export function pathLength(path: GeoPath): number {
+	let length = 0;
+	for (let i = 1; i < path.length; i++) length += distance(path[i - 1], path[i]);
+	return length;
+}
+
+// Area of a closed ring on a sphere in square meters, see:
+// Chamberlain & Duquette, "Some Algorithms for Polygons on a Sphere", JPL Publication 07-03, 2007
+export function polygonArea(path: GeoPath): number {
+	const n = path.length;
+	if (n < 3) return 0;
+	let sum = 0;
+	for (let i = 0; i < n; i++) {
+		const prev = path[(i + n - 1) % n];
+		const next = path[(i + 1) % n];
+		sum += degreesToRadians(next[0] - prev[0]) * Math.sin(degreesToRadians(path[i][1]));
+	}
+	return (Math.abs(sum) * EARTH_RADIUS * EARTH_RADIUS) / 2;
+}
+
+// Area of a spherical cap, i.e. a circle on the Earth's surface, in square meters
+export function circleArea(radius: number): number {
+	return 2 * Math.PI * EARTH_RADIUS * EARTH_RADIUS * (1 - Math.cos(radius / EARTH_RADIUS));
+}

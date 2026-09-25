@@ -31,6 +31,16 @@ describe('PolygonElement', () => {
 		expect(element.path).toEqual(customPolygon);
 	});
 
+	it('should provide the area as measurement', () => {
+		element = new PolygonElement(mockManager, [
+			[0, 0],
+			[1, 0],
+			[1, 1],
+			[0, 1]
+		]);
+		expect(get(element.measurements)).toEqual([{ label: 'Area', value: '12,400 km²' }]);
+	});
+
 	it('should set isSelected correctly', () => {
 		element.select(true);
 		expect(element.fillLayer.isSelected).toBe(true);

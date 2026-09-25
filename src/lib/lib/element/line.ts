@@ -3,6 +3,9 @@ import type { GeoPath } from '../utils/types.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '$lib/codec/types.js';
+import type { Measurement } from './types.js';
+import { pathLength } from '../utils/geometry.js';
+import { formatLength } from '../utils/format.js';
 
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;
@@ -19,7 +22,7 @@ export class LineElement extends AbstractPathElement {
 			this.handleDrag(e);
 		});
 
-		this.source.setData(this.getFeature());
+		this.updateSource();
 	}
 
 	public select(value: boolean) {
@@ -33,6 +36,10 @@ export class LineElement extends AbstractPathElement {
 			properties: {},
 			geometry: { type: 'LineString', coordinates: this.path }
 		};
+	}
+
+	protected getMeasurements(): Measurement[] {
+		return [{ label: 'Length', value: formatLength(pathLength(this.path)) }];
 	}
 
 	destroy(): void {

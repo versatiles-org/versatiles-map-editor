@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { get } from 'svelte/store';
 import { CircleElement } from './circle.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
@@ -19,6 +20,15 @@ describe('CircleElement', () => {
 	it('should initialize with given point and radius', () => {
 		expect(circleElement.point).toEqual([10, 20]);
 		expect(circleElement.radius).toBe(300000);
+	});
+
+	it('should provide radius and area as measurements', () => {
+		expect(get(circleElement.measurements)).toEqual([
+			{ label: 'Radius', value: '300 km' },
+			{ label: 'Area', value: '283,000 km²' }
+		]);
+		circleElement.getSelectionNodeUpdater({ index: 1 })?.update(10, 20.01);
+		expect(get(circleElement.measurements)[0]).toEqual({ label: 'Radius', value: '1.11 km' });
 	});
 
 	it('should generate selection nodes', () => {

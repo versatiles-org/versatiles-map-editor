@@ -1,11 +1,12 @@
 import type { GeometryManager } from '../geometry_manager.js';
-import type { SelectionNode, SelectionNodeUpdater } from './types.js';
+import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.js';
 import type { GeoPoint } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import type { StateElementCircle } from '$lib/codec/types.js';
 import { AbstractElement } from './abstract.js';
-import { circle, distance } from '../utils/geometry.js';
+import { circle, circleArea, distance } from '../utils/geometry.js';
+import { formatArea, formatLength } from '../utils/format.js';
 
 export class CircleElement extends AbstractElement {
 	public readonly fillLayer: MapLayerFill;
@@ -24,7 +25,7 @@ export class CircleElement extends AbstractElement {
 		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
 		this.strokeLayer.on('click', () => this.manager.selection?.selectElement(this));
 
-		this.source.setData(this.getFeature());
+		this.updateSource();
 	}
 
 	getSelectionNodes(): SelectionNode[] {
@@ -45,7 +46,7 @@ export class CircleElement extends AbstractElement {
 				update: (lng: number, lat: number) => {
 					this.point[0] = lng;
 					this.point[1] = lat;
-					this.source.setData(this.getFeature());
+					this.updateSource();
 				},
 				delete: () => this.delete()
 			};
@@ -53,7 +54,7 @@ export class CircleElement extends AbstractElement {
 			return {
 				update: (lng: number, lat: number) => {
 					this.radius = distance([lng, lat], this.point);
-					this.source.setData(this.getFeature());
+					this.updateSource();
 				},
 				delete: () => this.delete()
 			};
@@ -75,6 +76,13 @@ export class CircleElement extends AbstractElement {
 			properties: {},
 			geometry: { type: 'Polygon', coordinates: [coordinates] }
 		};
+	}
+
+	protected getMeasurements(): Measurement[] {
+		return [
+			{ label: 'Radius', value: formatLength(this.radius) },
+			{ label: 'Area', value: formatArea(circleArea(this.radius)) }
+		];
 	}
 
 	destroy(): void {

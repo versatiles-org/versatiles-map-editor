@@ -10,3 +10,8 @@ export interface SelectionNodeUpdater {
 	update: (lng: number, lat: number) => void;
 	delete: () => void;
 }
+
+export interface Measurement {
+	label: string;
+	value: string;
+}

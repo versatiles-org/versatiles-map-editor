@@ -1,4 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { get } from 'svelte/store';
 import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
@@ -12,6 +13,10 @@ describe('MarkerElement', () => {
 	beforeEach(() => {
 		mockManager = new MockGeometryManager() as unknown as GeometryManager;
 		element = new MarkerElement(mockManager);
+	});
+
+	it('should have no measurements', () => {
+		expect(get(element.measurements)).toEqual([]);
 	});
 
 	it('should initialize with a default point', () => {
