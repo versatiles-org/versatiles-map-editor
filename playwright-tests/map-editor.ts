@@ -1230,3 +1230,32 @@ test.describe('address search in the viewer', () => {
 		});
 	});
 });
+
+test('precision of a shared map', async ({ page }) => {
+	const point: [number, number] = [13.412341, 52.512341];
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point }] })
+	);
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: 'Share/Embed' }).click();
+	const precision = page.getByRole('combobox', { name: 'Precision:' });
+	const shared = async () => {
+		const link = await page.getByLabel('Link:').inputValue();
+		const element = decodeState(new URL(link).hash.slice(1)).elements[0] as StateElementMarker;
+		return { point: element.point, length: link.length };
+	};
+
+	// automatic: a thousandth of the 10 km viewport radius, about 11 m
+	await expect(precision.getByRole('option').first()).toHaveText('Automatic (about 11 m)');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4123, 52.5123]);
+	const automatic = await shared();
+
+	await precision.selectOption('About 1 m');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
+	await precision.selectOption('About 1.11 km');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41, 52.51]);
+	expect((await shared()).length).toBeLessThan(automatic.length);
+
+	// the map in the editor keeps its precision
+	expect((stateInUrl(page).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
+});

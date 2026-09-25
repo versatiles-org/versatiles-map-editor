@@ -9,10 +9,15 @@ export * from './types.js';
 export type { StateRoot as MapState } from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
+export { digitsForResolution, resolutionOfDigits } from './grid.js';
 
-/** Encode a map state document into the compact base64 representation. */
-export function encodeState(state: StateRoot): string {
-	const writer = new StateWriter();
+/**
+ * Encode a map state document into the compact base64 representation.
+ * `resolution`: the precision of the element coordinates in meters. Coarser is shorter,
+ * e.g. for sharing. Default: 1 m.
+ */
+export function encodeState(state: StateRoot, options: { resolution?: number } = {}): string {
+	const writer = new StateWriter(options);
 	writer.writeRoot(state);
 	return writer.asBase64();
 }

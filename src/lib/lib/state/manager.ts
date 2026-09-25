@@ -15,7 +15,8 @@ export class StateManager {
 		this.history = new StateHistory(geometryManager.getState());
 	}
 
-	public getHash(additionalMeta?: StateMetadata): string {
+	/** `resolution`: the precision of the coordinates in meters, e.g. coarser for sharing. */
+	public getHash(additionalMeta?: StateMetadata, options: { resolution?: number } = {}): string {
 		const state = this.geometryManager.getState();
 
 		if (additionalMeta) {
@@ -23,7 +24,7 @@ export class StateManager {
 			state.meta = { ...state.meta, ...Object.fromEntries(defined) };
 		}
 
-		return encodeState(state);
+		return encodeState(state, options);
 	}
 
 	public setHash(hash: string) {

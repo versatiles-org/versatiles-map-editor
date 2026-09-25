@@ -2,6 +2,7 @@ import { Color } from '@versatiles/style';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, MAX_CODEC_VERSION } from './constants.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { digitsForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
 	StateElementCircle,
@@ -23,9 +24,19 @@ export class StateWriter {
 	// Since version 1: the styles written so far
 	private styleHistory: StyleHistory | undefined;
 
-	constructor({ version = CODEC_VERSION }: { version?: number } = {}) {
+	// Since version 1: the coordinates of the elements are steps on this grid
+	private grid: LocalGrid | undefined;
+	private readonly resolution: number;
+
+	/**
+	 * `resolution`: the precision of the element coordinates in meters (since version 1),
+	 * rounded to decimal places of degrees. Coarser is shorter. Default: 1 m, as precise as version 0.
+	 */
+	constructor({ version = CODEC_VERSION, resolution = 1 }: { version?: number; resolution?: number } = {}) {
 		if (version < 0 || version > MAX_CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+		if (!(resolution > 0) || !Number.isFinite(resolution)) throw new Error(`Invalid resolution: ${resolution}`);
 		this.version = version;
+		this.resolution = resolution;
 	}
 
 	asBase64(): string {
@@ -105,7 +116,12 @@ export class StateWriter {
 			this.styleHistory = new StyleHistory();
 		}
 
-		this.writeMap(root.map);
+		const center = this.writeMap(root.map);
+		if (this.version >= 1) {
+			const digits = digitsForResolution(this.resolution);
+			this.writeVarint(digits);
+			this.grid = new LocalGrid(center ?? [0, 0], digits);
+		}
 		this.writeMetadata(root.meta);
 
 		root.elements.forEach((element) => {
@@ -130,10 +146,12 @@ export class StateWriter {
 		});
 	}
 
-	writeMap(map: StateRoot['map']) {
+	/** Returns the center as the reader decodes it, or undefined without a map. */
+	writeMap(map: StateRoot['map']): [number, number] | undefined {
 		// A degenerate viewport (e.g. from a zero-sized map container) is not worth storing
 		if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) {
-			return this.writeBit(false);
+			this.writeBit(false);
+			return undefined;
 		}
 
 		this.writeBit(true);
@@ -146,6 +164,32 @@ export class StateWriter {
 		this.writePoint(map.center, radius / 1e3);
 
 		this.writeBit(false); // additional map data not supported yet
+
+		const scale = Math.round(1e5 / Math.max(1, radius / 1e3));
+		return [Math.round(map.center[0] * scale) / scale, Math.round(map.center[1] * scale) / scale];
+	}
+
+	/** A point of an element: absolute (version 0), or on the local grid. */
+	writeElementPoint(point: [number, number]) {
+		if (!this.grid) return this.writePoint(point);
+		const [x, y] = this.grid.toGrid(point);
+		this.writeVarint(x, true);
+		this.writeVarint(y, true);
+	}
+
+	/** The points of an element: each as the difference to the previous one. */
+	writeElementPoints(points: [number, number][]) {
+		if (!this.grid) return this.writePoints(points);
+		this.writeVarint(points.length);
+		let px = 0;
+		let py = 0;
+		for (const point of points) {
+			const [x, y] = this.grid.toGrid(point);
+			this.writeVarint(x - px, true);
+			this.writeVarint(y - py, true);
+			px = x;
+			py = y;
+		}
 	}
 
 	writeMetadata(metadata?: StateMetadata) {
@@ -179,7 +223,7 @@ export class StateWriter {
 	}
 
 	writeElementMarker(element: StateElementMarker) {
-		this.writePoint(element.point);
+		this.writeElementPoint(element.point);
 		if (element.style) {
 			this.writeBit(true);
 			this.writeStyle(element.style);
@@ -191,7 +235,7 @@ export class StateWriter {
 	}
 
 	writeElementLine(element: StateElementLine) {
-		this.writePoints(element.points);
+		this.writeElementPoints(element.points);
 		if (element.style) {
 			this.writeBit(true);
 			this.writeStyle(element.style);
@@ -203,7 +247,7 @@ export class StateWriter {
 	}
 
 	writeElementPolygon(element: StateElementPolygon) {
-		this.writePoints(element.points);
+		this.writeElementPoints(element.points);
 		if (element.style) {
 			this.writeBit(true);
 			this.writeStyle(element.style);
@@ -220,7 +264,7 @@ export class StateWriter {
 	}
 
 	writeElementCircle(element: StateElementCircle) {
-		this.writePoint(element.point);
+		this.writeElementPoint(element.point);
 		this.writeVarint(Math.round(element.radius));
 
 		if (element.style) {
@@ -342,7 +386,7 @@ export class StateWriter {
 
 	/** A writer for trying out an encoding, with the same palette. */
 	private fork(): StateWriter {
-		const writer = new StateWriter({ version: this.version });
+		const writer = new StateWriter({ version: this.version, resolution: this.resolution });
 		writer.palette = this.palette;
 		return writer;
 	}

@@ -72,7 +72,7 @@ describe('GeometryManager', () => {
 				elements: [],
 				map: { center: [1, 2], radius: 312696.8037113758 }
 			});
-			expect(manager.state.getHash()).toBe('G2haCUQg');
+			expect(manager.state.getHash()).toBe('IG2haCUQhQ');
 
 			manager.map.setCenter({ lng: 12, lat: 34 });
 			manager.map.setZoom(5);
@@ -83,7 +83,7 @@ describe('GeometryManager', () => {
 			});
 
 			const hash = manager.state.getHash();
-			expect(hash).toBe('GxYdVMa_A');
+			expect(hash).toBe('IGxYdVMa_BQ');
 
 			manager.state.setHash(hash);
 			expect(get(manager.elements).length).toBe(0);
@@ -108,7 +108,7 @@ describe('GeometryManager', () => {
 			expect(manager.getState().elements).toStrictEqual([element]);
 
 			const hash = manager.state.getHash();
-			expect(hash).toBe('G2haCUQgg4npiA0wvmZI4COEA');
+			expect(hash).toBe('IG2haCUQhQgukjiAgqjmQJI4COEA');
 
 			manager.state.setHash(hash);
 			const elements = get(manager.elements);
@@ -133,7 +133,7 @@ describe('GeometryManager', () => {
 			expect(manager.getState().elements).toStrictEqual([element]);
 
 			const hash = manager.state.getHash();
-			expect(hash).toBe('G2haCUQhCAqjmA0msA0msA0msYq83vA');
+			expect(hash).toBe('IVXm97bQtBKIQohAAAaTWAaTWIEAA');
 
 			manager.state.setHash(hash);
 			const elements = get(manager.elements);
@@ -160,7 +160,7 @@ describe('GeometryManager', () => {
 			expect(manager.getState().elements).toStrictEqual([element]);
 
 			const hash = manager.state.getHash();
-			expect(hash).toBe('G2haCUQhiAqjmA0msA0msA0msYq83vBgSNFYA');
+			expect(hash).toBe('IlXm94SNFZtoWglEIUYgAANJrANJrECAAgQEA');
 
 			manager.state.setHash(hash);
 			const elements = get(manager.elements);

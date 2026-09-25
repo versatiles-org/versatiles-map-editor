@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { StateManager } from '../lib/state/manager.js';
 	import Dialog from './Dialog.svelte';
+	import { digitsForResolution, resolutionOfDigits } from '$lib/codec/index.js';
+	import { formatLength } from '../lib/utils/format.js';
 
 	const { state: stateManager = $bindable() }: { state: StateManager } = $props();
 
@@ -22,8 +24,19 @@
 		update(1);
 	}
 
+	// The precision of the shared map: automatic (from the viewport) or decimal places of degrees
+	let precision: 'auto' | number = $state('auto');
+	let autoDigits = $state(5);
+
+	/** Fine enough for the current viewport: a thousandth of its radius, below a pixel of a typical embed. */
+	function updateAutoDigits() {
+		const radius = stateManager.geometryManager.getState().map?.radius;
+		autoDigits = radius ? digitsForResolution(radius / 1000) : 5;
+	}
+
 	function getLinkCode() {
-		return `${baseUrl}#${stateManager.getHash()}`;
+		const digits = precision === 'auto' ? autoDigits : precision;
+		return `${baseUrl}#${stateManager.getHash(undefined, { resolution: resolutionOfDigits(digits) })}`;
 	}
 
 	function getEmbedCode() {
@@ -32,6 +45,7 @@
 
 	function update(delay: number = 500) {
 		if (!dialog?.isOpen()) return;
+		updateAutoDigits();
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
 		if (timeout != null) {
@@ -104,6 +118,24 @@
 				</label>
 
 				<button class="btn" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
+			</p>
+			<p>
+				<label for="share-precision">Precision:</label>
+				<select
+					id="share-precision"
+					value={String(precision)}
+					onchange={(e) => {
+						const value = e.currentTarget.value;
+						precision = value === 'auto' ? 'auto' : Number(value);
+						update(0);
+					}}
+				>
+					<option value="auto">Automatic (about {formatLength(resolutionOfDigits(autoDigits))})</option>
+					{#each [5, 4, 3, 2] as digits (digits)}
+						<option value={String(digits)}>About {formatLength(resolutionOfDigits(digits))}</option>
+					{/each}
+				</select>
+				<span class="hint">Coarser positions make shorter links.</span>
 			</p>
 			<p>
 				<label class="checkbox">

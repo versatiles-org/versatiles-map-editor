@@ -97,6 +97,7 @@ describe('style references (version 1)', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
 		writer.writeBit(false); // no map
+		writer.writeVarint(5); // resolution: decimal places
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
 		writer.writePoint([0, 0]);

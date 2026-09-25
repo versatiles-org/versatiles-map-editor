@@ -93,7 +93,7 @@ describe('StateReader', () => {
 
 		it('should read integer from writer correctly', () => {
 			function test(value: number, bits: number, signed?: true) {
-				const writer = new StateWriter();
+				const writer = new StateWriter({ version: 0 });
 				writer.writeInteger(value, bits);
 				const reader = new StateReader(writer.bits);
 				expect(reader.readInteger(bits, signed)).toBe(value);
@@ -153,7 +153,7 @@ describe('StateReader', () => {
 
 		it('should read varint from writer correctly', () => {
 			function test(value: number, signed?: true) {
-				const writer = new StateWriter();
+				const writer = new StateWriter({ version: 0 });
 				writer.writeVarint(value, signed);
 				const reader = new StateReader(writer.bits);
 				expect(reader.readVarint(signed)).toBe(value);
@@ -188,7 +188,7 @@ describe('StateReader', () => {
 
 		it('should write and read points correctly', () => {
 			function test(x: number, y: number, bits: number) {
-				const writer = new StateWriter();
+				const writer = new StateWriter({ version: 0 });
 				writer.writePoint([x, y], bits);
 				const reader = new StateReader(writer.bits);
 				const point = reader.readPoint(bits);
@@ -204,7 +204,7 @@ describe('StateReader', () => {
 
 	describe('readPoints', () => {
 		it('should write and read point arrays correctly', () => {
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writePoints(path);
 			expect(writer.asBase64()).toBe('alhnjE1fjBUbQzgblGPOnElCDG5C_IA_E3CyTENC7CpEHC1GuJMr0lIji');
 
@@ -221,7 +221,7 @@ describe('StateReader', () => {
 				center: [1.0085728693898135, 2.017145738779627],
 				radius: 10085.53503412156
 			};
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeMap(map);
 			expect(writer.asBitString()).toBe('110000101000000011000111001100000010001010011110000100');
 
@@ -235,7 +235,7 @@ describe('StateReader', () => {
 				center: [-121.013, 82.65],
 				radius: 10.021315508993025
 			};
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeMap(map0);
 			expect(writer.asBitString()).toBe('100100001010011110101111001110001011011101000011001010111011100010111100');
 
@@ -249,7 +249,7 @@ describe('StateReader', () => {
 
 	describe('readMetadata', () => {
 		function test(metadata0: StateMetadata | undefined, expected: string) {
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeMetadata(metadata0);
 			expect(writer.asBase64()).toBe(expected);
 
@@ -271,7 +271,7 @@ describe('StateReader', () => {
 
 	describe('readRoot', () => {
 		it('should reject unknown element keys', () => {
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeInteger(0, 3); // version
 			writer.writeBit(false); // no map
 			writer.writeBit(false); // no metadata
@@ -304,7 +304,7 @@ describe('StateReader', () => {
 				]
 			} as StateRoot;
 
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeRoot(root);
 			expect(writer.asBitString()).toBe(
 				'000110000010001111011101011011101110011010110111110000100000100000111110101001110010000000101000101101111000000'
@@ -348,7 +348,7 @@ describe('StateReader', () => {
 					}
 				]
 			};
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
 				'FkIb_SgX-1gg-pyAot4RYKlSP8AAAEIDLD4DzOSEDSawDSawNqWGeMTV-MFRtDOBuUY86cSUIMbkL8gD8TcLJMQ0LsKkQcLUa4kyvSUiOKLxQiQAAH_ZAi8UIkf_-AAQHXu0IEkPsLMNjAiIiIMERERAA'
@@ -380,7 +380,7 @@ describe('StateReader', () => {
 				visible: false,
 				color: '#C400FF42'
 			};
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeStyle(style);
 			expect(writer.asBase64()).toBe('F4oRDGTMRcmuciMQA_6FJAgRwlA');
 
@@ -400,7 +400,7 @@ describe('StateReader', () => {
 		it('should write and read a string', () => {
 			const text =
 				'Hello, world, 🌍, וועלט, მოსოფელი, دنیا, ܥܠܡܐ, ലോകം, العالم, دنی, 世界, ދުނިޔެ, Sè-kài, ពិភពលោក, ലോകം,';
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeString(text);
 			expect(writer.asBase64()).toBe(
 				'JGzCCSSMsAqMQSUsA5DtCbxvCsArdCrdCFfC5dCxdCsA3NI7NIDPI7NIJPIpNI1NIxNIsAfjCNlCZtCPjCsALzCBzCDzChxCsAlTGXVGrRGFRGsAPjCJlCzjCPjCJlCLlCsAfjCNlCZtCsAthmZV6sAX5CV7CF5CR7Cp5CZ7CsA2RONCyBOKsAt5Kv7Kv5Kt5K35KJ9KB5KsAlTGXVGrRGFRGs'
@@ -421,7 +421,7 @@ describe('StateReader', () => {
 		});
 		it('should write and read a RGB color', () => {
 			const color = '#123456';
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeColor(color);
 			expect(writer.asBitString()).toBe('0001001000110100010101100');
 
@@ -431,7 +431,7 @@ describe('StateReader', () => {
 		});
 		it('should write and read a RGBA color', () => {
 			const color = '#12345678';
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeColor(color);
 			expect(writer.asBitString()).toBe('000100100011010001010110101111000');
 
@@ -552,7 +552,7 @@ describe('popups', () => {
 	});
 
 	it('reject unknown popup fields', () => {
-		const writer = new StateWriter();
+		const writer = new StateWriter({ version: 0 });
 		writer.writeInteger(15, 4);
 		expect(() => new StateReader(writer.bits).readPopup()).toThrow('Error reading popup');
 	});
@@ -574,7 +574,7 @@ describe('background', () => {
 
 	it('rejects invalid backgrounds', () => {
 		for (const json of ['{"builder":"other","options":{}}', '{"builder":"osm","options":[]}', 'null', '{']) {
-			const writer = new StateWriter();
+			const writer = new StateWriter({ version: 0 });
 			writer.writeBit(true);
 			writer.writeInteger(2, 6);
 			writer.writeString(json);
@@ -613,7 +613,7 @@ describe('legend', () => {
 	});
 
 	it('rejects unknown fields', () => {
-		const writer = new StateWriter();
+		const writer = new StateWriter({ version: 0 });
 		writer.writeInteger(15, 4);
 		expect(() => new StateReader(writer.bits).readLegend()).toThrow('Error reading legend');
 	});

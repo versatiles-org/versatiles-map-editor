@@ -59,6 +59,7 @@ describe('color palette (version 1)', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeArray(['#ff0000'], (c) => writer.writeColor(c));
 		writer.writeBit(false); // no map
+		writer.writeVarint(5); // resolution: decimal places
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
 		writer.writePoint([0, 0]);
@@ -71,8 +72,8 @@ describe('color palette (version 1)', () => {
 });
 
 describe('versions', () => {
-	it('encodeState still writes version 0, which every editor can read', () => {
-		expect(StateReader.fromBase64(encodeState(state)).readInteger(3)).toBe(0);
+	it('encodeState writes version 1', () => {
+		expect(StateReader.fromBase64(encodeState(state)).readInteger(3)).toBe(1);
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 

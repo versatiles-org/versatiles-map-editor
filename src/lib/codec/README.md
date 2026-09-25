@@ -75,15 +75,20 @@ their defaults and enum names from here and only add rendering data;
 ## Backward compatibility
 
 The base64 starts with a 3-bit format version, and every version can be read, so existing
-hashes keep decoding. `encodeState` writes `CODEC_VERSION` (`constants.ts`):
+hashes keep decoding (`legacy.test.ts`). `encodeState` writes `CODEC_VERSION` (`constants.ts`):
 
-- **0**: the original format. New fields use the extension points v0 reserved: e.g. popups use
-  the per-element popup flag, which old hashes always leave at `0`.
-- **1**: the colors of all styles and of the legend are stored once in a palette, most frequent
-  first, and referenced by index (#5). A style refers to a similar one of the last 32 styles and
-  stores only the fields that differ, or that it does not have (#4, `style_history.ts`).
+- **0**: the original format. Coordinates are absolute, with 5 decimal places. New fields use the
+  extension points v0 reserved: e.g. popups use the per-element popup flag, which old hashes
+  always leave at `0`.
+- **1**: shorter hashes, with the same content:
+  - the colors of all styles and of the legend are stored once in a palette, most frequent
+    first, and referenced by index (#5);
+  - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
+    or that it does not have (#4, `style_history.ts`);
+  - element coordinates are whole steps from the map center, with a global resolution in decimal
+    places of degrees (#3, `grid.ts`). `encodeState(state, { resolution })` takes it in meters:
+    the default of 1 m is as precise as version 0; coarser values make shorter hashes, e.g. for
+    sharing.
 
-Version 1 is still being completed (#4, #3); until then `encodeState` writes version 0, so no
-hash in the wild depends on an unfinished version. Coordinates are quantized to a ~1e-5 grid and
-the viewport radius is log-quantized, so base64 round-trips are lossy at sub-meter precision by
-design.
+The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
+round-trips are lossy at the resolution by design.

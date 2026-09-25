@@ -14,6 +14,7 @@ import type {
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
 import { sanitizeBackground } from './profile.js';
+import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
@@ -24,6 +25,8 @@ export class StateReader {
 	private palette: string[] | undefined;
 	// Since version 1: the styles read so far
 	private styleHistory: StyleHistory | undefined;
+	// Since version 1: the coordinates of the elements are steps on this grid
+	private grid: LocalGrid | undefined;
 
 	constructor(bits: boolean[]) {
 		this.bits = bits;
@@ -135,6 +138,27 @@ export class StateReader {
 		}
 	}
 
+	/** A point of an element: absolute (version 0), or on the local grid. */
+	readElementPoint(): [number, number] {
+		if (!this.grid) return this.readPoint();
+		return this.grid.fromGrid([this.readVarint(true), this.readVarint(true)]);
+	}
+
+	/** The points of an element: each as the difference to the previous one. */
+	readElementPoints(): [number, number][] {
+		if (!this.grid) return this.readPoints();
+		const length = this.readVarint();
+		const points: [number, number][] = [];
+		let x = 0;
+		let y = 0;
+		for (let i = 0; i < length; i++) {
+			x += this.readVarint(true);
+			y += this.readVarint(true);
+			points.push(this.grid.fromGrid([x, y]));
+		}
+		return points;
+	}
+
 	readRoot(): StateRoot {
 		try {
 			const root: StateRoot = { elements: [] };
@@ -151,6 +175,12 @@ export class StateReader {
 			// Read the map element
 			root.map = this.readMap();
 			if (!root.map) delete root.map;
+
+			if (version >= 1) {
+				const digits = this.readVarint();
+				if (digits > MAX_DIGITS) throw new Error(`Invalid resolution: ${digits}`);
+				this.grid = new LocalGrid(root.map?.center ?? [0, 0], digits);
+			}
 
 			// Read the metadata
 			root.meta = this.readMetadata();
@@ -241,7 +271,7 @@ export class StateReader {
 
 	readElementMarker(): StateElementMarker {
 		try {
-			const element: StateElementMarker = { type: 'marker', point: this.readPoint() };
+			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			if (this.readBit()) element.style = this.readStyle();
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
@@ -252,7 +282,7 @@ export class StateReader {
 
 	readElementLine(): StateElementLine {
 		try {
-			const element: StateElementLine = { type: 'line', points: this.readPoints() };
+			const element: StateElementLine = { type: 'line', points: this.readElementPoints() };
 			if (this.readBit()) element.style = this.readStyle();
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
@@ -263,7 +293,7 @@ export class StateReader {
 
 	readElementPolygon(): StateElementPolygon {
 		try {
-			const element: StateElementPolygon = { type: 'polygon', points: this.readPoints() };
+			const element: StateElementPolygon = { type: 'polygon', points: this.readElementPoints() };
 			if (this.readBit()) element.style = this.readStyle();
 			if (this.readBit()) element.strokeStyle = this.readStyle();
 			if (this.readBit()) element.popup = this.readPopup();
@@ -275,7 +305,7 @@ export class StateReader {
 
 	readElementCircle(): StateElementCircle {
 		try {
-			const point = this.readPoint();
+			const point = this.readElementPoint();
 			const radius = this.readVarint();
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			if (this.readBit()) element.style = this.readStyle();

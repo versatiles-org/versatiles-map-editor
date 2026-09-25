@@ -59,7 +59,7 @@ describe('StateManager', () => {
 			geometryManager.setState(state1);
 			const hash = stateManager.getHash();
 			expect(geometryManager.getState).toHaveBeenCalled();
-			expect(hash).toBe('G2haCUQgg-pyAot4ZIECOEA');
+			expect(hash).toBe('IG2haCUQhQg0msA0msQJIECOEA');
 		});
 
 		it('should set the geometry manager state from a base64 compressed hash', () => {
