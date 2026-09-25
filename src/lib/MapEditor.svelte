@@ -5,8 +5,8 @@
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
-	// bundle after a build. Let Vite bundle and fingerprint the worker instead.
-	import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
+	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import Sidebar from './components/Sidebar.svelte';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
