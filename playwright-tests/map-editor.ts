@@ -374,12 +374,21 @@ test('deleting nodes and elements with the keyboard', async ({ page }) => {
 });
 
 test.describe('small screens', () => {
-	test.use({ viewport: { width: 390, height: 844 } });
+	// wide enough for the hint to fit on one line, next to the attribution
+	test.use({ viewport: { width: 500, height: 500 } });
 
 	test('show the map read-only with a hint', async ({ page }) => {
 		await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 		await waitForMapIsReady(page);
-		await expect(page.getByText('Open this page on a larger screen to edit the map.')).toBeVisible();
+		const hint = page.getByText('Open this page on a larger screen to edit the map.');
+		await expect(hint).toBeVisible();
+
+		// the hint must not cover the attribution, which is expanded at first
+		await expect(page.locator('.maplibregl-compact-show')).toBeVisible();
+		const a = (await hint.boundingBox())!;
+		const b = (await page.locator('.maplibregl-ctrl-attrib').boundingBox())!;
+		const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+		expect(overlap).toBe(false);
 		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
 	});
 });

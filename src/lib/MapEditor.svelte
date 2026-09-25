@@ -205,9 +205,10 @@
 		height: 100%;
 	}
 
+	/* at the top, since the attribution at the bottom can expand to the full width */
 	.hint {
 		position: absolute;
-		bottom: var(--gap);
+		top: var(--gap);
 		left: 50%;
 		transform: translateX(-50%);
 		max-width: calc(100% - 4 * var(--gap));
