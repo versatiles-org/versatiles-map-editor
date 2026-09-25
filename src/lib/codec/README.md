@@ -74,7 +74,15 @@ their defaults and enum names from here and only add rendering data;
 
 ## Backward compatibility
 
-The base64 layout is unchanged (3-bit version `0`); existing hashes keep
-decoding. New fields use the extension points v0 reserved: e.g. popups use the
-per-element popup flag, which old hashes always leave at `0`. Coordinates are quantized to a ~1e-5 grid and the viewport radius is
-log-quantized, so base64 round-trips are lossy at sub-meter precision by design.
+The base64 starts with a 3-bit format version, and every version can be read, so existing
+hashes keep decoding. `encodeState` writes `CODEC_VERSION` (`constants.ts`):
+
+- **0**: the original format. New fields use the extension points v0 reserved: e.g. popups use
+  the per-element popup flag, which old hashes always leave at `0`.
+- **1**: the colors of all styles and of the legend are stored once in a palette, most frequent
+  first, and referenced by index (#5).
+
+Version 1 is still being completed (#4, #3); until then `encodeState` writes version 0, so no
+hash in the wild depends on an unfinished version. Coordinates are quantized to a ~1e-5 grid and
+the viewport radius is log-quantized, so base64 round-trips are lossy at sub-meter precision by
+design.

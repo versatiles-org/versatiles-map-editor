@@ -12,13 +12,15 @@ import type {
 	StateRoot,
 	StateStyle
 } from './types.js';
-import { BASE64_CODE2BITS, CHAR_VALUE2CODE } from './constants.js';
+import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
 import { sanitizeBackground } from './profile.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
 	public offset: number = 0;
+	// Since version 1: the colors, which are referenced by index
+	private palette: string[] | undefined;
 
 	constructor(bits: boolean[]) {
 		this.bits = bits;
@@ -135,9 +137,10 @@ export class StateReader {
 			const root: StateRoot = { elements: [] };
 
 			const version = this.readInteger(3);
-			if (version != 0) {
+			if (version > MAX_CODEC_VERSION) {
 				throw new Error(`Unsupported version: ${version}`);
 			}
+			if (version >= 1) this.palette = this.readArray(() => this.readColor());
 
 			// Read the map element
 			root.map = this.readMap();
@@ -318,7 +321,7 @@ export class StateReader {
 				case 0:
 					return entry;
 				case 1:
-					entry.color = this.readColor();
+					entry.color = this.readColorValue();
 					break;
 				case 2:
 					entry.symbol = this.readVarint();
@@ -382,7 +385,7 @@ export class StateReader {
 						style.align = this.readVarint();
 						break;
 					case 8:
-						style.color = this.readColor();
+						style.color = this.readColorValue();
 						break;
 					case 9:
 						style.label = this.readString();
@@ -397,6 +400,15 @@ export class StateReader {
 		} catch (cause) {
 			throw new Error(`Error reading style`, { cause });
 		}
+	}
+
+	/** A color: its index in the palette, or the color itself (version 0). */
+	readColorValue(): string {
+		if (!this.palette) return this.readColor();
+		const index = this.readVarint();
+		const color = this.palette[index];
+		if (color === undefined) throw new Error(`Invalid palette index: ${index}`);
+		return color;
 	}
 
 	readColor(): string {

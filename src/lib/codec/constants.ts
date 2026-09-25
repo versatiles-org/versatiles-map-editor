@@ -21,3 +21,11 @@ export const CHAR_VALUE2CODE: number[] = [
 ];
 export const CHAR_CODE2VALUE: number[] = [];
 CHAR_VALUE2CODE.forEach((c, v) => (CHAR_CODE2VALUE[c] = v));
+
+/**
+ * The format version that `encodeState` writes. Every version can be read.
+ * - 0: the original format
+ * - 1: colors are stored once in a palette and referenced by index (#5)
+ */
+export const CODEC_VERSION = 0;
+export const MAX_CODEC_VERSION = 1;

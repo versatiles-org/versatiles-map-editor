@@ -1,5 +1,5 @@
 import { Color } from '@versatiles/style';
-import { BASE64_CHARS, CHAR_CODE2VALUE } from './constants.js';
+import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, MAX_CODEC_VERSION } from './constants.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import type {
@@ -16,8 +16,14 @@ import type {
 
 export class StateWriter {
 	bits: boolean[] = [];
+	readonly version: number;
+	// Since version 1: the colors of the state, most frequent first, by their color key
+	private palette: Map<string, number> | undefined;
 
-	constructor() {}
+	constructor({ version = CODEC_VERSION }: { version?: number } = {}) {
+		if (version < 0 || version > MAX_CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+		this.version = version;
+	}
 
 	asBase64(): string {
 		const reader = new StateReader(this.bits);
@@ -90,8 +96,8 @@ export class StateWriter {
 	}
 
 	writeRoot(root: StateRoot) {
-		// Write the version
-		this.writeInteger(0, 3);
+		this.writeInteger(this.version, 3);
+		if (this.version >= 1) this.writePalette(collectColors(root));
 
 		this.writeMap(root.map);
 		this.writeMetadata(root.meta);
@@ -245,7 +251,7 @@ export class StateWriter {
 		this.writeInteger(3, 4);
 		this.writeArray(legend.entries, (entry) => {
 			this.writeInteger(1, 4);
-			this.writeColor(entry.color);
+			this.writeColorValue(entry.color);
 			if (entry.symbol != null) {
 				this.writeInteger(2, 4);
 				this.writeVarint(entry.symbol);
@@ -299,7 +305,7 @@ export class StateWriter {
 		}
 		if (style.color != null) {
 			this.writeInteger(8, 4);
-			this.writeColor(style.color);
+			this.writeColorValue(style.color);
 		}
 		if (style.label != null) {
 			this.writeInteger(9, 4);
@@ -309,6 +315,20 @@ export class StateWriter {
 			this.writeInteger(10, 4);
 		}
 		this.writeInteger(0, 4);
+	}
+
+	/** The colors, each once, and afterwards only their index (since version 1). */
+	writePalette(colors: string[]) {
+		this.writeArray(colors, (color) => this.writeColor(color));
+		this.palette = new Map(colors.map((color, index) => [colorKey(color), index]));
+	}
+
+	/** A color: its index in the palette, or the color itself (version 0). */
+	writeColorValue(color: string) {
+		if (!this.palette) return this.writeColor(color);
+		const index = this.palette.get(colorKey(color));
+		if (index === undefined) throw new Error(`Color not in the palette: ${color}`);
+		this.writeVarint(index);
 	}
 
 	writeColor(color: string) {
@@ -330,4 +350,29 @@ export class StateWriter {
 		charCodes.forEach((c) => this.writeVarint(c < 128 ? CHAR_CODE2VALUE[c] : c));
 		return value;
 	}
+}
+
+/** Colors that are written identically have the same key, e.g. "#FF0000" and "#ff0000". */
+function colorKey(color: string): string {
+	const { r, g, b, alpha } = Color.parse(color).srgb;
+	return [r, g, b, alpha * 255].map(Math.round).join(',');
+}
+
+/** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */
+export function collectColors(root: StateRoot): string[] {
+	const colors: string[] = [];
+	for (const element of root.elements) {
+		if (element.style?.color) colors.push(element.style.color);
+		if ('strokeStyle' in element && element.strokeStyle?.color) colors.push(element.strokeStyle.color);
+	}
+	for (const entry of root.meta?.legend?.entries ?? []) colors.push(entry.color);
+
+	const counts = new Map<string, { color: string; count: number; first: number }>();
+	colors.forEach((color, i) => {
+		const key = colorKey(color);
+		const entry = counts.get(key);
+		if (entry) entry.count++;
+		else counts.set(key, { color, count: 1, first: i });
+	});
+	return [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first).map((entry) => entry.color);
 }
