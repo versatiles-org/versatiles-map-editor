@@ -19,7 +19,7 @@ export async function waitForMapIsReady(
 			const text = msg.text();
 			if (text == 'map_ready') {
 				count--;
-				if (count < 1) setTimeout(resolve, 100);
+				if (count < 1) resolve();
 				return;
 			}
 			if (expectedMessages.some((pattern) => pattern.test(text))) return;
@@ -28,7 +28,21 @@ export async function waitForMapIsReady(
 			console.log(process.platform + ': ' + text);
 		});
 	});
-	await new Promise((resolve) => setTimeout(resolve, 1000));
+}
+
+/**
+ * Wait until the map has rendered all pending changes, e.g. after selecting an element.
+ * Requires the map to be exposed as `window.map`, like the demo page does.
+ */
+export async function waitForMapIsIdle(page: Page): Promise<void> {
+	await page.evaluate(
+		() =>
+			new Promise<void>((resolve) => {
+				const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+				map.once('idle', () => resolve());
+				map.triggerRepaint();
+			})
+	);
 }
 
 export async function trackServerRequests(page: Page): Promise<() => string[]> {

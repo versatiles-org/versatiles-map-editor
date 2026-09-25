@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
-import { decodeState, encodeState } from '../src/lib/codec/index.js';
-import { trackServerRequests, waitForMapIsReady } from './lib/utils';
+import { decodeState, encodeState, type MapState } from '../src/lib/codec/index.js';
+import type { Page } from '@playwright/test';
+import { trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
@@ -58,6 +59,18 @@ const ariaResult = `- region "Map"
   - link "Repository on GitHub":
     - /url: https://github.com/versatiles-org/versatiles-map-editor/issues
     - text: GitHub Issues`;
+
+/**
+ * The map state in the URL. The hash is written shortly after a change, so it can be
+ * missing or outdated. Returns an empty state if there is no valid hash (yet).
+ */
+function stateInUrl(page: Page): MapState {
+	try {
+		return decodeState(new URL(page.url()).hash.slice(1));
+	} catch {
+		return { elements: [] };
+	}
+}
 
 /**
  * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
@@ -275,7 +288,7 @@ test('keeps the map in the URL across reloads', async ({ page }) => {
 	await page.getByRole('button', { name: 'Marker' }).click();
 
 	// the hash is written shortly after the last change
-	const elementsInUrl = () => decodeState(new URL(page.url()).hash.slice(1)).elements.map((e) => e.type);
+	const elementsInUrl = () => stateInUrl(page).elements.map((e) => e.type);
 	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
 
 	await page.reload();
@@ -295,8 +308,7 @@ test('duplicating an element', async ({ page }) => {
 	);
 	await waitForMapIsReady(page);
 
-	const pointsInUrl = () =>
-		decodeState(new URL(page.url()).hash.slice(1)).elements.map((e) => ('point' in e ? e.point : undefined));
+	const pointsInUrl = () => stateInUrl(page).elements.map((e) => ('point' in e ? e.point : undefined));
 	// the map is centered in the area left of the 250px sidebar
 	const viewport = page.viewportSize()!;
 	const x = (viewport.width - 250) / 2;
@@ -319,7 +331,7 @@ test('duplicating an element', async ({ page }) => {
 	// alt-drag moves a copy of the selected marker and keeps the original
 	await page.mouse.click(x + 6, y - 8);
 	// the selection node is rendered asynchronously, and it can only be dragged once it is visible
-	await page.waitForTimeout(500);
+	await waitForMapIsIdle(page);
 	await page.keyboard.down('Alt');
 	await page.mouse.move(x, y);
 	await page.mouse.down();
