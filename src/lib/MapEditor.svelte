@@ -10,6 +10,7 @@
 	import Sidebar from './components/Sidebar.svelte';
 	import NodeDeleteButton from './components/NodeDeleteButton.svelte';
 	import Legend from './components/Legend.svelte';
+	import SearchPlace from './components/SearchPlace.svelte';
 	import { writable } from 'svelte/store';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
@@ -32,6 +33,9 @@
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
 	const legend = $derived(geometryManager?.legend ?? writable(undefined));
+	const searchEnabled = $derived(geometryManager?.search ?? writable(false));
+	// only in the read-only viewer; the editor has its search in the sidebar
+	const showSearch = $derived(!showSidebar && $searchEnabled);
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
@@ -168,7 +172,12 @@
 		<div class="map" bind:this={container}></div>
 	</div>
 	{#if geometryManager && $legend}
-		<Legend legend={$legend} map={geometryManager.map} right={showSidebar ? 250 : 0} />
+		<Legend legend={$legend} map={geometryManager.map} right={showSidebar ? 250 : 0} top={showSearch ? 44 : 0} />
+	{/if}
+	{#if geometryManager && showSearch}
+		<div class="viewer-search">
+			<SearchPlace map={geometryManager.map} />
+		</div>
 	{/if}
 	{#if showSidebar && geometryManager && geometryManager.isInteractive()}
 		<NodeDeleteButton {geometryManager} />
@@ -183,7 +192,7 @@
 			}
 		</style>
 	{:else if screenTooSmall}
-		<div class="hint">Open this page on a larger screen to edit the map.</div>
+		<div class="hint" class:below-search={showSearch}>Open this page on a larger screen to edit the map.</div>
 	{/if}
 </div>
 
@@ -228,6 +237,25 @@
 		color: var(--color-text);
 		font-size: 0.8em;
 		text-align: center;
+	}
+
+	.hint.below-search {
+		top: calc(var(--gap) + 44px);
+	}
+
+	.viewer-search {
+		position: absolute;
+		z-index: 2;
+		top: var(--gap);
+		left: var(--gap);
+		width: min(260px, calc(100% - 2 * var(--gap)));
+		font-size: 13px;
+		:global(input) {
+			padding: 6px 8px;
+			border: 1px solid rgba(0, 0, 0, 0.3);
+			border-radius: 4px;
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+		}
 	}
 
 	.map :global(canvas) {

@@ -625,3 +625,11 @@ describe('color scheme', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 });
+
+describe('search', () => {
+	it('round-trips as a flag', () => {
+		const state: StateRoot = { meta: { search: true }, elements: [] };
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+		expect(decodeState(encodeState({ meta: { search: false }, elements: [] })).meta).toStrictEqual({});
+	});
+});

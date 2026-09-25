@@ -5,7 +5,13 @@
 	import { SymbolLibrary } from '../lib/symbols.js';
 
 	/** The legend over the map, in the editor and in the viewer. `right` keeps it clear of the sidebar. */
-	const { legend, map, right = 0 }: { legend: StateLegend; map: MaplibreMap; right?: number } = $props();
+	/** `top` keeps it clear of a search field. */
+	const {
+		legend,
+		map,
+		right = 0,
+		top = 0
+	}: { legend: StateLegend; map: MaplibreMap; right?: number; top?: number } = $props();
 
 	const symbolSize = 18;
 	const retina = window.devicePixelRatio || 1;
@@ -25,6 +31,7 @@
 	<div
 		class="legend position-{legend.position ?? 'bottom-left'} layout-{legend.layout ?? 'vertical'}"
 		style:--sidebar="{right}px"
+		style:--top="{top}px"
 		style:font-family={legend.font ?? 'sans-serif'}
 		role="list"
 		aria-label="Legend"
@@ -58,7 +65,7 @@
 		gap: 4px 12px;
 		box-sizing: border-box;
 		max-width: calc(100% - var(--sidebar) - 2 * var(--margin));
-		max-height: calc(100% - 2 * var(--margin) - 30px);
+		max-height: calc(100% - 2 * var(--margin) - 30px - var(--top));
 		overflow: auto;
 		padding: 6px 10px;
 		border-radius: 6px;
@@ -85,7 +92,7 @@
 	.position-top-left,
 	.position-top,
 	.position-top-right {
-		top: var(--margin);
+		top: calc(var(--margin) + var(--top));
 	}
 	.position-bottom-left,
 	.position-bottom,

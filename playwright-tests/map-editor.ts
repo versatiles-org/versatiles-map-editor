@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
-import { encodeState, type MapState, type StateElementMarker } from '../src/lib/codec/index.js';
+import { decodeState, encodeState, type MapState, type StateElementMarker } from '../src/lib/codec/index.js';
 import { stateInUrl, trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
@@ -1155,5 +1155,78 @@ test.describe('importing a table', () => {
 			'Shop',
 			'(empty)'
 		]);
+	});
+});
+
+test.describe('address search in the viewer', () => {
+	test('is enabled in the share dialog', async ({ page }) => {
+		await page.goto('/');
+		await waitForMapIsReady(page, { count: 1 });
+		await page.getByRole('button', { name: 'Share/Embed' }).click();
+		const option = page.getByRole('checkbox', { name: 'Address search in the map' });
+		await expect(option).not.toBeChecked();
+		await option.check();
+
+		await expect.poll(() => stateInUrl(page).meta?.search).toBe(true);
+		const link = await page.getByLabel('Link:').inputValue();
+		expect(decodeState(new URL(link).hash.slice(1)).meta?.search).toBe(true);
+		// the preview is the embedded viewer, with the search
+		await expect(
+			page.frameLocator('iframe[title=preview]').getByRole('combobox', { name: 'Search address or place' })
+		).toBeVisible();
+	});
+
+	test.describe('small screens', () => {
+		test.use({ viewport: { width: 500, height: 500 } });
+
+		const boxesOverlap = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+			a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+		test('finds places without changing the map', async ({ page }) => {
+			await page.route('https://geocode.versatiles.org/**', (route) =>
+				route.fulfill({
+					json: {
+						type: 'FeatureCollection',
+						features: [
+							{
+								type: 'Feature',
+								properties: { name: 'Hamburg' },
+								geometry: { type: 'Point', coordinates: [10, 53.55] }
+							}
+						]
+					}
+				})
+			);
+			const state: MapState = {
+				map: { center: [13.4, 52.5], radius: 10000 },
+				meta: { search: true, legend: { position: 'top-left', entries: [{ color: '#ff0000', label: 'Area' }] } },
+				elements: [{ type: 'marker', point: [13.4, 52.5] }]
+			};
+			const hash = encodeState(state);
+			await page.goto('/#' + hash);
+			await waitForMapIsReady(page);
+
+			const search = page.getByRole('combobox', { name: 'Search address or place' });
+			const legend = page.getByRole('list', { name: 'Legend' });
+			const hint = page.getByText('Open this page on a larger screen');
+			expect(boxesOverlap((await search.boundingBox())!, (await legend.boundingBox())!)).toBe(false);
+			expect(boxesOverlap((await search.boundingBox())!, (await hint.boundingBox())!)).toBe(false);
+
+			await search.fill('Hamburg');
+			await expect(page.getByRole('option')).toHaveText(['Hamburg']);
+			await search.press('Enter');
+			await expect
+				.poll(() => page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().lng))
+				.toBeCloseTo(10, 1);
+			// the viewer cannot change the map
+			await expect(page.getByRole('button', { name: 'Add marker here' })).toHaveCount(0);
+			expect(new URL(page.url()).hash.slice(1)).toBe(hash);
+		});
+
+		test('is hidden by default', async ({ page }) => {
+			await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+			await waitForMapIsReady(page);
+			await expect(page.getByRole('combobox', { name: 'Search address or place' })).toHaveCount(0);
+		});
 	});
 });

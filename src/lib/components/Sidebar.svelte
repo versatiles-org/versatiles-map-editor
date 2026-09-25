@@ -121,7 +121,13 @@
 			<button class="btn" onclick={() => stateManager.redo()} disabled={!$redoEnabled}>Redo</button>
 		</div>
 		<hr class="thick" />
-		<SearchPlace {geometryManager} />
+		<SearchPlace
+			map={geometryManager.map}
+			onmark={(point) => {
+				geometryManager.addElement({ type: 'marker', point });
+				geometryManager.state.log();
+			}}
+		/>
 		<hr class="thick" />
 		<SidebarPanel title="Map">
 			<PanelFile manager={geometryManager} />

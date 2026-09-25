@@ -218,6 +218,9 @@ export class StateReader {
 					case 4:
 						metadata.colorScheme = this.readString();
 						break;
+					case 5:
+						metadata.search = true;
+						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}

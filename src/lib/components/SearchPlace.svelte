@@ -1,11 +1,17 @@
 <script lang="ts">
 	import { geocode, type GeocodingResult } from '$lib/utils/geocoding.js';
-	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
+	import type { Map as MaplibreMap } from 'maplibre-gl';
 
-	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
+	const {
+		map,
+		onmark
+	}: {
+		map: MaplibreMap;
+		/** Offers to add a marker at the found place. Not in the read-only viewer. */
+		onmark?: (point: [number, number]) => void;
+	} = $props();
 
 	const uid = $props.id();
-	const map = $derived(geometryManager.map);
 
 	let query = $state('');
 	let results: GeocodingResult[] = $state([]);
@@ -84,8 +90,7 @@
 
 	function addMarker() {
 		if (!selected) return;
-		geometryManager.addElement({ type: 'marker', point: selected.point });
-		geometryManager.state.log();
+		onmark?.(selected.point);
 		selected = undefined;
 	}
 
@@ -158,7 +163,7 @@
 			{/if}
 		</ul>
 	{/if}
-	{#if selected}
+	{#if selected && onmark}
 		<button class="btn add-marker" onclick={addMarker}>Add marker here</button>
 	{/if}
 </div>

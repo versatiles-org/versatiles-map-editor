@@ -300,6 +300,15 @@ describe('color scheme', () => {
 	});
 });
 
+describe('search', () => {
+	it('round-trips as the meta member', () => {
+		const doc = stateToGeoJSON({ meta: { search: true }, elements: [] });
+		expect(doc.meta).toStrictEqual({ search: true });
+		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ search: true });
+		expect(stateFromGeoJSON({ ...doc, meta: { search: 'yes' } } as unknown as GeoJSONDocument).meta).toBeUndefined();
+	});
+});
+
 describe('popups', () => {
 	it('are written as the description property', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [0, 0], popup: { text: 'Hello' } }] });

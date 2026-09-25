@@ -56,7 +56,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
   minimized options, stored as JSON in base64, so any current or future option fits;
   `meta.legend`: position, layout, generic font and entries of a legend defined by the author;
-  `meta.colorScheme`: the id of the color scheme offered in the color picker)
+  `meta.colorScheme`: the id of the color scheme offered in the color picker;
+  `meta.search`: show an address search in the read-only viewer)
 
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;

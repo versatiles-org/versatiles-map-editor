@@ -48,6 +48,8 @@ export class GeometryManager {
 	 * A new background map removes all images, and MapLibre asks for them again.
 	 */
 	public readonly imageResolvers = new Map<string, () => void>();
+	/** Whether the read-only viewer shows an address search. */
+	public readonly search: Writable<boolean> = writable(false);
 	/** The legend of the map, if it has one. */
 	public readonly legend: Writable<StateLegend | undefined> = writable(undefined);
 	/** The background map. Undefined for the editor's default background. */
@@ -179,6 +181,7 @@ export class GeometryManager {
 
 		if (state.map) this.fitViewport(state.map);
 		this.legend.set(state.meta?.legend);
+		this.search.set(state.meta?.search === true);
 		this.colors?.scheme.set(state.meta?.colorScheme);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, get(this.background))) await this.setBackground(state.meta?.background);

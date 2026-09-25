@@ -159,6 +159,10 @@ export class StateWriter {
 			this.writeInteger(4, 6);
 			this.writeString(metadata.colorScheme);
 		}
+		if (metadata.search) {
+			// a flag: the key alone
+			this.writeInteger(5, 6);
+		}
 		this.writeInteger(0, 6);
 	}
 

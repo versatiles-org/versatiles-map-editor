@@ -105,12 +105,12 @@ export function stateToGeoJSON(state: StateRoot): GeoJSONDocument {
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
 	if (state.map) doc.map = { center: state.map.center, radius: state.map.radius };
-	if (state.meta?.background || state.meta?.legend || state.meta?.colorScheme) {
-		doc.meta = {};
-		if (state.meta.background) doc.meta.background = state.meta.background;
-		if (state.meta.legend) doc.meta.legend = state.meta.legend;
-		if (state.meta.colorScheme) doc.meta.colorScheme = state.meta.colorScheme;
-	}
+	const meta: StateMetadata = {};
+	if (state.meta?.background) meta.background = state.meta.background;
+	if (state.meta?.legend) meta.legend = state.meta.legend;
+	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
+	if (state.meta?.search) meta.search = true;
+	if (Object.keys(meta).length > 0) doc.meta = meta;
 	return doc;
 }
 
@@ -260,6 +260,7 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): StateR
 		if (legend) meta.legend = legend;
 		const colorScheme = sanitizeString(doc.meta.colorScheme);
 		if (colorScheme) meta.colorScheme = colorScheme;
+		if (doc.meta.search === true) meta.search = true;
 		if (Object.keys(meta).length > 0) state.meta = meta;
 	}
 	return state;

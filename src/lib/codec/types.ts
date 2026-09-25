@@ -60,6 +60,8 @@ export interface StateMetadata {
 	legend?: StateLegend;
 	/** The id of the color scheme offered for the map's colors. Without it, the default scheme. */
 	colorScheme?: string;
+	/** Show an address search in the read-only viewer, e.g. in an embedded map. */
+	search?: boolean;
 }
 
 export const LEGEND_POSITIONS = [

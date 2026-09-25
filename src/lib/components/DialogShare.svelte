@@ -11,6 +11,7 @@
 	let previewAspectRatio: 'wide' | 'square' | 'tall' = $state('wide');
 
 	const baseUrl = window.location.href.replace(/#.*$/, '');
+	const search = $derived(stateManager.geometryManager.search);
 
 	let timeout: ReturnType<typeof setTimeout> | null = null;
 	let linkCode = $state('');
@@ -104,6 +105,21 @@
 
 				<button class="btn" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
 			</p>
+			<p>
+				<label class="checkbox">
+					<input
+						type="checkbox"
+						checked={$search}
+						onchange={(e) => {
+							search.set(e.currentTarget.checked);
+							stateManager.log();
+							update(0);
+						}}
+					/>
+					Address search in the map
+				</label>
+				<span class="hint">Visitors can find a place, e.g. their street. The map content does not change.</span>
+			</p>
 		</div>
 		<div class="bottom">
 			<button class="btn" onclick={() => update(0)}>Reload</button>
@@ -196,6 +212,17 @@
 				margin: 0 0 0.3rem;
 				display: block;
 				resize: none;
+			}
+
+			.checkbox {
+				display: block;
+			}
+
+			.hint {
+				display: block;
+				width: 200px;
+				font-size: 0.8em;
+				opacity: 0.7;
 			}
 
 			textarea[readonly] {
