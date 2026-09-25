@@ -14,6 +14,7 @@ import {
 	sanitizeBackground,
 	sanitizeLegend,
 	sanitizeNumber,
+	sanitizeString,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
 	symbolPropsFromStyle,
@@ -104,10 +105,11 @@ export function stateToGeoJSON(state: StateRoot): GeoJSONDocument {
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
 	if (state.map) doc.map = { center: state.map.center, radius: state.map.radius };
-	if (state.meta?.background || state.meta?.legend) {
+	if (state.meta?.background || state.meta?.legend || state.meta?.colorScheme) {
 		doc.meta = {};
 		if (state.meta.background) doc.meta.background = state.meta.background;
 		if (state.meta.legend) doc.meta.legend = state.meta.legend;
+		if (state.meta.colorScheme) doc.meta.colorScheme = state.meta.colorScheme;
 	}
 	return doc;
 }
@@ -256,6 +258,8 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): StateR
 		if (background) meta.background = background;
 		const legend = sanitizeLegend(doc.meta.legend);
 		if (legend) meta.legend = legend;
+		const colorScheme = sanitizeString(doc.meta.colorScheme);
+		if (colorScheme) meta.colorScheme = colorScheme;
 		if (Object.keys(meta).length > 0) state.meta = meta;
 	}
 	return state;

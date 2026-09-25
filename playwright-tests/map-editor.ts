@@ -953,3 +953,42 @@ test('editing the legend', async ({ page }) => {
 	await expect.poll(legendInUrl).toBeUndefined();
 	expect(pageErrors).toStrictEqual([]);
 });
+
+test('choosing a color scheme', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Polygon' }).click();
+	const [fillColor, strokeColor] = await page.getByLabel('Color').all();
+	const swatches = (name: string) =>
+		page
+			.getByRole('group', { name })
+			.getByRole('button')
+			.evaluateAll((buttons) => buttons.map((b) => b.getAttribute('aria-label')));
+	const polygon = () => stateInUrl(page).elements[0] as { style?: { color?: string } };
+
+	// the default scheme is offered, and not stored
+	await fillColor.click();
+	const scheme = page.getByRole('combobox', { name: 'Color scheme' });
+	await expect(scheme).toHaveValue('bright');
+	expect((await swatches('Bright (colorblind-safe)')).length).toBe(7);
+
+	// another scheme, and one of its colors
+	await scheme.selectOption('Okabe-Ito (colorblind-safe)');
+	await expect.poll(() => stateInUrl(page).meta?.colorScheme).toBe('okabe-ito');
+	await page
+		.getByRole('group', { name: 'Okabe-Ito (colorblind-safe)' })
+		.getByRole('button', { name: '#0072b2' })
+		.click();
+	await expect.poll(() => polygon().style?.color?.toLowerCase()).toBe('#0072b2');
+	await page.keyboard.press('Escape');
+
+	// the scheme belongs to the map, so every color picker offers it
+	await strokeColor.click();
+	await expect(page.getByRole('combobox', { name: 'Color scheme' })).toHaveValue('okabe-ito');
+	await page.keyboard.press('Escape');
+
+	// undo reverts the color, then the scheme
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(() => stateInUrl(page).meta?.colorScheme).toBeUndefined();
+});

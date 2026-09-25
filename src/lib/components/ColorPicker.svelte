@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { hsvToRgb, parseHex, rgbToHsv, toHex, type HSV, type RGB } from '$lib/utils/color.js';
 	import type { ColorPalette } from '../lib/color_palette.js';
+	import { COLOR_SCHEMES, DEFAULT_COLOR_SCHEME, getColorScheme } from '$lib/utils/color_schemes.js';
+	import { writable } from 'svelte/store';
 
 	let {
 		value = $bindable(),
@@ -22,6 +24,8 @@
 	let draggingField = false;
 
 	const rgb: RGB = $derived(parseHex(value) ?? { r: 0, g: 0, b: 0 });
+	const schemeStore = $derived(palette?.scheme ?? writable(undefined));
+	const colorScheme = $derived(getColorScheme($schemeStore));
 	const hex = $derived(toHex(rgb));
 
 	// HSV is kept separately from the value, so the hue and saturation survive while the
@@ -155,6 +159,21 @@
 
 <svelte:window onclick={onWindowClick} onkeydown={onWindowKeyDown} />
 
+{#snippet swatches(colors: string[], label: string)}
+	<div class="palette" role="group" aria-label={label}>
+		{#each colors as color (color)}
+			<button
+				class="swatch"
+				class:active={color === value.toLowerCase()}
+				style:background-color={color}
+				aria-label={color}
+				title={color}
+				onclick={() => pick(color)}
+			></button>
+		{/each}
+	</div>
+{/snippet}
+
 <button
 	{id}
 	bind:this={button}
@@ -236,19 +255,28 @@
 			/>
 		</div>
 
-		{#if paletteColors.length > 0}
-			<div class="palette" role="group" aria-label="Used colors">
-				{#each paletteColors as color (color)}
-					<button
-						class="swatch"
-						class:active={color === value}
-						style:background-color={color}
-						aria-label={color}
-						title={color}
-						onclick={() => pick(color)}
-					></button>
+		{#if palette}
+			<select
+				class="scheme"
+				aria-label="Color scheme"
+				value={colorScheme.id}
+				onchange={(e) => {
+					const id = e.currentTarget.value;
+					// the default scheme is not stored
+					palette.scheme.set(id === DEFAULT_COLOR_SCHEME.id ? undefined : id);
+					onchange?.();
+				}}
+			>
+				{#each COLOR_SCHEMES as { id, name } (id)}
+					<option value={id}>{name}</option>
 				{/each}
-			</div>
+			</select>
+			{@render swatches(colorScheme.colors, colorScheme.name)}
+		{/if}
+
+		{#if paletteColors.length > 0}
+			<div class="group-label">Used colors</div>
+			{@render swatches(paletteColors, 'Used colors')}
 		{/if}
 	</div>
 {/if}
@@ -357,6 +385,16 @@
 			appearance: none;
 			margin: 0;
 		}
+	}
+
+	.scheme {
+		width: 100%;
+	}
+
+	.group-label {
+		font-size: 0.9em;
+		opacity: 0.7;
+		margin-bottom: calc(-0.5 * var(--gap));
 	}
 
 	.palette {

@@ -176,6 +176,7 @@ export class GeometryManager {
 
 		if (state.map) this.fitViewport(state.map);
 		this.legend.set(state.meta?.legend);
+		this.colors?.scheme.set(state.meta?.colorScheme);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, get(this.background))) await this.setBackground(state.meta?.background);
 

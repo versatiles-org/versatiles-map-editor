@@ -291,6 +291,14 @@ describe('legend', () => {
 	});
 });
 
+describe('color scheme', () => {
+	it('round-trips as the meta member', () => {
+		const doc = stateToGeoJSON({ meta: { colorScheme: 'dark2' }, elements: [] });
+		expect(doc.meta).toStrictEqual({ colorScheme: 'dark2' });
+		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ colorScheme: 'dark2' });
+	});
+});
+
 describe('popups', () => {
 	it('are written as the description property', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [0, 0], popup: { text: 'Hello' } }] });

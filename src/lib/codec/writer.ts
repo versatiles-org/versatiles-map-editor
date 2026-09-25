@@ -155,6 +155,10 @@ export class StateWriter {
 			this.writeInteger(3, 6);
 			this.writeLegend(metadata.legend);
 		}
+		if (metadata.colorScheme) {
+			this.writeInteger(4, 6);
+			this.writeString(metadata.colorScheme);
+		}
 		this.writeInteger(0, 6);
 	}
 

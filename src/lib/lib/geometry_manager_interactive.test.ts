@@ -176,6 +176,13 @@ describe('GeometryManager', () => {
 			expect(element.getState()).toMatchObject(state);
 		});
 
+		it('should keep the color scheme in the state', async () => {
+			expect(manager.getState()).not.toHaveProperty('meta');
+			await manager.setState({ meta: { colorScheme: 'dark2' }, elements: [] });
+			expect(get(manager.colors.scheme)).toBe('dark2');
+			expect(manager.getState().meta).toStrictEqual({ colorScheme: 'dark2' });
+		});
+
 		it('should disable box zoom, which would swallow Shift+clicks', () => {
 			expect(manager.map.boxZoom.disable).toHaveBeenCalled();
 		});

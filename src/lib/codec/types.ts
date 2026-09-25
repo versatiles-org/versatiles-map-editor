@@ -58,6 +58,8 @@ export interface StateMetadata {
 	background?: StateBackground;
 	/** A legend, defined by the author, not generated from the elements. */
 	legend?: StateLegend;
+	/** The id of the color scheme offered for the map's colors. Without it, the default scheme. */
+	colorScheme?: string;
 }
 
 export const LEGEND_POSITIONS = [

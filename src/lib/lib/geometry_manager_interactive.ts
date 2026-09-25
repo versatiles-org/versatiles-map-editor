@@ -128,6 +128,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 		if (background) meta.background = background;
 		const legend = get(this.legend);
 		if (legend) meta.legend = legend;
+		const colorScheme = get(this.colors.scheme);
+		if (colorScheme) meta.colorScheme = colorScheme;
 		return {
 			map: {
 				center: [center.lng, center.lat],

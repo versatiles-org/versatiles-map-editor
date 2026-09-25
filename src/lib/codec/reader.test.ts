@@ -617,3 +617,10 @@ describe('legend', () => {
 		expect(() => new StateReader(writer.bits).readLegend()).toThrow('Error reading legend');
 	});
 });
+
+describe('color scheme', () => {
+	it('round-trips', () => {
+		const state: StateRoot = { meta: { colorScheme: 'okabe-ito' }, elements: [] };
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+});
