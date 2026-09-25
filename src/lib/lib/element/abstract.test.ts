@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { AbstractElement } from './abstract.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementMarker } from '$lib/codec/types.js';
+import type { StateElementMarker } from '@versatiles/map-state';
 
 class TestElement extends AbstractElement {
 	constructor(manager: GeometryManager) {

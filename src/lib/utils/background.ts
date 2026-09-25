@@ -1,5 +1,5 @@
 import { osm, satellite, type OsmOptions, type SatelliteOptions } from '@versatiles/style';
-import type { StateBackground } from '$lib/codec/types.js';
+import type { StateBackground } from '@versatiles/map-state';
 
 /**
  * The few background options the editor offers, as a view on the `@versatiles/style` options of

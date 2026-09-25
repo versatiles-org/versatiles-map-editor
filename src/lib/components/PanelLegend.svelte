@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
-	import type { StateLegend, StateLegendEntry } from '$lib/codec/types.js';
+	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';

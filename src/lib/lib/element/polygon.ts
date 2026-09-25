@@ -4,7 +4,7 @@ import type { GeoPath } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
-import type { StateElementPolygon } from '$lib/codec/types.js';
+import type { StateElementPolygon } from '@versatiles/map-state';
 import type { Measurement } from './types.js';
 import { polygonArea } from '../utils/geometry.js';
 import { formatArea } from '../utils/format.js';

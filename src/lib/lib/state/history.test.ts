@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StateHistory } from './history.js';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateRoot } from '@versatiles/map-state';
 import { get } from 'svelte/store';
 
 describe('StateHistory', () => {

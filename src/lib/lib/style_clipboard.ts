@@ -1,6 +1,5 @@
 import { writable, type Writable } from 'svelte/store';
-import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS } from '$lib/codec/profile.js';
-import type { StateStyle } from '$lib/codec/types.js';
+import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';

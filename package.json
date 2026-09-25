@@ -5,11 +5,14 @@
   "license": "MIT",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm run check-types && vite build",
     "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check-watch": "npm run check-types -- --watch",
-    "check": "npm run lint && npm run build && npm run test && npm run format:check",
+    "check": "npm run lint && npm run build && npm run build --workspaces && npm run test && npm run format:check",
     "dev": "vite dev",
     "doc": "npm run doc-graph && npm run doc-bundle && prettier --write --log-level warn README.md",
     "doc-bundle": "svelte-kit sync && vite build --sourcemap && vrt bundle-treemap \"$(ls -S build/_app/immutable/nodes/*.js | head -1)\" --depth 3 --min-size 4000 --svg docs/bundle-treemap.svg | vrt doc-insert README.md '### Bundle Composition'",

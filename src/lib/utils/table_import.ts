@@ -1,4 +1,4 @@
-import type { StateElementMarker, StateStyle } from '$lib/codec/types.js';
+import type { StateElementMarker, StateStyle } from '@versatiles/map-state';
 import { geocode, type GeocodingOptions } from './geocoding.js';
 import { parseNumber, type Table } from './table.js';
 

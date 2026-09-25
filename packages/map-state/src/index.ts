@@ -3,14 +3,26 @@ import { StateReader } from './reader.js';
 import type { StateRoot } from './types.js';
 import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
 
-// Public types of the codec. `MapState` is the preferred public name for the
-// document model; `StateRoot` remains exported for internal continuity.
+// Public types. `MapState` is the preferred public name for the document model;
+// `StateRoot` remains exported for internal continuity.
 export * from './types.js';
 export type { StateRoot as MapState } from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { digitsForResolution, resolutionOfDigits } from './grid.js';
 export { stateFromKML, stateToKML } from './kml.js';
+
+// The style vocabulary: defaults and names of the style values, e.g. for rendering the elements
+export {
+	FILL_DEFAULTS,
+	LINE_DEFAULTS,
+	SYMBOL_DEFAULTS,
+	FILL_PATTERN_NAMES,
+	STROKE_STYLE_NAMES,
+	LABEL_ALIGN_NAMES,
+	removeDefaultFields
+} from './profile.js';
+export { symbolEntries, type SymbolEntry } from './symbols.js';
 
 /**
  * Encode a map state document into the compact base64 representation.

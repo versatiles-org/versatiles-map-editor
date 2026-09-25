@@ -1,5 +1,5 @@
 import type { AbstractElement } from '../element/abstract.js';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateRoot } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { writable, type Writable } from 'svelte/store';
 import { vi } from 'vitest';

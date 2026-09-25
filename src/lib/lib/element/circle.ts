@@ -4,7 +4,7 @@ import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.j
 import type { GeoPoint } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
-import type { StateElementCircle } from '$lib/codec/types.js';
+import type { StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.js';
 import { circle, circleArea, distance, movePoint } from '../utils/geometry.js';
 import { formatArea, formatLength } from '../utils/format.js';

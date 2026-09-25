@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementMarker } from '$lib/codec/types.js';
+import type { StateElementMarker } from '@versatiles/map-state';
 import type { GeoPoint } from '../utils/types.js';
 
 describe('MarkerElement', () => {

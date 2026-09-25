@@ -1,4 +1,4 @@
-import { Color } from '@versatiles/style';
+import { formatHex, parseColor } from './color.js';
 import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
@@ -68,11 +68,8 @@ export function sanitizeRotation(value: unknown): number | undefined {
 /** A parseable color, normalized to lowercase hex (#rrggbb or #rrggbbaa). */
 export function sanitizeColor(value: unknown): string | undefined {
 	if (typeof value !== 'string') return undefined;
-	try {
-		return Color.parse(value).asHex().toLowerCase();
-	} catch {
-		return undefined;
-	}
+	const color = parseColor(value);
+	return color && formatHex(color).toLowerCase();
 }
 
 export function sanitizeString(value: unknown): string | undefined {

@@ -7,6 +7,8 @@ const config = {
 
 	kit: {
 		adapter: staticAdapter(),
+		// the map state codec, used from its source (packages/map-state), so it needs no build
+		alias: { '@versatiles/map-state': 'packages/map-state/src/index.ts' },
 		prerender: { handleMissingId: 'ignore' }
 	}
 };

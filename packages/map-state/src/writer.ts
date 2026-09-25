@@ -1,4 +1,4 @@
-import { Color } from '@versatiles/style';
+import { parseColor } from './color.js';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, MAX_CODEC_VERSION } from './constants.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
@@ -406,7 +406,8 @@ export class StateWriter {
 	}
 
 	writeColor(color: string) {
-		const rgb = Color.parse(color).srgb;
+		const rgb = parseColor(color);
+		if (!rgb) throw new Error(`Invalid color: ${color}`);
 		this.writeInteger(Math.round(rgb.r), 8);
 		this.writeInteger(Math.round(rgb.g), 8);
 		this.writeInteger(Math.round(rgb.b), 8);

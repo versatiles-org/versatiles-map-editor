@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { symbolEntries as entries } from '$lib/codec/symbols.js';
+import { symbolEntries as entries } from '@versatiles/map-state';
 import { parseHex } from '$lib/utils/color.js';
 
 export interface SymbolInfo {

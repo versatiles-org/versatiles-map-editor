@@ -3,9 +3,8 @@ import type { LayerSymbol } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '$lib/codec/types.js';
+import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol } from '../symbols.js';
-import { LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '$lib/codec/profile.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
 

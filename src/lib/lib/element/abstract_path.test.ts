@@ -3,7 +3,7 @@ import { AbstractPathElement } from './abstract_path.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode } from './types.js';
-import type { StateElement } from '$lib/codec/types.js';
+import type { StateElement } from '@versatiles/map-state';
 import { getMiddlePoint, lat2mercator } from '../utils/geometry.js';
 
 class TestPathElement extends AbstractPathElement {

@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateRoot } from '@versatiles/map-state';
 
 const MAXLENGTH = 100;
 

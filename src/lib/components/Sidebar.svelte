@@ -9,7 +9,7 @@
 	import PanelLegend from './PanelLegend.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
-	import { stateFromKML, stateToKML } from '$lib/codec/index.js';
+	import { stateFromKML, stateToKML } from '@versatiles/map-state';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();

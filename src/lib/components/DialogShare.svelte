@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { StateManager } from '../lib/state/manager.js';
 	import Dialog from './Dialog.svelte';
-	import { digitsForResolution, resolutionOfDigits } from '$lib/codec/index.js';
+	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
 	import { formatLength } from '../lib/utils/format.js';
 
 	const { state: stateManager = $bindable() }: { state: StateManager } = $props();

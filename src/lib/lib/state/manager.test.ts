@@ -2,7 +2,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateRoot } from '@versatiles/map-state';
 import { get } from 'svelte/store';
 import { MockMap } from '$lib/__mocks__/map.js';
 

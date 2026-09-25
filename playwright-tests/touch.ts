@@ -1,5 +1,5 @@
 import { expect, test } from './lib/test.js';
-import { encodeState, type MapState } from '../src/lib/codec/index.js';
+import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import type { CDPSession, Page } from '@playwright/test';
 import { stateInUrl, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 

@@ -1,5 +1,5 @@
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import { encodeState, decodeState, type StateMetadata } from '$lib/codec/index.js';
+import { encodeState, decodeState, type StateMetadata } from '@versatiles/map-state';
 import { StateHistory } from './history.js';
 import { EventHandler } from '$lib/utils/event_handler.js';
 

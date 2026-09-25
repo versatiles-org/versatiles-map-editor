@@ -1,4 +1,4 @@
-import { Color } from '@versatiles/style';
+import { parseColor } from './color.js';
 import type { StateStyle } from './types.js';
 
 /**
@@ -24,7 +24,9 @@ export const STYLE_REMOVE_KEY = 15;
 
 /** Colors that are written identically have the same key, e.g. "#FF0000" and "#ff0000". */
 export function colorKey(color: string): string {
-	const { r, g, b, alpha } = Color.parse(color).srgb;
+	const parsed = parseColor(color);
+	if (!parsed) throw new Error(`Invalid color: ${color}`);
+	const { r, g, b, alpha } = parsed;
 	return [r, g, b, alpha * 255].map(Math.round).join(',');
 }
 

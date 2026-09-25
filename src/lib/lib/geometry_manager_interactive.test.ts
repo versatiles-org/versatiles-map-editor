@@ -1,4 +1,4 @@
-import type { StateElement } from '$lib/codec/types.js';
+import type { StateElement } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MarkerElement } from './element/marker.js';

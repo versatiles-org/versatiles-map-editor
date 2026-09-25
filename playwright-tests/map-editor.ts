@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
-import { decodeState, encodeState, type MapState, type StateElementMarker } from '../src/lib/codec/index.js';
+import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
 import { stateInUrl, trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =

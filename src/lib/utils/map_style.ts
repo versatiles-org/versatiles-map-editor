@@ -1,5 +1,5 @@
 import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpecification } from '@versatiles/style';
-import type { StateBackground } from '$lib/codec/types.js';
+import type { StateBackground } from '@versatiles/map-state';
 import { DEFAULT_BACKGROUND } from './background.js';
 
 export const TILE_SERVER = 'https://tiles.versatiles.org';

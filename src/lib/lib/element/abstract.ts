@@ -3,7 +3,7 @@ import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.j
 import { get, writable, type Writable } from 'svelte/store';
 import type { GeoPoint } from '../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElement, StatePopup } from '$lib/codec/types.js';
+import type { StateElement, StatePopup } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 export abstract class AbstractElement {

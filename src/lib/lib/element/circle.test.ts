@@ -3,7 +3,7 @@ import { get } from 'svelte/store';
 import { CircleElement } from './circle.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElementCircle } from '$lib/codec/types.js';
+import type { StateElementCircle } from '@versatiles/map-state';
 import type { GeoPoint } from '../utils/types.js';
 
 describe('CircleElement', () => {

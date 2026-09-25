@@ -1,46 +1,70 @@
-# `codec` — map state ⇄ GeoJSON ⇄ compact base64
+# @versatiles/map-state
 
-Self-contained, editor-independent module that converts the map editor's
-document model between three representations. It is the single source of truth
-for the serialization format and is intended to be extracted into a standalone
-package (`@versatiles/...`) once the API stabilizes — hence it must **not** import
-from the editor (`$lib/lib/...`); the dependency only goes the other way.
+Encode and decode maps of the [VersaTiles map editor](https://github.com/versatiles-org/versatiles-map-editor):
+a viewport, markers, lines, polygons and circles with their styles and popups, and map properties
+like the background map and a legend.
 
-## Public API (`index.ts`)
+- as a **compact base64 string**, which the editor keeps in the URL hash of a map, so a map can be
+  shared as a link or embedded,
+- as **GeoJSON**, human-readable and for other tools,
+- as **KML**, for Google Earth, Google My Maps and many GIS tools.
+
+It has no dependencies and works in browsers and in Node.js, e.g. to render shared maps in other
+apps or to create links on a server.
+
+```sh
+npm install @versatiles/map-state
+```
+
+## Usage
 
 ```ts
-import {
-  encodeState,
-  decodeState,
-  encodeGeoJSON,
-  decodeGeoJSON,
-  stateToGeoJSON,
-  stateFromGeoJSON,
-  type MapState,
-  type GeoJSONDocument
-} from '$lib/codec/index.js';
+import { encodeState, decodeState, stateToGeoJSON, type MapState } from '@versatiles/map-state';
 
-encodeState(state: MapState): string            // → compact base64
+const state: MapState = {
+	map: { center: [13.4, 52.5], radius: 5000 },
+	elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#0000ff', label: 'Berlin' } }]
+};
+
+const hash = encodeState(state); // e.g. for https://your-editor/#…
+const decoded = decodeState(hash);
+const geojson = stateToGeoJSON(decoded);
+```
+
+## API
+
+```ts
+encodeState(state: MapState, options?: { resolution?: number }): string // → compact base64
 decodeState(base64: string): MapState
 
 stateToGeoJSON(state: MapState): GeoJSONDocument
-stateFromGeoJSON(doc: GeoJSONDocument): MapState
+stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapState
+encodeGeoJSON(doc: GeoJSONDocument): string // = encodeState(stateFromGeoJSON(doc))
+decodeGeoJSON(base64: string): GeoJSONDocument // = stateToGeoJSON(decodeState(base64))
 
-encodeGeoJSON(doc: GeoJSONDocument): string      // = encodeState(stateFromGeoJSON(doc))
-decodeGeoJSON(base64: string): GeoJSONDocument   // = stateToGeoJSON(decodeState(base64))
+stateToKML(state: MapState): string
+stateFromKML(kml: string): MapState
 ```
 
-`MapState` (alias of the internal `StateRoot`) is the canonical model: a viewport
-plus a list of typed elements with default-stripped numeric styles. Base64 is its
-compressed wire form; GeoJSON is a human-readable adapter.
+- `resolution`: the precision of the coordinates in meters, rounded to decimal places of degrees.
+  The default of 1 m keeps all detail; coarser values make shorter strings, e.g. for sharing.
+  `digitsForResolution` and `resolutionOfDigits` convert between meters and decimal places.
+- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
+  `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `symbolEntries`, `removeDefaultFields`) helps to
+  render the elements the way the editor does.
+
+`MapState` is the canonical model: a viewport, map properties (`meta`) and a list of typed
+elements whose styles omit default values. The types are exported too (`StateElement`,
+`StateStyle`, `StateLegend`, …).
 
 ## Representations
 
 | Representation | Owner                       | Notes                                                                    |
 | -------------- | --------------------------- | ------------------------------------------------------------------------ |
-| `MapState`     | canonical                   | viewport (`center` + `radius` m) + `elements[]` with diffed `StateStyle` |
-| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned (v0); **backward compatible**       |
-| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` foreign member                               |
+| `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle` |
+| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned; **backward compatible**            |
+| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` and `meta` foreign members                   |
+| KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`              |
 
 ## GeoJSON profile (`profile.ts`)
 

@@ -1,5 +1,5 @@
 import { type Page } from '@playwright/test';
-import { decodeState, type MapState } from '../../src/lib/codec/index.js';
+import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';

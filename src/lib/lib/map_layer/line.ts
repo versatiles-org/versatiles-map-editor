@@ -3,8 +3,7 @@ import type { LayerLine } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '$lib/codec/types.js';
-import { LINE_DEFAULTS, STROKE_STYLE_NAMES, removeDefaultFields } from '$lib/codec/profile.js';
+import { type StateStyle, LINE_DEFAULTS, STROKE_STYLE_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
 // Dash array per stroke style index; the names come from the codec
 const arrays: number[][] = [

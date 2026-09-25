@@ -55,6 +55,14 @@ The editor reads its state from the URL hash, so it can be embedded in an `<ifra
 
 When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
 
+## Map state format
+
+How a map is encoded (URL hash, GeoJSON, KML) is published as its own npm package,
+[`@versatiles/map-state`](packages/map-state), e.g. to render shared maps in other apps or to
+create links on a server. The editor uses it from `packages/map-state/src`. To publish a new
+version: raise the version in `packages/map-state/package.json`, then run
+`npm publish --workspace packages/map-state` (it builds before packing).
+
 ## Configuration
 
 An organisation running the editor can offer its own color schemes and fonts, e.g. its corporate identity. Put them into `map-editor.config.json` next to the editor's `index.html` (in this repository: `static/map-editor.config.json`, which is empty). No rebuild is needed. Every field is optional:

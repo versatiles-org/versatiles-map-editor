@@ -3,8 +3,7 @@ import type { LayerFill } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateStyle } from '$lib/codec/types.js';
-import { FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '$lib/codec/profile.js';
+import { type StateStyle, FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
 const size = 32;
 

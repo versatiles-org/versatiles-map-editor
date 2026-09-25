@@ -1,7 +1,7 @@
 import { MapLayer } from './abstract.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { LayerFill } from './types.js';
-import type { StateStyle } from '$lib/codec/types.js';
+import type { StateStyle } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { GeometryManager } from '../geometry_manager.js';
 

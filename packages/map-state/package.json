@@ -1,0 +1,45 @@
+{
+  "name": "@versatiles/map-state",
+  "version": "1.0.0",
+  "description": "Encode and decode maps of the VersaTiles map editor: as compact URL hash, GeoJSON and KML.",
+  "license": "MIT",
+  "author": "Michael Kreil <versatiles@michael-kreil.de>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/versatiles-org/versatiles-map-editor.git",
+    "directory": "packages/map-state"
+  },
+  "homepage": "https://github.com/versatiles-org/versatiles-map-editor/tree/main/packages/map-state#readme",
+  "keywords": [
+    "versatiles",
+    "map",
+    "geojson",
+    "kml",
+    "url",
+    "maplibre"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@types/geojson": "^7946.0.16"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

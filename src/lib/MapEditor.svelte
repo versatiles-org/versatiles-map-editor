@@ -17,7 +17,7 @@
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
 	import { PopupHandler } from './lib/popup_handler.js';
 	import { loadConfig } from '$lib/utils/config.js';
-	import { decodeState } from '$lib/codec/index.js';
+	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
 
 	let {

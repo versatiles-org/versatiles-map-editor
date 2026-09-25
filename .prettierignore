@@ -3,3 +3,5 @@ node_modules/
 package-lock.json
 package.json
 playwright-tests/__snapshots__/
+packages/*/dist/
+packages/*/package.json

@@ -1,4 +1,4 @@
-import { Color } from '@versatiles/style';
+import { formatHex } from './color.js';
 import type {
 	StateBackground,
 	StateElementCircle,
@@ -473,7 +473,7 @@ export class StateReader {
 
 			let a = 1;
 			if (this.readBit()) a = this.readInteger(8) / 255;
-			return Color.srgb(r, g, b, a).asHex();
+			return formatHex({ r, g, b, alpha: a });
 		} catch (cause) {
 			throw new Error(`Error reading color`, { cause });
 		}
