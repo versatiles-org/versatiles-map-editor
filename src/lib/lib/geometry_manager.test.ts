@@ -202,20 +202,37 @@ describe('GeometryManager', () => {
 	describe('background', () => {
 		const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
 
-		it('loads a new style without a diff, keeping the elements', async () => {
+		it('changes the style, keeping the elements', async () => {
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
 			map.setStyle.mockClear();
+			// the mocked map changes its style object, like MapLibre with a diff: nothing has to load
+			map.setStyle.mockImplementation(() => {});
 			await geometryManager.setBackground(gray);
 			expect(get(geometryManager.background)).toStrictEqual(gray);
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
 			expect((map.setStyle.mock.lastCall as unknown[])[1]).toMatchObject({
-				diff: false,
 				transformStyle: expect.any(Function)
 			});
+			// only the permanent listener is left
+			expect(map.listenerCount('style.load')).toBe(1);
 
 			// an unchanged background loads no style
 			await geometryManager.setBackground({ ...gray });
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
+		});
+
+		it('waits for a new style object to load', async () => {
+			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
+			// a full reload: MapLibre replaces the style object, which loads later
+			map.setStyle.mockImplementation(() => (map.style = {}));
+			let done = false;
+			const loading = geometryManager.setBackground(gray).then(() => (done = true));
+			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(2));
+			await new Promise((r) => setTimeout(r, 0));
+			expect(done).toBe(false);
+			map.emit('style.load');
+			await loading;
+			expect(done).toBe(true);
 		});
 
 		it('is set by the state', async () => {

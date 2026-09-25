@@ -95,13 +95,22 @@ export class GeometryManager {
 		// a newer background replaces this one
 		if (this.destroyed || request !== this.styleRequest) return;
 
+		const previousStyle = this.map.style;
+		let onLoad!: () => void;
+		const loaded = new Promise<void>((resolve) => (onLoad = resolve));
+		this.map.once('style.load', onLoad);
 		this.styleLoaded = false;
-		const loaded = new Promise((resolve) => this.map.once('style.load', resolve));
-		// Always a full reload, which is predictable. The elements keep their sources and layers.
+		// The elements keep their sources and layers
 		this.map.setStyle(inlined, {
-			diff: false,
 			transformStyle: (previous, next) => keepElements(previous, next, get(this.elements))
 		});
+		// MapLibre changes the current style if it can (keeping e.g. the images of the fill patterns).
+		// Only a new style object has to load, which fires "style.load".
+		if (previousStyle && this.map.style === previousStyle) {
+			this.map.off('style.load', onLoad);
+			this.styleLoaded = true;
+			return;
+		}
 		await loaded;
 	}
 
