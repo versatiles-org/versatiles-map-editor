@@ -167,6 +167,61 @@ describe('GeometryManager', () => {
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
 
+		describe('duplicate', () => {
+			it('should duplicate a marker with an offset and select the copy', () => {
+				const marker = manager.addNewElement('marker');
+				marker.point = [10, 20];
+				marker.layer.label.set('Test');
+
+				const copy = manager.duplicateElement(marker, [5, 0]);
+
+				expect(copy).toBeInstanceOf(MarkerElement);
+				expect(copy).not.toBe(marker);
+				expect(get(manager.elements)).toStrictEqual([marker, copy]);
+				expect(get(manager.selection.selectedElement)).toBe(copy);
+				expect(copy.getState()).toStrictEqual({
+					type: 'marker',
+					point: [15, expect.closeTo(20)],
+					style: { label: 'Test' }
+				});
+				expect(marker.point).toStrictEqual([10, 20]);
+			});
+
+			it('should duplicate a line without sharing its points', () => {
+				const line = manager.addNewElement('line');
+				line.path = [
+					[1, 2],
+					[3, 4]
+				];
+				line.layer.color.set('#ABCDEF');
+
+				const copy = manager.duplicateElement(line) as LineElement;
+
+				expect(copy.getState()).toStrictEqual(line.getState());
+				copy.path[0][0] = 99;
+				expect(line.path[0]).toStrictEqual([1, 2]);
+			});
+
+			it('should duplicate polygons and circles with their outline style', () => {
+				const polygon = manager.addNewElement('polygon');
+				polygon.strokeLayer.visible.set(false);
+				const circle = manager.addNewElement('circle');
+				circle.strokeLayer.color.set('#123456');
+
+				const polygonCopy = manager.duplicateElement(polygon, [0, 10]);
+				const circleCopy = manager.duplicateElement(circle, [0, 10]);
+
+				expect(polygonCopy).toBeInstanceOf(PolygonElement);
+				expect(polygonCopy.getState()).toMatchObject({ strokeStyle: { visible: false } });
+				expect(circleCopy).toBeInstanceOf(CircleElement);
+				expect(circleCopy.getState()).toMatchObject({
+					radius: circle.radius,
+					point: [circle.point[0], expect.closeTo(circle.point[1] + 10)],
+					strokeStyle: { color: '#123456' }
+				});
+			});
+		});
+
 		it('should restore falsy style values', async () => {
 			const polygon = manager.addNewElement('polygon');
 			polygon.fillLayer.opacity.set(0);

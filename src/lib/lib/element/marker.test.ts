@@ -15,6 +15,10 @@ describe('MarkerElement', () => {
 		element = new MarkerElement(mockManager);
 	});
 
+	it('should move the whole marker with its node', () => {
+		expect(element.isMoveNode()).toBe(true);
+	});
+
 	it('should have no measurements', () => {
 		expect(get(element.measurements)).toEqual([]);
 	});

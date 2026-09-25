@@ -39,6 +39,10 @@ export class CircleElement extends AbstractElement {
 		];
 	}
 
+	public isMoveNode(properties?: Record<string, unknown>): boolean {
+		return properties?.index == 0;
+	}
+
 	getSelectionNodeUpdater(properties?: Record<string, unknown>): SelectionNodeUpdater | undefined {
 		if (properties == undefined) return;
 		if (properties.index == 0) {

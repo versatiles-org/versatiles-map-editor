@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { AbstractPathElement } from './abstract_path.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
@@ -107,6 +107,7 @@ describe('AbstractPathElement', () => {
 		];
 		const mockEvent = {
 			lngLat: { lng: 5, lat: 5 },
+			originalEvent: { altKey: false },
 			preventDefault: vi.fn()
 		} as unknown as maplibregl.MapMouseEvent;
 
@@ -128,5 +129,53 @@ describe('AbstractPathElement', () => {
 			[20, expect.closeTo(19.81)]
 		]);
 		expect(mockMoveEvent.preventDefault).toHaveBeenCalled();
+	});
+
+	describe('alt-drag', () => {
+		let element: TestPathElement;
+		let copy: TestPathElement;
+		const altEvent = {
+			lngLat: { lng: 5, lat: 5 },
+			originalEvent: { altKey: true },
+			preventDefault: vi.fn()
+		} as unknown as maplibregl.MapMouseEvent;
+		const moveEvent = {
+			lngLat: { lng: 15, lat: 5 },
+			preventDefault: vi.fn()
+		} as unknown as maplibregl.MapMouseEvent;
+
+		beforeEach(() => {
+			element = new TestPathElement(manager, true);
+			element.path = [
+				[0, 0],
+				[10, 0]
+			];
+			copy = new TestPathElement(manager, true);
+			copy.path = element.path.map((p) => [...p]);
+			Object.assign(mockManager, { duplicateElement: vi.fn(() => copy) });
+		});
+
+		it('should move a copy instead of the original', () => {
+			element.handleDrag(altEvent);
+			mockManager.map.emit('mousemove', moveEvent);
+			mockManager.map.emit('mousemove', moveEvent);
+
+			expect((mockManager as unknown as { duplicateElement: Mock }).duplicateElement).toHaveBeenCalledTimes(1);
+			expect(element.path).toStrictEqual([
+				[0, 0],
+				[10, 0]
+			]);
+			expect(copy.path).toStrictEqual([
+				[10, expect.closeTo(0)],
+				[20, expect.closeTo(0)]
+			]);
+		});
+
+		it('should not create a copy on a click without moving', () => {
+			element.handleDrag(altEvent);
+			mockManager.map.emit('mouseup');
+
+			expect((mockManager as unknown as { duplicateElement: Mock }).duplicateElement).not.toHaveBeenCalled();
+		});
 	});
 });

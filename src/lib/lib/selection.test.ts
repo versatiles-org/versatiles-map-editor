@@ -217,5 +217,52 @@ describe('SelectionHandler', () => {
 			mockMap.emit('mouseup');
 			expect(mockState.log).toHaveBeenCalled();
 		});
+
+		describe('alt-drag', () => {
+			let copyUpdateMock: Mock;
+			let duplicateElement: Mock;
+			const altEvent = { point: {}, originalEvent: { shiftKey: false, altKey: true }, preventDefault: vi.fn() };
+			const moveEvent = { lngLat: { lng: 10, lat: 20 }, preventDefault: vi.fn() };
+
+			beforeEach(() => {
+				copyUpdateMock = vi.fn();
+				duplicateElement = vi.fn(() => ({
+					getSelectionNodeUpdater: vi.fn().mockReturnValue({ update: copyUpdateMock, delete: vi.fn() })
+				}));
+				Object.assign(mockManager, { duplicateElement });
+				mockMap.queryRenderedFeatures.mockReturnValue([
+					{ properties: { index: 0 } } as unknown as maplibregl.MapGeoJSONFeature
+				]);
+			});
+
+			it('should move a copy when dragging a node that moves the element', () => {
+				Object.assign(element, { isMoveNode: vi.fn(() => true) });
+				mockMap.emit('mousedown', altEvent);
+				mockMap.emit('mousemove', moveEvent);
+				mockMap.emit('mousemove', moveEvent);
+
+				expect(duplicateElement).toHaveBeenCalledTimes(1);
+				expect(duplicateElement).toHaveBeenCalledWith(element);
+				expect(copyUpdateMock).toHaveBeenCalledTimes(2);
+				expect(updateMock).not.toHaveBeenCalled();
+			});
+
+			it('should reshape the original when dragging any other node', () => {
+				Object.assign(element, { isMoveNode: vi.fn(() => false) });
+				mockMap.emit('mousedown', altEvent);
+				mockMap.emit('mousemove', moveEvent);
+
+				expect(duplicateElement).not.toHaveBeenCalled();
+				expect(updateMock).toHaveBeenCalledWith(10, 20);
+			});
+
+			it('should not create a copy on a click without moving', () => {
+				Object.assign(element, { isMoveNode: vi.fn(() => true) });
+				mockMap.emit('mousedown', altEvent);
+				mockMap.emit('mouseup');
+
+				expect(duplicateElement).not.toHaveBeenCalled();
+			});
+		});
 	});
 });

@@ -10,7 +10,8 @@ import { SelectionHandler } from './selection.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from '$lib/codec/index.js';
-import type { StateRoot } from '$lib/codec/types.js';
+import type { StateElement, StateRoot } from '$lib/codec/types.js';
+import type { GeoPoint } from './utils/types.js';
 
 export class GeometryManagerInteractive extends GeometryManager {
 	public readonly selection: SelectionHandler;
@@ -59,6 +60,35 @@ export class GeometryManagerInteractive extends GeometryManager {
 		this.appendElement(element);
 		this.selection.selectElement(element);
 		return element;
+	}
+
+	/**
+	 * Add a copy of the element, moved by the given offset in pixels, and select it.
+	 */
+	public duplicateElement(element: AbstractElement, offset: [number, number] = [0, 0]): AbstractElement {
+		const move = (point: GeoPoint): GeoPoint => {
+			if (offset[0] === 0 && offset[1] === 0) return point;
+			const { x, y } = this.map.project(point);
+			const { lng, lat } = this.map.unproject([x + offset[0], y + offset[1]]);
+			return [lng, lat];
+		};
+
+		const state: StateElement = structuredClone(element.getState());
+		switch (state.type) {
+			case 'marker':
+			case 'circle':
+				state.point = move(state.point);
+				break;
+			case 'line':
+			case 'polygon':
+				state.points = state.points.map(move);
+				break;
+		}
+
+		const copy = elementFromState(this, state);
+		this.appendElement(copy);
+		this.selection.selectElement(copy);
+		return copy;
 	}
 
 	public getGeoJSON(): GeoJSONDocument {

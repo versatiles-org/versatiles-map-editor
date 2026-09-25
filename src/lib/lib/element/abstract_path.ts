@@ -18,15 +18,21 @@ export abstract class AbstractPathElement extends AbstractElement {
 		const { lng, lat } = e.lngLat;
 		let x0 = lng;
 		let y0 = lat2mercator(lat);
+		// Alt/Option-drag moves a copy. It is created on the first move, so a click creates no copy.
+		let target: AbstractPathElement | undefined = e.originalEvent.altKey ? undefined : this;
 		const moveHandler = (e: maplibregl.MapMouseEvent) => {
+			if (!target) {
+				if (!this.manager.isInteractive()) return;
+				target = this.manager.duplicateElement(this) as AbstractPathElement;
+			}
 			const { lng, lat } = e.lngLat;
 			const y = lat2mercator(lat);
 			const dx = lng - x0;
 			const dy = y - y0;
 			y0 = y;
 			x0 = lng;
-			this.path = this.path.map(([x, y]) => [x + dx, mercator2lat(lat2mercator(y) + dy)]);
-			this.updateSource();
+			target.path = target.path.map(([x, y]) => [x + dx, mercator2lat(lat2mercator(y) + dy)]);
+			target.updateSource();
 			this.manager.selection?.updateSelectionNodes();
 			e.preventDefault();
 		};

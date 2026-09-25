@@ -37,6 +37,11 @@ describe('CircleElement', () => {
 		expect(nodes[0].coordinates).toEqual([10, 20]);
 	});
 
+	it('should only move the whole circle with the center node', () => {
+		expect(circleElement.isMoveNode({ index: 0 })).toBe(true);
+		expect(circleElement.isMoveNode({ index: 1 })).toBe(false);
+	});
+
 	describe('getSelectionNodeUpdater', () => {
 		it('should update point when selection node updater is used for center', () => {
 			const updater = circleElement.getSelectionNodeUpdater({ index: 0 });

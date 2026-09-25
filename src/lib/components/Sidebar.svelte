@@ -47,11 +47,32 @@
 		downloadJSON(geometryManager.getGeoJSON(), 'map.geojson', 'application/geo+json');
 	}
 
+	function duplicateElement() {
+		const element = $activeElement;
+		if (!element) return;
+		geometryManager.duplicateElement(element, [20, 20]);
+		geometryManager.state.log();
+	}
+
+	function onKeydown(e: KeyboardEvent) {
+		// Leave keyboard shortcuts in text fields to the browser
+		const target = e.target as HTMLElement | null;
+		if (target?.closest('input, textarea, select, [contenteditable]')) return;
+
+		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
+			if (!$activeElement) return;
+			e.preventDefault();
+			duplicateElement();
+		}
+	}
+
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
 		activeElement.set(geometryManager.addNewElement(type));
 		geometryManager.state.log();
 	}
 </script>
+
+<svelte:window onkeydown={onKeydown} />
 
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
@@ -97,6 +118,9 @@
 						$activeElement!.delete();
 						geometryManager.state.log();
 					}}>Delete</button
+				>
+				<button class="btn" onclick={duplicateElement} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
+					>Duplicate</button
 				>
 			</div>
 		</SidebarPanel>

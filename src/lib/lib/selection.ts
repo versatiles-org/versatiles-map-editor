@@ -30,9 +30,16 @@ export class SelectionHandler {
 				selectedNode.delete();
 				this.updateSelectionNodes();
 			} else {
+				// Alt/Option-drag moves a copy. It is created on the first move, so a click creates no copy.
+				let copy = e.originalEvent.altKey && element.isMoveNode(feature.properties);
+				let node = selectedNode;
 				const onMove = (e: maplibregl.MapMouseEvent) => {
 					e.preventDefault();
-					selectedNode.update(e.lngLat.lng, e.lngLat.lat);
+					if (copy) {
+						copy = false;
+						node = this.manager.duplicateElement(element).getSelectionNodeUpdater(feature.properties) ?? node;
+					}
+					node.update(e.lngLat.lng, e.lngLat.lat);
 					this.updateSelectionNodes();
 				};
 

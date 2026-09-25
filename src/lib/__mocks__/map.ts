@@ -49,6 +49,10 @@ export class MockMap {
 		const c = LngLat.convert(lnglat);
 		return new Point(c.lng, Math.sin(c.lat / 1000) * 1000);
 	});
+	unproject = vi.fn((point: maplibre.PointLike) => {
+		const p = Point.convert(point);
+		return new LngLat(p.x, Math.asin(p.y / 1000) * 1000);
+	});
 	getBounds = vi.fn(() => {
 		const dy = 90 * Math.pow(0.5, this.zoom);
 		const dx = dy * Math.cos((this.center.lat * Math.PI) / 180);

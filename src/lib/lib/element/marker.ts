@@ -39,6 +39,10 @@ export class MarkerElement extends AbstractElement {
 		return [{ index: 0, coordinates: this.point }];
 	}
 
+	public isMoveNode(): boolean {
+		return true;
+	}
+
 	getSelectionNodeUpdater(): SelectionNodeUpdater | undefined {
 		return {
 			update: (lng, lat) => {

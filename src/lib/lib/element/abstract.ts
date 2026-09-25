@@ -65,6 +65,12 @@ export abstract class AbstractElement {
 		return [];
 	}
 
+	/** Whether dragging this selection node moves the whole element (instead of reshaping it). */
+	public isMoveNode(properties?: Record<string, unknown>): boolean {
+		void properties;
+		return false;
+	}
+
 	public delete() {
 		this.manager.removeElement(this);
 		this.destroy();

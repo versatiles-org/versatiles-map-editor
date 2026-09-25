@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
-import { decodeState } from '../src/lib/codec/index.js';
+import { decodeState, encodeState } from '../src/lib/codec/index.js';
 import { trackServerRequests, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
@@ -285,4 +285,50 @@ test('keeps the map in the URL across reloads', async ({ page }) => {
 	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
 	const doc = JSON.parse(readFileSync(await download.path(), 'utf-8'));
 	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
+});
+
+test('duplicating an element', async ({ page }) => {
+	// a marker in the center of the map
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+	);
+	await waitForMapIsReady(page);
+
+	const pointsInUrl = () =>
+		decodeState(new URL(page.url()).hash.slice(1)).elements.map((e) => ('point' in e ? e.point : undefined));
+	// the map is centered in the area left of the 250px sidebar
+	const viewport = page.viewportSize()!;
+	const x = (viewport.width - 250) / 2;
+	const y = viewport.height / 2;
+
+	// select the marker by clicking its flag icon, which is drawn above and right of its point
+	await page.mouse.click(x + 6, y - 8);
+	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeEnabled();
+
+	// button and keyboard shortcut place the copy with an offset
+	await page.getByRole('button', { name: 'Duplicate' }).click();
+	await page.keyboard.press('ControlOrMeta+d');
+	await expect.poll(async () => (await pointsInUrl()).length).toBe(3);
+	const [original, copy1, copy2] = pointsInUrl();
+	expect(original).toStrictEqual(center);
+	expect(copy1![0]).toBeGreaterThan(center[0]);
+	expect(copy1![1]).toBeLessThan(center[1]);
+	expect(copy2![0]).toBeGreaterThan(copy1![0]);
+
+	// alt-drag moves a copy of the selected marker and keeps the original
+	await page.mouse.click(x + 6, y - 8);
+	// the selection node is rendered asynchronously, and it can only be dragged once it is visible
+	await page.waitForTimeout(500);
+	await page.keyboard.down('Alt');
+	await page.mouse.move(x, y);
+	await page.mouse.down();
+	await page.mouse.move(x - 50, y - 50, { steps: 5 });
+	await page.mouse.up();
+	await page.keyboard.up('Alt');
+	await expect.poll(async () => (await pointsInUrl()).length).toBe(4);
+	const points = pointsInUrl();
+	expect(points[0]).toStrictEqual(center);
+	expect(points[3]![0]).toBeLessThan(center[0]);
+	expect(points[3]![1]).toBeGreaterThan(center[1]);
 });
