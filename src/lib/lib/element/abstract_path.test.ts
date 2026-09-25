@@ -32,7 +32,7 @@ class TestPathElement extends AbstractPathElement {
 		};
 	}
 
-	public handleDrag(e: maplibregl.MapMouseEvent): void {
+	public handleDrag(e: maplibregl.MapMouseEvent | maplibregl.MapTouchEvent): void {
 		super.handleDrag(e);
 	}
 
@@ -85,18 +85,65 @@ describe('AbstractPathElement', () => {
 		}
 	});
 
-	it('should delete selection node correctly', () => {
+	it('should report the dragged vertex, and insert a vertex for a dragged midpoint', () => {
+		const element = new TestPathElement(manager, false);
+		element.path = [
+			[0, 0],
+			[10, 0],
+			[10, 10]
+		];
+		expect(element.getSelectionNodeUpdater({ index: 1 })?.vertex).toBe(1);
+		// the midpoint of the closing edge becomes the last vertex
+		expect(element.getSelectionNodeUpdater({ index: 2.5 })?.vertex).toBe(3);
+		expect(element.path).toStrictEqual([[0, 0], [10, 0], [10, 10], getMiddlePoint([10, 10], [0, 0])]);
+	});
+
+	it('should delete a vertex', () => {
 		const element = new TestPathElement(manager, true);
-		element['path'] = [
+		element.path = [
 			[0, 0],
 			[10, 10],
 			[20, 20]
 		];
-		const updater = element.getSelectionNodeUpdater({ index: 1 });
-		if (updater) {
-			updater.delete();
-			expect(element['path'].length).toBe(2);
-		}
+		expect(element.canDeleteNode(1)).toBe(true);
+		expect(element.deleteNode(1)).toBe(true);
+		expect(element.path).toStrictEqual([
+			[0, 0],
+			[20, 20]
+		]);
+	});
+
+	it('should keep the minimum number of vertices', () => {
+		const line = new TestPathElement(manager, true);
+		line.path = [
+			[0, 0],
+			[10, 10]
+		];
+		expect(line.canDeleteNode(0)).toBe(false);
+		expect(line.deleteNode(0)).toBe(false);
+		expect(line.path.length).toBe(2);
+
+		const polygon = new TestPathElement(manager, false);
+		polygon.path = [
+			[0, 0],
+			[10, 0],
+			[10, 10]
+		];
+		expect(polygon.canDeleteNode(0)).toBe(false);
+		polygon.path.push([0, 10]);
+		expect(polygon.canDeleteNode(0)).toBe(true);
+	});
+
+	it('should not delete midpoints or unknown nodes', () => {
+		const element = new TestPathElement(manager, true);
+		element.path = [
+			[0, 0],
+			[10, 10],
+			[20, 20]
+		];
+		expect(element.canDeleteNode(0.5)).toBe(false);
+		expect(element.canDeleteNode(3)).toBe(false);
+		expect(element.canDeleteNode(-1)).toBe(false);
 	});
 
 	it('should handle drag correctly', () => {
@@ -106,12 +153,14 @@ describe('AbstractPathElement', () => {
 			[10, 10]
 		];
 		const mockEvent = {
+			type: 'mousedown',
 			lngLat: { lng: 5, lat: 5 },
 			originalEvent: { altKey: false },
 			preventDefault: vi.fn()
 		} as unknown as maplibregl.MapMouseEvent;
 
 		const mockMoveEvent = {
+			type: 'mousemove',
 			lngLat: { lng: 15, lat: 15 },
 			preventDefault: vi.fn()
 		} as unknown as maplibregl.MapMouseEvent;
@@ -119,7 +168,7 @@ describe('AbstractPathElement', () => {
 		element.handleDrag(mockEvent);
 
 		expect(mockManager.map.on).toHaveBeenCalledWith('mousemove', expect.any(Function));
-		expect(mockManager.map.once).toHaveBeenCalledWith('mouseup', expect.any(Function));
+		expect(mockManager.map.on).toHaveBeenCalledWith('mouseup', expect.any(Function));
 		expect(mockEvent.preventDefault).toHaveBeenCalled();
 
 		mockManager.map.emit('mousemove', mockMoveEvent);
@@ -129,17 +178,59 @@ describe('AbstractPathElement', () => {
 			[20, expect.closeTo(19.81)]
 		]);
 		expect(mockMoveEvent.preventDefault).toHaveBeenCalled();
+
+		const log = vi.spyOn(mockManager.state, 'log');
+		mockManager.map.emit('mouseup');
+		expect(mockManager.map.listenerCount('mousemove')).toBe(0);
+		expect(log).toHaveBeenCalled();
+	});
+
+	it('should handle a touch drag, and stop it for a pinch-zoom', () => {
+		const element = new TestPathElement(manager, true);
+		element.path = [
+			[0, 0],
+			[10, 0]
+		];
+		const originalEvent = { altKey: false, cancelable: true, preventDefault: vi.fn() };
+		const touchEvent = (type: string, lng: number, fingers = 1) =>
+			({
+				type,
+				lngLat: { lng, lat: 0 },
+				points: new Array(fingers).fill({ x: 0, y: 0 }),
+				originalEvent,
+				preventDefault: vi.fn()
+			}) as unknown as maplibregl.MapTouchEvent;
+
+		const start = touchEvent('touchstart', 5);
+		element.handleDrag(start);
+		// the map must not pan
+		expect(start.preventDefault).toHaveBeenCalled();
+
+		mockManager.map.emit('touchmove', touchEvent('touchmove', 15));
+		expect(element.path).toStrictEqual([
+			[10, expect.closeTo(0)],
+			[20, expect.closeTo(0)]
+		]);
+
+		// a second finger ends the drag
+		mockManager.map.emit('touchmove', touchEvent('touchmove', 25, 2));
+		mockManager.map.emit('touchmove', touchEvent('touchmove', 35));
+		expect(element.path[0][0]).toBe(10);
+		expect(mockManager.map.listenerCount('touchmove')).toBe(0);
+		expect(mockManager.map.listenerCount('touchend')).toBe(0);
 	});
 
 	describe('alt-drag', () => {
 		let element: TestPathElement;
 		let copy: TestPathElement;
 		const altEvent = {
+			type: 'mousedown',
 			lngLat: { lng: 5, lat: 5 },
 			originalEvent: { altKey: true },
 			preventDefault: vi.fn()
 		} as unknown as maplibregl.MapMouseEvent;
 		const moveEvent = {
+			type: 'mousemove',
 			lngLat: { lng: 15, lat: 5 },
 			preventDefault: vi.fn()
 		} as unknown as maplibregl.MapMouseEvent;

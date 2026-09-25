@@ -1,4 +1,5 @@
 import { type Page } from '@playwright/test';
+import { decodeState, type MapState } from '../../src/lib/codec/index.js';
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -43,6 +44,18 @@ export async function waitForMapIsIdle(page: Page): Promise<void> {
 				map.triggerRepaint();
 			})
 	);
+}
+
+/**
+ * The map state in the URL. Rapid changes are throttled, so the hash can be missing or
+ * outdated for a moment. Returns an empty state if there is no valid hash (yet).
+ */
+export function stateInUrl(page: Page): MapState {
+	try {
+		return decodeState(new URL(page.url()).hash.slice(1));
+	} catch {
+		return { elements: [] };
+	}
 }
 
 export async function trackServerRequests(page: Page): Promise<() => string[]> {

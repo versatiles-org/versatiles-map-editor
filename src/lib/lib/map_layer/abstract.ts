@@ -4,12 +4,14 @@ import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import { isClaimed, isMultiTouch, type MapPointerEvent } from '../utils/drag.js';
 
 type LayerSpec = LayerFill | LayerLine | LayerSymbol;
-type Events = 'click' | 'mousedown' | 'mousemove' | 'mouseup';
-type MouseEventHandler = (event: maplibregl.MapMouseEvent) => void;
-type MapLayerEvent = Events | 'mouseenter' | 'mouseleave';
-type MapLayerEventHandler = (event: maplibregl.MapLayerMouseEvent) => void;
+// 'pointerdown' is a mousedown or the touchstart of a finger or pencil
+type Events = 'click' | 'pointerdown' | 'mousemove' | 'mouseup';
+type PointerEventHandler = (event: MapPointerEvent) => void;
+type MapLayerEvent = Exclude<Events, 'pointerdown'> | 'mousedown' | 'touchstart' | 'mouseenter' | 'mouseleave';
+type MapLayerEventHandler = (event: maplibregl.MapLayerMouseEvent | maplibregl.MapLayerTouchEvent) => void;
 type PaintKey = keyof maplibregl.AllPaintProperties;
 type LayoutKey = keyof maplibregl.AllLayoutProperties;
 
@@ -21,7 +23,7 @@ export abstract class MapLayer<T extends LayerSpec> {
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
 	protected readonly map: maplibregl.Map;
 
-	public eventHandlers = new Map<Events, MouseEventHandler[]>();
+	public eventHandlers = new Map<Events, PointerEventHandler[]>();
 	// Listeners registered on the map, so they can be removed in destroy()
 	private mapListeners: [MapLayerEvent, MapLayerEventHandler][] = [];
 	public isSelected = false;
@@ -52,12 +54,12 @@ export abstract class MapLayer<T extends LayerSpec> {
 		}
 	}
 
-	on(event: Events, handler: MouseEventHandler) {
+	on(event: Events, handler: PointerEventHandler) {
 		if (!this.eventHandlers.has(event)) this.eventHandlers.set(event, []);
 		this.eventHandlers.get(event)!.push(handler);
 	}
 
-	off(event: Events, handler: MouseEventHandler) {
+	off(event: Events, handler: PointerEventHandler) {
 		if (!this.eventHandlers.has(event)) return;
 		const handlers = this.eventHandlers.get(event)!;
 		this.eventHandlers.set(
@@ -66,7 +68,7 @@ export abstract class MapLayer<T extends LayerSpec> {
 		);
 	}
 
-	private dispatchEvent(event: Events, e: maplibregl.MapMouseEvent) {
+	private dispatchEvent(event: Events, e: MapPointerEvent) {
 		const handlers = this.eventHandlers.get(event);
 		if (handlers) handlers.forEach((handler) => handler(e));
 	}
@@ -93,10 +95,16 @@ export abstract class MapLayer<T extends LayerSpec> {
 				manager.cursor.toggleHover(this.id);
 				e.preventDefault();
 			});
+			const onDown = (e: MapPointerEvent) => {
+				// e.g. a selection node above the element was hit, or a pinch-zoom starts
+				if (isClaimed(e) || isMultiTouch(e)) return;
+				this.dispatchEvent('pointerdown', e);
+			};
 			this.listen('mousedown', (e) => {
 				if (manager.cursor.isPrecise()) return;
-				this.dispatchEvent('mousedown', e);
+				onDown(e);
 			});
+			this.listen('touchstart', onDown);
 		}
 		this.listen('mouseup', (e) => this.dispatchEvent('mouseup', e));
 		this.listen('mousemove', (e) => this.dispatchEvent('mousemove', e));

@@ -16,10 +16,8 @@ export class LineElement extends AbstractPathElement {
 
 		this.layer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
 		this.layer.on('click', () => this.manager.selection?.selectElement(this));
-		this.layer.on('mousedown', (e) => {
-			if (!this.isSelected) return;
-			if ('ignore' in e && e.ignore) return;
-			this.handleDrag(e);
+		this.layer.on('pointerdown', (e) => {
+			if (this.isSelected) this.handleDrag(e);
 		});
 
 		this.updateSource();

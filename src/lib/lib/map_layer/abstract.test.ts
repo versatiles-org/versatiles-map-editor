@@ -51,7 +51,7 @@ describe('MapLayer', () => {
 
 	it('should unregister all map listeners on destroy', () => {
 		layer.addLayer('source', 'fill', {}, {});
-		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(6);
+		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(7);
 
 		layer.destroy();
 		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(0);

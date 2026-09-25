@@ -18,9 +18,8 @@ export class PolygonElement extends AbstractPathElement {
 
 		this.fillLayer = new MapLayerFill(manager, 'fill' + this.slug, this.sourceId);
 		this.fillLayer.on('click', () => this.manager.selection?.selectElement(this));
-		this.fillLayer.on('mousedown', (e) => {
-			if (!this.isSelected) return;
-			this.handleDrag(e);
+		this.fillLayer.on('pointerdown', (e) => {
+			if (this.isSelected) this.handleDrag(e);
 		});
 
 		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);

@@ -8,7 +8,8 @@ export interface SelectionNode {
 
 export interface SelectionNodeUpdater {
 	update: (lng: number, lat: number) => void;
-	delete: () => void;
+	/** Index of the dragged vertex in the path, if it is one (a dragged midpoint becomes a new vertex). */
+	vertex?: number;
 }
 
 export interface Measurement {

@@ -71,6 +71,18 @@ export abstract class AbstractElement {
 		return false;
 	}
 
+	/** Whether the node can be deleted on its own, i.e. it is a vertex and the shape keeps enough vertices. */
+	public canDeleteNode(index: number): boolean {
+		void index;
+		return false;
+	}
+
+	/** Delete a single node. Returns false if it cannot be deleted. */
+	public deleteNode(index: number): boolean {
+		void index;
+		return false;
+	}
+
 	public delete() {
 		this.manager.removeElement(this);
 		this.destroy();

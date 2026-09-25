@@ -59,13 +59,9 @@ describe('MarkerElement', () => {
 		}
 	});
 
-	it('should delete selection node correctly', () => {
-		const updater = element.getSelectionNodeUpdater();
-		vi.spyOn(element, 'delete');
-		if (updater) {
-			updater.delete();
-			expect(element.delete).toHaveBeenCalled();
-		}
+	it('should not delete its only node', () => {
+		expect(element.canDeleteNode(0)).toBe(false);
+		expect(element.deleteNode(0)).toBe(false);
 	});
 
 	it('should call destroy correctly', () => {

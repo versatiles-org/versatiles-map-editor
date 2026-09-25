@@ -1,9 +1,9 @@
-import type * as maplibregl from 'maplibre-gl';
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import { getMiddlePoint, lat2mercator, mercator2lat } from '../utils/geometry.js';
 import type { GeoPath, GeoPoint } from '../utils/types.js';
+import { claimEvent, trackDrag, type MapPointerEvent } from '../utils/drag.js';
 
 export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];
@@ -14,13 +14,13 @@ export abstract class AbstractPathElement extends AbstractElement {
 		this.isLine = isLine;
 	}
 
-	protected handleDrag(e: maplibregl.MapMouseEvent) {
+	protected handleDrag(e: MapPointerEvent) {
 		const { lng, lat } = e.lngLat;
 		let x0 = lng;
 		let y0 = lat2mercator(lat);
 		// Alt/Option-drag moves a copy. It is created on the first move, so a click creates no copy.
 		let target: AbstractPathElement | undefined = e.originalEvent.altKey ? undefined : this;
-		const moveHandler = (e: maplibregl.MapMouseEvent) => {
+		const moveHandler = (e: MapPointerEvent) => {
 			if (!target) {
 				if (!this.manager.isInteractive()) return;
 				target = this.manager.duplicateElement(this) as AbstractPathElement;
@@ -36,12 +36,8 @@ export abstract class AbstractPathElement extends AbstractElement {
 			this.manager.selection?.updateSelectionNodes();
 			e.preventDefault();
 		};
-		this.manager.map.on('mousemove', moveHandler);
-		this.manager.map.once('mouseup', () => {
-			this.manager.map.off('mousemove', moveHandler);
-			this.manager.state?.log();
-		});
-		e.preventDefault();
+		trackDrag(this.manager.map, e, moveHandler, () => this.manager.state?.log());
+		claimEvent(e);
 	}
 
 	getSelectionNodes(): SelectionNode[] {
@@ -63,13 +59,15 @@ export abstract class AbstractPathElement extends AbstractElement {
 		if (properties == undefined) return;
 		const index = properties.index as number;
 		let point: GeoPoint;
+		let vertex: number;
 		if (index % 1 === 0) {
+			vertex = index;
 			point = this.path[index];
 		} else {
 			const i = Math.floor(index);
-			const j = (i + 1) % this.path.length;
-			point = getMiddlePoint(this.path[i], this.path[j]);
-			this.path.splice(j, 0, point);
+			vertex = i + 1;
+			point = getMiddlePoint(this.path[i], this.path[vertex % this.path.length]);
+			this.path.splice(vertex, 0, point);
 		}
 
 		return {
@@ -78,16 +76,19 @@ export abstract class AbstractPathElement extends AbstractElement {
 				point[1] = lat;
 				this.updateSource();
 			},
-			delete: () => {
-				if (this.isLine) {
-					if (this.path.length <= 2) return this.delete();
-				} else {
-					if (this.path.length <= 3) return this.delete();
-				}
-
-				this.path.splice(index, 1);
-				this.updateSource();
-			}
+			vertex
 		};
+	}
+
+	public canDeleteNode(index: number): boolean {
+		const minLength = this.isLine ? 2 : 3;
+		return Number.isInteger(index) && index >= 0 && index < this.path.length && this.path.length > minLength;
+	}
+
+	public deleteNode(index: number): boolean {
+		if (!this.canDeleteNode(index)) return false;
+		this.path.splice(index, 1);
+		this.updateSource();
+		return true;
 	}
 }

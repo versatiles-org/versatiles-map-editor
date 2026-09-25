@@ -1,8 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
-import { decodeState, encodeState, type MapState } from '../src/lib/codec/index.js';
-import type { Page } from '@playwright/test';
-import { trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
+import { encodeState, type MapState } from '../src/lib/codec/index.js';
+import { stateInUrl, trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
@@ -59,18 +58,6 @@ const ariaResult = `- region "Map"
   - link "Repository on GitHub":
     - /url: https://github.com/versatiles-org/versatiles-map-editor/issues
     - text: GitHub Issues`;
-
-/**
- * The map state in the URL. Rapid changes are throttled, so the hash can be missing or
- * outdated for a moment. Returns an empty state if there is no valid hash (yet).
- */
-function stateInUrl(page: Page): MapState {
-	try {
-		return decodeState(new URL(page.url()).hash.slice(1));
-	} catch {
-		return { elements: [] };
-	}
-}
 
 /**
  * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
@@ -352,4 +339,47 @@ test('duplicating an element', async ({ page }) => {
 	expect(points[0]).toStrictEqual(center);
 	expect(points[3]![0]).toBeLessThan(center[0]);
 	expect(points[3]![1]).toBeGreaterThan(center[1]);
+});
+
+test('deleting nodes and elements with the keyboard', async ({ page }) => {
+	const points: [number, number][] = [
+		[13.35, 52.5],
+		[13.4, 52.52],
+		[13.45, 52.5]
+	];
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'line', points }] })
+	);
+	await waitForMapIsReady(page);
+	const project = (point: [number, number]) =>
+		page.evaluate((point) => {
+			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
+			return [x, y] as const;
+		}, point);
+	const linePoints = () => stateInUrl(page).elements.map((e) => ('points' in e ? e.points.length : 0));
+
+	// select the line, then its middle node
+	const [x, y] = await project([13.375, 52.51]);
+	await page.mouse.click(x, y);
+	await waitForMapIsIdle(page);
+	await page.mouse.click(...(await project(points[1])));
+	await expect(page.getByRole('button', { name: 'Delete node' })).toBeEnabled();
+
+	// Delete removes the node, Backspace without a selected node the element
+	await page.keyboard.press('Delete');
+	await expect.poll(linePoints).toStrictEqual([2]);
+	await expect(page.getByRole('button', { name: 'Delete node' })).toBeHidden();
+	await page.keyboard.press('Backspace');
+	await expect.poll(linePoints).toStrictEqual([]);
+});
+
+test.describe('small screens', () => {
+	test.use({ viewport: { width: 390, height: 844 } });
+
+	test('show the map read-only with a hint', async ({ page }) => {
+		await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+		await waitForMapIsReady(page);
+		await expect(page.getByText('Open this page on a larger screen to edit the map.')).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
+	});
 });

@@ -8,6 +8,7 @@
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import Sidebar from './components/Sidebar.svelte';
+	import NodeDeleteButton from './components/NodeDeleteButton.svelte';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
@@ -24,6 +25,7 @@
 	let map: MaplibreMapType | undefined;
 	let triggeredMapReady = false;
 	let showSidebar = $state(false);
+	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
@@ -117,7 +119,11 @@
 	}
 
 	function onMapInit(map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) {
-		showSidebar = window.self === window.top;
+		// The editor needs room for the sidebar and the map. Smaller screens (phones) get the
+		// read-only viewer. The size is checked once, since switching modes would lose the editor state.
+		const embedded = window.self !== window.top;
+		screenTooSmall = !embedded && !matchMedia('(min-width: 600px) and (min-height: 400px)').matches;
+		showSidebar = !embedded && !screenTooSmall;
 
 		const padding = 10;
 		map.setPadding({
@@ -154,6 +160,7 @@
 		<div class="map" bind:this={container}></div>
 	</div>
 	{#if showSidebar && geometryManager && geometryManager.isInteractive()}
+		<NodeDeleteButton {geometryManager} />
 		<Sidebar {geometryManager} />
 
 		<style>
@@ -164,6 +171,8 @@
 				left: 0;
 			}
 		</style>
+	{:else if screenTooSmall}
+		<div class="hint">Open this page on a larger screen to edit the map.</div>
 	{/if}
 </div>
 
@@ -192,6 +201,21 @@
 		top: 0;
 		width: 100%;
 		height: 100%;
+	}
+
+	.hint {
+		position: absolute;
+		bottom: var(--gap);
+		left: 50%;
+		transform: translateX(-50%);
+		max-width: calc(100% - 4 * var(--gap));
+		padding: 0.4em 1em;
+		border-radius: var(--border-radius);
+		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		backdrop-filter: blur(10px);
+		color: var(--color-text);
+		font-size: 0.8em;
+		text-align: center;
 	}
 
 	.map :global(canvas) {

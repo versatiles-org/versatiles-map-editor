@@ -49,8 +49,7 @@ export class MarkerElement extends AbstractElement {
 				this.point[0] = lng;
 				this.point[1] = lat;
 				this.updateSource();
-			},
-			delete: () => this.delete()
+			}
 		};
 	}
 

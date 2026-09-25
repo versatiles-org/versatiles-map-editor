@@ -15,6 +15,7 @@
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
 	const activeElement = $derived(geometryManager.selection.selectedElement);
+	const selectedNode = $derived(geometryManager.selection.selectedNode);
 
 	function importGeoJSON() {
 		const input = document.createElement('input');
@@ -64,6 +65,20 @@
 			e.preventDefault();
 			duplicateElement();
 		}
+
+		if ((e.key === 'Delete' || e.key === 'Backspace') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+			if (!$activeElement) return;
+			e.preventDefault();
+			// Delete the selected node, or the element if no node is selected. A node the shape
+			// needs is kept, so the element is not deleted by accident.
+			if ($selectedNode) geometryManager.selection.deleteSelectedNode();
+			else deleteElement();
+		}
+	}
+
+	function deleteElement() {
+		$activeElement?.delete();
+		geometryManager.state.log();
 	}
 
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
@@ -112,13 +127,7 @@
 		<hr class="thick" />
 		<SidebarPanel title="Actions" disabled={!$activeElement}>
 			<div class="grid2">
-				<button
-					class="btn"
-					onclick={() => {
-						$activeElement!.delete();
-						geometryManager.state.log();
-					}}>Delete</button
-				>
+				<button class="btn" onclick={deleteElement} title="Delete (Delete/Backspace)">Delete</button>
 				<button class="btn" onclick={duplicateElement} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
 					>Duplicate</button
 				>

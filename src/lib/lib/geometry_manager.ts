@@ -58,9 +58,11 @@ export class GeometryManager {
 			type: 'circle',
 			layout: {},
 			paint: {
-				'circle-color': '#ffffff',
+				// the selected node is filled, like in vector graphics software
+				'circle-color': ['case', ['boolean', ['get', 'selected'], false], '#000000', '#ffffff'],
 				'circle-opacity': ['get', 'opacity'],
-				'circle-radius': 3,
+				// larger nodes are easier to see and hit with a finger
+				'circle-radius': hasCoarsePointer() ? 6 : 3,
 				'circle-stroke-color': '#000000',
 				'circle-stroke-opacity': ['get', 'opacity'],
 				'circle-stroke-width': 1
@@ -143,4 +145,9 @@ export class GeometryManager {
 			this.elements.set(state.elements.map((element) => elementFromState(this, element)));
 		}
 	}
+}
+
+/** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */
+function hasCoarsePointer(): boolean {
+	return typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
 }
