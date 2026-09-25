@@ -56,7 +56,7 @@
 					</InputRow>
 				{/each}
 				<p class="label" style="margin: 0.5em 0 1em;">
-					Drag points to move.<br />Drag a midpoint to add.<br />Shift-click to delete a point.
+					Drag points to move.<br />Drag a midpoint to add.<br />Select a point and press Delete or × to remove it.
 				</p>
 			{/if}
 		</div>
