@@ -9,6 +9,7 @@ import type {
 import {
 	fillPropsFromStyle,
 	fillStyleFromProps,
+	popupFromProps,
 	sanitizeNumber,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
@@ -42,7 +43,7 @@ function clean(properties: GeoJSON.GeoJsonProperties): GeoJSON.GeoJsonProperties
 function markerToFeature(el: StateElementMarker): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean(symbolPropsFromStyle(el.style)),
+		properties: clean({ ...symbolPropsFromStyle(el.style), description: el.popup?.text }),
 		geometry: { type: 'Point', coordinates: el.point }
 	};
 }
@@ -50,7 +51,7 @@ function markerToFeature(el: StateElementMarker): GeoJSON.Feature {
 function lineToFeature(el: StateElementLine): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean(strokePropsFromStyle(el.style)),
+		properties: clean({ ...strokePropsFromStyle(el.style), description: el.popup?.text }),
 		geometry: { type: 'LineString', coordinates: el.points }
 	};
 }
@@ -58,7 +59,11 @@ function lineToFeature(el: StateElementLine): GeoJSON.Feature {
 function polygonToFeature(el: StateElementPolygon): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean({ ...fillPropsFromStyle(el.style), ...strokePropsFromStyle(el.strokeStyle) }),
+		properties: clean({
+			...fillPropsFromStyle(el.style),
+			...strokePropsFromStyle(el.strokeStyle),
+			description: el.popup?.text
+		}),
 		geometry: { type: 'Polygon', coordinates: [[...el.points, el.points[0]]] }
 	};
 }
@@ -70,7 +75,8 @@ function circleToFeature(el: StateElementCircle): GeoJSON.Feature {
 			...fillPropsFromStyle(el.style),
 			...strokePropsFromStyle(el.strokeStyle),
 			subType: 'Circle',
-			radius: el.radius
+			radius: el.radius,
+			description: el.popup?.text
 		}),
 		geometry: { type: 'Point', coordinates: el.point }
 	};
@@ -145,6 +151,13 @@ function toPoints(positions: unknown): Point[] | undefined {
 }
 
 function featureToElement(feature: GeoJSON.Feature): StateElement | undefined {
+	const element = featureToElementWithoutPopup(feature);
+	const popup = popupFromProps(feature.properties);
+	if (element && popup) element.popup = popup;
+	return element;
+}
+
+function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | undefined {
 	const p = feature.properties ?? {};
 	const g = feature.geometry;
 

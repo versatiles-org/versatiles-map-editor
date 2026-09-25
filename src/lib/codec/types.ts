@@ -13,14 +13,14 @@ export interface StateElementMarker {
 	type: 'marker';
 	point: [number, number];
 	style?: StateStyle;
-	tooltip?: StateTooltip;
+	popup?: StatePopup;
 }
 
 export interface StateElementLine {
 	type: 'line';
 	points: [number, number][];
 	style?: StateStyle;
-	tooltip?: StateTooltip;
+	popup?: StatePopup;
 }
 
 export interface StateElementPolygon {
@@ -28,7 +28,7 @@ export interface StateElementPolygon {
 	points: [number, number][];
 	style?: StateStyle;
 	strokeStyle?: StateStyle;
-	tooltip?: StateTooltip;
+	popup?: StatePopup;
 }
 
 export interface StateElementCircle {
@@ -37,7 +37,7 @@ export interface StateElementCircle {
 	radius: number;
 	style?: StateStyle;
 	strokeStyle?: StateStyle;
-	tooltip?: StateTooltip;
+	popup?: StatePopup;
 }
 
 export interface StateStyle {
@@ -56,6 +56,8 @@ export interface StateStyle {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface StateMetadata {}
 
-export interface StateTooltip {
-	text?: string;
+/** A popup that opens when the element is clicked or tapped in the viewer. */
+export interface StatePopup {
+	/** Plain text with simple formatting: **bold**, line breaks and links. */
+	text: string;
 }

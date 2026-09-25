@@ -77,7 +77,12 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 		map: { center: [13.4, 52.5], radius: 1234 },
 		elements: [
 			{ type: 'marker', point: [13.4, 52.5] },
-			{ type: 'marker', point: [1, 2], style: { color: '#abcdef', pattern: 10, label: 'x', size: 2 } },
+			{
+				type: 'marker',
+				point: [1, 2],
+				style: { color: '#abcdef', pattern: 10, label: 'x', size: 2 },
+				popup: { text: 'A **marker**' }
+			},
 			{
 				type: 'line',
 				points: [
@@ -85,7 +90,8 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 1],
 					[2, 0]
 				],
-				style: { color: '#00ff00', pattern: 1, width: 5 }
+				style: { color: '#00ff00', pattern: 1, width: 5 },
+				popup: { text: 'A line' }
 			},
 			{
 				type: 'polygon',
@@ -95,14 +101,16 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 1]
 				],
 				style: { color: '#112233', opacity: 0.5 },
-				strokeStyle: { color: '#445566', width: 3, visible: false }
+				strokeStyle: { color: '#445566', width: 3, visible: false },
+				popup: { text: 'A polygon' }
 			},
 			{
 				type: 'circle',
 				point: [10, 20],
 				radius: 500,
 				style: { color: '#778899' },
-				strokeStyle: { pattern: 2 }
+				strokeStyle: { pattern: 2 },
+				popup: { text: 'A circle' }
 			}
 		]
 	};
@@ -239,6 +247,22 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 		expect(decoded.features.map((f) => f.geometry)).toEqual(doc.features.map((f) => f.geometry));
 		// decoding is a fixed point: re-encoding yields the identical base64
 		expect(encodeGeoJSON(decoded)).toBe(base64);
+	});
+});
+
+describe('popups', () => {
+	it('are written as the description property', () => {
+		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [0, 0], popup: { text: 'Hello' } }] });
+		expect(doc.features[0].properties).toMatchObject({ description: 'Hello' });
+	});
+
+	it('are read from the description property, ignoring empty and non-text values', () => {
+		const popups = [{ description: 'Hi\nthere' }, { description: '  ' }, { description: 42 }, {}].map(
+			(properties) =>
+				stateFromGeoJSON({ type: 'Feature', properties, geometry: { type: 'Point', coordinates: [0, 0] } }).elements[0]
+					.popup
+		);
+		expect(popups).toStrictEqual([{ text: 'Hi\nthere' }, undefined, { text: '42' }, undefined]);
 	});
 });
 

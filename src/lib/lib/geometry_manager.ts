@@ -15,6 +15,12 @@ import { PolygonElement } from './element/polygon.js';
 
 /** Build a live editor element from its serialized state. */
 export function elementFromState(manager: GeometryManager, element: StateElement): AbstractElement {
+	const result = elementFromStateWithoutPopup(manager, element);
+	if (element.popup) result.popup.set(element.popup.text);
+	return result;
+}
+
+function elementFromStateWithoutPopup(manager: GeometryManager, element: StateElement): AbstractElement {
 	switch (element.type) {
 		case 'marker':
 			return MarkerElement.fromState(manager, element);
@@ -49,6 +55,25 @@ export class GeometryManager {
 
 		const style = getMapStyle({ darkMode: false });
 		style.transition = { duration: 0, delay: 0 };
+
+		// Highlights the element with a popup under the pointer in the viewer, below all elements
+		style.sources.highlight = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+		style.layers.push(
+			{
+				id: 'highlight_line',
+				source: 'highlight',
+				type: 'line',
+				filter: ['!=', ['geometry-type'], 'Point'],
+				paint: { 'line-color': '#000000', 'line-opacity': 0.2, 'line-width': 10, 'line-blur': 2 }
+			},
+			{
+				id: 'highlight_point',
+				source: 'highlight',
+				type: 'circle',
+				filter: ['==', ['geometry-type'], 'Point'],
+				paint: { 'circle-color': '#000000', 'circle-opacity': 0.2, 'circle-radius': 16, 'circle-blur': 0.3 }
+			}
+		);
 
 		style.sources.selection_nodes = {
 			type: 'geojson',

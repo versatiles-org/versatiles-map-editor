@@ -429,3 +429,76 @@ test('color picker', async ({ page }) => {
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(() => fill()).toBe('#00ff00');
 });
+
+test('editing a popup', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+	);
+	await waitForMapIsReady(page);
+	const viewport = page.viewportSize()!;
+	// select the marker by clicking its flag icon, which is drawn above and right of its point
+	await page.mouse.click((viewport.width - 250) / 2 + 6, viewport.height / 2 - 8);
+
+	const popup = page.getByRole('textbox', { name: 'Popup' });
+	await popup.fill('Hello **world**\nhttps://versatiles.org');
+	// Backspace in the text field must not delete the element
+	await popup.press('Backspace');
+	await popup.blur();
+	await expect
+		.poll(() => stateInUrl(page).elements[0]?.popup)
+		.toStrictEqual({ text: 'Hello **world**\nhttps://versatiles.or' });
+});
+
+test.describe('viewer', () => {
+	// small screens show the read-only viewer, like embedded maps
+	test.use({ viewport: { width: 500, height: 500 } });
+
+	test('opens popups on click', async ({ page }) => {
+		const state: MapState = {
+			map: { center: [13.4, 52.5], radius: 10000 },
+			elements: [
+				{
+					type: 'polygon',
+					points: [
+						[13.3, 52.45],
+						[13.5, 52.45],
+						[13.4, 52.55]
+					],
+					popup: { text: 'A **polygon**\n[VersaTiles](https://versatiles.org/)' }
+				},
+				{ type: 'circle', point: [13.5, 52.55], radius: 1000 }
+			]
+		};
+		await page.goto('/#' + encodeState(state));
+		await waitForMapIsReady(page);
+		await waitForMapIsIdle(page);
+		const project = (point: [number, number]) =>
+			page.evaluate((point) => {
+				const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
+				return [x, y] as const;
+			}, point);
+		const cursor = () =>
+			page.evaluate(() => document.querySelector<HTMLElement>('.maplibregl-canvas-container')!.style.cursor);
+
+		// an element with a popup shows a pointer cursor
+		const [x, y] = await project([13.4, 52.49]);
+		await page.mouse.move(x, y);
+		await expect.poll(cursor).toBe('pointer');
+
+		// a click opens the formatted popup
+		await page.mouse.click(x, y);
+		const popup = page.locator('.maplibregl-popup');
+		await expect(popup.locator('strong')).toHaveText('polygon');
+		await expect(popup.getByRole('link', { name: 'VersaTiles' })).toHaveAttribute('href', 'https://versatiles.org/');
+
+		// an element without a popup does not react
+		const [cx, cy] = await project([13.5, 52.55]);
+		await page.mouse.move(cx, cy);
+		await expect.poll(cursor).toBe('');
+
+		// a click elsewhere closes the popup
+		await page.mouse.click(cx, cy);
+		await expect(popup).toBeHidden();
+	});
+});

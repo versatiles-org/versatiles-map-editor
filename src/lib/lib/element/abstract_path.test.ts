@@ -32,6 +32,9 @@ class TestPathElement extends AbstractPathElement {
 		};
 	}
 
+	getLayerIds() {
+		return [];
+	}
 	getColors(): string[] {
 		return [];
 	}

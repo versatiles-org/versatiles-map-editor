@@ -1,5 +1,5 @@
 import { Color } from '@versatiles/style';
-import type { StateStyle } from './types.js';
+import type { StatePopup, StateStyle } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
 
 // ---------------------------------------------------------------------------
@@ -178,4 +178,12 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		if (typeof p['symbol-pattern'] === 'string') set(s, 'pattern', symbolIndexByName(p['symbol-pattern']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);
+}
+
+// ----- popup (all elements) -----
+
+/** The popup text as the `description` property, like in simplestyle and KML. */
+export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undefined {
+	const text = sanitizeString(p?.description);
+	return text?.trim() ? { text } : undefined;
 }

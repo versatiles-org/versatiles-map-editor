@@ -88,6 +88,10 @@ export class CircleElement extends AbstractElement {
 		];
 	}
 
+	getLayerIds(): string[] {
+		return [this.fillLayer.id, this.strokeLayer.id];
+	}
+
 	getColors(): string[] {
 		const colors = [get(this.fillLayer.color)];
 		if (get(this.strokeLayer.visible)) colors.push(get(this.strokeLayer.color));
@@ -106,7 +110,8 @@ export class CircleElement extends AbstractElement {
 			point: this.point,
 			radius: this.radius,
 			style: this.fillLayer.getState(),
-			strokeStyle: this.strokeLayer.getState()
+			strokeStyle: this.strokeLayer.getState(),
+			...this.getPopupState()
 		};
 	}
 

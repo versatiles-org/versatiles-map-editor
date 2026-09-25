@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
 import type { StateMetadata, StateRoot, StateStyle } from './types.js';
 import { StateWriter } from './writer.js';
+import { decodeState, encodeState } from './index.js';
 
 describe('StateReader', () => {
 	const path: [number, number][] = [
@@ -511,5 +512,48 @@ describe('StateReader', () => {
 				}
 			});
 		});
+	});
+});
+
+describe('popups', () => {
+	const text = 'Line 1\n**bold** [link](https://example.org) äöü € 🗺️';
+
+	it('round-trip for all element types', () => {
+		const state: StateRoot = {
+			elements: [
+				{ type: 'marker', point: [1, 2], popup: { text } },
+				{
+					type: 'line',
+					points: [
+						[1, 2],
+						[3, 4]
+					],
+					popup: { text: 'line' }
+				},
+				{
+					type: 'polygon',
+					points: [
+						[1, 2],
+						[3, 4],
+						[5, 2]
+					],
+					popup: { text: 'polygon' }
+				},
+				{ type: 'circle', point: [1, 2], radius: 100, popup: { text: 'circle' } },
+				{ type: 'marker', point: [1, 2] }
+			]
+		};
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+
+	it('skip empty popups', () => {
+		const state: StateRoot = { elements: [{ type: 'marker', point: [1, 2], popup: { text: '' } }] };
+		expect(decodeState(encodeState(state))).toStrictEqual({ elements: [{ type: 'marker', point: [1, 2] }] });
+	});
+
+	it('reject unknown popup fields', () => {
+		const writer = new StateWriter();
+		writer.writeInteger(15, 4);
+		expect(() => new StateReader(writer.bits).readPopup()).toThrow('Error reading popup');
 	});
 });

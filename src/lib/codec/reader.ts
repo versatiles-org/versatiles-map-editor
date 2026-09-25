@@ -5,6 +5,7 @@ import type {
 	StateElementMarker,
 	StateElementPolygon,
 	StateMetadata,
+	StatePopup,
 	StateRoot,
 	StateStyle
 } from './types.js';
@@ -216,7 +217,7 @@ export class StateReader {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readPoint() };
 			if (this.readBit()) element.style = this.readStyle();
-			if (this.readBit()) throw new Error(`Tooltip not supported yet`);
+			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading marker element`, { cause });
@@ -227,7 +228,7 @@ export class StateReader {
 		try {
 			const element: StateElementLine = { type: 'line', points: this.readPoints() };
 			if (this.readBit()) element.style = this.readStyle();
-			if (this.readBit()) throw new Error(`Tooltip not supported yet`);
+			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading line element`, { cause });
@@ -239,7 +240,7 @@ export class StateReader {
 			const element: StateElementPolygon = { type: 'polygon', points: this.readPoints() };
 			if (this.readBit()) element.style = this.readStyle();
 			if (this.readBit()) element.strokeStyle = this.readStyle();
-			if (this.readBit()) throw new Error(`Tooltip not supported yet`);
+			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading polygon element`, { cause });
@@ -253,10 +254,30 @@ export class StateReader {
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			if (this.readBit()) element.style = this.readStyle();
 			if (this.readBit()) element.strokeStyle = this.readStyle();
-			if (this.readBit()) throw new Error(`Tooltip not supported yet`);
+			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading circle element`, { cause });
+		}
+	}
+
+	readPopup(): StatePopup {
+		try {
+			const popup: StatePopup = { text: '' };
+			while (true) {
+				const key = this.readInteger(4);
+				switch (key) {
+					case 0:
+						return popup;
+					case 1:
+						popup.text = this.readString();
+						break;
+					default:
+						throw new Error(`Invalid popup key: ${key}`);
+				}
+			}
+		} catch (cause) {
+			throw new Error(`Error reading popup`, { cause });
 		}
 	}
 

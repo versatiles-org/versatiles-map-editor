@@ -47,6 +47,10 @@ export class PolygonElement extends AbstractPathElement {
 		return [{ label: 'Area', value: formatArea(polygonArea(this.path)) }];
 	}
 
+	getLayerIds(): string[] {
+		return [this.fillLayer.id, this.strokeLayer.id];
+	}
+
 	getColors(): string[] {
 		const colors = [get(this.fillLayer.color)];
 		if (get(this.strokeLayer.visible)) colors.push(get(this.strokeLayer.color));
@@ -64,7 +68,8 @@ export class PolygonElement extends AbstractPathElement {
 			type: 'polygon',
 			points: this.path,
 			style: this.fillLayer.getState(),
-			strokeStyle: this.strokeLayer.getState()
+			strokeStyle: this.strokeLayer.getState(),
+			...this.getPopupState()
 		};
 	}
 

@@ -41,6 +41,10 @@ export class LineElement extends AbstractPathElement {
 		return [{ label: 'Length', value: formatLength(pathLength(this.path)) }];
 	}
 
+	getLayerIds(): string[] {
+		return [this.layer.id];
+	}
+
 	getColors(): string[] {
 		return [get(this.layer.color)];
 	}
@@ -54,7 +58,8 @@ export class LineElement extends AbstractPathElement {
 		return {
 			type: 'line',
 			points: this.path,
-			style: this.layer.getState()
+			style: this.layer.getState(),
+			...this.getPopupState()
 		};
 	}
 

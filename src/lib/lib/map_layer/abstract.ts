@@ -19,7 +19,7 @@ export abstract class MapLayer<T extends LayerSpec> {
 	private layout = {} as T['layout'];
 	private paint = {} as T['paint'];
 
-	protected readonly id: string;
+	public readonly id: string;
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
 	protected readonly map: maplibregl.Map;
 

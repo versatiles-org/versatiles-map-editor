@@ -20,6 +20,7 @@
 		return writable(false);
 	});
 	const measurements = $derived(element?.measurements ?? writable([]));
+	const popup = $derived(element?.popup ?? writable(''));
 </script>
 
 {#key element}
@@ -48,6 +49,17 @@
 					<EditorStroke layer={element.strokeLayer} />
 				{/if}
 			{/if}
+			{#if element}
+				<hr />
+				<label class="label" for="{uid}-popup">Popup</label>
+				<textarea
+					id="{uid}-popup"
+					class="popup"
+					rows="3"
+					bind:value={$popup}
+					onchange={() => element.manager.state?.log()}
+					placeholder="Shown on click: **bold**, [link](https://…)"></textarea>
+			{/if}
 			{#if element instanceof LineElement || element instanceof PolygonElement || element instanceof CircleElement}
 				<hr />
 				{#each $measurements as { label, value }, i (label)}
@@ -62,3 +74,14 @@
 		</div>
 	</SidebarPanel>
 {/key}
+
+<style>
+	.popup {
+		display: block;
+		width: 100%;
+		box-sizing: border-box;
+		margin: 0.3em 0 var(--gap);
+		resize: vertical;
+		font: inherit;
+	}
+</style>

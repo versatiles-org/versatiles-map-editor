@@ -54,6 +54,10 @@ export class MarkerElement extends AbstractElement {
 		};
 	}
 
+	getLayerIds(): string[] {
+		return [this.layer.id];
+	}
+
 	getColors(): string[] {
 		return [get(this.layer.color)];
 	}
@@ -67,7 +71,8 @@ export class MarkerElement extends AbstractElement {
 		return {
 			type: 'marker',
 			point: this.point,
-			style: this.layer.getState()
+			style: this.layer.getState(),
+			...this.getPopupState()
 		};
 	}
 

@@ -21,6 +21,9 @@ class TestElement extends AbstractElement {
 		return [];
 	}
 
+	getLayerIds() {
+		return [];
+	}
 	getColors() {
 		return [];
 	}

@@ -151,6 +151,25 @@ describe('GeometryManager', () => {
 		expect(map.fitBounds).toHaveBeenCalled();
 	});
 
+	it('should restore popups', async () => {
+		map.setStyle();
+		await geometryManager.setState({
+			elements: [
+				{
+					type: 'line',
+					points: [
+						[0, 0],
+						[1, 1]
+					],
+					popup: { text: 'Hello' }
+				}
+			]
+		});
+		const [element] = get(geometryManager.elements);
+		expect(get(element.popup)).toBe('Hello');
+		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
+	});
+
 	it('should identify as non-interactive', () => {
 		expect(geometryManager.isInteractive()).toBe(false);
 	});

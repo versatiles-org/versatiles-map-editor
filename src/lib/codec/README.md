@@ -52,6 +52,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
+- popup text (all element types) → `description`, as in simplestyle and KML
 
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;
@@ -69,5 +70,6 @@ their defaults and enum names from here and only add rendering data;
 ## Backward compatibility
 
 The base64 layout is unchanged (3-bit version `0`); existing hashes keep
-decoding. Coordinates are quantized to a ~1e-5 grid and the viewport radius is
+decoding. New fields use the extension points v0 reserved: e.g. popups use the
+per-element popup flag, which old hashes always leave at `0`. Coordinates are quantized to a ~1e-5 grid and the viewport radius is
 log-quantized, so base64 round-trips are lossy at sub-meter precision by design.

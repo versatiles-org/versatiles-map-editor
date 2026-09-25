@@ -81,6 +81,14 @@ describe('MarkerElement', () => {
 		expect(state.style).toEqual(element.layer.getState());
 	});
 
+	it('should include a popup in the state, unless it is empty', () => {
+		expect(element.getState()).not.toHaveProperty('popup');
+		element.popup.set('Hello');
+		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
+		element.popup.set(' \n ');
+		expect(element.getState()).not.toHaveProperty('popup');
+	});
+
 	it('should restore from state correctly', () => {
 		const state: StateElementMarker = {
 			type: 'marker',

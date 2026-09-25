@@ -12,6 +12,7 @@
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
+	import { PopupHandler } from './lib/popup_handler.js';
 	import { decodeState } from '$lib/codec/index.js';
 	import { throttle } from '$lib/utils/throttle.js';
 
@@ -142,6 +143,7 @@
 			geometryManager = manager;
 		} else {
 			geometryManager = new GeometryManager(map);
+			new PopupHandler(geometryManager);
 		}
 
 		let hash = location.hash.slice(1);

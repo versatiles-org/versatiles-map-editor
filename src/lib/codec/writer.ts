@@ -7,6 +7,7 @@ import type {
 	StateElementMarker,
 	StateElementPolygon,
 	StateMetadata,
+	StatePopup,
 	StateRoot,
 	StateStyle
 } from './types.js';
@@ -154,7 +155,7 @@ export class StateWriter {
 		} else {
 			this.writeBit(false);
 		}
-		this.writeBit(false); // tooltip not supported yet
+		this.writePopup(element.popup);
 		return element;
 	}
 
@@ -166,7 +167,7 @@ export class StateWriter {
 		} else {
 			this.writeBit(false);
 		}
-		this.writeBit(false); // tooltip not supported yet
+		this.writePopup(element.popup);
 		return element;
 	}
 
@@ -184,7 +185,7 @@ export class StateWriter {
 		} else {
 			this.writeBit(false);
 		}
-		this.writeBit(false); // tooltip not supported yet
+		this.writePopup(element.popup);
 	}
 
 	writeElementCircle(element: StateElementCircle) {
@@ -205,7 +206,16 @@ export class StateWriter {
 			this.writeBit(false);
 		}
 
-		this.writeBit(false); // tooltip not supported yet
+		this.writePopup(element.popup);
+	}
+
+	writePopup(popup?: StatePopup) {
+		if (!popup?.text) return this.writeBit(false);
+		this.writeBit(true);
+		// key/value pairs like a style, so fields can be added later
+		this.writeInteger(1, 4);
+		this.writeString(popup.text);
+		this.writeInteger(0, 4);
 	}
 
 	writeStyle(style: StateStyle) {
