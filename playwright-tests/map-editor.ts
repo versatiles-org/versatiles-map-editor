@@ -59,6 +59,18 @@ const ariaResult = `- region "Map"
     - /url: https://github.com/versatiles-org/versatiles-map-editor/issues
     - text: GitHub Issues`;
 
+/**
+ * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
+ * viewport and are compared exactly. The glyph ranges depend on the label texts in the
+ * current tile data, so only the font and the basic Latin range are checked.
+ */
+function expectServerRequests(requests: string[], expected: string[]) {
+	const glyphs = requests.filter((url) => url.startsWith('assets/glyphs/'));
+	expect(glyphs).toContain('assets/glyphs/noto_sans_regular/0-255.pbf');
+	for (const url of glyphs) expect(url).toMatch(/^assets\/glyphs\/noto_sans_regular\/\d+-\d+\.pbf$/);
+	expect(requests.filter((url) => !url.startsWith('assets/glyphs/'))).toStrictEqual(expected);
+}
+
 test('empty map', async ({ page }) => {
 	const tracker = await trackServerRequests(page);
 
@@ -73,11 +85,7 @@ test('empty map', async ({ page }) => {
 		height: 720
 	});
 
-	expect(tracker()).toStrictEqual([
-		'assets/glyphs/noto_sans_regular/0-255.pbf',
-		'assets/glyphs/noto_sans_regular/256-511.pbf',
-		'assets/glyphs/noto_sans_regular/512-767.pbf',
-		'assets/glyphs/noto_sans_regular/8192-8447.pbf',
+	expectServerRequests(tracker(), [
 		'assets/sprites/base.json',
 		'assets/sprites/base.png',
 		'tiles/osm/5/16/10',
@@ -98,8 +106,7 @@ test('filled map', async ({ page }) => {
 	await page.goto(mapUrl);
 	await waitForMapIsReady(page);
 
-	expect(tracker()).toStrictEqual([
-		'assets/glyphs/noto_sans_regular/0-255.pbf',
+	expectServerRequests(tracker(), [
 		'assets/sprites/base.json',
 		'assets/sprites/base.png',
 		'tiles/osm/13/4399/2686',
