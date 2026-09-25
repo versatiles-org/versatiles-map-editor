@@ -168,6 +168,15 @@ describe('GeometryManager', () => {
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
 
+		it('should add several elements and select them all', () => {
+			const elements = manager.addElements([
+				{ type: 'marker', point: [1, 2] },
+				{ type: 'marker', point: [3, 4] }
+			]);
+			expect(get(manager.elements)).toStrictEqual(elements);
+			expect(get(manager.selection.selectedElements)).toStrictEqual(elements);
+		});
+
 		it('should add an element from its state and select it', () => {
 			const state: StateElement = { type: 'marker', point: [10, 20], popup: { text: 'Hi' } };
 			const element = manager.addElement(state);

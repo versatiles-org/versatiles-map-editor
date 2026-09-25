@@ -7,6 +7,7 @@
 	import SearchPlace from './SearchPlace.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
+	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
@@ -14,6 +15,7 @@
 
 	const uid = $props.id();
 	let panelShareMap: DialogShareMap | null = null;
+	let dialogImportTable: DialogImportTable | undefined = $state();
 	const stateManager = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
@@ -144,6 +146,13 @@
 					<button class="btn" onclick={importGeoJSON}>Import</button>
 					<button class="btn" onclick={exportGeoJSON} data-testid="btnExportGeoJSON">Export</button>
 				</div>
+			</div>
+			<div role="group" aria-labelledby="{uid}-table">
+				<span id="{uid}-table">Table (CSV/TSV):</span>
+				<div class="grid1">
+					<button class="btn" onclick={() => dialogImportTable?.open()}>Import table…</button>
+				</div>
+				<DialogImportTable bind:this={dialogImportTable} manager={geometryManager} />
 			</div>
 		</SidebarPanel>
 		<hr class="thick" />

@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
-import { encodeState, type MapState } from '../src/lib/codec/index.js';
+import type { Page } from '@playwright/test';
+import { encodeState, type MapState, type StateElementMarker } from '../src/lib/codec/index.js';
 import { stateInUrl, trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 const mapUrl =
@@ -87,6 +88,9 @@ const ariaResult = `- region "Map"
   - text: "GeoJSON:"
   - button "Import ✓"
   - button "Export ✓"
+- group "Table (CSV/TSV):":
+  - text: "Table (CSV/TSV):"
+  - button "Import table… ✓"
 - separator
 - button "Add new":
   - text: Add new
@@ -1037,4 +1041,81 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await page.getByRole('combobox', { name: 'Font' }).last().selectOption('Serif');
 	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
 	await expect.poll(() => stateInUrl(page).meta?.legend?.font).toBe('serif');
+});
+
+test.describe('importing a table', () => {
+	async function openImport(page: Page) {
+		await page.goto('/');
+		await waitForMapIsReady(page);
+		await page.getByRole('button', { name: 'Import/Export' }).click();
+		await page.getByRole('button', { name: 'Import table…' }).click();
+		return page.getByRole('dialog');
+	}
+	const markers = (page: Page) => stateInUrl(page).elements as StateElementMarker[];
+
+	test('pasted from a spreadsheet, with coordinates', async ({ page }) => {
+		const dialog = await openImport(page);
+		await dialog
+			.getByLabel('Or paste the table here:')
+			.fill('Name\tBreite\tLänge\tInfo\nCafé\t52,5\t13,4\tOpen **daily**\nShop\t52,51\t13,41\t\nBroken\tx\t13\t');
+		await dialog.getByRole('button', { name: 'Continue' }).click();
+
+		// the columns are recognized
+		await expect(dialog.getByRole('radio', { name: 'Latitude and longitude' })).toBeChecked();
+		await expect(dialog.getByRole('combobox', { name: 'Latitude' })).toHaveValue('1');
+		await expect(dialog.getByRole('combobox', { name: 'Longitude' })).toHaveValue('2');
+		await expect(dialog.getByRole('combobox', { name: 'Label' })).toHaveValue('0');
+		await expect(dialog.getByRole('combobox', { name: 'Popup' })).toHaveValue('3');
+
+		await dialog.getByRole('button', { name: 'Import 3 rows' }).click();
+		await expect(dialog.getByText('Imported 2 markers.')).toBeVisible();
+		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
+			'Row 3: x, 13 — invalid coordinates'
+		);
+		await dialog.getByRole('button', { name: /^Close/ }).click();
+
+		await expect
+			.poll(() => markers(page).map((m) => [m.point, m.style?.label, m.popup?.text]))
+			.toStrictEqual([
+				[[13.4, 52.5], 'Café', 'Open **daily**'],
+				[[13.41, 52.51], 'Shop', undefined]
+			]);
+		// the imported markers are selected, and one undo step removes them
+		await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(() => markers(page).length).toBe(0);
+	});
+
+	test('from a file, with addresses', async ({ page }) => {
+		await page.route('https://geocode.versatiles.org/**', (route) => {
+			const q = new URL(route.request().url()).searchParams.get('q');
+			const features =
+				q === 'Hauptstraße 1, Berlin'
+					? [{ type: 'Feature', properties: { name: q }, geometry: { type: 'Point', coordinates: [13.4, 52.5] } }]
+					: [];
+			return route.fulfill({ json: { type: 'FeatureCollection', features } });
+		});
+		const dialog = await openImport(page);
+
+		// a CSV file from an older Excel: semicolons, Windows-1252
+		const csv = 'Adresse;Name\r\nHauptstraße 1, Berlin;Bäckerei\r\nNirgendwo 5;Kiosk\r\n';
+		const bytes = Buffer.from([...csv].map((c) => ({ ß: 0xdf, ä: 0xe4 })[c] ?? c.charCodeAt(0)));
+		const [chooser] = await Promise.all([
+			page.waitForEvent('filechooser'),
+			dialog.getByRole('button', { name: 'Choose a file…' }).click()
+		]);
+		await chooser.setFiles({ name: 'places.csv', mimeType: 'text/csv', buffer: bytes });
+
+		await expect(dialog.getByRole('radio', { name: 'Address (searched)' })).toBeChecked();
+		await expect(dialog.getByRole('cell', { name: 'Bäckerei' })).toBeVisible();
+		await dialog.getByRole('button', { name: 'Import 2 rows' }).click();
+
+		await expect(dialog.getByText('Imported 1 markers.')).toBeVisible();
+		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
+			'Row 2: Nirgendwo 5 — address not found'
+		);
+		await expect
+			.poll(() => markers(page).map((m) => [m.point, m.style?.label]))
+			.toStrictEqual([[[13.4, 52.5], 'Bäckerei']]);
+	});
 });

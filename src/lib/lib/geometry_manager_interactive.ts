@@ -82,7 +82,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 			return [lng, lat];
 		};
 
-		const copies = elements.map((element) => {
+		const states = elements.map((element) => {
 			const state: StateElement = structuredClone(element.getState());
 			switch (state.type) {
 				case 'marker':
@@ -94,12 +94,20 @@ export class GeometryManagerInteractive extends GeometryManager {
 					state.points = state.points.map(move);
 					break;
 			}
-			const copy = elementFromState(this, state);
-			this.appendElement(copy);
-			return copy;
+			return state;
 		});
-		this.selection.selectElements(copies);
-		return copies;
+		return this.addElements(states);
+	}
+
+	/** Add elements from their states and select them all. */
+	public addElements(states: StateElement[]): AbstractElement[] {
+		const elements = states.map((state) => {
+			const element = elementFromState(this, state);
+			this.appendElement(element);
+			return element;
+		});
+		this.selection.selectElements(elements);
+		return elements;
 	}
 
 	/** Add an element from its state and select it. */
