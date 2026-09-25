@@ -6,12 +6,15 @@ import type {
 	StateElementMarker,
 	StateElementPolygon,
 	StateMetadata,
+	StateLegend,
+	StateLegendEntry,
 	StatePopup,
 	StateRoot,
 	StateStyle
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE } from './constants.js';
 import { sanitizeBackground } from './profile.js';
+import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -209,6 +212,9 @@ export class StateReader {
 					case 2:
 						metadata.background = parseBackground(this.readString());
 						break;
+					case 3:
+						metadata.legend = this.readLegend();
+						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}
@@ -263,6 +269,56 @@ export class StateReader {
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading circle element`, { cause });
+		}
+	}
+
+	readLegend(): StateLegend {
+		try {
+			const legend: StateLegend = { entries: [] };
+			while (true) {
+				const key = this.readInteger(4);
+				switch (key) {
+					case 0:
+						return legend;
+					case 1:
+						legend.position = LEGEND_POSITIONS[this.readVarint()];
+						if (!legend.position) throw new Error('Invalid legend position');
+						break;
+					case 2:
+						legend.layout = LEGEND_LAYOUTS[this.readVarint()];
+						if (!legend.layout) throw new Error('Invalid legend layout');
+						break;
+					case 3:
+						legend.entries = this.readArray(() => this.readLegendEntry());
+						break;
+					default:
+						throw new Error(`Invalid legend key: ${key}`);
+				}
+			}
+		} catch (cause) {
+			throw new Error(`Error reading legend`, { cause });
+		}
+	}
+
+	readLegendEntry(): StateLegendEntry {
+		const entry: StateLegendEntry = { color: '#000000', label: '' };
+		while (true) {
+			const key = this.readInteger(4);
+			switch (key) {
+				case 0:
+					return entry;
+				case 1:
+					entry.color = this.readColor();
+					break;
+				case 2:
+					entry.symbol = this.readVarint();
+					break;
+				case 3:
+					entry.label = this.readString();
+					break;
+				default:
+					throw new Error(`Invalid legend entry key: ${key}`);
+			}
 		}
 	}
 

@@ -1,12 +1,14 @@
 import { Color } from '@versatiles/style';
 import { BASE64_CHARS, CHAR_CODE2VALUE } from './constants.js';
 import { StateReader } from './reader.js';
+import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import type {
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
 	StateElementPolygon,
 	StateMetadata,
+	StateLegend,
 	StatePopup,
 	StateRoot,
 	StateStyle
@@ -149,6 +151,10 @@ export class StateWriter {
 			// as JSON, so any option of @versatiles/style can be stored
 			this.writeString(JSON.stringify(metadata.background));
 		}
+		if (metadata.legend) {
+			this.writeInteger(3, 6);
+			this.writeLegend(metadata.legend);
+		}
 		this.writeInteger(0, 6);
 	}
 
@@ -212,6 +218,33 @@ export class StateWriter {
 		}
 
 		this.writePopup(element.popup);
+	}
+
+	// key/value pairs like a style, so fields can be added later
+	writeLegend(legend: StateLegend) {
+		if (legend.position && legend.position !== 'bottom-left') {
+			this.writeInteger(1, 4);
+			this.writeVarint(LEGEND_POSITIONS.indexOf(legend.position));
+		}
+		if (legend.layout && legend.layout !== 'vertical') {
+			this.writeInteger(2, 4);
+			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));
+		}
+		this.writeInteger(3, 4);
+		this.writeArray(legend.entries, (entry) => {
+			this.writeInteger(1, 4);
+			this.writeColor(entry.color);
+			if (entry.symbol != null) {
+				this.writeInteger(2, 4);
+				this.writeVarint(entry.symbol);
+			}
+			if (entry.label) {
+				this.writeInteger(3, 4);
+				this.writeString(entry.label);
+			}
+			this.writeInteger(0, 4);
+		});
+		this.writeInteger(0, 4);
 	}
 
 	writePopup(popup?: StatePopup) {

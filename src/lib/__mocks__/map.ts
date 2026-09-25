@@ -14,6 +14,8 @@ export class MockMap {
 	getCanvasContainer = vi.fn(() => mockedCanvas);
 	boxZoom = { disable: vi.fn(), enable: vi.fn() };
 	setMissingStyleImageResolver = vi.fn();
+	// set once the map has a style
+	style: object | undefined = {};
 	addSource = vi.fn();
 	removeSource = vi.fn();
 	getSource = vi.fn(() => ({ setData: vi.fn() }) as unknown) as Mock<MaplibreMap['getSource']>;

@@ -10,14 +10,26 @@
 	const listIconSize = 32;
 	const retina = window.devicePixelRatio || 1;
 
-	let { symbolIndex = $bindable(), map, id }: { symbolIndex: number; map: MaplibreMap; id?: string } = $props();
+	let {
+		symbolIndex = $bindable(),
+		map,
+		id,
+		noneLabel
+	}: {
+		symbolIndex: number | undefined;
+		map: MaplibreMap;
+		id?: string;
+		/** If set, offers "no symbol" (undefined) with this name, e.g. for a plain color. */
+		noneLabel?: string;
+	} = $props();
 
 	const symbolLibrary = $derived(new SymbolLibrary(map));
 
 	const drawIcon: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index);
-	const drawIconHalo: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index, 3);
+	const drawIconHalo: Action<HTMLCanvasElement, number> = (canvas, index) =>
+		symbolLibrary.drawSymbol(canvas, index, { halo: 3 });
 
-	function selectSymbol(index: number) {
+	function selectSymbol(index: number | undefined) {
 		symbolIndex = index;
 		dialog?.close();
 	}
@@ -30,22 +42,25 @@
 	style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px"
 >
 	{#key symbolIndex}
-		<canvas
-			width={buttonIconSize * retina}
-			height={buttonIconSize * retina}
-			use:drawIcon={symbolIndex}
-			style="width:{buttonIconSize}px;height:{buttonIconSize}px;vertical-align:middle"
-		></canvas>
+		{#if symbolIndex !== undefined}<canvas
+				width={buttonIconSize * retina}
+				height={buttonIconSize * retina}
+				use:drawIcon={symbolIndex}
+				style="width:{buttonIconSize}px;height:{buttonIconSize}px;vertical-align:middle"
+			></canvas>{/if}
 	{/key}
 	{#if symbolIndex !== undefined}
 		{symbolLibrary.getSymbol(symbolIndex)?.name}
 	{:else}
-		Select Symbol
+		{noneLabel ?? 'Select Symbol'}
 	{/if}
 </button>
 
 <Dialog bind:this={dialog}>
 	<div class="list" style="--list-icon-size: {listIconSize}px; --list-item-size: {listItemSize}px">
+		{#if noneLabel}
+			<button class="item" onclick={() => selectSymbol(undefined)}>{noneLabel}</button>
+		{/if}
 		{#each symbolLibrary.asList() as symbol (symbol.index)}
 			<button class="item" onclick={() => selectSymbol(symbol.index)}
 				><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={symbol.index}

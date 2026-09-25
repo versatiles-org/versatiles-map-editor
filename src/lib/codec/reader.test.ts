@@ -583,3 +583,37 @@ describe('background', () => {
 		}
 	});
 });
+
+describe('legend', () => {
+	it('round-trips positions, layouts and entries', () => {
+		const state: StateRoot = {
+			meta: {
+				legend: {
+					position: 'top-right',
+					layout: 'inline',
+					entries: [
+						// the decoder returns colors in upper case
+						{ color: '#FF0000', label: 'Red area' },
+						{ color: '#0000FF', symbol: 12, label: 'Blue marker' },
+						{ color: '#00FF00', label: '' }
+					]
+				}
+			},
+			elements: []
+		};
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+
+	it('does not store the default position and layout', () => {
+		const legend = { position: 'bottom-left' as const, layout: 'vertical' as const, entries: [] };
+		expect(decodeState(encodeState({ meta: { legend }, elements: [] })).meta).toStrictEqual({
+			legend: { entries: [] }
+		});
+	});
+
+	it('rejects unknown fields', () => {
+		const writer = new StateWriter();
+		writer.writeInteger(15, 4);
+		expect(() => new StateReader(writer.bits).readLegend()).toThrow('Error reading legend');
+	});
+});

@@ -19,12 +19,8 @@ export class StateManager {
 		const state = this.geometryManager.getState();
 
 		if (additionalMeta) {
-			state.meta ??= {};
-			const keys = Object.keys(additionalMeta) as (keyof StateMetadata)[];
-			for (const key of keys) {
-				if (additionalMeta[key] == null) continue;
-				state.meta[key] = additionalMeta[key];
-			}
+			const defined = Object.entries(additionalMeta).filter(([, value]) => value != null);
+			state.meta = { ...state.meta, ...Object.fromEntries(defined) };
 		}
 
 		return encodeState(state);

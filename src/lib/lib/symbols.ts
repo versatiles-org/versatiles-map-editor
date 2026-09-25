@@ -1,5 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { symbolEntries as entries } from '$lib/codec/symbols.js';
+import { parseHex } from '$lib/utils/color.js';
 
 export interface SymbolInfo {
 	index: number;
@@ -33,16 +34,26 @@ export class SymbolLibrary {
 		return symbols.get(index) ?? defaultSymbol!;
 	}
 
-	drawSymbol(canvas: HTMLCanvasElement, index: number, halo = 0, retry = true): void {
+	/**
+	 * Draw the symbol into the canvas: black, or in `color`, or with a white `halo` (in pixels).
+	 */
+	drawSymbol(canvas: HTMLCanvasElement, index: number, options: { halo?: number; color?: string } = {}): void {
+		this.draw(canvas, index, options, true);
+	}
+
+	private draw(canvas: HTMLCanvasElement, index: number, options: { halo?: number; color?: string }, retry: boolean) {
 		const symbol = this.getSymbol(index);
 		if (!symbol.image) return;
 
-		const image = this.map.getImage(symbol.image);
+		// throws while the map has no style yet (e.g. a legend in a shared map)
+		const image = this.map.style ? this.map.getImage(symbol.image) : undefined;
 		if (!image) {
 			// The sprite is not loaded yet: try once more when the map has settled
-			if (retry) this.map.once('idle', () => this.drawSymbol(canvas, index, halo, false));
+			if (retry) this.map.once('idle', () => this.draw(canvas, index, options, false));
 			return;
 		}
+		const halo = options.halo ?? 0;
+		const rgb = (options.color && parseHex(options.color)) || { r: 0, g: 0, b: 0 };
 		const { sdf, data: imageDataSrc } = image;
 		const { data: dataSrc, width: widthSrc, height: heightSrc } = imageDataSrc;
 
@@ -62,18 +73,16 @@ export class SymbolLibrary {
 
 				if (sdf) {
 					const v = (interpolate(x, y, 3) - 191) * 8 * scale;
-					let alpha, color;
 					if (halo) {
-						color = Math.min(255, Math.max(0, 127.5 - v));
-						alpha = Math.min(255, Math.max(0, 256 * border + v));
+						const gray = Math.min(255, Math.max(0, 127.5 - v));
+						dataDst[i] = dataDst[i + 1] = dataDst[i + 2] = gray;
+						dataDst[i + 3] = Math.min(255, Math.max(0, 256 * border + v));
 					} else {
-						color = 0;
-						alpha = Math.min(255, Math.max(0, v));
+						dataDst[i] = rgb.r;
+						dataDst[i + 1] = rgb.g;
+						dataDst[i + 2] = rgb.b;
+						dataDst[i + 3] = Math.min(255, Math.max(0, v));
 					}
-					dataDst[i] = color;
-					dataDst[i + 1] = color;
-					dataDst[i + 2] = color;
-					dataDst[i + 3] = alpha;
 				} else {
 					dataDst[i] = interpolate(x, y, 0);
 					dataDst[i + 1] = interpolate(x, y, 1);

@@ -75,6 +75,11 @@ const ariaResult = `- region "Map"
   - option "Fewer"
   - option "None"
 - separator
+- button "Legend":
+  - text: Legend
+  - img
+- button "Add legend entry ✓"
+- separator
 - button "Import/Export":
   - text: Import/Export
   - img
@@ -870,4 +875,81 @@ test('styling the background map', async ({ page }) => {
 			)
 		);
 	await expect.poll(labelsInGerman).toBe(true);
+});
+
+test('editing the legend', async ({ page }) => {
+	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
+	const pageErrors: string[] = [];
+	page.on('pageerror', (error) => pageErrors.push(error.message));
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.33, 52.47],
+					[13.38, 52.47],
+					[13.38, 52.5]
+				],
+				style: { color: '#00aa00' },
+				strokeStyle: { visible: false }
+			}
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const legendInUrl = () => {
+		const legend = stateInUrl(page).meta?.legend;
+		return legend && { ...legend, entries: legend.entries.map((e) => ({ ...e, color: e.color.toLowerCase() })) };
+	};
+	const overlay = page.getByRole('list', { name: 'Legend' });
+
+	// a new entry starts with a color of the map
+	await page.getByRole('button', { name: 'Legend', exact: true }).click();
+	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	await page.getByRole('textbox', { name: 'Text' }).fill('Park');
+	await page.getByRole('textbox', { name: 'Text' }).press('Enter');
+	await expect(overlay.getByRole('listitem')).toHaveText(['Park']);
+
+	// a second entry with a blue symbol
+	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	const entry = page.getByRole('group', { name: 'Entry 2' });
+	await entry.getByRole('textbox', { name: 'Text' }).fill('Cafe');
+	await entry.getByRole('textbox', { name: 'Text' }).press('Enter');
+	await entry.getByRole('button', { name: /^Color/ }).click();
+	await entry.getByLabel('Hex').fill('#0000ff');
+	await entry.getByLabel('Hex').press('Enter');
+	await entry.getByRole('button', { name: /^Symbol/ }).click();
+	await page.getByRole('button', { name: 'cafe', exact: true }).click();
+
+	await page.getByRole('combobox', { name: 'Position' }).selectOption('Top right');
+	await page.getByRole('combobox', { name: 'Layout' }).selectOption('Horizontal');
+	await expect.poll(legendInUrl).toMatchObject({
+		position: 'top-right',
+		layout: 'horizontal',
+		entries: [
+			{ color: '#00aa00', label: 'Park' },
+			{ color: '#0000ff', label: 'Cafe', symbol: expect.any(Number) }
+		]
+	});
+	await expect(overlay.getByRole('listitem')).toHaveText(['Park', 'Cafe']);
+	await expect(overlay.locator('canvas')).toHaveCount(1);
+	await page.screenshot({ path: 'test-results/legend.png' });
+
+	// shown in the read-only viewer
+	await page.setViewportSize({ width: 500, height: 500 });
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect(overlay.getByRole('listitem')).toHaveText(['Park', 'Cafe']);
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.reload();
+	await waitForMapIsReady(page);
+
+	// without entries, there is no legend
+	await page.getByRole('button', { name: 'Legend', exact: true }).click();
+	await page.getByRole('button', { name: 'Remove entry 2' }).click();
+	await page.getByRole('button', { name: 'Remove entry 1' }).click();
+	await expect(overlay).toBeHidden();
+	await expect.poll(legendInUrl).toBeUndefined();
+	expect(pageErrors).toStrictEqual([]);
 });

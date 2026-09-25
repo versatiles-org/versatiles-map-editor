@@ -1,5 +1,6 @@
 import { Color } from '@versatiles/style';
-import type { StateBackground, StatePopup, StateStyle } from './types.js';
+import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
+import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
 
 // ---------------------------------------------------------------------------
@@ -197,4 +198,32 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 	if (builder !== 'osm' && builder !== 'satellite') return undefined;
 	if (typeof options !== 'object' || options === null || Array.isArray(options)) return undefined;
 	return { builder, options: options as Record<string, unknown> };
+}
+
+// ----- legend -----
+
+/** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
+export function sanitizeLegend(value: unknown): StateLegend | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const { position, layout, entries } = value as Record<string, unknown>;
+	if (!Array.isArray(entries)) return undefined;
+
+	const legend: StateLegend = { entries: [] };
+	if (LEGEND_POSITIONS.includes(position as StateLegend['position'] & string)) {
+		legend.position = position as StateLegend['position'];
+	}
+	if (LEGEND_LAYOUTS.includes(layout as StateLegend['layout'] & string)) {
+		legend.layout = layout as StateLegend['layout'];
+	}
+	for (const entry of entries) {
+		if (typeof entry !== 'object' || entry === null) continue;
+		const e = entry as Record<string, unknown>;
+		const color = sanitizeColor(e.color);
+		if (!color) continue;
+		const result: StateLegendEntry = { color, label: sanitizeString(e.label) ?? '' };
+		const symbol = sanitizeNumber(e.symbol, 0);
+		if (symbol !== undefined) result.symbol = Math.round(symbol);
+		legend.entries.push(result);
+	}
+	return legend;
 }

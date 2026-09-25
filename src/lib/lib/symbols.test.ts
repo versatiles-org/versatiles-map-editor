@@ -109,6 +109,24 @@ describe('SymbolLibrary', () => {
 		expect(ctx.putImageData).toBeCalledWith(expect.any(MyImageData), 0, 0);
 	});
 
+	it('should draw an SDF symbol in a color', () => {
+		// @ts-expect-error Mocking globalThis
+		globalThis.ImageData = class {
+			constructor(public data: Uint8ClampedArray) {}
+		};
+		const ctx = { putImageData: vi.fn() } as unknown as CanvasRenderingContext2D;
+		const canvas = { getContext: vi.fn(() => ctx), width: 2, height: 2 } as unknown as HTMLCanvasElement;
+		// an opaque SDF icon: every value far inside the shape
+		vi.spyOn(map, 'getImage').mockReturnValue({
+			sdf: true,
+			data: { data: new Uint8ClampedArray(4 * 4 * 4).fill(255), width: 4, height: 4 }
+		} as unknown as ReturnType<maplibregl.Map['getImage']>);
+
+		symbolLibrary.drawSymbol(canvas, 1, { color: '#0080ff' });
+		const data = (vi.mocked(ctx.putImageData).mock.lastCall![0] as unknown as { data: Uint8ClampedArray }).data;
+		expect([...data.slice(0, 4)]).toStrictEqual([0, 128, 255, 255]);
+	});
+
 	describe('when the sprite is not loaded yet', () => {
 		let ctx: CanvasRenderingContext2D;
 		let canvas: HTMLCanvasElement;
@@ -132,6 +150,18 @@ describe('SymbolLibrary', () => {
 		it('should draw once the map is idle', () => {
 			symbolLibrary.drawSymbol(canvas, 1);
 			vi.spyOn(map, 'getImage').mockReturnValue(image);
+			map.emit('idle');
+			expect(ctx.putImageData).toHaveBeenCalledTimes(1);
+		});
+
+		it('should wait while the map has no style yet', () => {
+			map.style = undefined;
+			const getImage = vi.spyOn(map, 'getImage');
+			expect(() => symbolLibrary.drawSymbol(canvas, 1)).not.toThrow();
+			expect(getImage).not.toHaveBeenCalled();
+
+			map.style = {};
+			getImage.mockReturnValue(image);
 			map.emit('idle');
 			expect(ctx.putImageData).toHaveBeenCalledTimes(1);
 		});

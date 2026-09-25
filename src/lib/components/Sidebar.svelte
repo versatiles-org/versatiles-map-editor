@@ -6,6 +6,7 @@
 	import PanelFile from './PanelFile.svelte';
 	import SearchPlace from './SearchPlace.svelte';
 	import PanelBackground from './PanelBackground.svelte';
+	import PanelLegend from './PanelLegend.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
@@ -130,6 +131,10 @@
 		<hr class="thick" />
 		<SidebarPanel title="Background map" open={false}>
 			<PanelBackground manager={geometryManager} />
+		</SidebarPanel>
+		<hr class="thick" />
+		<SidebarPanel title="Legend" open={false}>
+			<PanelLegend manager={geometryManager} />
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Import/Export" open={false}>

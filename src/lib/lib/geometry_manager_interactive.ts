@@ -12,7 +12,7 @@ import { StateManager } from './state/manager.js';
 import { ColorPalette } from './color_palette.js';
 import { StyleClipboard } from './style_clipboard.js';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from '$lib/codec/index.js';
-import type { StateElement, StateRoot } from '$lib/codec/types.js';
+import type { StateElement, StateMetadata, StateRoot } from '$lib/codec/types.js';
 import type { GeoPoint } from './utils/types.js';
 
 export class GeometryManagerInteractive extends GeometryManager {
@@ -123,13 +123,17 @@ export class GeometryManagerInteractive extends GeometryManager {
 				(bounds.getEast() - bounds.getWest()) * Math.cos((center.lat * Math.PI) / 180)
 			) / 2;
 		const radius = 40074000 * (radiusDegrees / 360);
+		const meta: StateMetadata = {};
 		const background = get(this.background);
+		if (background) meta.background = background;
+		const legend = get(this.legend);
+		if (legend) meta.legend = legend;
 		return {
 			map: {
 				center: [center.lng, center.lat],
 				radius
 			},
-			...(background ? { meta: { background } } : {}),
+			...(Object.keys(meta).length > 0 ? { meta } : {}),
 			elements: get(this.elements).map((element) => element.getState())
 		};
 	}

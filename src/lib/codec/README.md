@@ -54,7 +54,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
-  minimized options, stored as JSON in base64, so any current or future option fits)
+  minimized options, stored as JSON in base64, so any current or future option fits;
+  `meta.legend`: position, layout and entries of a legend defined by the author)
 
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;

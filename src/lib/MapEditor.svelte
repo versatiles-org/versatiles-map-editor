@@ -9,6 +9,8 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import Sidebar from './components/Sidebar.svelte';
 	import NodeDeleteButton from './components/NodeDeleteButton.svelte';
+	import Legend from './components/Legend.svelte';
+	import { writable } from 'svelte/store';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
@@ -28,6 +30,7 @@
 	let showSidebar = $state(false);
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
+	const legend = $derived(geometryManager?.legend ?? writable(undefined));
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
@@ -161,6 +164,9 @@
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
+	{#if geometryManager && $legend}
+		<Legend legend={$legend} map={geometryManager.map} right={showSidebar ? 250 : 0} />
+	{/if}
 	{#if showSidebar && geometryManager && geometryManager.isInteractive()}
 		<NodeDeleteButton {geometryManager} />
 		<Sidebar {geometryManager} />

@@ -265,6 +265,32 @@ describe('background', () => {
 	});
 });
 
+describe('legend', () => {
+	it('round-trips as the meta member', () => {
+		const legend = { position: 'top' as const, entries: [{ color: '#ff0000', symbol: 3, label: 'A' }] };
+		const doc = stateToGeoJSON({ meta: { legend }, elements: [] });
+		expect(doc.meta).toStrictEqual({ legend });
+		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ legend });
+	});
+
+	it('sanitizes foreign legends', () => {
+		const doc = {
+			type: 'FeatureCollection',
+			features: [],
+			meta: {
+				legend: {
+					position: 'middle',
+					layout: 'inline',
+					entries: [{ color: '#F00', label: 5, symbol: '2.4' }, { color: 'nope', label: 'x' }, 'x']
+				}
+			}
+		};
+		expect(stateFromGeoJSON(doc as unknown as GeoJSONDocument).meta).toStrictEqual({
+			legend: { layout: 'inline', entries: [{ color: '#ff0000', label: '5', symbol: 2 }] }
+		});
+	});
+});
+
 describe('popups', () => {
 	it('are written as the description property', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [0, 0], popup: { text: 'Hello' } }] });

@@ -4,7 +4,7 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
-import type { StateBackground, StateRoot, StateElement } from '$lib/codec/types.js';
+import type { StateBackground, StateLegend, StateRoot, StateElement } from '$lib/codec/types.js';
 import { get, writable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
@@ -47,6 +47,8 @@ export class GeometryManager {
 	 * A new background map removes all images, and MapLibre asks for them again.
 	 */
 	public readonly imageResolvers = new Map<string, () => void>();
+	/** The legend of the map, if it has one. */
+	public readonly legend: Writable<StateLegend | undefined> = writable(undefined);
 	/** The background map. Undefined for the editor's default background. */
 	public readonly background: Writable<StateBackground | undefined> = writable(undefined);
 	private destroyed = false;
@@ -173,6 +175,7 @@ export class GeometryManager {
 		this.clear();
 
 		if (state.map) this.fitViewport(state.map);
+		this.legend.set(state.meta?.legend);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, get(this.background))) await this.setBackground(state.meta?.background);
 

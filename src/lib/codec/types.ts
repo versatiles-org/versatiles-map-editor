@@ -56,6 +56,36 @@ export interface StateStyle {
 export interface StateMetadata {
 	/** The background map. Without it, the map has the editor's default background. */
 	background?: StateBackground;
+	/** A legend, defined by the author, not generated from the elements. */
+	legend?: StateLegend;
+}
+
+export const LEGEND_POSITIONS = [
+	'bottom-left',
+	'bottom',
+	'bottom-right',
+	'right',
+	'top-right',
+	'top',
+	'top-left',
+	'left'
+] as const;
+export const LEGEND_LAYOUTS = ['vertical', 'horizontal', 'inline'] as const;
+
+export interface StateLegend {
+	/** A side (centered) or a corner of the map. Default: "bottom-left". */
+	position?: (typeof LEGEND_POSITIONS)[number];
+	/** How the entries are arranged. "inline" flows like text. Default: "vertical". */
+	layout?: (typeof LEGEND_LAYOUTS)[number];
+	entries: StateLegendEntry[];
+}
+
+/** A row of the legend: a color, or a symbol in this color, and a text. */
+export interface StateLegendEntry {
+	color: string;
+	/** Index of a marker symbol. Without it, the entry shows a color swatch. */
+	symbol?: number;
+	label: string;
 }
 
 /**
