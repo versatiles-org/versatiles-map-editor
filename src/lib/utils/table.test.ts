@@ -80,6 +80,6 @@ describe('guessColumns', () => {
 			longitude: 2,
 			popup: 3
 		});
-		expect(guessColumns(['Adresse', 'Titel'])).toStrictEqual({ address: 0, label: 1 });
+		expect(guessColumns(['Adresse', 'Titel', 'Kategorie'])).toStrictEqual({ address: 0, label: 1, category: 2 });
 	});
 });

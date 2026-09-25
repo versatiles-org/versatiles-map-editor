@@ -1118,4 +1118,42 @@ test.describe('importing a table', () => {
 			.poll(() => markers(page).map((m) => [m.point, m.style?.label]))
 			.toStrictEqual([[[13.4, 52.5], 'Bäckerei']]);
 	});
+
+	test('styled by a category column, with a legend', async ({ page }) => {
+		const dialog = await openImport(page);
+		await dialog
+			.getByLabel('Or paste the table here:')
+			.fill('lat,lon,Kategorie\n52.50,13.40,Cafe\n52.51,13.41,Shop\n52.52,13.42,Cafe\n52.53,13.43,');
+		await dialog.getByRole('button', { name: 'Continue' }).click();
+
+		// the category column is recognized, and each value gets a color of the color scheme
+		await expect(dialog.getByRole('combobox', { name: 'Category' })).toHaveValue('2');
+		const categories = dialog.getByRole('group', { name: 'Style per category' });
+		await expect(categories.getByRole('button', { name: /^Cafe \(2\)/ })).toHaveText('#4477aa');
+		await expect(categories.getByRole('button', { name: /^Shop \(1\)/ })).toHaveText('#ee6677');
+		await expect(categories.getByRole('button', { name: /^\(empty\) \(1\)/ })).toHaveText('#228833');
+
+		// the colors can be changed
+		await categories.getByRole('button', { name: /^Shop/ }).first().click();
+		await categories.getByLabel('Hex').fill('#000000');
+		await categories.getByLabel('Hex').press('Enter');
+
+		await dialog.getByRole('button', { name: 'Import 4 rows' }).click();
+		await expect(dialog.getByText('Imported 4 markers.')).toBeVisible();
+
+		const colors = () => (stateInUrl(page).elements as StateElementMarker[]).map((m) => m.style?.color?.toLowerCase());
+		await expect.poll(colors).toStrictEqual(['#4477aa', '#000000', '#4477aa', '#228833']);
+		await expect
+			.poll(() => stateInUrl(page).meta?.legend?.entries.map((e) => [e.label, e.color.toLowerCase()]))
+			.toStrictEqual([
+				['Cafe', '#4477aa'],
+				['Shop', '#000000'],
+				['(empty)', '#228833']
+			]);
+		await expect(page.getByRole('list', { name: 'Legend' }).getByRole('listitem')).toHaveText([
+			'Cafe',
+			'Shop',
+			'(empty)'
+		]);
+	});
 });

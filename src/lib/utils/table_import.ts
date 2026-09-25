@@ -9,6 +9,8 @@ export interface TableMapping {
 	popup?: number;
 	/** The style of all markers. */
 	style?: StateStyle;
+	/** A column whose values get their own style, e.g. a color per kind of place. */
+	category?: { column: number; styles: Record<string, StateStyle> };
 }
 
 export interface FailedRow {
@@ -34,6 +36,16 @@ export interface ImportOptions extends Pick<GeocodingOptions, 'language' | 'near
 // Requests at the same time, so a long list is fast without overloading the geocoding service
 const GEOCODING_CONCURRENCY = 2;
 
+/** The distinct values of a column, trimmed, in order of appearance, with the number of rows. */
+export function columnValues(table: Table, column: number): { value: string; count: number }[] {
+	const counts = new Map<string, number>();
+	for (const row of table.rows) {
+		const value = row[column].trim();
+		counts.set(value, (counts.get(value) ?? 0) + 1);
+	}
+	return [...counts].map(([value, count]) => ({ value, count }));
+}
+
 /** Create a marker for each row. Rows without a valid position are reported, not imported. */
 export async function importTable(
 	table: Table,
@@ -46,7 +58,9 @@ export async function importTable(
 	const marker = (row: string[], point: [number, number]): StateElementMarker => {
 		const element: StateElementMarker = { type: 'marker', point };
 		const label = mapping.label != null ? row[mapping.label].trim() : '';
-		if (mapping.style || label) element.style = { ...mapping.style, ...(label ? { label } : {}) };
+		const category = mapping.category && mapping.category.styles[row[mapping.category.column].trim()];
+		const style = { ...mapping.style, ...category, ...(label ? { label } : {}) };
+		if (Object.keys(style).length > 0) element.style = style;
 		const popup = mapping.popup != null ? row[mapping.popup].trim() : '';
 		if (popup) element.popup = { text: popup };
 		return element;

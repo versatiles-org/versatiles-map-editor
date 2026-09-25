@@ -118,14 +118,15 @@ export function parseNumber(value: string | undefined): number | undefined {
 	return Number(text.replace(',', '.'));
 }
 
-export type ColumnRole = 'latitude' | 'longitude' | 'address' | 'label' | 'popup';
+export type ColumnRole = 'latitude' | 'longitude' | 'address' | 'label' | 'popup' | 'category';
 
 const ROLE_NAMES: Record<ColumnRole, RegExp> = {
 	latitude: /^(lat|latitude|breite|breitengrad|y)$/i,
 	longitude: /^(lon|lng|long|longitude|länge|laenge|längengrad|x)$/i,
 	address: /^(address|adresse|anschrift|location|ort|place|standort|street|straße|strasse)$/i,
 	label: /^(name|title|titel|label|bezeichnung)$/i,
-	popup: /^(description|beschreibung|popup|info|text|details|notes?|notiz)$/i
+	popup: /^(description|beschreibung|popup|info|text|details|notes?|notiz)$/i,
+	category: /^(category|kategorie|type|typ|art|kind|group|gruppe|class|klasse)$/i
 };
 
 /** Guess the column of each role from the column names. */

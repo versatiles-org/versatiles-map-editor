@@ -5,7 +5,14 @@
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 	import { guessColumns, parseTable, type Table } from '$lib/utils/table.js';
-	import { importTable, type FailedRow } from '$lib/utils/table_import.js';
+	import { columnValues, importTable, type FailedRow } from '$lib/utils/table_import.js';
+	import { getColorScheme } from '$lib/utils/color_schemes.js';
+	import { config } from '$lib/utils/config.js';
+	import type { StateStyle } from '$lib/codec/types.js';
+	import { get } from 'svelte/store';
+
+	// More values are no categories, e.g. names
+	const MAX_CATEGORIES = 30;
 	import { SYMBOL_DEFAULTS } from '$lib/codec/profile.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -28,6 +35,11 @@
 	let popup = $state(-1);
 	let color = $state(SYMBOL_DEFAULTS.color);
 	let symbol: number | undefined = $state(SYMBOL_DEFAULTS.pattern);
+	// -1: none
+	let category = $state(-1);
+	let categories: { value: string; count: number; color: string; symbol: number | undefined }[] = $state([]);
+	let tooManyCategories = $state(0);
+	let addLegend = $state(true);
 
 	let progress = $state({ done: 0, total: 0 });
 	let controller: AbortController | undefined;
@@ -64,7 +76,23 @@
 		address = guess.address ?? 0;
 		label = guess.label ?? -1;
 		popup = guess.popup ?? -1;
+		setCategory(guess.category ?? -1);
 		step = 'mapping';
+	}
+
+	/** Each value of the category column gets a color of the map's color scheme. */
+	function setCategory(column: number) {
+		category = column;
+		categories = [];
+		tooManyCategories = 0;
+		if (column < 0 || !table) return;
+		const values = columnValues(table, column);
+		if (values.length > MAX_CATEGORIES) {
+			tooManyCategories = values.length;
+			return;
+		}
+		const colors = getColorScheme(get(manager.colors.scheme), get(config).colorSchemes).colors;
+		categories = values.map(({ value, count }, i) => ({ value, count, color: colors[i % colors.length], symbol }));
 	}
 
 	async function runImport() {
@@ -80,7 +108,14 @@
 					position: positionType === 'coordinates' ? { latitude, longitude } : { address },
 					label: label >= 0 ? label : undefined,
 					popup: popup >= 0 ? popup : undefined,
-					style: { color, ...(symbol !== undefined ? { pattern: symbol } : {}) }
+					style: styleOf(color, symbol),
+					category:
+						categories.length > 0
+							? {
+									column: category,
+									styles: Object.fromEntries(categories.map((c) => [c.value, styleOf(c.color, c.symbol)]))
+								}
+							: undefined
 				},
 				{
 					signal: controller.signal,
@@ -92,6 +127,12 @@
 			);
 			showPoints(result.markers.map((m) => m.point));
 			manager.addElements(result.markers);
+			if (addLegend && categories.length > 0 && result.markers.length > 0) {
+				// added to an existing legend
+				const legend = get(manager.legend) ?? { entries: [] };
+				const entries = categories.map((c) => ({ color: c.color, symbol: c.symbol, label: c.value || '(empty)' }));
+				manager.legend.set({ ...legend, entries: [...legend.entries, ...entries] });
+			}
 			if (result.markers.length > 0) manager.state.log();
 			imported = result.markers.length;
 			failed = result.failed;
@@ -100,6 +141,10 @@
 			if (controller.signal.aborted) step = 'mapping';
 			else throw error;
 		}
+	}
+
+	function styleOf(color: string, symbol: number | undefined): StateStyle {
+		return { color, ...(symbol !== undefined ? { pattern: symbol } : {}) };
 	}
 
 	/** Move the map to the imported markers. */
@@ -136,7 +181,7 @@
 			<button class="btn" disabled={!text.trim()} onclick={() => startMapping(undefined)}>Continue</button>
 		{:else if step === 'mapping' && table}
 			<label class="checkbox">
-				<input type="checkbox" bind:checked={hasHeader} />
+				<input type="checkbox" bind:checked={hasHeader} onchange={() => setCategory(category)} />
 				The first row contains the column names
 			</label>
 
@@ -212,8 +257,34 @@
 					<InputRow id="{uid}-symbol" label="Symbol">
 						<SymbolSelector id="{uid}-symbol" bind:symbolIndex={symbol} map={manager.map} />
 					</InputRow>
+					{@render columnSelect('category', 'Category', () => category, setCategory, true)}
 				</fieldset>
 			</div>
+
+			{#if tooManyCategories > 0}
+				<p class="warning">
+					The category column has {tooManyCategories} different values. Categories are for a few values (at most
+					{MAX_CATEGORIES}), like kinds of places.
+				</p>
+			{:else if categories.length > 0}
+				<fieldset class="categories">
+					<legend>Style per category</legend>
+					{#each categories as c, i (c.value)}
+						<div class="category">
+							<span id="{uid}-category-{i}-label">{c.value || '(empty)'} ({c.count})</span>
+							<div class="picker">
+								<ColorPicker id="{uid}-category-{i}" bind:value={c.color} palette={manager.colors} />
+							</div>
+							<span id="{uid}-category-{i}-symbol-label" hidden>Symbol of {c.value || '(empty)'}</span>
+							<SymbolSelector id="{uid}-category-{i}-symbol" bind:symbolIndex={c.symbol} map={manager.map} />
+						</div>
+					{/each}
+					<label class="checkbox">
+						<input type="checkbox" bind:checked={addLegend} />
+						Add the categories to the legend
+					</label>
+				</fieldset>
+			{/if}
 
 			<div class="buttons">
 				<button class="btn" onclick={() => (step = 'input')}>Back</button>
@@ -306,6 +377,34 @@
 		fieldset > label {
 			display: block;
 		}
+	}
+
+	.categories {
+		margin: 0;
+		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
+		border-radius: 4px;
+	}
+
+	.category {
+		display: grid;
+		/* wide enough for the opened color picker */
+		grid-template-columns: minmax(8em, max-content) 16em 12em;
+		justify-content: start;
+		align-items: start;
+		gap: var(--btn-gap);
+		margin-bottom: var(--btn-gap);
+	}
+
+	.picker {
+		display: flex;
+		flex-wrap: wrap;
+		:global(.color-button) {
+			width: 100%;
+		}
+	}
+
+	.warning {
+		color: #a40;
 	}
 
 	.buttons {

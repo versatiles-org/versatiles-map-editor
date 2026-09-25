@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { importTable } from './table_import.js';
+import { columnValues, importTable } from './table_import.js';
 import { parseTable } from './table.js';
 import type { geocode } from './geocoding.js';
 
@@ -67,5 +67,31 @@ describe('importTable', () => {
 			importTable(table, { position: { address: 0 } }, { geocoder, signal: controller.signal })
 		).rejects.toThrow();
 		expect(geocoder.mock.calls.length).toBeLessThan(4);
+	});
+
+	it('styles the markers by a category column', async () => {
+		const table = parseTable('lat,lon,kind\n1,2,Cafe\n3,4,Shop\n5,6, Cafe \n7,8,Other');
+		const { markers } = await importTable(table, {
+			position: { latitude: 0, longitude: 1 },
+			style: { color: '#ff0000', pattern: 38 },
+			category: { column: 2, styles: { Cafe: { color: '#0000ff', pattern: 12 }, Shop: { color: '#00ff00' } } }
+		});
+		expect(markers.map((m) => m.style)).toStrictEqual([
+			{ color: '#0000ff', pattern: 12 },
+			{ color: '#00ff00', pattern: 38 },
+			{ color: '#0000ff', pattern: 12 },
+			{ color: '#ff0000', pattern: 38 }
+		]);
+	});
+});
+
+describe('columnValues', () => {
+	it('lists the distinct values with their number of rows', () => {
+		const table = parseTable('kind\nCafe\nShop\n Cafe\n\u0020\nBar', true);
+		expect(columnValues(table, 0)).toStrictEqual([
+			{ value: 'Cafe', count: 2 },
+			{ value: 'Shop', count: 1 },
+			{ value: 'Bar', count: 1 }
+		]);
 	});
 });
