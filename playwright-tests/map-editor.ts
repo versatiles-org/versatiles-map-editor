@@ -283,6 +283,14 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	await expect(deleteButton).toBeHidden();
 });
 
+test('keeps an opened map in the URL', async ({ page }) => {
+	const state = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point: [13.4, 52.5] }] };
+	await page.goto('/#' + encodeState(state as MapState));
+	await waitForMapIsReady(page);
+	// the viewport is written before the elements have loaded, which must not drop them
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});
+
 test('keeps the map in the URL across reloads', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);

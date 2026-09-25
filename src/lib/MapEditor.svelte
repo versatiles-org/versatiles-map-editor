@@ -84,7 +84,9 @@
 			console.error('Invalid map state in URL hash', error);
 			return false;
 		}
-		geometryManager.loadState(state).catch((error) => console.error('Failed to load map state', error));
+		// The viewport changes (and is persisted) at once, but the elements only after the style has
+		// loaded, so the URL must be written again. Otherwise a reload would lose the elements.
+		geometryManager.loadState(state).then(requestPersist, (error) => console.error('Failed to load map state', error));
 		return true;
 	}
 
