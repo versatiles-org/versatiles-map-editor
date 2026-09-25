@@ -1351,3 +1351,40 @@ test.describe('overlays of the viewer on a phone', () => {
 		}
 	}
 });
+
+test('Enter searches at once and goes to the first result', async ({ page }) => {
+	const queries: string[] = [];
+	await page.route('https://geocode.versatiles.org/**', (route) => {
+		const q = new URL(route.request().url()).searchParams.get('q')!;
+		queries.push(q);
+		const places: Record<string, [number, number]> = { Hamburg: [10, 53.55], 'Hamburg Altona': [9.93, 53.55] };
+		const features = Object.entries(places)
+			.filter(([name]) => name.startsWith(q))
+			.map(([name, coordinates]) => ({
+				type: 'Feature',
+				properties: { name },
+				geometry: { type: 'Point', coordinates }
+			}));
+		return route.fulfill({ json: { type: 'FeatureCollection', features } });
+	});
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const lng = () => page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().lng);
+	const search = page.getByRole('combobox', { name: 'Search address or place' });
+
+	// Enter right after typing, before the suggestions arrive
+	await search.fill('Hamburg');
+	await search.press('Enter');
+	await expect.poll(lng).toBeCloseTo(10, 1);
+	await expect(search).toHaveValue('Hamburg');
+	// one request, instead of one after a pause in typing too
+	expect(queries).toStrictEqual(['Hamburg']);
+
+	// Enter with suggestions of an older text: the current text is searched
+	await search.fill('Hamburg');
+	await expect(page.getByRole('listbox', { name: 'Search results' }).getByRole('option')).toHaveCount(2);
+	await search.pressSequentially(' Altona');
+	await search.press('Enter');
+	await expect.poll(lng).toBeCloseTo(9.93, 1);
+	await expect(search).toHaveValue('Hamburg Altona');
+});

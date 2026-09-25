@@ -22,6 +22,10 @@
 	let selected: GeocodingResult | undefined = $state();
 
 	let timeout: ReturnType<typeof setTimeout> | undefined;
+	// the query of the results
+	let resultsQuery = '';
+	// select the first result when it arrives, after Enter
+	let selectFirst = false;
 	let controller: AbortController | undefined;
 
 	$effect(() => () => {
@@ -33,6 +37,7 @@
 		clearTimeout(timeout);
 		controller?.abort();
 		selected = undefined;
+		selectFirst = false;
 		const text = query.trim();
 		if (text.length < 2) {
 			results = [];
@@ -45,6 +50,8 @@
 	}
 
 	async function search(text: string) {
+		clearTimeout(timeout);
+		controller?.abort();
 		controller = new AbortController();
 		const signal = controller.signal;
 		status = 'searching';
@@ -59,13 +66,18 @@
 			});
 			if (signal.aborted) return;
 			results = found;
+			resultsQuery = text;
 			active = found.length > 0 ? 0 : -1;
 			status = found.length > 0 ? 'idle' : 'empty';
+			// Enter was pressed before the results arrived
+			if (selectFirst && found.length > 0) select(found[0]);
+			selectFirst = false;
 		} catch (error) {
 			if (signal.aborted) return;
 			console.error(error);
 			results = [];
 			status = 'error';
+			selectFirst = false;
 		}
 	}
 
@@ -103,12 +115,21 @@
 				open = true;
 				active = (active + (e.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
 				break;
-			case 'Enter':
-				if (open && results[active]) {
+			case 'Enter': {
+				const text = query.trim();
+				// the results of what was typed
+				if (open && results[active] && resultsQuery === text) {
 					e.preventDefault();
 					select(results[active]);
+				} else if (text.length >= 2) {
+					// no results (yet): search at once, without waiting for a pause in typing,
+					// and go to the first result
+					e.preventDefault();
+					selectFirst = true;
+					search(text);
 				}
 				break;
+			}
 			case 'Escape':
 				if (open) {
 					e.preventDefault();
