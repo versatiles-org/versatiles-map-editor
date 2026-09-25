@@ -250,6 +250,21 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 	});
 });
 
+describe('background', () => {
+	const background = { builder: 'osm' as const, options: { theme: 'gray' } };
+
+	it('round-trips as the meta member', () => {
+		const doc = stateToGeoJSON({ meta: { background }, elements: [] });
+		expect(doc.meta).toStrictEqual({ background });
+		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ background });
+	});
+
+	it('ignores invalid backgrounds', () => {
+		const doc = { type: 'FeatureCollection', features: [], meta: { background: { builder: 'x', options: {} } } };
+		expect(stateFromGeoJSON(doc as GeoJSONDocument)).toStrictEqual({ elements: [] });
+	});
+});
+
 describe('popups', () => {
 	it('are written as the description property', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [0, 0], popup: { text: 'Hello' } }] });

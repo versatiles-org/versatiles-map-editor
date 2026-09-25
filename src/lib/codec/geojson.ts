@@ -4,12 +4,14 @@ import type {
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
-	StateElementPolygon
+	StateElementPolygon,
+	StateMetadata
 } from './types.js';
 import {
 	fillPropsFromStyle,
 	fillStyleFromProps,
 	popupFromProps,
+	sanitizeBackground,
 	sanitizeNumber,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
@@ -23,6 +25,8 @@ import {
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	map?: { center: [number, number]; radius: number };
+	/** Properties of the whole map, e.g. its background. */
+	meta?: StateMetadata;
 };
 
 type Point = [number, number];
@@ -99,6 +103,7 @@ export function stateToGeoJSON(state: StateRoot): GeoJSONDocument {
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
 	if (state.map) doc.map = { center: state.map.center, radius: state.map.radius };
+	if (state.meta?.background) doc.meta = { background: state.meta.background };
 	return doc;
 }
 
@@ -239,6 +244,10 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): StateR
 		const center = toPoint(doc.map.center);
 		const radius = sanitizeNumber(doc.map.radius, 0);
 		if (center && radius !== undefined) state.map = { center, radius };
+	}
+	if (doc.type === 'FeatureCollection' && 'meta' in doc && doc.meta) {
+		const background = sanitizeBackground(doc.meta.background);
+		if (background) state.meta = { background };
 	}
 	return state;
 }

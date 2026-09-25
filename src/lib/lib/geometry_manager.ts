@@ -4,9 +4,9 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
-import type { StateRoot, StateElement } from '$lib/codec/types.js';
+import type { StateBackground, StateRoot, StateElement } from '$lib/codec/types.js';
 import { get, writable, type Writable } from 'svelte/store';
-import { inlineSources } from '@versatiles/style';
+import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
@@ -42,73 +42,60 @@ export class GeometryManager {
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
 	public readonly colors: ColorPalette | null = null;
+	/**
+	 * Functions that add the images the editor generates (e.g. fill patterns), by image id.
+	 * A new background map removes all images, and MapLibre asks for them again.
+	 */
+	public readonly imageResolvers = new Map<string, () => void>();
+	/** The background map. Undefined for the editor's default background. */
+	public readonly background: Writable<StateBackground | undefined> = writable(undefined);
 	private destroyed = false;
 	private readonly abortController = new AbortController();
 	// The map has no style until inlineSources() finishes, so elements must wait for it
 	private styleLoaded = false;
+	private styleRequest = 0;
 
 	constructor(map: maplibregl.Map) {
 		this.elements = writable([]);
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
-		this.map.once('style.load', () => (this.styleLoaded = true));
+		this.map.on('style.load', () => (this.styleLoaded = true));
+		this.map.setMissingStyleImageResolver((id) => this.imageResolvers.get(id)?.());
+		void this.loadStyle(undefined);
+	}
 
-		const style = getMapStyle({ darkMode: false });
-		style.transition = { duration: 0, delay: 0 };
+	/** Show another background map. The background is set at once; resolves when its style is loaded. */
+	public async setBackground(background?: StateBackground) {
+		if (sameBackground(background, get(this.background))) return;
+		this.background.set(background);
+		await this.loadStyle(background);
+	}
 
-		// Highlights the element with a popup under the pointer in the viewer, below all elements
-		style.sources.highlight = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
-		style.layers.push(
-			{
-				id: 'highlight_line',
-				source: 'highlight',
-				type: 'line',
-				filter: ['!=', ['geometry-type'], 'Point'],
-				paint: { 'line-color': '#000000', 'line-opacity': 0.2, 'line-width': 10, 'line-blur': 2 }
-			},
-			{
-				id: 'highlight_point',
-				source: 'highlight',
-				type: 'circle',
-				filter: ['==', ['geometry-type'], 'Point'],
-				paint: { 'circle-color': '#000000', 'circle-opacity': 0.2, 'circle-radius': 16, 'circle-blur': 0.3 }
-			}
-		);
-
-		style.sources.selection_nodes = {
-			type: 'geojson',
-			data: { type: 'FeatureCollection', features: [] }
-		};
-		style.layers.push({
-			id: 'selection_nodes',
-			source: 'selection_nodes',
-			type: 'circle',
-			layout: {},
-			paint: {
-				// the selected node is filled, like in vector graphics software
-				'circle-color': ['case', ['boolean', ['get', 'selected'], false], '#000000', '#ffffff'],
-				'circle-opacity': ['get', 'opacity'],
-				// larger nodes are easier to see and hit with a finger
-				'circle-radius': hasCoarsePointer() ? 6 : 3,
-				'circle-stroke-color': '#000000',
-				'circle-stroke-opacity': ['get', 'opacity'],
-				'circle-stroke-width': 1
-			}
-		});
+	private async loadStyle(background: StateBackground | undefined) {
+		const request = ++this.styleRequest;
+		const style = buildStyle(background);
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
 		// The download is aborted and its result ignored once the manager is destroyed.
 		const signal = this.abortController.signal;
-		inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) }).then(
-			(inlined) => {
-				if (!this.destroyed) map.setStyle(inlined);
-			},
-			(error) => {
-				if (this.destroyed) return; // includes the AbortError caused by destroy()
-				console.error('Failed to inline map style sources', error);
-				map.setStyle(style);
-			}
-		);
+		let inlined = style;
+		try {
+			inlined = await inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) });
+		} catch (error) {
+			if (this.destroyed) return; // includes the AbortError caused by destroy()
+			console.error('Failed to inline map style sources', error);
+		}
+		// a newer background replaces this one
+		if (this.destroyed || request !== this.styleRequest) return;
+
+		this.styleLoaded = false;
+		const loaded = new Promise((resolve) => this.map.once('style.load', resolve));
+		// Always a full reload, which is predictable. The elements keep their sources and layers.
+		this.map.setStyle(inlined, {
+			diff: false,
+			transformStyle: (previous, next) => keepElements(previous, next, get(this.elements))
+		});
+		await loaded;
 	}
 
 	/** Stop pending work and remove all elements. Call before removing the map. */
@@ -186,6 +173,8 @@ export class GeometryManager {
 		this.clear();
 
 		if (state.map) this.fitViewport(state.map);
+		// Only awaited when it changes, so an unchanged background restores the elements at once
+		if (!sameBackground(state.meta?.background, get(this.background))) await this.setBackground(state.meta?.background);
 
 		if (!this.styleLoaded) {
 			await new Promise((r) => this.map.once('style.load', r));
@@ -201,4 +190,80 @@ export class GeometryManager {
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */
 function hasCoarsePointer(): boolean {
 	return typeof matchMedia === 'function' && matchMedia('(pointer: coarse)').matches;
+}
+
+function sameBackground(a: StateBackground | undefined, b: StateBackground | undefined): boolean {
+	return JSON.stringify(a) === JSON.stringify(b);
+}
+
+/** The background map with the editor's own layers: the highlight and the selection nodes. */
+function buildStyle(background: StateBackground | undefined): StyleSpecification {
+	const style = getMapStyle(background);
+	style.transition = { duration: 0, delay: 0 };
+
+	// Highlights the element with a popup under the pointer in the viewer, below all elements
+	style.sources.highlight = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+	style.layers.push(
+		{
+			id: 'highlight_line',
+			source: 'highlight',
+			type: 'line',
+			filter: ['!=', ['geometry-type'], 'Point'],
+			paint: { 'line-color': '#000000', 'line-opacity': 0.2, 'line-width': 10, 'line-blur': 2 }
+		},
+		{
+			id: 'highlight_point',
+			source: 'highlight',
+			type: 'circle',
+			filter: ['==', ['geometry-type'], 'Point'],
+			paint: { 'circle-color': '#000000', 'circle-opacity': 0.2, 'circle-radius': 16, 'circle-blur': 0.3 }
+		}
+	);
+
+	style.sources.selection_nodes = {
+		type: 'geojson',
+		data: { type: 'FeatureCollection', features: [] }
+	};
+	style.layers.push({
+		id: 'selection_nodes',
+		source: 'selection_nodes',
+		type: 'circle',
+		layout: {},
+		paint: {
+			// the selected node is filled, like in vector graphics software
+			'circle-color': ['case', ['boolean', ['get', 'selected'], false], '#000000', '#ffffff'],
+			'circle-opacity': ['get', 'opacity'],
+			// larger nodes are easier to see and hit with a finger
+			'circle-radius': hasCoarsePointer() ? 6 : 3,
+			'circle-stroke-color': '#000000',
+			'circle-stroke-opacity': ['get', 'opacity'],
+			'circle-stroke-width': 1
+		}
+	});
+	return style;
+}
+
+/**
+ * Move the sources and layers of the elements, and the current selection nodes and highlight,
+ * from the previous style into the next one. The element layers stay between the highlight and
+ * the selection nodes.
+ */
+export function keepElements(
+	previous: StyleSpecification | undefined,
+	next: StyleSpecification,
+	elements: AbstractElement[]
+): StyleSpecification {
+	if (!previous) return next;
+	const sources = { ...next.sources };
+	for (const id of [...elements.map((e) => e.sourceId), 'highlight', 'selection_nodes']) {
+		if (previous.sources[id]) sources[id] = previous.sources[id];
+	}
+	const elementSources = new Set(elements.map((e) => e.sourceId));
+	const elementLayers = previous.layers.filter((layer) => 'source' in layer && elementSources.has(layer.source));
+	const index = next.layers.findIndex((layer) => layer.id === 'selection_nodes');
+	return {
+		...next,
+		sources,
+		layers: [...next.layers.slice(0, index), ...elementLayers, ...next.layers.slice(index)]
+	};
 }

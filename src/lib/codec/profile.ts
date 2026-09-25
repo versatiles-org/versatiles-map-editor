@@ -1,5 +1,5 @@
 import { Color } from '@versatiles/style';
-import type { StatePopup, StateStyle } from './types.js';
+import type { StateBackground, StatePopup, StateStyle } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
 
 // ---------------------------------------------------------------------------
@@ -186,4 +186,15 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undefined {
 	const text = sanitizeString(p?.description);
 	return text?.trim() ? { text } : undefined;
+}
+
+// ----- background map -----
+
+/** A valid background, or undefined. The options are not checked, since they belong to `@versatiles/style`. */
+export function sanitizeBackground(value: unknown): StateBackground | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const { builder, options } = value as Record<string, unknown>;
+	if (builder !== 'osm' && builder !== 'satellite') return undefined;
+	if (typeof options !== 'object' || options === null || Array.isArray(options)) return undefined;
+	return { builder, options: options as Record<string, unknown> };
 }

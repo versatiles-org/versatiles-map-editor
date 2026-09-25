@@ -1,13 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getMapStyle, isDarkMode } from './map_style.js';
-import { osm } from '@versatiles/style';
-import { getLanguage } from './location.js';
+import { osm, satellite } from '@versatiles/style';
 
 vi.mock('@versatiles/style', { spy: true });
-
-vi.mock('./location.js', () => ({
-	getLanguage: vi.fn()
-}));
 
 describe('src/lib/utils/map_style.ts', () => {
 	beforeEach(() => {
@@ -15,44 +10,31 @@ describe('src/lib/utils/map_style.ts', () => {
 	});
 
 	describe('getMapStyle', () => {
-		it('should call osm with dark mode options', () => {
-			vi.mocked(getLanguage).mockReturnValue('en');
-			getMapStyle({ darkMode: true });
+		const fixed = { urls: { base: 'https://tiles.versatiles.org' }, projection: 'mercator' };
 
-			expect(osm).toHaveBeenCalledWith({
-				urls: { base: 'https://tiles.versatiles.org' },
-				text: { language: 'en' },
-				theme: 'colorful-dark',
-				projection: 'mercator'
-			});
+		it('builds the default background with labels in the browser language', () => {
+			getMapStyle();
+			expect(osm).toHaveBeenCalledWith({ text: { language: 'user' }, ...fixed });
 		});
 
-		it('should call osm with light mode options', () => {
-			vi.mocked(getLanguage).mockReturnValue('de');
-			getMapStyle({ darkMode: false });
-			expect(osm).toHaveBeenCalledWith({
-				urls: { base: 'https://tiles.versatiles.org' },
-				text: { language: 'de' },
-				theme: 'colorful',
-				projection: 'mercator'
-			});
+		it('builds the stored background', () => {
+			getMapStyle({ builder: 'osm', options: { theme: 'gray' } });
+			expect(osm).toHaveBeenCalledWith({ theme: 'gray', ...fixed });
+			getMapStyle({ builder: 'satellite', options: { osmOverlay: false } });
+			expect(satellite).toHaveBeenCalledWith({ osmOverlay: false, ...fixed });
 		});
 
-		it('should fall back to local language if none is detected', () => {
-			vi.mocked(getLanguage).mockReturnValue(null);
-			getMapStyle({ darkMode: true });
-			expect(osm).toHaveBeenCalledWith({
-				urls: { base: 'https://tiles.versatiles.org' },
-				text: { language: 'local' },
-				theme: 'colorful-dark',
-				projection: 'mercator'
-			});
+		it('never takes the tile server from the options', () => {
+			getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.org' }, projection: 'globe' } });
+			expect(osm).toHaveBeenCalledWith(fixed);
 		});
 
-		it('should set the transition duration', () => {
-			vi.mocked(getLanguage).mockReturnValue('en');
-			const style = getMapStyle({ darkMode: false, transitionDuration: 100 });
-			expect(style.transition).toEqual({ duration: 100, delay: 0 });
+		it('falls back to the default background for invalid options', () => {
+			const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const style = getMapStyle({ builder: 'osm', options: { theme: 'no such theme' } });
+			expect(error).toHaveBeenCalled();
+			expect(osm).toHaveBeenLastCalledWith({ text: { language: 'user' }, ...fixed });
+			expect(style.layers.length).toBeGreaterThan(0);
 		});
 	});
 

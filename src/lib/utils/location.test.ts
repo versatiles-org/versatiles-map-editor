@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getCountryCode, getLanguage } from './location.js';
+import { getCountryCode } from './location.js';
 import { timezone2countrycode } from './zones.js';
 
 // Mock the `timezone2countrycode` function
@@ -52,35 +52,6 @@ describe('src/lib/utils/location.ts', () => {
 			});
 
 			expect(getCountryCode()).toBeNull();
-		});
-	});
-
-	describe('getLanguage', () => {
-		it('should return "en" for English locale (USA)', () => {
-			mockResolvedOptions({ locale: 'en-US' });
-			expect(getLanguage()).toBe('en');
-		});
-
-		it('should return "en" for English locale (UK)', () => {
-			mockResolvedOptions({ locale: 'en-GB' });
-			expect(getLanguage()).toBe('en');
-		});
-
-		it('should return "de" for German locale', () => {
-			mockResolvedOptions({ locale: 'de-DE' });
-			expect(getLanguage()).toBe('de');
-		});
-
-		it('should return null for unsupported locales', () => {
-			mockResolvedOptions({ locale: 'fr-FR' });
-			expect(getLanguage()).toBeNull();
-		});
-
-		it('should handle errors gracefully and return null', () => {
-			vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions').mockImplementation(() => {
-				throw new Error('Test error');
-			});
-			expect(getLanguage()).toBeNull();
 		});
 	});
 });

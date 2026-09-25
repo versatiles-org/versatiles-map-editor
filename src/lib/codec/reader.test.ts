@@ -557,3 +557,29 @@ describe('popups', () => {
 		expect(() => new StateReader(writer.bits).readPopup()).toThrow('Error reading popup');
 	});
 });
+
+describe('background', () => {
+	it('round-trips any options', () => {
+		const state: StateRoot = {
+			meta: {
+				background: {
+					builder: 'satellite',
+					options: { osmOverlay: { text: { language: 'de', spacing: 1.5 }, layers: { labels: false } } }
+				}
+			},
+			elements: []
+		};
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+
+	it('rejects invalid backgrounds', () => {
+		for (const json of ['{"builder":"other","options":{}}', '{"builder":"osm","options":[]}', 'null', '{']) {
+			const writer = new StateWriter();
+			writer.writeBit(true);
+			writer.writeInteger(2, 6);
+			writer.writeString(json);
+			writer.writeInteger(0, 6);
+			expect(() => new StateReader(writer.bits).readMetadata()).toThrow('Error reading metadata');
+		}
+	});
+});

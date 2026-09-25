@@ -34,7 +34,6 @@ export class SelectionHandler {
 	);
 	public readonly selectedNode: Writable<SelectedNode | undefined> = writable(undefined);
 	private selectedNodeIndex: number | undefined;
-	private selectionNodes: maplibregl.GeoJSONSource | undefined;
 	private manager: GeometryManagerInteractive;
 
 	constructor(manager: GeometryManagerInteractive) {
@@ -229,8 +228,8 @@ export class SelectionHandler {
 				: undefined
 		);
 
-		if (!this.selectionNodes) this.selectionNodes = this.manager.map.getSource('selection_nodes')!;
-		this.selectionNodes?.setData({
+		// looked up each time, since a new background map replaces the source object
+		this.manager.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({
 			type: 'FeatureCollection',
 			features: nodes.map((n) => ({
 				type: 'Feature',

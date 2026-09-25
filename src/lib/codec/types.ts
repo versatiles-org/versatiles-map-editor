@@ -53,8 +53,20 @@ export interface StateStyle {
 	visible?: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface StateMetadata {}
+export interface StateMetadata {
+	/** The background map. Without it, the map has the editor's default background. */
+	background?: StateBackground;
+}
+
+/**
+ * A background map built with `@versatiles/style`: the builder and its options, minimized
+ * (e.g. with `osm.minimizeOptions`). Storing the options instead of a preset keeps every
+ * current and future option of `@versatiles/style` available.
+ */
+export interface StateBackground {
+	builder: 'osm' | 'satellite';
+	options: Record<string, unknown>;
+}
 
 /** A popup that opens when the element is clicked or tapped in the viewer. */
 export interface StatePopup {

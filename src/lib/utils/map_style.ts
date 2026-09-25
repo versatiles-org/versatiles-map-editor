@@ -1,24 +1,25 @@
-import { osm, type OsmOptions } from '@versatiles/style';
-import { getLanguage } from './location.js';
+import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpecification } from '@versatiles/style';
+import type { StateBackground } from '$lib/codec/types.js';
+import { DEFAULT_BACKGROUND } from './background.js';
 
-export function getMapStyle(
-	styleOptions: OsmOptions & {
-		darkMode?: boolean;
-		transitionDuration?: number;
-	} = {}
-) {
-	const { darkMode = isDarkMode(), transitionDuration, ...osmOptions } = styleOptions;
-	const style = osm({
-		urls: { base: 'https://tiles.versatiles.org' },
-		text: { language: getLanguage() ?? 'local' },
-		theme: darkMode ? 'colorful-dark' : 'colorful',
-		projection: 'mercator',
-		...osmOptions
-	});
-	if (transitionDuration != null) {
-		style.transition = { duration: transitionDuration, delay: 0 };
+const TILE_SERVER = 'https://tiles.versatiles.org';
+
+/**
+ * The style of the background map. The tile server and the projection are set by the editor,
+ * never by the (shared) options, so a map cannot load tiles or fonts from other servers.
+ */
+export function getMapStyle(background: StateBackground = DEFAULT_BACKGROUND): StyleSpecification {
+	const fixed = { urls: { base: TILE_SERVER }, projection: 'mercator' as const };
+	try {
+		if (background.builder === 'satellite') {
+			return satellite({ ...(background.options as SatelliteOptions), ...fixed });
+		}
+		return osm({ ...(background.options as OsmOptions), ...fixed });
+	} catch (error) {
+		// e.g. options of a newer version of @versatiles/style
+		console.error('Invalid background map options', error);
+		return osm({ ...(DEFAULT_BACKGROUND.options as OsmOptions), ...fixed });
 	}
-	return style;
 }
 
 export function isDarkMode(element?: HTMLElement): boolean {

@@ -81,6 +81,8 @@ export class MapLayerFill extends MapLayer<LayerFill> {
 
 		this.color.subscribe(() => updatePattern());
 		this.pattern.subscribe(() => updatePattern());
+		// A new background map removes all images, so the pattern is added again when it is missing
+		manager.imageResolvers.set(this.patternImageName, updatePattern);
 		this.opacity.subscribe((value) => this.updatePaint('fill-opacity', value));
 	}
 
@@ -89,6 +91,7 @@ export class MapLayerFill extends MapLayer<LayerFill> {
 	}
 
 	destroy(): void {
+		this.manager.imageResolvers.delete(this.patternImageName);
 		super.destroy();
 		if (this.map.hasImage(this.patternImageName)) this.map.removeImage(this.patternImageName);
 	}

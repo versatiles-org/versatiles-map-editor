@@ -28,6 +28,53 @@ const ariaResult = `- region "Map"
 - button "Download ✓"
 - button "Share/Embed ✓"
 - separator
+- button "Background map":
+  - text: Background map
+  - img
+- text: Base map
+- combobox "Base map":
+  - option "Vector map" [selected]
+  - option "Satellite"
+- text: Theme
+- combobox "Theme":
+  - option "Colorful" [selected]
+  - option "Natural"
+  - option "Muted"
+  - option "Gray"
+  - option "Black & white"
+- text: Font
+- combobox "Font":
+  - option "Noto Sans" [selected]
+  - option "Fira Sans"
+  - option "Lato"
+  - option "Libre Baskerville"
+  - option "Merriweather Sans"
+  - option "Nunito"
+  - option "Open Sans"
+  - option "PT Sans"
+  - option "Roboto"
+  - option "Source Sans 3"
+- text: Language
+- combobox "Language":
+  - option "Browser language" [selected]
+  - option "Local names"
+  - option "Arabic"
+  - option "Dutch"
+  - option "English"
+  - option "French"
+  - option "German"
+  - option "Greek"
+  - option "Italian"
+  - option "Polish"
+  - option "Portuguese"
+  - option "Spanish"
+  - option "Ukrainian"
+- text: Labels
+- combobox "Labels":
+  - option "Normal" [selected]
+  - option "Fewer"
+  - option "None"
+- separator
 - button "Import/Export":
   - text: Import/Export
   - img
@@ -543,7 +590,7 @@ test('searching a place', async ({ page }) => {
 
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
 	await search.fill('Brandenburger');
-	const options = page.getByRole('option');
+	const options = page.getByRole('listbox', { name: 'Search results' }).getByRole('option');
 	await expect(options).toHaveText(['Brandenburger Tor, Berlin, Deutschland', 'Tiergarten, Berlin, Deutschland']);
 	// one request after typing, preferring results near the current view
 	expect(requests.length).toBe(1);
@@ -733,4 +780,94 @@ test('copying and pasting a style', async ({ page }) => {
 				.map((s) => JSON.stringify(s))
 		)
 		.toStrictEqual(['{}', '{}']);
+});
+
+test('styling the background map', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.33, 52.47],
+					[13.38, 52.47],
+					[13.38, 52.5]
+				],
+				// a pattern is an image, which a new style must not lose
+				style: { pattern: 1 }
+			},
+			{ type: 'marker', point: [13.42, 52.5] }
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await waitForMapIsIdle(page);
+
+	// what the map shows: the element layers, the images of their patterns, the selection nodes
+	const mapContent = () =>
+		page.evaluate(() => {
+			const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+			// undefined while a new style loads
+			const style = map.getStyle();
+			if (!style) return undefined;
+			const layers = style.layers.filter((l) => 'source' in l && l.source.startsWith('source_'));
+			const nodes = map.getSource<import('maplibre-gl').GeoJSONSource>('selection_nodes')!.serialize().data as {
+				features: unknown[];
+			};
+			return {
+				elementLayers: layers.length,
+				patterns: layers.filter((l) => l.type === 'fill' && map.hasImage('fill-pattern-' + l.id)).length,
+				selectionNodes: nodes.features.length,
+				satellite: 'satellite' in style.sources
+			};
+		});
+	const background = () => stateInUrl(page).meta?.background;
+	const [x, y] = await page.evaluate(() => {
+		const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project([13.36, 52.48]);
+		return [x, y];
+	});
+	await page.mouse.click(x, y);
+	const before = await mapContent();
+	expect(before).toStrictEqual({ elementLayers: 3, patterns: 1, selectionNodes: 6, satellite: false });
+
+	await page.getByRole('button', { name: 'Background map' }).click();
+	await page.getByRole('combobox', { name: 'Theme' }).selectOption('Gray');
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });
+	// the elements, their patterns and the selection survive the new style
+	await waitForMapIsIdle(page);
+	await expect.poll(mapContent).toStrictEqual(before);
+
+	await page.getByRole('combobox', { name: 'Language' }).selectOption('German');
+	await page.getByRole('combobox', { name: 'Labels' }).selectOption('Fewer');
+	await page.getByRole('combobox', { name: 'Base map' }).selectOption('Satellite');
+	// the colors of the vector map do not apply to the satellite map, the labels are kept
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'satellite', options: { osmOverlay: { text: { language: 'de', spacing: 2 } } } });
+	await expect(page.getByRole('combobox', { name: 'Theme' })).toBeHidden();
+	await waitForMapIsIdle(page);
+	await expect.poll(mapContent).toStrictEqual({ ...before, satellite: true });
+
+	// undoable: back to the gray map with fewer German labels
+	const undone = { builder: 'osm', options: { theme: 'gray', text: { language: 'de', spacing: 2 } } };
+	await page.getByRole('button', { name: 'Undo' }).click();
+	// the URL is written throttled, so wait for the final state before reloading
+	await expect.poll(background).toStrictEqual(undone);
+	await expect(page.getByRole('combobox', { name: 'Base map' })).toHaveValue('vector');
+
+	// kept in the URL, and shown in the read-only viewer
+	await page.setViewportSize({ width: 500, height: 500 });
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect(page.getByText('Open this page on a larger screen')).toBeVisible();
+	expect(background()).toStrictEqual(undone);
+	const labelsInGerman = () =>
+		page.evaluate(() =>
+			JSON.stringify((window as unknown as { map: import('maplibre-gl').Map }).map.getStyle()?.layers).includes(
+				'name_de'
+			)
+		);
+	await expect.poll(labelsInGerman).toBe(true);
 });

@@ -9,7 +9,6 @@ import type { GeometryManagerInteractive } from '../geometry_manager_interactive
 export abstract class AbstractElement {
 	protected readonly canvas: HTMLElement;
 	protected readonly map: maplibregl.Map;
-	protected readonly source: maplibregl.GeoJSONSource;
 	protected readonly slug = '_' + Math.random().toString(36).slice(2);
 	protected isSelected = false;
 
@@ -28,7 +27,6 @@ export abstract class AbstractElement {
 			type: 'geojson',
 			data: { type: 'FeatureCollection', features: [] }
 		});
-		this.source = this.map.getSource(this.sourceId)!;
 	}
 
 	public select(value: boolean) {
@@ -59,7 +57,8 @@ export abstract class AbstractElement {
 	}
 
 	protected updateSource() {
-		this.source.setData(this.getFeature());
+		// looked up each time, since a new background map replaces the source object
+		this.map.getSource<maplibregl.GeoJSONSource>(this.sourceId)?.setData(this.getFeature());
 		this.measurements.set(this.getMeasurements());
 	}
 

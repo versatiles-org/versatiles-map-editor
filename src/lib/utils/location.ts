@@ -11,20 +11,6 @@ export function getCountryCode(): string | null {
 	}
 }
 
-export function getLanguage(): string | null {
-	try {
-		const language = Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0].toLowerCase();
-		switch (language) {
-			case 'en':
-			case 'de':
-				return language;
-		}
-		return null;
-	} catch {
-		return null; // Fallback if no country can be determined
-	}
-}
-
 const countryBoundingBoxes: { [key: string]: [number, number, number, number] } = {
 	AF: [60.5, 29.3, 75.2, 38.5],
 	AO: [11.6, -18, 24.1, -4.4],

@@ -144,6 +144,11 @@ export class StateWriter {
 		//	this.writeInteger(1, 6);
 		//	this.writeString(metadata.heading);
 		//}
+		if (metadata.background) {
+			this.writeInteger(2, 6);
+			// as JSON, so any option of @versatiles/style can be stored
+			this.writeString(JSON.stringify(metadata.background));
+		}
 		this.writeInteger(0, 6);
 	}
 

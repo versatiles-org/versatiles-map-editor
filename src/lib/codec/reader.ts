@@ -1,5 +1,6 @@
 import { Color } from '@versatiles/style';
 import type {
+	StateBackground,
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
@@ -10,6 +11,7 @@ import type {
 	StateStyle
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE } from './constants.js';
+import { sanitizeBackground } from './profile.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -204,6 +206,9 @@ export class StateReader {
 					//case 1:
 					//	metadata.heading = this.readString();
 					//	break;
+					case 2:
+						metadata.background = parseBackground(this.readString());
+						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}
@@ -355,4 +360,10 @@ export class StateReader {
 			throw new Error(`Error reading string`, { cause });
 		}
 	}
+}
+
+function parseBackground(json: string): StateBackground {
+	const background = sanitizeBackground(JSON.parse(json));
+	if (!background) throw new Error('Invalid background');
+	return background;
 }

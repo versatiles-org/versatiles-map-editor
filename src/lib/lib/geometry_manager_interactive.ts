@@ -123,11 +123,13 @@ export class GeometryManagerInteractive extends GeometryManager {
 				(bounds.getEast() - bounds.getWest()) * Math.cos((center.lat * Math.PI) / 180)
 			) / 2;
 		const radius = 40074000 * (radiusDegrees / 360);
+		const background = get(this.background);
 		return {
 			map: {
 				center: [center.lng, center.lat],
 				radius
 			},
+			...(background ? { meta: { background } } : {}),
 			elements: get(this.elements).map((element) => element.getState())
 		};
 	}

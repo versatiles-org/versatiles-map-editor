@@ -11,6 +11,7 @@ export class MockGeometryManager {
 	public readonly elements: Writable<AbstractElement[]> = writable([]);
 	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
+	public readonly imageResolvers = new Map<string, () => void>();
 	public readonly state;
 
 	constructor() {
