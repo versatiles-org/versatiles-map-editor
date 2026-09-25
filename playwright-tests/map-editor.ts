@@ -18,6 +18,8 @@ const ariaResult = `- region "Map"
 - button "Undo ✓" [disabled]
 - button "Redo ✓" [disabled]
 - separator
+- combobox "Search address or place"
+- separator
 - button "Map":
   - text: Map
   - img
@@ -510,4 +512,62 @@ test.describe('viewer', () => {
 		await page.mouse.click(cx, cy);
 		await expect(popup).toBeHidden();
 	});
+});
+
+test('searching a place', async ({ page }) => {
+	const requests: URLSearchParams[] = [];
+	let fail = false;
+	await page.route('https://geocode.versatiles.org/**', (route) => {
+		requests.push(new URL(route.request().url()).searchParams);
+		if (fail) return route.fulfill({ status: 500 });
+		const feature = (name: string, coordinates: [number, number], extent?: number[]) => ({
+			type: 'Feature',
+			properties: { name, city: 'Berlin', country: 'Deutschland', extent },
+			geometry: { type: 'Point', coordinates }
+		});
+		return route.fulfill({
+			json: {
+				type: 'FeatureCollection',
+				features: [
+					feature('Brandenburger Tor', [13.3777, 52.5163]),
+					feature('Tiergarten', [13.35, 52.515], [13.33, 52.52, 13.37, 52.51])
+				]
+			}
+		});
+	});
+	await page.goto('/');
+	// the last search fails on purpose
+	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/] });
+	const mapCenter = () =>
+		page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().toArray());
+
+	const search = page.getByRole('combobox', { name: 'Search address or place' });
+	await search.fill('Brandenburger');
+	const options = page.getByRole('option');
+	await expect(options).toHaveText(['Brandenburger Tor, Berlin, Deutschland', 'Tiergarten, Berlin, Deutschland']);
+	// one request after typing, preferring results near the current view
+	expect(requests.length).toBe(1);
+	expect(requests[0].get('q')).toBe('Brandenburger');
+	expect(requests[0].has('lat') && requests[0].has('lon')).toBe(true);
+
+	// the keyboard selects a place, and the map moves to its extent
+	await search.press('ArrowDown');
+	await expect(options.nth(1)).toHaveAttribute('aria-selected', 'true');
+	await search.press('Enter');
+	await expect(search).toHaveValue('Tiergarten, Berlin, Deutschland');
+	await expect(page.getByRole('listbox')).toBeHidden();
+	await expect.poll(mapCenter).toStrictEqual([expect.closeTo(13.35, 2), expect.closeTo(52.515, 2)]);
+
+	// a click selects a place without extent, which can be marked
+	await search.fill('Brandenburger Tor');
+	await options.first().click();
+	await expect.poll(mapCenter).toStrictEqual([expect.closeTo(13.3777, 3), expect.closeTo(52.5163, 3)]);
+	await page.getByRole('button', { name: 'Add marker here' }).click();
+	await expect.poll(() => stateInUrl(page).elements).toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163] }]);
+	await expect(page.getByRole('button', { name: 'Add marker here' })).toBeHidden();
+
+	// errors are shown
+	fail = true;
+	await search.fill('Somewhere');
+	await expect(page.getByRole('listbox')).toContainText('Search failed');
 });

@@ -87,10 +87,15 @@ export class GeometryManagerInteractive extends GeometryManager {
 				break;
 		}
 
-		const copy = elementFromState(this, state);
-		this.appendElement(copy);
-		this.selection.selectElement(copy);
-		return copy;
+		return this.addElement(state);
+	}
+
+	/** Add an element from its state and select it. */
+	public addElement(state: StateElement): AbstractElement {
+		const element = elementFromState(this, state);
+		this.appendElement(element);
+		this.selection.selectElement(element);
+		return element;
 	}
 
 	public getGeoJSON(): GeoJSONDocument {

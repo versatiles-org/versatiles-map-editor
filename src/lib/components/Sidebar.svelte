@@ -4,6 +4,7 @@
 	import SidebarPanel from './SidebarPanel.svelte';
 	import DialogShareMap from './DialogShare.svelte';
 	import PanelFile from './PanelFile.svelte';
+	import SearchPlace from './SearchPlace.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
@@ -95,6 +96,8 @@
 			<button class="btn" onclick={() => stateManager.undo()} disabled={!$undoEnabled}>Undo</button>
 			<button class="btn" onclick={() => stateManager.redo()} disabled={!$redoEnabled}>Redo</button>
 		</div>
+		<hr class="thick" />
+		<SearchPlace {geometryManager} />
 		<hr class="thick" />
 		<SidebarPanel title="Map">
 			<PanelFile manager={geometryManager} />

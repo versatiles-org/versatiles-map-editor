@@ -1,3 +1,4 @@
+import type { StateElement } from '$lib/codec/types.js';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MarkerElement } from './element/marker.js';
@@ -165,6 +166,14 @@ describe('GeometryManager', () => {
 			const elements = get(manager.elements);
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
+		});
+
+		it('should add an element from its state and select it', () => {
+			const state: StateElement = { type: 'marker', point: [10, 20], popup: { text: 'Hi' } };
+			const element = manager.addElement(state);
+			expect(get(manager.elements)).toStrictEqual([element]);
+			expect(get(manager.selection.selectedElement)).toBe(element);
+			expect(element.getState()).toMatchObject(state);
 		});
 
 		describe('duplicate', () => {

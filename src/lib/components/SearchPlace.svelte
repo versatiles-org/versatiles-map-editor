@@ -1,0 +1,211 @@
+<script lang="ts">
+	import { geocode, type GeocodingResult } from '$lib/utils/geocoding.js';
+	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
+
+	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
+
+	const uid = $props.id();
+	const map = $derived(geometryManager.map);
+
+	let query = $state('');
+	let results: GeocodingResult[] = $state([]);
+	let status: 'idle' | 'searching' | 'empty' | 'error' = $state('idle');
+	let open = $state(false);
+	let active = $state(-1);
+	// The last selected place, which can be marked on the map
+	let selected: GeocodingResult | undefined = $state();
+
+	let timeout: ReturnType<typeof setTimeout> | undefined;
+	let controller: AbortController | undefined;
+
+	$effect(() => () => {
+		clearTimeout(timeout);
+		controller?.abort();
+	});
+
+	function onInput() {
+		clearTimeout(timeout);
+		controller?.abort();
+		selected = undefined;
+		const text = query.trim();
+		if (text.length < 2) {
+			results = [];
+			status = 'idle';
+			open = false;
+			return;
+		}
+		// wait for a pause in typing, so not every keystroke sends a request
+		timeout = setTimeout(() => search(text), 300);
+	}
+
+	async function search(text: string) {
+		controller = new AbortController();
+		const signal = controller.signal;
+		status = 'searching';
+		open = true;
+		try {
+			const center = map.getCenter();
+			const found = await geocode(text, {
+				language: navigator.language,
+				near: [center.lng, center.lat],
+				zoom: map.getZoom(),
+				signal
+			});
+			if (signal.aborted) return;
+			results = found;
+			active = found.length > 0 ? 0 : -1;
+			status = found.length > 0 ? 'idle' : 'empty';
+		} catch (error) {
+			if (signal.aborted) return;
+			console.error(error);
+			results = [];
+			status = 'error';
+		}
+	}
+
+	function select(result: GeocodingResult) {
+		query = result.label;
+		selected = result;
+		open = false;
+		results = [];
+		if (result.bbox) {
+			const [west, south, east, north] = result.bbox;
+			map.fitBounds(
+				[
+					[west, south],
+					[east, north]
+				],
+				{ maxZoom: 17 }
+			);
+		} else {
+			map.flyTo({ center: result.point, zoom: 17 });
+		}
+	}
+
+	function addMarker() {
+		if (!selected) return;
+		geometryManager.addElement({ type: 'marker', point: selected.point });
+		geometryManager.state.log();
+		selected = undefined;
+	}
+
+	function onKeydown(e: KeyboardEvent) {
+		switch (e.key) {
+			case 'ArrowDown':
+			case 'ArrowUp':
+				if (results.length === 0) return;
+				e.preventDefault();
+				open = true;
+				active = (active + (e.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
+				break;
+			case 'Enter':
+				if (open && results[active]) {
+					e.preventDefault();
+					select(results[active]);
+				}
+				break;
+			case 'Escape':
+				if (open) {
+					e.preventDefault();
+					open = false;
+				}
+				break;
+		}
+	}
+</script>
+
+<div class="search">
+	<input
+		id="{uid}-input"
+		type="search"
+		role="combobox"
+		aria-label="Search address or place"
+		aria-autocomplete="list"
+		aria-expanded={open}
+		aria-controls="{uid}-results"
+		aria-activedescendant={open && active >= 0 ? `${uid}-result-${active}` : undefined}
+		placeholder="Search address or place"
+		autocomplete="off"
+		bind:value={query}
+		oninput={onInput}
+		onkeydown={onKeydown}
+		onfocus={() => (open = results.length > 0)}
+		onblur={() => (open = false)}
+	/>
+	{#if open}
+		<ul class="results" id="{uid}-results" role="listbox" aria-label="Search results">
+			{#each results as result, i (i)}
+				<!-- The keyboard is handled by the input (aria-activedescendant), so the options need no key
+				     events. pointerdown would move the focus away from the input and close the list. -->
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<li
+					id="{uid}-result-{i}"
+					role="option"
+					aria-selected={i === active}
+					class:active={i === active}
+					onpointerdown={(e) => e.preventDefault()}
+					onclick={() => select(result)}
+				>
+					{result.label}
+				</li>
+			{/each}
+			{#if status === 'searching' && results.length === 0}
+				<li class="status" role="presentation">Searching…</li>
+			{:else if status === 'empty'}
+				<li class="status" role="presentation">No results</li>
+			{:else if status === 'error'}
+				<li class="status" role="presentation">Search failed, please try again.</li>
+			{/if}
+		</ul>
+	{/if}
+	{#if selected}
+		<button class="btn add-marker" onclick={addMarker}>Add marker here</button>
+	{/if}
+</div>
+
+<style>
+	.search {
+		position: relative;
+	}
+
+	input {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.results {
+		position: absolute;
+		z-index: 1;
+		top: 100%;
+		left: 0;
+		right: 0;
+		margin: 2px 0 0;
+		padding: 0;
+		list-style: none;
+		background: var(--color-bg);
+		border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
+		border-radius: 3px;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+		li {
+			padding: 0.4em 0.6em;
+		}
+
+		li[role='option'] {
+			cursor: pointer;
+		}
+
+		li.active {
+			background: color-mix(in srgb, var(--color-blue) 20%, transparent);
+		}
+
+		.status {
+			opacity: 0.6;
+		}
+	}
+
+	.add-marker {
+		width: 100%;
+		margin-top: var(--btn-gap);
+	}
+</style>
