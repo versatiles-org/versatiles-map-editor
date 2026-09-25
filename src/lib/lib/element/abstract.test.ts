@@ -21,6 +21,9 @@ class TestElement extends AbstractElement {
 		return [];
 	}
 
+	getColors() {
+		return [];
+	}
 	getSelectionNodeUpdater() {
 		return undefined;
 	}

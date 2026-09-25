@@ -3,6 +3,7 @@ import type { AbstractElement } from './element/abstract.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
+import type { ColorPalette } from './color_palette.js';
 import type { StateRoot, StateElement } from '$lib/codec/types.js';
 import { writable, type Writable } from 'svelte/store';
 import { inlineSources } from '@versatiles/style';
@@ -34,6 +35,7 @@ export class GeometryManager {
 	public readonly canvas: HTMLElement;
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
+	public readonly colors: ColorPalette | null = null;
 	private destroyed = false;
 	private readonly abortController = new AbortController();
 	// The map has no style until inlineSources() finishes, so elements must wait for it

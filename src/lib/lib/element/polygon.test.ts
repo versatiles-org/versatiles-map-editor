@@ -41,6 +41,15 @@ describe('PolygonElement', () => {
 		expect(get(element.measurements)).toEqual([{ label: 'Area', value: '12,400 km²' }]);
 	});
 
+	it('should list the colors of the fill and the visible outline', () => {
+		element.fillLayer.color.set('#00ff00');
+		element.strokeLayer.color.set('#0000ff');
+		element.strokeLayer.visible.set(false);
+		expect(element.getColors()).toStrictEqual(['#00ff00']);
+		element.strokeLayer.visible.set(true);
+		expect(element.getColors()).toStrictEqual(['#00ff00', '#0000ff']);
+	});
+
 	it('should set isSelected correctly', () => {
 		element.select(true);
 		expect(element.fillLayer.isSelected).toBe(true);

@@ -88,6 +88,8 @@ export abstract class AbstractElement {
 		this.destroy();
 	}
 
+	/** The colors of the element, e.g. for the palette of used colors. */
+	abstract getColors(): string[];
 	abstract destroy(): void;
 	abstract getFeature(): GeoJSON.Feature;
 	abstract getSelectionNodes(): SelectionNode[];

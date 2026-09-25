@@ -383,3 +383,49 @@ test.describe('small screens', () => {
 		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
 	});
 });
+
+test('color picker', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Polygon' }).click();
+	// the codec returns colors in upper case
+	const fill = () => (stateInUrl(page).elements[0] as { style?: { color?: string } })?.style?.color?.toLowerCase();
+	const stroke = () =>
+		(stateInUrl(page).elements[0] as { strokeStyle?: { color?: string } })?.strokeStyle?.color?.toLowerCase();
+	const [fillColor, strokeColor] = await page.getByLabel('Color').all();
+
+	// a hex value sets the fill color
+	await fillColor.click();
+	await page.getByLabel('Hex').fill('#00ff00');
+	await page.getByLabel('Hex').press('Enter');
+	await expect.poll(() => fill()).toBe('#00ff00');
+	await expect(fillColor).toHaveText('#00ff00');
+
+	// Escape closes the picker
+	await page.keyboard.press('Escape');
+	await expect(page.getByLabel('Hex')).toBeHidden();
+
+	// the outline offers the used colors, most recently used first
+	await strokeColor.click();
+	const palette = page.getByRole('group', { name: 'Used colors' }).getByRole('button');
+	await expect
+		.poll(() => palette.evaluateAll((buttons) => buttons.map((b) => b.getAttribute('aria-label'))))
+		.toStrictEqual(['#00ff00', '#ff0000']);
+	await palette.first().click();
+	await expect.poll(() => stroke()).toBe('#00ff00');
+
+	// dragging in the saturation/brightness field creates a single undo step
+	await fillColor.click();
+	const field = page.getByRole('slider', { name: 'Saturation and brightness' });
+	const box = (await field.boundingBox())!;
+	await page.mouse.move(box.x + box.width - 1, box.y + 1);
+	await page.mouse.down();
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
+	await page.mouse.up();
+	// the center is half saturation and half brightness of the hue green
+	await expect.poll(() => fill()).toBe('#408040');
+	await expect(page.getByLabel('Green')).toHaveValue('128');
+	await page.screenshot({ path: 'test-results/color-picker.png' });
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(() => fill()).toBe('#00ff00');
+});

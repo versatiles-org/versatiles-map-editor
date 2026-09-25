@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../utils/types.js';
 import { MapLayerLine } from '../map_layer/line.js';
@@ -38,6 +39,10 @@ export class LineElement extends AbstractPathElement {
 
 	protected getMeasurements(): Measurement[] {
 		return [{ label: 'Length', value: formatLength(pathLength(this.path)) }];
+	}
+
+	getColors(): string[] {
+		return [get(this.layer.color)];
 	}
 
 	destroy(): void {

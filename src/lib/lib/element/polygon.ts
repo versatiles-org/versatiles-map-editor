@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
@@ -44,6 +45,12 @@ export class PolygonElement extends AbstractPathElement {
 
 	protected getMeasurements(): Measurement[] {
 		return [{ label: 'Area', value: formatArea(polygonArea(this.path)) }];
+	}
+
+	getColors(): string[] {
+		const colors = [get(this.fillLayer.color)];
+		if (get(this.strokeLayer.visible)) colors.push(get(this.strokeLayer.color));
+		return colors;
 	}
 
 	destroy(): void {

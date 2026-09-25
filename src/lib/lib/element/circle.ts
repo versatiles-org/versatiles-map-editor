@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.js';
 import type { GeoPoint } from '../utils/types.js';
@@ -85,6 +86,12 @@ export class CircleElement extends AbstractElement {
 			{ label: 'Radius', value: formatLength(this.radius) },
 			{ label: 'Area', value: formatArea(circleArea(this.radius)) }
 		];
+	}
+
+	getColors(): string[] {
+		const colors = [get(this.fillLayer.color)];
+		if (get(this.strokeLayer.visible)) colors.push(get(this.strokeLayer.color));
+		return colors;
 	}
 
 	destroy(): void {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fillPatterns, type MapLayerFill } from '../lib/map_layer/fill.js';
 	import InputRow from './InputRow.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 
 	const { layer }: { layer: MapLayerFill } = $props();
 	const uid = $props.id();
@@ -11,7 +12,7 @@
 </script>
 
 <InputRow label="Color" id="{uid}-color">
-	<input id="{uid}-color" type="color" bind:value={$color} onchange={log} />
+	<ColorPicker id="{uid}-color" bind:value={$color} onchange={log} palette={layer.manager.colors} />
 </InputRow>
 
 <InputRow label="Pattern" id="{uid}-pattern">

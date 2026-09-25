@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { labelPositions, MapLayerSymbol } from '../lib/map_layer/symbol.js';
 	import InputRow from './InputRow.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 
 	const { layer }: { layer: MapLayerSymbol } = $props();
@@ -30,7 +31,7 @@
 </InputRow>
 
 <InputRow id="{uid}-color" label="Color">
-	<input id="{uid}-color" type="color" bind:value={$color} onchange={log} />
+	<ColorPicker id="{uid}-color" bind:value={$color} onchange={log} palette={layer.manager.colors} />
 </InputRow>
 
 <InputRow id="{uid}-size" label="Size">

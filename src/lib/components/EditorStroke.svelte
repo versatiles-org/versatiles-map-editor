@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { dashArrays, MapLayerLine } from '../lib/map_layer/line.js';
 	import InputRow from './InputRow.svelte';
+	import ColorPicker from './ColorPicker.svelte';
 
 	const { layer }: { layer: MapLayerLine } = $props();
 	const uid = $props.id();
@@ -11,7 +12,7 @@
 </script>
 
 <InputRow id="{uid}-color" label="Color">
-	<input id="{uid}-color" type="color" bind:value={$color} onchange={log} />
+	<ColorPicker id="{uid}-color" bind:value={$color} onchange={log} palette={layer.manager.colors} />
 </InputRow>
 
 <InputRow id="{uid}-dashed" label="Dashed">

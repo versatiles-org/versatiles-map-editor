@@ -1,3 +1,4 @@
+import { get } from 'svelte/store';
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
@@ -51,6 +52,10 @@ export class MarkerElement extends AbstractElement {
 				this.updateSource();
 			}
 		};
+	}
+
+	getColors(): string[] {
+		return [get(this.layer.color)];
 	}
 
 	destroy(): void {

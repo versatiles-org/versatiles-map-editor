@@ -13,6 +13,7 @@
 	.row {
 		margin: var(--gap) 0 var(--gap);
 		display: flex;
+		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
 		color: var(--color-text);

@@ -32,6 +32,10 @@ class TestPathElement extends AbstractPathElement {
 		};
 	}
 
+	getColors(): string[] {
+		return [];
+	}
+
 	public handleDrag(e: maplibregl.MapMouseEvent | maplibregl.MapTouchEvent): void {
 		super.handleDrag(e);
 	}
