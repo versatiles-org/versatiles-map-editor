@@ -36,6 +36,8 @@
 	const searchEnabled = $derived(geometryManager?.search ?? writable(false));
 	// only in the read-only viewer; the editor has its search in the sidebar
 	const showSearch = $derived(!showSidebar && $searchEnabled);
+	// the height of the search and the hint at the top of the viewer
+	let topOverlaysHeight = $state(0);
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
@@ -172,11 +174,24 @@
 		<div class="map" bind:this={container}></div>
 	</div>
 	{#if geometryManager && $legend}
-		<Legend legend={$legend} map={geometryManager.map} right={showSidebar ? 250 : 0} top={showSearch ? 44 : 0} />
+		<!-- a legend at the top goes below the search and the hint -->
+		<Legend
+			legend={$legend}
+			map={geometryManager.map}
+			right={showSidebar ? 250 : 0}
+			top={topOverlaysHeight ? topOverlaysHeight + 10 : 0}
+		/>
 	{/if}
-	{#if geometryManager && showSearch}
-		<div class="viewer-search">
-			<SearchPlace map={geometryManager.map} />
+	{#if geometryManager && (showSearch || screenTooSmall)}
+		<div class="top-overlays" bind:offsetHeight={topOverlaysHeight}>
+			{#if showSearch}
+				<div class="viewer-search">
+					<SearchPlace map={geometryManager.map} />
+				</div>
+			{/if}
+			{#if screenTooSmall}
+				<div class="hint">Open this page on a larger screen to edit the map.</div>
+			{/if}
 		</div>
 	{/if}
 	{#if showSidebar && geometryManager && geometryManager.isInteractive()}
@@ -191,8 +206,6 @@
 				left: 0;
 			}
 		</style>
-	{:else if screenTooSmall}
-		<div class="hint" class:below-search={showSearch}>Open this page on a larger screen to edit the map.</div>
 	{/if}
 </div>
 
@@ -223,13 +236,27 @@
 		height: 100%;
 	}
 
-	/* at the top, since the attribution at the bottom can expand to the full width */
-	.hint {
+	/* The search and the hint of the viewer, at the top, since the attribution at the bottom can
+	   expand to the full width. Stacked, so they do not overlap. */
+	.top-overlays {
 		position: absolute;
+		z-index: 2;
 		top: var(--gap);
-		left: 50%;
-		transform: translateX(-50%);
-		max-width: calc(100% - 4 * var(--gap));
+		left: var(--gap);
+		right: var(--gap);
+		display: flex;
+		flex-direction: column;
+		gap: var(--gap);
+		/* the map can be dragged between them */
+		pointer-events: none;
+		& > * {
+			pointer-events: auto;
+		}
+	}
+
+	.hint {
+		align-self: center;
+		max-width: calc(100% - 2 * var(--gap));
 		padding: 0.4em 1em;
 		border-radius: var(--border-radius);
 		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
@@ -239,16 +266,8 @@
 		text-align: center;
 	}
 
-	.hint.below-search {
-		top: calc(var(--gap) + 44px);
-	}
-
 	.viewer-search {
-		position: absolute;
-		z-index: 2;
-		top: var(--gap);
-		left: var(--gap);
-		width: min(260px, calc(100% - 2 * var(--gap)));
+		width: min(260px, 100%);
 		font-size: 13px;
 		:global(input) {
 			padding: 6px 8px;

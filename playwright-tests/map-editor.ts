@@ -1312,3 +1312,42 @@ test('exporting and importing KML', async ({ page }) => {
 	await expect.poll(() => lower(stateInUrl(page).elements)).toStrictEqual(lower(state.elements));
 	await expect.poll(() => lower(stateInUrl(page).meta)).toStrictEqual(lower(state.meta));
 });
+
+test.describe('overlays of the viewer on a phone', () => {
+	// narrow, so the hint wraps into two lines
+	test.use({ viewport: { width: 390, height: 700 } });
+
+	const overlap = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
+		a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+	for (const search of [false, true]) {
+		for (const position of ['top-left', 'top', 'top-right'] as const) {
+			test(`a legend at ${position}${search ? ', with search,' : ''} does not cover the hint`, async ({ page }) => {
+				const state: MapState = {
+					map: { center: [13.4, 52.5], radius: 10000 },
+					meta: {
+						search,
+						legend: {
+							position,
+							entries: [
+								{ color: '#ff0000', label: 'A long legend entry' },
+								{ color: '#00ff00', label: 'Another entry' }
+							]
+						}
+					},
+					elements: []
+				};
+				await page.goto('/#' + encodeState(state));
+				await waitForMapIsReady(page);
+				const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
+				const hint = (await page.getByText('Open this page on a larger screen').boundingBox())!;
+				expect(overlap(legend, hint)).toBe(false);
+				if (search) {
+					const field = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
+					expect(overlap(legend, field)).toBe(false);
+					expect(overlap(hint, field)).toBe(false);
+				}
+			});
+		}
+	}
+});
