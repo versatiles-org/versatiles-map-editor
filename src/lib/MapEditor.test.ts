@@ -28,6 +28,12 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 	return { ...original, Map, setWorkerUrl: vi.fn(), AttributionControl: vi.fn() };
 });
 
+// The editor loads its optional configuration file, which unit tests must not download
+vi.mock('$lib/utils/config.js', async (importOriginal) => ({
+	...(await importOriginal<typeof import('$lib/utils/config.js')>()),
+	loadConfig: vi.fn(async () => {})
+}));
+
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
 const { GeometryManagerInteractive } = await import('./lib/geometry_manager_interactive.js');

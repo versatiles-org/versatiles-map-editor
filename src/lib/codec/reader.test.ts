@@ -591,6 +591,7 @@ describe('legend', () => {
 				legend: {
 					position: 'top-right',
 					layout: 'inline',
+					font: 'serif',
 					entries: [
 						// the decoder returns colors in upper case
 						{ color: '#FF0000', label: 'Red area' },

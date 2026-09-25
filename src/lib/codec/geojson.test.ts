@@ -281,12 +281,13 @@ describe('legend', () => {
 				legend: {
 					position: 'middle',
 					layout: 'inline',
+					font: 'monospace',
 					entries: [{ color: '#F00', label: 5, symbol: '2.4' }, { color: 'nope', label: 'x' }, 'x']
 				}
 			}
 		};
 		expect(stateFromGeoJSON(doc as unknown as GeoJSONDocument).meta).toStrictEqual({
-			legend: { layout: 'inline', entries: [{ color: '#ff0000', label: '5', symbol: 2 }] }
+			legend: { layout: 'inline', font: 'monospace', entries: [{ color: '#ff0000', label: '5', symbol: 2 }] }
 		});
 	});
 });

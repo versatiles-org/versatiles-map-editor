@@ -1,13 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
-	import {
-		changeSettings,
-		FONTS,
-		getSettings,
-		LANGUAGES,
-		THEMES,
-		type BackgroundSettings
-	} from '$lib/utils/background.js';
+	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
+	import { config } from '$lib/utils/config.js';
 	import InputRow from './InputRow.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
@@ -16,6 +10,8 @@
 	const uid = $props.id();
 	const background = $derived(manager.background);
 	const settings = $derived(getSettings($background));
+	// the fonts of this editor instance
+	const fonts = $derived($config.fonts);
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>
@@ -50,8 +46,8 @@
 
 <InputRow id="{uid}-font" label="Font">
 	<select id="{uid}-font" value={settings.font} onchange={(e) => change('font', e.currentTarget.value)}>
-		{#if !FONTS.some((f) => f.id === settings.font)}<option value={settings.font}>{settings.font}</option>{/if}
-		{#each FONTS as { id, name } (id)}
+		{#if !fonts.some((f) => f.id === settings.font)}<option value={settings.font}>{settings.font}</option>{/if}
+		{#each fonts as { id, name } (id)}
 			<option value={id}>{name}</option>
 		{/each}
 	</select>

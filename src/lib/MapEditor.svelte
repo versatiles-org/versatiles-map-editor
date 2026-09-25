@@ -15,6 +15,7 @@
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
 	import { PopupHandler } from './lib/popup_handler.js';
+	import { loadConfig } from '$lib/utils/config.js';
 	import { decodeState } from '$lib/codec/index.js';
 	import { throttle } from '$lib/utils/throttle.js';
 
@@ -140,6 +141,8 @@
 		map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-left');
 
 		if (showSidebar) {
+			// the color schemes and fonts of this editor instance
+			void loadConfig();
 			const manager = new GeometryManagerInteractive(map);
 			manager.state.events.on('change', requestPersist);
 			map.on('moveend', requestPersist);

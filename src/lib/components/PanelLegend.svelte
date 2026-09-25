@@ -83,6 +83,21 @@
 		</select>
 	</InputRow>
 
+	<InputRow id="{uid}-font" label="Font">
+		<select
+			id="{uid}-font"
+			value={legend.font ?? 'sans-serif'}
+			onchange={(e) => {
+				update({ font: e.currentTarget.value as StateLegend['font'] });
+				log();
+			}}
+		>
+			<option value="sans-serif">Sans-serif</option>
+			<option value="serif">Serif</option>
+			<option value="monospace">Monospace</option>
+		</select>
+	</InputRow>
+
 	{#each legend.entries as entry, i (i)}
 		<fieldset class="entry">
 			<legend>Entry {i + 1}</legend>

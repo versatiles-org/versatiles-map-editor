@@ -992,3 +992,49 @@ test('choosing a color scheme', async ({ page }) => {
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(() => stateInUrl(page).meta?.colorScheme).toBeUndefined();
 });
+
+test('color schemes and fonts of an organisation', async ({ page }) => {
+	await page.route('**/map-editor.config.json', (route) =>
+		route.fulfill({
+			json: {
+				colorSchemes: [{ id: 'ci', name: 'Corporate', colors: ['#003366', '#e30613', '#f5a800'] }],
+				replaceDefaultSchemes: true,
+				fonts: ['lato_bold']
+			}
+		})
+	);
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const symbolFont = () =>
+		page.evaluate(() => {
+			const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+			const layer = map.getStyle().layers.find((l) => l.type === 'symbol' && l.id.startsWith('symbol_'));
+			return layer && map.getLayoutProperty(layer.id, 'text-font');
+		});
+
+	// only the corporate color scheme is offered, as the default
+	await page.getByRole('button', { name: 'Marker' }).click();
+	await page.getByLabel('Color').first().click();
+	const scheme = page.getByRole('combobox', { name: 'Color scheme' });
+	await expect(scheme.getByRole('option')).toHaveText(['Corporate']);
+	await expect(page.getByRole('group', { name: 'Corporate' }).getByRole('button')).toHaveCount(3);
+	await page.keyboard.press('Escape');
+
+	// the configured font comes first, with its name from the tile server
+	await page.getByRole('button', { name: 'Background map' }).click();
+	const font = page.getByRole('combobox', { name: 'Font' });
+	await expect(font.getByRole('option').first()).toHaveText('Lato Bold');
+
+	// marker labels use the font of the map
+	await expect.poll(symbolFont).toStrictEqual(['noto_sans_regular']);
+	await font.selectOption('Lato Bold');
+	await expect.poll(symbolFont).toStrictEqual(['lato_bold']);
+	await expect.poll(() => stateInUrl(page).meta?.background?.options).toMatchObject({ text: { font: 'lato_bold' } });
+
+	// the legend has a generic font of its own
+	await page.getByRole('button', { name: 'Legend', exact: true }).click();
+	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	await page.getByRole('combobox', { name: 'Font' }).last().selectOption('Serif');
+	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
+	await expect.poll(() => stateInUrl(page).meta?.legend?.font).toBe('serif');
+});

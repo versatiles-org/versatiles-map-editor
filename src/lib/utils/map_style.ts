@@ -2,7 +2,7 @@ import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpeci
 import type { StateBackground } from '$lib/codec/types.js';
 import { DEFAULT_BACKGROUND } from './background.js';
 
-const TILE_SERVER = 'https://tiles.versatiles.org';
+export const TILE_SERVER = 'https://tiles.versatiles.org';
 
 /**
  * The style of the background map. The tile server and the projection are set by the editor,

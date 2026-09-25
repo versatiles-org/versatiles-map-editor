@@ -42,9 +42,10 @@ export const COLOR_SCHEMES: ColorScheme[] = [
 	}
 ];
 
-export const DEFAULT_COLOR_SCHEME = COLOR_SCHEMES[0];
-
-/** The scheme with this id, or the default scheme (e.g. for an id of a scheme that no longer exists). */
-export function getColorScheme(id: string | undefined): ColorScheme {
-	return COLOR_SCHEMES.find((scheme) => scheme.id === id) ?? DEFAULT_COLOR_SCHEME;
+/**
+ * The scheme with this id among the offered schemes, or the first one, which is the default
+ * (e.g. for an id of a scheme that this editor instance does not offer).
+ */
+export function getColorScheme(id: string | undefined, schemes: ColorScheme[] = COLOR_SCHEMES): ColorScheme {
+	return schemes.find((scheme) => scheme.id === id) ?? schemes[0];
 }

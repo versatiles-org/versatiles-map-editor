@@ -55,7 +55,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
   minimized options, stored as JSON in base64, so any current or future option fits;
-  `meta.legend`: position, layout and entries of a legend defined by the author;
+  `meta.legend`: position, layout, generic font and entries of a legend defined by the author;
   `meta.colorScheme`: the id of the color scheme offered in the color picker)
 
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.

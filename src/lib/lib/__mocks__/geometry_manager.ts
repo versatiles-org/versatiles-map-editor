@@ -12,6 +12,7 @@ export class MockGeometryManager {
 	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
 	public readonly imageResolvers = new Map<string, () => void>();
+	public readonly font = writable('noto_sans_regular');
 	public readonly state;
 
 	constructor() {

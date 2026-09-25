@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { hsvToRgb, parseHex, rgbToHsv, toHex, type HSV, type RGB } from '$lib/utils/color.js';
 	import type { ColorPalette } from '../lib/color_palette.js';
-	import { COLOR_SCHEMES, DEFAULT_COLOR_SCHEME, getColorScheme } from '$lib/utils/color_schemes.js';
+	import { getColorScheme } from '$lib/utils/color_schemes.js';
+	import { config } from '$lib/utils/config.js';
 	import { writable } from 'svelte/store';
 
 	let {
@@ -25,7 +26,8 @@
 
 	const rgb: RGB = $derived(parseHex(value) ?? { r: 0, g: 0, b: 0 });
 	const schemeStore = $derived(palette?.scheme ?? writable(undefined));
-	const colorScheme = $derived(getColorScheme($schemeStore));
+	const schemes = $derived($config.colorSchemes);
+	const colorScheme = $derived(getColorScheme($schemeStore, schemes));
 	const hex = $derived(toHex(rgb));
 
 	// HSV is kept separately from the value, so the hue and saturation survive while the
@@ -262,12 +264,12 @@
 				value={colorScheme.id}
 				onchange={(e) => {
 					const id = e.currentTarget.value;
-					// the default scheme is not stored
-					palette.scheme.set(id === DEFAULT_COLOR_SCHEME.id ? undefined : id);
+					// the default scheme (the first one) is not stored
+					palette.scheme.set(id === schemes[0].id ? undefined : id);
 					onchange?.();
 				}}
 			>
-				{#each COLOR_SCHEMES as { id, name } (id)}
+				{#each schemes as { id, name } (id)}
 					<option value={id}>{name}</option>
 				{/each}
 			</select>

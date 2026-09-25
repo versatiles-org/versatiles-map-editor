@@ -55,6 +55,24 @@ The editor reads its state from the URL hash, so it can be embedded in an `<ifra
 
 When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
 
+## Configuration
+
+An organisation running the editor can offer its own color schemes and fonts, e.g. its corporate identity. Put them into `map-editor.config.json` next to the editor's `index.html` (in this repository: `static/map-editor.config.json`, which is empty). No rebuild is needed. Every field is optional:
+
+```json
+{
+	"colorSchemes": [{ "id": "corporate", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
+	"replaceDefaultSchemes": false,
+	"fonts": ["open_sans_regular", "lato_bold"],
+	"replaceDefaultFonts": false
+}
+```
+
+- `colorSchemes` are offered in the color picker before the predefined schemes. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
+- `fonts` are glyph names of the tile server (see `https://tiles.versatiles.org/assets/glyphs/`). They are offered for the labels of the map and its markers. Fonts that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered.
+
+A missing or invalid file leaves the defaults. The legend uses a generic font (sans-serif, serif or monospace) instead, since the map's glyph fonts are usually not available as web fonts.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

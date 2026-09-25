@@ -1,7 +1,7 @@
 import { Color } from '@versatiles/style';
 import { BASE64_CHARS, CHAR_CODE2VALUE } from './constants.js';
 import { StateReader } from './reader.js';
-import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import type {
 	StateElementCircle,
 	StateElementLine,
@@ -233,6 +233,10 @@ export class StateWriter {
 		if (legend.layout && legend.layout !== 'vertical') {
 			this.writeInteger(2, 4);
 			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));
+		}
+		if (legend.font && legend.font !== 'sans-serif') {
+			this.writeInteger(4, 4);
+			this.writeVarint(LEGEND_FONTS.indexOf(legend.font));
 		}
 		this.writeInteger(3, 4);
 		this.writeArray(legend.entries, (entry) => {

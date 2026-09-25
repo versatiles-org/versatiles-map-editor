@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { COLOR_SCHEMES, DEFAULT_COLOR_SCHEME, getColorScheme } from './color_schemes.js';
+import { COLOR_SCHEMES, getColorScheme } from './color_schemes.js';
 
 describe('COLOR_SCHEMES', () => {
 	it('have unique ids and 6 to 10 distinct lowercase hex colors', () => {
@@ -12,9 +12,11 @@ describe('COLOR_SCHEMES', () => {
 		}
 	});
 
-	it('are found by id, with the default as fallback', () => {
+	it('are found by id, with the first as fallback', () => {
 		expect(getColorScheme('dark2').id).toBe('dark2');
-		expect(getColorScheme('unknown')).toBe(DEFAULT_COLOR_SCHEME);
-		expect(getColorScheme(undefined)).toBe(DEFAULT_COLOR_SCHEME);
+		expect(getColorScheme('unknown')).toBe(COLOR_SCHEMES[0]);
+		expect(getColorScheme(undefined)).toBe(COLOR_SCHEMES[0]);
+		const custom = { id: 'ci', name: 'CI', colors: ['#123456'] };
+		expect(getColorScheme(undefined, [custom])).toBe(custom);
 	});
 });

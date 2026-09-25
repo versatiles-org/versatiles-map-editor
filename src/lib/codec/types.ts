@@ -73,12 +73,16 @@ export const LEGEND_POSITIONS = [
 	'left'
 ] as const;
 export const LEGEND_LAYOUTS = ['vertical', 'horizontal', 'inline'] as const;
+/** Generic CSS font families, which every browser has, unlike the glyph fonts of the map. */
+export const LEGEND_FONTS = ['sans-serif', 'serif', 'monospace'] as const;
 
 export interface StateLegend {
 	/** A side (centered) or a corner of the map. Default: "bottom-left". */
 	position?: (typeof LEGEND_POSITIONS)[number];
 	/** How the entries are arranged. "inline" flows like text. Default: "vertical". */
 	layout?: (typeof LEGEND_LAYOUTS)[number];
+	/** Default: "sans-serif". */
+	font?: (typeof LEGEND_FONTS)[number];
 	entries: StateLegendEntry[];
 }
 

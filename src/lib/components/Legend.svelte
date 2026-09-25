@@ -25,6 +25,7 @@
 	<div
 		class="legend position-{legend.position ?? 'bottom-left'} layout-{legend.layout ?? 'vertical'}"
 		style:--sidebar="{right}px"
+		style:font-family={legend.font ?? 'sans-serif'}
 		role="list"
 		aria-label="Legend"
 	>
@@ -64,9 +65,8 @@
 		background: color-mix(in srgb, #fff 85%, transparent);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 		color: #000;
-		font:
-			12px/1.3 system-ui,
-			sans-serif;
+		font-size: 12px;
+		line-height: 1.3;
 	}
 
 	.layout-vertical {

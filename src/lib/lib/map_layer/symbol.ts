@@ -55,6 +55,8 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 		return ['left', 'right', 'top', 'bottom'] as TextVariableAnchor;
 	});
 
+	private readonly unsubscribeFont: () => void;
+
 	constructor(manager: GeometryManager, id: string, source: string) {
 		super(manager, id);
 
@@ -69,7 +71,7 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 				'icon-size': get(this.size),
 
 				'text-field': get(this.label),
-				'text-font': ['noto_sans_regular'],
+				'text-font': [get(manager.font)],
 				'text-justify': 'left',
 				'text-overlap': 'always',
 				'text-radial-offset': 0.7,
@@ -101,6 +103,8 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 			this.updateLayout('icon-size', v);
 			this.updateLayout('text-size', v * 16);
 		});
+		// marker labels use the font of the map labels
+		this.unsubscribeFont = manager.font.subscribe((font) => this.updateLayout('text-font', [font]));
 		this.symbolInfo.subscribe((v) => {
 			if (v.image == null) {
 				this.updateLayout('icon-image', undefined);
@@ -109,6 +113,11 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 				this.updateLayout('icon-offset', v.offset);
 			}
 		});
+	}
+
+	destroy(): void {
+		this.unsubscribeFont();
+		super.destroy();
 	}
 
 	getState(): StateStyle | undefined {

@@ -5,9 +5,10 @@ import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
 import type { StateBackground, StateLegend, StateRoot, StateElement } from '$lib/codec/types.js';
-import { get, writable, type Writable } from 'svelte/store';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
+import { getSettings } from '$lib/utils/background.js';
 import { CircleElement } from './element/circle.js';
 import { LineElement } from './element/line.js';
 import { MarkerElement } from './element/marker.js';
@@ -51,6 +52,8 @@ export class GeometryManager {
 	public readonly legend: Writable<StateLegend | undefined> = writable(undefined);
 	/** The background map. Undefined for the editor's default background. */
 	public readonly background: Writable<StateBackground | undefined> = writable(undefined);
+	/** The glyph font of the map labels, which the marker labels use too. */
+	public readonly font: Readable<string> = derived(this.background, (background) => getSettings(background).font);
 	private destroyed = false;
 	private readonly abortController = new AbortController();
 	// The map has no style until inlineSources() finishes, so elements must wait for it

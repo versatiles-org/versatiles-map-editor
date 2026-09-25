@@ -1,6 +1,6 @@
 import { Color } from '@versatiles/style';
 import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
-import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { symbolName, symbolIndexByName } from './symbols.js';
 
 // ---------------------------------------------------------------------------
@@ -205,7 +205,7 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 /** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const { position, layout, entries } = value as Record<string, unknown>;
+	const { position, layout, font, entries } = value as Record<string, unknown>;
 	if (!Array.isArray(entries)) return undefined;
 
 	const legend: StateLegend = { entries: [] };
@@ -214,6 +214,9 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	}
 	if (LEGEND_LAYOUTS.includes(layout as StateLegend['layout'] & string)) {
 		legend.layout = layout as StateLegend['layout'];
+	}
+	if (LEGEND_FONTS.includes(font as StateLegend['font'] & string)) {
+		legend.font = font as StateLegend['font'];
 	}
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;

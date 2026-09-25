@@ -14,7 +14,7 @@ import type {
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE } from './constants.js';
 import { sanitizeBackground } from './profile.js';
-import { LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -293,6 +293,10 @@ export class StateReader {
 						break;
 					case 3:
 						legend.entries = this.readArray(() => this.readLegendEntry());
+						break;
+					case 4:
+						legend.font = LEGEND_FONTS[this.readVarint()];
+						if (!legend.font) throw new Error('Invalid legend font');
 						break;
 					default:
 						throw new Error(`Invalid legend key: ${key}`);
