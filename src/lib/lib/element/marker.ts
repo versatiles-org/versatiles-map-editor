@@ -5,6 +5,7 @@ import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import { MapLayerSymbol } from '../map_layer/symbol.js';
 import type { StateElementMarker } from '$lib/codec/types.js';
 import type { GeoPoint } from '../utils/types.js';
+import { movePoint } from '../utils/geometry.js';
 
 export class MarkerElement extends AbstractElement {
 	public readonly layer: MapLayerSymbol;
@@ -16,13 +17,12 @@ export class MarkerElement extends AbstractElement {
 		this.point = point ?? this.randomPositions(1)[0];
 
 		this.layer = new MapLayerSymbol(manager, 'symbol' + this.slug, this.sourceId);
-		this.layer.on('click', () => this.manager.selection?.selectElement(this));
 		this.updateSource();
 	}
 
 	public select(value: boolean) {
 		super.select(value);
-		this.layer.isSelected = value;
+		this.layer.setSelected(value);
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Point> {
@@ -52,6 +52,11 @@ export class MarkerElement extends AbstractElement {
 				this.updateSource();
 			}
 		};
+	}
+
+	moveBy(dx: number, dy: number) {
+		this.point = movePoint(this.point, dx, dy);
+		this.updateSource();
 	}
 
 	getLayerIds(): string[] {

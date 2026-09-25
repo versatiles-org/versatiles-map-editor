@@ -16,6 +16,11 @@ export function mercator2lat(y: number): number {
 	return ((2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180) / Math.PI;
 }
 
+/** Move a point by `dx` degrees of longitude and `dy` in mercator units, so shapes keep their form on the map. */
+export function movePoint([x, y]: GeoPoint, dx: number, dy: number): GeoPoint {
+	return [x + dx, mercator2lat(lat2mercator(y) + dy)];
+}
+
 export function distance(point1: GeoPoint, point2: GeoPoint): number {
 	const lat1 = degreesToRadians(point1[1]);
 	const lat2 = degreesToRadians(point2[1]);

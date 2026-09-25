@@ -15,7 +15,7 @@
 	const stateManager = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
-	const activeElement = $derived(geometryManager.selection.selectedElement);
+	const selectedElements = $derived(geometryManager.selection.selectedElements);
 	const selectedNode = $derived(geometryManager.selection.selectedNode);
 
 	function importGeoJSON() {
@@ -49,10 +49,9 @@
 		downloadJSON(geometryManager.getGeoJSON(), 'map.geojson', 'application/geo+json');
 	}
 
-	function duplicateElement() {
-		const element = $activeElement;
-		if (!element) return;
-		geometryManager.duplicateElement(element, [20, 20]);
+	function duplicateElements() {
+		if ($selectedElements.length === 0) return;
+		geometryManager.duplicateElements($selectedElements, [20, 20]);
 		geometryManager.state.log();
 	}
 
@@ -62,28 +61,28 @@
 		if (target?.closest('input, textarea, select, [contenteditable]')) return;
 
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
-			if (!$activeElement) return;
+			if ($selectedElements.length === 0) return;
 			e.preventDefault();
-			duplicateElement();
+			duplicateElements();
 		}
 
 		if ((e.key === 'Delete' || e.key === 'Backspace') && !e.metaKey && !e.ctrlKey && !e.altKey) {
-			if (!$activeElement) return;
+			if ($selectedElements.length === 0) return;
 			e.preventDefault();
-			// Delete the selected node, or the element if no node is selected. A node the shape
+			// Delete the selected node, or the elements if no node is selected. A node the shape
 			// needs is kept, so the element is not deleted by accident.
 			if ($selectedNode) geometryManager.selection.deleteSelectedNode();
-			else deleteElement();
+			else deleteElements();
 		}
 	}
 
-	function deleteElement() {
-		$activeElement?.delete();
+	function deleteElements() {
+		$selectedElements.forEach((element) => element.delete());
 		geometryManager.state.log();
 	}
 
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
-		activeElement.set(geometryManager.addNewElement(type));
+		geometryManager.addNewElement(type);
 		geometryManager.state.log();
 	}
 </script>
@@ -126,15 +125,16 @@
 			</div>
 		</SidebarPanel>
 		<hr class="thick" />
-		<Editor element={$activeElement} />
+		<Editor elements={$selectedElements} />
 		<hr class="thick" />
-		<SidebarPanel title="Actions" disabled={!$activeElement}>
+		<SidebarPanel title="Actions" disabled={$selectedElements.length === 0}>
 			<div class="grid2">
-				<button class="btn" onclick={deleteElement} title="Delete (Delete/Backspace)">Delete</button>
-				<button class="btn" onclick={duplicateElement} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
+				<button class="btn" onclick={deleteElements} title="Delete (Delete/Backspace)">Delete</button>
+				<button class="btn" onclick={duplicateElements} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
 					>Duplicate</button
 				>
 			</div>
+			<p class="label">Shift-click to select several elements.</p>
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Help" open={false}>

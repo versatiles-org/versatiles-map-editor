@@ -1,11 +1,26 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	const { children, label, id }: { children: Snippet; label: string; id: string } = $props();
+	const {
+		children,
+		label,
+		id,
+		mixed = false
+	}: {
+		children: Snippet;
+		label: string;
+		id: string;
+		/** The selected elements have different values, and the control shows only the first one. */
+		mixed?: boolean;
+	} = $props();
 </script>
 
 <div class="row">
-	<label class="label" for={id} id="{id}-label">{label}</label>
+	<label class="label" for={id} id="{id}-label"
+		>{label}{#if mixed}<span class="mixed" title="The selected elements have different values">
+				(mixed)</span
+			>{/if}</label
+	>
 	{@render children()}
 </div>
 
@@ -30,5 +45,9 @@
 		& > :global(input[type='checkbox']) {
 			width: auto;
 		}
+	}
+	.mixed {
+		opacity: 0.6;
+		font-style: italic;
 	}
 </style>

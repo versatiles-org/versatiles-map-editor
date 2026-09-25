@@ -21,6 +21,7 @@ class TestElement extends AbstractElement {
 		return [];
 	}
 
+	moveBy() {}
 	getLayerIds() {
 		return [];
 	}

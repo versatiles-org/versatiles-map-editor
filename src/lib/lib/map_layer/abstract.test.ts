@@ -51,10 +51,25 @@ describe('MapLayer', () => {
 
 	it('should unregister all map listeners on destroy', () => {
 		layer.addLayer('source', 'fill', {}, {});
-		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(7);
+		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(2);
 
 		layer.destroy();
 		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(0);
+	});
+
+	it('should show the grab cursor while a selected layer is hovered', () => {
+		layer.addLayer('source', 'fill', {}, {});
+		layer.setSelected(true);
+		expect(mockManager.cursor.toggleGrab).not.toHaveBeenCalled();
+
+		mockManager.map.emit('mouseenter');
+		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer');
+		layer.setSelected(false);
+		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', false);
+		layer.setSelected(true);
+		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', true);
+		mockManager.map.emit('mouseleave');
+		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', false);
 	});
 
 	it('should reset the cursor on destroy', () => {

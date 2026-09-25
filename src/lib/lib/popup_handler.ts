@@ -26,22 +26,9 @@ export class PopupHandler {
 	}
 
 	/** The topmost element with a popup at the point. */
-	private elementAt({ x, y }: { x: number; y: number }): AbstractElement | undefined {
+	private elementAt(point: { x: number; y: number }): AbstractElement | undefined {
 		const elements = get(this.manager.elements).filter((element) => get(element.popup).trim());
-		if (elements.length === 0) return undefined;
-
-		const features = this.manager.map.queryRenderedFeatures(
-			[
-				[x - TOLERANCE, y - TOLERANCE],
-				[x + TOLERANCE, y + TOLERANCE]
-			],
-			{ layers: elements.flatMap((element) => element.getLayerIds()) }
-		);
-		for (const feature of features) {
-			const element = elements.find((e) => e.sourceId === feature.source);
-			if (element) return element;
-		}
-		return undefined;
+		return this.manager.elementAt(point, TOLERANCE, elements);
 	}
 
 	private open(e: MapMouseEvent) {

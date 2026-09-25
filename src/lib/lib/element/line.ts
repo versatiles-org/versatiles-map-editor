@@ -16,17 +16,13 @@ export class LineElement extends AbstractPathElement {
 		this.path = line ?? this.randomPositions(2);
 
 		this.layer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
-		this.layer.on('click', () => this.manager.selection?.selectElement(this));
-		this.layer.on('pointerdown', (e) => {
-			if (this.isSelected) this.handleDrag(e);
-		});
 
 		this.updateSource();
 	}
 
 	public select(value: boolean) {
 		super.select(value);
-		this.layer.isSelected = value;
+		this.layer.setSelected(value);
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.LineString> {

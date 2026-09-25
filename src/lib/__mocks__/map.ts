@@ -12,6 +12,7 @@ export class MockMap {
 
 	constructor() {}
 	getCanvasContainer = vi.fn(() => mockedCanvas);
+	boxZoom = { disable: vi.fn(), enable: vi.fn() };
 	addSource = vi.fn();
 	removeSource = vi.fn();
 	getSource = vi.fn(() => ({ setData: vi.fn() }) as unknown) as Mock<MaplibreMap['getSource']>;

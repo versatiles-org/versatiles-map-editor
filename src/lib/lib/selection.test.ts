@@ -33,7 +33,8 @@ describe('SelectionHandler', () => {
 			map: mockMap,
 			cursor: mockCursor,
 			state: mockState,
-			elements: mockElements
+			elements: mockElements,
+			elementAt: vi.fn(() => undefined)
 		} as unknown as GeometryManagerInteractive;
 
 		vi.clearAllMocks();
@@ -86,7 +87,7 @@ describe('SelectionHandler', () => {
 		const element = {
 			getSelectionNodes: vi.fn().mockReturnValue([selectionNode])
 		};
-		handler.selectedElement.set(element as unknown as AbstractElement);
+		handler.selectedElements.set([element as unknown as AbstractElement]);
 		handler.updateSelectionNodes();
 		expect(setDataMock).toHaveBeenCalledWith({
 			type: 'FeatureCollection',
@@ -103,7 +104,7 @@ describe('SelectionHandler', () => {
 	it('updateSelectionNodes does nothing if no selected element', () => {
 		const setDataMock = vi.fn();
 		mockMap.getSource.mockReturnValue({ setData: setDataMock } as unknown as maplibregl.Source);
-		handler.selectedElement.set(undefined);
+		handler.selectedElements.set([]);
 		handler.updateSelectionNodes();
 		expect(setDataMock).toHaveBeenCalledWith({
 			type: 'FeatureCollection',
@@ -168,7 +169,7 @@ describe('SelectionHandler', () => {
 				getSelectionNodes: vi.fn().mockReturnValue([]),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			handler.selectedElement.set(element);
+			handler.selectedElements.set([element]);
 		});
 
 		it('should handle mousedown', () => {
@@ -179,7 +180,7 @@ describe('SelectionHandler', () => {
 		});
 
 		it('should not call getSelectionNodeUpdater if no selected element on mousedown', () => {
-			handler.selectedElement.set(undefined);
+			handler.selectedElements.set([]);
 			const event = mouseEvent('mousedown');
 			mockMap.emit('mousedown', event);
 			expect(element.getSelectionNodeUpdater).not.toHaveBeenCalled();
@@ -287,7 +288,7 @@ describe('SelectionHandler', () => {
 				getSelectionNodes: vi.fn().mockReturnValue([]),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			handler.selectedElement.set(element);
+			handler.selectedElements.set([element]);
 			// the mocked projection maps [x, 0] to the pixel (x, 0)
 			mockMap.project.mockImplementation((p) => ({ x: (p as number[])[0], y: 100 }) as maplibregl.Point);
 		});
@@ -407,6 +408,146 @@ describe('SelectionHandler', () => {
 			handler.selectNode(1);
 			expect(handler.deleteSelectedNode()).toBe(false);
 			expect(mockState.log).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('multiple elements', () => {
+		let elements: Mocked<AbstractElement>[];
+		let elementAt: Mock;
+		const mouseEvent = (type: string, keys: { shiftKey?: boolean; altKey?: boolean } = {}, lng = 10) => ({
+			type,
+			point: { x: 1, y: 2 },
+			lngLat: { lng, lat: 0 },
+			originalEvent: { shiftKey: false, altKey: false, ...keys },
+			preventDefault: vi.fn()
+		});
+		const selected = () => get(handler.selectedElements);
+
+		beforeEach(() => {
+			const createElement = () =>
+				({
+					select: vi.fn(),
+					moveBy: vi.fn(),
+					getSelectionNodes: vi.fn(() => [{ index: 0, coordinates: [0, 0] }])
+				}) as unknown as Mocked<AbstractElement>;
+			elements = [createElement(), createElement(), createElement()];
+			mockElements.set(elements);
+			elementAt = mockManager.elementAt as Mock;
+			// no selection node is hit
+			mockMap.queryRenderedFeatures.mockReturnValue([]);
+		});
+
+		it('selects, toggles and deselects elements', () => {
+			handler.selectElements([elements[0], elements[1]]);
+			expect(elements.map((e) => e.select.mock.lastCall![0])).toStrictEqual([true, true, false]);
+			expect(get(handler.selectedElement)).toBeUndefined();
+
+			handler.toggleElement(elements[2]);
+			handler.toggleElement(elements[0]);
+			expect(selected()).toStrictEqual([elements[1], elements[2]]);
+
+			handler.deselectElement(elements[1]);
+			expect(selected()).toStrictEqual([elements[2]]);
+			expect(get(handler.selectedElement)).toBe(elements[2]);
+		});
+
+		it('shows the nodes of a single element only', () => {
+			const setData = vi.fn();
+			mockMap.getSource.mockReturnValue({ setData } as unknown as maplibregl.Source);
+			handler.selectElements([elements[0]]);
+			expect(setData.mock.lastCall![0].features.length).toBe(1);
+			handler.selectElements([elements[0], elements[1]]);
+			expect(setData.mock.lastCall![0].features.length).toBe(0);
+		});
+
+		it('selects the clicked element, or adds it with Shift+click', () => {
+			elementAt.mockReturnValue(elements[0]);
+			mockMap.emit('click', mouseEvent('click'));
+			expect(selected()).toStrictEqual([elements[0]]);
+
+			elementAt.mockReturnValue(elements[1]);
+			mockMap.emit('click', mouseEvent('click', { shiftKey: true }));
+			expect(selected()).toStrictEqual([elements[0], elements[1]]);
+
+			// Shift+click next to the elements keeps the selection
+			elementAt.mockReturnValue(undefined);
+			mockMap.emit('click', mouseEvent('click', { shiftKey: true }));
+			expect(selected()).toStrictEqual([elements[0], elements[1]]);
+
+			// a click next to the elements deselects all
+			mockMap.emit('click', mouseEvent('click'));
+			expect(selected()).toStrictEqual([]);
+		});
+
+		it('moves all selected elements by dragging one of them', () => {
+			handler.selectElements([elements[0], elements[1]]);
+			elementAt.mockReturnValue(elements[1]);
+			const down = mouseEvent('mousedown', {}, 10);
+			mockMap.emit('mousedown', down);
+			// only the selected elements are candidates
+			expect(elementAt).toHaveBeenLastCalledWith(down.point, 3, [elements[0], elements[1]]);
+			expect(down.preventDefault).toHaveBeenCalled();
+
+			mockMap.emit('mousemove', mouseEvent('mousemove', {}, 12));
+			mockMap.emit('mouseup');
+			expect(elements[0].moveBy).toHaveBeenCalledWith(2, 0);
+			expect(elements[1].moveBy).toHaveBeenCalledWith(2, 0);
+			expect(elements[2].moveBy).not.toHaveBeenCalled();
+			expect(mockState.log).toHaveBeenCalled();
+			expect(selected()).toStrictEqual([elements[0], elements[1]]);
+		});
+
+		it('selects only the pressed element on a click without moving', () => {
+			handler.selectElements([elements[0], elements[1]]);
+			elementAt.mockReturnValue(elements[1]);
+			mockMap.emit('mousedown', mouseEvent('mousedown'));
+			mockMap.emit('mouseup');
+			expect(selected()).toStrictEqual([elements[1]]);
+		});
+
+		it('moves copies of all selected elements with Alt-drag', () => {
+			const copies = [elements[2]];
+			const duplicateElements = vi.fn(() => copies);
+			Object.assign(mockManager, { duplicateElements });
+			handler.selectElements([elements[0]]);
+			elementAt.mockReturnValue(elements[0]);
+
+			mockMap.emit('mousedown', mouseEvent('mousedown', { altKey: true }, 10));
+			mockMap.emit('mousemove', mouseEvent('mousemove', {}, 11));
+			mockMap.emit('mousemove', mouseEvent('mousemove', {}, 12));
+			expect(duplicateElements).toHaveBeenCalledExactlyOnceWith([elements[0]]);
+			expect(elements[0].moveBy).not.toHaveBeenCalled();
+			expect(elements[2].moveBy).toHaveBeenCalledTimes(2);
+		});
+
+		it('does not drag with Shift or on unselected elements', () => {
+			handler.selectElements([elements[0]]);
+
+			elementAt.mockReturnValue(elements[0]);
+			const shiftDown = mouseEvent('mousedown', { shiftKey: true });
+			mockMap.emit('mousedown', shiftDown);
+			expect(shiftDown.preventDefault).not.toHaveBeenCalled();
+
+			elementAt.mockReturnValue(undefined);
+			const down = mouseEvent('mousedown');
+			mockMap.emit('mousedown', down);
+			expect(down.preventDefault).not.toHaveBeenCalled();
+			expect(mockMap.listenerCount('mousemove')).toBe(0);
+		});
+
+		it('drags with a finger, using a larger tolerance', () => {
+			handler.selectElements([elements[0]]);
+			elementAt.mockReturnValue(elements[0]);
+			const touch = (type: string, lng: number) => ({
+				...mouseEvent(type, {}, lng),
+				points: [{ x: 1, y: 2 }],
+				originalEvent: { altKey: false, shiftKey: false, cancelable: true, preventDefault: vi.fn() }
+			});
+			mockMap.emit('touchstart', touch('touchstart', 10));
+			expect(elementAt).toHaveBeenLastCalledWith({ x: 1, y: 2 }, 16, [elements[0]]);
+			mockMap.emit('touchmove', touch('touchmove', 13));
+			mockMap.emit('touchend', touch('touchend', 13));
+			expect(elements[0].moveBy).toHaveBeenCalledWith(3, 0);
 		});
 	});
 });

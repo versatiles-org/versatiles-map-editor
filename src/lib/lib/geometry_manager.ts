@@ -5,7 +5,7 @@ import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
 import type { StateRoot, StateElement } from '$lib/codec/types.js';
-import { writable, type Writable } from 'svelte/store';
+import { get, writable, type Writable } from 'svelte/store';
 import { inlineSources } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { CircleElement } from './element/circle.js';
@@ -131,6 +131,30 @@ export class GeometryManager {
 
 	protected appendElement(element: AbstractElement) {
 		this.elements.update((elements) => [...elements, element]);
+	}
+
+	/**
+	 * The topmost element drawn at the pixel, within `tolerance` pixels.
+	 * Only `candidates` are considered, e.g. the elements with a popup.
+	 */
+	public elementAt(
+		{ x, y }: { x: number; y: number },
+		tolerance = 0,
+		candidates: AbstractElement[] = get(this.elements)
+	): AbstractElement | undefined {
+		if (candidates.length === 0) return undefined;
+		const features = this.map.queryRenderedFeatures(
+			[
+				[x - tolerance, y - tolerance],
+				[x + tolerance, y + tolerance]
+			],
+			{ layers: candidates.flatMap((element) => element.getLayerIds()) }
+		);
+		for (const feature of features) {
+			const element = candidates.find((e) => e.sourceId === feature.source);
+			if (element) return element;
+		}
+		return undefined;
 	}
 
 	public removeElement(element: AbstractElement) {

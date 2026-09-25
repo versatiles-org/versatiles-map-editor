@@ -18,21 +18,16 @@ export class PolygonElement extends AbstractPathElement {
 		this.path = polygon ?? this.randomPositions(3);
 
 		this.fillLayer = new MapLayerFill(manager, 'fill' + this.slug, this.sourceId);
-		this.fillLayer.on('click', () => this.manager.selection?.selectElement(this));
-		this.fillLayer.on('pointerdown', (e) => {
-			if (this.isSelected) this.handleDrag(e);
-		});
 
 		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
-		this.strokeLayer.on('click', () => this.manager.selection?.selectElement(this));
 
 		this.updateSource();
 	}
 
 	public select(value: boolean) {
 		super.select(value);
-		this.fillLayer.isSelected = value;
-		this.strokeLayer.isSelected = value;
+		this.fillLayer.setSelected(value);
+		this.strokeLayer.setSelected(value);
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {

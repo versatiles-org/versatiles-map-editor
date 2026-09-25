@@ -1,9 +1,8 @@
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
-import { getMiddlePoint, lat2mercator, mercator2lat } from '../utils/geometry.js';
+import { getMiddlePoint, movePoint } from '../utils/geometry.js';
 import type { GeoPath, GeoPoint } from '../utils/types.js';
-import { claimEvent, trackDrag, type MapPointerEvent } from '../utils/drag.js';
 
 export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];
@@ -14,30 +13,9 @@ export abstract class AbstractPathElement extends AbstractElement {
 		this.isLine = isLine;
 	}
 
-	protected handleDrag(e: MapPointerEvent) {
-		const { lng, lat } = e.lngLat;
-		let x0 = lng;
-		let y0 = lat2mercator(lat);
-		// Alt/Option-drag moves a copy. It is created on the first move, so a click creates no copy.
-		let target: AbstractPathElement | undefined = e.originalEvent.altKey ? undefined : this;
-		const moveHandler = (e: MapPointerEvent) => {
-			if (!target) {
-				if (!this.manager.isInteractive()) return;
-				target = this.manager.duplicateElement(this) as AbstractPathElement;
-			}
-			const { lng, lat } = e.lngLat;
-			const y = lat2mercator(lat);
-			const dx = lng - x0;
-			const dy = y - y0;
-			y0 = y;
-			x0 = lng;
-			target.path = target.path.map(([x, y]) => [x + dx, mercator2lat(lat2mercator(y) + dy)]);
-			target.updateSource();
-			this.manager.selection?.updateSelectionNodes();
-			e.preventDefault();
-		};
-		trackDrag(this.manager.map, e, moveHandler, () => this.manager.state?.log());
-		claimEvent(e);
+	moveBy(dx: number, dy: number) {
+		this.path = this.path.map((point) => movePoint(point, dx, dy));
+		this.updateSource();
 	}
 
 	getSelectionNodes(): SelectionNode[] {

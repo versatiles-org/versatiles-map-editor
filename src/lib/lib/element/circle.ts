@@ -6,7 +6,7 @@ import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import type { StateElementCircle } from '$lib/codec/types.js';
 import { AbstractElement } from './abstract.js';
-import { circle, circleArea, distance } from '../utils/geometry.js';
+import { circle, circleArea, distance, movePoint } from '../utils/geometry.js';
 import { formatArea, formatLength } from '../utils/format.js';
 
 export class CircleElement extends AbstractElement {
@@ -21,10 +21,8 @@ export class CircleElement extends AbstractElement {
 		this.radius = radius ?? this.randomRadius();
 
 		this.fillLayer = new MapLayerFill(manager, 'fill' + this.slug, this.sourceId);
-		this.fillLayer.on('click', () => this.manager.selection?.selectElement(this));
 
 		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
-		this.strokeLayer.on('click', () => this.manager.selection?.selectElement(this));
 
 		this.updateSource();
 	}
@@ -66,8 +64,8 @@ export class CircleElement extends AbstractElement {
 
 	public select(value: boolean) {
 		super.select(value);
-		this.fillLayer.isSelected = value;
-		this.strokeLayer.isSelected = value;
+		this.fillLayer.setSelected(value);
+		this.strokeLayer.setSelected(value);
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
@@ -86,6 +84,11 @@ export class CircleElement extends AbstractElement {
 			{ label: 'Radius', value: formatLength(this.radius) },
 			{ label: 'Area', value: formatArea(circleArea(this.radius)) }
 		];
+	}
+
+	moveBy(dx: number, dy: number) {
+		this.point = movePoint(this.point, dx, dy);
+		this.updateSource();
 	}
 
 	getLayerIds(): string[] {

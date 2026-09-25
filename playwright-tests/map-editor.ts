@@ -571,3 +571,88 @@ test('searching a place', async ({ page }) => {
 	await search.fill('Somewhere');
 	await expect(page.getByRole('listbox')).toContainText('Search failed');
 });
+
+test('selecting multiple elements', async ({ page }) => {
+	const square = (x: number, y: number): [number, number][] => [
+		[x, y],
+		[x + 0.02, y],
+		[x + 0.02, y + 0.01],
+		[x, y + 0.01]
+	];
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{ type: 'polygon', points: square(13.33, 52.47) },
+			{ type: 'polygon', points: square(13.4, 52.47), style: { color: '#0000ff' } },
+			{ type: 'marker', point: [13.37, 52.52] }
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await waitForMapIsIdle(page);
+	const project = (point: [number, number]) =>
+		page.evaluate((point) => {
+			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
+			return [x, y] as const;
+		}, point);
+	const elements = () => stateInUrl(page).elements;
+	const fillColors = () =>
+		elements().map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
+	const styleTitle = page.getByRole('button', { name: /^Style/ });
+
+	// Shift+click adds the second polygon; the fill colors differ
+	const a = await project([13.34, 52.475]);
+	const b = await project([13.41, 52.475]);
+	await page.mouse.click(...a);
+	await expect(styleTitle).toHaveText('Style');
+	await page.keyboard.down('Shift');
+	await page.mouse.click(...b);
+	await page.keyboard.up('Shift');
+	await expect(styleTitle).toHaveText('Style of 2 elements');
+	const fillColor = page.getByRole('button', { name: /^Color/ }).first();
+	await expect(page.getByText('(mixed)').first()).toBeVisible();
+
+	// the style changes for both polygons
+	await fillColor.click();
+	await page.getByLabel('Hex').fill('#00ff00');
+	await page.getByLabel('Hex').press('Enter');
+	await expect.poll(fillColors).toStrictEqual(['#00ff00', '#00ff00', 'marker']);
+	await page.keyboard.press('Escape');
+
+	// dragging one of them moves both polygons south, but not the marker
+	const firstLatitudes = () => elements().map((e) => ('points' in e ? e.points[0][1] : e.point[1]));
+	const before = firstLatitudes();
+	await page.mouse.move(...a);
+	await page.mouse.down();
+	await page.mouse.move(a[0], a[1] + 40, { steps: 5 });
+	await page.mouse.up();
+	await expect.poll(() => firstLatitudes()[0]).toBeLessThan(before[0]);
+	const after = firstLatitudes();
+	expect(after[1] - before[1]).toBeCloseTo(after[0] - before[0], 4);
+	expect(after[2]).toBe(before[2]);
+	await expect(styleTitle).toHaveText('Style of 2 elements');
+
+	// duplicate and delete act on all selected elements
+	await page.keyboard.press('ControlOrMeta+d');
+	await expect.poll(() => elements().length).toBe(5);
+	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await page.keyboard.press('Delete');
+	await expect.poll(() => elements().length).toBe(3);
+
+	// a marker and polygons have no style properties in common
+	const moved = await project([13.34, 52.465]);
+	await page.mouse.click(...moved);
+	await expect(styleTitle).toHaveText('Style');
+	await page.keyboard.down('Shift');
+	await page.mouse.click(...((await project([13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
+	await page.keyboard.up('Shift');
+	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await expect(page.getByText('These elements have no style properties in common.')).toBeVisible();
+
+	// Shift+click on a selected element removes it from the selection
+	await page.keyboard.down('Shift');
+	await page.mouse.click(...moved);
+	await page.keyboard.up('Shift');
+	await expect(styleTitle).toHaveText('Style');
+	await expect(page.getByRole('button', { name: /^Symbol/ })).toBeVisible();
+});

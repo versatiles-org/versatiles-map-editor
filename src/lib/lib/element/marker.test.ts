@@ -100,4 +100,10 @@ describe('MarkerElement', () => {
 		expect(restoredElement['point']).toEqual(state.point);
 		expect(restoredElement.layer.getState()?.color).toBe('#00ff00');
 	});
+
+	it('should move its point', () => {
+		element.point = [10, 20];
+		element.moveBy(1, 0);
+		expect(element.point).toStrictEqual([11, expect.closeTo(20)]);
+	});
 });

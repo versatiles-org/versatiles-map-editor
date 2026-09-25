@@ -97,4 +97,10 @@ describe('CircleElement', () => {
 		expect(element.point).toEqual([30, 40]);
 		expect(element.radius).toBe(10);
 	});
+
+	it('should move its point', () => {
+		circleElement.point = [10, 20];
+		circleElement.moveBy(1, 0);
+		expect(circleElement.point).toStrictEqual([11, expect.closeTo(20)]);
+	});
 });

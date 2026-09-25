@@ -23,6 +23,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 	constructor(map: maplibregl.Map) {
 		super(map);
 		this.cursor = new Cursor(map.getCanvasContainer());
+		// Shift+click selects several elements. Box zoom (Shift+drag) would swallow these clicks.
+		map.boxZoom.disable();
 		this.selection = new SelectionHandler(this);
 		this.state = new StateManager(this);
 	}
@@ -42,7 +44,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 	}
 
 	public removeElement(element: AbstractElement) {
-		this.selection.selectElement();
+		this.selection.deselectElement(element);
 		super.removeElement(element);
 	}
 
@@ -64,10 +66,13 @@ export class GeometryManagerInteractive extends GeometryManager {
 		return element;
 	}
 
-	/**
-	 * Add a copy of the element, moved by the given offset in pixels, and select it.
-	 */
+	/** Add a copy of the element, moved by the given offset in pixels, and select it. */
 	public duplicateElement(element: AbstractElement, offset: [number, number] = [0, 0]): AbstractElement {
+		return this.duplicateElements([element], offset)[0];
+	}
+
+	/** Add copies of the elements, moved by the given offset in pixels, and select them. */
+	public duplicateElements(elements: AbstractElement[], offset: [number, number] = [0, 0]): AbstractElement[] {
 		const move = (point: GeoPoint): GeoPoint => {
 			if (offset[0] === 0 && offset[1] === 0) return point;
 			const { x, y } = this.map.project(point);
@@ -75,19 +80,24 @@ export class GeometryManagerInteractive extends GeometryManager {
 			return [lng, lat];
 		};
 
-		const state: StateElement = structuredClone(element.getState());
-		switch (state.type) {
-			case 'marker':
-			case 'circle':
-				state.point = move(state.point);
-				break;
-			case 'line':
-			case 'polygon':
-				state.points = state.points.map(move);
-				break;
-		}
-
-		return this.addElement(state);
+		const copies = elements.map((element) => {
+			const state: StateElement = structuredClone(element.getState());
+			switch (state.type) {
+				case 'marker':
+				case 'circle':
+					state.point = move(state.point);
+					break;
+				case 'line':
+				case 'polygon':
+					state.points = state.points.map(move);
+					break;
+			}
+			const copy = elementFromState(this, state);
+			this.appendElement(copy);
+			return copy;
+		});
+		this.selection.selectElements(copies);
+		return copies;
 	}
 
 	/** Add an element from its state and select it. */

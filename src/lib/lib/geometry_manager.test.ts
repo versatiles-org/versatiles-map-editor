@@ -6,6 +6,7 @@ import type { StateRoot } from '$lib/codec/types.js';
 import type { AbstractElement } from './element/abstract.js';
 import { inlineSources } from '@versatiles/style';
 import type { StyleSpecification } from 'maplibre-gl';
+import type * as maplibregl from 'maplibre-gl';
 
 describe('GeometryManager', () => {
 	let map: MockMap;
@@ -168,6 +169,34 @@ describe('GeometryManager', () => {
 		const [element] = get(geometryManager.elements);
 		expect(get(element.popup)).toBe('Hello');
 		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
+	});
+
+	it('should find the topmost element at a pixel', async () => {
+		map.setStyle();
+		await geometryManager.setState({
+			elements: [
+				{ type: 'marker', point: [0, 0] },
+				{ type: 'marker', point: [1, 1] }
+			]
+		});
+		const [a, b] = get(geometryManager.elements);
+		map.queryRenderedFeatures.mockReturnValue([
+			{ source: 'basemap' },
+			{ source: b.sourceId },
+			{ source: a.sourceId }
+		] as unknown as maplibregl.MapGeoJSONFeature[]);
+
+		expect(geometryManager.elementAt({ x: 10, y: 20 }, 2)).toBe(b);
+		expect(map.queryRenderedFeatures).toHaveBeenLastCalledWith(
+			[
+				[8, 18],
+				[12, 22]
+			],
+			{ layers: [...a.getLayerIds(), ...b.getLayerIds()] }
+		);
+		// only among the candidates
+		expect(geometryManager.elementAt({ x: 10, y: 20 }, 0, [a])).toBe(a);
+		expect(geometryManager.elementAt({ x: 10, y: 20 }, 0, [])).toBeUndefined();
 	});
 
 	it('should identify as non-interactive', () => {

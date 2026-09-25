@@ -7,6 +7,7 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 	const original = await importOriginal<typeof import('maplibre-gl')>();
 	class Map {
 		getCanvasContainer = vi.fn(() => document.createElement('div'));
+		boxZoom = { disable: vi.fn() };
 		getCenter = vi.fn(() => new original.LngLat(0, 0));
 		getBounds = vi.fn(() => new original.LngLatBounds([-1, -1], [1, 1]));
 		getSource = vi.fn();

@@ -1,11 +1,10 @@
-import type * as maplibregl from 'maplibre-gl';
-import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { AbstractPathElement } from './abstract_path.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode } from './types.js';
 import type { StateElement } from '$lib/codec/types.js';
-import { getMiddlePoint } from '../utils/geometry.js';
+import { getMiddlePoint, lat2mercator } from '../utils/geometry.js';
 
 class TestPathElement extends AbstractPathElement {
 	constructor(manager: GeometryManager, isLine: boolean) {
@@ -37,10 +36,6 @@ class TestPathElement extends AbstractPathElement {
 	}
 	getColors(): string[] {
 		return [];
-	}
-
-	public handleDrag(e: maplibregl.MapMouseEvent | maplibregl.MapTouchEvent): void {
-		super.handleDrag(e);
 	}
 
 	destroy() {}
@@ -153,127 +148,16 @@ describe('AbstractPathElement', () => {
 		expect(element.canDeleteNode(-1)).toBe(false);
 	});
 
-	it('should handle drag correctly', () => {
-		const element = new TestPathElement(manager, true);
-		element['path'] = [
-			[0, 0],
-			[10, 10]
-		];
-		const mockEvent = {
-			type: 'mousedown',
-			lngLat: { lng: 5, lat: 5 },
-			originalEvent: { altKey: false },
-			preventDefault: vi.fn()
-		} as unknown as maplibregl.MapMouseEvent;
-
-		const mockMoveEvent = {
-			type: 'mousemove',
-			lngLat: { lng: 15, lat: 15 },
-			preventDefault: vi.fn()
-		} as unknown as maplibregl.MapMouseEvent;
-
-		element.handleDrag(mockEvent);
-
-		expect(mockManager.map.on).toHaveBeenCalledWith('mousemove', expect.any(Function));
-		expect(mockManager.map.on).toHaveBeenCalledWith('mouseup', expect.any(Function));
-		expect(mockEvent.preventDefault).toHaveBeenCalled();
-
-		mockManager.map.emit('mousemove', mockMoveEvent);
-
-		expect(element['path']).toEqual([
-			[10, expect.closeTo(10.12)],
-			[20, expect.closeTo(19.81)]
-		]);
-		expect(mockMoveEvent.preventDefault).toHaveBeenCalled();
-
-		const log = vi.spyOn(mockManager.state, 'log');
-		mockManager.map.emit('mouseup');
-		expect(mockManager.map.listenerCount('mousemove')).toBe(0);
-		expect(log).toHaveBeenCalled();
-	});
-
-	it('should handle a touch drag, and stop it for a pinch-zoom', () => {
+	it('should move all points, keeping the shape on the map', () => {
 		const element = new TestPathElement(manager, true);
 		element.path = [
 			[0, 0],
-			[10, 0]
+			[10, 10]
 		];
-		const originalEvent = { altKey: false, cancelable: true, preventDefault: vi.fn() };
-		const touchEvent = (type: string, lng: number, fingers = 1) =>
-			({
-				type,
-				lngLat: { lng, lat: 0 },
-				points: new Array(fingers).fill({ x: 0, y: 0 }),
-				originalEvent,
-				preventDefault: vi.fn()
-			}) as unknown as maplibregl.MapTouchEvent;
-
-		const start = touchEvent('touchstart', 5);
-		element.handleDrag(start);
-		// the map must not pan
-		expect(start.preventDefault).toHaveBeenCalled();
-
-		mockManager.map.emit('touchmove', touchEvent('touchmove', 15));
+		element.moveBy(10, lat2mercator(5) - lat2mercator(0));
 		expect(element.path).toStrictEqual([
-			[10, expect.closeTo(0)],
-			[20, expect.closeTo(0)]
+			[10, expect.closeTo(5)],
+			[20, expect.closeTo(14.887, 3)]
 		]);
-
-		// a second finger ends the drag
-		mockManager.map.emit('touchmove', touchEvent('touchmove', 25, 2));
-		mockManager.map.emit('touchmove', touchEvent('touchmove', 35));
-		expect(element.path[0][0]).toBe(10);
-		expect(mockManager.map.listenerCount('touchmove')).toBe(0);
-		expect(mockManager.map.listenerCount('touchend')).toBe(0);
-	});
-
-	describe('alt-drag', () => {
-		let element: TestPathElement;
-		let copy: TestPathElement;
-		const altEvent = {
-			type: 'mousedown',
-			lngLat: { lng: 5, lat: 5 },
-			originalEvent: { altKey: true },
-			preventDefault: vi.fn()
-		} as unknown as maplibregl.MapMouseEvent;
-		const moveEvent = {
-			type: 'mousemove',
-			lngLat: { lng: 15, lat: 5 },
-			preventDefault: vi.fn()
-		} as unknown as maplibregl.MapMouseEvent;
-
-		beforeEach(() => {
-			element = new TestPathElement(manager, true);
-			element.path = [
-				[0, 0],
-				[10, 0]
-			];
-			copy = new TestPathElement(manager, true);
-			copy.path = element.path.map((p) => [...p]);
-			Object.assign(mockManager, { duplicateElement: vi.fn(() => copy) });
-		});
-
-		it('should move a copy instead of the original', () => {
-			element.handleDrag(altEvent);
-			mockManager.map.emit('mousemove', moveEvent);
-			mockManager.map.emit('mousemove', moveEvent);
-
-			expect((mockManager as unknown as { duplicateElement: Mock }).duplicateElement).toHaveBeenCalledTimes(1);
-			expect(element.path).toStrictEqual([
-				[0, 0],
-				[10, 0]
-			]);
-			expect(copy.path).toStrictEqual([
-				[10, expect.closeTo(0)],
-				[20, expect.closeTo(0)]
-			]);
-		});
-
-		it('should not create a copy on a click without moving', () => {
-			element.handleDrag(altEvent);
-			mockManager.map.emit('mouseup');
-
-			expect((mockManager as unknown as { duplicateElement: Mock }).duplicateElement).not.toHaveBeenCalled();
-		});
 	});
 });

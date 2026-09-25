@@ -96,6 +96,8 @@ export abstract class AbstractElement {
 		this.destroy();
 	}
 
+	/** Move the element by `dx` degrees of longitude and `dy` in mercator units (see `movePoint`). */
+	abstract moveBy(dx: number, dy: number): void;
 	/** The colors of the element, e.g. for the palette of used colors. */
 	abstract getColors(): string[];
 	/** The ids of the map layers that draw the element. */

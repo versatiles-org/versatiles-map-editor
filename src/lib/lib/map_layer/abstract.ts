@@ -4,14 +4,10 @@ import { Color } from '@versatiles/style';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateStyle } from '$lib/codec/types.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import { isClaimed, isMultiTouch, type MapPointerEvent } from '../utils/drag.js';
 
 type LayerSpec = LayerFill | LayerLine | LayerSymbol;
-// 'pointerdown' is a mousedown or the touchstart of a finger or pencil
-type Events = 'click' | 'pointerdown' | 'mousemove' | 'mouseup';
-type PointerEventHandler = (event: MapPointerEvent) => void;
-type MapLayerEvent = Exclude<Events, 'pointerdown'> | 'mousedown' | 'touchstart' | 'mouseenter' | 'mouseleave';
-type MapLayerEventHandler = (event: maplibregl.MapLayerMouseEvent | maplibregl.MapLayerTouchEvent) => void;
+type MapLayerEvent = 'mouseenter' | 'mouseleave';
+type MapLayerEventHandler = (event: maplibregl.MapLayerMouseEvent) => void;
 type PaintKey = keyof maplibregl.AllPaintProperties;
 type LayoutKey = keyof maplibregl.AllLayoutProperties;
 
@@ -23,10 +19,10 @@ export abstract class MapLayer<T extends LayerSpec> {
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
 	protected readonly map: maplibregl.Map;
 
-	public eventHandlers = new Map<Events, PointerEventHandler[]>();
 	// Listeners registered on the map, so they can be removed in destroy()
 	private mapListeners: [MapLayerEvent, MapLayerEventHandler][] = [];
 	public isSelected = false;
+	private isHovered = false;
 
 	constructor(manager: GeometryManager, id: string) {
 		this.manager = manager;
@@ -54,60 +50,32 @@ export abstract class MapLayer<T extends LayerSpec> {
 		}
 	}
 
-	on(event: Events, handler: PointerEventHandler) {
-		if (!this.eventHandlers.has(event)) this.eventHandlers.set(event, []);
-		this.eventHandlers.get(event)!.push(handler);
-	}
-
-	off(event: Events, handler: PointerEventHandler) {
-		if (!this.eventHandlers.has(event)) return;
-		const handlers = this.eventHandlers.get(event)!;
-		this.eventHandlers.set(
-			event,
-			handlers.filter((h) => h !== handler)
-		);
-	}
-
-	private dispatchEvent(event: Events, e: MapPointerEvent) {
-		const handlers = this.eventHandlers.get(event);
-		if (handlers) handlers.forEach((handler) => handler(e));
-	}
-
 	private listen(event: MapLayerEvent, handler: MapLayerEventHandler) {
 		this.map.on(event, this.id, handler);
 		this.mapListeners.push([event, handler]);
 	}
 
+	// Selection and dragging are handled by the SelectionHandler. The layer only shows the cursor.
 	private addEvents() {
 		const manager = this.manager;
-		if (manager.isInteractive()) {
-			this.listen('mouseenter', () => {
-				if (this.isSelected) manager.cursor.toggleGrab(this.id);
-				manager.cursor.toggleHover(this.id);
-			});
-			this.listen('mouseleave', () => {
-				if (this.isSelected) manager.cursor.toggleGrab(this.id, false);
-				manager.cursor.toggleHover(this.id, false);
-			});
-			this.listen('click', (e) => {
-				this.dispatchEvent('click', e);
-				if (this.isSelected) manager.cursor.toggleGrab(this.id);
-				manager.cursor.toggleHover(this.id);
-				e.preventDefault();
-			});
-			const onDown = (e: MapPointerEvent) => {
-				// e.g. a selection node above the element was hit, or a pinch-zoom starts
-				if (isClaimed(e) || isMultiTouch(e)) return;
-				this.dispatchEvent('pointerdown', e);
-			};
-			this.listen('mousedown', (e) => {
-				if (manager.cursor.isPrecise()) return;
-				onDown(e);
-			});
-			this.listen('touchstart', onDown);
-		}
-		this.listen('mouseup', (e) => this.dispatchEvent('mouseup', e));
-		this.listen('mousemove', (e) => this.dispatchEvent('mousemove', e));
+		if (!manager.isInteractive()) return;
+		this.listen('mouseenter', () => {
+			this.isHovered = true;
+			if (this.isSelected) manager.cursor.toggleGrab(this.id);
+			manager.cursor.toggleHover(this.id);
+		});
+		this.listen('mouseleave', () => {
+			this.isHovered = false;
+			manager.cursor.toggleGrab(this.id, false);
+			manager.cursor.toggleHover(this.id, false);
+		});
+	}
+
+	/** A selected layer can be dragged, which the cursor shows while it is hovered. */
+	setSelected(value: boolean) {
+		this.isSelected = value;
+		const manager = this.manager;
+		if (this.isHovered && manager.isInteractive()) manager.cursor.toggleGrab(this.id, value);
 	}
 
 	setPaint(paint: T['paint']) {
@@ -145,7 +113,6 @@ export abstract class MapLayer<T extends LayerSpec> {
 	destroy(): void {
 		for (const [event, handler] of this.mapListeners) this.map.off(event, this.id, handler);
 		this.mapListeners = [];
-		this.eventHandlers.clear();
 
 		// The layer may be destroyed while hovered (e.g. on undo), which would leave the cursor stuck
 		const manager = this.manager;

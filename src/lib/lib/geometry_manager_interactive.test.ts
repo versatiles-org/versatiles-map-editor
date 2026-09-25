@@ -61,9 +61,9 @@ describe('GeometryManager', () => {
 		const { selection } = manager;
 		if (!selection) throw new Error('Selection is not defined');
 		selection.selectElement(element);
-		vi.spyOn(selection, 'selectElement');
 		manager.removeElement(element);
-		expect(selection?.selectElement).toHaveBeenCalledWith();
+		expect(get(selection.selectedElements)).toStrictEqual([]);
+		expect(get(manager.elements)).toStrictEqual([]);
 	});
 
 	describe('state', () => {
@@ -176,7 +176,28 @@ describe('GeometryManager', () => {
 			expect(element.getState()).toMatchObject(state);
 		});
 
+		it('should disable box zoom, which would swallow Shift+clicks', () => {
+			expect(manager.map.boxZoom.disable).toHaveBeenCalled();
+		});
+
 		describe('duplicate', () => {
+			it('should duplicate several elements and select all copies', () => {
+				const marker = manager.addNewElement('marker');
+				const line = manager.addNewElement('line');
+				const copies = manager.duplicateElements([marker, line]);
+				expect(copies.map((c) => c.getState())).toStrictEqual([marker.getState(), line.getState()]);
+				expect(get(manager.selection.selectedElements)).toStrictEqual(copies);
+				expect(get(manager.elements).length).toBe(4);
+			});
+
+			it('should keep the other selected elements when one is removed', () => {
+				const marker = manager.addNewElement('marker');
+				const line = manager.addNewElement('line');
+				manager.selection.selectElements([marker, line]);
+				marker.delete();
+				expect(get(manager.selection.selectedElements)).toStrictEqual([line]);
+			});
+
 			it('should duplicate a marker with an offset and select the copy', () => {
 				const marker = manager.addNewElement('marker');
 				marker.point = [10, 20];
