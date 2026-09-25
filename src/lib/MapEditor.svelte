@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { replaceState } from '$app/navigation';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import * as maplibre from 'maplibre-gl';
@@ -12,6 +12,7 @@
 	import { GeometryManager } from './lib/geometry_manager.js';
 	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
 	import { decodeState } from '$lib/codec/index.js';
+	import { throttle } from '$lib/utils/throttle.js';
 
 	let {
 		onMapLoad
@@ -28,11 +29,18 @@
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
 		init();
+		// SvelteKit's replaceState fails until its router has finished starting, which happens
+		// after all components are mounted. Changes during startup (e.g. the initial viewport)
+		// are written once it is ready, without delaying the first edit by the throttle.
+		tick().then(() => {
+			routerReady = true;
+			if (persistRequested) writeHash();
+		});
 		return destroy;
 	});
 
 	function destroy(): void {
-		clearTimeout(persistTimeout);
+		persistState.cancel();
 		removeEventListener('hashchange', onHashChange);
 		// before map.remove(), so the elements can still remove their layers
 		geometryManager?.destroy();
@@ -43,19 +51,24 @@
 
 	// Keep the URL hash in sync with the edited map, so a reload keeps the work and the
 	// address bar always holds a shareable link. replaceState does not fire "hashchange".
-	let persistTimeout: ReturnType<typeof setTimeout> | undefined;
-	function persistState() {
-		clearTimeout(persistTimeout);
-		persistTimeout = setTimeout(() => {
-			if (!geometryManager?.isInteractive()) return;
-			try {
-				// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
-				replaceState('#' + geometryManager.state.getHash(), {});
-			} catch (error) {
-				console.error('Failed to store the map state in the URL', error);
-			}
-		}, 300);
+	// A single edit is written immediately. Bursts (e.g. zooming with the mouse wheel) are
+	// throttled, because browsers limit how often replaceState may be called.
+	let routerReady = false;
+	let persistRequested = false;
+	function requestPersist() {
+		if (routerReady) persistState();
+		else persistRequested = true;
 	}
+	function writeHash() {
+		if (!geometryManager?.isInteractive()) return;
+		try {
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
+			replaceState('#' + geometryManager.state.getHash(), {});
+		} catch (error) {
+			console.error('Failed to store the map state in the URL', error);
+		}
+	}
+	const persistState = throttle(writeHash, 300);
 
 	function onHashChange() {
 		readHash(location.hash.slice(1));
@@ -116,8 +129,8 @@
 
 		if (showSidebar) {
 			const manager = new GeometryManagerInteractive(map);
-			manager.state.events.on('change', persistState);
-			map.on('moveend', persistState);
+			manager.state.events.on('change', requestPersist);
+			map.on('moveend', requestPersist);
 			geometryManager = manager;
 		} else {
 			geometryManager = new GeometryManager(map);

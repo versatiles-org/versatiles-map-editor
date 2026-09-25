@@ -61,8 +61,8 @@ const ariaResult = `- region "Map"
     - text: GitHub Issues`;
 
 /**
- * The map state in the URL. The hash is written shortly after a change, so it can be
- * missing or outdated. Returns an empty state if there is no valid hash (yet).
+ * The map state in the URL. Rapid changes are throttled, so the hash can be missing or
+ * outdated for a moment. Returns an empty state if there is no valid hash (yet).
  */
 function stateInUrl(page: Page): MapState {
 	try {
@@ -287,7 +287,7 @@ test('keeps the map in the URL across reloads', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Marker' }).click();
 
-	// the hash is written shortly after the last change
+	// a single change is written to the hash immediately
 	const elementsInUrl = () => stateInUrl(page).elements.map((e) => e.type);
 	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
 
