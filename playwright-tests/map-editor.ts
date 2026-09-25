@@ -656,3 +656,81 @@ test('selecting multiple elements', async ({ page }) => {
 	await expect(styleTitle).toHaveText('Style');
 	await expect(page.getByRole('button', { name: /^Symbol/ })).toBeVisible();
 });
+
+test('copying and pasting a style', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'line',
+				points: [
+					[13.33, 52.52],
+					[13.38, 52.52]
+				],
+				style: { color: '#0000ff', width: 4 }
+			},
+			{
+				type: 'polygon',
+				points: [
+					[13.33, 52.47],
+					[13.36, 52.47],
+					[13.36, 52.49]
+				]
+			},
+			{ type: 'marker', point: [13.42, 52.5] }
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await waitForMapIsIdle(page);
+	const project = (point: [number, number]) =>
+		page.evaluate((point) => {
+			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
+			return [x, y] as const;
+		}, point);
+	// the style parts of all elements, with colors in lower case like in the state
+	const styles = () =>
+		stateInUrl(page).elements.map((e) => {
+			const lower = (style?: { color?: string }) => style && { ...style, color: style.color?.toLowerCase() };
+			return 'strokeStyle' in e
+				? { style: lower(e.style), strokeStyle: lower(e.strokeStyle) }
+				: { style: lower(e.style) };
+		});
+	const pasteButton = page.getByRole('button', { name: 'Paste style' });
+
+	// copy the style of the line with the keyboard
+	await page.mouse.click(...(await project([13.355, 52.52])));
+	await expect(page.getByRole('button', { name: 'Copy style' })).toBeEnabled();
+	await expect(pasteButton).toBeDisabled();
+	await page.keyboard.press('ControlOrMeta+Alt+c');
+	await expect(pasteButton).toBeEnabled();
+
+	// paste it onto the polygon and the marker at once
+	await page.mouse.click(...(await project([13.35, 52.475])));
+	await page.keyboard.down('Shift');
+	// the flag icon of the marker is drawn above and right of its point
+	const [mx, my] = await project([13.42, 52.5]);
+	await page.mouse.click(mx + 6, my - 8);
+	await page.keyboard.up('Shift');
+	await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+	await pasteButton.click();
+
+	// the outline of the polygon gets the line style, the marker only its color
+	await expect
+		.poll(styles)
+		.toStrictEqual([
+			{ style: { color: '#0000ff', width: 4 } },
+			{ style: undefined, strokeStyle: { color: '#0000ff', width: 4 } },
+			{ style: { color: '#0000ff' } }
+		]);
+
+	// a single undo step reverts both
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect
+		.poll(() =>
+			styles()
+				.slice(1)
+				.map((s) => JSON.stringify(s))
+		)
+		.toStrictEqual(['{}', '{}']);
+});

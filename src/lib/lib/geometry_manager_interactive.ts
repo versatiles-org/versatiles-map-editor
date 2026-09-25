@@ -10,6 +10,7 @@ import { SelectionHandler } from './selection.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
 import { ColorPalette } from './color_palette.js';
+import { StyleClipboard } from './style_clipboard.js';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from '$lib/codec/index.js';
 import type { StateElement, StateRoot } from '$lib/codec/types.js';
 import type { GeoPoint } from './utils/types.js';
@@ -18,6 +19,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 	public readonly selection: SelectionHandler;
 	public readonly cursor: Cursor;
 	public readonly state: StateManager;
+	public readonly styleClipboard = new StyleClipboard();
 	public readonly colors = new ColorPalette(() => get(this.elements).flatMap((e) => e.getColors()));
 
 	constructor(map: maplibregl.Map) {
