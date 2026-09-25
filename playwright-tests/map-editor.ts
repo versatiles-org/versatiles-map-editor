@@ -148,12 +148,7 @@ test('invalid hash', async ({ page }) => {
 
 test('dragging a slider creates a single undo step', async ({ page }) => {
 	const undo = page.getByRole('button', { name: 'Undo' });
-
-	async function addPolygon() {
-		await page.goto('/');
-		await waitForMapIsReady(page);
-		await page.getByRole('button', { name: 'Polygon' }).click();
-	}
+	const addPolygon = () => page.getByRole('button', { name: 'Polygon' }).click();
 
 	async function countUndoSteps(): Promise<number> {
 		let steps = 0;
@@ -164,7 +159,11 @@ test('dragging a slider creates a single undo step', async ({ page }) => {
 		return steps;
 	}
 
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
 	await addPolygon();
+	// undoes everything, so the map is empty again
 	const baseline = await countUndoSteps();
 
 	await addPolygon();
@@ -273,6 +272,8 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	await fileName.fill('my-map.mapjson');
 	const [download] = await Promise.all([page.waitForEvent('download'), fileName.press('Enter')]);
 	expect(download.suggestedFilename()).toBe('my-map.mapjson');
+	// otherwise closing the page has to cancel the unfinished download, which is slow in Firefox
+	await download.path();
 	await expect(dialog).toBeHidden();
 
 	// "New" → OK clears the map
