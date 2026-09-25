@@ -14,6 +14,7 @@ import type {
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
 import { sanitizeBackground } from './profile.js';
+import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
@@ -21,6 +22,8 @@ export class StateReader {
 	public offset: number = 0;
 	// Since version 1: the colors, which are referenced by index
 	private palette: string[] | undefined;
+	// Since version 1: the styles read so far
+	private styleHistory: StyleHistory | undefined;
 
 	constructor(bits: boolean[]) {
 		this.bits = bits;
@@ -140,7 +143,10 @@ export class StateReader {
 			if (version > MAX_CODEC_VERSION) {
 				throw new Error(`Unsupported version: ${version}`);
 			}
-			if (version >= 1) this.palette = this.readArray(() => this.readColor());
+			if (version >= 1) {
+				this.palette = this.readArray(() => this.readColor());
+				this.styleHistory = new StyleHistory();
+			}
 
 			// Read the map element
 			root.map = this.readMap();
@@ -355,50 +361,68 @@ export class StateReader {
 		}
 	}
 
+	/** A style. Since version 1: a reference to an earlier style (0: none) and the differences to it. */
 	readStyle(): StateStyle {
 		try {
-			const style: StateStyle = {};
-			while (true) {
-				const key = this.readInteger(4);
-				switch (key) {
-					case 0:
-						return style;
-					case 1:
-						style.halo = this.readVarint() / 10;
-						break;
-					case 2:
-						style.opacity = this.readVarint() / 100;
-						break;
-					case 3:
-						style.pattern = this.readVarint();
-						break;
-					case 4:
-						style.rotate = this.readVarint(true);
-						break;
-					case 5:
-						style.size = this.readVarint() / 10;
-						break;
-					case 6:
-						style.width = this.readVarint() / 10;
-						break;
-					case 7:
-						style.align = this.readVarint();
-						break;
-					case 8:
-						style.color = this.readColorValue();
-						break;
-					case 9:
-						style.label = this.readString();
-						break;
-					case 10:
-						style.visible = false;
-						break;
-					default:
-						throw new Error(`Invalid state key: ${key}`);
-				}
-			}
+			if (!this.styleHistory) return this.readStylePatch({});
+			const ref = this.readVarint();
+			const base = this.styleHistory.get(ref);
+			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
+			const style = this.readStylePatch({ ...base });
+			this.styleHistory.remember(style);
+			return style;
 		} catch (cause) {
 			throw new Error(`Error reading style`, { cause });
+		}
+	}
+
+	/** Apply the changed and removed fields to `style`. */
+	readStylePatch(style: StateStyle): StateStyle {
+		while (true) {
+			const key = this.readInteger(4);
+			switch (key) {
+				case 0:
+					return style;
+				case 1:
+					style.halo = this.readVarint() / 10;
+					break;
+				case 2:
+					style.opacity = this.readVarint() / 100;
+					break;
+				case 3:
+					style.pattern = this.readVarint();
+					break;
+				case 4:
+					style.rotate = this.readVarint(true);
+					break;
+				case 5:
+					style.size = this.readVarint() / 10;
+					break;
+				case 6:
+					style.width = this.readVarint() / 10;
+					break;
+				case 7:
+					style.align = this.readVarint();
+					break;
+				case 8:
+					style.color = this.readColorValue();
+					break;
+				case 9:
+					style.label = this.readString();
+					break;
+				case 10:
+					style.visible = false;
+					break;
+				case STYLE_REMOVE_KEY: {
+					const removed = this.readInteger(4);
+					const field = STYLE_FIELDS.find((f) => f.key === removed);
+					if (!field) throw new Error(`Invalid state key: ${removed}`);
+					delete style[field.name];
+					break;
+				}
+				default:
+					throw new Error(`Invalid state key: ${key}`);
+			}
 		}
 	}
 

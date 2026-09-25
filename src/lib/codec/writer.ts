@@ -2,6 +2,7 @@ import { Color } from '@versatiles/style';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, MAX_CODEC_VERSION } from './constants.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
 	StateElementCircle,
 	StateElementLine,
@@ -19,6 +20,8 @@ export class StateWriter {
 	readonly version: number;
 	// Since version 1: the colors of the state, most frequent first, by their color key
 	private palette: Map<string, number> | undefined;
+	// Since version 1: the styles written so far
+	private styleHistory: StyleHistory | undefined;
 
 	constructor({ version = CODEC_VERSION }: { version?: number } = {}) {
 		if (version < 0 || version > MAX_CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
@@ -97,7 +100,10 @@ export class StateWriter {
 
 	writeRoot(root: StateRoot) {
 		this.writeInteger(this.version, 3);
-		if (this.version >= 1) this.writePalette(collectColors(root));
+		if (this.version >= 1) {
+			this.writePalette(collectColors(root));
+			this.styleHistory = new StyleHistory();
+		}
 
 		this.writeMap(root.map);
 		this.writeMetadata(root.meta);
@@ -274,47 +280,71 @@ export class StateWriter {
 		this.writeInteger(0, 4);
 	}
 
+	/**
+	 * A style. Since version 1: a reference to a similar earlier style (0: none) and only the
+	 * differences to it, whichever is shortest.
+	 */
 	writeStyle(style: StateStyle) {
-		if (style.halo != null) {
-			this.writeInteger(1, 4);
-			this.writeVarint(Math.round(style.halo * 10));
+		if (!this.styleHistory) return this.writeStylePatch({}, style);
+
+		let best: boolean[] | undefined;
+		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
+			const writer = this.fork();
+			writer.writeVarint(ref);
+			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
+			if (!best || writer.bits.length < best.length) best = writer.bits;
 		}
-		if (style.opacity != null) {
-			this.writeInteger(2, 4);
-			this.writeVarint(Math.round(style.opacity * 100));
-		}
-		if (style.pattern != null) {
-			this.writeInteger(3, 4);
-			this.writeVarint(style.pattern);
-		}
-		if (style.rotate != null) {
-			this.writeInteger(4, 4);
-			this.writeVarint(style.rotate, true);
-		}
-		if (style.size != null) {
-			this.writeInteger(5, 4);
-			this.writeVarint(Math.round(style.size * 10));
-		}
-		if (style.width != null) {
-			this.writeInteger(6, 4);
-			this.writeVarint(Math.round(style.width * 10));
-		}
-		if (style.align != null) {
-			this.writeInteger(7, 4);
-			this.writeVarint(style.align);
-		}
-		if (style.color != null) {
-			this.writeInteger(8, 4);
-			this.writeColorValue(style.color);
-		}
-		if (style.label != null) {
-			this.writeInteger(9, 4);
-			this.writeString(style.label);
-		}
-		if (style.visible === false) {
-			this.writeInteger(10, 4);
+		this.bits.push(...best!);
+		this.styleHistory.remember(style);
+	}
+
+	/** The fields that differ from `base`: changed ones with their value, missing ones as removed. */
+	writeStylePatch(base: StateStyle, style: StateStyle) {
+		for (const field of STYLE_FIELDS) {
+			const value = encodedValue(style, field);
+			if (value === encodedValue(base, field)) continue;
+			if (value === undefined) {
+				this.writeInteger(STYLE_REMOVE_KEY, 4);
+				this.writeInteger(field.key, 4);
+				continue;
+			}
+			this.writeInteger(field.key, 4);
+			this.writeStyleValue(field.name, style);
 		}
 		this.writeInteger(0, 4);
+	}
+
+	private writeStyleValue(name: keyof StateStyle, style: StateStyle) {
+		switch (name) {
+			case 'halo':
+				return this.writeVarint(Math.round(style.halo! * 10));
+			case 'opacity':
+				return this.writeVarint(Math.round(style.opacity! * 100));
+			case 'pattern':
+				return this.writeVarint(style.pattern!);
+			case 'rotate':
+				return this.writeVarint(style.rotate!, true);
+			case 'size':
+				return this.writeVarint(Math.round(style.size! * 10));
+			case 'width':
+				return this.writeVarint(Math.round(style.width! * 10));
+			case 'align':
+				return this.writeVarint(style.align!);
+			case 'color':
+				return this.writeColorValue(style.color!);
+			case 'label':
+				return this.writeString(style.label!);
+			case 'visible':
+				// the key alone means "false"
+				return;
+		}
+	}
+
+	/** A writer for trying out an encoding, with the same palette. */
+	private fork(): StateWriter {
+		const writer = new StateWriter({ version: this.version });
+		writer.palette = this.palette;
+		return writer;
 	}
 
 	/** The colors, each once, and afterwards only their index (since version 1). */
@@ -350,12 +380,6 @@ export class StateWriter {
 		charCodes.forEach((c) => this.writeVarint(c < 128 ? CHAR_CODE2VALUE[c] : c));
 		return value;
 	}
-}
-
-/** Colors that are written identically have the same key, e.g. "#FF0000" and "#ff0000". */
-function colorKey(color: string): string {
-	const { r, g, b, alpha } = Color.parse(color).srgb;
-	return [r, g, b, alpha * 255].map(Math.round).join(',');
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

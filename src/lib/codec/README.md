@@ -80,7 +80,8 @@ hashes keep decoding. `encodeState` writes `CODEC_VERSION` (`constants.ts`):
 - **0**: the original format. New fields use the extension points v0 reserved: e.g. popups use
   the per-element popup flag, which old hashes always leave at `0`.
 - **1**: the colors of all styles and of the legend are stored once in a palette, most frequent
-  first, and referenced by index (#5).
+  first, and referenced by index (#5). A style refers to a similar one of the last 32 styles and
+  stores only the fields that differ, or that it does not have (#4, `style_history.ts`).
 
 Version 1 is still being completed (#4, #3); until then `encodeState` writes version 0, so no
 hash in the wild depends on an unfinished version. Coordinates are quantized to a ~1e-5 grid and
