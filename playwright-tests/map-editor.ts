@@ -88,6 +88,10 @@ const ariaResult = `- region "Map"
   - text: "GeoJSON:"
   - button "Import ✓"
   - button "Export ✓"
+- group "KML (Google Earth):":
+  - text: "KML (Google Earth):"
+  - button "Import ✓"
+  - button "Export ✓"
 - group "Table (CSV/TSV):":
   - text: "Table (CSV/TSV):"
   - button "Import table… ✓"
@@ -1258,4 +1262,53 @@ test('precision of a shared map', async ({ page }) => {
 
 	// the map in the editor keeps its precision
 	expect((stateInUrl(page).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
+});
+
+test('exporting and importing KML', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		meta: {
+			background: { builder: 'osm', options: { theme: 'gray' } },
+			legend: { entries: [{ color: '#00ff00', label: 'Park' }] }
+		},
+		elements: [
+			{ type: 'marker', point: [13.41, 52.51], style: { color: '#0000ff', label: 'Café' }, popup: { text: 'Open' } },
+			{
+				type: 'polygon',
+				points: [
+					[13.3, 52.4],
+					[13.4, 52.4],
+					[13.4, 52.5]
+				],
+				style: { color: '#00ff00', pattern: 1 }
+			},
+			{ type: 'circle', point: [13.45, 52.55], radius: 800 }
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportKML').click()]);
+	expect(download.suggestedFilename()).toBe('map.kml');
+	const kml = readFileSync(await download.path(), 'utf-8');
+	expect(kml).toContain('<Placemark><name>Café</name><description>Open</description>');
+
+	// importing it into an empty map restores the map
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const group = page.getByRole('group', { name: 'KML (Google Earth):' });
+	const [chooser] = await Promise.all([
+		page.waitForEvent('filechooser'),
+		group.getByRole('button', { name: /^Import/ }).click()
+	]);
+	await chooser.setFiles({
+		name: 'map.kml',
+		mimeType: 'application/vnd.google-earth.kml+xml',
+		buffer: Buffer.from(kml)
+	});
+
+	const lower = (value: unknown) => JSON.parse(JSON.stringify(value).toLowerCase());
+	await expect.poll(() => lower(stateInUrl(page).elements)).toStrictEqual(lower(state.elements));
+	await expect.poll(() => lower(stateInUrl(page).meta)).toStrictEqual(lower(state.meta));
 });

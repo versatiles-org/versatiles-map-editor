@@ -168,6 +168,26 @@ describe('GeometryManager', () => {
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
 
+		it('should add an imported state: its elements and its map properties', () => {
+			manager.addNewElement('marker');
+			manager.addState({
+				meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] }, colorScheme: 'dark2', search: true },
+				elements: [
+					{
+						type: 'line',
+						points: [
+							[0, 0],
+							[1, 1]
+						]
+					}
+				]
+			});
+			expect(get(manager.elements).map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
+			expect(get(manager.legend)?.entries.length).toBe(1);
+			expect(get(manager.colors.scheme)).toBe('dark2');
+			expect(get(manager.search)).toBe(true);
+		});
+
 		it('should add several elements and select them all', () => {
 			const elements = manager.addElements([
 				{ type: 'marker', point: [1, 2] },

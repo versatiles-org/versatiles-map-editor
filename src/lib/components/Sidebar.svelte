@@ -8,7 +8,8 @@
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
-	import { downloadJSON } from '$lib/utils/download.js';
+	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
+	import { stateFromKML, stateToKML } from '$lib/codec/index.js';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
@@ -23,10 +24,11 @@
 	const selectedNode = $derived(geometryManager.selection.selectedNode);
 	const copiedStyle = $derived(geometryManager.styleClipboard.style);
 
-	function importGeoJSON() {
+	/** Let the user choose a file, and add its content to the map. */
+	function importFile(accept: string, read: (text: string) => void, format: string) {
 		const input = document.createElement('input');
 		input.type = 'file';
-		input.accept = '.geojson,.json,application/geo+json,application/json';
+		input.accept = accept;
 		input.onchange = () => {
 			const file = input.files?.[0];
 			if (!file) return;
@@ -34,12 +36,11 @@
 			reader.onload = (evt) => {
 				try {
 					if (!evt.target) return alert('Failed to read file.');
-					const json = JSON.parse(evt.target.result as string);
-					geometryManager.addGeoJSON(json);
+					read(evt.target.result as string);
 					geometryManager.state.log();
 				} catch (error) {
 					console.error(error);
-					return alert('Failed to import GeoJSON. Please check the file format.');
+					return alert(`Failed to import ${format}. Please check the file format.`);
 				}
 			};
 
@@ -50,8 +51,29 @@
 		input.click();
 	}
 
+	function importGeoJSON() {
+		importFile(
+			'.geojson,.json,application/geo+json,application/json',
+			(text) => geometryManager.addGeoJSON(JSON.parse(text)),
+			'GeoJSON'
+		);
+	}
+
+	function importKML() {
+		importFile(
+			'.kml,application/vnd.google-earth.kml+xml',
+			(text) => geometryManager.addState(stateFromKML(text)),
+			'KML'
+		);
+	}
+
 	function exportGeoJSON() {
 		downloadJSON(geometryManager.getGeoJSON(), 'map.geojson', 'application/geo+json');
+	}
+
+	function exportKML() {
+		const kml = stateToKML(geometryManager.getState());
+		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), 'map.kml');
 	}
 
 	function duplicateElements() {
@@ -151,6 +173,13 @@
 				<div class="grid2">
 					<button class="btn" onclick={importGeoJSON}>Import</button>
 					<button class="btn" onclick={exportGeoJSON} data-testid="btnExportGeoJSON">Export</button>
+				</div>
+			</div>
+			<div role="group" aria-labelledby="{uid}-kml">
+				<span id="{uid}-kml">KML (Google Earth):</span>
+				<div class="grid2">
+					<button class="btn" onclick={importKML}>Import</button>
+					<button class="btn" onclick={exportKML} data-testid="btnExportKML">Export</button>
 				</div>
 			</div>
 			<div role="group" aria-labelledby="{uid}-table">

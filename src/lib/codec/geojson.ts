@@ -164,8 +164,13 @@ function toPoints(positions: unknown): Point[] | undefined {
 
 function featureToElement(feature: GeoJSON.Feature): StateElement | undefined {
 	const element = featureToElementWithoutPopup(feature);
+	if (!element) return undefined;
 	const popup = popupFromProps(feature.properties);
-	if (element && popup) element.popup = popup;
+	if (popup) element.popup = popup;
+	// default styles are absent, not undefined, like in a decoded state
+	for (const key of Object.keys(element) as (keyof StateElement)[]) {
+		if (element[key] === undefined) delete element[key];
+	}
 	return element;
 }
 

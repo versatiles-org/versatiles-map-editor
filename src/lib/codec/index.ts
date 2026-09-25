@@ -10,6 +10,7 @@ export type { StateRoot as MapState } from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { digitsForResolution, resolutionOfDigits } from './grid.js';
+export { stateFromKML, stateToKML } from './kml.js';
 
 /**
  * Encode a map state document into the compact base64 representation.

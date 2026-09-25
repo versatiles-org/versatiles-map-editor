@@ -150,8 +150,20 @@ export class GeometryManagerInteractive extends GeometryManager {
 	}
 
 	public addGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON) {
-		const state = stateFromGeoJSON(doc);
+		this.addState(stateFromGeoJSON(doc));
+	}
+
+	/**
+	 * Add the content of an imported file: its elements are added to the map, and the map
+	 * properties it has (e.g. the background) replace the current ones.
+	 */
+	public addState(state: StateRoot) {
 		if (state.map) this.fitViewport(state.map);
+		const meta = state.meta ?? {};
+		if (meta.background) void this.setBackground(meta.background);
+		if (meta.legend) this.legend.set(meta.legend);
+		if (meta.colorScheme) this.colors.scheme.set(meta.colorScheme);
+		if (meta.search) this.search.set(true);
 		for (const element of state.elements) {
 			this.appendElement(elementFromState(this, element));
 		}

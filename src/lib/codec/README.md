@@ -72,6 +72,23 @@ Enum values use human-readable names (`fill-pattern`, `stroke-style`,
 their defaults and enum names from here and only add rendering data;
 `profile.test.ts` checks that every enum value can be rendered.
 
+## KML (`kml.ts`)
+
+`stateToKML` / `stateFromKML` convert through the GeoJSON profile, so they cover the same
+properties:
+
+- For other tools (Google Earth, My Maps, GIS), each element becomes a Placemark with a KML style
+  (colors as `aabbggrr`, line width, opacity, marker size and rotation), its label as `<name>` and
+  its popup as `<description>`. Circles are drawn as polygons.
+- All GeoJSON properties are also stored in the Placemark's `<ExtendedData>` (and the circle
+  center, the viewport and `meta` in the Document's), so importing an exported file restores the
+  exact map state.
+- Files of other tools: Placemarks (also in folders and `MultiGeometry`) become markers, lines and
+  polygons, with the colors and widths of their styles (inline, `styleUrl`, `StyleMap`). HTML in
+  descriptions becomes text. 3D models, tracks, overlays and network links are skipped.
+
+A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
+
 ## Backward compatibility
 
 The base64 starts with a 3-bit format version, and every version can be read, so existing
