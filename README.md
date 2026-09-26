@@ -4,6 +4,19 @@ A standalone, embeddable map editor for [VersaTiles](https://versatiles.org). Dr
 
 This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLibre GL](https://maplibre.org/) and [`@versatiles/style`](https://github.com/versatiles-org/versatiles-style). It was extracted from [`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte) to be developed on its own.
 
+## Features
+
+- **Draw** markers, lines, polygons and circles. Drag an element or its nodes to change it, select a node to delete it, and Shift-click to select several elements.
+- **Style** them: symbols with color, size, rotation, halo and a label; lines and outlines with color, width and dash patterns; fills with color, opacity and patterns. Elements can have a popup text, and lines, polygons and circles show their length, area or radius.
+- **Edit quickly**: undo and redo, duplicate (<kbd>Cmd/Ctrl</kbd>+<kbd>D</kbd>), copy and paste a style (<kbd>Cmd/Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>/<kbd>V</kbd>), delete (<kbd>Delete</kbd>/<kbd>Backspace</kbd>).
+- **Background map**: vector map or satellite imagery, with a theme, a label font, a label language and fewer or no labels.
+- **Legend** with a position, a layout and a font. New entries start with a color of the map that the legend does not show yet.
+- **Search** for addresses and places.
+- **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
+- **Save** the map as a file and open it again. The address bar always holds the whole map, so a reload keeps the work.
+- **Share** a link or embed the map in a website, with a selectable precision and an optional search. Embedded maps and phones show a read-only viewer.
+- **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
+
 ## Development
 
 ```bash
