@@ -2,6 +2,7 @@
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 	import Dialog from './DialogFile.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
+	import { notify } from '$lib/utils/notify.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
@@ -45,10 +46,10 @@
 					filename = file.name;
 				} catch (error) {
 					console.error(error);
-					alert('Failed to open the map. Please check the file format.');
+					notify('Failed to open the map. Please check the file format.');
 				}
 			};
-			reader.onerror = () => alert('Failed to read file. Please try again.');
+			reader.onerror = () => notify('Failed to read the file. Please try again.');
 			reader.readAsText(file);
 		};
 		fileInput.click();

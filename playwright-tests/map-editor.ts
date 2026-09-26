@@ -133,6 +133,10 @@ test('invalid hash', async ({ page }) => {
 
 	expect(pageErrors).toStrictEqual([]);
 	expect(consoleErrors).toStrictEqual([expect.stringMatching(/^Invalid map state in URL hash/)]);
+	// the map is empty, and a message says why
+	const message = page.getByRole('alert');
+	await expect(message).toHaveText(/The map in the link could not be read/);
+	await message.getByRole('button', { name: 'Dismiss' }).click();
 	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
 });
 
@@ -1587,4 +1591,22 @@ test('screen readers hear the state of the search and of copying', async ({ page
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await page.getByRole('button', { name: /^Copy Link/ }).click();
 	await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
+});
+
+test('a file that cannot be imported shows a message instead of a browser dialog', async ({ page }) => {
+	page.on('dialog', () => {
+		throw new Error('No browser dialog expected');
+	});
+	await page.goto('/');
+	await waitForMapIsReady(page, { expectedMessages: [/JSON/, /JSHandle/, /^SyntaxError/] });
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const [chooser] = await Promise.all([
+		page.waitForEvent('filechooser'),
+		page
+			.getByRole('group', { name: 'GeoJSON:' })
+			.getByRole('button', { name: /^Import/ })
+			.click()
+	]);
+	await chooser.setFiles({ name: 'broken.geojson', mimeType: 'application/geo+json', buffer: Buffer.from('{ broken') });
+	await expect(page.getByRole('alert')).toHaveText(/Failed to import GeoJSON. Please check the file format./);
 });

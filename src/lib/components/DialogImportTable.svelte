@@ -44,6 +44,7 @@
 	let controller: AbortController | undefined;
 	let imported = $state(0);
 	let failed: FailedRow[] = $state([]);
+	let importError = $state('');
 
 	export function open() {
 		step = 'input';
@@ -97,6 +98,7 @@
 	async function runImport() {
 		if (!table) return;
 		step = 'importing';
+		importError = '';
 		progress = { done: 0, total: table.rows.length };
 		controller = new AbortController();
 		const center = manager.map.getCenter();
@@ -137,8 +139,16 @@
 			failed = result.failed;
 			step = 'done';
 		} catch (error) {
-			if (controller.signal.aborted) step = 'mapping';
-			else throw error;
+			if (controller.signal.aborted) {
+				step = 'mapping';
+				return;
+			}
+			// shown in the dialog, which is modal: messages of the page would be behind it
+			console.error(error);
+			importError = error instanceof Error ? error.message : String(error);
+			imported = 0;
+			failed = [];
+			step = 'done';
 		}
 	}
 
@@ -286,7 +296,11 @@
 			<progress max={progress.total} value={progress.done}></progress>
 			<button class="btn" onclick={() => controller?.abort()}>Cancel</button>
 		{:else if step === 'done'}
-			<p>Imported {imported} markers.</p>
+			{#if importError}
+				<p class="error" role="alert">The import failed: {importError}</p>
+			{:else}
+				<p>Imported {imported} markers.</p>
+			{/if}
 			{#if failed.length > 0}
 				<p>These rows could not be imported:</p>
 				<ul class="failed" aria-label="Rows not imported">
@@ -401,5 +415,8 @@
 		max-height: 30vh;
 		overflow: auto;
 		margin: 0;
+	}
+	.error {
+		color: #b00020;
 	}
 </style>

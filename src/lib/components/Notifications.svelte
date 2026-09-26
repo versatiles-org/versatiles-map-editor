@@ -1,0 +1,65 @@
+<script lang="ts">
+	import { dismiss, notifications } from '$lib/utils/notify.js';
+
+	/** `right` keeps the messages clear of the sidebar. */
+	const { right = 0 }: { right?: number } = $props();
+</script>
+
+<div class="notifications" style:--sidebar="{right}px">
+	{#each $notifications as { id, message, kind } (id)}
+		<div class="notification {kind}" role={kind === 'error' ? 'alert' : 'status'}>
+			<span>{message}</span>
+			<button onclick={() => dismiss(id)} aria-label="Dismiss" title="Dismiss">&#x2715;</button>
+		</div>
+	{/each}
+</div>
+
+<style>
+	.notifications {
+		position: absolute;
+		z-index: 3;
+		/* above the attribution, centered in the map */
+		bottom: 40px;
+		left: 10px;
+		right: calc(var(--sidebar) + 10px);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 6px;
+		pointer-events: none;
+	}
+
+	.notification {
+		pointer-events: auto;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		max-width: 100%;
+		box-sizing: border-box;
+		padding: 8px 8px 8px 12px;
+		border-radius: 6px;
+		background: #fff;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		color: #000;
+		font:
+			14px/1.3 system-ui,
+			sans-serif;
+	}
+
+	.error {
+		border-left: 4px solid #b00020;
+	}
+
+	.info {
+		border-left: 4px solid #158;
+	}
+
+	button {
+		flex-shrink: 0;
+		border: none;
+		background: none;
+		cursor: pointer;
+		font-size: 16px;
+		padding: 2px 4px;
+	}
+</style>

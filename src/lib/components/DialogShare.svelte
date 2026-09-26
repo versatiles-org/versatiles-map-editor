@@ -69,19 +69,21 @@
 	function copyLink() {
 		navigator.clipboard.writeText(getLinkCode()).then(
 			() => flash(btnLink),
-			() => alert('Failed to copy link. Please try again.')
+			() => (copyError = 'Copying failed. Please select the link and copy it yourself.')
 		);
 	}
 
 	function copyEmbedCode() {
 		navigator.clipboard.writeText(getEmbedCode()).then(
 			() => flash(btnEmbed),
-			() => alert('Failed to copy embed code. Please try again.')
+			() => (copyError = 'Copying failed. Please select the embed code and copy it yourself.')
 		);
 	}
 
 	// announced to screen readers, which do not see the ✓ of the button
 	let copied = $state('');
+	// shown in the dialog, which is modal: messages of the page would be behind it
+	let copyError = $state('');
 
 	function flash(b?: HTMLButtonElement) {
 		if (!b) return;
@@ -118,6 +120,7 @@
 				</label>
 				<button class="btn" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
 				<span class="sr-only" role="status">{copied}</span>
+				{#if copyError}<span class="copy-error" role="alert">{copyError}</span>{/if}
 			</p>
 			<p>
 				<label for="text-iframe">
@@ -291,5 +294,12 @@
 		clip-path: inset(50%);
 		white-space: nowrap;
 		border: 0;
+	}
+	.copy-error {
+		display: block;
+		width: 200px;
+		margin-top: 0.3em;
+		color: #b00020;
+		font-size: 0.8em;
 	}
 </style>

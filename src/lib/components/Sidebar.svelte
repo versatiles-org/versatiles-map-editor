@@ -9,6 +9,7 @@
 	import PanelLegend from './PanelLegend.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
+	import { notify } from '$lib/utils/notify.js';
 	import { stateFromKML, stateToKML } from '@versatiles/map-state';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 
@@ -35,16 +36,16 @@
 			const reader = new FileReader();
 			reader.onload = (evt) => {
 				try {
-					if (!evt.target) return alert('Failed to read file.');
+					if (!evt.target) return notify('Failed to read the file.');
 					read(evt.target.result as string);
 					geometryManager.state.log();
 				} catch (error) {
 					console.error(error);
-					return alert(`Failed to import ${format}. Please check the file format.`);
+					return notify(`Failed to import ${format}. Please check the file format.`);
 				}
 			};
 
-			reader.onerror = () => alert('Failed to read file. Please try again.');
+			reader.onerror = () => notify('Failed to read the file. Please try again.');
 
 			reader.readAsText(file);
 		};

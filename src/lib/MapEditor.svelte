@@ -10,6 +10,8 @@
 	import Sidebar from './components/Sidebar.svelte';
 	import NodeDeleteButton from './components/NodeDeleteButton.svelte';
 	import Legend from './components/Legend.svelte';
+	import Notifications from './components/Notifications.svelte';
+	import { notify } from '$lib/utils/notify.js';
 	import SearchPlace from './components/SearchPlace.svelte';
 	import { writable } from 'svelte/store';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
@@ -107,11 +109,15 @@
 			state = decodeState(hash);
 		} catch (error) {
 			console.error('Invalid map state in URL hash', error);
+			notify('The map in the link could not be read. The link may be incomplete.');
 			return false;
 		}
 		// The viewport changes (and is persisted) at once, but the elements only after the style has
 		// loaded, so the URL must be written again. Otherwise a reload would lose the elements.
-		geometryManager.loadState(state).then(requestPersist, (error) => console.error('Failed to load map state', error));
+		geometryManager.loadState(state).then(requestPersist, (error) => {
+			console.error('Failed to load map state', error);
+			notify('The map could not be loaded completely.');
+		});
 		return true;
 	}
 
@@ -185,6 +191,7 @@
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
+	<Notifications right={showSidebar ? 250 : 0} />
 	{#if geometryManager && $legend}
 		<!-- a legend at the top goes below the search and the hint -->
 		<Legend
