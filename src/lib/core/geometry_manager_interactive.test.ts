@@ -103,7 +103,7 @@ describe('GeometryManager', () => {
 
 			const marker = manager.addNewElement('marker');
 			marker.point = element.point;
-			marker.layer.label.set(element.style.label);
+			marker.layer.label = element.style.label;
 
 			expect(manager.getState().elements).toStrictEqual([element]);
 
@@ -128,7 +128,7 @@ describe('GeometryManager', () => {
 
 			const line = manager.addNewElement('line');
 			line.path = element.points;
-			line.layer.color.set(element.style.color);
+			line.layer.color = element.style.color;
 
 			expect(manager.getState().elements).toStrictEqual([element]);
 
@@ -154,8 +154,8 @@ describe('GeometryManager', () => {
 
 			const polygon = manager.addNewElement('polygon');
 			polygon.path = element.points;
-			polygon.fillLayer.color.set(element.style.color);
-			polygon.strokeLayer.color.set(element.strokeStyle.color);
+			polygon.fillLayer.color = element.style.color;
+			polygon.strokeLayer.color = element.strokeStyle.color;
 
 			expect(manager.getState().elements).toStrictEqual([element]);
 
@@ -237,7 +237,7 @@ describe('GeometryManager', () => {
 			it('should duplicate a marker with an offset and select the copy', () => {
 				const marker = manager.addNewElement('marker');
 				marker.point = [10, 20];
-				marker.layer.label.set('Test');
+				marker.layer.label = 'Test';
 
 				const copy = manager.duplicateElement(marker, [5, 0]);
 
@@ -259,7 +259,7 @@ describe('GeometryManager', () => {
 					[1, 2],
 					[3, 4]
 				];
-				line.layer.color.set('#abcdef');
+				line.layer.color = '#abcdef';
 
 				const copy = manager.duplicateElement(line) as LineElement;
 
@@ -270,9 +270,9 @@ describe('GeometryManager', () => {
 
 			it('should duplicate polygons and circles with their outline style', () => {
 				const polygon = manager.addNewElement('polygon');
-				polygon.strokeLayer.visible.set(false);
+				polygon.strokeLayer.visible = false;
 				const circle = manager.addNewElement('circle');
-				circle.strokeLayer.color.set('#123456');
+				circle.strokeLayer.color = '#123456';
 
 				const polygonCopy = manager.duplicateElement(polygon, [0, 10]);
 				const circleCopy = manager.duplicateElement(circle, [0, 10]);
@@ -290,10 +290,10 @@ describe('GeometryManager', () => {
 
 		it('should restore falsy style values', async () => {
 			const polygon = manager.addNewElement('polygon');
-			polygon.fillLayer.opacity.set(0);
-			polygon.strokeLayer.visible.set(false);
+			polygon.fillLayer.opacity = 0;
+			polygon.strokeLayer.visible = false;
 			const marker = manager.addNewElement('marker');
-			marker.layer.halo.set(0);
+			marker.layer.halo = 0;
 
 			await manager.setState(decodeState(manager.state.getHash()));
 			const [restoredPolygon, restoredMarker] = get(manager.elements).map((e) => e.getState());
@@ -431,9 +431,9 @@ describe('GeometryManager', () => {
 			const polygon = manager.addNewElement('polygon');
 			const marker = manager.addNewElement('marker');
 			manager.state.log();
-			polygon.fillLayer.color.set('#123456');
-			polygon.fillLayer.opacity.set(0.2);
-			polygon.strokeLayer.width.set(7);
+			polygon.fillLayer.color = '#123456';
+			polygon.fillLayer.opacity = 0.2;
+			polygon.strokeLayer.width = 7;
 			manager.state.log();
 			mockMap.addSource.mockClear();
 

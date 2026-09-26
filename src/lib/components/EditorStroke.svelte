@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManager } from '../core/geometry_manager.js';
-	import { dashArrays, MapLayerLine } from '../core/map_layer/line.js';
-	import { groupStore } from '$lib/utils/group_store.js';
+	import { dashArrays, MapLayerLine } from '../core/map_layer/line.svelte.js';
+	import { group } from '$lib/utils/group.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 
@@ -9,26 +9,23 @@
 	const { layers, manager }: { layers: MapLayerLine[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
 	const log = () => manager.state?.log();
-	const color = $derived(groupStore(layers.map((l) => l.color)));
-	const width = $derived(groupStore(layers.map((l) => l.width)));
-	const dashed = $derived(groupStore(layers.map((l) => l.dashed)));
-	const colorMixed = $derived(color.mixed);
-	const widthMixed = $derived(width.mixed);
-	const dashedMixed = $derived(dashed.mixed);
+	const color = $derived(group(layers, 'color'));
+	const width = $derived(group(layers, 'width'));
+	const dashed = $derived(group(layers, 'dashed'));
 </script>
 
-<InputRow id="{uid}-color" label="Color" mixed={$colorMixed}>
-	<ColorPicker id="{uid}-color" bind:value={$color} onchange={log} palette={manager.colors} />
+<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
+	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={manager.colors} />
 </InputRow>
 
-<InputRow id="{uid}-dashed" label="Dashed" mixed={$dashedMixed}>
-	<select id="{uid}-dashed" bind:value={$dashed} onchange={log}>
+<InputRow id="{uid}-dashed" label="Dashed" mixed={dashed.mixed}>
+	<select id="{uid}-dashed" bind:value={dashed.value} onchange={log}>
 		{#each dashArrays as [index, dash] (index)}
 			<option value={index}>{dash.name}</option>
 		{/each}
 	</select>
 </InputRow>
 
-<InputRow id="{uid}-width" label="Width" mixed={$widthMixed}>
-	<input id="{uid}-width" type="range" min="0.5" max="5" step="0.5" bind:value={$width} onchange={log} />
+<InputRow id="{uid}-width" label="Width" mixed={width.mixed}>
+	<input id="{uid}-width" type="range" min="0.5" max="5" step="0.5" bind:value={width.value} onchange={log} />
 </InputRow>

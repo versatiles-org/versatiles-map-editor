@@ -57,9 +57,9 @@ describe('ElementRenderer', () => {
 		const [polygon, marker] = get(manager.elements) as [PolygonElement, MarkerElement];
 		for (const source of Object.values(sources)) source.setData.mockClear();
 
-		marker.layer.label.set('B');
-		marker.layer.color.set('#00ff00');
-		polygon.strokeLayer.visible.set(true);
+		marker.layer.label = 'B';
+		marker.layer.color = '#00ff00';
+		polygon.strokeLayer.visible = true;
 		await Promise.resolve();
 
 		expect(sources.elements_symbol.updateData).toHaveBeenCalledTimes(1);

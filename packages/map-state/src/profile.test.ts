@@ -4,9 +4,9 @@ import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, LABEL_ALIGN_NAMES, removeDefaul
 import { symbolName, symbolIndexByName, symbolEntries } from './symbols.js';
 import type { StateStyle } from './types.js';
 
-import { fillPatterns } from '$lib/core/map_layer/fill.js';
-import { dashArrays } from '$lib/core/map_layer/line.js';
-import { labelPositions } from '$lib/core/map_layer/symbol.js';
+import { fillPatterns } from '$lib/core/map_layer/fill.svelte.js';
+import { dashArrays } from '$lib/core/map_layer/line.svelte.js';
+import { labelPositions } from '$lib/core/map_layer/symbol.svelte.js';
 import { getSymbol } from '$lib/core/symbols.js';
 
 // The codec owns the style vocabulary and the editor derives its tables from it.

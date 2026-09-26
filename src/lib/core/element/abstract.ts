@@ -54,10 +54,10 @@ export abstract class AbstractElement {
 	public getColors(): string[] {
 		const { symbol, fill, stroke } = this.getStyleLayers();
 		const colors: string[] = [];
-		if (symbol) colors.push(get(symbol.color));
-		if (fill) colors.push(get(fill.color));
+		if (symbol) colors.push(symbol.color);
+		if (fill) colors.push(fill.color);
 		// a line is always drawn, the outline of an area only if it is visible
-		if (stroke && (!fill || get(stroke.visible))) colors.push(get(stroke.color));
+		if (stroke && (!fill || stroke.visible)) colors.push(stroke.color);
 		return colors;
 	}
 

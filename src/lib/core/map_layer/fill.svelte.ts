@@ -1,6 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { get, writable } from 'svelte/store';
-import { MapLayer } from './abstract.js';
+import { MapLayer } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
@@ -58,33 +57,49 @@ export function addFillPatternImage(map: maplibregl.Map, name: string): boolean 
 export class MapLayerFill extends MapLayer {
 	static readonly defaultStyle = FILL_DEFAULTS;
 
-	color = writable(MapLayerFill.defaultStyle.color);
-	opacity = writable(MapLayerFill.defaultStyle.opacity);
-	pattern = writable(MapLayerFill.defaultStyle.pattern);
+	#color: string = $state(FILL_DEFAULTS.color);
+	#opacity: number = $state(FILL_DEFAULTS.opacity);
+	#pattern: number = $state(FILL_DEFAULTS.pattern);
 
-	constructor(onChange: () => void) {
-		super(onChange);
-		this.watch(this.color, this.opacity, this.pattern);
+	get color(): string {
+		return this.#color;
+	}
+	set color(value: string) {
+		if (value === this.#color) return;
+		this.#color = value;
+		this.changed();
+	}
+	get opacity(): number {
+		return this.#opacity;
+	}
+	set opacity(value: number) {
+		if (value === this.#opacity) return;
+		this.#opacity = value;
+		this.changed();
+	}
+	get pattern(): number {
+		return this.#pattern;
+	}
+	set pattern(value: number) {
+		if (value === this.#pattern) return;
+		this.#pattern = value;
+		this.changed();
 	}
 
 	getProperties() {
-		return { pattern: fillPatternName(get(this.pattern), get(this.color)), opacity: get(this.opacity) };
+		return { pattern: fillPatternName(this.pattern, this.color), opacity: this.opacity };
 	}
 
 	getState(): StateStyle | undefined {
 		return removeDefaultFields(
-			{
-				color: get(this.color),
-				opacity: get(this.opacity),
-				pattern: get(this.pattern)
-			},
+			{ color: this.color, opacity: this.opacity, pattern: this.pattern },
 			MapLayerFill.defaultStyle
 		);
 	}
 
 	setState(state: StateStyle) {
-		if (state.color != null) this.color.set(state.color);
-		if (state.opacity != null) this.opacity.set(state.opacity);
-		if (state.pattern != null) this.pattern.set(state.pattern);
+		if (state.color != null) this.color = state.color;
+		if (state.opacity != null) this.opacity = state.opacity;
+		if (state.pattern != null) this.pattern = state.pattern;
 	}
 }

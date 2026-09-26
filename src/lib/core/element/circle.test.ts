@@ -13,8 +13,8 @@ describe('CircleElement', () => {
 	beforeEach(() => {
 		manager = new MockGeometryManager() as unknown as GeometryManager;
 		circleElement = new CircleElement(manager, [10, 20], 300000);
-		circleElement.fillLayer.color.set('#00ff00');
-		circleElement.strokeLayer.color.set('#0000ff');
+		circleElement.fillLayer.color = '#00ff00';
+		circleElement.strokeLayer.color = '#0000ff';
 	});
 
 	it('should initialize with given point and radius', () => {
@@ -66,7 +66,7 @@ describe('CircleElement', () => {
 
 	it('draws itself again after a change of its style', () => {
 		vi.mocked(manager.renderer.update).mockClear();
-		circleElement.strokeLayer.visible.set(false);
+		circleElement.strokeLayer.visible = false;
 		expect(manager.renderer.update).toHaveBeenCalledWith(circleElement);
 	});
 

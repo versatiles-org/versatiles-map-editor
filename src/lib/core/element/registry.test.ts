@@ -78,17 +78,17 @@ describe('style layers', () => {
 
 	it('give the colors, without the color of a hidden outline', () => {
 		const line = createElement(manager, 'line');
-		line.layer.color.set('#00ff00');
+		line.layer.color = '#00ff00';
 		// a line is drawn even if its state says otherwise
-		line.layer.visible.set(false);
+		line.layer.visible = false;
 		expect(line.getColors()).toStrictEqual(['#00ff00']);
 
 		const circle = createElement(manager, 'circle');
-		circle.fillLayer.color.set('#ff0000');
-		circle.strokeLayer.color.set('#0000ff');
-		circle.strokeLayer.visible.set(true);
+		circle.fillLayer.color = '#ff0000';
+		circle.strokeLayer.color = '#0000ff';
+		circle.strokeLayer.visible = true;
 		expect(circle.getColors()).toStrictEqual(['#ff0000', '#0000ff']);
-		circle.strokeLayer.visible.set(false);
+		circle.strokeLayer.visible = false;
 		expect(circle.getColors()).toStrictEqual(['#ff0000']);
 	});
 });

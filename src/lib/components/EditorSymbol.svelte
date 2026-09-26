@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManager } from '../core/geometry_manager.js';
-	import { labelPositions, MapLayerSymbol } from '../core/map_layer/symbol.js';
-	import { groupStore } from '$lib/utils/group_store.js';
+	import { labelPositions, MapLayerSymbol } from '../core/map_layer/symbol.svelte.js';
+	import { group } from '$lib/utils/group.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
@@ -10,29 +10,22 @@
 	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
 	const log = () => manager.state?.log();
-	const symbolIndex = $derived(groupStore(layers.map((l) => l.symbolIndex)));
-	const color = $derived(groupStore(layers.map((l) => l.color)));
-	const rotate = $derived(groupStore(layers.map((l) => l.rotate)));
-	const halo = $derived(groupStore(layers.map((l) => l.halo)));
-	const label = $derived(groupStore(layers.map((l) => l.label)));
-	const labelAlign = $derived(groupStore(layers.map((l) => l.labelAlign)));
-	const size = $derived(groupStore(layers.map((l) => l.size)));
-	const symbolMixed = $derived(symbolIndex.mixed);
-	const colorMixed = $derived(color.mixed);
-	const rotateMixed = $derived(rotate.mixed);
-	const haloMixed = $derived(halo.mixed);
-	const labelMixed = $derived(label.mixed);
-	const labelAlignMixed = $derived(labelAlign.mixed);
-	const sizeMixed = $derived(size.mixed);
+	const symbolIndex = $derived(group(layers, 'symbolIndex'));
+	const color = $derived(group(layers, 'color'));
+	const rotate = $derived(group(layers, 'rotate'));
+	const halo = $derived(group(layers, 'halo'));
+	const label = $derived(group(layers, 'label'));
+	const labelAlign = $derived(group(layers, 'labelAlign'));
+	const size = $derived(group(layers, 'size'));
 </script>
 
-<InputRow id="{uid}-symbol" label="Symbol" mixed={$symbolMixed}>
+<InputRow id="{uid}-symbol" label="Symbol" mixed={symbolIndex.mixed}>
 	<SymbolSelector
 		id="{uid}-symbol"
 		bind:symbolIndex={
-			() => $symbolIndex,
+			() => symbolIndex.value,
 			(v) => {
-				symbolIndex.set(v);
+				symbolIndex.value = v;
 				log();
 			}
 		}
@@ -40,28 +33,28 @@
 	/>
 </InputRow>
 
-<InputRow id="{uid}-color" label="Color" mixed={$colorMixed}>
-	<ColorPicker id="{uid}-color" bind:value={$color} onchange={log} palette={manager.colors} />
+<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
+	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={manager.colors} />
 </InputRow>
 
-<InputRow id="{uid}-size" label="Size" mixed={$sizeMixed}>
-	<input id="{uid}-size" type="range" min="0.5" max="3" step="0.1" bind:value={$size} onchange={log} />
+<InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
+	<input id="{uid}-size" type="range" min="0.5" max="3" step="0.1" bind:value={size.value} onchange={log} />
 </InputRow>
 
-<InputRow id="{uid}-rotate" label="Rotation" mixed={$rotateMixed}>
-	<input id="{uid}-rotate" type="range" min="-180" max="180" step="15" bind:value={$rotate} onchange={log} />
+<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
+	<input id="{uid}-rotate" type="range" min="-180" max="180" step="15" bind:value={rotate.value} onchange={log} />
 </InputRow>
 
-<InputRow id="{uid}-halo" label="Halo" mixed={$haloMixed}>
-	<input id="{uid}-halo" type="range" min="0" max="3" step="0.5" bind:value={$halo} onchange={log} />
+<InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
+	<input id="{uid}-halo" type="range" min="0" max="3" step="0.5" bind:value={halo.value} onchange={log} />
 </InputRow>
 
-<InputRow id="{uid}-label" label="Label" mixed={$labelMixed}>
-	<input id="{uid}-label" type="text" bind:value={$label} onchange={log} />
+<InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
+	<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
 </InputRow>
 
-<InputRow id="{uid}-labelAlign" label="Align Label" mixed={$labelAlignMixed}>
-	<select id="{uid}-labelAlign" bind:value={$labelAlign} onchange={log}>
+<InputRow id="{uid}-labelAlign" label="Align Label" mixed={labelAlign.mixed}>
+	<select id="{uid}-labelAlign" bind:value={labelAlign.value} onchange={log}>
 		{#each labelPositions as { index, name } (index)}
 			<option value={index}>{name}</option>
 		{/each}

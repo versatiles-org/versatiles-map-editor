@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { writable } from 'svelte/store';
-import { MapLayer } from './abstract.js';
+import { MapLayer } from './abstract.svelte.js';
 
 class TestLayer extends MapLayer {
-	a = writable(1);
-	b = writable('x');
-
-	constructor(onChange: () => void) {
-		super(onChange);
-		this.watch(this.a, this.b);
+	#a = 1;
+	get a() {
+		return this.#a;
+	}
+	set a(value: number) {
+		this.#a = value;
+		this.changed();
 	}
 
 	getProperties() {
@@ -21,17 +21,11 @@ class TestLayer extends MapLayer {
 }
 
 describe('MapLayer', () => {
-	it('reports the changes of the watched stores, not their initial values', () => {
+	it('reports the changes of the style', () => {
 		const onChange = vi.fn();
 		const layer = new TestLayer(onChange);
 		expect(onChange).not.toHaveBeenCalled();
-
-		layer.a.set(2);
-		layer.b.set('y');
-		expect(onChange).toHaveBeenCalledTimes(2);
-
-		// an unchanged value is no change
-		layer.a.set(2);
-		expect(onChange).toHaveBeenCalledTimes(2);
+		layer.a = 2;
+		expect(onChange).toHaveBeenCalledTimes(1);
 	});
 });

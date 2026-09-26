@@ -42,11 +42,11 @@ describe('PolygonElement', () => {
 	});
 
 	it('should list the colors of the fill and the visible outline', () => {
-		element.fillLayer.color.set('#00ff00');
-		element.strokeLayer.color.set('#0000ff');
-		element.strokeLayer.visible.set(false);
+		element.fillLayer.color = '#00ff00';
+		element.strokeLayer.color = '#0000ff';
+		element.strokeLayer.visible = false;
 		expect(element.getColors()).toStrictEqual(['#00ff00']);
-		element.strokeLayer.visible.set(true);
+		element.strokeLayer.visible = true;
 		expect(element.getColors()).toStrictEqual(['#00ff00', '#0000ff']);
 	});
 
@@ -64,8 +64,8 @@ describe('PolygonElement', () => {
 
 	it('draws itself again after a change of its style', () => {
 		vi.mocked(mockManager.renderer.update).mockClear();
-		element.fillLayer.color.set('#00ff00');
-		element.strokeLayer.width.set(5);
+		element.fillLayer.color = '#00ff00';
+		element.strokeLayer.width = 5;
 		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
 	});
 
@@ -91,7 +91,7 @@ describe('PolygonElement', () => {
 		const restoredElement = PolygonElement.fromState(mockManager, state);
 
 		expect(restoredElement.path).toEqual(state.points);
-		expect(get(restoredElement.fillLayer.color)).toBe('#00ff00');
-		expect(get(restoredElement.strokeLayer.width)).toBe(2);
+		expect(restoredElement.fillLayer.color).toBe('#00ff00');
+		expect(restoredElement.strokeLayer.width).toBe(2);
 	});
 });

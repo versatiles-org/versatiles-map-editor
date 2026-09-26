@@ -1,5 +1,4 @@
-import { derived, get, writable, type Writable } from 'svelte/store';
-import { MapLayer } from './abstract.js';
+import { MapLayer } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol } from '../symbols.js';
@@ -52,39 +51,91 @@ export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) 
 export class MapLayerSymbol extends MapLayer {
 	static readonly defaultStyle = SYMBOL_DEFAULTS;
 
-	color = writable(MapLayerSymbol.defaultStyle.color);
-	halo = writable(MapLayerSymbol.defaultStyle.halo);
-	rotate = writable(MapLayerSymbol.defaultStyle.rotate);
-	size = writable(MapLayerSymbol.defaultStyle.size);
-	symbolIndex = writable(MapLayerSymbol.defaultStyle.pattern);
-	label = writable(MapLayerSymbol.defaultStyle.label);
-	labelAlign = writable(MapLayerSymbol.defaultStyle.align);
+	#color: string = $state(SYMBOL_DEFAULTS.color);
+	#halo: number = $state(SYMBOL_DEFAULTS.halo);
+	#rotate: number = $state(SYMBOL_DEFAULTS.rotate);
+	#size: number = $state(SYMBOL_DEFAULTS.size);
+	#symbolIndex: number = $state(SYMBOL_DEFAULTS.pattern);
+	#label: string = $state(SYMBOL_DEFAULTS.label);
+	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
 
-	symbolInfo = derived(this.symbolIndex, (index) => getSymbol(index));
-
-	constructor(onChange: () => void) {
-		super(onChange);
-		this.watch(this.color, this.halo, this.rotate, this.size, this.symbolIndex, this.label, this.labelAlign);
+	get color(): string {
+		return this.#color;
 	}
+	set color(value: string) {
+		if (value === this.#color) return;
+		this.#color = value;
+		this.changed();
+	}
+	get halo(): number {
+		return this.#halo;
+	}
+	set halo(value: number) {
+		if (value === this.#halo) return;
+		this.#halo = value;
+		this.changed();
+	}
+	get rotate(): number {
+		return this.#rotate;
+	}
+	set rotate(value: number) {
+		if (value === this.#rotate) return;
+		this.#rotate = value;
+		this.changed();
+	}
+	get size(): number {
+		return this.#size;
+	}
+	set size(value: number) {
+		if (value === this.#size) return;
+		this.#size = value;
+		this.changed();
+	}
+	get symbolIndex(): number {
+		return this.#symbolIndex;
+	}
+	set symbolIndex(value: number) {
+		if (value === this.#symbolIndex) return;
+		this.#symbolIndex = value;
+		this.changed();
+	}
+	get label(): string {
+		return this.#label;
+	}
+	set label(value: string) {
+		if (value === this.#label) return;
+		this.#label = value;
+		this.changed();
+	}
+	get labelAlign(): number {
+		return this.#labelAlign;
+	}
+	set labelAlign(value: number) {
+		if (value === this.#labelAlign) return;
+		this.#labelAlign = value;
+		this.changed();
+	}
+
+	readonly symbolInfo = $derived(getSymbol(this.symbolIndex));
 
 	/** The name of the label position, see `LABEL_POSITIONS`. */
 	private getPosition(): string {
-		const anchor = lookupLabelAlign(get(this.labelAlign)).anchor;
+		const anchor = lookupLabelAlign(this.labelAlign).anchor;
 		if (anchor) return anchor;
-		return get(this.symbolInfo).image == null ? 'auto-center' : 'auto';
+		return this.symbolInfo.image == null ? 'auto-center' : 'auto';
 	}
 
 	getProperties() {
-		const { image } = get(this.symbolInfo);
+		const { image } = this.symbolInfo;
 		return {
 			...(image == null ? {} : { icon: image }),
 			// the layer looks up the offset of the icon by the symbol
-			symbol: get(this.symbolIndex),
-			color: Color.parse(get(this.color)).asString(),
-			rotate: get(this.rotate),
-			size: get(this.size),
-			halo: get(this.halo),
-			label: get(this.label),
+			symbol: this.symbolIndex,
+			color: Color.parse(this.color).asString(),
+			rotate: this.rotate,
+			size: this.size,
+			halo: this.halo,
+			label: this.label,
 			position: this.getPosition()
 		};
 	}
@@ -92,35 +143,31 @@ export class MapLayerSymbol extends MapLayer {
 	getState(): StateStyle | undefined {
 		return removeDefaultFields(
 			{
-				color: get(this.color),
-				rotate: get(this.rotate),
-				size: get(this.size),
-				halo: get(this.halo),
-				pattern: get(this.symbolIndex),
-				label: get(this.label),
-				align: get(this.labelAlign)
+				color: this.color,
+				rotate: this.rotate,
+				size: this.size,
+				halo: this.halo,
+				pattern: this.symbolIndex,
+				label: this.label,
+				align: this.labelAlign
 			},
 			MapLayerSymbol.defaultStyle
 		);
 	}
 
 	setState(state: StateStyle) {
-		if (state.color != null) this.color.set(state.color);
-		if (state.rotate != null) this.rotate.set(state.rotate);
-		if (state.size != null) this.size.set(state.size);
-		if (state.halo != null) this.halo.set(state.halo);
-		if (state.pattern != null) this.symbolIndex.set(state.pattern);
-		if (state.label != null) this.label.set(state.label);
-		if (state.align != null) this.labelAlign.set(lookupLabelAlign(state.align).index);
+		if (state.color != null) this.color = state.color;
+		if (state.rotate != null) this.rotate = state.rotate;
+		if (state.size != null) this.size = state.size;
+		if (state.halo != null) this.halo = state.halo;
+		if (state.pattern != null) this.symbolIndex = state.pattern;
+		if (state.label != null) this.label = state.label;
+		if (state.align != null) this.labelAlign = lookupLabelAlign(state.align).index;
 	}
 }
 
-function lookupLabelAlign(index: number | string | Writable<number>): LabelAlign {
+function lookupLabelAlign(index: number | string): LabelAlign {
 	let pos;
-
-	if (typeof index === 'object') {
-		index = get(index);
-	}
 
 	if (typeof index === 'number') {
 		pos = labelPositions.find((p) => p.index === index);

@@ -11,7 +11,7 @@ import { getMapStyle } from '$lib/utils/map_style.js';
 import { getSettings } from '$lib/utils/background.js';
 import { elementFromState } from './element/registry.js';
 import { ELEMENT_LAYERS, ElementRenderer, elementStyle } from './element_renderer.js';
-import { addFillPatternImage } from './map_layer/fill.js';
+import { addFillPatternImage } from './map_layer/fill.svelte.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {

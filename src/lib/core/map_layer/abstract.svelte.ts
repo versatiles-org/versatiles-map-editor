@@ -1,9 +1,9 @@
-import type { Readable } from 'svelte/store';
 import type { StateStyle } from '@versatiles/map-state';
 
 /**
  * The style of one role of an element (symbol, fill or stroke), e.g. the color of a marker.
- * The editors change its stores; the element renderer draws it from its feature properties.
+ * Its properties are reactive state, which the editors change; the element renderer draws it
+ * from its feature properties.
  */
 export abstract class MapLayer {
 	private readonly onChange: () => void;
@@ -13,15 +13,9 @@ export abstract class MapLayer {
 		this.onChange = onChange;
 	}
 
-	/** Call `onChange` when one of the stores changes (not for their current values). */
-	protected watch(...stores: Readable<unknown>[]) {
-		for (const store of stores) {
-			let current = true;
-			store.subscribe(() => {
-				if (!current) this.onChange();
-			});
-			current = false;
-		}
+	/** Report a change of the style. */
+	protected changed() {
+		this.onChange();
 	}
 
 	/** The feature properties that the layer of the role reads, or undefined if nothing is drawn. */

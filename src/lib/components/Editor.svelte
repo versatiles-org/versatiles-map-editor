@@ -7,7 +7,7 @@
 	import InputRow from './InputRow.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
 	import { writable } from 'svelte/store';
-	import { groupStore } from '$lib/utils/group_store.js';
+	import { group } from '$lib/utils/group.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */
 	const { elements }: { elements: AbstractElement[] } = $props();
@@ -27,10 +27,7 @@
 	const fillLayers = $derived(layersOfRole('fill'));
 	// lines and the outlines of polygons and circles
 	const strokeLayers = $derived(layersOfRole('stroke'));
-	const strokeVisible = $derived(
-		fillLayers.length > 0 ? groupStore(strokeLayers.map((layer) => layer.visible)) : undefined
-	);
-	const strokeVisibleMixed = $derived(strokeVisible?.mixed ?? writable(false));
+	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
 
 	const measurements = $derived(single?.measurements ?? writable([]));
 	const popup = $derived(single?.popup ?? writable(''));
@@ -49,11 +46,11 @@
 				<EditorFill layers={fillLayers} manager={elements[0].manager} />
 				<hr />
 
-				<InputRow id="{uid}-showStroke" label="Draw Outline" mixed={$strokeVisibleMixed}>
-					<input id="{uid}-showStroke" type="checkbox" bind:checked={$strokeVisible} onchange={log} />
+				<InputRow id="{uid}-showStroke" label="Draw Outline" mixed={strokeVisible.mixed}>
+					<input id="{uid}-showStroke" type="checkbox" bind:checked={strokeVisible.value} onchange={log} />
 				</InputRow>
 
-				{#if $strokeVisible}
+				{#if strokeVisible.value}
 					<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
 				{/if}
 			{:else if strokeLayers.length > 0}

@@ -1,7 +1,7 @@
 import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../../utils/types.js';
-import { MapLayerFill } from '../map_layer/fill.js';
-import { MapLayerLine } from '../map_layer/line.js';
+import { MapLayerFill } from '../map_layer/fill.svelte.js';
+import { MapLayerLine } from '../map_layer/line.svelte.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';

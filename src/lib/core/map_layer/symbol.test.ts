@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { get } from 'svelte/store';
-import { LABEL_POSITIONS, MapLayerSymbol } from './symbol.js';
+import { LABEL_POSITIONS, MapLayerSymbol } from './symbol.svelte.js';
 
 describe('MapLayerSymbol', () => {
 	let onChange: Mock<() => void>;
@@ -18,19 +18,19 @@ describe('MapLayerSymbol', () => {
 
 	it('should initialize layer with default values', () => {
 		expect(layer).toBeDefined();
-		expect(get(layer.color)).toBe('#ff0000');
-		expect(get(layer.rotate)).toBe(0);
-		expect(get(layer.size)).toBe(1);
-		expect(get(layer.halo)).toBe(1);
-		expect(get(layer.symbolIndex)).toBe(38);
-		expect(get(layer.label)).toBe('');
+		expect(layer.color).toBe('#ff0000');
+		expect(layer.rotate).toBe(0);
+		expect(layer.size).toBe(1);
+		expect(layer.halo).toBe(1);
+		expect(layer.symbolIndex).toBe(38);
+		expect(layer.label).toBe('');
 	});
 
 	it('gives its style as feature properties', () => {
-		layer.color.set('#00ff00');
-		layer.size.set(2);
-		layer.symbolIndex.set(1);
-		layer.label.set('Price {EUR}');
+		layer.color = '#00ff00';
+		layer.size = 2;
+		layer.symbolIndex = 1;
+		layer.label = 'Price {EUR}';
 		expect(layer.getProperties()).toStrictEqual({
 			icon: 'base:icon-airfield',
 			symbol: 1,
@@ -46,11 +46,11 @@ describe('MapLayerSymbol', () => {
 	});
 
 	it('places the label at the chosen side, or also on a symbol without image', () => {
-		layer.labelAlign.set(3); // top
+		layer.labelAlign = 3; // top
 		expect(layer.getProperties().position).toBe('bottom');
 		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
-		layer.labelAlign.set(0); // auto
-		layer.symbolIndex.set(0); // no image
+		layer.labelAlign = 0; // auto
+		layer.symbolIndex = 0; // no image
 		expect(layer.getProperties().position).toBe('auto-center');
 		expect(LABEL_POSITIONS['auto-center'].filter((a) => typeof a === 'string')).toStrictEqual([
 			'center',
@@ -62,13 +62,13 @@ describe('MapLayerSymbol', () => {
 	});
 
 	it('should return correct state object', () => {
-		layer.color.set('#00ff00');
-		layer.rotate.set(45);
-		layer.size.set(2);
-		layer.halo.set(3);
-		layer.symbolIndex.set(1);
-		layer.label.set('Test Label');
-		layer.labelAlign.set(2);
+		layer.color = '#00ff00';
+		layer.rotate = 45;
+		layer.size = 2;
+		layer.halo = 3;
+		layer.symbolIndex = 1;
+		layer.label = 'Test Label';
+		layer.labelAlign = 2;
 
 		expect(layer.getState()).toEqual({
 			color: '#00ff00',
@@ -92,22 +92,22 @@ describe('MapLayerSymbol', () => {
 			align: 2
 		});
 
-		expect(get(layer.color)).toBe('#0000ff');
-		expect(get(layer.rotate)).toBe(90);
-		expect(get(layer.size)).toBe(3);
-		expect(get(layer.halo)).toBe(2);
-		expect(get(layer.symbolIndex)).toBe(5);
-		expect(get(layer.label)).toBe('New Label');
-		expect(get(layer.labelAlign)).toBe(2);
+		expect(layer.color).toBe('#0000ff');
+		expect(layer.rotate).toBe(90);
+		expect(layer.size).toBe(3);
+		expect(layer.halo).toBe(2);
+		expect(layer.symbolIndex).toBe(5);
+		expect(layer.label).toBe('New Label');
+		expect(layer.labelAlign).toBe(2);
 	});
 
 	it('should restore falsy values', () => {
 		layer.setState({ halo: 0, rotate: 90, label: 'Label', align: 2 });
 		layer.setState({ rotate: 0, label: '', align: 0 });
 
-		expect(get(layer.halo)).toBe(0);
-		expect(get(layer.rotate)).toBe(0);
-		expect(get(layer.label)).toBe('');
-		expect(get(layer.labelAlign)).toBe(0);
+		expect(layer.halo).toBe(0);
+		expect(layer.rotate).toBe(0);
+		expect(layer.label).toBe('');
+		expect(layer.labelAlign).toBe(0);
 	});
 });
