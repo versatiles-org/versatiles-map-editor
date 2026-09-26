@@ -51,7 +51,20 @@ export default defineConfig({
 		setupFiles: ['src/vitest.setup.ts'],
 		coverage: {
 			provider: 'v8',
-			reporter: ['lcov', 'text']
+			reporter: ['lcov', 'text'],
+			// all sources, also those that no test loads
+			include: ['src/**/*.{ts,svelte}', 'packages/*/src/**/*.ts'],
+			exclude: [
+				'**/*.{test,spec}.ts',
+				'**/__mocks__/**',
+				'**/__fixtures__/**',
+				'**/*.d.ts',
+				'src/vitest.setup.ts',
+				// only types or data
+				'**/types.ts',
+				'packages/map-state/src/symbols.ts',
+				'src/lib/utils/zones.ts'
+			]
 		}
 	},
 	build: {

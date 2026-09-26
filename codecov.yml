@@ -3,4 +3,7 @@ github_checks: false
 coverage:
   status:
     project: off
-    patch: off
+    # shows the coverage of the changed lines, without failing a pull request
+    patch:
+      default:
+        informational: true
