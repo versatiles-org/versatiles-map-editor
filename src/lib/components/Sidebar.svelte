@@ -95,9 +95,10 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		// Leave keyboard shortcuts in text fields to the browser
+		// The shortcuts act on the selected elements, not where the keys mean something else:
+		// in text fields, in sliders (e.g. the color field) and in open dialogs (e.g. the symbol picker)
 		const target = e.target as HTMLElement | null;
-		if (target?.closest('input, textarea, select, [contenteditable]')) return;
+		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open]')) return;
 
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
 			if ($selectedElements.length === 0) return;

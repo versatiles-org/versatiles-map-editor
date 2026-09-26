@@ -1534,3 +1534,36 @@ test('Escape cancels a running table import', async ({ page }) => {
 	await page.waitForTimeout(1000);
 	expect(stateInUrl(page).elements).toStrictEqual([]);
 });
+
+test('Delete and Backspace keep the elements in sliders and dialogs', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+	);
+	await waitForMapIsReady(page);
+	const viewport = page.viewportSize()!;
+	// select the marker by clicking its flag icon, which is drawn above and right of its point
+	const selectMarker = () => page.mouse.click((viewport.width - 250) / 2 + 6, viewport.height / 2 - 8);
+	await selectMarker();
+	const markers = () => stateInUrl(page).elements.length;
+
+	// in the saturation/brightness field of the color picker
+	await page.getByRole('button', { name: /^Color/ }).click();
+	await page.getByRole('slider', { name: 'Saturation and brightness' }).focus();
+	await page.keyboard.press('Backspace');
+	await page.keyboard.press('Delete');
+	await page.keyboard.press('Escape');
+
+	// in the symbol picker dialog
+	await page.getByRole('button', { name: /^Symbol/ }).click();
+	await expect(page.getByRole('dialog')).toBeVisible();
+	await page.keyboard.press('Delete');
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('dialog')).toBeHidden();
+	expect(markers()).toBe(1);
+
+	// on the map, Delete deletes the selected marker
+	await selectMarker();
+	await page.keyboard.press('Delete');
+	await expect.poll(markers).toBe(0);
+});
