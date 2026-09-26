@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { dismiss, notifications } from '$lib/utils/notify.js';
+	import { dismiss, notifications } from '$lib/utils/notify.svelte.js';
 
 	/** `right` keeps the messages clear of the sidebar. */
 	const { right = 0 }: { right?: number } = $props();
 </script>
 
 <div class="notifications" style:--sidebar="{right}px">
-	{#each $notifications as { id, message, kind } (id)}
+	{#each notifications.list as { id, message, kind } (id)}
 		<div class="notification {kind}" role={kind === 'error' ? 'alert' : 'status'}>
 			<span>{message}</span>
 			<button onclick={() => dismiss(id)} aria-label="Dismiss" title="Dismiss">&#x2715;</button>

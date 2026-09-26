@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
-import { writable } from 'svelte/store';
 import type { StateElementMarker, StateLegend } from '@versatiles/map-state';
 import { MockMap } from '$lib/__mocks__/map.js';
 import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
@@ -10,7 +9,7 @@ describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;
 	let manager: {
 		map: MockMap;
-		colors: { scheme: ReturnType<typeof writable>; getColors: () => string[]; use: () => void };
+		colors: { scheme: string | undefined; getColors: () => string[]; use: () => void };
 		legend: StateLegend | undefined;
 		addElements: ReturnType<typeof vi.fn>;
 		state: { log: ReturnType<typeof vi.fn> };
@@ -19,7 +18,7 @@ describe('DialogImportTable', () => {
 	beforeEach(() => {
 		manager = {
 			map: new MockMap(),
-			colors: { scheme: writable(undefined), getColors: () => [], use: () => {} },
+			colors: { scheme: undefined, getColors: () => [], use: () => {} },
 			legend: undefined,
 			addElements: vi.fn(),
 			state: { log: vi.fn() }

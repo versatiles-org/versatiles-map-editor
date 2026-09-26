@@ -9,12 +9,12 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import Legend from './components/Legend.svelte';
 	import Notifications from './components/Notifications.svelte';
-	import { notify } from '$lib/utils/notify.js';
+	import { notify } from '$lib/utils/notify.svelte.js';
 	import SearchPlace from './components/SearchPlace.svelte';
 	import { GeometryManager } from './core/geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
 	import { PopupHandler } from './core/popup_handler.svelte.js';
-	import { loadConfig } from '$lib/utils/config.js';
+	import { loadConfig } from '$lib/utils/config.svelte.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
 

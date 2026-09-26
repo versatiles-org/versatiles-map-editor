@@ -17,9 +17,8 @@
 		type FailedRow
 	} from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
-	import { config } from '$lib/utils/config.js';
+	import { config } from '$lib/utils/config.svelte.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { get } from 'svelte/store';
 	import { formatCount } from '../utils/format.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -88,7 +87,7 @@
 		categories = [];
 		tooManyCategories = 0;
 		if (column < 0 || !table) return;
-		const colors = getColorScheme(manager.colors.scheme, get(config).colorSchemes).colors;
+		const colors = getColorScheme(manager.colors.scheme, config.current.colorSchemes).colors;
 		({ categories, tooMany: tooManyCategories } = tableCategories(table, column, colors, symbol));
 	}
 

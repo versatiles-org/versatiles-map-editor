@@ -2,7 +2,7 @@
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import Dialog from './DialogFile.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
-	import { notify } from '$lib/utils/notify.js';
+	import { notify } from '$lib/utils/notify.svelte.js';
 	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();

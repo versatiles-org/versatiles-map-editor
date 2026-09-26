@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
-	import { config } from '$lib/utils/config.js';
+	import { config } from '$lib/utils/config.svelte.js';
 	import InputRow from './InputRow.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
@@ -10,7 +10,7 @@
 	const uid = $props.id();
 	const settings = $derived(getSettings(manager.background));
 	// the fonts of this editor instance
-	const fonts = $derived($config.fonts);
+	const fonts = $derived(config.current.fonts);
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>

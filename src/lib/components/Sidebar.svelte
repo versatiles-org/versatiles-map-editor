@@ -10,7 +10,7 @@
 	import PanelElements from './PanelElements.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
-	import { notify } from '$lib/utils/notify.js';
+	import { notify } from '$lib/utils/notify.svelte.js';
 	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
 	import { stateFromKML, stateToKML } from '@versatiles/map-state';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';

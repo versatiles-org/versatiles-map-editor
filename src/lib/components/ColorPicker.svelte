@@ -12,7 +12,7 @@
 	} from '$lib/utils/color.js';
 	import type { ColorPalette } from '../core/color_palette.svelte.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
-	import { config } from '$lib/utils/config.js';
+	import { config } from '$lib/utils/config.svelte.js';
 
 	let {
 		value = $bindable(),
@@ -34,7 +34,7 @@
 	let draggingField = false;
 
 	const rgb: RGB = $derived(parseHex(value) ?? { r: 0, g: 0, b: 0 });
-	const schemes = $derived($config.colorSchemes);
+	const schemes = $derived(config.current.colorSchemes);
 	const colorScheme = $derived(getColorScheme(palette?.scheme, schemes));
 	const hex = $derived(toHex(rgb));
 

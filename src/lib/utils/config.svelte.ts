@@ -1,4 +1,3 @@
-import { writable } from 'svelte/store';
 import { fetchFontFaces } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FONTS } from './background.js';
@@ -29,8 +28,10 @@ export interface EditorConfig {
 
 export const DEFAULT_CONFIG: EditorConfig = { colorSchemes: COLOR_SCHEMES, fonts: FONTS };
 
-/** The configuration of this editor instance. Holds the defaults until the file is loaded. */
-export const config = writable<EditorConfig>(DEFAULT_CONFIG);
+/** The configuration of this editor instance: `config.current`. Holds the defaults until the file is loaded. */
+export const config = new (class {
+	current: EditorConfig = $state.raw(DEFAULT_CONFIG);
+})();
 
 /** Load the configuration file into `config`. A missing file keeps the defaults. */
 export async function loadConfig(url = new URL(CONFIG_URL, document.baseURI).href): Promise<void> {
@@ -46,7 +47,7 @@ export async function loadConfig(url = new URL(CONFIG_URL, document.baseURI).hre
 	}
 
 	try {
-		config.set(await resolveConfig(file));
+		config.current = await resolveConfig(file);
 	} catch (error) {
 		console.warn(`Invalid editor configuration in ${url}`, error);
 	}

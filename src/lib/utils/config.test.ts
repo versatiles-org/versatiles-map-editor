@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { get } from 'svelte/store';
 import { fetchFontFaces, type FontFaceInfo } from '@versatiles/style';
-import { config, DEFAULT_CONFIG, loadConfig, resolveConfig } from './config.js';
+import { config, DEFAULT_CONFIG, loadConfig, resolveConfig } from './config.svelte.js';
 import { COLOR_SCHEMES } from './color_schemes.js';
 import { FONTS } from './background.js';
 
@@ -18,7 +17,7 @@ beforeEach(() => {
 		face('open_sans_regular', 'Open Sans Regular'),
 		face('lato_bold', 'Lato Bold')
 	]);
-	config.set(DEFAULT_CONFIG);
+	config.current = DEFAULT_CONFIG;
 });
 
 afterEach(() => vi.unstubAllGlobals());
@@ -82,13 +81,13 @@ describe('loadConfig', () => {
 	it('loads the file', async () => {
 		respond(new Response(JSON.stringify({ colorSchemes: [ci], replaceDefaultSchemes: true })));
 		await loadConfig('https://example.org/map-editor.config.json');
-		expect(get(config).colorSchemes.map((s) => s.id)).toStrictEqual(['ci']);
+		expect(config.current.colorSchemes.map((s) => s.id)).toStrictEqual(['ci']);
 	});
 
 	it('keeps the defaults without a file', async () => {
 		respond(new Response('not found', { status: 404 }));
 		await loadConfig('https://example.org/map-editor.config.json');
-		expect(get(config)).toBe(DEFAULT_CONFIG);
+		expect(config.current).toBe(DEFAULT_CONFIG);
 	});
 
 	it('keeps the defaults and warns for an invalid or unreachable file', async () => {
@@ -99,7 +98,7 @@ describe('loadConfig', () => {
 		await loadConfig('https://example.org/b.json');
 		respond(new TypeError('Failed to fetch'));
 		await loadConfig('https://example.org/c.json');
-		expect(get(config)).toBe(DEFAULT_CONFIG);
+		expect(config.current).toBe(DEFAULT_CONFIG);
 		expect(warn).toHaveBeenCalledTimes(3);
 	});
 });

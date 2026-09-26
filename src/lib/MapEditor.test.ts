@@ -29,8 +29,8 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 });
 
 // The editor loads its optional configuration file, which unit tests must not download
-vi.mock('$lib/utils/config.js', async (importOriginal) => ({
-	...(await importOriginal<typeof import('$lib/utils/config.js')>()),
+vi.mock('$lib/utils/config.svelte.js', async (importOriginal) => ({
+	...(await importOriginal<typeof import('$lib/utils/config.svelte.js')>()),
 	loadConfig: vi.fn(async () => {})
 }));
 
