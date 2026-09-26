@@ -66,11 +66,12 @@
 		width: 80vw;
 		height: 80vh;
 
-		background-color: rgba(255, 255, 255, 0.8);
+		background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		color: var(--color-text);
 		backdrop-filter: blur(10px);
 		box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
 		z-index: 10000;
-		border: 0.5px solid rgba(0, 0, 0, 0.3);
+		border: 0.5px solid color-mix(in srgb, var(--color-text) 30%, transparent);
 		border-radius: 10px;
 		box-sizing: border-box;
 		padding: 20px;

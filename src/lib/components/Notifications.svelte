@@ -38,20 +38,20 @@
 		box-sizing: border-box;
 		padding: 8px 8px 8px 12px;
 		border-radius: 6px;
-		background: #fff;
+		background: var(--color-bg);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-		color: #000;
+		color: var(--color-text);
 		font:
 			14px/1.3 system-ui,
 			sans-serif;
 	}
 
 	.error {
-		border-left: 4px solid #b00020;
+		border-left: 4px solid var(--color-error);
 	}
 
 	.info {
-		border-left: 4px solid #158;
+		border-left: 4px solid var(--color-blue);
 	}
 
 	button {

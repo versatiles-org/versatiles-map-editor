@@ -9,7 +9,7 @@ fieldset.btn > div > label {
 	background-color: var(--color-blue);
 	border-radius: var(--border-radius);
 	border: none;
-	color: var(--color-bg);
+	color: var(--color-on-blue);
 	cursor: pointer;
 	display: inline-block;
 	font-weight: 600;
@@ -41,7 +41,7 @@ button.btn {
 		content: '✓';
 		background-color: var(--color-green);
 		border-radius: 1em;
-		color: var(--color-bg);
+		color: var(--color-on-blue);
 		display: block;
 		font-size: 1em;
 		height: 1.6em;
@@ -94,7 +94,7 @@ fieldset.btn {
 			border-left: 0.5px solid color-mix(in srgb, var(--color-blue) 30%, transparent);
 			// the options that are not selected
 			background-color: color-mix(in srgb, var(--color-blue) 15%, var(--color-bg));
-			color: var(--color-blue);
+			color: var(--color-blue-text);
 
 			&:first-of-type {
 				border-left: none;
@@ -118,7 +118,7 @@ fieldset.btn {
 		input:checked + label,
 		label:hover {
 			background-color: var(--color-blue);
-			color: var(--color-bg);
+			color: var(--color-on-blue);
 		}
 	}
 }

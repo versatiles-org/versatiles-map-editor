@@ -217,7 +217,7 @@
 	}
 </script>
 
-<div class="page">
+<div class="page" class:editor={showSidebar}>
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
@@ -274,6 +274,11 @@
 		--color-text-muted: #505050;
 		--color-disabled-bg: #d4d8dc;
 		--color-disabled-text: #4d4d4d;
+		--color-on-blue: #fff;
+		/* blue text, e.g. of options that are not selected */
+		--color-blue-text: #158;
+		--color-error: #b00020;
+		--color-warning: #a40;
 		--btn-gap: 5px;
 		--gap: 10px;
 		--border-radius: 1em;
@@ -285,6 +290,37 @@
 		height: 100%;
 		position: relative;
 		min-height: 6em;
+	}
+
+	/*
+	 * The editor follows the dark mode of the system. The map, its legend and the viewer keep
+	 * their colors: they are part of the map that the author designed and shares.
+	 */
+	@media (prefers-color-scheme: dark) {
+		.page.editor {
+			color-scheme: dark;
+			/* white text on it: 5.4:1; as focus ring on the background: 3:1 */
+			--color-blue: #2b6cb0;
+			--color-blue-dark: #1f5a96;
+			--color-blue-text: #9ccbff;
+			--color-green: #2a2;
+			--color-bg: #1c1d20;
+			--color-text: #e6e6e6;
+			/* at least 4.5:1 on the (translucent) dark sidebar, also above a light map */
+			--color-text-muted: #bdbdbd;
+			--color-disabled-bg: #3a3d42;
+			--color-disabled-text: #c4c4c4;
+			--color-error: #ff8a95;
+			--color-warning: #ffb74d;
+		}
+	}
+
+	/* no transitions, e.g. of the panels and buttons, for people who get dizzy from motion */
+	@media (prefers-reduced-motion: reduce) {
+		.page :global(*),
+		.page :global(*::after) {
+			transition: none !important;
+		}
 	}
 
 	/* appears only after a moment, so a quick load does not flash */
@@ -299,7 +335,7 @@
 		gap: 0.5em;
 		padding: 0.4em 0.8em;
 		border-radius: var(--border-radius);
-		background: rgba(255, 255, 255, 0.9);
+		background: color-mix(in srgb, var(--color-bg) 90%, transparent);
 		color: var(--color-text);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 		font-size: 0.875rem;

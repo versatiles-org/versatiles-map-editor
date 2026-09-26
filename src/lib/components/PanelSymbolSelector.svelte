@@ -93,7 +93,7 @@
 			padding: 0;
 
 			&:hover {
-				background-color: rgba(0, 0, 0, 0.1);
+				background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
 			}
 
 			canvas {

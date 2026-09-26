@@ -404,7 +404,7 @@
 	}
 
 	.warning {
-		color: #a40;
+		color: var(--color-warning);
 	}
 
 	.buttons {
@@ -418,6 +418,6 @@
 		margin: 0;
 	}
 	.error {
-		color: #b00020;
+		color: var(--color-error);
 	}
 </style>

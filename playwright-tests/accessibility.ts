@@ -113,3 +113,30 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Marker 1: Berlin']);
 	await expect(page.getByRole('button', { name: 'Style', exact: true })).toBeEnabled();
 });
+
+test.describe('dark mode and reduced motion', () => {
+	test.use({ colorScheme: 'dark', reducedMotion: 'reduce' });
+
+	test('the editor follows the dark mode and does without transitions', async ({ page }) => {
+		await page.goto('/');
+		await waitForMapIsReady(page);
+		const style = (selector: string, property: string) =>
+			page
+				.locator(selector)
+				.first()
+				.evaluate((el, property) => getComputedStyle(el).getPropertyValue(property), property);
+
+		expect(await style('.page', 'color-scheme')).toBe('dark');
+		expect(await style('.sidebar', 'color')).toBe('rgb(230, 230, 230)');
+		// white on blue, also in dark mode
+		expect(await style('button.btn:not([disabled])', 'color')).toBe('rgb(255, 255, 255)');
+		expect(await style('button.btn', 'transition-duration')).toBe('0s');
+	});
+
+	test('the viewer keeps the colors of the map', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 700 });
+		await page.goto('/');
+		await waitForMapIsReady(page);
+		expect(await page.locator('.page').evaluate((el) => getComputedStyle(el).colorScheme)).toBe('normal');
+	});
+});

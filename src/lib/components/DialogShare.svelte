@@ -299,7 +299,7 @@
 		display: block;
 		width: 200px;
 		margin-top: 0.3em;
-		color: #b00020;
+		color: var(--color-error);
 		font-size: 0.8em;
 	}
 </style>
