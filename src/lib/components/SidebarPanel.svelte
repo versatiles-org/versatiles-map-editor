@@ -76,12 +76,13 @@
 				}
 			}
 
+			/* only for keyboard focus, not after a click */
 			&:focus {
 				outline: none;
-				.chevron {
-					outline: 1px solid var(--color-blue);
-					outline-offset: 2px;
-				}
+			}
+			&:focus-visible .chevron {
+				outline: 2px solid var(--color-blue);
+				outline-offset: 2px;
 			}
 		}
 
@@ -103,7 +104,7 @@
 	}
 
 	.disabled {
-		opacity: 0.3;
+		opacity: 0.5;
 
 		.header {
 			cursor: default;

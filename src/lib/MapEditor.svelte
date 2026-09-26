@@ -224,9 +224,14 @@
 <style>
 	.page {
 		--color-blue: #158;
+		--color-blue-dark: #0c3c63;
 		--color-green: #1a1;
 		--color-bg: #fff;
 		--color-text: #000;
+		/* at least 4.5:1 on the (translucent) white of the sidebar */
+		--color-text-muted: #505050;
+		--color-disabled-bg: #d4d8dc;
+		--color-disabled-text: #4d4d4d;
 		--btn-gap: 5px;
 		--gap: 10px;
 		--border-radius: 1em;

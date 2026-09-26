@@ -254,14 +254,14 @@
 				display: block;
 				width: 200px;
 				font-size: 0.8em;
-				opacity: 0.7;
+				color: var(--color-text-muted);
 			}
 
 			textarea[readonly] {
-				font-size: 0.6rem;
+				font-size: 0.75rem;
 				-webkit-user-select: all;
 				user-select: all;
-				color: color-mix(in srgb, var(--color-text) 60%, transparent);
+				color: var(--color-text-muted);
 			}
 		}
 

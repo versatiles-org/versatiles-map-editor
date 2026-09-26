@@ -245,7 +245,7 @@
 		backdrop-filter: blur(10px);
 		box-sizing: border-box;
 		color: var(--color-text);
-		font-size: 0.8em;
+		font-size: 0.875em;
 		height: 100%;
 		overflow-y: scroll;
 		padding: var(--gap);
