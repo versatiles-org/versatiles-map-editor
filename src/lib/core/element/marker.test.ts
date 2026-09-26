@@ -1,8 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { get } from 'svelte/store';
 import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 import type { GeoPoint } from '../../utils/types.js';
 
@@ -20,7 +19,7 @@ describe('MarkerElement', () => {
 	});
 
 	it('should have no measurements', () => {
-		expect(get(element.measurements)).toEqual([]);
+		expect(element.measurements).toEqual([]);
 	});
 
 	it('should initialize with a default point', () => {
@@ -79,9 +78,9 @@ describe('MarkerElement', () => {
 
 	it('should include a popup in the state, unless it is empty', () => {
 		expect(element.getState()).not.toHaveProperty('popup');
-		element.popup.set('Hello');
+		element.popup = 'Hello';
 		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
-		element.popup.set(' \n ');
+		element.popup = ' \n ';
 		expect(element.getState()).not.toHaveProperty('popup');
 	});
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManager } from '../core/geometry_manager.js';
+	import type { GeometryManager } from '../core/geometry_manager.svelte.js';
 	import { dashArrays, MapLayerLine } from '../core/map_layer/line.svelte.js';
 	import { group } from '$lib/utils/group.js';
 	import InputRow from './InputRow.svelte';

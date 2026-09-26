@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { get } from 'svelte/store';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import { GeometryManager } from './geometry_manager.js';
+import { GeometryManager } from './geometry_manager.svelte.js';
 import { ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
 import type { PolygonElement } from './element/polygon.js';
 import type { MarkerElement } from './element/marker.js';
@@ -44,7 +43,7 @@ describe('ElementRenderer', () => {
 		sources[ELEMENT_LAYERS[role]].setData.mock.lastCall![0].features as GeoJSON.Feature[];
 
 	it('draws all elements with one source per role, in the order of the elements', () => {
-		const [polygon, marker] = get(manager.elements);
+		const [polygon, marker] = manager.elements;
 		expect(lastFeatures('fill').map((f) => [f.id, f.properties?.order])).toStrictEqual([[polygon.id, 0]]);
 		// a hidden outline is not drawn
 		expect(lastFeatures('stroke')).toStrictEqual([]);
@@ -54,7 +53,7 @@ describe('ElementRenderer', () => {
 	});
 
 	it('writes changes of single elements once, only their features', async () => {
-		const [polygon, marker] = get(manager.elements) as [PolygonElement, MarkerElement];
+		const [polygon, marker] = manager.elements as [PolygonElement, MarkerElement];
 		for (const source of Object.values(sources)) source.setData.mockClear();
 
 		marker.layer.label = 'B';

@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 import type { SelectionNode } from './element/types.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { GeoPoint } from '../utils/types.js';
@@ -203,7 +203,7 @@ export class SelectionHandler {
 		// only the elements whose selection changes, so selecting many elements takes linear time
 		const was = new Set(current);
 		const is = new Set(selection);
-		get(this.manager.elements).forEach((e) => {
+		this.manager.elements.forEach((e) => {
 			if (was.has(e) !== is.has(e)) e.select(is.has(e));
 		});
 		this.selectedElements.set(selection);

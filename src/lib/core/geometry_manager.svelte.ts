@@ -1,11 +1,10 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
-import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { getSettings } from '$lib/utils/background.js';
@@ -30,7 +29,8 @@ export function indexElements(elements: AbstractElement[]): ElementIndex {
 const MAX_LATITUDE = 85.051129;
 
 export class GeometryManager {
-	public readonly elements: Writable<AbstractElement[]>;
+	// replaced as a whole, never changed in place, so it needs no deep reactivity
+	#elements: AbstractElement[] = $state.raw([]);
 	public readonly map: maplibregl.Map;
 	public readonly canvas: HTMLElement;
 	public readonly state: StateManager | null = null;
@@ -39,41 +39,57 @@ export class GeometryManager {
 	/** Draws all elements. */
 	public readonly renderer: ElementRenderer;
 	/** Whether the read-only viewer shows an address search. */
-	public readonly search: Writable<boolean> = writable(false);
-	/** The legend of the map, if it has one. */
-	public readonly legend: Writable<StateLegend | undefined> = writable(undefined);
+	public search = $state(false);
+	/** The legend of the map, if it has one. Replaced as a whole on every change. */
+	public legend: StateLegend | undefined = $state.raw(undefined);
 	/** The background map. Undefined for the editor's default background. */
-	public readonly background: Writable<StateBackground | undefined> = writable(undefined);
+	#background: StateBackground | undefined = $state.raw(undefined);
 	/** The glyph font of the map labels, which the marker labels use too. */
-	public readonly font: Readable<string> = derived(this.background, (background) => getSettings(background).font);
+	public readonly font: string = $derived(getSettings(this.#background).font);
 	private destroyed = false;
 	private readonly abortController = new AbortController();
 	// The map has no style until inlineSources() finishes, so elements must wait for it
 	private styleLoaded = false;
 	private styleRequest = 0;
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
-	public readonly loading: Readable<boolean>;
-	private readonly loadingStore: Writable<boolean> = writable(false);
+	#loading = $state(false);
 	private loadingStates = 0;
 	private stateRequest = 0;
 	private loadedCallbacks: (() => void)[] = [];
 
 	constructor(map: maplibregl.Map) {
-		this.elements = writable([]);
-		this.loading = { subscribe: this.loadingStore.subscribe };
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
 		this.map.on('style.load', () => (this.styleLoaded = true));
 		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
 		this.map.setMissingStyleImageResolver((id) => void addFillPatternImage(this.map, id));
-		this.renderer = new ElementRenderer(this.map, this.elements);
+		this.renderer = new ElementRenderer(this.map);
 		void this.loadStyle(undefined);
+	}
+
+	/** All elements of the map, in drawing order. Replaced as a whole on every change. */
+	public get elements(): AbstractElement[] {
+		return this.#elements;
+	}
+	public set elements(elements: AbstractElement[]) {
+		this.#elements = elements;
+		this.renderer.setElements(elements);
+	}
+
+	/** The background map. Undefined for the editor's default background. See `setBackground`. */
+	public get background(): StateBackground | undefined {
+		return this.#background;
+	}
+
+	/** Whether a state is being loaded, e.g. to show a loading indicator. */
+	public get loading(): boolean {
+		return this.#loading;
 	}
 
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
 	public async setBackground(background?: StateBackground) {
-		if (sameBackground(background, get(this.background))) return;
-		this.background.set(background);
+		if (sameBackground(background, this.#background)) return;
+		this.#background = background;
 		await this.loadStyle(background);
 	}
 
@@ -127,10 +143,9 @@ export class GeometryManager {
 	}
 
 	public clear() {
-		this.elements.update((elements) => {
-			elements.forEach((e) => e.destroy());
-			return [];
-		});
+		const elements = this.elements;
+		this.elements = [];
+		elements.forEach((e) => e.destroy());
 	}
 
 	protected appendElement(element: AbstractElement) {
@@ -139,7 +154,7 @@ export class GeometryManager {
 
 	/** Append several elements at once, e.g. of an import, in linear time. */
 	protected appendElements(added: AbstractElement[]) {
-		if (added.length > 0) this.elements.update((elements) => [...elements, ...added]);
+		if (added.length > 0) this.elements = [...this.elements, ...added];
 	}
 
 	/**
@@ -149,7 +164,7 @@ export class GeometryManager {
 	public elementAt(
 		{ x, y }: { x: number; y: number },
 		tolerance = 0,
-		candidates: AbstractElement[] | ElementIndex = get(this.elements)
+		candidates: AbstractElement[] | ElementIndex = this.elements
 	): AbstractElement | undefined {
 		const { layerIds, byId } = Array.isArray(candidates) ? indexElements(candidates) : candidates;
 		if (layerIds.length === 0) return undefined;
@@ -175,7 +190,7 @@ export class GeometryManager {
 	/** Remove several elements from the map state at once, in linear time. */
 	public removeElements(removed: AbstractElement[]) {
 		const set = new Set(removed);
-		this.elements.update((elements) => elements.filter((e) => !set.has(e)));
+		this.elements = this.elements.filter((e) => !set.has(e));
 	}
 
 	/** Remove the elements and their map layers. */
@@ -222,12 +237,12 @@ export class GeometryManager {
 	}
 
 	public async setState(state: MapState) {
-		if (this.loadingStates++ === 0) this.loadingStore.set(true);
+		if (this.loadingStates++ === 0) this.#loading = true;
 		try {
 			await this.applyState(state);
 		} finally {
 			if (--this.loadingStates === 0) {
-				this.loadingStore.set(false);
+				this.#loading = false;
 				const callbacks = this.loadedCallbacks;
 				this.loadedCallbacks = [];
 				callbacks.forEach((callback) => callback());
@@ -244,11 +259,11 @@ export class GeometryManager {
 		this.deselectAll();
 
 		if (state.map) this.fitViewport(state.map);
-		this.legend.set(state.meta?.legend);
-		this.search.set(state.meta?.search === true);
+		this.legend = state.meta?.legend;
+		this.search = state.meta?.search === true;
 		this.colors?.scheme.set(state.meta?.colorScheme);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!sameBackground(state.meta?.background, get(this.background))) {
+		if (!sameBackground(state.meta?.background, this.#background)) {
 			await this.setBackground(state.meta?.background);
 			if (outdated()) return;
 		}
@@ -267,14 +282,14 @@ export class GeometryManager {
 	 * built or removed.
 	 */
 	private reconcileElements(states: StateElement[]) {
-		const current = get(this.elements);
+		const current = this.elements;
 		const next = states.map((state, i) => {
 			const element = current[i];
 			return element?.updateFromState(state) ? element : elementFromState(this, state);
 		});
 		const kept = new Set(next);
 		current.filter((element) => !kept.has(element)).forEach((element) => element.destroy());
-		this.elements.set(next);
+		this.elements = next;
 	}
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */

@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { get } from 'svelte/store';
-import type { AbstractElement } from './element/abstract.js';
-import { GeometryManager } from './geometry_manager.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
+import { GeometryManager } from './geometry_manager.svelte.js';
 import { createElement, elementFromState, type ElementOfType, type ElementType } from './element/registry.js';
 import { SelectionHandler } from './selection.js';
 import { Cursor } from './cursor.js';
@@ -23,7 +23,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 	public readonly cursor: Cursor;
 	public readonly state: StateManager;
 	public readonly styleClipboard = new StyleClipboard();
-	public readonly colors = new ColorPalette(() => get(this.elements).flatMap((e) => e.getColors()));
+	public readonly colors = new ColorPalette(() => this.elements.flatMap((e) => e.getColors()));
 
 	constructor(map: maplibregl.Map) {
 		super(map);
@@ -117,20 +117,20 @@ export class GeometryManagerInteractive extends GeometryManager {
 			) / 2;
 		const radius = 40074000 * (radiusDegrees / 360);
 		const meta: StateMetadata = {};
-		const background = get(this.background);
+		const background = this.background;
 		if (background) meta.background = background;
-		const legend = get(this.legend);
+		const legend = this.legend;
 		if (legend) meta.legend = legend;
 		const colorScheme = get(this.colors.scheme);
 		if (colorScheme) meta.colorScheme = colorScheme;
-		if (get(this.search)) meta.search = true;
+		if (this.search) meta.search = true;
 		return {
 			map: {
 				center: [center.lng, center.lat],
 				radius
 			},
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
-			elements: get(this.elements).map((element) => element.getState())
+			elements: this.elements.map((element) => element.getState())
 		};
 	}
 
@@ -146,9 +146,9 @@ export class GeometryManagerInteractive extends GeometryManager {
 		if (state.map) this.fitViewport(state.map);
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
-		if (meta.legend) this.legend.set(meta.legend);
+		if (meta.legend) this.legend = meta.legend;
 		if (meta.colorScheme) this.colors.scheme.set(meta.colorScheme);
-		if (meta.search) this.search.set(true);
+		if (meta.search) this.search = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

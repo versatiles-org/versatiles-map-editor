@@ -1,5 +1,4 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { get } from 'svelte/store';
 import { MapLayerLine } from './line.svelte.js';
 
 describe('MapLayerLine', () => {

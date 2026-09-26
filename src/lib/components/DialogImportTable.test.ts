@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
-import { get, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { StateElementMarker, StateLegend } from '@versatiles/map-state';
 import { MockMap } from '$lib/__mocks__/map.js';
 import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
@@ -11,7 +11,7 @@ describe('DialogImportTable', () => {
 	let manager: {
 		map: MockMap;
 		colors: { scheme: ReturnType<typeof writable>; getColors: () => string[]; use: () => void };
-		legend: ReturnType<typeof writable<StateLegend | undefined>>;
+		legend: StateLegend | undefined;
 		addElements: ReturnType<typeof vi.fn>;
 		state: { log: ReturnType<typeof vi.fn> };
 	};
@@ -20,7 +20,7 @@ describe('DialogImportTable', () => {
 		manager = {
 			map: new MockMap(),
 			colors: { scheme: writable(undefined), getColors: () => [], use: () => {} },
-			legend: writable(undefined),
+			legend: undefined,
 			addElements: vi.fn(),
 			state: { log: vi.fn() }
 		};
@@ -99,7 +99,7 @@ describe('DialogImportTable', () => {
 		// both cafes in one color, the shop in another
 		expect(markers[0].style?.color).toBe(markers[2].style?.color);
 		expect(markers[0].style?.color).not.toBe(markers[1].style?.color);
-		expect(get(manager.legend)?.entries.map((e) => e.label)).toStrictEqual(['cafe', 'shop']);
+		expect(manager.legend?.entries.map((e) => e.label)).toStrictEqual(['cafe', 'shop']);
 		expect(manager.map.fitBounds).toHaveBeenCalled();
 		expect(manager.state.log).toHaveBeenCalledTimes(1);
 		expect(document.body.textContent).toContain('Imported 3 markers.');

@@ -11,10 +11,9 @@
 	import Notifications from './components/Notifications.svelte';
 	import { notify } from '$lib/utils/notify.js';
 	import SearchPlace from './components/SearchPlace.svelte';
-	import { writable } from 'svelte/store';
-	import { GeometryManager } from './core/geometry_manager.js';
+	import { GeometryManager } from './core/geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
-	import { PopupHandler } from './core/popup_handler.js';
+	import { PopupHandler } from './core/popup_handler.svelte.js';
 	import { loadConfig } from '$lib/utils/config.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
@@ -31,13 +30,10 @@
 	let showSidebar = $state(false);
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
-	const legend = $derived(geometryManager?.legend ?? writable(undefined));
-	const searchEnabled = $derived(geometryManager?.search ?? writable(false));
 	// only in the read-only viewer; the editor has its search in the sidebar
-	const showSearch = $derived(!showSidebar && $searchEnabled);
-	const loadingState = $derived(geometryManager?.loading ?? writable(false));
+	const showSearch = $derived(!showSidebar && geometryManager?.search === true);
 	// until the map has loaded for the first time, and while a map from a link or file loads
-	const loading = $derived(!triggeredMapReady || $loadingState);
+	const loading = $derived(!triggeredMapReady || geometryManager?.loading === true);
 	// the height of the search and the hint at the top of the viewer
 	let topOverlaysHeight = $state(0);
 
@@ -227,10 +223,10 @@
 		</div>
 	{/if}
 	<Notifications right={showSidebar ? 250 : 0} />
-	{#if geometryManager && $legend}
+	{#if geometryManager?.legend}
 		<!-- a legend at the top goes below the search and the hint -->
 		<Legend
-			legend={$legend}
+			legend={geometryManager.legend}
 			map={geometryManager.map}
 			right={showSidebar ? 250 : 0}
 			top={topOverlaysHeight ? topOverlaysHeight + 10 : 0}

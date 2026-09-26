@@ -1,6 +1,6 @@
 import { writable, type Writable } from 'svelte/store';
 import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 
 /** The parts of a style: markers have a symbol, lines a stroke, polygons and circles a fill and a stroke. */
 type Role = 'symbol' | 'fill' | 'stroke';

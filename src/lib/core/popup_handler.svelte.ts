@@ -1,7 +1,6 @@
 import { Popup, type GeoJSONSource, type MapMouseEvent } from 'maplibre-gl';
-import { get } from 'svelte/store';
-import type { AbstractElement } from './element/abstract.js';
-import { indexElements, type ElementIndex, type GeometryManager } from './geometry_manager.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
+import { indexElements, type ElementIndex, type GeometryManager } from './geometry_manager.svelte.js';
 import { renderPopupText } from '$lib/utils/popup_text.js';
 
 // Tolerance in pixels around the pointer, so thin lines are easier to hit, especially with a finger
@@ -16,18 +15,16 @@ export class PopupHandler {
 	private readonly manager: GeometryManager;
 	private popup: Popup | undefined;
 	private hovered: AbstractElement | undefined;
-	// The elements with a popup, prepared once instead of on every mouse move
-	private candidates: ElementIndex | undefined;
-	private readonly withPopup = new Set<AbstractElement>();
-	private unsubscribePopups: (() => void)[] = [];
+	// The elements with a popup, prepared once per change instead of on every mouse move
+	readonly #candidates: ElementIndex;
 	// The last mouse position, handled once per frame
 	private pointer: { x: number; y: number } | undefined;
 	private frame: number | undefined;
 
 	constructor(manager: GeometryManager) {
 		this.manager = manager;
+		this.#candidates = $derived(indexElements(manager.elements.filter((element) => element.popup.trim())));
 		const map = manager.map;
-		manager.elements.subscribe((elements) => this.watchPopups(elements));
 		map.on('click', (e) => this.open(e));
 		map.on('mousemove', (e) => this.scheduleHover(e.point));
 		map.on('mouseout', () => {
@@ -36,24 +33,9 @@ export class PopupHandler {
 		});
 	}
 
-	/** Keep track of the elements with a popup text. */
-	private watchPopups(elements: AbstractElement[]) {
-		this.unsubscribePopups.forEach((unsubscribe) => unsubscribe());
-		this.withPopup.clear();
-		this.unsubscribePopups = elements.map((element) =>
-			element.popup.subscribe((text) => {
-				if (text.trim()) this.withPopup.add(element);
-				else this.withPopup.delete(element);
-				this.candidates = undefined;
-			})
-		);
-		this.candidates = undefined;
-	}
-
 	/** The topmost element with a popup at the point. */
 	private elementAt(point: { x: number; y: number }): AbstractElement | undefined {
-		this.candidates ??= indexElements([...this.withPopup]);
-		return this.manager.elementAt(point, TOLERANCE, this.candidates);
+		return this.manager.elementAt(point, TOLERANCE, this.#candidates);
 	}
 
 	private scheduleHover(point: { x: number; y: number }) {
@@ -72,7 +54,7 @@ export class PopupHandler {
 		this.popup?.remove();
 		const content = document.createElement('div');
 		content.className = 'element-popup';
-		content.append(renderPopupText(get(element.popup)));
+		content.append(renderPopupText(element.popup));
 		this.popup = new Popup({ maxWidth: '280px' }).setLngLat(e.lngLat).setDOMContent(content).addTo(this.manager.map);
 	}
 

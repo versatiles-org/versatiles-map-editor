@@ -1,12 +1,11 @@
 <script lang="ts">
-	import type { AbstractElement } from '../core/element/abstract.js';
+	import type { AbstractElement } from '../core/element/abstract.svelte.js';
 	import type { StyleLayers } from '../core/element/types.js';
 	import EditorFill from './EditorFill.svelte';
 	import EditorStroke from './EditorStroke.svelte';
 	import EditorSymbol from './EditorSymbol.svelte';
 	import InputRow from './InputRow.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
-	import { writable } from 'svelte/store';
 	import { group } from '$lib/utils/group.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */
@@ -28,9 +27,6 @@
 	// lines and the outlines of polygons and circles
 	const strokeLayers = $derived(layersOfRole('stroke'));
 	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
-
-	const measurements = $derived(single?.measurements ?? writable([]));
-	const popup = $derived(single?.popup ?? writable(''));
 </script>
 
 {#key elements}
@@ -66,13 +62,13 @@
 					id="{uid}-popup"
 					class="popup"
 					rows="3"
-					bind:value={$popup}
+					bind:value={single.popup}
 					onchange={log}
 					placeholder="Shown on click: **bold**, [link](https://…)"></textarea>
 			{/if}
 			{#if single?.getStyleLayers().stroke}
 				<hr />
-				{#each $measurements as { label, value }, i (label)}
+				{#each single.measurements as { label, value }, i (label)}
 					<InputRow id="{uid}-measurement-{i}" {label}>
 						<output id="{uid}-measurement-{i}">{value}</output>
 					</InputRow>

@@ -13,7 +13,6 @@
 	let previewAspectRatio: 'wide' | 'square' | 'tall' = $state('wide');
 
 	const baseUrl = window.location.href.replace(/#.*$/, '');
-	const search = $derived(stateManager.geometryManager.search);
 
 	let timeout: ReturnType<typeof setTimeout> | null = null;
 	let linkCode = $state('');
@@ -152,9 +151,9 @@
 				<label class="checkbox">
 					<input
 						type="checkbox"
-						checked={$search}
+						checked={stateManager.geometryManager.search}
 						onchange={(e) => {
-							search.set(e.currentTarget.checked);
+							stateManager.geometryManager.search = e.currentTarget.checked;
 							stateManager.log();
 							update(0);
 						}}

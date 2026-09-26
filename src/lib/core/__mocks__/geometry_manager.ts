@@ -1,18 +1,17 @@
-import type { AbstractElement } from '../element/abstract.js';
+import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapState } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import { writable, type Writable } from 'svelte/store';
 import { vi } from 'vitest';
 import { MockMap } from '$lib/__mocks__/map.js';
 import { MockCursor } from './cursor.js';
 import { StateManager } from '../state/manager.js';
 
 export class MockGeometryManager {
-	public readonly elements: Writable<AbstractElement[]> = writable([]);
+	public elements: AbstractElement[] = [];
 	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
 	public readonly renderer = { update: vi.fn(), redraw: vi.fn(), flush: vi.fn() };
-	public readonly font = writable('noto_sans_regular');
+	public readonly font = 'noto_sans_regular';
 	public readonly state;
 
 	constructor() {

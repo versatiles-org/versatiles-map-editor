@@ -1,5 +1,4 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { get } from 'svelte/store';
 import { addFillPatternImage, fillPatternName, MapLayerFill } from './fill.svelte.js';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 

@@ -1,9 +1,8 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { GeometryManager, keepElements } from './geometry_manager.js';
-import { get } from 'svelte/store';
+import { GeometryManager, keepElements } from './geometry_manager.svelte.js';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import type { MapState } from '@versatiles/map-state';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 import { inlineSources } from '@versatiles/style';
 import type { StyleSpecification } from 'maplibre-gl';
 import type * as maplibregl from 'maplibre-gl';
@@ -85,11 +84,11 @@ describe('GeometryManager', () => {
 			const { manager, resolve } = deferInlineSources();
 			const loading = manager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			await new Promise((r) => setTimeout(r, 0));
-			expect(get(manager.elements)).toHaveLength(0);
+			expect(manager.elements).toHaveLength(0);
 
 			resolve({ version: 8, sources: {}, layers: [] });
 			await loading;
-			expect(get(manager.elements)).toHaveLength(1);
+			expect(manager.elements).toHaveLength(1);
 		});
 
 		it('removes all elements', () => {
@@ -97,13 +96,13 @@ describe('GeometryManager', () => {
 			geometryManager['appendElement'](element);
 			geometryManager.destroy();
 			expect(element.destroy).toHaveBeenCalled();
-			expect(get(geometryManager.elements)).toStrictEqual([]);
+			expect(geometryManager.elements).toStrictEqual([]);
 		});
 	});
 
 	it('should clear all elements', () => {
 		const element = { destroy: vi.fn() } as unknown as AbstractElement;
-		get(geometryManager.elements).push(element);
+		geometryManager.elements.push(element);
 		geometryManager.clear();
 		expect(element.destroy).toHaveBeenCalled();
 		expect(geometryManager.elements).toBeDefined();
@@ -112,14 +111,14 @@ describe('GeometryManager', () => {
 	it('should append an element', () => {
 		const element = { id: 'test-element' } as unknown as AbstractElement;
 		geometryManager['appendElement'](element);
-		expect(get(geometryManager.elements)).toContain(element);
+		expect(geometryManager.elements).toContain(element);
 	});
 
 	it('should remove an element', () => {
 		const element = { id: 'test-element' } as unknown as AbstractElement;
-		get(geometryManager.elements).push(element);
+		geometryManager.elements.push(element);
 		geometryManager.removeElement(element);
-		expect(get(geometryManager.elements)).not.toContain(element);
+		expect(geometryManager.elements).not.toContain(element);
 	});
 
 	it('should load a state', async () => {
@@ -166,19 +165,19 @@ describe('GeometryManager', () => {
 				}
 			]
 		});
-		const [element] = get(geometryManager.elements);
-		expect(get(element.popup)).toBe('Hello');
+		const [element] = geometryManager.elements;
+		expect(element.popup).toBe('Hello');
 		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
 	});
 
 	describe('loading', () => {
 		it('reports a state as loading until its elements exist', async () => {
 			expect(geometryManager.isLoading()).toBe(false);
-			expect(get(geometryManager.loading)).toBe(false);
+			expect(geometryManager.loading).toBe(false);
 			// the style is not loaded yet, so the elements have to wait
 			const loading = geometryManager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			expect(geometryManager.isLoading()).toBe(true);
-			expect(get(geometryManager.loading)).toBe(true);
+			expect(geometryManager.loading).toBe(true);
 			let loaded = false;
 			geometryManager.whenLoaded().then(() => (loaded = true));
 
@@ -187,8 +186,8 @@ describe('GeometryManager', () => {
 			await Promise.resolve();
 			expect(loaded).toBe(true);
 			expect(geometryManager.isLoading()).toBe(false);
-			expect(get(geometryManager.loading)).toBe(false);
-			expect(get(geometryManager.elements)).toHaveLength(1);
+			expect(geometryManager.loading).toBe(false);
+			expect(geometryManager.elements).toHaveLength(1);
 		});
 
 		it('resolves at once when nothing is loading', async () => {
@@ -224,7 +223,7 @@ describe('GeometryManager', () => {
 			resolve({ version: 8, sources: {}, layers: [] });
 			await older;
 
-			const elements = get(geometryManager.elements);
+			const elements = geometryManager.elements;
 			expect(elements.map((e) => e.getState().type)).toStrictEqual(['line']);
 			expect(geometryManager.isLoading()).toBe(false);
 		});
@@ -272,7 +271,7 @@ describe('GeometryManager', () => {
 				{ type: 'marker', point: [1, 1] }
 			]
 		});
-		const [a, b] = get(geometryManager.elements);
+		const [a, b] = geometryManager.elements;
 		map.queryRenderedFeatures.mockReturnValue([
 			{ source: 'basemap', id: 'x' },
 			{ source: 'elements_symbol', id: b.id },
@@ -302,7 +301,7 @@ describe('GeometryManager', () => {
 			// the mocked map changes its style object, like MapLibre with a diff: nothing has to load
 			map.setStyle.mockImplementation(() => {});
 			await geometryManager.setBackground(gray);
-			expect(get(geometryManager.background)).toStrictEqual(gray);
+			expect(geometryManager.background).toStrictEqual(gray);
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
 			expect((map.setStyle.mock.lastCall as unknown[])[1]).toMatchObject({
 				transformStyle: expect.any(Function)
@@ -332,9 +331,9 @@ describe('GeometryManager', () => {
 		it('is set by the state', async () => {
 			map.setStyle();
 			await geometryManager.setState({ meta: { background: gray }, elements: [] });
-			expect(get(geometryManager.background)).toStrictEqual(gray);
+			expect(geometryManager.background).toStrictEqual(gray);
 			await geometryManager.setState({ elements: [] });
-			expect(get(geometryManager.background)).toBeUndefined();
+			expect(geometryManager.background).toBeUndefined();
 		});
 
 		it('makes the missing images of fill patterns', () => {

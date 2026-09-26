@@ -1,8 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import { get, writable, type Writable } from 'svelte/store';
 import type { GeoPoint } from '../../utils/types.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import {
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
@@ -24,9 +23,10 @@ export abstract class AbstractElement {
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
 	/** The id of the element's features in the shared element sources. */
 	public readonly id = nextId++;
-	public readonly measurements: Writable<Measurement[]> = writable([]);
+	/** The length, area or radius, shown in the style editor. */
+	public measurements: Measurement[] = $state.raw([]);
 	/** Text of the popup that opens on click in the viewer. Empty for no popup. */
-	public readonly popup: Writable<string> = writable('');
+	public popup = $state('');
 
 	constructor(manager: GeometryManager | GeometryManagerInteractive) {
 		this.manager = manager;
@@ -90,7 +90,7 @@ export abstract class AbstractElement {
 	/** Draw the element again, after a change of its geometry or style. */
 	protected updateSource() {
 		this.manager.renderer.update(this);
-		this.measurements.set(this.getMeasurements());
+		this.measurements = this.getMeasurements();
 	}
 
 	protected getMeasurements(): Measurement[] {
@@ -99,7 +99,7 @@ export abstract class AbstractElement {
 
 	/** The popup as part of the element state: `{ popup }`, or nothing if there is no popup. */
 	protected getPopupState(): { popup?: StatePopup } {
-		const text = get(this.popup);
+		const text = this.popup;
 		return text.trim() ? { popup: { text } } : {};
 	}
 
@@ -138,7 +138,7 @@ export abstract class AbstractElement {
 		// the outline of an area has its own style, a line has only one
 		const strokeStyle = fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style;
 		if (stroke) stroke.setState({ ...LINE_DEFAULTS, ...strokeStyle });
-		this.popup.set(state.popup?.text ?? '');
+		this.popup = state.popup?.text ?? '';
 		this.updateSource();
 		return true;
 	}

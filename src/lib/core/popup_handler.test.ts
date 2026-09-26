@@ -1,9 +1,8 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { get } from 'svelte/store';
 import type { MapGeoJSONFeature } from 'maplibre-gl';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import { GeometryManager } from './geometry_manager.js';
-import { PopupHandler } from './popup_handler.js';
+import { GeometryManager } from './geometry_manager.svelte.js';
+import { PopupHandler } from './popup_handler.svelte.js';
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
 
@@ -27,7 +26,7 @@ describe('PopupHandler', () => {
 	});
 
 	const hoverOver = (index: number | undefined) => {
-		const element = index === undefined ? undefined : get(manager.elements)[index];
+		const element = index === undefined ? undefined : manager.elements[index];
 		map.queryRenderedFeatures.mockReturnValue(element ? [{ id: element.id } as unknown as MapGeoJSONFeature] : []);
 		map.emit('mousemove', { point: { x: 10, y: 20 } });
 	};
@@ -47,12 +46,12 @@ describe('PopupHandler', () => {
 	});
 
 	it('only takes elements with a popup, also after a popup changes', async () => {
-		const withoutPopup = get(manager.elements)[1];
+		const withoutPopup = manager.elements[1];
 		hoverOver(1);
 		await nextFrame();
 		expect(map.getCanvasContainer().style.cursor).toBe('');
 
-		withoutPopup.popup.set('World');
+		withoutPopup.popup = 'World';
 		hoverOver(1);
 		await nextFrame();
 		expect(map.getCanvasContainer().style.cursor).toBe('pointer');

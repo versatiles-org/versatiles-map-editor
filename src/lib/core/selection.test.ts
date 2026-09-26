@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach, type Mock, type Mocked } from 'vitest';
-import { get, writable, type Writable } from 'svelte/store';
+import { get } from 'svelte/store';
 import { SelectionHandler } from './selection.js';
 import { MockMap } from '$lib/__mocks__/map.js';
 import type * as maplibregl from 'maplibre-gl';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import type { Cursor } from './cursor.js';
 import type { StateManager } from './state/manager.js';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 
 function createSelectionNode(index = 0, transparent = false, coordinates = [0, 0]) {
 	return { index, transparent, coordinates };
@@ -17,7 +17,6 @@ describe('SelectionHandler', () => {
 	let mockMap: MockMap;
 	let mockCursor: Mocked<Cursor>;
 	let mockState: Mocked<StateManager>;
-	let mockElements: Writable<AbstractElement[]>;
 	let mockManager: GeometryManagerInteractive;
 
 	beforeEach(() => {
@@ -30,17 +29,15 @@ describe('SelectionHandler', () => {
 		mockState = {
 			log: vi.fn()
 		} as unknown as Mocked<StateManager>;
-		mockElements = writable([]);
 		mockManager = {
 			map: mockMap,
 			cursor: mockCursor,
 			state: mockState,
-			elements: mockElements,
+			elements: [],
 			elementAt: vi.fn(() => undefined)
 		} as unknown as GeometryManagerInteractive;
 
 		vi.clearAllMocks();
-		mockElements.set([]);
 		handler = new SelectionHandler(mockManager);
 	});
 
@@ -56,7 +53,7 @@ describe('SelectionHandler', () => {
 			select: selectMock,
 			getSelectionNodes: vi.fn().mockReturnValue([])
 		} as unknown as AbstractElement;
-		mockElements.set([element]);
+		mockManager.elements = [element];
 		handler.selectElement(element);
 		let value;
 		handler.selectedElement.subscribe((v) => (value = v))();
@@ -75,7 +72,7 @@ describe('SelectionHandler', () => {
 			select: selectMock2,
 			getSelectionNodes: vi.fn().mockReturnValue([])
 		} as unknown as AbstractElement;
-		mockElements.set([element1, element2]);
+		mockManager.elements = [element1, element2];
 		handler.selectElement(element1);
 		handler.selectElement(element2);
 		expect(selectMock1).toHaveBeenCalledWith(false);
@@ -356,7 +353,7 @@ describe('SelectionHandler', () => {
 				deleteNode: vi.fn(() => true),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			mockElements.set([element]);
+			mockManager.elements = [element];
 			handler.selectElement(element);
 		});
 
@@ -434,7 +431,7 @@ describe('SelectionHandler', () => {
 					getSelectionNodes: vi.fn(() => [{ index: 0, coordinates: [0, 0] }])
 				}) as unknown as Mocked<AbstractElement>;
 			elements = [createElement(), createElement(), createElement()];
-			mockElements.set(elements);
+			mockManager.elements = elements;
 			elementAt = mockManager.elementAt as Mock;
 			// no selection node is hit
 			mockMap.queryRenderedFeatures.mockReturnValue([]);

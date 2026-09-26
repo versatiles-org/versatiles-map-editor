@@ -1,6 +1,6 @@
 import type { StateElement } from '@versatiles/map-state';
-import type { GeometryManager } from '../geometry_manager.js';
-import type { AbstractElement } from './abstract.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { AbstractElement } from './abstract.svelte.js';
 import { CircleElement } from './circle.js';
 import { LineElement } from './line.js';
 import { MarkerElement } from './marker.js';
@@ -29,6 +29,6 @@ export function elementFromState(manager: GeometryManager, state: StateElement):
 	// each class reads the state of its own type
 	const fromState = Class.fromState as (manager: GeometryManager, state: StateElement) => AbstractElement;
 	const element = fromState(manager, state);
-	if (state.popup) element.popup.set(state.popup.text);
+	if (state.popup) element.popup = state.popup.text;
 	return element;
 }

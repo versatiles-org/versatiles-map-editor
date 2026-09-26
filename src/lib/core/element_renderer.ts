@@ -1,7 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { ExpressionSpecification, LayerSpecification, SourceSpecification } from 'maplibre-gl';
-import type { Readable } from 'svelte/store';
-import type { AbstractElement } from './element/abstract.js';
+import type { AbstractElement } from './element/abstract.svelte.js';
 import type { StyleLayers } from './element/types.js';
 import { symbolEntries } from '@versatiles/map-state';
 import { dashArrays } from './map_layer/line.svelte.js';
@@ -124,13 +123,15 @@ export class ElementRenderer {
 	private all = false;
 	private scheduled = false;
 
-	constructor(map: maplibregl.Map, elements: Readable<AbstractElement[]>) {
+	constructor(map: maplibregl.Map) {
 		this.map = map;
-		elements.subscribe((list) => {
-			this.elements = list;
-			this.order = new Map(list.map((element, i) => [element, i]));
-			this.redraw();
-		});
+	}
+
+	/** The elements to draw, in drawing order. The manager calls it on every change of the list. */
+	public setElements(elements: AbstractElement[]) {
+		this.elements = elements;
+		this.order = new Map(elements.map((element, i) => [element, i]));
+		this.redraw();
 	}
 
 	/** Draw the element again, e.g. after a change of its geometry or style. */

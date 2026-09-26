@@ -8,8 +8,7 @@
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
 	const uid = $props.id();
-	const background = $derived(manager.background);
-	const settings = $derived(getSettings($background));
+	const settings = $derived(getSettings(manager.background));
 	// the fonts of this editor instance
 	const fonts = $derived($config.fonts);
 
@@ -21,7 +20,7 @@
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
 		// and quick changes are separate undo steps.
-		void manager.setBackground(changeSettings($background, { [key]: value }));
+		void manager.setBackground(changeSettings(manager.background, { [key]: value }));
 		manager.state.log();
 	}
 </script>

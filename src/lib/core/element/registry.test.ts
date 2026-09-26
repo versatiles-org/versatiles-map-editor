@@ -1,8 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { StateElement } from '@versatiles/map-state';
-import { get } from 'svelte/store';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import { createElement, elementFromState } from './registry.js';
 import { CircleElement } from './circle.js';
 import { LineElement } from './line.js';
@@ -49,7 +48,7 @@ describe('element registry', () => {
 			const element = elementFromState(manager, state);
 			expect(element.getState()).toMatchObject(state);
 		}
-		expect(get(elementFromState(manager, states[0]).popup)).toBe('A');
+		expect(elementFromState(manager, states[0]).popup).toBe('A');
 	});
 
 	it('rejects an unknown type', () => {

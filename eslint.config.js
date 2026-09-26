@@ -42,6 +42,19 @@ export default [
 		}
 	},
 	{
+		// runes in TypeScript modules, e.g. classes with $state fields
+		files: ['**/*.svelte.ts'],
+		languageOptions: {
+			parserOptions: {
+				parser: ts.parser
+			}
+		},
+		rules: {
+			// their Maps and Sets are lookup tables or local values, not reactive state
+			'svelte/prefer-svelte-reactivity': 'off'
+		}
+	},
+	{
 		ignores: ['coverage/', 'build/', '.svelte-kit/', 'dist/', 'packages/*/dist/', '.github/', 'node_modules/']
 	}
 ];

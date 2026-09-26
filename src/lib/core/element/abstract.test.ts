@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { AbstractElement } from './abstract.js';
+import { AbstractElement } from './abstract.svelte.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 
 class TestElement extends AbstractElement {

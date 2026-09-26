@@ -127,7 +127,7 @@
 			manager.addElements(result.markers);
 			if (addLegend && categories.length > 0 && result.markers.length > 0) {
 				// added to an existing legend
-				manager.legend.set(legendWithCategories(get(manager.legend), categories));
+				manager.legend = legendWithCategories(manager.legend, categories);
 			}
 			if (result.markers.length > 0) manager.state.log();
 			imported = result.markers.length;

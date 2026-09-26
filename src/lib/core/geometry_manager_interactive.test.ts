@@ -63,7 +63,7 @@ describe('GeometryManager', () => {
 		selection.selectElement(element);
 		manager.removeElement(element);
 		expect(get(selection.selectedElements)).toStrictEqual([]);
-		expect(get(manager.elements)).toStrictEqual([]);
+		expect(manager.elements).toStrictEqual([]);
 	});
 
 	describe('state', () => {
@@ -86,7 +86,7 @@ describe('GeometryManager', () => {
 			expect(hash).toBe('IGxYdVMa_BQ');
 
 			await manager.setState(decodeState(hash));
-			expect(get(manager.elements).length).toBe(0);
+			expect(manager.elements.length).toBe(0);
 			const center = manager.map.getCenter();
 			expect(center).toStrictEqual({ lng: 12, lat: 34 });
 			expect(manager.map.getZoom()).toStrictEqual(5);
@@ -111,7 +111,7 @@ describe('GeometryManager', () => {
 			expect(hash).toBe('IG2haCUQhQgukjiAgqjmQJI4COEA');
 
 			await manager.setState(decodeState(hash));
-			const elements = get(manager.elements);
+			const elements = manager.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
@@ -136,7 +136,7 @@ describe('GeometryManager', () => {
 			expect(hash).toBe('IVXm97bQtBKIQohAAAaTWAaTWIEAA');
 
 			await manager.setState(decodeState(hash));
-			const elements = get(manager.elements);
+			const elements = manager.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
@@ -163,7 +163,7 @@ describe('GeometryManager', () => {
 			expect(hash).toBe('IlXm94SNFZtoWglEIUYgAANJrANJrECAAgQEA');
 
 			await manager.setState(decodeState(hash));
-			const elements = get(manager.elements);
+			const elements = manager.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
@@ -182,10 +182,10 @@ describe('GeometryManager', () => {
 					}
 				]
 			});
-			expect(get(manager.elements).map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
-			expect(get(manager.legend)?.entries.length).toBe(1);
+			expect(manager.elements.map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
+			expect(manager.legend?.entries.length).toBe(1);
 			expect(get(manager.colors.scheme)).toBe('dark2');
-			expect(get(manager.search)).toBe(true);
+			expect(manager.search).toBe(true);
 		});
 
 		it('should add several elements and select them all', () => {
@@ -193,14 +193,14 @@ describe('GeometryManager', () => {
 				{ type: 'marker', point: [1, 2] },
 				{ type: 'marker', point: [3, 4] }
 			]);
-			expect(get(manager.elements)).toStrictEqual(elements);
+			expect(manager.elements).toStrictEqual(elements);
 			expect(get(manager.selection.selectedElements)).toStrictEqual(elements);
 		});
 
 		it('should add an element from its state and select it', () => {
 			const state: StateElement = { type: 'marker', point: [10, 20], popup: { text: 'Hi' } };
 			const element = manager.addElement(state);
-			expect(get(manager.elements)).toStrictEqual([element]);
+			expect(manager.elements).toStrictEqual([element]);
 			expect(get(manager.selection.selectedElement)).toBe(element);
 			expect(element.getState()).toMatchObject(state);
 		});
@@ -223,7 +223,7 @@ describe('GeometryManager', () => {
 				const copies = manager.duplicateElements([marker, line]);
 				expect(copies.map((c) => c.getState())).toStrictEqual([marker.getState(), line.getState()]);
 				expect(get(manager.selection.selectedElements)).toStrictEqual(copies);
-				expect(get(manager.elements).length).toBe(4);
+				expect(manager.elements.length).toBe(4);
 			});
 
 			it('should keep the other selected elements when one is removed', () => {
@@ -243,7 +243,7 @@ describe('GeometryManager', () => {
 
 				expect(copy).toBeInstanceOf(MarkerElement);
 				expect(copy).not.toBe(marker);
-				expect(get(manager.elements)).toStrictEqual([marker, copy]);
+				expect(manager.elements).toStrictEqual([marker, copy]);
 				expect(get(manager.selection.selectedElement)).toBe(copy);
 				expect(copy.getState()).toStrictEqual({
 					type: 'marker',
@@ -296,7 +296,7 @@ describe('GeometryManager', () => {
 			marker.layer.halo = 0;
 
 			await manager.setState(decodeState(manager.state.getHash()));
-			const [restoredPolygon, restoredMarker] = get(manager.elements).map((e) => e.getState());
+			const [restoredPolygon, restoredMarker] = manager.elements.map((e) => e.getState());
 			expect(restoredPolygon).toMatchObject({ style: { opacity: 0 }, strokeStyle: { visible: false } });
 			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });
 		});
@@ -363,7 +363,7 @@ describe('GeometryManager', () => {
 				]
 			});
 
-			const elements = get(manager.elements);
+			const elements = manager.elements;
 			expect(elements[0]).toBeInstanceOf(MarkerElement);
 			expect(elements[1]).toBeInstanceOf(CircleElement);
 			expect(elements[2]).toBeInstanceOf(LineElement);
@@ -376,7 +376,7 @@ describe('GeometryManager', () => {
 				type: 'FeatureCollection',
 				features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } }]
 			});
-			expect(get(manager.elements)).toHaveLength(2);
+			expect(manager.elements).toHaveLength(2);
 		});
 
 		it('ignores features it cannot map without throwing', () => {
@@ -386,7 +386,7 @@ describe('GeometryManager', () => {
 					features: [{ type: 'Feature', properties: {}, geometry: { type: 'GeometryCollection', geometries: [] } }]
 				})
 			).not.toThrow();
-			expect(get(manager.elements)).toHaveLength(0);
+			expect(manager.elements).toHaveLength(0);
 		});
 	});
 
@@ -395,29 +395,28 @@ describe('GeometryManager', () => {
 			Array.from({ length: n }, (_, i) => ({ type: 'marker', point: [i / 100, 0] }));
 
 		it('adds them in one change and selects them in one step', () => {
-			const lengths: number[] = [];
-			manager.elements.subscribe((elements) => lengths.push(elements.length));
+			// every change of the element list is drawn
+			const setElements = vi.spyOn(manager.renderer, 'setElements');
 			const selections: number[] = [];
 			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
 
 			manager.addElements(markers(100));
-			expect(lengths).toStrictEqual([0, 100]);
+			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([100]);
 			expect(selections).toStrictEqual([0, 100]);
 		});
 
 		it('deletes them in one change, with their layers', () => {
 			const elements = manager.addElements(markers(3));
 			const destroy = elements.map((element) => vi.spyOn(element, 'destroy'));
-			const lengths: number[] = [];
-			manager.elements.subscribe((elements) => lengths.push(elements.length));
+			const setElements = vi.spyOn(manager.renderer, 'setElements');
 			const selections: number[] = [];
 			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
 
 			manager.deleteElements(elements.slice(0, 2));
-			expect(lengths).toStrictEqual([3, 1]);
+			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([1]);
 			expect(selections).toStrictEqual([3, 1]);
 			expect(destroy.map((spy) => spy.mock.calls.length)).toStrictEqual([1, 1, 0]);
-			expect(get(manager.elements)).toStrictEqual([elements[2]]);
+			expect(manager.elements).toStrictEqual([elements[2]]);
 		});
 	});
 
@@ -438,14 +437,14 @@ describe('GeometryManager', () => {
 			mockMap.addSource.mockClear();
 
 			await manager.state.undo();
-			expect(get(manager.elements)).toStrictEqual([polygon, marker]);
+			expect(manager.elements).toStrictEqual([polygon, marker]);
 			expect(mockMap.addSource).not.toHaveBeenCalled();
 			// the defaults, which the state leaves out
 			expect(polygon.getState().style).toBeUndefined();
 			expect(polygon.getState().strokeStyle).toBeUndefined();
 
 			await manager.state.redo();
-			expect(get(manager.elements)).toStrictEqual([polygon, marker]);
+			expect(manager.elements).toStrictEqual([polygon, marker]);
 			expect(polygon.getState().style).toStrictEqual({ color: '#123456', opacity: 0.2 });
 			expect(polygon.getState().strokeStyle).toStrictEqual({ width: 7 });
 		});
@@ -455,12 +454,12 @@ describe('GeometryManager', () => {
 			const path = structuredClone(line.path);
 			manager.state.log();
 			line.moveBy(1, 0);
-			line.popup.set('Hello');
+			line.popup = 'Hello';
 			manager.state.log();
 
 			await manager.state.undo();
 			expect(line.path).toStrictEqual(path);
-			expect(get(line.popup)).toBe('');
+			expect(line.popup).toBe('');
 		});
 
 		it('build and remove only the elements that differ, in the right order', async () => {
@@ -474,15 +473,15 @@ describe('GeometryManager', () => {
 
 			// [line, circle] becomes [marker]: the line is replaced, the circle removed
 			await manager.state.undo();
-			const [restored] = get(manager.elements);
-			expect(get(manager.elements)).toHaveLength(1);
+			const [restored] = manager.elements;
+			expect(manager.elements).toHaveLength(1);
 			expect(restored).toBeInstanceOf(MarkerElement);
 			expect(destroyLine).toHaveBeenCalled();
 
 			// [marker] becomes [line, circle]: a new line and a new circle
 			mockMap.moveLayer.mockClear();
 			await manager.state.redo();
-			expect(get(manager.elements).map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
+			expect(manager.elements.map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
 			expect(mockMap.moveLayer).not.toHaveBeenCalled();
 		});
 	});

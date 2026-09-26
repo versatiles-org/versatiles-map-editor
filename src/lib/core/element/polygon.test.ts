@@ -1,9 +1,8 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { PolygonElement } from './polygon.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
-import { get } from 'svelte/store';
 import type { GeoPath } from '../../utils/types.js';
 
 describe('PolygonElement', () => {
@@ -38,7 +37,7 @@ describe('PolygonElement', () => {
 			[1, 1],
 			[0, 1]
 		]);
-		expect(get(element.measurements)).toEqual([{ label: 'Area', value: '12,400 km²' }]);
+		expect(element.measurements).toEqual([{ label: 'Area', value: '12,400 km²' }]);
 	});
 
 	it('should list the colors of the fill and the visible outline', () => {

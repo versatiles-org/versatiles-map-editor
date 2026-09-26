@@ -23,7 +23,6 @@
 	const stateManager = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
-	const elements = $derived(geometryManager.elements);
 	const selectedElements = $derived(geometryManager.selection.selectedElements);
 	const selectedNode = $derived(geometryManager.selection.selectedNode);
 	const copiedStyle = $derived(geometryManager.styleClipboard.style);
@@ -192,7 +191,7 @@
 			</div>
 		</SidebarPanel>
 		<hr class="thick" />
-		<SidebarPanel title="Elements" open={false} disabled={$elements.length === 0}>
+		<SidebarPanel title="Elements" open={false} disabled={geometryManager.elements.length === 0}>
 			<PanelElements manager={geometryManager} />
 		</SidebarPanel>
 		<hr class="thick" />

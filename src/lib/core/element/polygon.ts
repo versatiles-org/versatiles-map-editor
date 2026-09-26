@@ -1,4 +1,4 @@
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { GeoPath } from '../../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.svelte.js';
 import { MapLayerLine } from '../map_layer/line.svelte.js';

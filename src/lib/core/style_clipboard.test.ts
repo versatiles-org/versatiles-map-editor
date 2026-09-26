@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { get } from 'svelte/store';
 import { StyleClipboard } from './style_clipboard.js';
 import { MockGeometryManager } from './__mocks__/geometry_manager.js';
-import type { GeometryManager } from './geometry_manager.js';
+import type { GeometryManager } from './geometry_manager.svelte.js';
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';

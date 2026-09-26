@@ -10,7 +10,6 @@
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
 	const uid = $props.id();
-	const elements = $derived(manager.elements);
 	const selected = $derived(manager.selection.selectedElements);
 	const selectedSet = $derived(new Set($selected));
 
@@ -18,7 +17,7 @@
 	// the type and the number among the elements of this type, e.g. "Marker 2"
 	const names = $derived.by(() => {
 		const counts: Record<string, number> = {};
-		return $elements.map((element) => {
+		return manager.elements.map((element) => {
 			const type = element.getState().type;
 			counts[type] = (counts[type] ?? 0) + 1;
 			return `${TYPE_NAMES[type] ?? type} ${counts[type]}`;
@@ -27,19 +26,19 @@
 
 	// the option with the keyboard focus
 	let active = $state(0);
-	const activeIndex = $derived(Math.min(active, $elements.length - 1));
+	const activeIndex = $derived(Math.min(active, manager.elements.length - 1));
 	let list: HTMLUListElement | undefined = $state();
 
 	// follows the selection on the map, e.g. after a click on an element
 	$effect(() => {
 		const last = $selected.at(-1);
-		const index = last ? $elements.indexOf(last) : -1;
+		const index = last ? manager.elements.indexOf(last) : -1;
 		if (index >= 0) active = index;
 	});
 
 	/** Select the element, or with `toggle` add it to the selection or remove it. */
 	function choose(index: number, mode: 'select' | 'add' | 'toggle') {
-		const element = $elements[index];
+		const element = manager.elements[index];
 		if (!element) return;
 		active = index;
 		if (mode === 'toggle') manager.selection.toggleElement(element);
@@ -48,7 +47,7 @@
 	}
 
 	async function onKeydown(e: KeyboardEvent) {
-		const last = $elements.length - 1;
+		const last = manager.elements.length - 1;
 		let index: number;
 		switch (e.key) {
 			case 'ArrowDown':
@@ -95,7 +94,7 @@
 	onkeydown={onKeydown}
 	onclick={onClick}
 >
-	{#each $elements as element, i (element)}
+	{#each manager.elements as element, i (element)}
 		<li
 			id="{uid}-{i}"
 			role="option"

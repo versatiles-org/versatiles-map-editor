@@ -1,8 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { get } from 'svelte/store';
 import { LineElement } from './line.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { GeoPoint } from '../../utils/types.js';
 
@@ -35,9 +34,9 @@ describe('LineElement', () => {
 			[0, 0],
 			[1, 0]
 		]);
-		expect(get(element.measurements)).toEqual([{ label: 'Length', value: '111 km' }]);
+		expect(element.measurements).toEqual([{ label: 'Length', value: '111 km' }]);
 		element.getSelectionNodeUpdater({ index: 1 })?.update(0, 0.001);
-		expect(get(element.measurements)).toEqual([{ label: 'Length', value: '111 m' }]);
+		expect(element.measurements).toEqual([{ label: 'Length', value: '111 m' }]);
 	});
 
 	it('should set isSelected correctly', () => {

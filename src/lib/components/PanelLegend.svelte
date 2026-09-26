@@ -8,8 +8,7 @@
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
 	const uid = $props.id();
-	const legendStore = $derived(manager.legend);
-	const legend: StateLegend = $derived($legendStore ?? { entries: [] });
+	const legend: StateLegend = $derived(manager.legend ?? { entries: [] });
 	const log = () => manager.state.log();
 
 	const positions: [NonNullable<StateLegend['position']>, string][] = [
@@ -31,7 +30,7 @@
 	/** A legend without entries is no legend. */
 	function update(change: Partial<StateLegend>) {
 		const next = { ...legend, ...change };
-		manager.legend.set(next.entries.length > 0 ? next : undefined);
+		manager.legend = next.entries.length > 0 ? next : undefined;
 	}
 
 	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
