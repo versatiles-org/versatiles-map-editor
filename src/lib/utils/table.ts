@@ -7,6 +7,11 @@ export interface Table {
 	/** Column names: from the header row, or "Column 1", "Column 2", … */
 	columns: string[];
 	rows: string[][];
+	/**
+	 * The number of each row in the original table, like in a spreadsheet: counting the header and
+	 * empty rows, which are left out, e.g. 2 for the first row below a header.
+	 */
+	rowNumbers: number[];
 	delimiter: string;
 	hasHeader: boolean;
 }
@@ -17,7 +22,10 @@ const DELIMITERS = ['\t', ';', ',', '|'];
 export function parseTable(text: string, hasHeader?: boolean): Table {
 	text = text.replace(/^\uFEFF/, ''); // byte order mark, e.g. from Excel
 	const delimiter = detectDelimiter(text);
-	const records = parseRecords(text, delimiter).filter((row) => row.some((cell) => cell.trim() !== ''));
+	const numbered = parseRecords(text, delimiter)
+		.map((row, i) => ({ row, number: i + 1 }))
+		.filter(({ row }) => row.some((cell) => cell.trim() !== ''));
+	const records = numbered.map(({ row }) => row);
 	// a loop, since spreading many rows into Math.max overflows the stack
 	let width = 0;
 	for (const row of records) width = Math.max(width, row.length);
@@ -25,11 +33,13 @@ export function parseTable(text: string, hasHeader?: boolean): Table {
 	for (const row of records) while (row.length < width) row.push('');
 
 	hasHeader ??= detectHeader(records);
-	const rows = hasHeader ? records.slice(1) : records;
+	const first = hasHeader ? 1 : 0;
+	const rows = records.slice(first);
+	const rowNumbers = numbered.slice(first).map(({ number }) => number);
 	const columns = Array.from({ length: width }, (_, i) =>
 		hasHeader && records[0][i].trim() ? records[0][i].trim() : `Column ${i + 1}`
 	);
-	return { columns, rows, delimiter, hasHeader };
+	return { columns, rows, rowNumbers, delimiter, hasHeader };
 }
 
 /** RFC 4180: fields in double quotes may contain delimiters, line breaks and doubled quotes. */

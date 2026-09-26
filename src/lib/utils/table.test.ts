@@ -9,9 +9,18 @@ describe('parseTable', () => {
 				['A', '52.5', '13.4'],
 				['B', '48.1', '11.6']
 			],
+			// like in a spreadsheet, the header is row 1
+			rowNumbers: [2, 3],
 			delimiter: ',',
 			hasHeader: true
 		});
+	});
+
+	it('numbers the rows like a spreadsheet, also across empty rows and line breaks in cells', () => {
+		const table = parseTable('name,lat,lon\nA,52.5,13.4\n\n"B\nC",48.1,11.6\nD,1,2', true);
+		expect(table.rows.map((row) => row[0])).toStrictEqual(['A', 'B\nC', 'D']);
+		expect(table.rowNumbers).toStrictEqual([2, 4, 5]);
+		expect(parseTable('A,52.5,13.4\nB,48.1,11.6', false).rowNumbers).toStrictEqual([1, 2]);
 	});
 
 	it('reads data pasted from a spreadsheet (tabs, Windows line breaks)', () => {

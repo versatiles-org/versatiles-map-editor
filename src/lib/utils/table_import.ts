@@ -14,7 +14,7 @@ export interface TableMapping {
 }
 
 export interface FailedRow {
-	/** Number of the row in the table, starting at 1 (without the header). */
+	/** Number of the row in the table, like in a spreadsheet: counting a header and empty rows. */
 	row: number;
 	/** The address or the coordinates, as in the table. */
 	value: string;
@@ -120,7 +120,7 @@ export async function importTable(
 			const lng = parseNumber(row[position.longitude]);
 			const value = `${row[position.latitude]}, ${row[position.longitude]}`;
 			if (lat === undefined || lng === undefined || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
-				results[i] = { row: i + 1, value, reason: 'invalid coordinates' };
+				results[i] = { row: table.rowNumbers[i], value, reason: 'invalid coordinates' };
 			} else {
 				results[i] = marker(row, [lng, lat]);
 			}
@@ -135,15 +135,17 @@ export async function importTable(
 				const row = table.rows[i];
 				const address = row[position.address].trim();
 				if (!address) {
-					results[i] = { row: i + 1, value: '', reason: 'no address' };
+					results[i] = { row: table.rowNumbers[i], value: '', reason: 'no address' };
 				} else {
 					try {
 						const [found] = await geocoder(address, { ...geocodingOptions, limit: 1, signal });
-						results[i] = found ? marker(row, found.point) : { row: i + 1, value: address, reason: 'address not found' };
+						results[i] = found
+							? marker(row, found.point)
+							: { row: table.rowNumbers[i], value: address, reason: 'address not found' };
 					} catch (error) {
 						signal?.throwIfAborted();
 						console.error(error);
-						results[i] = { row: i + 1, value: address, reason: 'search failed' };
+						results[i] = { row: table.rowNumbers[i], value: address, reason: 'search failed' };
 					}
 				}
 				onProgress?.(++done, table.rows.length);

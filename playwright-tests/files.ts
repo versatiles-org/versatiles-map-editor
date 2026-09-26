@@ -196,7 +196,8 @@ test.describe('importing a table', () => {
 		await dialog.getByRole('button', { name: 'Import 3 rows' }).click();
 		await expect(dialog.getByText('Imported 2 markers.')).toBeVisible();
 		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
-			'Row 3: x, 13 — invalid coordinates'
+			// the 4th line of the spreadsheet, with the header in line 1
+			'Row 4: x, 13 — invalid coordinates'
 		);
 		await dialog.getByRole('button', { name: /^Done/ }).click();
 
@@ -238,7 +239,7 @@ test.describe('importing a table', () => {
 
 		await expect(dialog.getByText('Imported 1 marker.')).toBeVisible();
 		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
-			'Row 2: Nirgendwo 5 — address not found'
+			'Row 3: Nirgendwo 5 — address not found'
 		);
 		await expect
 			.poll(() => markers(page).map((m) => [m.point, m.style?.label]))

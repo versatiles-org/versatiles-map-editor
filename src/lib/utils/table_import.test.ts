@@ -29,9 +29,10 @@ describe('importTable', () => {
 				popup: { text: 'Open **daily**' }
 			}
 		]);
+		// numbered like in the spreadsheet, where the header is row 1
 		expect(result.failed).toStrictEqual([
-			{ row: 2, value: 'x, 13', reason: 'invalid coordinates' },
-			{ row: 3, value: '95, 13', reason: 'invalid coordinates' }
+			{ row: 3, value: 'x, 13', reason: 'invalid coordinates' },
+			{ row: 4, value: '95, 13', reason: 'invalid coordinates' }
 		]);
 	});
 
@@ -57,9 +58,9 @@ describe('importTable', () => {
 		);
 		expect(result.markers).toStrictEqual([{ type: 'marker', point: [10, 20], style: { label: 'A' } }]);
 		expect(result.failed).toStrictEqual([
-			{ row: 2, value: '', reason: 'no address' },
-			{ row: 3, value: 'Nowhere', reason: 'address not found' },
-			{ row: 4, value: 'Error', reason: 'search failed' }
+			{ row: 3, value: '', reason: 'no address' },
+			{ row: 4, value: 'Nowhere', reason: 'address not found' },
+			{ row: 5, value: 'Error', reason: 'search failed' }
 		]);
 		expect(geocoder).toHaveBeenCalledWith('Main St 1', expect.objectContaining({ limit: 1, language: 'de' }));
 		expect(onProgress).toHaveBeenLastCalledWith(4, 4);
