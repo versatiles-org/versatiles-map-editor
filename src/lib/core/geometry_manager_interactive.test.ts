@@ -6,7 +6,6 @@ import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import { get } from 'svelte/store';
 import type { GeoPath, GeoPoint } from '../utils/types.js';
 
 describe('GeometryManager', () => {
@@ -62,7 +61,7 @@ describe('GeometryManager', () => {
 		if (!selection) throw new Error('Selection is not defined');
 		selection.selectElement(element);
 		manager.removeElement(element);
-		expect(get(selection.selectedElements)).toStrictEqual([]);
+		expect(selection.selectedElements).toStrictEqual([]);
 		expect(manager.elements).toStrictEqual([]);
 	});
 
@@ -184,7 +183,7 @@ describe('GeometryManager', () => {
 			});
 			expect(manager.elements.map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
 			expect(manager.legend?.entries.length).toBe(1);
-			expect(get(manager.colors.scheme)).toBe('dark2');
+			expect(manager.colors.scheme).toBe('dark2');
 			expect(manager.search).toBe(true);
 		});
 
@@ -194,21 +193,21 @@ describe('GeometryManager', () => {
 				{ type: 'marker', point: [3, 4] }
 			]);
 			expect(manager.elements).toStrictEqual(elements);
-			expect(get(manager.selection.selectedElements)).toStrictEqual(elements);
+			expect(manager.selection.selectedElements).toStrictEqual(elements);
 		});
 
 		it('should add an element from its state and select it', () => {
 			const state: StateElement = { type: 'marker', point: [10, 20], popup: { text: 'Hi' } };
 			const element = manager.addElement(state);
 			expect(manager.elements).toStrictEqual([element]);
-			expect(get(manager.selection.selectedElement)).toBe(element);
+			expect(manager.selection.selectedElement).toBe(element);
 			expect(element.getState()).toMatchObject(state);
 		});
 
 		it('should keep the color scheme in the state', async () => {
 			expect(manager.getState()).not.toHaveProperty('meta');
 			await manager.setState({ meta: { colorScheme: 'dark2' }, elements: [] });
-			expect(get(manager.colors.scheme)).toBe('dark2');
+			expect(manager.colors.scheme).toBe('dark2');
 			expect(manager.getState().meta).toStrictEqual({ colorScheme: 'dark2' });
 		});
 
@@ -222,7 +221,7 @@ describe('GeometryManager', () => {
 				const line = manager.addNewElement('line');
 				const copies = manager.duplicateElements([marker, line]);
 				expect(copies.map((c) => c.getState())).toStrictEqual([marker.getState(), line.getState()]);
-				expect(get(manager.selection.selectedElements)).toStrictEqual(copies);
+				expect(manager.selection.selectedElements).toStrictEqual(copies);
 				expect(manager.elements.length).toBe(4);
 			});
 
@@ -231,7 +230,7 @@ describe('GeometryManager', () => {
 				const line = manager.addNewElement('line');
 				manager.selection.selectElements([marker, line]);
 				marker.delete();
-				expect(get(manager.selection.selectedElements)).toStrictEqual([line]);
+				expect(manager.selection.selectedElements).toStrictEqual([line]);
 			});
 
 			it('should duplicate a marker with an offset and select the copy', () => {
@@ -244,7 +243,7 @@ describe('GeometryManager', () => {
 				expect(copy).toBeInstanceOf(MarkerElement);
 				expect(copy).not.toBe(marker);
 				expect(manager.elements).toStrictEqual([marker, copy]);
-				expect(get(manager.selection.selectedElement)).toBe(copy);
+				expect(manager.selection.selectedElement).toBe(copy);
 				expect(copy.getState()).toStrictEqual({
 					type: 'marker',
 					point: [15, expect.closeTo(20)],
@@ -397,24 +396,23 @@ describe('GeometryManager', () => {
 		it('adds them in one change and selects them in one step', () => {
 			// every change of the element list is drawn
 			const setElements = vi.spyOn(manager.renderer, 'setElements');
-			const selections: number[] = [];
-			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
+			const selectElements = vi.spyOn(manager.selection, 'selectElements');
 
 			manager.addElements(markers(100));
 			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([100]);
-			expect(selections).toStrictEqual([0, 100]);
+			expect(selectElements.mock.calls.map(([list]) => list.length)).toStrictEqual([100]);
+			expect(manager.selection.selectedElements).toHaveLength(100);
 		});
 
 		it('deletes them in one change, with their layers', () => {
 			const elements = manager.addElements(markers(3));
 			const destroy = elements.map((element) => vi.spyOn(element, 'destroy'));
 			const setElements = vi.spyOn(manager.renderer, 'setElements');
-			const selections: number[] = [];
-			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
+			const selectElements = vi.spyOn(manager.selection, 'selectElements');
 
 			manager.deleteElements(elements.slice(0, 2));
 			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([1]);
-			expect(selections).toStrictEqual([3, 1]);
+			expect(selectElements.mock.calls.map(([list]) => list.length)).toStrictEqual([1]);
 			expect(destroy.map((spy) => spy.mock.calls.length)).toStrictEqual([1, 1, 0]);
 			expect(manager.elements).toStrictEqual([elements[2]]);
 		});

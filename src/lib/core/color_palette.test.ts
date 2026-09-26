@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ColorPalette, PALETTE_SIZE } from './color_palette.js';
+import { ColorPalette, PALETTE_SIZE } from './color_palette.svelte.js';
 
 describe('ColorPalette', () => {
 	it('lists the used colors once, newest element first', () => {

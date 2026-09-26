@@ -1,4 +1,3 @@
-import { writable, type Writable } from 'svelte/store';
 import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
 
@@ -29,7 +28,8 @@ function mainRole(roles: Partial<Record<Role, unknown>>): Role | undefined {
  * "Paste Style" in Keynote or PowerPoint.
  */
 export class StyleClipboard {
-	public readonly style: Writable<CopiedStyle | undefined> = writable(undefined);
+	/** The copied style, if any. Replaced as a whole on every copy. */
+	public style: CopiedStyle | undefined = $state.raw(undefined);
 
 	public copy(element: AbstractElement) {
 		const style: CopiedStyle = {};
@@ -39,7 +39,7 @@ export class StyleClipboard {
 		}
 		// The label is content, not style
 		if (style.symbol) delete style.symbol.label;
-		this.style.set(style);
+		this.style = style;
 	}
 
 	/**

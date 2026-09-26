@@ -1,5 +1,3 @@
-import { writable, type Writable } from 'svelte/store';
-
 /** Number of colors in the palette. */
 export const PALETTE_SIZE = 16;
 
@@ -9,7 +7,7 @@ export const PALETTE_SIZE = 16;
  */
 export class ColorPalette {
 	/** The id of the color scheme of the map. Undefined for the default scheme. */
-	public readonly scheme: Writable<string | undefined> = writable(undefined);
+	public scheme: string | undefined = $state(undefined);
 	// Colors picked in this session, most recent first
 	private recent: string[] = [];
 	private readonly getUsedColors: () => string[];

@@ -1,5 +1,4 @@
 import type * as maplibregl from 'maplibre-gl';
-import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { SelectionNode } from './element/types.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
@@ -26,13 +25,25 @@ export interface SelectedNode {
 }
 
 export class SelectionHandler {
+	// replaced as a whole, so they need no deep reactivity
+	#selectedElements: AbstractElement[] = $state.raw([]);
+	#selectedNode: SelectedNode | undefined = $state.raw(undefined);
+
 	/** All selected elements, in the order of selection. */
-	public readonly selectedElements: Writable<AbstractElement[]> = writable([]);
+	public get selectedElements(): AbstractElement[] {
+		return this.#selectedElements;
+	}
+
 	/** The selected element, if exactly one is selected. Only then its nodes can be edited. */
-	public readonly selectedElement: Readable<AbstractElement | undefined> = derived(this.selectedElements, (elements) =>
-		elements.length === 1 ? elements[0] : undefined
-	);
-	public readonly selectedNode: Writable<SelectedNode | undefined> = writable(undefined);
+	public get selectedElement(): AbstractElement | undefined {
+		return this.#selectedElements.length === 1 ? this.#selectedElements[0] : undefined;
+	}
+
+	/** The selected vertex of the selected line or polygon. */
+	public get selectedNode(): SelectedNode | undefined {
+		return this.#selectedNode;
+	}
+
 	private selectedNodeIndex: number | undefined;
 	private manager: GeometryManagerInteractive;
 	// The element under the mouse, for the cursor; the mouse position is handled once per frame
@@ -93,7 +104,7 @@ export class SelectionHandler {
 	private handleElementDown(e: MapPointerEvent) {
 		// Shift+click toggles the selection instead
 		if (e.originalEvent.shiftKey) return;
-		const selected = get(this.selectedElements);
+		const selected = this.#selectedElements;
 		const element = this.manager.elementAt(e.point, isTouchEvent(e) ? TOUCH_TOLERANCE : MOUSE_TOLERANCE, selected);
 		if (!element) return;
 
@@ -157,7 +168,7 @@ export class SelectionHandler {
 
 	/** Returns whether a node was hit. */
 	private handleNodeDown(e: MapPointerEvent): boolean {
-		const element = get(this.selectedElement);
+		const element = this.selectedElement;
 		if (element == null) return false;
 
 		const properties = this.findNode(e);
@@ -198,7 +209,7 @@ export class SelectionHandler {
 	}
 
 	public selectElements(selection: AbstractElement[]) {
-		const current = get(this.selectedElements);
+		const current = this.#selectedElements;
 		if (selection.length === current.length && selection.every((e, i) => e === current[i])) return;
 		// only the elements whose selection changes, so selecting many elements takes linear time
 		const was = new Set(current);
@@ -206,7 +217,7 @@ export class SelectionHandler {
 		this.manager.elements.forEach((e) => {
 			if (was.has(e) !== is.has(e)) e.select(is.has(e));
 		});
-		this.selectedElements.set(selection);
+		this.#selectedElements = selection;
 		this.selectedNodeIndex = undefined;
 		this.updateSelectionNodes();
 		// e.g. the element under the mouse was selected, so it can be dragged now
@@ -222,7 +233,7 @@ export class SelectionHandler {
 
 	/** Add the element to the selection, or remove it. */
 	public toggleElement(element: AbstractElement) {
-		const current = get(this.selectedElements);
+		const current = this.#selectedElements;
 		this.selectElements(current.includes(element) ? current.filter((e) => e !== element) : [...current, element]);
 	}
 
@@ -232,7 +243,7 @@ export class SelectionHandler {
 
 	public deselectElements(elements: AbstractElement[]) {
 		const removed = new Set(elements);
-		const current = get(this.selectedElements);
+		const current = this.#selectedElements;
 		if (current.some((e) => removed.has(e))) this.selectElements(current.filter((e) => !removed.has(e)));
 	}
 
@@ -244,7 +255,7 @@ export class SelectionHandler {
 
 	/** Delete the selected vertex. Returns false if there is none, or the shape needs it. */
 	public deleteSelectedNode(): boolean {
-		const element = get(this.selectedElement);
+		const element = this.selectedElement;
 		const index = this.selectedNodeIndex;
 		if (element == null || index == null) return false;
 		if (!element.deleteNode(index)) return false;
@@ -254,16 +265,15 @@ export class SelectionHandler {
 	}
 
 	public updateSelectionNodes() {
-		const element = get(this.selectedElement);
+		const element = this.selectedElement;
 		const nodes: SelectionNode[] = element?.getSelectionNodes() ?? [];
 		const selectedIndex = this.selectedNodeIndex;
 		const selected = nodes.find((n) => n.index === selectedIndex && !n.transparent);
 		if (selected == null) this.selectedNodeIndex = undefined;
-		this.selectedNode.set(
+		this.#selectedNode =
 			element && selected
 				? { index: selected.index, coordinates: selected.coordinates, deletable: element.canDeleteNode(selected.index) }
-				: undefined
-		);
+				: undefined;
 
 		// looked up each time, since a new background map replaces the source object
 		this.manager.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({

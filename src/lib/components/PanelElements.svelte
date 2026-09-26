@@ -11,7 +11,7 @@
 
 	const uid = $props.id();
 	const selected = $derived(manager.selection.selectedElements);
-	const selectedSet = $derived(new Set($selected));
+	const selectedSet = $derived(new Set(selected));
 
 	const TYPE_NAMES: Record<string, string> = { marker: 'Marker', line: 'Line', polygon: 'Polygon', circle: 'Circle' };
 	// the type and the number among the elements of this type, e.g. "Marker 2"
@@ -31,7 +31,7 @@
 
 	// follows the selection on the map, e.g. after a click on an element
 	$effect(() => {
-		const last = $selected.at(-1);
+		const last = selected.at(-1);
 		const index = last ? manager.elements.indexOf(last) : -1;
 		if (index >= 0) active = index;
 	});
@@ -42,7 +42,7 @@
 		if (!element) return;
 		active = index;
 		if (mode === 'toggle') manager.selection.toggleElement(element);
-		else if (mode === 'add' && !selectedSet.has(element)) manager.selection.selectElements([...$selected, element]);
+		else if (mode === 'add' && !selectedSet.has(element)) manager.selection.selectElements([...selected, element]);
 		else if (mode === 'select') manager.selection.selectElement(element);
 	}
 

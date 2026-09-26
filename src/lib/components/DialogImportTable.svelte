@@ -88,7 +88,7 @@
 		categories = [];
 		tooManyCategories = 0;
 		if (column < 0 || !table) return;
-		const colors = getColorScheme(get(manager.colors.scheme), get(config).colorSchemes).colors;
+		const colors = getColorScheme(manager.colors.scheme, get(config).colorSchemes).colors;
 		({ categories, tooMany: tooManyCategories } = tableCategories(table, column, colors, symbol));
 	}
 

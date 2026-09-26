@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { get } from 'svelte/store';
-import { StyleClipboard } from './style_clipboard.js';
+import { StyleClipboard } from './style_clipboard.svelte.js';
 import { MockGeometryManager } from './__mocks__/geometry_manager.js';
 import type { GeometryManager } from './geometry_manager.svelte.js';
 import { MarkerElement } from './element/marker.js';
@@ -22,7 +22,7 @@ describe('StyleClipboard', () => {
 		...targets: Parameters<StyleClipboard['copy']>[0][]
 	) {
 		clipboard.copy(source);
-		clipboard.paste(targets, get(clipboard.style)!);
+		clipboard.paste(targets, clipboard.style!);
 	}
 
 	it('transfers the complete style between elements of the same type, including defaults', () => {

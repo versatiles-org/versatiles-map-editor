@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import type { MapState } from '@versatiles/map-state';
-import { get } from 'svelte/store';
 import { MockMap } from '$lib/__mocks__/map.js';
 
 describe('StateManager', () => {
@@ -35,8 +34,8 @@ describe('StateManager', () => {
 
 	function getStatus(): [boolean, boolean, number, number, number, number] {
 		return [
-			get(stateManager.history.undoEnabled),
-			get(stateManager.history.redoEnabled),
+			stateManager.history.undoEnabled,
+			stateManager.history.redoEnabled,
 			stateManager.history['history'].length,
 			stateManager.history['index'],
 			vi.mocked(geometryManager.getState).mock.calls.length,

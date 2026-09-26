@@ -1,4 +1,3 @@
-import { writable } from 'svelte/store';
 import type { MapState } from '@versatiles/map-state';
 
 const MAXLENGTH = 100;
@@ -13,8 +12,9 @@ export class StateHistory {
 	// 1 means the second most recent state
 	private index: number = 0;
 
-	public undoEnabled = writable(false);
-	public redoEnabled = writable(false);
+	/** Whether there is something to undo or to redo, e.g. for the buttons. */
+	public undoEnabled = $state(false);
+	public redoEnabled = $state(false);
 
 	constructor(state: MapState) {
 		this.reset(state);
@@ -65,7 +65,7 @@ export class StateHistory {
 	}
 
 	private updateButtons() {
-		this.undoEnabled.set(this.index < this.history.length - 1);
-		this.redoEnabled.set(this.index > 0);
+		this.undoEnabled = this.index < this.history.length - 1;
+		this.redoEnabled = this.index > 0;
 	}
 }

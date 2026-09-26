@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, type Mock, type Mocked } from 'vitest';
-import { get } from 'svelte/store';
-import { SelectionHandler } from './selection.js';
+import { SelectionHandler } from './selection.svelte.js';
 import { MockMap } from '$lib/__mocks__/map.js';
 import type * as maplibregl from 'maplibre-gl';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
@@ -42,9 +41,7 @@ describe('SelectionHandler', () => {
 	});
 
 	it('should initialize with undefined selectedElement', () => {
-		let value;
-		handler.selectedElement.subscribe((v) => (value = v))();
-		expect(value).toBeUndefined();
+		expect(handler.selectedElement).toBeUndefined();
 	});
 
 	it('selectElement sets selected element and updates nodes', () => {
@@ -55,9 +52,7 @@ describe('SelectionHandler', () => {
 		} as unknown as AbstractElement;
 		mockManager.elements = [element];
 		handler.selectElement(element);
-		let value;
-		handler.selectedElement.subscribe((v) => (value = v))();
-		expect(value).toBe(element);
+		expect(handler.selectedElement).toBe(element);
 		expect(selectMock).toHaveBeenCalledWith(true);
 	});
 
@@ -86,7 +81,7 @@ describe('SelectionHandler', () => {
 		const element = {
 			getSelectionNodes: vi.fn().mockReturnValue([selectionNode])
 		};
-		handler.selectedElements.set([element as unknown as AbstractElement]);
+		handler.selectElements([element as unknown as AbstractElement]);
 		handler.updateSelectionNodes();
 		expect(setDataMock).toHaveBeenCalledWith({
 			type: 'FeatureCollection',
@@ -103,7 +98,7 @@ describe('SelectionHandler', () => {
 	it('updateSelectionNodes does nothing if no selected element', () => {
 		const setDataMock = vi.fn();
 		mockMap.getSource.mockReturnValue({ setData: setDataMock } as unknown as maplibregl.Source);
-		handler.selectedElements.set([]);
+		handler.selectElements([]);
 		handler.updateSelectionNodes();
 		expect(setDataMock).toHaveBeenCalledWith({
 			type: 'FeatureCollection',
@@ -168,7 +163,7 @@ describe('SelectionHandler', () => {
 				getSelectionNodes: vi.fn().mockReturnValue([]),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			handler.selectedElements.set([element]);
+			handler.selectElements([element]);
 		});
 
 		it('should handle mousedown', () => {
@@ -179,7 +174,7 @@ describe('SelectionHandler', () => {
 		});
 
 		it('should not call getSelectionNodeUpdater if no selected element on mousedown', () => {
-			handler.selectedElements.set([]);
+			handler.selectElements([]);
 			const event = mouseEvent('mousedown');
 			mockMap.emit('mousedown', event);
 			expect(element.getSelectionNodeUpdater).not.toHaveBeenCalled();
@@ -288,7 +283,7 @@ describe('SelectionHandler', () => {
 				getSelectionNodes: vi.fn().mockReturnValue([]),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			handler.selectedElements.set([element]);
+			handler.selectElements([element]);
 			// the mocked projection maps [x, 0] to the pixel (x, 0)
 			mockMap.project.mockImplementation((p) => ({ x: (p as number[])[0], y: 100 }) as maplibregl.Point);
 		});
@@ -357,7 +352,7 @@ describe('SelectionHandler', () => {
 			handler.selectElement(element);
 		});
 
-		const selectedNode = () => get(handler.selectedNode);
+		const selectedNode = () => handler.selectedNode;
 
 		it('should select the vertex that is pressed', () => {
 			mockMap.queryRenderedFeatures.mockReturnValue([
@@ -421,7 +416,7 @@ describe('SelectionHandler', () => {
 			originalEvent: { shiftKey: false, altKey: false, ...keys },
 			preventDefault: vi.fn()
 		});
-		const selected = () => get(handler.selectedElements);
+		const selected = () => handler.selectedElements;
 
 		beforeEach(() => {
 			const createElement = () =>
@@ -441,7 +436,7 @@ describe('SelectionHandler', () => {
 			handler.selectElements([elements[0], elements[1]]);
 			// only the elements whose selection changes
 			expect(elements.map((e) => e.select.mock.calls)).toStrictEqual([[[true]], [[true]], []]);
-			expect(get(handler.selectedElement)).toBeUndefined();
+			expect(handler.selectedElement).toBeUndefined();
 
 			handler.toggleElement(elements[2]);
 			handler.toggleElement(elements[0]);
@@ -449,7 +444,7 @@ describe('SelectionHandler', () => {
 
 			handler.deselectElement(elements[1]);
 			expect(selected()).toStrictEqual([elements[2]]);
-			expect(get(handler.selectedElement)).toBe(elements[2]);
+			expect(handler.selectedElement).toBe(elements[2]);
 		});
 
 		it('shows the nodes of a single element only', () => {

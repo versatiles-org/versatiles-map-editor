@@ -7,7 +7,7 @@
 	let position: { x: number; y: number } | undefined = $state();
 
 	function updatePosition() {
-		const node = $selectedNode;
+		const node = selectedNode;
 		position = node ? geometryManager.map.project(node.coordinates) : undefined;
 	}
 
@@ -22,16 +22,16 @@
 	}
 </script>
 
-{#if $selectedNode && position}
+{#if selectedNode && position}
 	<!-- next to the node, so it works with touch, where there is no Delete key -->
 	<button
 		class="delete-node"
 		style:left="{position.x + 12}px"
 		style:top="{position.y - 36}px"
-		disabled={!$selectedNode.deletable}
+		disabled={!selectedNode.deletable}
 		onclick={deleteNode}
 		aria-label="Delete node"
-		title={$selectedNode.deletable ? 'Delete node (Delete/Backspace)' : 'The shape needs this node'}>×</button
+		title={selectedNode.deletable ? 'Delete node (Delete/Backspace)' : 'The shape needs this node'}>×</button
 	>
 {/if}
 

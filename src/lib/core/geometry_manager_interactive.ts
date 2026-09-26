@@ -1,13 +1,12 @@
 import type * as maplibregl from 'maplibre-gl';
-import { get } from 'svelte/store';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { GeometryManager } from './geometry_manager.svelte.js';
 import { createElement, elementFromState, type ElementOfType, type ElementType } from './element/registry.js';
-import { SelectionHandler } from './selection.js';
+import { SelectionHandler } from './selection.svelte.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
-import { ColorPalette } from './color_palette.js';
-import { StyleClipboard } from './style_clipboard.js';
+import { ColorPalette } from './color_palette.svelte.js';
+import { StyleClipboard } from './style_clipboard.svelte.js';
 import {
 	stateToGeoJSON,
 	stateFromGeoJSON,
@@ -121,7 +120,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		if (background) meta.background = background;
 		const legend = this.legend;
 		if (legend) meta.legend = legend;
-		const colorScheme = get(this.colors.scheme);
+		const colorScheme = this.colors.scheme;
 		if (colorScheme) meta.colorScheme = colorScheme;
 		if (this.search) meta.search = true;
 		return {
@@ -147,7 +146,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
 		if (meta.legend) this.legend = meta.legend;
-		if (meta.colorScheme) this.colors.scheme.set(meta.colorScheme);
+		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.search) this.search = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}

@@ -21,10 +21,9 @@
 	let panelShareMap: DialogShareMap | null = null;
 	let dialogImportTable: DialogImportTable | undefined = $state();
 	const stateManager = $derived(geometryManager.state);
-	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
-	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
-	const selectedElements = $derived(geometryManager.selection.selectedElements);
-	const selectedNode = $derived(geometryManager.selection.selectedNode);
+	const history = $derived(geometryManager.state.history);
+	const selection = $derived(geometryManager.selection);
+	const selectedElements = $derived(selection.selectedElements);
 	const copiedStyle = $derived(geometryManager.styleClipboard.style);
 
 	/** Let the user choose a file, and add its content to the map. */
@@ -67,20 +66,20 @@
 	}
 
 	function duplicateElements() {
-		if ($selectedElements.length === 0) return;
-		geometryManager.duplicateElements($selectedElements, [20, 20]);
+		if (selectedElements.length === 0) return;
+		geometryManager.duplicateElements(selectedElements, [20, 20]);
 		geometryManager.state.log();
 	}
 
 	function copyStyle() {
 		// the style of one element, since several elements can have different styles
-		if ($selectedElements.length !== 1) return;
-		geometryManager.styleClipboard.copy($selectedElements[0]);
+		if (selectedElements.length !== 1) return;
+		geometryManager.styleClipboard.copy(selectedElements[0]);
 	}
 
 	function pasteStyle() {
-		if ($selectedElements.length === 0 || !$copiedStyle) return;
-		geometryManager.styleClipboard.paste($selectedElements, $copiedStyle);
+		if (selectedElements.length === 0 || !copiedStyle) return;
+		geometryManager.styleClipboard.paste(selectedElements, copiedStyle);
 		geometryManager.state.log();
 	}
 
@@ -91,31 +90,31 @@
 		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open]')) return;
 
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
-			if ($selectedElements.length === 0) return;
+			if (selectedElements.length === 0) return;
 			e.preventDefault();
 			duplicateElements();
 		}
 
 		// Cmd/Ctrl+Alt+C/V, like in Keynote and PowerPoint. By e.code, since Alt changes e.key (e.g. to "ç" on macOS).
 		if ((e.metaKey || e.ctrlKey) && e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.code === 'KeyV')) {
-			if ($selectedElements.length === 0) return;
+			if (selectedElements.length === 0) return;
 			e.preventDefault();
 			if (e.code === 'KeyC') copyStyle();
 			else pasteStyle();
 		}
 
 		if ((e.key === 'Delete' || e.key === 'Backspace') && !e.metaKey && !e.ctrlKey && !e.altKey) {
-			if ($selectedElements.length === 0) return;
+			if (selectedElements.length === 0) return;
 			e.preventDefault();
 			// Delete the selected node, or the elements if no node is selected. A node the shape
 			// needs is kept, so the element is not deleted by accident.
-			if ($selectedNode) geometryManager.selection.deleteSelectedNode();
+			if (selection.selectedNode) selection.deleteSelectedNode();
 			else deleteElements();
 		}
 	}
 
 	function deleteElements() {
-		geometryManager.deleteElements($selectedElements);
+		geometryManager.deleteElements(selectedElements);
 		geometryManager.state.log();
 	}
 
@@ -130,8 +129,8 @@
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
 		<div class="grid2">
-			<button class="btn" onclick={() => stateManager.undo()} disabled={!$undoEnabled}>Undo</button>
-			<button class="btn" onclick={() => stateManager.redo()} disabled={!$redoEnabled}>Redo</button>
+			<button class="btn" onclick={() => stateManager.undo()} disabled={!history.undoEnabled}>Undo</button>
+			<button class="btn" onclick={() => stateManager.redo()} disabled={!history.redoEnabled}>Redo</button>
 		</div>
 		<hr class="thick" />
 		<SearchPlace
@@ -195,9 +194,9 @@
 			<PanelElements manager={geometryManager} />
 		</SidebarPanel>
 		<hr class="thick" />
-		<Editor elements={$selectedElements} />
+		<Editor elements={selectedElements} />
 		<hr class="thick" />
-		<SidebarPanel title="Actions" disabled={$selectedElements.length === 0}>
+		<SidebarPanel title="Actions" disabled={selectedElements.length === 0}>
 			<div class="grid2">
 				<button class="btn" onclick={deleteElements} title="Delete (Delete/Backspace)">Delete</button>
 				<button class="btn" onclick={duplicateElements} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
@@ -206,13 +205,13 @@
 				<button
 					class="btn"
 					onclick={copyStyle}
-					disabled={$selectedElements.length !== 1}
+					disabled={selectedElements.length !== 1}
 					title="Copy the style of the element (Cmd/Ctrl+Alt+C)">Copy style</button
 				>
 				<button
 					class="btn"
 					onclick={pasteStyle}
-					disabled={!$copiedStyle}
+					disabled={!copiedStyle}
 					title="Paste the style onto the selected elements (Cmd/Ctrl+Alt+V)">Paste style</button
 				>
 			</div>

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { StateHistory } from './history.js';
+import { StateHistory } from './history.svelte.js';
 import type { MapState } from '@versatiles/map-state';
-import { get } from 'svelte/store';
 
 describe('StateHistory', () => {
 	let history: StateHistory;
@@ -35,32 +34,32 @@ describe('StateHistory', () => {
 
 	it('should initialize with the given state', () => {
 		expect(JSON.parse(history['history'][0])).toEqual({ ...state1, map: undefined });
-		expect(get(history.undoEnabled)).toBe(false);
-		expect(get(history.redoEnabled)).toBe(false);
+		expect(history.undoEnabled).toBe(false);
+		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should reset the history with a new state', () => {
 		history.reset(state2);
 		expect(JSON.parse(history['history'][0])).toEqual({ ...state2, map: undefined });
 		expect(history['history'].length).toBe(1);
-		expect(get(history.undoEnabled)).toBe(false);
-		expect(get(history.redoEnabled)).toBe(false);
+		expect(history.undoEnabled).toBe(false);
+		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should push a new state to the history', () => {
 		history.push(state2);
 		expect(JSON.parse(history['history'][0])).toEqual({ ...state2, map: undefined });
 		expect(history['history'].length).toBe(2);
-		expect(get(history.undoEnabled)).toBe(true);
-		expect(get(history.redoEnabled)).toBe(false);
+		expect(history.undoEnabled).toBe(true);
+		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should undo to the previous state', () => {
 		history.push(state2);
 		const undoneState = history.undo();
 		expect(undoneState).toEqual({ ...state1, map: undefined });
-		expect(get(history.undoEnabled)).toBe(false);
-		expect(get(history.redoEnabled)).toBe(true);
+		expect(history.undoEnabled).toBe(false);
+		expect(history.redoEnabled).toBe(true);
 	});
 
 	it('should redo to the next state', () => {
@@ -68,28 +67,28 @@ describe('StateHistory', () => {
 		history.undo();
 		const redoneState = history.redo();
 		expect(redoneState).toEqual({ ...state2, map: undefined });
-		expect(get(history.undoEnabled)).toBe(true);
-		expect(get(history.redoEnabled)).toBe(false);
+		expect(history.undoEnabled).toBe(true);
+		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should not push a state that equals the current one', () => {
 		expect(history.push(state2)).toBe(true);
 		expect(history.push(structuredClone(state2))).toBe(false);
 		expect(history['history'].length).toBe(2);
-		expect(get(history.undoEnabled)).toBe(true);
+		expect(history.undoEnabled).toBe(true);
 	});
 
 	it('should ignore viewport changes', () => {
 		history.push({ ...state1, map: { center: [7, 8], radius: 99 } });
 		expect(history['history'].length).toBe(1);
-		expect(get(history.undoEnabled)).toBe(false);
+		expect(history.undoEnabled).toBe(false);
 	});
 
 	it('should keep the redo stack when pushing the current state after undo', () => {
 		history.push(state2);
 		history.undo();
 		history.push(state1);
-		expect(get(history.redoEnabled)).toBe(true);
+		expect(history.redoEnabled).toBe(true);
 		expect(history.redo()).toEqual({ ...state2, map: undefined });
 	});
 

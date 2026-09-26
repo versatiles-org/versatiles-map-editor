@@ -1,9 +1,9 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { SelectionHandler } from './selection.js';
+import type { SelectionHandler } from './selection.svelte.js';
 import type { StateManager } from './state/manager.js';
-import type { ColorPalette } from './color_palette.js';
+import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
@@ -261,7 +261,7 @@ export class GeometryManager {
 		if (state.map) this.fitViewport(state.map);
 		this.legend = state.meta?.legend;
 		this.search = state.meta?.search === true;
-		this.colors?.scheme.set(state.meta?.colorScheme);
+		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, this.#background)) {
 			await this.setBackground(state.meta?.background);
