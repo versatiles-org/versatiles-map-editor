@@ -1016,7 +1016,7 @@ test.describe('importing a table', () => {
 		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
 			'Row 3: x, 13 — invalid coordinates'
 		);
-		await dialog.getByRole('button', { name: /^Close/ }).click();
+		await dialog.getByRole('button', { name: /^Done/ }).click();
 
 		await expect
 			.poll(() => markers(page).map((m) => [m.point, m.style?.label, m.popup?.text]))
@@ -1525,4 +1525,32 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 	// literal text: in a plain string, maplibre would replace "{EUR}" with a feature property
 	expect(textField).toStrictEqual(['literal', 'Price {EUR}']);
 	expect(errors).toStrictEqual([]);
+});
+
+test('dialogs are named, can be closed and are usable by keyboard', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	// the share dialog: a name, a labelled close button, and aspect ratios reachable by keyboard
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const share = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(share).toBeVisible();
+	const square = share.getByRole('radio', { name: 'square' });
+	await square.focus();
+	await page.keyboard.press('Space');
+	await expect(square).toBeChecked();
+	await share.getByRole('button', { name: 'Close' }).click();
+	await expect(share).toBeHidden();
+
+	// the download dialog: the file name can be typed at once
+	await page.getByRole('button', { name: /^Download/ }).click();
+	const download = page.getByRole('dialog', { name: 'Download File' });
+	await expect(download.getByRole('textbox', { name: 'File name:' })).toBeFocused();
+	await page.keyboard.press('Escape');
+	await expect(download).toBeHidden();
+
+	// the symbol picker
+	await page.getByRole('button', { name: /^Marker/ }).click();
+	await page.getByRole('button', { name: /^Symbol/ }).click();
+	await expect(page.getByRole('dialog', { name: 'Select a symbol' })).toBeVisible();
 });

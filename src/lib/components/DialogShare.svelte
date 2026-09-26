@@ -95,7 +95,7 @@
 	}
 </script>
 
-<Dialog bind:this={dialog} size="fullscreen">
+<Dialog bind:this={dialog} size="fullscreen" title="Share or embed the map">
 	<div class="grid">
 		<div class="head">
 			<p>Share your map with others by copying the link or embed code below.</p>
@@ -177,7 +177,8 @@
 		grid-template-rows: auto 1fr auto;
 		gap: 10px;
 		width: 100%;
-		height: 100%;
+		flex: 1;
+		min-height: 0;
 		overflow: hidden;
 
 		.head {

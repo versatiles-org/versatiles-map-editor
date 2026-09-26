@@ -36,7 +36,12 @@
 	export async function askDownloadFilename(initialFilename: string): Promise<string | null> {
 		if (!dialog) return null;
 		await openDialog('download');
-		if (input) input.value = initialFilename;
+		if (input) {
+			input.value = initialFilename;
+			// ready to type a new name
+			input.focus();
+			input.select();
+		}
 		const { confirmed, value } = await getResponse();
 		return (confirmed && value?.trim()) || null;
 	}
@@ -78,20 +83,22 @@
 	}
 </script>
 
-<Dialog bind:this={dialog} size="small">
+<Dialog
+	bind:this={dialog}
+	size="small"
+	title={mode == 'download' ? 'Download File' : mode == 'new' ? 'New Map' : 'Open Map'}
+>
 	{#if mode == 'download'}
-		<h2>Download File</h2>
 		<label>
 			File name:
 			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<div class="grid2">
 			<button class="btn" onclick={cancel}>Cancel</button>
-			<button class="btn" onclick={confirm} data-focus>Download</button>
+			<button class="btn" onclick={confirm}>Download</button>
 		</div>
 	{/if}
 	{#if mode == 'new' || mode == 'replace'}
-		<h2>{mode == 'new' ? 'New Map' : 'Open Map'}</h2>
 		<p>
 			{mode == 'new' ? 'Do you want to create a new map?' : 'Do you want to replace the current map?'}
 			You can undo this.
@@ -104,10 +111,6 @@
 </Dialog>
 
 <style>
-	h2 {
-		text-align: center;
-		margin-top: 0;
-	}
 	.grid2 {
 		margin: 0;
 	}

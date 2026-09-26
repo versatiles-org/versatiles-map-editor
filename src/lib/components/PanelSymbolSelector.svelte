@@ -56,7 +56,7 @@
 	{/if}
 </button>
 
-<Dialog bind:this={dialog}>
+<Dialog bind:this={dialog} title="Select a symbol">
 	<div class="list" style="--list-icon-size: {listIconSize}px; --list-item-size: {listItemSize}px">
 		{#if noneLabel}
 			<button class="item" onclick={() => selectSymbol(undefined)}>{noneLabel}</button>

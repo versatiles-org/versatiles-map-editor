@@ -5,14 +5,19 @@
 	const {
 		children,
 		size,
+		title,
 		onopen,
 		onclose
 	}: {
 		children?: Snippet;
 		size?: 'big' | 'fullscreen' | 'small';
+		/** The heading, which is also the accessible name of the dialog. */
+		title?: string;
 		onopen?: () => void;
 		onclose?: () => void;
 	} = $props();
+
+	const uid = $props.id();
 
 	let dialog: HTMLDialogElement | null = null;
 	export const eventHandler = new EventHandler<{
@@ -45,9 +50,11 @@
 	}
 </script>
 
-<dialog bind:this={dialog} class={size} onclose={handleClose}>
-	<button onclick={close}>&#x2715;</button>
+<dialog bind:this={dialog} class={size} onclose={handleClose} aria-labelledby={title ? `${uid}-title` : undefined}>
+	{#if title}<h2 id="{uid}-title">{title}</h2>{/if}
 	{@render children?.()}
+	<!-- after the content, so the first focus goes to the first control of the dialog -->
+	<button class="close" onclick={close} aria-label="Close" title="Close (Escape)">&#x2715;</button>
 </dialog>
 
 <style>
@@ -83,7 +90,19 @@
 		backdrop-filter: blur(2px) brightness(0.9);
 	}
 
-	button {
+	/* the heading, then the content, which can take the remaining height (flex: 1) */
+	dialog[open] {
+		display: flex;
+		flex-direction: column;
+	}
+
+	h2 {
+		flex-shrink: 0;
+		margin: 0 30px var(--gap, 10px) 0;
+		font-size: 1.2em;
+	}
+
+	.close {
 		position: absolute;
 		top: 5px;
 		right: 5px;
@@ -95,5 +114,12 @@
 		height: 25px;
 		text-align: center;
 		padding: 0;
+
+		/* a larger hit area for fingers, without a larger button */
+		&::after {
+			content: '';
+			position: absolute;
+			inset: -10px;
+		}
 	}
 </style>

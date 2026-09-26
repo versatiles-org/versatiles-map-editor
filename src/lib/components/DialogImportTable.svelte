@@ -153,10 +153,8 @@
 	}
 </script>
 
-<Dialog bind:this={dialog} onclose={() => controller?.abort()}>
+<Dialog bind:this={dialog} title="Import a table as markers" onclose={() => controller?.abort()}>
 	<div class="import">
-		<h2>Import a table as markers</h2>
-
 		{#if step === 'input'}
 			<p>A CSV or TSV file, or a table copied from a spreadsheet, with one place per row.</p>
 			<button class="btn file" onclick={() => fileInput?.click()}>Choose a file…</button>
@@ -297,7 +295,7 @@
 					{/each}
 				</ul>
 			{/if}
-			<button class="btn" onclick={() => dialog?.close()}>Close</button>
+			<button class="btn" onclick={() => dialog?.close()}>Done</button>
 		{/if}
 	</div>
 </Dialog>
@@ -318,14 +316,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--gap);
-		height: 100%;
+		flex: 1;
+		min-height: 0;
 		overflow: auto;
 		font-size: 0.9em;
-	}
-
-	h2 {
-		margin: 0;
-		font-size: 1.2em;
 	}
 
 	textarea {
