@@ -7,10 +7,19 @@
 		open = true,
 		title
 	}: { children: Snippet; disabled?: boolean; open?: boolean; title: string } = $props();
+
+	const uid = $props.id();
+	const expanded = $derived(open && !disabled);
 </script>
 
 <div class={{ panel: true, open, disabled }}>
-	<button class="header" onclick={() => (open = !open)}>
+	<button
+		class="header"
+		onclick={() => (open = !open)}
+		{disabled}
+		aria-expanded={expanded}
+		aria-controls="{uid}-content"
+	>
 		<span class="title">{title}</span>
 		<div class="chevron">
 			<svg viewBox="0 0 7 12">
@@ -18,7 +27,8 @@
 			</svg>
 		</div>
 	</button>
-	<div class="content">
+	<!-- hidden, not only invisible: collapsed controls are out of the tab order and the accessibility tree -->
+	<div class="content" id="{uid}-content" hidden={!expanded}>
 		{@render children()}
 	</div>
 </div>
@@ -77,9 +87,7 @@
 
 		.content {
 			box-sizing: border-box;
-			height: 0;
 			margin: 0;
-			overflow: hidden;
 			padding: 0;
 		}
 	}
@@ -92,18 +100,13 @@
 				}
 			}
 		}
-
-		.content {
-			height: auto;
-			overflow: visible;
-		}
 	}
 
 	.disabled {
 		opacity: 0.3;
 
-		.content {
-			display: none;
+		.header {
+			cursor: default;
 		}
 	}
 </style>

@@ -21,7 +21,7 @@ const ariaResult = `- region "Map"
 - separator
 - combobox "Search address or place"
 - separator
-- button "Map":
+- button "Map" [expanded]:
   - text: Map
   - img
 - button "New ✓"
@@ -32,71 +32,16 @@ const ariaResult = `- region "Map"
 - button "Background map":
   - text: Background map
   - img
-- text: Base map
-- combobox "Base map":
-  - option "Vector map" [selected]
-  - option "Satellite"
-- text: Theme
-- combobox "Theme":
-  - option "Colorful" [selected]
-  - option "Natural"
-  - option "Muted"
-  - option "Gray"
-  - option "Black & white"
-- text: Font
-- combobox "Font":
-  - option "Noto Sans" [selected]
-  - option "Fira Sans"
-  - option "Lato"
-  - option "Libre Baskerville"
-  - option "Merriweather Sans"
-  - option "Nunito"
-  - option "Open Sans"
-  - option "PT Sans"
-  - option "Roboto"
-  - option "Source Sans 3"
-- text: Language
-- combobox "Language":
-  - option "Browser language" [selected]
-  - option "Local names"
-  - option "Arabic"
-  - option "Dutch"
-  - option "English"
-  - option "French"
-  - option "German"
-  - option "Greek"
-  - option "Italian"
-  - option "Polish"
-  - option "Portuguese"
-  - option "Spanish"
-  - option "Ukrainian"
-- text: Labels
-- combobox "Labels":
-  - option "Normal" [selected]
-  - option "Fewer"
-  - option "None"
 - separator
 - button "Legend":
   - text: Legend
   - img
-- button "Add legend entry ✓"
 - separator
 - button "Import/Export":
   - text: Import/Export
   - img
-- group "GeoJSON:":
-  - text: "GeoJSON:"
-  - button "Import ✓"
-  - button "Export ✓"
-- group "KML (Google Earth):":
-  - text: "KML (Google Earth):"
-  - button "Import ✓"
-  - button "Export ✓"
-- group "Table (CSV/TSV):":
-  - text: "Table (CSV/TSV):"
-  - button "Import table… ✓"
 - separator
-- button "Add new":
+- button "Add new" [expanded]:
   - text: Add new
   - img
 - button "Marker ✓"
@@ -104,22 +49,17 @@ const ariaResult = `- region "Map"
 - button "Polygon ✓"
 - button "Circle ✓"
 - separator
-- button "Style":
+- button "Style" [disabled]:
   - text: Style
   - img
 - separator
-- button "Actions":
+- button "Actions" [disabled]:
   - text: Actions
   - img
 - separator
 - button "Help":
   - text: Help
-  - img
-- paragraph:
-  - text: Submit bugs and feature requests as
-  - link "Repository on GitHub":
-    - /url: https://github.com/versatiles-org/versatiles-map-editor/issues
-    - text: GitHub Issues`;
+  - img`;
 
 /**
  * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
