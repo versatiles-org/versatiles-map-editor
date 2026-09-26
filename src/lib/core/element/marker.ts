@@ -1,7 +1,6 @@
-import { get } from 'svelte/store';
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { SelectionNode, SelectionNodeUpdater } from './types.js';
+import type { SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { MapLayerSymbol } from '../map_layer/symbol.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 import type { GeoPoint } from '../../utils/types.js';
@@ -20,9 +19,8 @@ export class MarkerElement extends AbstractElement {
 		this.updateSource();
 	}
 
-	public select(value: boolean) {
-		super.select(value);
-		this.layer.setSelected(value);
+	getStyleLayers(): StyleLayers {
+		return { symbol: this.layer };
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Point> {
@@ -57,19 +55,6 @@ export class MarkerElement extends AbstractElement {
 	moveBy(dx: number, dy: number) {
 		this.point = movePoint(this.point, dx, dy);
 		this.updateSource();
-	}
-
-	getLayerIds(): string[] {
-		return [this.layer.id];
-	}
-
-	getColors(): string[] {
-		return [get(this.layer.color)];
-	}
-
-	destroy(): void {
-		this.layer.destroy();
-		this.map.removeSource(this.sourceId);
 	}
 
 	getState(): StateElementMarker {

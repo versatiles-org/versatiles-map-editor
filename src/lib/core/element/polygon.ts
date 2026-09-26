@@ -1,11 +1,10 @@
-import { get } from 'svelte/store';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
-import type { Measurement } from './types.js';
+import type { Measurement, StyleLayers } from './types.js';
 import { polygonArea } from '../../utils/geometry.js';
 import { formatArea } from '../../utils/format.js';
 
@@ -24,10 +23,8 @@ export class PolygonElement extends AbstractPathElement {
 		this.updateSource();
 	}
 
-	public select(value: boolean) {
-		super.select(value);
-		this.fillLayer.setSelected(value);
-		this.strokeLayer.setSelected(value);
+	getStyleLayers(): StyleLayers {
+		return { fill: this.fillLayer, stroke: this.strokeLayer };
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
@@ -40,22 +37,6 @@ export class PolygonElement extends AbstractPathElement {
 
 	protected getMeasurements(): Measurement[] {
 		return [{ label: 'Area', value: formatArea(polygonArea(this.path)) }];
-	}
-
-	getLayerIds(): string[] {
-		return [this.fillLayer.id, this.strokeLayer.id];
-	}
-
-	getColors(): string[] {
-		const colors = [get(this.fillLayer.color)];
-		if (get(this.strokeLayer.visible)) colors.push(get(this.strokeLayer.color));
-		return colors;
-	}
-
-	destroy(): void {
-		this.fillLayer.destroy();
-		this.strokeLayer.destroy();
-		this.map.removeSource(this.sourceId);
 	}
 
 	getState(): StateElementPolygon {

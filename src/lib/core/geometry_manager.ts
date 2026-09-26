@@ -4,37 +4,12 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
-import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
+import type { StateBackground, StateLegend, MapState } from '@versatiles/map-state';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { getSettings } from '$lib/utils/background.js';
-import { CircleElement } from './element/circle.js';
-import { LineElement } from './element/line.js';
-import { MarkerElement } from './element/marker.js';
-import { PolygonElement } from './element/polygon.js';
-
-/** Build a live editor element from its serialized state. */
-export function elementFromState(manager: GeometryManager, element: StateElement): AbstractElement {
-	const result = elementFromStateWithoutPopup(manager, element);
-	if (element.popup) result.popup.set(element.popup.text);
-	return result;
-}
-
-function elementFromStateWithoutPopup(manager: GeometryManager, element: StateElement): AbstractElement {
-	switch (element.type) {
-		case 'marker':
-			return MarkerElement.fromState(manager, element);
-		case 'line':
-			return LineElement.fromState(manager, element);
-		case 'polygon':
-			return PolygonElement.fromState(manager, element);
-		case 'circle':
-			return CircleElement.fromState(manager, element);
-		default:
-			throw new Error('Unknown element type');
-	}
-}
+import { elementFromState } from './element/registry.js';
 
 /** The northernmost latitude of the Web Mercator projection. */
 const MAX_LATITUDE = 85.051129;

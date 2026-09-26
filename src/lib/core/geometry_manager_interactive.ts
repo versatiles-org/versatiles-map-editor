@@ -1,11 +1,8 @@
 import type * as maplibregl from 'maplibre-gl';
 import { get } from 'svelte/store';
 import type { AbstractElement } from './element/abstract.js';
-import { CircleElement } from './element/circle.js';
-import { LineElement } from './element/line.js';
-import { MarkerElement } from './element/marker.js';
-import { PolygonElement } from './element/polygon.js';
-import { GeometryManager, elementFromState } from './geometry_manager.js';
+import { GeometryManager } from './geometry_manager.js';
+import { createElement, elementFromState, type ElementOfType, type ElementType } from './element/registry.js';
 import { SelectionHandler } from './selection.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
@@ -56,19 +53,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 		super.removeElement(element);
 	}
 
-	public addNewElement(type: 'marker'): MarkerElement;
-	public addNewElement(type: 'line'): LineElement;
-	public addNewElement(type: 'polygon'): PolygonElement;
-	public addNewElement(type: 'circle'): CircleElement;
-	public addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle'): AbstractElement;
-	public addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle'): AbstractElement {
-		const AbstractClass = {
-			marker: MarkerElement,
-			line: LineElement,
-			polygon: PolygonElement,
-			circle: CircleElement
-		}[type];
-		const element = new AbstractClass(this);
+	public addNewElement<T extends ElementType>(type: T): ElementOfType<T> {
+		const element = createElement(this, type);
 		this.appendElement(element);
 		this.selection.selectElement(element);
 		return element;
@@ -90,16 +76,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 
 		const states = elements.map((element) => {
 			const state: StateElement = structuredClone(element.getState());
-			switch (state.type) {
-				case 'marker':
-				case 'circle':
-					state.point = move(state.point);
-					break;
-				case 'line':
-				case 'polygon':
-					state.points = state.points.map(move);
-					break;
-			}
+			if ('point' in state) state.point = move(state.point);
+			if ('points' in state) state.points = state.points.map(move);
 			return state;
 		});
 		return this.addElements(states);

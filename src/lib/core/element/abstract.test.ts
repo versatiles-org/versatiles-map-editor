@@ -9,8 +9,8 @@ class TestElement extends AbstractElement {
 		super(manager);
 	}
 
-	destroy(): void {
-		// Mock destroy behavior
+	getStyleLayers() {
+		return {};
 	}
 
 	getFeature(): GeoJSON.Feature {
@@ -22,12 +22,6 @@ class TestElement extends AbstractElement {
 	}
 
 	moveBy() {}
-	getLayerIds() {
-		return [];
-	}
-	getColors() {
-		return [];
-	}
 	getSelectionNodeUpdater() {
 		return undefined;
 	}

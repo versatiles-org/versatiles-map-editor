@@ -31,14 +31,9 @@ class TestPathElement extends AbstractPathElement {
 		};
 	}
 
-	getLayerIds() {
-		return [];
+	getStyleLayers() {
+		return {};
 	}
-	getColors(): string[] {
-		return [];
-	}
-
-	destroy() {}
 }
 
 describe('AbstractPathElement', () => {

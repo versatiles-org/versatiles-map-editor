@@ -1,10 +1,9 @@
-import { get } from 'svelte/store';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { GeoPath } from '../../utils/types.js';
 import { MapLayerLine } from '../map_layer/line.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
-import type { Measurement } from './types.js';
+import type { Measurement, StyleLayers } from './types.js';
 import { pathLength } from '../../utils/geometry.js';
 import { formatLength } from '../../utils/format.js';
 
@@ -20,9 +19,8 @@ export class LineElement extends AbstractPathElement {
 		this.updateSource();
 	}
 
-	public select(value: boolean) {
-		super.select(value);
-		this.layer.setSelected(value);
+	getStyleLayers(): StyleLayers {
+		return { stroke: this.layer };
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.LineString> {
@@ -35,19 +33,6 @@ export class LineElement extends AbstractPathElement {
 
 	protected getMeasurements(): Measurement[] {
 		return [{ label: 'Length', value: formatLength(pathLength(this.path)) }];
-	}
-
-	getLayerIds(): string[] {
-		return [this.layer.id];
-	}
-
-	getColors(): string[] {
-		return [get(this.layer.color)];
-	}
-
-	destroy(): void {
-		this.layer.destroy();
-		this.map.removeSource(this.sourceId);
 	}
 
 	getState(): StateElementLine {

@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.js';
+import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { get, writable, type Writable } from 'svelte/store';
 import type { GeoPoint } from '../../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
@@ -29,8 +29,38 @@ export abstract class AbstractElement {
 		});
 	}
 
+	/** The map layers that draw the element, by their role in its style. */
+	abstract getStyleLayers(): StyleLayers;
+
 	public select(value: boolean) {
 		this.isSelected = value;
+		for (const layer of this.layers()) layer.setSelected(value);
+	}
+
+	/** The ids of the map layers that draw the element. */
+	public getLayerIds(): string[] {
+		return this.layers().map((layer) => layer.id);
+	}
+
+	/** The colors of the element, e.g. for the palette of used colors. A hidden outline has none. */
+	public getColors(): string[] {
+		const { symbol, fill, stroke } = this.getStyleLayers();
+		const colors: string[] = [];
+		if (symbol) colors.push(get(symbol.color));
+		if (fill) colors.push(get(fill.color));
+		// a line is always drawn, the outline of an area only if it is visible
+		if (stroke && (!fill || get(stroke.visible))) colors.push(get(stroke.color));
+		return colors;
+	}
+
+	public destroy(): void {
+		for (const layer of this.layers()) layer.destroy();
+		this.map.removeSource(this.sourceId);
+	}
+
+	private layers() {
+		const { symbol, fill, stroke } = this.getStyleLayers();
+		return [symbol, fill, stroke].filter((layer) => layer !== undefined);
 	}
 
 	protected randomPositions(length: number): GeoPoint[] {
@@ -97,11 +127,6 @@ export abstract class AbstractElement {
 
 	/** Move the element by `dx` degrees of longitude and `dy` in mercator units (see `movePoint`). */
 	abstract moveBy(dx: number, dy: number): void;
-	/** The colors of the element, e.g. for the palette of used colors. */
-	abstract getColors(): string[];
-	/** The ids of the map layers that draw the element. */
-	abstract getLayerIds(): string[];
-	abstract destroy(): void;
 	abstract getFeature(): GeoJSON.Feature;
 	abstract getSelectionNodes(): SelectionNode[];
 	abstract getSelectionNodeUpdater(properties?: Record<string, unknown>): SelectionNodeUpdater | undefined;
