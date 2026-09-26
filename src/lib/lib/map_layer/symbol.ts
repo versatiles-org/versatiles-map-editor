@@ -1,4 +1,5 @@
 import { derived, get, writable, type Writable } from 'svelte/store';
+import type { ExpressionSpecification } from 'maplibre-gl';
 import type { LayerSymbol } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
@@ -69,7 +70,7 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 				'icon-rotate': get(this.rotate),
 				'icon-size': get(this.size),
 
-				'text-field': get(this.label),
+				'text-field': labelField(get(this.label)),
 				'text-font': [get(manager.font)],
 				'text-justify': 'left',
 				'text-overlap': 'always',
@@ -94,7 +95,7 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 			this.updatePaint('icon-halo-width', v);
 			this.updatePaint('text-halo-width', v);
 		});
-		this.label.subscribe((v) => this.updateLayout('text-field', v));
+		this.label.subscribe((v) => this.updateLayout('text-field', labelField(v)));
 		this.textAnchor.subscribe((v) => this.updateLayout('text-anchor', v));
 		this.textVariableAnchor.subscribe((v) => this.updateLayout('text-variable-anchor', v));
 		this.rotate.subscribe((v) => this.updateLayout('icon-rotate', v));
@@ -160,4 +161,9 @@ function lookupLabelAlign(index: number | string | Writable<number>): LabelAlign
 
 	if (pos == null) return labelPositions[0];
 	return pos;
+}
+
+/** The label as literal text: in a plain string, maplibre would replace "{…}" with feature properties. */
+function labelField(label: string): ExpressionSpecification {
+	return ['literal', label];
 }

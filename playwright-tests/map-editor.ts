@@ -1567,3 +1567,23 @@ test('Delete and Backspace keep the elements in sliders and dialogs', async ({ p
 	await page.keyboard.press('Delete');
 	await expect.poll(markers).toBe(0);
 });
+
+test('marker labels with braces are drawn as they are', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('console', (message) => {
+		if (message.type() === 'error') errors.push(message.text());
+	});
+	const center: [number, number] = [13.4, 52.5];
+	const marker = { type: 'marker' as const, point: center, style: { label: 'Price {EUR}' } };
+	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements: [marker] }));
+	await waitForMapIsReady(page);
+	await waitForMapIsIdle(page);
+	const textField = await page.evaluate(() => {
+		const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+		const layer = map.getStyle().layers.find((l) => l.id.startsWith('symbol_'))!;
+		return map.getLayoutProperty(layer.id, 'text-field');
+	});
+	// literal text: in a plain string, maplibre would replace "{EUR}" with a feature property
+	expect(textField).toStrictEqual(['literal', 'Price {EUR}']);
+	expect(errors).toStrictEqual([]);
+});

@@ -38,7 +38,7 @@ describe('MapLayerSymbol', () => {
 					'icon-offset': [0, 0],
 					'icon-rotate': 0,
 					'icon-size': 1,
-					'text-field': '',
+					'text-field': ['literal', ''],
 					'text-font': ['noto_sans_regular'],
 					'text-justify': 'left',
 					'text-overlap': 'always',
@@ -127,5 +127,13 @@ describe('MapLayerSymbol', () => {
 		expect(get(layer.rotate)).toBe(0);
 		expect(get(layer.label)).toBe('');
 		expect(get(layer.labelAlign)).toBe(0);
+	});
+
+	it('passes the label as literal text, so "{…}" is not replaced', () => {
+		layer.label.set('Price {EUR}');
+		expect(mockManager.map.setLayoutProperty).toHaveBeenLastCalledWith(expect.any(String), 'text-field', [
+			'literal',
+			'Price {EUR}'
+		]);
 	});
 });

@@ -66,7 +66,7 @@ export interface LayerSymbol {
 		'icon-pitch-alignment'?: 'map' | 'viewport' | 'auto';
 		'text-pitch-alignment'?: 'map' | 'viewport' | 'auto';
 		'text-rotation-alignment'?: 'map' | 'viewport' | 'viewport-glyph' | 'auto';
-		'text-field'?: maplibregl.FormattedSpecification;
+		'text-field'?: maplibregl.DataDrivenPropertyValueSpecification<maplibregl.FormattedSpecification>;
 		'text-font'?: Array<string>;
 		'text-size'?: number;
 		'text-max-width'?: number;
