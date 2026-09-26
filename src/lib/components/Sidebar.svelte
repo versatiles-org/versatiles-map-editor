@@ -7,6 +7,7 @@
 	import SearchPlace from './SearchPlace.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
+	import PanelElements from './PanelElements.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.js';
@@ -21,6 +22,7 @@
 	const stateManager = $derived(geometryManager.state);
 	const undoEnabled = $derived(geometryManager.state.history.undoEnabled);
 	const redoEnabled = $derived(geometryManager.state.history.redoEnabled);
+	const elements = $derived(geometryManager.elements);
 	const selectedElements = $derived(geometryManager.selection.selectedElements);
 	const selectedNode = $derived(geometryManager.selection.selectedNode);
 	const copiedStyle = $derived(geometryManager.styleClipboard.style);
@@ -200,6 +202,10 @@
 				<button class="btn" onclick={() => addNewElement('polygon')}>Polygon</button>
 				<button class="btn" onclick={() => addNewElement('circle')}>Circle</button>
 			</div>
+		</SidebarPanel>
+		<hr class="thick" />
+		<SidebarPanel title="Elements" open={false} disabled={$elements.length === 0}>
+			<PanelElements manager={geometryManager} />
 		</SidebarPanel>
 		<hr class="thick" />
 		<Editor elements={$selectedElements} />

@@ -1,5 +1,6 @@
 import { expect, test } from './lib/test.js';
-import { waitForMapIsReady } from './lib/utils.js';
+import { encodeState } from '../packages/map-state/src/index.js';
+import { stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
 test('dialogs are named, can be closed and are usable by keyboard', async ({ page }) => {
 	await page.goto('/');
@@ -60,4 +61,55 @@ test('screen readers hear the state of the search and of copying', async ({ page
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await page.getByRole('button', { name: /^Copy Link/ }).click();
 	await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
+});
+
+test('elements can be chosen and deleted with the keyboard in the list of elements', async ({ page }) => {
+	const state = encodeState({
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{ type: 'marker', point: [13.4, 52.5], style: { label: 'Berlin' } },
+			{
+				type: 'line',
+				points: [
+					[13.35, 52.5],
+					[13.45, 52.5]
+				]
+			},
+			{
+				type: 'polygon',
+				points: [
+					[13.35, 52.48],
+					[13.45, 52.48],
+					[13.4, 52.52]
+				],
+				popup: { text: 'Park\nwith trees' }
+			}
+		]
+	});
+	await page.goto('/#' + state);
+	await waitForMapIsReady(page);
+
+	await page.getByRole('button', { name: 'Elements' }).click();
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	const options = list.getByRole('option');
+	await expect(options).toHaveText(['Marker 1: Berlin', 'Line 1', 'Polygon 1: Park']);
+
+	// the selection follows the focus, and Shift adds to it
+	await list.focus();
+	await page.keyboard.press('ArrowDown');
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1']);
+	await page.keyboard.press('Shift+ArrowDown');
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1', 'Polygon 1: Park']);
+	await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+
+	// Delete removes the selected elements
+	await page.keyboard.press('Delete');
+	await expect(options).toHaveText(['Marker 1: Berlin']);
+	await expect.poll(() => stateInUrl(page).elements.map((e) => e.type)).toStrictEqual(['marker']);
+
+	// Enter selects the element, like a click on the map
+	await page.keyboard.press('Home');
+	await page.keyboard.press('Enter');
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Marker 1: Berlin']);
+	await expect(page.getByRole('button', { name: 'Style', exact: true })).toBeEnabled();
 });

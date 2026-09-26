@@ -25,6 +25,7 @@ const sidebarAria = `
 - button /^Line/
 - button /^Polygon/
 - button /^Circle/
+- button "Elements"
 - button "Style" [disabled]
 - button "Actions" [disabled]
 - button "Help" [expanded=false]
