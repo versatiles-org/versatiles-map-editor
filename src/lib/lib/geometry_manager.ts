@@ -36,6 +36,9 @@ function elementFromStateWithoutPopup(manager: GeometryManager, element: StateEl
 	}
 }
 
+/** The northernmost latitude of the Web Mercator projection. */
+const MAX_LATITUDE = 85.051129;
+
 export class GeometryManager {
 	public readonly elements: Writable<AbstractElement[]>;
 	public readonly map: maplibregl.Map;
@@ -175,12 +178,19 @@ export class GeometryManager {
 	public fitViewport(viewport: NonNullable<StateRoot['map']>) {
 		const { center, radius } = viewport;
 		const dy = (radius * 360) / 40074000;
-		const dx = dy / Math.cos((center[1] * Math.PI) / 180);
+		const dx = Math.min(180, dy / Math.max(Math.cos((center[1] * Math.PI) / 180), 1e-6));
+		// A viewport near a pole can reach beyond the latitudes of the map, where MapLibre throws
+		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
 		const bounds: [[number, number], [number, number]] = [
-			[center[0] - dx, center[1] - dy],
-			[center[0] + dx, center[1] + dy]
+			[center[0] - dx, lat(center[1] - dy)],
+			[center[0] + dx, lat(center[1] + dy)]
 		];
-		this.map.fitBounds(bounds, { animate: false });
+		try {
+			this.map.fitBounds(bounds, { animate: false });
+		} catch (error) {
+			// the elements must be shown anyway
+			console.error('Failed to show the viewport of the map', error);
+		}
 	}
 
 	public async setState(state: StateRoot) {

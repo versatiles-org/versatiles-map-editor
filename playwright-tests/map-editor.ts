@@ -1388,3 +1388,28 @@ test('Enter searches at once and goes to the first result', async ({ page }) => 
 	await expect.poll(lng).toBeCloseTo(9.93, 1);
 	await expect(search).toHaveValue('Hamburg Altona');
 });
+
+test('a map near a pole keeps its elements', async ({ page }) => {
+	// half the height of the view reaches beyond the latitudes of the map
+	const state: MapState = {
+		map: { center: [0, 70], radius: 3_061_000 },
+		elements: [{ type: 'marker', point: [10, 70] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const markerLayers = () =>
+		page.evaluate(
+			() =>
+				(window as unknown as { map: import('maplibre-gl').Map }).map
+					.getStyle()
+					?.layers.filter((l) => l.id.startsWith('symbol_')).length
+		);
+	await expect.poll(markerLayers).toBe(1);
+
+	// panning writes the map, with its marker, to the URL
+	await page.mouse.move(400, 300);
+	await page.mouse.down();
+	await page.mouse.move(450, 350, { steps: 5 });
+	await page.mouse.up();
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});
