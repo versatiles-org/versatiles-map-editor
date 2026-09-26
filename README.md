@@ -117,6 +117,14 @@ An organisation running the editor can offer its own color schemes and fonts, e.
 
 A missing or invalid file leaves the defaults. The legend uses a generic font (sans-serif, serif or monospace) instead, since the map's glyph fonts are usually not available as web fonts.
 
+## Versions
+
+The editor itself has no versions: every change on `main` is deployed to GitHub Pages once CI has
+passed, and the git history is its record of changes. Only the package `@versatiles/map-state` has
+releases, with its own [changelog](packages/map-state/CHANGELOG.md). The tags `v2.x.x` come from the
+history of [`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte),
+from which the editor was extracted.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
