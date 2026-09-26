@@ -5,7 +5,9 @@ FROM mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-noble
 WORKDIR /code
 COPY docker/xvfb-startup.sh /usr/local/bin/xvfb-startup.sh
 RUN chmod +x /usr/local/bin/xvfb-startup.sh
+# the workspace package too, so npm links it (its sources are mounted at run time)
 COPY package.json package-lock.json ./
+COPY packages/map-state/package.json packages/map-state/
 RUN npm ci
 COPY *.ts *.js *.json ./
 ENTRYPOINT ["/usr/local/bin/xvfb-startup.sh"]

@@ -10,6 +10,7 @@ docker build -t playwright-tests \
 docker run \
   -v "$(pwd)/src:/code/src" \
   -v "$(pwd)/static:/code/static" \
+  -v "$(pwd)/packages/map-state/src:/code/packages/map-state/src" \
   -v "$(pwd)/playwright-tests:/code/playwright-tests" \
   -v "$(pwd)/test-results:/code/test-results" \
   --ipc=host --rm playwright-tests /bin/bash -c "npx playwright test"
