@@ -1501,3 +1501,36 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	await expect.poll(types).toStrictEqual(['marker']);
 	await expect.poll(() => stateInUrl(page).meta?.legend?.entries.length).toBe(1);
 });
+
+test('Escape cancels a running table import', async ({ page }) => {
+	// the geocoder answers only when the test releases it
+	let release!: () => void;
+	const released = new Promise<void>((resolve) => (release = resolve));
+	await page.route('https://geocode.versatiles.org/**', async (route) => {
+		await released;
+		const q = new URL(route.request().url()).searchParams.get('q');
+		await route.fulfill({
+			json: {
+				type: 'FeatureCollection',
+				features: [{ type: 'Feature', properties: { name: q }, geometry: { type: 'Point', coordinates: [13.4, 52.5] } }]
+			}
+		});
+	});
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	await page.getByRole('button', { name: 'Import table…' }).click();
+	const dialog = page.getByRole('dialog');
+	await dialog.getByLabel('Or paste the table here:').fill('Address\nMain St 1\nMain St 2\nMain St 3');
+	await dialog.getByRole('button', { name: /^Continue/ }).click();
+	await dialog.getByRole('button', { name: /^Import 3 rows/ }).click();
+	await expect(dialog.getByText('Searching the addresses')).toBeVisible();
+
+	// Escape closes the dialog, which cancels the import
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	release();
+	// Something must *not* happen here (markers added later), so the test gives it time
+	await page.waitForTimeout(1000);
+	expect(stateInUrl(page).elements).toStrictEqual([]);
+});

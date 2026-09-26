@@ -32,6 +32,10 @@
 
 	export function close() {
 		dialog?.close();
+	}
+
+	// Every way of closing ends here: close(), the ✕ button, and Escape, which the browser handles
+	function handleClose() {
 		if (onclose) onclose();
 		eventHandler.emit('close');
 	}
@@ -41,7 +45,7 @@
 	}
 </script>
 
-<dialog bind:this={dialog} class={size}>
+<dialog bind:this={dialog} class={size} onclose={handleClose}>
 	<button onclick={close}>&#x2715;</button>
 	{@render children?.()}
 </dialog>
