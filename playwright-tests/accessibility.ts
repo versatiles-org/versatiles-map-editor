@@ -43,7 +43,7 @@ test('screen readers hear the state of the search and of copying', async ({ page
 		return route.fulfill({ json: { type: 'FeatureCollection', features } });
 	});
 	await page.goto('/');
-	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/, /JSHandle/] });
+	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/] });
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
 	const status = page.locator('.search [role=status]');
 

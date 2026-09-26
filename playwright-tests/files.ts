@@ -322,7 +322,7 @@ test('a file that cannot be imported shows a message instead of a browser dialog
 		throw new Error('No browser dialog expected');
 	});
 	await page.goto('/');
-	await waitForMapIsReady(page, { expectedMessages: [/JSON/, /JSHandle/, /^SyntaxError/] });
+	await waitForMapIsReady(page, { expectedMessages: [/JSON/, /^SyntaxError/] });
 	await page.getByRole('button', { name: 'Import/Export' }).click();
 	const [chooser] = await Promise.all([
 		page.waitForEvent('filechooser'),

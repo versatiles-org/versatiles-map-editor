@@ -1,4 +1,4 @@
-import { type Page } from '@playwright/test';
+import { type JSHandle, type Page } from '@playwright/test';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
 import { createHash, randomBytes } from 'crypto';
@@ -57,14 +57,28 @@ const expectedConsoleMessages = new WeakMap<Page, RegExp[]>();
  */
 export function printConsoleMessages(page: Page): void {
 	expectedConsoleMessages.set(page, []);
-	page.on('console', (msg) => {
-		const text = msg.text();
+	page.on('console', async (msg) => {
+		let text = msg.text();
+		// Firefox shows objects, e.g. errors, only as "JSHandle@object", so they are described here
+		if (text.includes('JSHandle@')) text = (await Promise.all(msg.args().map(describeValue))).join(' ');
 		if (text === 'map_ready') return;
 		if (expectedConsoleMessages.get(page)?.some((pattern) => pattern.test(text))) return;
 		if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
 		if (text.includes('GPU stall due to ReadPixels')) return;
+		// Firefox, when the map measures its container while the page's styles are still loading
+		if (text.includes('Layout was forced before the page was fully loaded')) return;
 		console.log(process.platform + ': ' + text);
 	});
+}
+
+/** A logged value as text, e.g. "SyntaxError: Unexpected token" for an error. */
+function describeValue(handle: JSHandle): Promise<string> {
+	return handle
+		.evaluate((value) => {
+			if (value instanceof Error) return `${value.name}: ${value.message}`;
+			return typeof value === 'object' ? JSON.stringify(value) : String(value);
+		})
+		.catch(() => '(unavailable)'); // e.g. the page was closed
 }
 
 /**
