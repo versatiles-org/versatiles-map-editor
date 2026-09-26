@@ -32,6 +32,19 @@ describe('renderPopupText', () => {
 		);
 	});
 
+	it('keeps parentheses that belong to a URL', () => {
+		const link = (href: string, label: string) =>
+			`<a href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+		const wiki = 'https://en.wikipedia.org/wiki/Mercury_(planet)';
+		expect(html(`[Mercury](${wiki})`)).toBe(link(wiki, 'Mercury'));
+		expect(html(`see ${wiki}.`)).toBe(`see ${link(wiki, wiki)}.`);
+		// the parentheses around a URL are not part of it
+		expect(html('(see https://example.org/x)')).toBe(
+			'(see ' + link('https://example.org/x', 'https://example.org/x') + ')'
+		);
+		expect(html(`(about ${wiki}).`)).toBe(`(about ${link(wiki, wiki)}).`);
+	});
+
 	it('does not create markup or unsafe links', () => {
 		expect(html('<b onclick="x">hi</b>')).toBe('&lt;b onclick="x"&gt;hi&lt;/b&gt;');
 		expect(html('[x](javascript:alert(1))')).toBe('[x](javascript:alert(1))');

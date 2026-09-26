@@ -16,23 +16,37 @@ export function renderPopupText(text: string, doc: Document = document): Documen
 	return fragment;
 }
 
-// [label](url), a bare URL (without trailing punctuation), or **bold**
-const INLINE = /\[([^\]]+)\]\(([^)\s]+)\)|\b(https?:\/\/[^\s<>]*[^\s<>.,;:!?'")\]])|\*\*(.+?)\*\*/g;
+// [label](url), a bare URL, or **bold**. URLs may contain parentheses, e.g. …/wiki/Foo_(bar).
+const INLINE = /\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)|\b(https?:\/\/[^\s<>]*[^\s<>.,;:!?'"\]])|\*\*(.+?)\*\*/g;
+
+/**
+ * A bare URL without the punctuation that follows it in the text, e.g. the "." at the end of a
+ * sentence, or the ")" around "(see https://…)". A ")" of the URL itself is kept.
+ */
+function trimUrl(url: string): string {
+	for (;;) {
+		const unbalanced = url.endsWith(')') && url.split(')').length > url.split('(').length;
+		if (!unbalanced && !/[.,;:!?'"]$/.test(url)) return url;
+		url = url.slice(0, -1);
+	}
+}
 
 function renderInline(text: string, doc: Document, allowBold: boolean): Node[] {
 	const nodes: Node[] = [];
 	let last = 0;
 	for (const match of text.matchAll(INLINE)) {
-		const [whole, label, target, url, bold] = match;
+		const [whole, label, target, bareUrl, bold] = match;
 		if (bold !== undefined && !allowBold) continue;
+		const url = bareUrl && trimUrl(bareUrl);
 		if (match.index > last) nodes.push(doc.createTextNode(text.slice(last, match.index)));
-		last = match.index + whole.length;
+		// the punctuation after a bare URL remains text
+		last = match.index + (url ? url.length : whole.length);
 
 		if (bold !== undefined) {
 			const strong = doc.createElement('strong');
 			strong.append(...renderInline(bold, doc, false));
 			nodes.push(strong);
-		} else if (url !== undefined) {
+		} else if (url) {
 			nodes.push(createLink(url, url, doc) ?? doc.createTextNode(whole));
 		} else {
 			nodes.push(createLink(label, target, doc) ?? doc.createTextNode(whole));
