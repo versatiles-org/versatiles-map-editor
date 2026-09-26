@@ -1,0 +1,233 @@
+import { readFileSync } from 'fs';
+import { expect, test } from './lib/test.js';
+import { encodeState, type MapState } from '../packages/map-state/src/index.js';
+import { stateInUrl, trackServerRequests, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+
+const mapUrl =
+	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
+
+const ariaResult = `- region "Map"
+- group:
+  - link "© OpenStreetMap contributors":
+    - /url: https://www.openstreetmap.org/copyright
+  - text: ·
+  - link "CC BY 4.0":
+    - /url: http://creativecommons.org/licenses/by/4.0/
+  - link "ESA WorldCover 2021":
+    - /url: https://esa-worldcover.org/en/data-access
+- button "Undo ✓" [disabled]
+- button "Redo ✓" [disabled]
+- separator
+- combobox "Search address or place"
+- status
+- separator
+- button "Map" [expanded]:
+  - text: Map
+  - img
+- button "New ✓"
+- button "Open… ✓"
+- button "Download ✓"
+- button "Share/Embed ✓"
+- separator
+- button "Background map":
+  - text: Background map
+  - img
+- separator
+- button "Legend":
+  - text: Legend
+  - img
+- separator
+- button "Import/Export":
+  - text: Import/Export
+  - img
+- separator
+- button "Add new" [expanded]:
+  - text: Add new
+  - img
+- button "Marker ✓"
+- button "Line ✓"
+- button "Polygon ✓"
+- button "Circle ✓"
+- separator
+- button "Style" [disabled]:
+  - text: Style
+  - img
+- separator
+- button "Actions" [disabled]:
+  - text: Actions
+  - img
+- separator
+- button "Help":
+  - text: Help
+  - img`;
+
+/**
+ * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
+ * viewport and are compared exactly. The glyph ranges depend on the label texts in the
+ * current tile data, so only the font and the basic Latin range are checked.
+ */
+function expectServerRequests(requests: string[], expected: string[]) {
+	const glyphs = requests.filter((url) => url.startsWith('assets/glyphs/'));
+	expect(glyphs).toContain('assets/glyphs/noto_sans_regular/0-255.pbf');
+	for (const url of glyphs) expect(url).toMatch(/^assets\/glyphs\/noto_sans_regular\/\d+-\d+\.pbf$/);
+	expect(requests.filter((url) => !url.startsWith('assets/glyphs/'))).toStrictEqual(expected);
+}
+
+test('empty map', async ({ page }) => {
+	const tracker = await trackServerRequests(page);
+
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	expect(await page.locator('.wrapper').count()).toBe(1);
+	expect(await page.locator('.wrapper').boundingBox()).toStrictEqual({
+		x: 0,
+		y: 0,
+		width: 1280,
+		height: 720
+	});
+
+	expectServerRequests(tracker(), [
+		'assets/sprites/base.json',
+		'assets/sprites/base.png',
+		'tiles/osm/5/16/10',
+		'tiles/osm/5/16/11',
+		'tiles/osm/5/17/10',
+		'tiles/osm/5/17/11',
+		'tiles/osm/5/18/10',
+		'tiles/osm/5/18/11',
+		'tiles/osm/tiles.json'
+	]);
+
+	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+});
+
+test('filled map', async ({ page }) => {
+	const tracker = await trackServerRequests(page);
+
+	await page.goto(mapUrl);
+	await waitForMapIsReady(page);
+
+	expectServerRequests(tracker(), [
+		'assets/sprites/base.json',
+		'assets/sprites/base.png',
+		'tiles/osm/13/4399/2686',
+		'tiles/osm/13/4399/2687',
+		'tiles/osm/13/4400/2686',
+		'tiles/osm/13/4400/2687',
+		'tiles/osm/tiles.json'
+	]);
+
+	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+});
+
+test('invalid hash', async ({ page }) => {
+	const pageErrors: Error[] = [];
+	page.on('pageerror', (error) => pageErrors.push(error));
+	const consoleErrors: string[] = [];
+	page.on('console', (msg) => msg.type() === 'error' && consoleErrors.push(msg.text()));
+
+	await page.goto('/#this-is-not-a-valid-state');
+	await waitForMapIsReady(page, { expectedMessages: [/^Invalid map state in URL hash/] });
+
+	expect(pageErrors).toStrictEqual([]);
+	expect(consoleErrors).toStrictEqual([expect.stringMatching(/^Invalid map state in URL hash/)]);
+	// the map is empty, and a message says why
+	const message = page.getByRole('alert');
+	await expect(message).toHaveText(/The map in the link could not be read/);
+	await message.getByRole('button', { name: 'Dismiss' }).click();
+	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+});
+
+test('keeps an opened map in the URL', async ({ page }) => {
+	const state = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point: [13.4, 52.5] }] };
+	await page.goto('/#' + encodeState(state as MapState));
+	await waitForMapIsReady(page);
+	// the viewport is written before the elements have loaded, which must not drop them
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});
+
+test('keeps the map in the URL across reloads', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Marker' }).click();
+
+	// a single change is written to the hash immediately
+	const elementsInUrl = () => stateInUrl(page).elements.map((e) => e.type);
+	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
+
+	await page.reload();
+	await waitForMapIsReady(page);
+
+	await page.getByRole('button', { name: 'Import/Export' }).click();
+	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
+	const doc = JSON.parse(readFileSync(await download.path(), 'utf-8'));
+	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
+});
+
+test('a map near a pole keeps its elements', async ({ page }) => {
+	// half the height of the view reaches beyond the latitudes of the map
+	const state: MapState = {
+		map: { center: [0, 70], radius: 3_061_000 },
+		elements: [{ type: 'marker', point: [10, 70] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const markerLayers = () =>
+		page.evaluate(
+			() => (window as unknown as MapWindow).map.getStyle()?.layers.filter((l) => l.id.startsWith('symbol_')).length
+		);
+	await expect.poll(markerLayers).toBe(1);
+
+	// panning writes the map, with its marker, to the URL
+	await page.mouse.move(400, 300);
+	await page.mouse.down();
+	await page.mouse.move(450, 350, { steps: 5 });
+	await page.mouse.up();
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});
+
+test('the URL keeps the elements while the map is loading', async ({ page }) => {
+	// a slow network: the style waits for its TileJSON until the test releases it
+	let release!: () => void;
+	const released = new Promise<void>((resolve) => (release = resolve));
+	await page.route('**/tiles.json', async (route) => {
+		await released;
+		await route.fallback();
+	});
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [{ type: 'marker', point: [13.4, 52.5] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	// The viewport is already set, the elements wait for the style. Something must *not* happen
+	// here (writing a URL without elements), so the test has to give it time to happen.
+	await page.waitForTimeout(1000);
+	expect(stateInUrl(page).elements.length).toBe(1);
+
+	release();
+	await waitForMapIsReady(page);
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});
+
+test('the page has a title and a description', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await expect(page).toHaveTitle('VersaTiles Map Editor');
+	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /map/);
+});
+
+test('a loading indicator shows until the map has loaded', async ({ page }) => {
+	// hold back the tiles, so the map keeps loading
+	let release = () => {};
+	const released = new Promise<void>((resolve) => (release = resolve));
+	await page.route('**/tiles/**', async (route) => {
+		await released;
+		await route.fallback();
+	});
+	await page.goto(mapUrl);
+	await expect(page.getByRole('status').filter({ hasText: 'Loading map…' })).toBeVisible();
+	release();
+	await waitForMapIsReady(page);
+	await expect(page.getByText('Loading map…')).toHaveCount(0);
+});
