@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import type { CDPSession, Page } from '@playwright/test';
-import { stateInUrl, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
+import { settledStateInUrl, stateInUrl, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
 
 // an iPad-like tablet in landscape
 test.use({ hasTouch: true, viewport: { width: 1024, height: 768 } });
@@ -91,7 +91,9 @@ test('dragging elements and nodes with a finger', async ({ page }) => {
 
 	// a node can be hit with a finger next to it, and dragging it reshapes the line
 	await waitForMapIsIdle(page);
-	const [first, second] = linePoints(page);
+	// the final position of the line, not an intermediate one of the drag
+	const settled = (await settledStateInUrl(page)).elements[0] as { points: Point[] };
+	const [first, second] = settled.points;
 	const node = await project(page, second);
 	await touch.drag([node[0] + 8, node[1] + 8], [node[0] + 8, node[1] - 42]);
 	await expect.poll(() => linePoints(page)[1][1]).toBeGreaterThan(second[1]);

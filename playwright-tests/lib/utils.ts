@@ -58,6 +58,26 @@ export function stateInUrl(page: Page): MapState {
 	}
 }
 
+/**
+ * The map state in the URL once it has stopped changing, e.g. after a drag: the editor writes
+ * the URL at most every 300 ms, so right after a change it can still hold an intermediate state.
+ */
+export async function settledStateInUrl(page: Page, quietTime = 500, timeout = 10_000): Promise<MapState> {
+	const start = Date.now();
+	let hash = new URL(page.url()).hash;
+	let since = Date.now();
+	while (Date.now() - since < quietTime) {
+		if (Date.now() - start > timeout) throw new Error('The URL did not stop changing');
+		await page.waitForTimeout(50);
+		const current = new URL(page.url()).hash;
+		if (current !== hash) {
+			hash = current;
+			since = Date.now();
+		}
+	}
+	return stateInUrl(page);
+}
+
 export async function trackServerRequests(page: Page): Promise<() => string[]> {
 	const prefix = 'https://tiles.versatiles.org/';
 	const tileServerRequests: string[] = [];
