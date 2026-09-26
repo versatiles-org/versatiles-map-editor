@@ -9,7 +9,7 @@ describe('notify', () => {
 	});
 	afterEach(() => vi.useRealTimers());
 
-	it('shows a message for a few seconds', () => {
+	it('shows an error until it is dismissed, and other messages for a few seconds', () => {
 		notify('Something failed');
 		notify('Saved', 'info');
 		expect(get(notifications).map((n) => [n.message, n.kind])).toStrictEqual([
@@ -17,7 +17,9 @@ describe('notify', () => {
 			['Saved', 'info']
 		]);
 		vi.advanceTimersByTime(8000);
-		expect(get(notifications)).toStrictEqual([]);
+		expect(get(notifications).map((n) => n.message)).toStrictEqual(['Something failed']);
+		vi.advanceTimersByTime(60000);
+		expect(get(notifications).map((n) => n.message)).toStrictEqual(['Something failed']);
 	});
 
 	it('can be dismissed', () => {

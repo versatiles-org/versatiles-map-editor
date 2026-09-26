@@ -13,11 +13,14 @@ export const notifications = writable<Notification[]>([]);
 const DURATION = 8000;
 let nextId = 1;
 
-/** Show a message for a few seconds. Errors are announced at once by screen readers. */
+/**
+ * Show a message. Errors stay until they are dismissed, so everyone has the time to read them;
+ * other messages disappear after a few seconds. Errors are announced at once by screen readers.
+ */
 export function notify(message: string, kind: Notification['kind'] = 'error'): void {
 	const id = nextId++;
 	notifications.update((list) => [...list, { id, message, kind }]);
-	setTimeout(() => dismiss(id), DURATION);
+	if (kind !== 'error') setTimeout(() => dismiss(id), DURATION);
 }
 
 export function dismiss(id: number): void {
