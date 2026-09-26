@@ -65,6 +65,7 @@ export class GeometryManager {
 	private styleLoaded = false;
 	private styleRequest = 0;
 	private loadingStates = 0;
+	private stateRequest = 0;
 	private loadedCallbacks: (() => void)[] = [];
 
 	constructor(map: maplibregl.Map) {
@@ -221,6 +222,9 @@ export class GeometryManager {
 
 	private async applyState(state: StateRoot) {
 		if (!state) return;
+		// A newer state (e.g. a quick second redo) replaces this one while it waits
+		const request = ++this.stateRequest;
+		const outdated = () => this.destroyed || request !== this.stateRequest;
 
 		this.clear();
 
@@ -229,14 +233,19 @@ export class GeometryManager {
 		this.search.set(state.meta?.search === true);
 		this.colors?.scheme.set(state.meta?.colorScheme);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!sameBackground(state.meta?.background, get(this.background))) await this.setBackground(state.meta?.background);
+		if (!sameBackground(state.meta?.background, get(this.background))) {
+			await this.setBackground(state.meta?.background);
+			if (outdated()) return;
+		}
 
 		if (!this.styleLoaded) {
 			await new Promise((r) => this.map.once('style.load', r));
-			if (this.destroyed) return;
+			if (outdated()) return;
 		}
 
 		if (state.elements) {
+			// e.g. elements added while this state was waiting
+			this.clear();
 			this.elements.set(state.elements.map((element) => elementFromState(this, element)));
 		}
 	}

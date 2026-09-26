@@ -192,6 +192,40 @@ describe('GeometryManager', () => {
 			await expect(geometryManager.whenLoaded()).resolves.toBeUndefined();
 		});
 
+		it('lets a newer state replace an older one that is still waiting', async () => {
+			map.setStyle();
+			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalled());
+			// the background of the older state loads slowly
+			let resolve!: (style: StyleSpecification) => void;
+			vi.mocked(inlineSources).mockImplementationOnce(() => new Promise((r) => (resolve = r)));
+			const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
+
+			const older = geometryManager.setState({
+				meta: { background: gray },
+				elements: [{ type: 'marker', point: [1, 2] }]
+			});
+			// the same background: the newer state does not wait
+			const newer = geometryManager.setState({
+				meta: { background: gray },
+				elements: [
+					{
+						type: 'line',
+						points: [
+							[0, 0],
+							[1, 1]
+						]
+					}
+				]
+			});
+			await newer;
+			resolve({ version: 8, sources: {}, layers: [] });
+			await older;
+
+			const elements = get(geometryManager.elements);
+			expect(elements.map((e) => e.getState().type)).toStrictEqual(['line']);
+			expect(geometryManager.isLoading()).toBe(false);
+		});
+
 		it('is not loading any more after an error', async () => {
 			await expect(
 				geometryManager.setState({ elements: [{ type: 'unknown' }] } as unknown as StateRoot)
