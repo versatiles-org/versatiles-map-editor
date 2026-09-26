@@ -36,7 +36,7 @@ describe('MarkerElement', () => {
 
 	it('should set isSelected correctly', () => {
 		element.select(true);
-		expect(element.layer.isSelected).toBe(true);
+		expect(element.selected).toBe(true);
 	});
 
 	it('should generate a valid GeoJSON feature', () => {
@@ -64,14 +64,10 @@ describe('MarkerElement', () => {
 		expect(element.deleteNode(0)).toBe(false);
 	});
 
-	it('should call destroy correctly', () => {
-		vi.spyOn(element.layer, 'destroy');
-		vi.spyOn(mockManager.map, 'removeSource');
-
-		element.destroy();
-
-		expect(element.layer.destroy).toHaveBeenCalled();
-		expect(mockManager.map.removeSource).toHaveBeenCalledWith(element.sourceId);
+	it('draws itself again after a change of its style', () => {
+		vi.mocked(mockManager.renderer.update).mockClear();
+		element.layer.color.set('#00ff00');
+		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {

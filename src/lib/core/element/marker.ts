@@ -15,7 +15,7 @@ export class MarkerElement extends AbstractElement {
 		super(manager);
 		this.point = point ?? this.randomPositions(1)[0];
 
-		this.layer = new MapLayerSymbol(manager, 'symbol' + this.slug, this.sourceId);
+		this.layer = new MapLayerSymbol(() => this.updateSource());
 		this.updateSource();
 	}
 

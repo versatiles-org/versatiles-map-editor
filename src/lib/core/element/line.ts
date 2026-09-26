@@ -14,7 +14,7 @@ export class LineElement extends AbstractPathElement {
 		super(manager, true);
 		this.path = line ?? this.randomPositions(2);
 
-		this.layer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
+		this.layer = new MapLayerLine(() => this.updateSource());
 
 		this.updateSource();
 	}

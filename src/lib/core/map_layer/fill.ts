@@ -1,11 +1,8 @@
+import type * as maplibregl from 'maplibre-gl';
 import { get, writable } from 'svelte/store';
-import type { LayerFill } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
-import type { GeometryManager } from '../geometry_manager.js';
 import { type StateStyle, FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '@versatiles/map-state';
-
-const size = 32;
 
 interface Fill {
 	xf: number;
@@ -24,75 +21,54 @@ export const fillPatterns = new Map<number, { name: string; fill: Fill | undefin
 	FILL_PATTERN_NAMES.map((name, index) => [index, { name, fill: fills[index] }])
 );
 
-export class MapLayerFill extends MapLayer<LayerFill> {
+const PATTERN_PREFIX = 'fill-pattern:';
+const PATTERN_SIZE = 32;
+
+/** The name of the image that fills an area with the pattern in the color, shared by all such areas. */
+export function fillPatternName(pattern: number, color: string): string {
+	return `${PATTERN_PREFIX}${pattern}:${color.toLowerCase()}`;
+}
+
+/**
+ * Add the image of a fill pattern, when the map asks for it (e.g. again after a new map style).
+ * Returns false for other images.
+ */
+export function addFillPatternImage(map: maplibregl.Map, name: string): boolean {
+	if (!name.startsWith(PATTERN_PREFIX)) return false;
+	const [index, color] = name.slice(PATTERN_PREFIX.length).split(':');
+	// a solid fill is a pattern without gaps
+	const fill = fillPatterns.get(Number(index))?.fill ?? { xf: 1, yf: 1, pattern: '5' };
+	const alpha = fill.pattern.split('').map((c) => parseInt(c, 10) / 5);
+	const [r, g, b, a = 1] = Color.parse(color).to('srgb').asArray();
+
+	const data = new Uint8ClampedArray(PATTERN_SIZE * PATTERN_SIZE * 4);
+	for (let y = 0; y < PATTERN_SIZE; y++) {
+		for (let x = 0; x < PATTERN_SIZE; x++) {
+			const i = (y * PATTERN_SIZE + x) * 4;
+			data[i] = r;
+			data[i + 1] = g;
+			data[i + 2] = b;
+			data[i + 3] = 255 * a * alpha[(x * fill.xf + y * fill.yf) % alpha.length];
+		}
+	}
+	if (!map.hasImage(name)) map.addImage(name, { width: PATTERN_SIZE, height: PATTERN_SIZE, data });
+	return true;
+}
+
+export class MapLayerFill extends MapLayer {
 	static readonly defaultStyle = FILL_DEFAULTS;
 
 	color = writable(MapLayerFill.defaultStyle.color);
 	opacity = writable(MapLayerFill.defaultStyle.opacity);
 	pattern = writable(MapLayerFill.defaultStyle.pattern);
 
-	constructor(manager: GeometryManager, id: string, source: string) {
-		super(manager, id);
-
-		this.addLayer(
-			source,
-			'fill',
-			{},
-			{
-				'fill-color': Color.parse(get(this.color)).asHex(),
-				'fill-opacity': get(this.opacity)
-			}
-		);
-
-		const updatePattern = () => {
-			const fill = fillPatterns.get(get(this.pattern))?.fill ?? undefined;
-			const color = Color.parse(get(this.color));
-
-			if (fill == null) {
-				this.updatePaint('fill-color', color);
-				this.updatePaint('fill-pattern', undefined);
-				return;
-			}
-
-			const { xf, yf, pattern: p } = fill;
-			const alpha = p.split('').map((c) => parseInt(c, 10) * 51);
-			const length = alpha.length;
-
-			const data = new Uint8ClampedArray(size * size * 4);
-			const c = color.to('srgb').asArray();
-
-			for (let y = 0; y < size; y++) {
-				for (let x = 0; x < size; x++) {
-					const v = x * xf + y * yf;
-					const i = (y * size + x) * 4;
-					data[i] = c[0];
-					data[i + 1] = c[1];
-					data[i + 2] = c[2];
-					data[i + 3] = alpha[v % length];
-				}
-			}
-
-			const name = this.patternImageName;
-			if (this.map.hasImage(name)) this.map.removeImage(name);
-			this.map.addImage(name, { width: size, height: size, data });
-			this.updatePaint('fill-pattern', name);
-		};
-
-		this.color.subscribe(() => updatePattern());
-		this.pattern.subscribe(() => updatePattern());
-		// A new background map removes all images, so the pattern is added again when it is missing
-		manager.imageResolvers.set(this.patternImageName, updatePattern);
-		this.opacity.subscribe((value) => this.updatePaint('fill-opacity', value));
+	constructor(onChange: () => void) {
+		super(onChange);
+		this.watch(this.color, this.opacity, this.pattern);
 	}
 
-	private get patternImageName(): string {
-		return 'fill-pattern-' + this.id;
-	}
-
-	destroy(): void {
-		this.manager.imageResolvers.delete(this.patternImageName);
-		super.destroy();
-		if (this.map.hasImage(this.patternImageName)) this.map.removeImage(this.patternImageName);
+	getProperties() {
+		return { pattern: fillPatternName(get(this.pattern), get(this.color)), opacity: get(this.opacity) };
 	}
 
 	getState(): StateStyle | undefined {

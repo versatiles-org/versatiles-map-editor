@@ -1,16 +1,14 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { get } from 'svelte/store';
-import { MapLayerSymbol } from './symbol.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import { LABEL_POSITIONS, MapLayerSymbol } from './symbol.js';
 
 describe('MapLayerSymbol', () => {
-	let mockManager: MockGeometryManager;
+	let onChange: Mock<() => void>;
 	let layer: MapLayerSymbol;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager();
-		layer = new MapLayerSymbol(mockManager as unknown as GeometryManager, 'test-layer', 'source');
+		onChange = vi.fn();
+		layer = new MapLayerSymbol(onChange);
 	});
 
 	it('should have the correct keys in default style', () => {
@@ -28,55 +26,39 @@ describe('MapLayerSymbol', () => {
 		expect(get(layer.label)).toBe('');
 	});
 
-	it('should add a symbol layer on initialization', () => {
-		expect(mockManager.map.addLayer).toHaveBeenCalledWith(
-			{
-				id: 'test-layer',
-				layout: {
-					'icon-allow-overlap': true,
-					'icon-image': 'base:icon-embassy',
-					'icon-offset': [0, 0],
-					'icon-rotate': 0,
-					'icon-size': 1,
-					'text-field': ['literal', ''],
-					'text-font': ['noto_sans_regular'],
-					'text-justify': 'left',
-					'text-overlap': 'always',
-					'text-radial-offset': 0.7,
-					'text-size': 16,
-					'text-variable-anchor': ['left', 'right', 'top', 'bottom']
-				},
-				paint: {
-					'icon-color': 'rgb(255,0,0)',
-					'icon-halo-blur': 0,
-					'icon-halo-color': '#FFFFFF',
-					'icon-halo-width': 1,
-					'icon-opacity': 1,
-					'text-halo-blur': 0,
-					'text-halo-color': '#FFFFFF',
-					'text-halo-width': 1
-				},
-				source: 'source',
-				type: 'symbol'
-			},
-			'selection_nodes'
-		);
-	});
-
-	it('should update symbol color correctly', () => {
+	it('gives its style as feature properties', () => {
 		layer.color.set('#00ff00');
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'icon-color', 'rgb(0,255,0)');
-	});
-
-	it('should update symbol size correctly', () => {
 		layer.size.set(2);
-		expect(mockManager.map.setLayoutProperty).toHaveBeenCalledWith('test-layer', 'icon-size', 2);
-		expect(mockManager.map.setLayoutProperty).toHaveBeenCalledWith('test-layer', 'text-size', 32);
+		layer.symbolIndex.set(1);
+		layer.label.set('Price {EUR}');
+		expect(layer.getProperties()).toStrictEqual({
+			icon: 'base:icon-airfield',
+			symbol: 1,
+			color: 'rgb(0,255,0)',
+			rotate: 0,
+			size: 2,
+			halo: 1,
+			// as it is: the layer reads it as a property, so "{…}" is not replaced
+			label: 'Price {EUR}',
+			position: 'auto'
+		});
+		expect(onChange).toHaveBeenCalledTimes(4);
 	});
 
-	it('should update symbol index correctly', () => {
-		layer.symbolIndex.set(1);
-		expect(mockManager.map.setLayoutProperty).toHaveBeenCalledWith('test-layer', 'icon-image', 'base:icon-airfield');
+	it('places the label at the chosen side, or also on a symbol without image', () => {
+		layer.labelAlign.set(3); // top
+		expect(layer.getProperties().position).toBe('bottom');
+		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
+		layer.labelAlign.set(0); // auto
+		layer.symbolIndex.set(0); // no image
+		expect(layer.getProperties().position).toBe('auto-center');
+		expect(LABEL_POSITIONS['auto-center'].filter((a) => typeof a === 'string')).toStrictEqual([
+			'center',
+			'left',
+			'right',
+			'top',
+			'bottom'
+		]);
 	});
 
 	it('should return correct state object', () => {
@@ -127,13 +109,5 @@ describe('MapLayerSymbol', () => {
 		expect(get(layer.rotate)).toBe(0);
 		expect(get(layer.label)).toBe('');
 		expect(get(layer.labelAlign)).toBe(0);
-	});
-
-	it('passes the label as literal text, so "{…}" is not replaced', () => {
-		layer.label.set('Price {EUR}');
-		expect(mockManager.map.setLayoutProperty).toHaveBeenLastCalledWith(expect.any(String), 'text-field', [
-			'literal',
-			'Price {EUR}'
-		]);
 	});
 });

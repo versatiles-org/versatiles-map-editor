@@ -16,9 +16,9 @@ export class PolygonElement extends AbstractPathElement {
 		super(manager, false);
 		this.path = polygon ?? this.randomPositions(3);
 
-		this.fillLayer = new MapLayerFill(manager, 'fill' + this.slug, this.sourceId);
+		this.fillLayer = new MapLayerFill(() => this.updateSource());
 
-		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
+		this.strokeLayer = new MapLayerLine(() => this.updateSource());
 
 		this.updateSource();
 	}

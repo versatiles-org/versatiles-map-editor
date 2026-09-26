@@ -485,38 +485,5 @@ describe('GeometryManager', () => {
 			expect(get(manager.elements).map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
 			expect(mockMap.moveLayer).not.toHaveBeenCalled();
 		});
-
-		it('keep the order of the map layers when a new element is below a kept one', async () => {
-			const line: StateElement = {
-				type: 'line',
-				points: [
-					[1, 2],
-					[3, 4]
-				]
-			};
-			await manager.setState({
-				elements: [
-					{
-						type: 'polygon',
-						points: [
-							[1, 2],
-							[3, 4],
-							[5, 2]
-						]
-					},
-					line
-				]
-			});
-			const kept = get(manager.elements)[1];
-			mockMap.moveLayer.mockClear();
-
-			// the new marker is added on top, but belongs below the kept line
-			await manager.setState({ elements: [{ type: 'marker', point: [1, 2] }, line] });
-			const [marker, sameLine] = get(manager.elements);
-			expect(sameLine).toBe(kept);
-			expect(mockMap.moveLayer.mock.calls).toStrictEqual(
-				[...marker.getLayerIds(), ...kept.getLayerIds()].map((id) => [id, 'selection_nodes'])
-			);
-		});
 	});
 });

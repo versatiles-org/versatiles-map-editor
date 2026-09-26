@@ -274,9 +274,9 @@ describe('GeometryManager', () => {
 		});
 		const [a, b] = get(geometryManager.elements);
 		map.queryRenderedFeatures.mockReturnValue([
-			{ source: 'basemap' },
-			{ source: b.sourceId },
-			{ source: a.sourceId }
+			{ source: 'basemap', id: 'x' },
+			{ source: 'elements_symbol', id: b.id },
+			{ source: 'elements_symbol', id: a.id }
 		] as unknown as maplibregl.MapGeoJSONFeature[]);
 
 		expect(geometryManager.elementAt({ x: 10, y: 20 }, 2)).toBe(b);
@@ -285,7 +285,8 @@ describe('GeometryManager', () => {
 				[8, 18],
 				[12, 22]
 			],
-			{ layers: [...a.getLayerIds(), ...b.getLayerIds()] }
+			// the layer shared by both markers, once
+			{ layers: ['elements_symbol'] }
 		);
 		// only among the candidates
 		expect(geometryManager.elementAt({ x: 10, y: 20 }, 0, [a])).toBe(a);
@@ -336,36 +337,35 @@ describe('GeometryManager', () => {
 			expect(get(geometryManager.background)).toBeUndefined();
 		});
 
-		it('resolves missing images with the registered functions', () => {
-			const resolve = vi.fn();
-			geometryManager.imageResolvers.set('pattern', resolve);
+		it('makes the missing images of fill patterns', () => {
 			const resolver = map.setMissingStyleImageResolver.mock.lastCall![0] as (id: string) => void;
-			resolver('other');
-			expect(resolve).not.toHaveBeenCalled();
-			resolver('pattern');
-			expect(resolve).toHaveBeenCalled();
+			resolver('base:icon-airfield');
+			expect(map.addImage).not.toHaveBeenCalled();
+			resolver('fill-pattern:1:#ff0000');
+			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:1:#ff0000', expect.anything());
 		});
 
-		it('moves the element sources and layers into the new style', () => {
-			const element = { sourceId: 'source_a' } as AbstractElement;
+		it('keeps the content of the element sources in the new style', () => {
 			const layer = (id: string, source: string) => ({ id, source, type: 'line' }) as maplibregl.LayerSpecification;
 			const geojson = (n: number) => ({ type: 'geojson', data: { type: 'FeatureCollection', features: new Array(n) } });
 			const previous = {
 				version: 8,
-				sources: { old: geojson(0), source_a: geojson(1), selection_nodes: geojson(2) },
-				layers: [layer('old', 'old'), layer('a', 'source_a'), layer('selection_nodes', 'selection_nodes')]
+				sources: { old: geojson(0), elements_stroke: geojson(1), selection_nodes: geojson(2) },
+				layers: [layer('old', 'old'), layer('elements_stroke', 'elements_stroke')]
 			} as unknown as maplibregl.StyleSpecification;
 			const next = {
 				version: 8,
-				sources: { base: geojson(0), selection_nodes: geojson(0) },
-				layers: [layer('base', 'base'), layer('highlight_line', 'base'), layer('selection_nodes', 'selection_nodes')]
+				sources: { base: geojson(0), elements_stroke: geojson(0), selection_nodes: geojson(0) },
+				layers: [layer('base', 'base'), layer('elements_stroke', 'elements_stroke')]
 			} as unknown as maplibregl.StyleSpecification;
 
-			const result = keepElements(previous, next, [element]);
-			expect(Object.keys(result.sources)).toStrictEqual(['base', 'selection_nodes', 'source_a']);
+			const result = keepElements(previous, next);
+			expect(Object.keys(result.sources)).toStrictEqual(['base', 'elements_stroke', 'selection_nodes']);
+			expect(result.sources.elements_stroke).toBe(previous.sources.elements_stroke);
 			expect(result.sources.selection_nodes).toBe(previous.sources.selection_nodes);
-			expect(result.layers.map((l) => l.id)).toStrictEqual(['base', 'highlight_line', 'a', 'selection_nodes']);
-			expect(keepElements(undefined, next, [element])).toBe(next);
+			// the layers of the new style, e.g. with the font of the new background map
+			expect(result.layers).toBe(next.layers);
+			expect(keepElements(undefined, next)).toBe(next);
 		});
 	});
 

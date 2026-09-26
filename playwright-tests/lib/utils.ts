@@ -24,6 +24,21 @@ export async function mapCenter(page: Page): Promise<Point> {
 	return page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());
 }
 
+/**
+ * The ids of the elements that the map draws, per element layer (all elements share them),
+ * e.g. `{ fill: [1], stroke: [1], symbol: [2] }` for a polygon and a marker.
+ */
+export async function drawnElements(page: Page): Promise<Record<'fill' | 'stroke' | 'symbol', number[]>> {
+	return page.evaluate(() => {
+		const map = (window as unknown as MapWindow).map;
+		const ids = (layer: string) =>
+			map.getLayer(layer)
+				? [...new Set(map.queryRenderedFeatures({ layers: [layer] }).map((f) => f.id as number))].sort((a, b) => a - b)
+				: [];
+		return { fill: ids('elements_fill'), stroke: ids('elements_stroke'), symbol: ids('elements_symbol') };
+	});
+}
+
 type Box = { x: number; y: number; width: number; height: number };
 
 /** Whether two bounding boxes overlap. */

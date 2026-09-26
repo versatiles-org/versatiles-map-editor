@@ -421,12 +421,13 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements: [marker] }));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
-	const textField = await page.evaluate(() => {
+	const [textField, labels] = await page.evaluate(() => {
 		const map = (window as unknown as MapWindow).map;
-		const layer = map.getStyle().layers.find((l) => l.id.startsWith('symbol_'))!;
-		return map.getLayoutProperty(layer.id, 'text-field');
+		const features = map.queryRenderedFeatures({ layers: ['elements_symbol'] });
+		return [map.getLayoutProperty('elements_symbol', 'text-field'), features.map((f) => f.properties.label)];
 	});
-	// literal text: in a plain string, maplibre would replace "{EUR}" with a feature property
-	expect(textField).toStrictEqual(['literal', 'Price {EUR}']);
+	// read as a property: in a plain string, maplibre would replace "{EUR}" with a feature property
+	expect(textField).toStrictEqual(['get', 'label']);
+	expect(labels).toStrictEqual(['Price {EUR}']);
 	expect(errors).toStrictEqual([]);
 });

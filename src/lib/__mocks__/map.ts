@@ -18,7 +18,7 @@ export class MockMap {
 	style: object | undefined = {};
 	addSource = vi.fn();
 	removeSource = vi.fn();
-	getSource = vi.fn(() => ({ setData: vi.fn() }) as unknown) as Mock<MaplibreMap['getSource']>;
+	getSource = vi.fn(() => ({ setData: vi.fn(), updateData: vi.fn() }) as unknown) as Mock<MaplibreMap['getSource']>;
 	addLayer = vi.fn();
 	// Mirrors maplibre's signatures: on(event, callback) and on(event, layerId, callback)
 	on = vi.fn((event: string, ...rest: unknown[]) => this.events.push({ event, ...parseListenerArgs(rest) }));

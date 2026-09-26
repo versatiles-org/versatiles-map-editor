@@ -1,16 +1,15 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { get } from 'svelte/store';
-import { MapLayerFill } from './fill.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
+import { addFillPatternImage, fillPatternName, MapLayerFill } from './fill.js';
+import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 
 describe('MapLayerFill', () => {
-	let mockManager: MockGeometryManager;
+	let onChange: Mock<() => void>;
 	let layer: MapLayerFill;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager();
-		layer = new MapLayerFill(mockManager as unknown as GeometryManager, 'test-layer', 'source');
+		onChange = vi.fn();
+		layer = new MapLayerFill(onChange);
 	});
 
 	it('should have the correct keys in default style', () => {
@@ -25,61 +24,20 @@ describe('MapLayerFill', () => {
 		expect(get(layer.pattern)).toBe(0);
 	});
 
-	it('should add a fill layer on initialization', () => {
-		expect(mockManager.map.addLayer).toHaveBeenCalledWith(
-			expect.objectContaining({
-				id: 'test-layer',
-				source: 'source',
-				type: 'fill',
-				layout: {},
-				paint: {
-					'fill-color': 'rgb(255,0,0)',
-					'fill-opacity': 1
-				}
-			}),
-			'selection_nodes'
-		);
-	});
-
-	it('should update fill color correctly', () => {
-		layer.color.set('#00ff00');
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'fill-color', 'rgb(0,255,0)');
-	});
-
-	it('should update opacity correctly', () => {
+	it('gives the pattern image and the opacity as feature properties', () => {
+		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:0:#ff0000', opacity: 1 });
+		layer.color.set('#00FF00');
+		layer.pattern.set(1);
 		layer.opacity.set(0.5);
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'fill-opacity', 0.5);
+		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:1:#00ff00', opacity: 0.5 });
 	});
 
-	it('should update fill pattern correctly', () => {
-		layer.pattern.set(1);
-	});
-
-	it('should remove and add new fill pattern image when pattern changes', () => {
-		mockManager.map.hasImage.mockReturnValue(true);
-		layer.pattern.set(1);
-
-		expect(mockManager.map.removeImage).toHaveBeenCalledWith('fill-pattern-test-layer');
-		expect(mockManager.map.addImage).toHaveBeenCalled();
-	});
-
-	it('should add the pattern image again when a new style has lost it', () => {
-		layer.pattern.set(1);
-		mockManager.map.addImage.mockClear();
-		mockManager.imageResolvers.get('fill-pattern-test-layer')!();
-		expect(mockManager.map.addImage).toHaveBeenCalledWith('fill-pattern-test-layer', expect.anything());
-
-		layer.destroy();
-		expect(mockManager.imageResolvers.has('fill-pattern-test-layer')).toBe(false);
-	});
-
-	it('should remove the pattern image on destroy', () => {
-		layer.pattern.set(1);
-		mockManager.map.hasImage.mockReturnValue(true);
-		layer.destroy();
-
-		expect(mockManager.map.removeLayer).toHaveBeenCalledWith('test-layer');
-		expect(mockManager.map.removeImage).toHaveBeenCalledWith('fill-pattern-test-layer');
+	it('reports every change, but not the initial values', () => {
+		expect(onChange).not.toHaveBeenCalled();
+		layer.color.set('#00ff00');
+		layer.pattern.set(2);
+		layer.opacity.set(0.3);
+		expect(onChange).toHaveBeenCalledTimes(3);
 	});
 
 	it('should return correct state object', () => {
@@ -104,5 +62,33 @@ describe('MapLayerFill', () => {
 
 		expect(get(layer.opacity)).toBe(0);
 		expect(get(layer.pattern)).toBe(0);
+	});
+});
+
+describe('fill pattern images', () => {
+	it('are made once per pattern and color, when the map needs them', () => {
+		const map = new MockMap();
+		const name = fillPatternName(1, '#FF0000');
+		expect(addFillPatternImage(map as unknown as MaplibreMap, name)).toBe(true);
+		expect(map.addImage).toHaveBeenCalledWith(name, expect.objectContaining({ width: 32, height: 32 }));
+		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
+		// red, with transparent gaps of the diagonal pattern
+		expect([...data.slice(0, 4)]).toStrictEqual([255, 0, 0, 0]);
+		expect(new Set([...data].filter((_, i) => i % 4 === 3))).toStrictEqual(new Set([0, 102, 255]));
+
+		map.hasImage.mockReturnValue(true);
+		addFillPatternImage(map as unknown as MaplibreMap, name);
+		expect(map.addImage).toHaveBeenCalledTimes(1);
+	});
+
+	it('fill a solid area completely, with the transparency of the color', () => {
+		const map = new MockMap();
+		addFillPatternImage(map as unknown as MaplibreMap, fillPatternName(0, '#0000ff80'));
+		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
+		expect([...data.slice(0, 4)]).toStrictEqual([0, 0, 255, 128]);
+	});
+
+	it('ignore other images', () => {
+		expect(addFillPatternImage(new MockMap() as unknown as MaplibreMap, 'base:icon-airfield')).toBe(false);
 	});
 });

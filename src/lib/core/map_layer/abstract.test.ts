@@ -1,85 +1,37 @@
+import { describe, expect, it, vi } from 'vitest';
+import { writable } from 'svelte/store';
 import { MapLayer } from './abstract.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { LayerFill } from './types.js';
-import type { StateStyle } from '@versatiles/map-state';
-import { describe, expect, it, beforeEach } from 'vitest';
-import type { GeometryManager } from '../geometry_manager.js';
 
-class TestLayer extends MapLayer<LayerFill> {
-	getState(): StateStyle {
-		return { halo: 1 };
+class TestLayer extends MapLayer {
+	a = writable(1);
+	b = writable('x');
+
+	constructor(onChange: () => void) {
+		super(onChange);
+		this.watch(this.a, this.b);
 	}
+
+	getProperties() {
+		return {};
+	}
+	getState() {
+		return undefined;
+	}
+	setState() {}
 }
 
 describe('MapLayer', () => {
-	let mockManager: MockGeometryManager;
-	let layer: TestLayer;
+	it('reports the changes of the watched stores, not their initial values', () => {
+		const onChange = vi.fn();
+		const layer = new TestLayer(onChange);
+		expect(onChange).not.toHaveBeenCalled();
 
-	beforeEach(() => {
-		mockManager = new MockGeometryManager();
+		layer.a.set(2);
+		layer.b.set('y');
+		expect(onChange).toHaveBeenCalledTimes(2);
 
-		layer = new TestLayer(mockManager as unknown as GeometryManager, 'test-layer');
-	});
-
-	it('should initialize layer with given ID', () => {
-		expect(layer).toBeDefined();
-		expect(layer.isSelected).toBe(false);
-	});
-
-	it('should add layer to map', () => {
-		layer.addLayer('source', 'fill', {}, {});
-		expect(mockManager.map.addLayer).toHaveBeenCalledWith(
-			{ id: 'test-layer', source: 'source', type: 'fill', layout: {}, paint: {} },
-			'selection_nodes'
-		);
-	});
-
-	it('should update paint property', () => {
-		layer.setPaint({ 'fill-color': 'red' });
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'fill-color', 'red');
-	});
-
-	it('should update layout property', () => {
-		layer.updateLayout({ visibility: 'none' });
-		expect(mockManager.map.setLayoutProperty).toHaveBeenCalledWith('test-layer', 'visibility', 'none');
-	});
-
-	it('should remove layer on destroy', () => {
-		layer.destroy();
-		expect(mockManager.map.removeLayer).toHaveBeenCalledWith('test-layer');
-	});
-
-	it('should unregister all map listeners on destroy', () => {
-		layer.addLayer('source', 'fill', {}, {});
-		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(2);
-
-		layer.destroy();
-		expect(mockManager.map.listenerCount(undefined, 'test-layer')).toBe(0);
-	});
-
-	it('should show the grab cursor while a selected layer is hovered', () => {
-		layer.addLayer('source', 'fill', {}, {});
-		layer.setSelected(true);
-		expect(mockManager.cursor.toggleGrab).not.toHaveBeenCalled();
-
-		mockManager.map.emit('mouseenter');
-		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer');
-		layer.setSelected(false);
-		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', false);
-		layer.setSelected(true);
-		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', true);
-		mockManager.map.emit('mouseleave');
-		expect(mockManager.cursor.toggleGrab).toHaveBeenLastCalledWith('test-layer', false);
-	});
-
-	it('should reset the cursor on destroy', () => {
-		layer.addLayer('source', 'fill', {}, {});
-		layer.destroy();
-		expect(mockManager.cursor.toggleHover).toHaveBeenCalledWith('test-layer', false);
-		expect(mockManager.cursor.toggleGrab).toHaveBeenCalledWith('test-layer', false);
-	});
-
-	it('should return state object', () => {
-		expect(layer.getState()).toEqual({ halo: 1 });
+		// an unchanged value is no change
+		layer.a.set(2);
+		expect(onChange).toHaveBeenCalledTimes(2);
 	});
 });

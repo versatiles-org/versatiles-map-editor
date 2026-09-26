@@ -1,13 +1,13 @@
 <script lang="ts">
+	import type { GeometryManager } from '../core/geometry_manager.js';
 	import { dashArrays, MapLayerLine } from '../core/map_layer/line.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 
 	/** The line layers of all selected elements, which are edited together. */
-	const { layers }: { layers: MapLayerLine[] } = $props();
+	const { layers, manager }: { layers: MapLayerLine[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
-	const manager = $derived(layers[0].manager);
 	const log = () => manager.state?.log();
 	const color = $derived(groupStore(layers.map((l) => l.color)));
 	const width = $derived(groupStore(layers.map((l) => l.width)));

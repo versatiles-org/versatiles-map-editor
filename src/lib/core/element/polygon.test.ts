@@ -52,8 +52,7 @@ describe('PolygonElement', () => {
 
 	it('should set isSelected correctly', () => {
 		element.select(true);
-		expect(element.fillLayer.isSelected).toBe(true);
-		expect(element.strokeLayer.isSelected).toBe(true);
+		expect(element.selected).toBe(true);
 	});
 
 	it('should generate a valid GeoJSON feature', () => {
@@ -63,16 +62,11 @@ describe('PolygonElement', () => {
 		expect(feature.geometry.coordinates[0]).toEqual([...element.path, element.path[0]]);
 	});
 
-	it('should call destroy correctly', () => {
-		vi.spyOn(element.fillLayer, 'destroy');
-		vi.spyOn(element.strokeLayer, 'destroy');
-		vi.spyOn(mockManager.map, 'removeSource');
-
-		element.destroy();
-
-		expect(element.fillLayer.destroy).toHaveBeenCalled();
-		expect(element.strokeLayer.destroy).toHaveBeenCalled();
-		expect(mockManager.map.removeSource).toHaveBeenCalledWith(element.sourceId);
+	it('draws itself again after a change of its style', () => {
+		vi.mocked(mockManager.renderer.update).mockClear();
+		element.fillLayer.color.set('#00ff00');
+		element.strokeLayer.width.set(5);
+		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {

@@ -19,9 +19,9 @@ export class CircleElement extends AbstractElement {
 		this.point = point ?? this.randomPositions(1)[0];
 		this.radius = radius ?? this.randomRadius();
 
-		this.fillLayer = new MapLayerFill(manager, 'fill' + this.slug, this.sourceId);
+		this.fillLayer = new MapLayerFill(() => this.updateSource());
 
-		this.strokeLayer = new MapLayerLine(manager, 'line' + this.slug, this.sourceId);
+		this.strokeLayer = new MapLayerLine(() => this.updateSource());
 
 		this.updateSource();
 	}

@@ -23,7 +23,9 @@ describe('SelectionHandler', () => {
 	beforeEach(() => {
 		mockMap = new MockMap();
 		mockCursor = {
-			togglePrecise: vi.fn()
+			togglePrecise: vi.fn(),
+			toggleHover: vi.fn(),
+			toggleGrab: vi.fn()
 		} as unknown as Mocked<Cursor>;
 		mockState = {
 			log: vi.fn()
@@ -216,7 +218,8 @@ describe('SelectionHandler', () => {
 
 			mockMap.emit('mouseup');
 			expect(mockState.log).toHaveBeenCalled();
-			expect(mockMap.listenerCount('mousemove')).toBe(0);
+			// only the permanent listener for the hover cursor, no drag listener
+			expect(mockMap.listenerCount('mousemove')).toBe(1);
 		});
 
 		describe('alt-drag', () => {
@@ -533,7 +536,8 @@ describe('SelectionHandler', () => {
 			const down = mouseEvent('mousedown');
 			mockMap.emit('mousedown', down);
 			expect(down.preventDefault).not.toHaveBeenCalled();
-			expect(mockMap.listenerCount('mousemove')).toBe(0);
+			// only the permanent listener for the hover cursor, no drag listener
+			expect(mockMap.listenerCount('mousemove')).toBe(1);
 		});
 
 		it('drags with a finger, using a larger tolerance', () => {

@@ -28,9 +28,7 @@ describe('PopupHandler', () => {
 
 	const hoverOver = (index: number | undefined) => {
 		const element = index === undefined ? undefined : get(manager.elements)[index];
-		map.queryRenderedFeatures.mockReturnValue(
-			element ? [{ source: element.sourceId } as unknown as MapGeoJSONFeature] : []
-		);
+		map.queryRenderedFeatures.mockReturnValue(element ? [{ id: element.id } as unknown as MapGeoJSONFeature] : []);
 		map.emit('mousemove', { point: { x: 10, y: 20 } });
 	};
 
@@ -48,18 +46,15 @@ describe('PopupHandler', () => {
 		expect(map.getCanvasContainer().style.cursor).toBe('');
 	});
 
-	it('only looks for elements with a popup, also after a popup changes', async () => {
-		const [withPopup, withoutPopup] = get(manager.elements);
-		const queriedLayers = () => map.queryRenderedFeatures.mock.lastCall?.[1]?.layers;
-
-		hoverOver(0);
+	it('only takes elements with a popup, also after a popup changes', async () => {
+		const withoutPopup = get(manager.elements)[1];
+		hoverOver(1);
 		await nextFrame();
-		expect(queriedLayers()).toStrictEqual(withPopup.getLayerIds());
+		expect(map.getCanvasContainer().style.cursor).toBe('');
 
 		withoutPopup.popup.set('World');
 		hoverOver(1);
 		await nextFrame();
-		expect(queriedLayers()).toStrictEqual([...withPopup.getLayerIds(), ...withoutPopup.getLayerIds()]);
 		expect(map.getCanvasContainer().style.cursor).toBe('pointer');
 	});
 });

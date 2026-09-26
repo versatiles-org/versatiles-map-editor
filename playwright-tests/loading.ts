@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { stateInUrl, trackServerRequests, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { drawnElements, stateInUrl, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
@@ -143,11 +143,7 @@ test('a map near a pole keeps its elements', async ({ page }) => {
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	const markerLayers = () =>
-		page.evaluate(
-			() => (window as unknown as MapWindow).map.getStyle()?.layers.filter((l) => l.id.startsWith('symbol_')).length
-		);
-	await expect.poll(markerLayers).toBe(1);
+	await expect.poll(async () => (await drawnElements(page)).symbol.length).toBe(1);
 
 	// panning writes the map, with its marker, to the URL
 	await page.mouse.move(400, 300);

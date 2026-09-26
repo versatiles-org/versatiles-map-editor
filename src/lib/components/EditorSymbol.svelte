@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { GeometryManager } from '../core/geometry_manager.js';
 	import { labelPositions, MapLayerSymbol } from '../core/map_layer/symbol.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
@@ -6,9 +7,8 @@
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
-	const { layers }: { layers: MapLayerSymbol[] } = $props();
+	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
-	const manager = $derived(layers[0].manager);
 	const log = () => manager.state?.log();
 	const symbolIndex = $derived(groupStore(layers.map((l) => l.symbolIndex)));
 	const color = $derived(groupStore(layers.map((l) => l.color)));

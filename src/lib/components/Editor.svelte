@@ -43,10 +43,10 @@
 	>
 		<div class="style-editor">
 			{#if symbolLayers.length > 0}
-				<EditorSymbol layers={symbolLayers} />
+				<EditorSymbol layers={symbolLayers} manager={elements[0].manager} />
 			{/if}
 			{#if fillLayers.length > 0 && strokeVisible}
-				<EditorFill layers={fillLayers} />
+				<EditorFill layers={fillLayers} manager={elements[0].manager} />
 				<hr />
 
 				<InputRow id="{uid}-showStroke" label="Draw Outline" mixed={$strokeVisibleMixed}>
@@ -54,10 +54,10 @@
 				</InputRow>
 
 				{#if $strokeVisible}
-					<EditorStroke layers={strokeLayers} />
+					<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
 				{/if}
 			{:else if strokeLayers.length > 0}
-				<EditorStroke layers={strokeLayers} />
+				<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
 			{/if}
 			{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
 				<p class="label">These elements have no style properties in common.</p>

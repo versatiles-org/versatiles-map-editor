@@ -1,13 +1,13 @@
 <script lang="ts">
+	import type { GeometryManager } from '../core/geometry_manager.js';
 	import { fillPatterns, type MapLayerFill } from '../core/map_layer/fill.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 
 	/** The fill layers of all selected elements, which are edited together. */
-	const { layers }: { layers: MapLayerFill[] } = $props();
+	const { layers, manager }: { layers: MapLayerFill[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
-	const manager = $derived(layers[0].manager);
 	const log = () => manager.state?.log();
 	const color = $derived(groupStore(layers.map((l) => l.color)));
 	const pattern = $derived(groupStore(layers.map((l) => l.pattern)));

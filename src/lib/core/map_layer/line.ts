@@ -1,8 +1,6 @@
-import { derived, get, writable } from 'svelte/store';
-import type { LayerLine } from './types.js';
+import { get, writable } from 'svelte/store';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
-import type { GeometryManager } from '../geometry_manager.js';
 import { type StateStyle, LINE_DEFAULTS, STROKE_STYLE_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
 // Dash array per stroke style index; the names come from the codec
@@ -16,7 +14,7 @@ export const dashArrays = new Map<number, { name: string; array: number[] | unde
 	STROKE_STYLE_NAMES.map((name, index) => [index, { name, array: arrays[index] }])
 );
 
-export class MapLayerLine extends MapLayer<LayerLine> {
+export class MapLayerLine extends MapLayer {
 	static readonly defaultStyle = LINE_DEFAULTS;
 
 	color = writable(MapLayerLine.defaultStyle.color);
@@ -24,30 +22,20 @@ export class MapLayerLine extends MapLayer<LayerLine> {
 	visible = writable(MapLayerLine.defaultStyle.visible);
 	width = writable(MapLayerLine.defaultStyle.width);
 
-	dashArray = derived(this.dashed, (dashed) => dashArrays.get(dashed)?.array ?? [100]);
+	constructor(onChange: () => void) {
+		super(onChange);
+		this.watch(this.color, this.dashed, this.visible, this.width);
+	}
 
-	constructor(manager: GeometryManager, id: string, source: string) {
-		super(manager, id);
-
-		this.addLayer(
-			source,
-			'line',
-			{
-				'line-cap': 'round',
-				'line-join': 'round',
-				visibility: get(this.visible) ? 'visible' : 'none'
-			},
-			{
-				'line-color': Color.parse(get(this.color)).asHex(),
-				'line-dasharray': get(this.dashArray),
-				'line-width': get(this.width)
-			}
-		);
-
-		this.color.subscribe((v) => this.updatePaint('line-color', Color.parse(v)));
-		this.dashArray.subscribe((v) => this.updatePaint('line-dasharray', v));
-		this.visible.subscribe((v) => this.updateLayout('visibility', v ? 'visible' : 'none'));
-		this.width.subscribe((v) => this.updatePaint('line-width', v));
+	getProperties() {
+		// a hidden outline is not drawn at all
+		if (!get(this.visible)) return undefined;
+		return {
+			color: Color.parse(get(this.color)).asString(),
+			width: get(this.width),
+			// the layer looks up the dash array by the stroke style
+			dash: get(this.dashed)
+		};
 	}
 
 	getState(): StateStyle | undefined {

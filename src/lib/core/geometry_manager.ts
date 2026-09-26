@@ -10,17 +10,19 @@ import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
 import { getSettings } from '$lib/utils/background.js';
 import { elementFromState } from './element/registry.js';
+import { ELEMENT_LAYERS, ElementRenderer, elementStyle } from './element_renderer.js';
+import { addFillPatternImage } from './map_layer/fill.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {
 	layerIds: string[];
-	bySource: Map<string, AbstractElement>;
+	byId: Map<number, AbstractElement>;
 }
 
 export function indexElements(elements: AbstractElement[]): ElementIndex {
 	return {
-		layerIds: elements.flatMap((element) => element.getLayerIds()),
-		bySource: new Map(elements.map((element) => [element.sourceId, element]))
+		layerIds: [...new Set(elements.flatMap((element) => element.getLayerIds()))],
+		byId: new Map(elements.map((element) => [element.id, element]))
 	};
 }
 
@@ -34,11 +36,8 @@ export class GeometryManager {
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
 	public readonly colors: ColorPalette | null = null;
-	/**
-	 * Functions that add the images the editor generates (e.g. fill patterns), by image id.
-	 * A new background map removes all images, and MapLibre asks for them again.
-	 */
-	public readonly imageResolvers = new Map<string, () => void>();
+	/** Draws all elements. */
+	public readonly renderer: ElementRenderer;
 	/** Whether the read-only viewer shows an address search. */
 	public readonly search: Writable<boolean> = writable(false);
 	/** The legend of the map, if it has one. */
@@ -65,7 +64,9 @@ export class GeometryManager {
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
 		this.map.on('style.load', () => (this.styleLoaded = true));
-		this.map.setMissingStyleImageResolver((id) => this.imageResolvers.get(id)?.());
+		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
+		this.map.setMissingStyleImageResolver((id) => void addFillPatternImage(this.map, id));
+		this.renderer = new ElementRenderer(this.map, this.elements);
 		void this.loadStyle(undefined);
 	}
 
@@ -100,8 +101,10 @@ export class GeometryManager {
 		this.styleLoaded = false;
 		// The elements keep their sources and layers
 		this.map.setStyle(inlined, {
-			transformStyle: (previous, next) => keepElements(previous, next, get(this.elements))
+			transformStyle: (previous, next) => keepElements(previous, next)
 		});
+		// the element sources of the new style may be empty or outdated
+		this.renderer.redraw();
 		// MapLibre changes the current style if it can (keeping e.g. the images of the fill patterns).
 		// Only a new style object has to load, which fires "style.load".
 		if (previousStyle && this.map.style === previousStyle) {
@@ -148,7 +151,7 @@ export class GeometryManager {
 		tolerance = 0,
 		candidates: AbstractElement[] | ElementIndex = get(this.elements)
 	): AbstractElement | undefined {
-		const { layerIds, bySource } = Array.isArray(candidates) ? indexElements(candidates) : candidates;
+		const { layerIds, byId } = Array.isArray(candidates) ? indexElements(candidates) : candidates;
 		if (layerIds.length === 0) return undefined;
 		const features = this.map.queryRenderedFeatures(
 			[
@@ -157,8 +160,9 @@ export class GeometryManager {
 			],
 			{ layers: layerIds }
 		);
+		// the topmost first; the element layers share the element ids as feature ids
 		for (const feature of features) {
-			const element = bySource.get(feature.source);
+			const element = typeof feature.id === 'number' ? byId.get(feature.id) : undefined;
 			if (element) return element;
 		}
 		return undefined;
@@ -264,24 +268,12 @@ export class GeometryManager {
 	 */
 	private reconcileElements(states: StateElement[]) {
 		const current = get(this.elements);
-		let built = false;
-		let reorder = false;
 		const next = states.map((state, i) => {
 			const element = current[i];
-			if (element?.updateFromState(state)) {
-				// a new element below it was added on top of the map layers
-				if (built) reorder = true;
-				return element;
-			}
-			built = true;
-			return elementFromState(this, state);
+			return element?.updateFromState(state) ? element : elementFromState(this, state);
 		});
 		const kept = new Set(next);
 		current.filter((element) => !kept.has(element)).forEach((element) => element.destroy());
-		if (reorder) {
-			// the element layers in the order of the elements, below the selection nodes
-			for (const id of next.flatMap((element) => element.getLayerIds())) this.map.moveLayer(id, 'selection_nodes');
-		}
 		this.elements.set(next);
 	}
 
@@ -322,6 +314,11 @@ function buildStyle(background: StateBackground | undefined): StyleSpecification
 		}
 	);
 
+	// All elements, between the highlight and the selection nodes
+	const elements = elementStyle(getSettings(background).font);
+	Object.assign(style.sources, elements.sources);
+	style.layers.push(...elements.layers);
+
 	style.sources.selection_nodes = {
 		type: 'geojson',
 		data: { type: 'FeatureCollection', features: [] }
@@ -346,26 +343,15 @@ function buildStyle(background: StateBackground | undefined): StyleSpecification
 }
 
 /**
- * Move the sources and layers of the elements, and the current selection nodes and highlight,
- * from the previous style into the next one. The element layers stay between the highlight and
- * the selection nodes.
+ * Keep the content of the element sources, the selection nodes and the highlight from the
+ * previous style, so the elements stay visible while the next one loads. The layers come from the
+ * next style, e.g. with the label font of the new background map.
  */
-export function keepElements(
-	previous: StyleSpecification | undefined,
-	next: StyleSpecification,
-	elements: AbstractElement[]
-): StyleSpecification {
+export function keepElements(previous: StyleSpecification | undefined, next: StyleSpecification): StyleSpecification {
 	if (!previous) return next;
 	const sources = { ...next.sources };
-	for (const id of [...elements.map((e) => e.sourceId), 'highlight', 'selection_nodes']) {
+	for (const id of [...Object.values(ELEMENT_LAYERS), 'highlight', 'selection_nodes']) {
 		if (previous.sources[id]) sources[id] = previous.sources[id];
 	}
-	const elementSources = new Set(elements.map((e) => e.sourceId));
-	const elementLayers = previous.layers.filter((layer) => 'source' in layer && elementSources.has(layer.source));
-	const index = next.layers.findIndex((layer) => layer.id === 'selection_nodes');
-	return {
-		...next,
-		sources,
-		layers: [...next.layers.slice(0, index), ...elementLayers, ...next.layers.slice(index)]
-	};
+	return { ...next, sources };
 }

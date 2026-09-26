@@ -1,6 +1,13 @@
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { project, stateInUrl, waitForMapIsIdle, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import {
+	drawnElements,
+	project,
+	stateInUrl,
+	waitForMapIsIdle,
+	waitForMapIsReady,
+	type MapWindow
+} from './lib/utils.js';
 
 test('styling the background map', async ({ page }) => {
 	const state: MapState = {
@@ -23,29 +30,32 @@ test('styling the background map', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
 
-	// what the map shows: the element layers, the images of their patterns, the selection nodes
-	const mapContent = () =>
-		page.evaluate(() => {
+	// what the map shows: the elements, the images of their fill patterns, the selection nodes
+	const mapContent = async () => {
+		const content = await page.evaluate(() => {
 			const map = (window as unknown as MapWindow).map;
 			// undefined while a new style loads
 			const style = map.getStyle();
 			if (!style) return undefined;
-			const layers = style.layers.filter((l) => 'source' in l && l.source.startsWith('source_'));
 			const nodes = map.getSource<import('maplibre-gl').GeoJSONSource>('selection_nodes')!.serialize().data as {
 				features: unknown[];
 			};
 			return {
-				elementLayers: layers.length,
-				patterns: layers.filter((l) => l.type === 'fill' && map.hasImage('fill-pattern-' + l.id)).length,
+				patterns: map.listImages().filter((id) => id.startsWith('fill-pattern:')).length,
 				selectionNodes: nodes.features.length,
 				satellite: 'satellite' in style.sources
 			};
 		});
+		if (!content) return undefined;
+		const drawn = await drawnElements(page);
+		return { ...content, drawn: [drawn.fill.length, drawn.stroke.length, drawn.symbol.length] };
+	};
 	const background = () => stateInUrl(page).meta?.background;
 	const [x, y] = await project(page, [13.36, 52.48]);
 	await page.mouse.click(x, y);
 	const before = await mapContent();
-	expect(before).toStrictEqual({ elementLayers: 3, patterns: 1, selectionNodes: 6, satellite: false });
+	// a polygon (fill and outline) and a marker
+	expect(before).toStrictEqual({ drawn: [1, 1, 1], patterns: 1, selectionNodes: 6, satellite: false });
 
 	await page.getByRole('button', { name: 'Background map' }).click();
 	await page.getByRole('combobox', { name: 'Theme' }).selectOption('Gray');
@@ -214,11 +224,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	const symbolFont = () =>
-		page.evaluate(() => {
-			const map = (window as unknown as MapWindow).map;
-			const layer = map.getStyle().layers.find((l) => l.type === 'symbol' && l.id.startsWith('symbol_'));
-			return layer && map.getLayoutProperty(layer.id, 'text-font');
-		});
+		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
 
 	// only the corporate color scheme is offered, as the default
 	await page.getByRole('button', { name: 'Marker' }).click();
@@ -234,9 +240,9 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect(font.getByRole('option').first()).toHaveText('Lato Bold');
 
 	// marker labels use the font of the map
-	await expect.poll(symbolFont).toStrictEqual(['noto_sans_regular']);
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['noto_sans_regular']]);
 	await font.selectOption('Lato Bold');
-	await expect.poll(symbolFont).toStrictEqual(['lato_bold']);
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
 	await expect.poll(() => stateInUrl(page).meta?.background?.options).toMatchObject({ text: { font: 'lato_bold' } });
 
 	// the legend has a generic font of its own

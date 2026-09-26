@@ -40,13 +40,11 @@ describe('AbstractElement', () => {
 		mockManager = new MockGeometryManager() as unknown as GeometryManager;
 	});
 
-	it('should initialize and create a GeoJSON source', () => {
-		const element = new TestElement(mockManager);
-		expect(mockManager.map.addSource).toHaveBeenCalledWith(
-			expect.stringContaining('source_'),
-			expect.objectContaining({ type: 'geojson' })
-		);
-		expect(element).toBeDefined();
+	it('gets a unique id for its features, and no source of its own', () => {
+		const a = new TestElement(mockManager);
+		const b = new TestElement(mockManager);
+		expect(a.id).not.toBe(b.id);
+		expect(mockManager.map.addSource).not.toHaveBeenCalled();
 	});
 
 	it('should generate random positions', () => {

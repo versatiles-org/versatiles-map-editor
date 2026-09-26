@@ -12,15 +12,18 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import { ELEMENT_LAYERS, type Role } from '../element_renderer.js';
+
+let nextId = 1;
 
 export abstract class AbstractElement {
 	protected readonly canvas: HTMLElement;
 	protected readonly map: maplibregl.Map;
-	protected readonly slug = '_' + Math.random().toString(36).slice(2);
 	protected isSelected = false;
 
 	public readonly manager: GeometryManager | GeometryManagerInteractive;
-	public readonly sourceId = 'source' + this.slug;
+	/** The id of the element's features in the shared element sources. */
+	public readonly id = nextId++;
 	public readonly measurements: Writable<Measurement[]> = writable([]);
 	/** Text of the popup that opens on click in the viewer. Empty for no popup. */
 	public readonly popup: Writable<string> = writable('');
@@ -29,11 +32,6 @@ export abstract class AbstractElement {
 		this.manager = manager;
 		this.map = manager.map;
 		this.canvas = this.map.getCanvasContainer();
-
-		this.map.addSource(this.sourceId, {
-			type: 'geojson',
-			data: { type: 'FeatureCollection', features: [] }
-		});
 	}
 
 	/** The map layers that draw the element, by their role in its style. */
@@ -41,12 +39,15 @@ export abstract class AbstractElement {
 
 	public select(value: boolean) {
 		this.isSelected = value;
-		for (const layer of this.layers()) layer.setSelected(value);
 	}
 
-	/** The ids of the map layers that draw the element. */
+	public get selected(): boolean {
+		return this.isSelected;
+	}
+
+	/** The ids of the map layers that draw the element (shared with the other elements). */
 	public getLayerIds(): string[] {
-		return this.layers().map((layer) => layer.id);
+		return (Object.keys(this.getStyleLayers()) as Role[]).map((role) => ELEMENT_LAYERS[role]);
 	}
 
 	/** The colors of the element, e.g. for the palette of used colors. A hidden outline has none. */
@@ -60,15 +61,8 @@ export abstract class AbstractElement {
 		return colors;
 	}
 
-	public destroy(): void {
-		for (const layer of this.layers()) layer.destroy();
-		this.map.removeSource(this.sourceId);
-	}
-
-	private layers() {
-		const { symbol, fill, stroke } = this.getStyleLayers();
-		return [symbol, fill, stroke].filter((layer) => layer !== undefined);
-	}
+	/** Called when the element is removed; the renderer removes its features with the element list. */
+	public destroy(): void {}
 
 	protected randomPositions(length: number): GeoPoint[] {
 		const points: GeoPoint[] = [];
@@ -93,9 +87,9 @@ export abstract class AbstractElement {
 		return Math.sqrt(width * height) * 10000;
 	}
 
+	/** Draw the element again, after a change of its geometry or style. */
 	protected updateSource() {
-		// looked up each time, since a new background map replaces the source object
-		this.map.getSource<maplibregl.GeoJSONSource>(this.sourceId)?.setData(this.getFeature());
+		this.manager.renderer.update(this);
 		this.measurements.set(this.getMeasurements());
 	}
 

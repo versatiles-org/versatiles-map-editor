@@ -64,16 +64,10 @@ describe('CircleElement', () => {
 		});
 	});
 
-	it('should destroy layers and source on destroy', () => {
-		const fillLayerDestroySpy = vi.spyOn(circleElement.fillLayer, 'destroy');
-		const strokeLayerDestroySpy = vi.spyOn(circleElement.strokeLayer, 'destroy');
-		const mapRemoveSourceSpy = vi.spyOn(manager.map, 'removeSource');
-
-		circleElement.destroy();
-
-		expect(fillLayerDestroySpy).toHaveBeenCalled();
-		expect(strokeLayerDestroySpy).toHaveBeenCalled();
-		expect(mapRemoveSourceSpy).toHaveBeenCalledWith(circleElement.sourceId);
+	it('draws itself again after a change of its style', () => {
+		vi.mocked(manager.renderer.update).mockClear();
+		circleElement.strokeLayer.visible.set(false);
+		expect(manager.renderer.update).toHaveBeenCalledWith(circleElement);
 	});
 
 	it('should return state representation', () => {

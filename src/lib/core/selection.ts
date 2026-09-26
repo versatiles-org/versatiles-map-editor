@@ -35,6 +35,10 @@ export class SelectionHandler {
 	public readonly selectedNode: Writable<SelectedNode | undefined> = writable(undefined);
 	private selectedNodeIndex: number | undefined;
 	private manager: GeometryManagerInteractive;
+	// The element under the mouse, for the cursor; the mouse position is handled once per frame
+	private hovered: AbstractElement | undefined;
+	private pointer: { x: number; y: number } | undefined;
+	private frame: number | undefined;
 
 	constructor(manager: GeometryManagerInteractive) {
 		this.manager = manager;
@@ -48,6 +52,19 @@ export class SelectionHandler {
 		});
 		map.on('mouseleave', 'selection_nodes', () => {
 			this.manager.cursor.togglePrecise('selection_nodes', false);
+		});
+
+		// A pointer over an element, and a grab hand over a selected one, which can be dragged
+		map.on('mousemove', (e) => {
+			this.pointer = e.point;
+			this.frame ??= requestAnimationFrame(() => {
+				this.frame = undefined;
+				this.hover(this.pointer && this.manager.elementAt(this.pointer, MOUSE_TOLERANCE));
+			});
+		});
+		map.on('mouseout', () => {
+			this.pointer = undefined;
+			this.hover(undefined);
 		});
 
 		map.on('click', (e) => {
@@ -192,6 +209,15 @@ export class SelectionHandler {
 		this.selectedElements.set(selection);
 		this.selectedNodeIndex = undefined;
 		this.updateSelectionNodes();
+		// e.g. the element under the mouse was selected, so it can be dragged now
+		this.hover(this.hovered);
+	}
+
+	private hover(element: AbstractElement | undefined) {
+		this.hovered = element;
+		const cursor = this.manager.cursor;
+		cursor.toggleHover('elements', element !== undefined);
+		cursor.toggleGrab('elements', element?.selected === true);
 	}
 
 	/** Add the element to the selection, or remove it. */

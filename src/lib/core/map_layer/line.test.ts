@@ -1,16 +1,14 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { get } from 'svelte/store';
 import { MapLayerLine } from './line.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.js';
 
 describe('MapLayerLine', () => {
-	let mockManager: MockGeometryManager;
+	let onChange: Mock<() => void>;
 	let layer: MapLayerLine;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager();
-		layer = new MapLayerLine(mockManager as unknown as GeometryManager, 'test-layer', 'source');
+		onChange = vi.fn();
+		layer = new MapLayerLine(onChange);
 	});
 
 	it('should have the correct keys in default style', () => {
@@ -26,45 +24,17 @@ describe('MapLayerLine', () => {
 		expect(get(layer.width)).toBe(2);
 	});
 
-	it('should add a line layer on initialization', () => {
-		expect(mockManager.map.addLayer).toHaveBeenCalledWith(
-			{
-				id: 'test-layer',
-				source: 'source',
-				type: 'line',
-				layout: {
-					'line-cap': 'round',
-					'line-join': 'round',
-					visibility: 'visible'
-				},
-				paint: {
-					'line-color': 'rgb(255,0,0)',
-					'line-dasharray': [100],
-					'line-width': 2
-				}
-			},
-			'selection_nodes'
-		);
-	});
-
-	it('should update line color correctly', () => {
+	it('gives color, width and dash pattern as feature properties', () => {
 		layer.color.set('#00ff00');
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'line-color', 'rgb(0,255,0)');
-	});
-
-	it('should update line width correctly', () => {
-		layer.width.set(4);
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'line-width', 4);
-	});
-
-	it('should update line visibility correctly', () => {
-		layer.visible.set(false);
-		expect(mockManager.map.setLayoutProperty).toHaveBeenCalledWith('test-layer', 'visibility', 'none');
-	});
-
-	it('should update line dash pattern correctly', () => {
+		layer.width.set(5);
 		layer.dashed.set(1);
-		expect(mockManager.map.setPaintProperty).toHaveBeenCalledWith('test-layer', 'line-dasharray', [2, 4]);
+		expect(layer.getProperties()).toStrictEqual({ color: 'rgb(0,255,0)', width: 5, dash: 1 });
+		expect(onChange).toHaveBeenCalledTimes(3);
+	});
+
+	it('draws nothing when hidden', () => {
+		layer.visible.set(false);
+		expect(layer.getProperties()).toBeUndefined();
 	});
 
 	it('should return correct state object', () => {

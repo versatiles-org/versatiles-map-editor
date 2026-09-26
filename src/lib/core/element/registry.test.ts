@@ -73,7 +73,7 @@ describe('style layers', () => {
 		expect(marker.getStyleLayers()).toStrictEqual({ symbol: marker.layer });
 		expect(line.getStyleLayers()).toStrictEqual({ stroke: line.layer });
 		expect(circle.getStyleLayers()).toStrictEqual({ fill: circle.fillLayer, stroke: circle.strokeLayer });
-		expect(circle.getLayerIds()).toStrictEqual([circle.fillLayer.id, circle.strokeLayer.id]);
+		expect(circle.getLayerIds()).toStrictEqual(['elements_fill', 'elements_stroke']);
 	});
 
 	it('give the colors, without the color of a hidden outline', () => {

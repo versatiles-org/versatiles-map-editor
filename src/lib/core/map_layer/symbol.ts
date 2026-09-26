@@ -1,13 +1,32 @@
 import { derived, get, writable, type Writable } from 'svelte/store';
-import type { ExpressionSpecification } from 'maplibre-gl';
-import type { LayerSymbol } from './types.js';
 import { MapLayer } from './abstract.js';
 import { Color } from '@versatiles/style';
-import type { GeometryManager } from '../geometry_manager.js';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol } from '../symbols.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
+
+// The distance of the label from the point, in ems, in the direction of its anchor
+const LABEL_OFFSET = 0.7;
+const anchorOffsets: Record<TextAnchor, [number, number]> = {
+	center: [0, 0],
+	left: [LABEL_OFFSET, 0],
+	right: [-LABEL_OFFSET, 0],
+	top: [0, LABEL_OFFSET],
+	bottom: [0, -LABEL_OFFSET]
+};
+const withOffsets = (anchors: TextAnchor[]) => anchors.flatMap((anchor) => [anchor, anchorOffsets[anchor]]);
+
+/**
+ * The possible places of a label with their offsets, by the name of the label position:
+ * the chosen side, or the first side that fits ("auto"; "auto-center" also on the point, for
+ * markers without image). The layer looks them up, since features cannot have array properties.
+ */
+export const LABEL_POSITIONS: Record<string, (TextAnchor | [number, number])[]> = {
+	auto: withOffsets(['left', 'right', 'top', 'bottom']),
+	'auto-center': withOffsets(['center', 'left', 'right', 'top', 'bottom']),
+	...Object.fromEntries((['left', 'right', 'top', 'bottom'] as const).map((anchor) => [anchor, withOffsets([anchor])]))
+};
 
 interface LabelAlign {
 	index: number;
@@ -30,9 +49,7 @@ export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) 
 	anchor: anchors[index]
 }));
 
-type TextVariableAnchor = LayerSymbol['layout']['text-variable-anchor'];
-
-export class MapLayerSymbol extends MapLayer<LayerSymbol> {
+export class MapLayerSymbol extends MapLayer {
 	static readonly defaultStyle = SYMBOL_DEFAULTS;
 
 	color = writable(MapLayerSymbol.defaultStyle.color);
@@ -44,80 +61,32 @@ export class MapLayerSymbol extends MapLayer<LayerSymbol> {
 	labelAlign = writable(MapLayerSymbol.defaultStyle.align);
 
 	symbolInfo = derived(this.symbolIndex, (index) => getSymbol(index));
-	textAnchor = derived(this.labelAlign, (index) => {
-		return lookupLabelAlign(index).anchor;
-	});
-	textVariableAnchor = derived([this.labelAlign, this.symbolInfo], ([index, symbol]) => {
-		if (index !== 0) return undefined;
-		if (symbol.image == null) {
-			return ['center', 'left', 'right', 'top', 'bottom'] as TextVariableAnchor;
-		}
-		return ['left', 'right', 'top', 'bottom'] as TextVariableAnchor;
-	});
 
-	private readonly unsubscribeFont: () => void;
-
-	constructor(manager: GeometryManager, id: string, source: string) {
-		super(manager, id);
-
-		this.addLayer(
-			source,
-			'symbol',
-			{
-				'icon-image': get(this.symbolInfo).image,
-				'icon-offset': get(this.symbolInfo).offset,
-				'icon-allow-overlap': true,
-				'icon-rotate': get(this.rotate),
-				'icon-size': get(this.size),
-
-				'text-field': labelField(get(this.label)),
-				'text-font': [get(manager.font)],
-				'text-justify': 'left',
-				'text-overlap': 'always',
-				'text-radial-offset': 0.7,
-				'text-variable-anchor': get(this.textVariableAnchor),
-				'text-anchor': get(this.textAnchor)
-			},
-			{
-				'icon-color': get(this.color),
-				'icon-halo-blur': 0,
-				'icon-halo-color': '#FFFFFF',
-				'icon-halo-width': get(this.halo),
-				'icon-opacity': 1,
-				'text-halo-blur': 0,
-				'text-halo-color': '#FFFFFF',
-				'text-halo-width': get(this.halo)
-			}
-		);
-
-		this.color.subscribe((v) => this.updatePaint('icon-color', Color.parse(v)));
-		this.halo.subscribe((v) => {
-			this.updatePaint('icon-halo-width', v);
-			this.updatePaint('text-halo-width', v);
-		});
-		this.label.subscribe((v) => this.updateLayout('text-field', labelField(v)));
-		this.textAnchor.subscribe((v) => this.updateLayout('text-anchor', v));
-		this.textVariableAnchor.subscribe((v) => this.updateLayout('text-variable-anchor', v));
-		this.rotate.subscribe((v) => this.updateLayout('icon-rotate', v));
-		this.size.subscribe((v) => {
-			this.updateLayout('icon-size', v);
-			this.updateLayout('text-size', v * 16);
-		});
-		// marker labels use the font of the map labels
-		this.unsubscribeFont = manager.font.subscribe((font) => this.updateLayout('text-font', [font]));
-		this.symbolInfo.subscribe((v) => {
-			if (v.image == null) {
-				this.updateLayout('icon-image', undefined);
-			} else {
-				this.updateLayout('icon-image', v.image);
-				this.updateLayout('icon-offset', v.offset);
-			}
-		});
+	constructor(onChange: () => void) {
+		super(onChange);
+		this.watch(this.color, this.halo, this.rotate, this.size, this.symbolIndex, this.label, this.labelAlign);
 	}
 
-	destroy(): void {
-		this.unsubscribeFont();
-		super.destroy();
+	/** The name of the label position, see `LABEL_POSITIONS`. */
+	private getPosition(): string {
+		const anchor = lookupLabelAlign(get(this.labelAlign)).anchor;
+		if (anchor) return anchor;
+		return get(this.symbolInfo).image == null ? 'auto-center' : 'auto';
+	}
+
+	getProperties() {
+		const { image } = get(this.symbolInfo);
+		return {
+			...(image == null ? {} : { icon: image }),
+			// the layer looks up the offset of the icon by the symbol
+			symbol: get(this.symbolIndex),
+			color: Color.parse(get(this.color)).asString(),
+			rotate: get(this.rotate),
+			size: get(this.size),
+			halo: get(this.halo),
+			label: get(this.label),
+			position: this.getPosition()
+		};
 	}
 
 	getState(): StateStyle | undefined {
@@ -161,9 +130,4 @@ function lookupLabelAlign(index: number | string | Writable<number>): LabelAlign
 
 	if (pos == null) return labelPositions[0];
 	return pos;
-}
-
-/** The label as literal text: in a plain string, maplibre would replace "{…}" with feature properties. */
-function labelField(label: string): ExpressionSpecification {
-	return ['literal', label];
 }
