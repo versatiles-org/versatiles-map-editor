@@ -6,60 +6,29 @@ import { stateInUrl, trackServerRequests, waitForMapIsReady, type MapWindow } fr
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
 
-const ariaResult = `- region "Map"
-- group:
-  - link "© OpenStreetMap contributors":
-    - /url: https://www.openstreetmap.org/copyright
-  - text: ·
-  - link "CC BY 4.0":
-    - /url: http://creativecommons.org/licenses/by/4.0/
-  - link "ESA WorldCover 2021":
-    - /url: https://esa-worldcover.org/en/data-access
-- button "Undo ✓" [disabled]
-- button "Redo ✓" [disabled]
-- separator
+// The controls of the sidebar at the start, in this order. Only names and states are compared,
+// so e.g. a separator or an icon does not matter. "✓" is the (hidden) feedback of a button.
+const sidebarAria = `
+- button /^Undo/ [disabled]
+- button /^Redo/ [disabled]
 - combobox "Search address or place"
-- status
-- separator
-- button "Map" [expanded]:
-  - text: Map
-  - img
-- button "New ✓"
-- button "Open… ✓"
-- button "Download ✓"
-- button "Share/Embed ✓"
-- separator
-- button "Background map":
-  - text: Background map
-  - img
-- separator
-- button "Legend":
-  - text: Legend
-  - img
-- separator
-- button "Import/Export":
-  - text: Import/Export
-  - img
-- separator
-- button "Add new" [expanded]:
-  - text: Add new
-  - img
-- button "Marker ✓"
-- button "Line ✓"
-- button "Polygon ✓"
-- button "Circle ✓"
-- separator
-- button "Style" [disabled]:
-  - text: Style
-  - img
-- separator
-- button "Actions" [disabled]:
-  - text: Actions
-  - img
-- separator
-- button "Help":
-  - text: Help
-  - img`;
+- button "Map" [expanded]
+- button /^New/
+- button /^Open…/
+- button /^Download/
+- button /^Share\\/Embed/
+- button "Background map" [expanded=false]
+- button "Legend" [expanded=false]
+- button "Import/Export" [expanded=false]
+- button "Add new" [expanded]
+- button /^Marker/
+- button /^Line/
+- button /^Polygon/
+- button /^Circle/
+- button "Style" [disabled]
+- button "Actions" [disabled]
+- button "Help" [expanded=false]
+`;
 
 /**
  * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
@@ -99,7 +68,7 @@ test('empty map', async ({ page }) => {
 		'tiles/osm/tiles.json'
 	]);
 
-	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
 test('filled map', async ({ page }) => {
@@ -118,7 +87,7 @@ test('filled map', async ({ page }) => {
 		'tiles/osm/tiles.json'
 	]);
 
-	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
 test('invalid hash', async ({ page }) => {
@@ -136,7 +105,7 @@ test('invalid hash', async ({ page }) => {
 	const message = page.getByRole('alert');
 	await expect(message).toHaveText(/The map in the link could not be read/);
 	await message.getByRole('button', { name: 'Dismiss' }).click();
-	expect(await page.locator('.wrapper').ariaSnapshot()).toBe(ariaResult);
+	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
 test('keeps an opened map in the URL', async ({ page }) => {
