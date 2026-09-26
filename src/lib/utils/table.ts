@@ -18,7 +18,9 @@ export function parseTable(text: string, hasHeader?: boolean): Table {
 	text = text.replace(/^\uFEFF/, ''); // byte order mark, e.g. from Excel
 	const delimiter = detectDelimiter(text);
 	const records = parseRecords(text, delimiter).filter((row) => row.some((cell) => cell.trim() !== ''));
-	const width = Math.max(0, ...records.map((row) => row.length));
+	// a loop, since spreading many rows into Math.max overflows the stack
+	let width = 0;
+	for (const row of records) width = Math.max(width, row.length);
 	// every row has every column
 	for (const row of records) while (row.length < width) row.push('');
 
@@ -76,8 +78,10 @@ function parseRecords(text: string, delimiter: string): string[][] {
 function detectDelimiter(text: string): string {
 	let best = DELIMITERS[0];
 	let bestScore = -1;
+	// the first lines are enough, and a large table is not parsed four times
+	const sample = text.slice(0, 65536);
 	for (const delimiter of DELIMITERS) {
-		const counts = parseRecords(text, delimiter)
+		const counts = parseRecords(sample, delimiter)
 			.slice(0, 20)
 			.filter((row) => row.some((cell) => cell.trim() !== ''))
 			.map((row) => row.length);

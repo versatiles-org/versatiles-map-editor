@@ -344,7 +344,8 @@ export class StateWriter {
 			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
 			if (!best || writer.bits.length < best.length) best = writer.bits;
 		}
-		this.bits.push(...best!);
+		// not with a spread: a style with a long label has many bits
+		for (const bit of best!) this.bits.push(bit);
 		this.styleHistory.remember(style);
 	}
 

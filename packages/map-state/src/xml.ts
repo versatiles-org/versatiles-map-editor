@@ -16,7 +16,8 @@ function decodeEntities(text: string): string {
 	return text.replace(/&(#x[0-9a-f]+|#\d+|\w+);/gi, (entity, code: string) => {
 		if (code[0] === '#') {
 			const n = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
-			return Number.isFinite(n) ? String.fromCodePoint(n) : entity;
+			// kept as text if it is no valid code point, e.g. &#x110000;
+			return Number.isInteger(n) && n >= 0 && n <= 0x10ffff ? String.fromCodePoint(n) : entity;
 		}
 		return ENTITIES[code] ?? entity;
 	});
@@ -93,12 +94,11 @@ export function text(element: XmlElement | undefined): string | undefined {
 }
 
 /** All descendant elements with this name, in document order. */
-export function descendants(element: XmlElement, name: string): XmlElement[] {
-	const result: XmlElement[] = [];
+export function descendants(element: XmlElement, name: string, result: XmlElement[] = []): XmlElement[] {
 	for (const c of element.children) {
 		if (typeof c === 'string') continue;
 		if (c.name === name) result.push(c);
-		result.push(...descendants(c, name));
+		descendants(c, name, result);
 	}
 	return result;
 }

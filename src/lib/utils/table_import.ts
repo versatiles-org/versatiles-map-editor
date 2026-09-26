@@ -113,3 +113,21 @@ export async function importTable(
 	}
 	return { markers, failed };
 }
+
+/** The bounding box [[west, south], [east, north]] of the points, or undefined without points. */
+export function boundsOf(points: [number, number][]): [[number, number], [number, number]] | undefined {
+	if (points.length === 0) return undefined;
+	// a loop, since spreading many points into Math.min overflows the stack
+	let [west, south] = points[0];
+	let [east, north] = points[0];
+	for (const [lng, lat] of points) {
+		if (lng < west) west = lng;
+		if (lng > east) east = lng;
+		if (lat < south) south = lat;
+		if (lat > north) north = lat;
+	}
+	return [
+		[west, south],
+		[east, north]
+	];
+}

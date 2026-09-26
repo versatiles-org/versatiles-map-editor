@@ -489,7 +489,12 @@ export class StateReader {
 				const value = this.readVarint();
 				charCodes.push(value < 128 ? CHAR_VALUE2CODE[value] : value);
 			}
-			return String.fromCharCode(...charCodes);
+			// in chunks: spreading a long array into the arguments overflows the stack
+			let text = '';
+			for (let i = 0; i < charCodes.length; i += 8192) {
+				text += String.fromCharCode(...charCodes.slice(i, i + 8192));
+			}
+			return text;
 		} catch (cause) {
 			throw new Error(`Error reading string`, { cause });
 		}

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { columnValues, importTable } from './table_import.js';
+import { boundsOf, columnValues, importTable } from './table_import.js';
 import { parseTable } from './table.js';
 import type { geocode } from './geocoding.js';
 
@@ -93,5 +93,23 @@ describe('columnValues', () => {
 			{ value: 'Shop', count: 1 },
 			{ value: 'Bar', count: 1 }
 		]);
+	});
+});
+
+describe('boundsOf', () => {
+	it('returns the bounding box, also of very many points', () => {
+		expect(boundsOf([])).toBeUndefined();
+		const points: [number, number][] = Array.from({ length: 300_000 }, (_, i) => [i / 1000, -i / 2000]);
+		const [[west, south], [east, north]] = boundsOf(points)!;
+		expect([west, north]).toStrictEqual([0, -0]);
+		expect(east).toBeCloseTo(299.999);
+		expect(south).toBeCloseTo(-149.9995);
+	});
+});
+
+describe('large tables', () => {
+	it('are parsed without overflowing the stack', () => {
+		const text = 'lat,lon\n' + '1,2\n'.repeat(300_000);
+		expect(parseTable(text).rows.length).toBe(300_000);
 	});
 });

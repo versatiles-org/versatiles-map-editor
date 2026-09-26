@@ -5,7 +5,7 @@
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
 	import { guessColumns, parseTable, type Table } from '$lib/utils/table.js';
-	import { columnValues, importTable, type FailedRow } from '$lib/utils/table_import.js';
+	import { boundsOf, columnValues, importTable, type FailedRow } from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.js';
 	import { type StateStyle, SYMBOL_DEFAULTS } from '@versatiles/map-state';
@@ -148,16 +148,8 @@
 
 	/** Move the map to the imported markers. */
 	function showPoints(points: [number, number][]) {
-		if (points.length === 0) return;
-		const lngs = points.map((p) => p[0]);
-		const lats = points.map((p) => p[1]);
-		manager.map.fitBounds(
-			[
-				[Math.min(...lngs), Math.min(...lats)],
-				[Math.max(...lngs), Math.max(...lats)]
-			],
-			{ padding: 50, maxZoom: 15 }
-		);
+		const bounds = boundsOf(points);
+		if (bounds) manager.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
 	}
 </script>
 
