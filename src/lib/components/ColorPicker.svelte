@@ -1,5 +1,15 @@
 <script lang="ts">
-	import { hsvToRgb, parseHex, rgbToHsv, toHex, type HSV, type RGB } from '$lib/utils/color.js';
+	import {
+		hsvKeeping,
+		hsvToRgb,
+		moveInField,
+		parseHex,
+		rgbToHsv,
+		toHex,
+		toHexKeepingAlpha,
+		type HSV,
+		type RGB
+	} from '$lib/utils/color.js';
 	import type { ColorPalette } from '../core/color_palette.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.js';
@@ -41,17 +51,12 @@
 	});
 
 	function setHsvFromRgb(color: RGB) {
-		const next = rgbToHsv(color);
-		// hue and saturation are undefined for gray and black
-		if (next.v === 0) next.s = hsv.s;
-		if (next.s === 0 || next.v === 0) next.h = hsv.h;
-		hsv = next;
+		hsv = hsvKeeping(color, hsv);
 	}
 
 	function write(color: RGB) {
 		// an alpha channel (e.g. from an imported GeoJSON) is kept
-		const alpha = value?.length === 9 ? value.slice(7) : '';
-		ownValue = toHex(color) + alpha;
+		ownValue = toHexKeepingAlpha(color, value);
 		value = ownValue;
 	}
 
@@ -118,17 +123,10 @@
 	}
 
 	function onFieldKey(e: KeyboardEvent) {
-		const step = e.shiftKey ? 0.1 : 0.01;
-		const clamp = (x: number) => Math.max(0, Math.min(1, x));
-		const delta = {
-			ArrowLeft: [-step, 0],
-			ArrowRight: [step, 0],
-			ArrowDown: [0, -step],
-			ArrowUp: [0, step]
-		}[e.key];
-		if (!delta) return;
+		const next = moveInField(hsv, e.key, e.shiftKey);
+		if (!next) return;
 		e.preventDefault();
-		setHsv({ h: hsv.h, s: clamp(hsv.s + delta[0]), v: clamp(hsv.v + delta[1]) });
+		setHsv(next);
 		commit();
 	}
 

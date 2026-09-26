@@ -3,6 +3,7 @@
 	import Dialog from './DialogFile.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.js';
+	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
@@ -27,32 +28,21 @@
 	async function openFile(): Promise<void> {
 		if (!dialog) return;
 
-		const fileInput = document.createElement('input');
-		fileInput.type = 'file';
-		fileInput.accept = '.mapjson';
-		fileInput.onchange = async (event: Event) => {
-			const target = event.target as HTMLInputElement;
-			if (!target.files || target.files.length === 0) return;
-			const file = target.files[0];
-			const reader = new FileReader();
-			reader.onload = async () => {
-				try {
-					const state = JSON.parse(reader.result as string);
-					if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
-					if (hasContent() && !(await dialog?.askReplace())) return;
-					// a change like any other, so it can be undone and is kept in the URL
-					await manager.setState(state);
-					manager.state.log();
-					filename = file.name;
-				} catch (error) {
-					console.error(error);
-					notify('Failed to open the map. Please check the file format.');
-				}
-			};
-			reader.onerror = () => notify('Failed to read the file. Please try again.');
-			reader.readAsText(file);
-		};
-		fileInput.click();
+		try {
+			const file = await chooseTextFile('.mapjson');
+			if (!file) return;
+			const state = JSON.parse(file.text);
+			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
+			if (hasContent() && !(await dialog?.askReplace())) return;
+			// a change like any other, so it can be undone and is kept in the URL
+			await manager.setState(state);
+			manager.state.log();
+			filename = file.name;
+		} catch (error) {
+			console.error(error);
+			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
+			else notify('Failed to open the map. Please check the file format.');
+		}
 	}
 
 	async function downloadFile(): Promise<void> {

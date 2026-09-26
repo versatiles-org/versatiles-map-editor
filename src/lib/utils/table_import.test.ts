@@ -1,5 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
-import { boundsOf, columnValues, importTable } from './table_import.js';
+import {
+	boundsOf,
+	columnValues,
+	decodeTableFile,
+	importTable,
+	legendWithCategories,
+	markerStyle,
+	MAX_CATEGORIES,
+	tableCategories
+} from './table_import.js';
 import { parseTable } from './table.js';
 import type { geocode } from './geocoding.js';
 
@@ -111,5 +120,61 @@ describe('large tables', () => {
 	it('are parsed without overflowing the stack', () => {
 		const text = 'lat,lon\n' + '1,2\n'.repeat(300_000);
 		expect(parseTable(text).rows.length).toBe(300_000);
+	});
+});
+
+describe('decodeTableFile', () => {
+	it('reads UTF-8, and Windows-1252 from an older Excel', () => {
+		expect(decodeTableFile(new TextEncoder().encode('Straße').buffer)).toBe('Straße');
+		// "Straße" in Windows-1252 is invalid UTF-8
+		expect(decodeTableFile(new Uint8Array([0x53, 0x74, 0x72, 0x61, 0xdf, 0x65]).buffer)).toBe('Straße');
+	});
+});
+
+describe('categories', () => {
+	const table = parseTable('name,kind\nA,cafe\nB,shop\nC,cafe\nD,', true);
+
+	it('give each value of the column the next color and the symbol', () => {
+		const { categories, tooMany } = tableCategories(table, 1, ['#111111', '#222222'], 5);
+		expect(tooMany).toBe(0);
+		expect(categories).toStrictEqual([
+			{ value: 'cafe', count: 2, color: '#111111', symbol: 5 },
+			{ value: 'shop', count: 1, color: '#222222', symbol: 5 },
+			{ value: '', count: 1, color: '#111111', symbol: 5 }
+		]);
+	});
+
+	it('are none if a column has too many values, e.g. names', () => {
+		const names = parseTable(
+			['name', ...Array.from({ length: MAX_CATEGORIES + 1 }, (_, i) => `N${i}`)].join('\n'),
+			true
+		);
+		expect(tableCategories(names, 0, ['#111111'], undefined)).toStrictEqual({
+			categories: [],
+			tooMany: MAX_CATEGORIES + 1
+		});
+	});
+
+	it('are added to the legend after its entries', () => {
+		const { categories } = tableCategories(table, 1, ['#111111', '#222222'], undefined);
+		const legend = legendWithCategories(
+			{ position: 'top-left', entries: [{ color: '#000000', label: 'Old' }] },
+			categories
+		);
+		expect(legend).toStrictEqual({
+			position: 'top-left',
+			entries: [
+				{ color: '#000000', label: 'Old' },
+				{ color: '#111111', symbol: undefined, label: 'cafe' },
+				{ color: '#222222', symbol: undefined, label: 'shop' },
+				{ color: '#111111', symbol: undefined, label: '(empty)' }
+			]
+		});
+		expect(legendWithCategories(undefined, []).entries).toStrictEqual([]);
+	});
+
+	it('style markers with the color and the chosen symbol', () => {
+		expect(markerStyle('#ff0000', 3)).toStrictEqual({ color: '#ff0000', pattern: 3 });
+		expect(markerStyle('#ff0000', undefined)).toStrictEqual({ color: '#ff0000' });
 	});
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hsvToRgb, parseHex, rgbToHsv, toHex } from './color.js';
+import { hsvKeeping, hsvToRgb, moveInField, parseHex, rgbToHsv, toHex, toHexKeepingAlpha } from './color.js';
 
 describe('parseHex', () => {
 	it('parses long, short and alpha forms', () => {
@@ -42,5 +42,32 @@ describe('HSV', () => {
 				}
 			}
 		}
+	});
+});
+
+describe('hsvKeeping', () => {
+	it('keeps hue and saturation where gray and black have none', () => {
+		const previous = { h: 120, s: 0.5, v: 0.8 };
+		expect(hsvKeeping({ r: 0, g: 0, b: 0 }, previous)).toStrictEqual({ h: 120, s: 0.5, v: 0 });
+		expect(hsvKeeping({ r: 128, g: 128, b: 128 }, previous)).toMatchObject({ h: 120, s: 0 });
+		expect(hsvKeeping({ r: 255, g: 0, b: 0 }, previous)).toStrictEqual({ h: 0, s: 1, v: 1 });
+	});
+});
+
+describe('toHexKeepingAlpha', () => {
+	it('keeps the alpha channel of the previous value', () => {
+		expect(toHexKeepingAlpha({ r: 255, g: 0, b: 0 }, '#00ff0080')).toBe('#ff000080');
+		expect(toHexKeepingAlpha({ r: 255, g: 0, b: 0 }, '#00ff00')).toBe('#ff0000');
+		expect(toHexKeepingAlpha({ r: 255, g: 0, b: 0 }, undefined)).toBe('#ff0000');
+	});
+});
+
+describe('moveInField', () => {
+	it('moves saturation and brightness with the arrow keys, within 0…1', () => {
+		const hsv = { h: 10, s: 0.5, v: 0.995 };
+		expect(moveInField(hsv, 'ArrowRight', false)).toStrictEqual({ h: 10, s: 0.51, v: 0.995 });
+		expect(moveInField(hsv, 'ArrowLeft', true)).toStrictEqual({ h: 10, s: 0.4, v: 0.995 });
+		expect(moveInField(hsv, 'ArrowUp', true)).toStrictEqual({ h: 10, s: 0.5, v: 1 });
+		expect(moveInField(hsv, 'Enter', false)).toBeUndefined();
 	});
 });

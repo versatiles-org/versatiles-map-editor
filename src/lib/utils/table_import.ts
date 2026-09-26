@@ -1,4 +1,4 @@
-import type { StateElementMarker, StateStyle } from '@versatiles/map-state';
+import type { StateElementMarker, StateLegend, StateStyle } from '@versatiles/map-state';
 import { geocode, type GeocodingOptions } from './geocoding.js';
 import { parseNumber, type Table } from './table.js';
 
@@ -44,6 +44,53 @@ export function columnValues(table: Table, column: number): { value: string; cou
 		counts.set(value, (counts.get(value) ?? 0) + 1);
 	}
 	return [...counts].map(([value, count]) => ({ value, count }));
+}
+
+/** The text of a table file: UTF-8, or Windows-1252 (e.g. a CSV file from an older Excel). */
+export function decodeTableFile(bytes: ArrayBuffer): string {
+	try {
+		return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+	} catch {
+		return new TextDecoder('windows-1252').decode(bytes);
+	}
+}
+
+/** A value of the category column, with the number of rows and its style. */
+export interface Category {
+	value: string;
+	count: number;
+	color: string;
+	symbol: number | undefined;
+}
+
+// More values are no categories, e.g. names
+export const MAX_CATEGORIES = 30;
+
+/**
+ * The categories of a column: each value gets the next color of the scheme and the symbol.
+ * Returns none, and the number of values, if there are too many for categories.
+ */
+export function tableCategories(
+	table: Table,
+	column: number,
+	colors: string[],
+	symbol: number | undefined
+): { categories: Category[]; tooMany: number } {
+	const values = columnValues(table, column);
+	if (values.length > MAX_CATEGORIES) return { categories: [], tooMany: values.length };
+	const categories = values.map(({ value, count }, i) => ({ value, count, color: colors[i % colors.length], symbol }));
+	return { categories, tooMany: 0 };
+}
+
+/** The style of markers with the color and, if chosen, the symbol. */
+export function markerStyle(color: string, symbol: number | undefined): StateStyle {
+	return { color, ...(symbol !== undefined ? { pattern: symbol } : {}) };
+}
+
+/** The legend with an entry for each category, after its existing entries. */
+export function legendWithCategories(legend: StateLegend | undefined, categories: Category[]): StateLegend {
+	const entries = categories.map((c) => ({ color: c.color, symbol: c.symbol, label: c.value || '(empty)' }));
+	return { ...(legend ?? { entries: [] }), entries: [...(legend?.entries ?? []), ...entries] };
 }
 
 /** Create a marker for each row. Rows without a valid position are reported, not imported. */

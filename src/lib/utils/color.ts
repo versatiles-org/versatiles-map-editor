@@ -44,6 +44,32 @@ export function rgbToHsv({ r, g, b }: RGB): HSV {
 	return { h: h * 60, s: max === 0 ? 0 : d / max, v: max };
 }
 
+/**
+ * The HSV of a color, keeping hue and saturation of the previous HSV where the color has none:
+ * gray has no hue, black neither hue nor saturation. So dragging to black and back keeps the hue.
+ */
+export function hsvKeeping(color: RGB, previous: HSV): HSV {
+	const next = rgbToHsv(color);
+	if (next.v === 0) next.s = previous.s;
+	if (next.s === 0 || next.v === 0) next.h = previous.h;
+	return next;
+}
+
+/** The color as "#rrggbb", with the alpha channel of the previous value, if it had one. */
+export function toHexKeepingAlpha(color: RGB, previous: string | undefined): string {
+	const alpha = previous?.length === 9 ? previous.slice(7) : '';
+	return toHex(color) + alpha;
+}
+
+/** Saturation and brightness moved by the arrow key, in steps of 1% (10% with Shift). */
+export function moveInField(hsv: HSV, key: string, large: boolean): HSV | undefined {
+	const step = large ? 0.1 : 0.01;
+	const delta = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowDown: [0, -step], ArrowUp: [0, step] }[key];
+	if (!delta) return undefined;
+	const clamp = (x: number) => Math.max(0, Math.min(1, x));
+	return { h: hsv.h, s: clamp(hsv.s + delta[0]), v: clamp(hsv.v + delta[1]) };
+}
+
 export function hsvToRgb({ h, s, v }: HSV): RGB {
 	const f = (n: number) => {
 		const k = (n + h / 60) % 6;

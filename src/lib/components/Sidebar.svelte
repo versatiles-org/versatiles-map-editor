@@ -11,6 +11,7 @@
 	import DialogImportTable from './DialogImportTable.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.js';
+	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
 	import { stateFromKML, stateToKML } from '@versatiles/map-state';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 
@@ -28,30 +29,17 @@
 	const copiedStyle = $derived(geometryManager.styleClipboard.style);
 
 	/** Let the user choose a file, and add its content to the map. */
-	function importFile(accept: string, read: (text: string) => void, format: string) {
-		const input = document.createElement('input');
-		input.type = 'file';
-		input.accept = accept;
-		input.onchange = () => {
-			const file = input.files?.[0];
+	async function importFile(accept: string, read: (text: string) => void, format: string) {
+		try {
+			const file = await chooseTextFile(accept);
 			if (!file) return;
-			const reader = new FileReader();
-			reader.onload = (evt) => {
-				try {
-					if (!evt.target) return notify('Failed to read the file.');
-					read(evt.target.result as string);
-					geometryManager.state.log();
-				} catch (error) {
-					console.error(error);
-					return notify(`Failed to import ${format}. Please check the file format.`);
-				}
-			};
-
-			reader.onerror = () => notify('Failed to read the file. Please try again.');
-
-			reader.readAsText(file);
-		};
-		input.click();
+			read(file.text);
+			geometryManager.state.log();
+		} catch (error) {
+			console.error(error);
+			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
+			else notify(`Failed to import ${format}. Please check the file format.`);
+		}
 	}
 
 	function importGeoJSON() {

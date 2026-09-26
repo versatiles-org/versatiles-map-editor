@@ -5,15 +5,22 @@
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { guessColumns, parseTable, type Table } from '$lib/utils/table.js';
-	import { boundsOf, columnValues, importTable, type FailedRow } from '$lib/utils/table_import.js';
+	import {
+		boundsOf,
+		decodeTableFile,
+		MAX_CATEGORIES,
+		importTable,
+		legendWithCategories,
+		markerStyle,
+		tableCategories,
+		type Category,
+		type FailedRow
+	} from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.js';
-	import { type StateStyle, SYMBOL_DEFAULTS } from '@versatiles/map-state';
+	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { get } from 'svelte/store';
 	import { formatCount } from '../utils/format.js';
-
-	// More values are no categories, e.g. names
-	const MAX_CATEGORIES = 30;
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
@@ -37,7 +44,7 @@
 	let symbol: number | undefined = $state(SYMBOL_DEFAULTS.pattern);
 	// -1: none
 	let category = $state(-1);
-	let categories: { value: string; count: number; color: string; symbol: number | undefined }[] = $state([]);
+	let categories: Category[] = $state([]);
 	let tooManyCategories = $state(0);
 	let addLegend = $state(true);
 
@@ -56,13 +63,7 @@
 	async function readFile(e: Event & { currentTarget: HTMLInputElement }) {
 		const file = e.currentTarget.files?.[0];
 		if (!file) return;
-		const bytes = await file.arrayBuffer();
-		try {
-			text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
-		} catch {
-			// e.g. a CSV file from an older Excel
-			text = new TextDecoder('windows-1252').decode(bytes);
-		}
+		text = decodeTableFile(await file.arrayBuffer());
 		startMapping(undefined);
 	}
 
@@ -87,13 +88,8 @@
 		categories = [];
 		tooManyCategories = 0;
 		if (column < 0 || !table) return;
-		const values = columnValues(table, column);
-		if (values.length > MAX_CATEGORIES) {
-			tooManyCategories = values.length;
-			return;
-		}
 		const colors = getColorScheme(get(manager.colors.scheme), get(config).colorSchemes).colors;
-		categories = values.map(({ value, count }, i) => ({ value, count, color: colors[i % colors.length], symbol }));
+		({ categories, tooMany: tooManyCategories } = tableCategories(table, column, colors, symbol));
 	}
 
 	async function runImport() {
@@ -110,12 +106,12 @@
 					position: positionType === 'coordinates' ? { latitude, longitude } : { address },
 					label: label >= 0 ? label : undefined,
 					popup: popup >= 0 ? popup : undefined,
-					style: styleOf(color, symbol),
+					style: markerStyle(color, symbol),
 					category:
 						categories.length > 0
 							? {
 									column: category,
-									styles: Object.fromEntries(categories.map((c) => [c.value, styleOf(c.color, c.symbol)]))
+									styles: Object.fromEntries(categories.map((c) => [c.value, markerStyle(c.color, c.symbol)]))
 								}
 							: undefined
 				},
@@ -131,9 +127,7 @@
 			manager.addElements(result.markers);
 			if (addLegend && categories.length > 0 && result.markers.length > 0) {
 				// added to an existing legend
-				const legend = get(manager.legend) ?? { entries: [] };
-				const entries = categories.map((c) => ({ color: c.color, symbol: c.symbol, label: c.value || '(empty)' }));
-				manager.legend.set({ ...legend, entries: [...legend.entries, ...entries] });
+				manager.legend.set(legendWithCategories(get(manager.legend), categories));
 			}
 			if (result.markers.length > 0) manager.state.log();
 			imported = result.markers.length;
@@ -151,10 +145,6 @@
 			failed = [];
 			step = 'done';
 		}
-	}
-
-	function styleOf(color: string, symbol: number | undefined): StateStyle {
-		return { color, ...(symbol !== undefined ? { pattern: symbol } : {}) };
 	}
 
 	/** Move the map to the imported markers. */
