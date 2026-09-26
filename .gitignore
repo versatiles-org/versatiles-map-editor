@@ -10,4 +10,5 @@
 /screenshots
 /playwright-tests/.request-cache
 /test-results
+/playwright-report
 Thumbs.db

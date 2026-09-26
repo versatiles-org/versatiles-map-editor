@@ -75,8 +75,23 @@ jobs:
       - name: Install
         run: npm ci
 
+      # The browsers of the installed Playwright version
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/ms-playwright
+          key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
-        run: npx playwright install
+        run: npx playwright install chromium firefox
+
+      # Responses of the tile server and the geocoder, so the tests do not depend on them
+      - name: Cache server responses
+        uses: actions/cache@v4
+        with:
+          path: playwright-tests/.request-cache
+          key: playwright-requests-${{ github.run_id }}
+          restore-keys: playwright-requests-
 
       - name: Test Playwright
         run: npx playwright test
@@ -85,5 +100,7 @@ jobs:
         uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
-          path: test-results
+          path: |
+            test-results
+            playwright-report
           name: playwright-test-report
