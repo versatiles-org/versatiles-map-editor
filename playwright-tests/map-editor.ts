@@ -2,7 +2,16 @@ import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { stateInUrl, trackServerRequests, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
+import {
+	boxesOverlap,
+	mapCenter,
+	project,
+	stateInUrl,
+	trackServerRequests,
+	waitForMapIsIdle,
+	waitForMapIsReady,
+	type MapWindow
+} from './lib/utils.js';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
@@ -358,18 +367,13 @@ test('deleting nodes and elements with the keyboard', async ({ page }) => {
 		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'line', points }] })
 	);
 	await waitForMapIsReady(page);
-	const project = (point: [number, number]) =>
-		page.evaluate((point) => {
-			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
-			return [x, y] as const;
-		}, point);
 	const linePoints = () => stateInUrl(page).elements.map((e) => ('points' in e ? e.points.length : 0));
 
 	// select the line, then its middle node
-	const [x, y] = await project([13.375, 52.51]);
+	const [x, y] = await project(page, [13.375, 52.51]);
 	await page.mouse.click(x, y);
 	await waitForMapIsIdle(page);
-	await page.mouse.click(...(await project(points[1])));
+	await page.mouse.click(...(await project(page, points[1])));
 	await expect(page.getByRole('button', { name: 'Delete node' })).toBeEnabled();
 
 	// Delete removes the node, Backspace without a selected node the element
@@ -394,8 +398,7 @@ test.describe('small screens', () => {
 		await expect(page.locator('.maplibregl-compact-show')).toBeVisible();
 		const a = (await hint.boundingBox())!;
 		const b = (await page.locator('.maplibregl-ctrl-attrib').boundingBox())!;
-		const overlap = a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-		expect(overlap).toBe(false);
+		expect(boxesOverlap(a, b)).toBe(false);
 		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
 	});
 });
@@ -489,16 +492,11 @@ test.describe('viewer', () => {
 		await page.goto('/#' + encodeState(state));
 		await waitForMapIsReady(page);
 		await waitForMapIsIdle(page);
-		const project = (point: [number, number]) =>
-			page.evaluate((point) => {
-				const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
-				return [x, y] as const;
-			}, point);
 		const cursor = () =>
 			page.evaluate(() => document.querySelector<HTMLElement>('.maplibregl-canvas-container')!.style.cursor);
 
 		// an element with a popup shows a pointer cursor
-		const [x, y] = await project([13.4, 52.49]);
+		const [x, y] = await project(page, [13.4, 52.49]);
 		await page.mouse.move(x, y);
 		await expect.poll(cursor).toBe('pointer');
 
@@ -509,7 +507,7 @@ test.describe('viewer', () => {
 		await expect(popup.getByRole('link', { name: 'VersaTiles' })).toHaveAttribute('href', 'https://versatiles.org/');
 
 		// an element without a popup does not react
-		const [cx, cy] = await project([13.5, 52.55]);
+		const [cx, cy] = await project(page, [13.5, 52.55]);
 		await page.mouse.move(cx, cy);
 		await expect.poll(cursor).toBe('');
 
@@ -543,8 +541,6 @@ test('searching a place', async ({ page }) => {
 	await page.goto('/');
 	// the last search fails on purpose
 	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/] });
-	const mapCenter = () =>
-		page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().toArray());
 
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
 	await search.fill('Brandenburger');
@@ -561,12 +557,12 @@ test('searching a place', async ({ page }) => {
 	await search.press('Enter');
 	await expect(search).toHaveValue('Tiergarten, Berlin, Deutschland');
 	await expect(page.getByRole('listbox')).toBeHidden();
-	await expect.poll(mapCenter).toStrictEqual([expect.closeTo(13.35, 2), expect.closeTo(52.515, 2)]);
+	await expect.poll(() => mapCenter(page)).toStrictEqual([expect.closeTo(13.35, 2), expect.closeTo(52.515, 2)]);
 
 	// a click selects a place without extent, which can be marked
 	await search.fill('Brandenburger Tor');
 	await options.first().click();
-	await expect.poll(mapCenter).toStrictEqual([expect.closeTo(13.3777, 3), expect.closeTo(52.5163, 3)]);
+	await expect.poll(() => mapCenter(page)).toStrictEqual([expect.closeTo(13.3777, 3), expect.closeTo(52.5163, 3)]);
 	await page.getByRole('button', { name: 'Add marker here' }).click();
 	await expect.poll(() => stateInUrl(page).elements).toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163] }]);
 	await expect(page.getByRole('button', { name: 'Add marker here' })).toBeHidden();
@@ -595,19 +591,14 @@ test('selecting multiple elements', async ({ page }) => {
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
-	const project = (point: [number, number]) =>
-		page.evaluate((point) => {
-			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
-			return [x, y] as const;
-		}, point);
 	const elements = () => stateInUrl(page).elements;
 	const fillColors = () =>
 		elements().map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
 	const styleTitle = page.getByRole('button', { name: /^Style/ });
 
 	// Shift+click adds the second polygon; the fill colors differ
-	const a = await project([13.34, 52.475]);
-	const b = await project([13.41, 52.475]);
+	const a = await project(page, [13.34, 52.475]);
+	const b = await project(page, [13.41, 52.475]);
 	await page.mouse.click(...a);
 	await expect(styleTitle).toHaveText('Style');
 	await page.keyboard.down('Shift');
@@ -645,11 +636,11 @@ test('selecting multiple elements', async ({ page }) => {
 	await expect.poll(() => elements().length).toBe(3);
 
 	// a marker and polygons have no style properties in common
-	const moved = await project([13.34, 52.465]);
+	const moved = await project(page, [13.34, 52.465]);
 	await page.mouse.click(...moved);
 	await expect(styleTitle).toHaveText('Style');
 	await page.keyboard.down('Shift');
-	await page.mouse.click(...((await project([13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
+	await page.mouse.click(...((await project(page, [13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
 	await page.keyboard.up('Shift');
 	await expect(styleTitle).toHaveText('Style of 2 elements');
 	await expect(page.getByText('These elements have no style properties in common.')).toBeVisible();
@@ -688,11 +679,6 @@ test('copying and pasting a style', async ({ page }) => {
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
-	const project = (point: [number, number]) =>
-		page.evaluate((point) => {
-			const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
-			return [x, y] as const;
-		}, point);
 	// the style parts of all elements, with colors in lower case like in the state
 	const styles = () =>
 		stateInUrl(page).elements.map((e) => {
@@ -704,17 +690,17 @@ test('copying and pasting a style', async ({ page }) => {
 	const pasteButton = page.getByRole('button', { name: 'Paste style' });
 
 	// copy the style of the line with the keyboard
-	await page.mouse.click(...(await project([13.355, 52.52])));
+	await page.mouse.click(...(await project(page, [13.355, 52.52])));
 	await expect(page.getByRole('button', { name: 'Copy style' })).toBeEnabled();
 	await expect(pasteButton).toBeDisabled();
 	await page.keyboard.press('ControlOrMeta+Alt+c');
 	await expect(pasteButton).toBeEnabled();
 
 	// paste it onto the polygon and the marker at once
-	await page.mouse.click(...(await project([13.35, 52.475])));
+	await page.mouse.click(...(await project(page, [13.35, 52.475])));
 	await page.keyboard.down('Shift');
 	// the flag icon of the marker is drawn above and right of its point
-	const [mx, my] = await project([13.42, 52.5]);
+	const [mx, my] = await project(page, [13.42, 52.5]);
 	await page.mouse.click(mx + 6, my - 8);
 	await page.keyboard.up('Shift');
 	await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
@@ -764,7 +750,7 @@ test('styling the background map', async ({ page }) => {
 	// what the map shows: the element layers, the images of their patterns, the selection nodes
 	const mapContent = () =>
 		page.evaluate(() => {
-			const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+			const map = (window as unknown as MapWindow).map;
 			// undefined while a new style loads
 			const style = map.getStyle();
 			if (!style) return undefined;
@@ -780,10 +766,7 @@ test('styling the background map', async ({ page }) => {
 			};
 		});
 	const background = () => stateInUrl(page).meta?.background;
-	const [x, y] = await page.evaluate(() => {
-		const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project([13.36, 52.48]);
-		return [x, y];
-	});
+	const [x, y] = await project(page, [13.36, 52.48]);
 	await page.mouse.click(x, y);
 	const before = await mapContent();
 	expect(before).toStrictEqual({ elementLayers: 3, patterns: 1, selectionNodes: 6, satellite: false });
@@ -822,11 +805,7 @@ test('styling the background map', async ({ page }) => {
 	await expect(page.getByText('Open this page on a larger screen')).toBeVisible();
 	expect(background()).toStrictEqual(undone);
 	const labelsInGerman = () =>
-		page.evaluate(() =>
-			JSON.stringify((window as unknown as { map: import('maplibre-gl').Map }).map.getStyle()?.layers).includes(
-				'name_de'
-			)
-		);
+		page.evaluate(() => JSON.stringify((window as unknown as MapWindow).map.getStyle()?.layers).includes('name_de'));
 	await expect.poll(labelsInGerman).toBe(true);
 });
 
@@ -960,7 +939,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await waitForMapIsReady(page);
 	const symbolFont = () =>
 		page.evaluate(() => {
-			const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+			const map = (window as unknown as MapWindow).map;
 			const layer = map.getStyle().layers.find((l) => l.type === 'symbol' && l.id.startsWith('symbol_'));
 			return layer && map.getLayoutProperty(layer.id, 'text-font');
 		});
@@ -1128,9 +1107,6 @@ test.describe('address search in the viewer', () => {
 	test.describe('small screens', () => {
 		test.use({ viewport: { width: 500, height: 500 } });
 
-		const boxesOverlap = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
-			a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-
 		test('finds places without changing the map', async ({ page }) => {
 			await page.route('https://geocode.versatiles.org/**', (route) =>
 				route.fulfill({
@@ -1165,7 +1141,7 @@ test.describe('address search in the viewer', () => {
 			await expect(page.getByRole('option')).toHaveText(['Hamburg']);
 			await search.press('Enter');
 			await expect
-				.poll(() => page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().lng))
+				.poll(() => page.evaluate(() => (window as unknown as MapWindow).map.getCenter().lng))
 				.toBeCloseTo(10, 1);
 			// the viewer cannot change the map
 			await expect(page.getByRole('button', { name: 'Add marker here' })).toHaveCount(0);
@@ -1262,9 +1238,6 @@ test.describe('overlays of the viewer on a phone', () => {
 	// narrow, so the hint wraps into two lines
 	test.use({ viewport: { width: 390, height: 700 } });
 
-	const overlap = (a: { x: number; y: number; width: number; height: number }, b: typeof a) =>
-		a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
-
 	for (const search of [false, true]) {
 		for (const position of ['top-left', 'top', 'top-right'] as const) {
 			test(`a legend at ${position}${search ? ', with search,' : ''} does not cover the hint`, async ({ page }) => {
@@ -1286,11 +1259,11 @@ test.describe('overlays of the viewer on a phone', () => {
 				await waitForMapIsReady(page);
 				const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
 				const hint = (await page.getByText('Open this page on a larger screen').boundingBox())!;
-				expect(overlap(legend, hint)).toBe(false);
+				expect(boxesOverlap(legend, hint)).toBe(false);
 				if (search) {
 					const field = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
-					expect(overlap(legend, field)).toBe(false);
-					expect(overlap(hint, field)).toBe(false);
+					expect(boxesOverlap(legend, field)).toBe(false);
+					expect(boxesOverlap(hint, field)).toBe(false);
 				}
 			});
 		}
@@ -1314,7 +1287,7 @@ test('Enter searches at once and goes to the first result', async ({ page }) => 
 	});
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	const lng = () => page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().lng);
+	const lng = () => page.evaluate(() => (window as unknown as MapWindow).map.getCenter().lng);
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
 
 	// Enter right after typing, before the suggestions arrive
@@ -1344,10 +1317,7 @@ test('a map near a pole keeps its elements', async ({ page }) => {
 	await waitForMapIsReady(page);
 	const markerLayers = () =>
 		page.evaluate(
-			() =>
-				(window as unknown as { map: import('maplibre-gl').Map }).map
-					.getStyle()
-					?.layers.filter((l) => l.id.startsWith('symbol_')).length
+			() => (window as unknown as MapWindow).map.getStyle()?.layers.filter((l) => l.id.startsWith('symbol_')).length
 		);
 	await expect.poll(markerLayers).toBe(1);
 
@@ -1523,7 +1493,7 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
 	const textField = await page.evaluate(() => {
-		const map = (window as unknown as { map: import('maplibre-gl').Map }).map;
+		const map = (window as unknown as MapWindow).map;
 		const layer = map.getStyle().layers.find((l) => l.id.startsWith('symbol_'))!;
 		return map.getLayoutProperty(layer.id, 'text-field');
 	});

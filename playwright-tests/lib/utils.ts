@@ -1,9 +1,35 @@
 import { type Page } from '@playwright/test';
+import type { Map as MaplibreMap } from 'maplibre-gl';
 import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
 import { createHash } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+
+export type Point = [number, number];
+
+/** The window of the editor page, which exposes the map for the tests (see src/routes/+page.svelte). */
+export type MapWindow = Window & { map: MaplibreMap };
+
+/** The pixel position of a coordinate on the page. */
+export async function project(page: Page, point: Point): Promise<Point> {
+	return page.evaluate((point) => {
+		const { x, y } = (window as unknown as MapWindow).map.project(point);
+		return [x, y] as Point;
+	}, point);
+}
+
+/** The center of the map as [lng, lat]. */
+export async function mapCenter(page: Page): Promise<Point> {
+	return page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());
+}
+
+type Box = { x: number; y: number; width: number; height: number };
+
+/** Whether two bounding boxes overlap. */
+export function boxesOverlap(a: Box, b: Box): boolean {
+	return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+}
 
 const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '.request-cache');
 

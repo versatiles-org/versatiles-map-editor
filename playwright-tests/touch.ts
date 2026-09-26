@@ -1,15 +1,22 @@
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import type { CDPSession, Page } from '@playwright/test';
-import { settledStateInUrl, stateInUrl, waitForMapIsIdle, waitForMapIsReady } from './lib/utils';
+import {
+	mapCenter,
+	project,
+	settledStateInUrl,
+	stateInUrl,
+	waitForMapIsIdle,
+	waitForMapIsReady,
+	type MapWindow,
+	type Point
+} from './lib/utils.js';
 
 // an iPad-like tablet in landscape
 test.use({ hasTouch: true, viewport: { width: 1024, height: 768 } });
 
 // Playwright can only tap. Drags and pinches need raw touch events, which only Chromium provides.
 test.skip(({ browserName }) => browserName !== 'chromium', 'touch gestures require the Chrome DevTools Protocol');
-
-type Point = [number, number];
 
 class Touchscreen {
 	constructor(private readonly cdp: CDPSession) {}
@@ -51,17 +58,6 @@ const points: Point[] = [
 	[13.45, 52.5]
 ];
 const line: MapState = { map: { center, radius: 10000 }, elements: [{ type: 'line', points }] };
-
-async function project(page: Page, point: Point): Promise<Point> {
-	return page.evaluate((point) => {
-		const { x, y } = (window as unknown as { map: import('maplibre-gl').Map }).map.project(point);
-		return [x, y] as Point;
-	}, point);
-}
-
-async function mapCenter(page: Page): Promise<Point> {
-	return page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getCenter().toArray());
-}
 
 const linePoints = (page: Page) => {
 	const element = stateInUrl(page).elements[0];
@@ -127,7 +123,7 @@ test('deleting a node with a finger', async ({ page }) => {
 test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 	await openLine(page);
 	const touch = await Touchscreen.create(page);
-	const getZoom = () => page.evaluate(() => (window as unknown as { map: import('maplibre-gl').Map }).map.getZoom());
+	const getZoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
 	const zoom = await getZoom();
 
 	const [x, y] = await project(page, onLine);

@@ -1,5 +1,5 @@
 import { expect, test } from './lib/test.js';
-import { trackServerRequests, waitForMapIsReady } from './lib/utils';
+import { trackServerRequests, waitForMapIsReady } from './lib/utils.js';
 
 test.use({ viewport: { width: 903, height: 903 }, deviceScaleFactor: 1 });
 
