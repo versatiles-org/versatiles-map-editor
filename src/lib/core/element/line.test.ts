@@ -78,4 +78,17 @@ describe('LineElement', () => {
 		expect(restoredElement.path).toEqual(state.points);
 		expect(restoredElement.layer.getState()?.color).toBe('#00ff00');
 	});
+
+	it('stays visible with "visible: false" from a link or a file, since a line cannot be hidden', () => {
+		const line = LineElement.fromState(mockManager, {
+			type: 'line',
+			points: [
+				[1, 2],
+				[3, 4]
+			],
+			style: { visible: false, color: '#00ff00' }
+		});
+		expect(line.layer.getProperties()).toBeDefined();
+		expect(line.getState().style).toStrictEqual({ color: '#00ff00' });
+	});
 });

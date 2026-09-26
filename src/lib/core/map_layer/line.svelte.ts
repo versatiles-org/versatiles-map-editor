@@ -20,6 +20,13 @@ export class MapLayerLine extends MapLayer {
 	#dashed: number = $state(LINE_DEFAULTS.pattern);
 	#visible: boolean = $state(LINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
+	/** Whether it can be hidden: the outline of an area can, a line cannot (it would be invisible). */
+	readonly canHide: boolean;
+
+	constructor(onChange: () => void, { canHide = true }: { canHide?: boolean } = {}) {
+		super(onChange);
+		this.canHide = canHide;
+	}
 
 	get color(): string {
 		return this.#color;
@@ -41,6 +48,8 @@ export class MapLayerLine extends MapLayer {
 		return this.#visible;
 	}
 	set visible(value: boolean) {
+		// e.g. from a link or a file with `visible: false` for a line
+		if (!this.canHide) value = true;
 		if (value === this.#visible) return;
 		this.#visible = value;
 		this.changed();

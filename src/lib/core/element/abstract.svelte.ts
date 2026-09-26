@@ -56,8 +56,8 @@ export abstract class AbstractElement {
 		const colors: string[] = [];
 		if (symbol) colors.push(symbol.color);
 		if (fill) colors.push(fill.color);
-		// a line is always drawn, the outline of an area only if it is visible
-		if (stroke && (!fill || stroke.visible)) colors.push(stroke.color);
+		// a hidden outline is not drawn (a line cannot be hidden)
+		if (stroke?.visible) colors.push(stroke.color);
 		return colors;
 	}
 

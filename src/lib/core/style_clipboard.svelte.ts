@@ -61,10 +61,8 @@ export class StyleClipboard {
 			}
 
 			for (const role of common) {
-				const roleStyle = { ...style[role] };
-				// A line (a stroke without fill) cannot be hidden, unlike the outline of a polygon
-				if (!layers.fill) delete roleStyle.visible;
-				layers[role]!.setState(roleStyle);
+				// a line ignores `visible` of an outline, since it cannot be hidden
+				layers[role]!.setState({ ...style[role] });
 			}
 		}
 	}

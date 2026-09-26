@@ -78,8 +78,9 @@ describe('style layers', () => {
 	it('give the colors, without the color of a hidden outline', () => {
 		const line = createElement(manager, 'line');
 		line.layer.color = '#00ff00';
-		// a line is drawn even if its state says otherwise
+		// a line cannot be hidden, so it is always drawn
 		line.layer.visible = false;
+		expect(line.layer.visible).toBe(true);
 		expect(line.getColors()).toStrictEqual(['#00ff00']);
 
 		const circle = createElement(manager, 'circle');
