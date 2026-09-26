@@ -214,8 +214,9 @@ function placemarkToFeature(placemark: XmlElement, styles: Map<string, XmlElemen
 	const polyColor = readColor(child(polyStyle, 'color'));
 
 	if (name) properties['symbol-label'] = name;
-	if (iconColor) properties['symbol-color'] = iconColor.color;
-	if (lineColor) properties['stroke-color'] = lineColor.color;
+	// markers and lines have no opacity of their own, so it stays part of their color
+	if (iconColor) properties['symbol-color'] = iconColor.withAlpha;
+	if (lineColor) properties['stroke-color'] = lineColor.withAlpha;
 	const width = text(child(lineStyle, 'width'));
 	if (width) properties['stroke-width'] = width;
 	if (polyColor) {
@@ -291,13 +292,19 @@ function readExtendedData(element: XmlElement | undefined): Record<string, strin
 	return data;
 }
 
-/** A KML color "aabbggrr" as "#rrggbb" and an opacity. */
-function readColor(element: XmlElement | undefined): { color: string; opacity: number } | undefined {
-	const value = text(element)?.trim().replace(/^#/, '');
-	if (!value || !/^[0-9a-f]{8}$/i.test(value)) return undefined;
+/**
+ * A KML color "aabbggrr" as "#rrggbb" and an opacity, e.g. for a fill with its own opacity, and
+ * as "#rrggbbaa" (or "#rrggbb" if opaque), for styles without an opacity, e.g. lines.
+ */
+function readColor(element: XmlElement | undefined): { color: string; opacity: number; withAlpha: string } | undefined {
+	const value = text(element)?.trim().replace(/^#/, '').toLowerCase();
+	if (!value || !/^[0-9a-f]{8}$/.test(value)) return undefined;
+	const alpha = value.slice(0, 2);
+	const color = `#${value.slice(6, 8)}${value.slice(4, 6)}${value.slice(2, 4)}`;
 	return {
-		color: `#${value.slice(6, 8)}${value.slice(4, 6)}${value.slice(2, 4)}`.toLowerCase(),
-		opacity: Math.round((parseInt(value.slice(0, 2), 16) / 255) * 100) / 100
+		color,
+		opacity: Math.round((parseInt(alpha, 16) / 255) * 100) / 100,
+		withAlpha: alpha === 'ff' ? color : color + alpha
 	};
 }
 

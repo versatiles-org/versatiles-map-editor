@@ -126,7 +126,8 @@ describe('stateFromKML', () => {
 					[13.1, 52.1],
 					[13.2, 52.2]
 				],
-				style: { color: '#0000ff', width: 3 }
+				// transparent like in the file: "7fff0000"
+				style: { color: '#0000ff7f', width: 3 }
 			},
 			{
 				type: 'polygon',
