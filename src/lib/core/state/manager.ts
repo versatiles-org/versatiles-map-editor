@@ -23,12 +23,16 @@ export class StateManager {
 		if (this.history.push(this.geometryManager.getState())) this.events.emit('change');
 	}
 
+	/** Go back one step. Without a step, nothing happens: the map is not loaded again. */
 	public async undo() {
+		if (!this.history.undoEnabled) return;
 		await this.geometryManager.setState(this.history.undo());
 		this.events.emit('change');
 	}
 
+	/** Go forward one step, if there is one. */
 	public async redo() {
+		if (!this.history.redoEnabled) return;
 		await this.geometryManager.setState(this.history.redo());
 		this.events.emit('change');
 	}

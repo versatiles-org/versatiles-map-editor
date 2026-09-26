@@ -85,15 +85,22 @@ describe('StateManager', () => {
 		});
 
 		it('should not undo if there is no previous state', () => {
+			const change = vi.fn();
+			stateManager.events.on('change', change);
 			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 0]);
 			stateManager.undo();
-			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 1]);
+			// the map is not loaded again, and nothing changed
+			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 0]);
+			expect(change).not.toHaveBeenCalled();
 		});
 
 		it('should not redo if there is no next state', () => {
+			const change = vi.fn();
+			stateManager.events.on('change', change);
 			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 0]);
 			stateManager.redo();
-			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 1]);
+			expect(getStatus()).toStrictEqual([false, false, 1, 0, 1, 0]);
+			expect(change).not.toHaveBeenCalled();
 		});
 	});
 
