@@ -87,19 +87,28 @@ export function child(element: XmlElement | undefined, name: string): XmlElement
 	return children(element, name)[0];
 }
 
+/** All nodes below the element, in document order. Without recursion, so any depth works. */
+function* walk(element: XmlElement): Generator<XmlElement | string> {
+	const stack: (XmlElement | string)[] = [...element.children].reverse();
+	while (stack.length > 0) {
+		const node = stack.pop()!;
+		yield node;
+		if (typeof node !== 'string') for (let i = node.children.length - 1; i >= 0; i--) stack.push(node.children[i]);
+	}
+}
+
 /** The text content of an element, e.g. "12" of <width>12</width>. */
 export function text(element: XmlElement | undefined): string | undefined {
 	if (!element) return undefined;
-	return element.children.map((c) => (typeof c === 'string' ? c : text(c))).join('');
+	let result = '';
+	for (const node of walk(element)) if (typeof node === 'string') result += node;
+	return result;
 }
 
 /** All descendant elements with this name, in document order. */
-export function descendants(element: XmlElement, name: string, result: XmlElement[] = []): XmlElement[] {
-	for (const c of element.children) {
-		if (typeof c === 'string') continue;
-		if (c.name === name) result.push(c);
-		descendants(c, name, result);
-	}
+export function descendants(element: XmlElement, name: string): XmlElement[] {
+	const result: XmlElement[] = [];
+	for (const node of walk(element)) if (typeof node !== 'string' && node.name === name) result.push(node);
 	return result;
 }
 
