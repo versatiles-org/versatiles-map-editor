@@ -49,9 +49,10 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	await download.path();
 	await expect(dialog).toBeHidden();
 
-	// "New" → OK clears the map
+	// "New" → "Create new map" clears the map
 	await page.getByRole('button', { name: /^New/ }).click();
-	await dialog.getByRole('button', { name: 'OK' }).click();
+	await expect(dialog).toContainText('It replaces the current map.');
+	await dialog.getByRole('button', { name: /^Create new map/ }).click();
 	await expect(dialog).toBeHidden();
 	await expect(deleteButton).toBeHidden();
 });
@@ -91,12 +92,12 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 
 	// opening asks before replacing the map
 	await openFile();
-	await expect(dialog).toContainText('Do you want to replace the current map?');
+	await expect(dialog).toContainText('Open this map? It replaces the current map.');
 	await dialog.getByRole('button', { name: /^Cancel/ }).click();
 	await expect.poll(types).toStrictEqual(['marker']);
 
 	await openFile();
-	await dialog.getByRole('button', { name: /^OK/ }).click();
+	await dialog.getByRole('button', { name: /^Replace map/ }).click();
 	await expect.poll(types).toStrictEqual(['line']);
 	await page.getByRole('button', { name: /^Undo/ }).click();
 	await expect.poll(types).toStrictEqual(['marker']);
@@ -112,7 +113,7 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	await page.goto('/#' + encodeState(state));
 	await expect.poll(types).toStrictEqual(['marker']);
 	await page.getByRole('button', { name: /^New/ }).click();
-	await dialog.getByRole('button', { name: /^OK/ }).click();
+	await dialog.getByRole('button', { name: /^Create new map/ }).click();
 	await expect.poll(() => stateInUrl(page)).toMatchObject({ elements: [] });
 	expect(stateInUrl(page).meta).toBeUndefined();
 	await page.getByRole('button', { name: /^Undo/ }).click();

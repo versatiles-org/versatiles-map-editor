@@ -99,12 +99,15 @@
 		</div>
 	{/if}
 	{#if mode == 'new' || mode == 'replace'}
+		<!-- the buttons name the action, so it is clear without the question, e.g. for screen readers -->
 		<p>
-			{mode == 'new' ? 'Do you want to create a new map?' : 'Do you want to replace the current map?'}
+			{mode == 'new'
+				? 'Create a new, empty map? It replaces the current map.'
+				: 'Open this map? It replaces the current map.'}
 			You can undo this.
 		</p>
 		<div class="grid2">
-			<button class="btn" onclick={confirm}>OK</button>
+			<button class="btn" onclick={confirm}>{mode == 'new' ? 'Create new map' : 'Replace map'}</button>
 			<button class="btn" onclick={cancel} data-focus>Cancel</button>
 		</div>
 	{/if}
