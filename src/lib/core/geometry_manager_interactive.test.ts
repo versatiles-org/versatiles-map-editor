@@ -420,4 +420,103 @@ describe('GeometryManager', () => {
 			expect(get(manager.elements)).toStrictEqual([elements[2]]);
 		});
 	});
+
+	describe('undo and redo', () => {
+		beforeEach(async () => {
+			// the elements are restored once the map style has loaded
+			await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
+		});
+
+		it('change the elements in place', async () => {
+			const polygon = manager.addNewElement('polygon');
+			const marker = manager.addNewElement('marker');
+			manager.state.log();
+			polygon.fillLayer.color.set('#123456');
+			polygon.fillLayer.opacity.set(0.2);
+			polygon.strokeLayer.width.set(7);
+			manager.state.log();
+			mockMap.addSource.mockClear();
+
+			await manager.state.undo();
+			expect(get(manager.elements)).toStrictEqual([polygon, marker]);
+			expect(mockMap.addSource).not.toHaveBeenCalled();
+			// the defaults, which the state leaves out
+			expect(polygon.getState().style).toBeUndefined();
+			expect(polygon.getState().strokeStyle).toBeUndefined();
+
+			await manager.state.redo();
+			expect(get(manager.elements)).toStrictEqual([polygon, marker]);
+			expect(polygon.getState().style).toStrictEqual({ color: '#123456', opacity: 0.2 });
+			expect(polygon.getState().strokeStyle).toStrictEqual({ width: 7 });
+		});
+
+		it('restore the geometry and the popup', async () => {
+			const line = manager.addNewElement('line');
+			const path = structuredClone(line.path);
+			manager.state.log();
+			line.moveBy(1, 0);
+			line.popup.set('Hello');
+			manager.state.log();
+
+			await manager.state.undo();
+			expect(line.path).toStrictEqual(path);
+			expect(get(line.popup)).toBe('');
+		});
+
+		it('build and remove only the elements that differ, in the right order', async () => {
+			const marker = manager.addNewElement('marker');
+			manager.state.log();
+			marker.delete();
+			const line = manager.addNewElement('line');
+			manager.addNewElement('circle');
+			manager.state.log();
+			const destroyLine = vi.spyOn(line, 'destroy');
+
+			// [line, circle] becomes [marker]: the line is replaced, the circle removed
+			await manager.state.undo();
+			const [restored] = get(manager.elements);
+			expect(get(manager.elements)).toHaveLength(1);
+			expect(restored).toBeInstanceOf(MarkerElement);
+			expect(destroyLine).toHaveBeenCalled();
+
+			// [marker] becomes [line, circle]: a new line and a new circle
+			mockMap.moveLayer.mockClear();
+			await manager.state.redo();
+			expect(get(manager.elements).map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
+			expect(mockMap.moveLayer).not.toHaveBeenCalled();
+		});
+
+		it('keep the order of the map layers when a new element is below a kept one', async () => {
+			const line: StateElement = {
+				type: 'line',
+				points: [
+					[1, 2],
+					[3, 4]
+				]
+			};
+			await manager.setState({
+				elements: [
+					{
+						type: 'polygon',
+						points: [
+							[1, 2],
+							[3, 4],
+							[5, 2]
+						]
+					},
+					line
+				]
+			});
+			const kept = get(manager.elements)[1];
+			mockMap.moveLayer.mockClear();
+
+			// the new marker is added on top, but belongs below the kept line
+			await manager.setState({ elements: [{ type: 'marker', point: [1, 2] }, line] });
+			const [marker, sameLine] = get(manager.elements);
+			expect(sameLine).toBe(kept);
+			expect(mockMap.moveLayer.mock.calls).toStrictEqual(
+				[...marker.getLayerIds(), ...kept.getLayerIds()].map((id) => [id, 'selection_nodes'])
+			);
+		});
+	});
 });

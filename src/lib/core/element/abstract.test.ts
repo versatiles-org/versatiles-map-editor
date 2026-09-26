@@ -13,6 +13,8 @@ class TestElement extends AbstractElement {
 		return {};
 	}
 
+	setGeometry() {}
+
 	getFeature(): GeoJSON.Feature {
 		return { type: 'Feature', geometry: { type: 'Point', coordinates: [0, 0] }, properties: {} };
 	}

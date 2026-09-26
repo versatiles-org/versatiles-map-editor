@@ -3,7 +3,14 @@ import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } fr
 import { get, writable, type Writable } from 'svelte/store';
 import type { GeoPoint } from '../../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
-import type { StateElement, StatePopup } from '@versatiles/map-state';
+import {
+	FILL_DEFAULTS,
+	LINE_DEFAULTS,
+	SYMBOL_DEFAULTS,
+	type StateElement,
+	type StatePopup,
+	type StateStyle
+} from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 export abstract class AbstractElement {
@@ -119,6 +126,31 @@ export abstract class AbstractElement {
 		void index;
 		return false;
 	}
+
+	/**
+	 * Change the element to the state, e.g. on undo, instead of building a new one.
+	 * Returns false if the state is of another type.
+	 */
+	public updateFromState(state: StateElement): boolean {
+		const current = this.getState();
+		if (current.type !== state.type) return false;
+		if (JSON.stringify(current) === JSON.stringify(state)) return true;
+
+		this.setGeometry(state);
+		// the style of the state, with the defaults for the properties it leaves out
+		const { symbol, fill, stroke } = this.getStyleLayers();
+		if (symbol) symbol.setState({ ...SYMBOL_DEFAULTS, ...state.style });
+		if (fill) fill.setState({ ...FILL_DEFAULTS, ...state.style });
+		// the outline of an area has its own style, a line has only one
+		const strokeStyle = fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style;
+		if (stroke) stroke.setState({ ...LINE_DEFAULTS, ...strokeStyle });
+		this.popup.set(state.popup?.text ?? '');
+		this.updateSource();
+		return true;
+	}
+
+	/** Take the geometry of a state of the same type. */
+	protected abstract setGeometry(state: StateElement): void;
 
 	public delete() {
 		this.manager.removeElement(this);

@@ -4,7 +4,7 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
-import type { StateBackground, StateLegend, MapState } from '@versatiles/map-state';
+import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
@@ -237,7 +237,7 @@ export class GeometryManager {
 		const request = ++this.stateRequest;
 		const outdated = () => this.destroyed || request !== this.stateRequest;
 
-		this.clear();
+		this.deselectAll();
 
 		if (state.map) this.fitViewport(state.map);
 		this.legend.set(state.meta?.legend);
@@ -254,12 +254,39 @@ export class GeometryManager {
 			if (outdated()) return;
 		}
 
-		if (state.elements) {
-			// e.g. elements added while this state was waiting
-			this.clear();
-			this.elements.set(state.elements.map((element) => elementFromState(this, element)));
-		}
+		if (state.elements) this.reconcileElements(state.elements);
 	}
+
+	/**
+	 * Change the elements to the states. An element is changed in place if it has the type of the
+	 * state at its position, so e.g. undoing a color change rebuilds no layers. Only the others are
+	 * built or removed.
+	 */
+	private reconcileElements(states: StateElement[]) {
+		const current = get(this.elements);
+		let built = false;
+		let reorder = false;
+		const next = states.map((state, i) => {
+			const element = current[i];
+			if (element?.updateFromState(state)) {
+				// a new element below it was added on top of the map layers
+				if (built) reorder = true;
+				return element;
+			}
+			built = true;
+			return elementFromState(this, state);
+		});
+		const kept = new Set(next);
+		current.filter((element) => !kept.has(element)).forEach((element) => element.destroy());
+		if (reorder) {
+			// the element layers in the order of the elements, below the selection nodes
+			for (const id of next.flatMap((element) => element.getLayerIds())) this.map.moveLayer(id, 'selection_nodes');
+		}
+		this.elements.set(next);
+	}
+
+	/** Deselect all elements, e.g. before undo. The viewer has no selection. */
+	protected deselectAll() {}
 }
 
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */

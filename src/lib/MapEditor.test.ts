@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
-const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock }[] }));
+const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock; setStyle: Mock }[] }));
 
 // A minimal stand-in for maplibre's Map: happy-dom has no WebGL
 vi.mock('maplibre-gl', async (importOriginal) => {

@@ -34,8 +34,12 @@ export class GeometryManagerInteractive extends GeometryManager {
 		this.state = new StateManager(this);
 	}
 
-	public clear() {
+	protected deselectAll() {
 		this.selection.selectElement();
+	}
+
+	public clear() {
+		this.deselectAll();
 		super.clear();
 	}
 

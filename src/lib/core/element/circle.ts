@@ -3,7 +3,7 @@ import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } fr
 import type { GeoPoint } from '../../utils/types.js';
 import { MapLayerFill } from '../map_layer/fill.js';
 import { MapLayerLine } from '../map_layer/line.js';
-import type { StateElementCircle } from '@versatiles/map-state';
+import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.js';
 import { circle, circleArea, distance, movePoint } from '../../utils/geometry.js';
 import { formatArea, formatLength } from '../../utils/format.js';
@@ -81,6 +81,12 @@ export class CircleElement extends AbstractElement {
 			{ label: 'Radius', value: formatLength(this.radius) },
 			{ label: 'Area', value: formatArea(circleArea(this.radius)) }
 		];
+	}
+
+	protected setGeometry(state: StateElement) {
+		const { point, radius } = state as StateElementCircle;
+		this.point = [...point];
+		this.radius = radius;
 	}
 
 	moveBy(dx: number, dy: number) {

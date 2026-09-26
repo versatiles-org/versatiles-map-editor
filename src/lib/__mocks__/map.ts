@@ -45,6 +45,7 @@ export class MockMap {
 	setPaintProperty = vi.fn();
 	setLayoutProperty = vi.fn();
 	removeLayer = vi.fn();
+	moveLayer = vi.fn();
 	hasImage = vi.fn();
 	removeImage = vi.fn();
 	getImage = vi.fn();

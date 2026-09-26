@@ -3,6 +3,7 @@ import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import { getMiddlePoint, movePoint } from '../../utils/geometry.js';
 import type { GeoPath, GeoPoint } from '../../utils/types.js';
+import type { StateElement, StateElementLine, StateElementPolygon } from '@versatiles/map-state';
 
 export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];
@@ -11,6 +12,10 @@ export abstract class AbstractPathElement extends AbstractElement {
 	constructor(manager: GeometryManager, isLine: boolean) {
 		super(manager);
 		this.isLine = isLine;
+	}
+
+	protected setGeometry(state: StateElement) {
+		this.path = (state as StateElementLine | StateElementPolygon).points.map((point): GeoPoint => [...point]);
 	}
 
 	moveBy(dx: number, dy: number) {
