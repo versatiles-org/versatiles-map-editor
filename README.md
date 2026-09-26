@@ -29,12 +29,18 @@ npm run preview  # preview the production build
 ### Quality checks
 
 ```bash
-npm run lint            # ESLint
-npm run check-types     # svelte-check (TypeScript + Svelte)
-npm run format:check    # Prettier
-npm run test-unit       # Vitest unit tests
-npm run test-playwright # Playwright visual/e2e tests
+npm run check                  # lint, types, builds of app and package, unit and Playwright tests, formatting
+npm run lint                   # ESLint
+npm run check-types            # svelte-check (TypeScript + Svelte)
+npm run format:check           # Prettier
+npm run test-unit              # Vitest unit tests
+npm run test-coverage          # Vitest unit tests with a coverage report
+npm run test-playwright        # Playwright visual/e2e tests in Chromium and Firefox
+npm run test-playwright-docker # Playwright tests in a Linux container with a virtual display
 ```
+
+Headless Firefox on Linux cannot create a WebGL context, so MapLibre never renders there and
+every Firefox test times out. That is why CI runs the Playwright tests on macOS.
 
 ### Documentation
 
@@ -67,6 +73,11 @@ The editor reads its state from the URL hash, so it can be embedded in an `<ifra
 ```
 
 When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
+
+The **Share/Embed** dialog creates the link and the embed code, with a preview in different aspect ratios. Its options:
+
+- **Precision**: how exactly the positions are stored. _Automatic_ is fine enough for the current viewport; coarser positions make shorter links.
+- **Address search in the map**: visitors of the read-only map can search for a place, e.g. their street. The map content does not change. This option is stored in the map.
 
 ## Map state format
 
