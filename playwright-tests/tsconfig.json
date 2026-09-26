@@ -1,0 +1,15 @@
+{
+	// The Playwright tests run in Node.js and are not part of the SvelteKit app, which svelte-check
+	// covers. Checked by "npm run check-types".
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"types": ["node"],
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true
+	},
+	"include": ["**/*.ts", "../playwright.config.ts"]
+}

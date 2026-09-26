@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "build": "npm run check-types && vite build",
-    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check-watch": "npm run check-types -- --watch",
+    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && tsc -p playwright-tests",
+    "check-watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "check": "npm run lint && npm run build && npm run build --workspaces && npm run test && npm run format:check",
     "dev": "vite dev",
     "doc": "npm run doc-graph && npm run doc-bundle && prettier --write --log-level warn README.md",
