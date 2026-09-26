@@ -9,9 +9,17 @@
 	let filename = defaultFilename;
 	let dialog: Dialog | undefined = undefined;
 
+	/** Whether the map has anything to lose: elements or map properties like a legend. */
+	function hasContent(): boolean {
+		const state = manager.getState();
+		return state.elements.length > 0 || state.meta !== undefined;
+	}
+
 	async function newFile(): Promise<void> {
 		if (!(await dialog?.askCreateNew())) return;
-		manager.clear();
+		// an empty map in the current view, without legend or background; undoable
+		await manager.setState({ elements: [] });
+		manager.state.log();
 		filename = defaultFilename;
 	}
 
@@ -30,7 +38,10 @@
 				try {
 					const state = JSON.parse(reader.result as string);
 					if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
-					await manager.loadState(state);
+					if (hasContent() && !(await dialog?.askReplace())) return;
+					// a change like any other, so it can be undone and is kept in the URL
+					await manager.setState(state);
+					manager.state.log();
 					filename = file.name;
 				} catch (error) {
 					console.error(error);

@@ -3,7 +3,7 @@
 	import Dialog from './Dialog.svelte';
 	import { EventHandler } from '$lib/utils/event_handler.js';
 
-	type Mode = 'download' | 'new' | null;
+	type Mode = 'download' | 'new' | 'replace' | null;
 	let mode: Mode = $state(null);
 	let dialog: Dialog | null = null;
 	let input: HTMLInputElement | null = $state(null);
@@ -48,6 +48,13 @@
 		return confirmed;
 	}
 
+	export async function askReplace(): Promise<boolean> {
+		if (!dialog) return false;
+		await openDialog('replace');
+		const { confirmed } = await getResponse();
+		return confirmed;
+	}
+
 	async function getResponse(): Promise<{ confirmed: boolean; value: string | null }> {
 		const confirmed = await new Promise<boolean>((resolve) => {
 			if (!dialog) return resolve(false);
@@ -83,9 +90,12 @@
 			<button class="btn" onclick={confirm} data-focus>Download</button>
 		</div>
 	{/if}
-	{#if mode == 'new'}
-		<h2>New Map</h2>
-		<p>Do you want to create a new map?</p>
+	{#if mode == 'new' || mode == 'replace'}
+		<h2>{mode == 'new' ? 'New Map' : 'Open Map'}</h2>
+		<p>
+			{mode == 'new' ? 'Do you want to create a new map?' : 'Do you want to replace the current map?'}
+			You can undo this.
+		</p>
 		<div class="grid2">
 			<button class="btn" onclick={confirm}>OK</button>
 			<button class="btn" onclick={cancel} data-focus>Cancel</button>

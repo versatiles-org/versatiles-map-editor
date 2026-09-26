@@ -1436,3 +1436,68 @@ test('the URL keeps the elements while the map is loading', async ({ page }) => 
 	await waitForMapIsReady(page);
 	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
 });
+
+test('opening a map file and a new map can be undone and are kept in the URL', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
+		elements: [{ type: 'marker', point: [13.4, 52.5] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const types = () => stateInUrl(page).elements.map((e) => e.type);
+	const dialog = page.getByRole('dialog');
+	const file: MapState = {
+		elements: [
+			{
+				type: 'line',
+				points: [
+					[13.3, 52.4],
+					[13.5, 52.6]
+				]
+			}
+		]
+	};
+	const openFile = async () => {
+		const [chooser] = await Promise.all([
+			page.waitForEvent('filechooser'),
+			page.getByRole('button', { name: /^Open/ }).click()
+		]);
+		await chooser.setFiles({
+			name: 'map.mapjson',
+			mimeType: 'application/json',
+			buffer: Buffer.from(JSON.stringify(file))
+		});
+	};
+
+	// opening asks before replacing the map
+	await openFile();
+	await expect(dialog).toContainText('Do you want to replace the current map?');
+	await dialog.getByRole('button', { name: /^Cancel/ }).click();
+	await expect.poll(types).toStrictEqual(['marker']);
+
+	await openFile();
+	await dialog.getByRole('button', { name: /^OK/ }).click();
+	await expect.poll(types).toStrictEqual(['line']);
+	await page.getByRole('button', { name: /^Undo/ }).click();
+	await expect.poll(types).toStrictEqual(['marker']);
+	await page.getByRole('button', { name: /^Redo/ }).click();
+	await expect.poll(types).toStrictEqual(['line']);
+	// kept in the URL; listening for the map before reloading, so its signal cannot be missed
+	const reloaded = waitForMapIsReady(page);
+	await page.reload();
+	await reloaded;
+	await expect.poll(types).toStrictEqual(['line']);
+
+	// a new map is empty, without legend, and undoable. Only the hash changes, so the editor
+	// loads the map without reloading the page.
+	await page.goto('/#' + encodeState(state));
+	await expect.poll(types).toStrictEqual(['marker']);
+	await page.getByRole('button', { name: /^New/ }).click();
+	await dialog.getByRole('button', { name: /^OK/ }).click();
+	await expect.poll(() => stateInUrl(page)).toMatchObject({ elements: [] });
+	expect(stateInUrl(page).meta).toBeUndefined();
+	await page.getByRole('button', { name: /^Undo/ }).click();
+	await expect.poll(types).toStrictEqual(['marker']);
+	await expect.poll(() => stateInUrl(page).meta?.legend?.entries.length).toBe(1);
+});
