@@ -39,6 +39,13 @@ jobs:
       - name: Build the project
         run: npm run build
 
+      # The app uses the package from its source, so its own build is checked here
+      - name: Build the npm package @versatiles/map-state
+        run: npm run build --workspaces
+
+      - name: Check the files of the npm package
+        run: npm pack --dry-run --workspace packages/map-state
+
       - name: Test Code with coverage
         run: npm run test-coverage
 
