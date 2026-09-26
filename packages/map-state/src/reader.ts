@@ -246,7 +246,8 @@ export class StateReader {
 				const key = this.readInteger(6);
 				switch (key) {
 					case 0:
-						return metadata;
+						// no metadata, like the writer does now (older hashes could store it empty)
+						return Object.keys(metadata).length > 0 ? metadata : undefined;
 					//case 1:
 					//	metadata.heading = this.readString();
 					//	break;

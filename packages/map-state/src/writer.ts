@@ -199,7 +199,9 @@ export class StateWriter {
 	}
 
 	writeMetadata(metadata?: StateMetadata) {
-		if (!metadata || Object.keys(metadata).length === 0) {
+		// only the fields that are stored count, e.g. not `search: false`
+		const stored = metadata && (metadata.background || metadata.legend || metadata.colorScheme || metadata.search);
+		if (!metadata || !stored) {
 			return this.writeBit(false);
 		}
 

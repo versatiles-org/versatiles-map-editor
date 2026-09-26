@@ -267,6 +267,12 @@ describe('StateReader', () => {
 		it('should read empty metadata correctly', () => {
 			test({}, 'A');
 		});
+		it('should read metadata that was stored empty as none, like older hashes', () => {
+			const writer = new StateWriter({ version: 0 });
+			writer.writeBit(true);
+			writer.writeInteger(0, 6);
+			expect(new StateReader(writer.bits).readMetadata()).toBeUndefined();
+		});
 	});
 
 	describe('readRoot', () => {
@@ -630,6 +636,10 @@ describe('search', () => {
 	it('round-trips as a flag', () => {
 		const state: MapState = { meta: { search: true }, elements: [] };
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
-		expect(decodeState(encodeState({ meta: { search: false }, elements: [] })).meta).toStrictEqual({});
+		// not stored, like missing metadata
+		expect(encodeState({ meta: { search: false }, elements: [] })).toBe(encodeState({ elements: [] }));
+		expect(decodeState(encodeState({ meta: { search: false, colorScheme: '' }, elements: [] }))).toStrictEqual({
+			elements: []
+		});
 	});
 });
