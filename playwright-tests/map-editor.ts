@@ -1413,3 +1413,26 @@ test('a map near a pole keeps its elements', async ({ page }) => {
 	await page.mouse.up();
 	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
 });
+
+test('the URL keeps the elements while the map is loading', async ({ page }) => {
+	// a slow network: the style waits for its TileJSON until the test releases it
+	let release!: () => void;
+	const released = new Promise<void>((resolve) => (release = resolve));
+	await page.route('**/tiles.json', async (route) => {
+		await released;
+		await route.fallback();
+	});
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [{ type: 'marker', point: [13.4, 52.5] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	// The viewport is already set, the elements wait for the style. Something must *not* happen
+	// here (writing a URL without elements), so the test has to give it time to happen.
+	await page.waitForTimeout(1000);
+	expect(stateInUrl(page).elements.length).toBe(1);
+
+	release();
+	await waitForMapIsReady(page);
+	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+});

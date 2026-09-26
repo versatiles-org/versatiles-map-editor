@@ -64,6 +64,8 @@ export class GeometryManager {
 	// The map has no style until inlineSources() finishes, so elements must wait for it
 	private styleLoaded = false;
 	private styleRequest = 0;
+	private loadingStates = 0;
+	private loadedCallbacks: (() => void)[] = [];
 
 	constructor(map: maplibregl.Map) {
 		this.elements = writable([]);
@@ -193,7 +195,31 @@ export class GeometryManager {
 		}
 	}
 
+	/** Whether a state is being loaded: until then, the map misses (some of) its elements. */
+	public isLoading(): boolean {
+		return this.loadingStates > 0;
+	}
+
+	/** Resolves when no state is being loaded any more. */
+	public whenLoaded(): Promise<void> {
+		if (!this.isLoading()) return Promise.resolve();
+		return new Promise((resolve) => this.loadedCallbacks.push(resolve));
+	}
+
 	public async setState(state: StateRoot) {
+		this.loadingStates++;
+		try {
+			await this.applyState(state);
+		} finally {
+			if (--this.loadingStates === 0) {
+				const callbacks = this.loadedCallbacks;
+				this.loadedCallbacks = [];
+				callbacks.forEach((callback) => callback());
+			}
+		}
+	}
+
+	private async applyState(state: StateRoot) {
 		if (!state) return;
 
 		this.clear();

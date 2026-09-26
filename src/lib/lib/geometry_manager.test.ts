@@ -171,6 +171,35 @@ describe('GeometryManager', () => {
 		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
 	});
 
+	describe('loading', () => {
+		it('reports a state as loading until its elements exist', async () => {
+			expect(geometryManager.isLoading()).toBe(false);
+			// the style is not loaded yet, so the elements have to wait
+			const loading = geometryManager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
+			expect(geometryManager.isLoading()).toBe(true);
+			let loaded = false;
+			geometryManager.whenLoaded().then(() => (loaded = true));
+
+			map.setStyle();
+			await loading;
+			await Promise.resolve();
+			expect(loaded).toBe(true);
+			expect(geometryManager.isLoading()).toBe(false);
+			expect(get(geometryManager.elements)).toHaveLength(1);
+		});
+
+		it('resolves at once when nothing is loading', async () => {
+			await expect(geometryManager.whenLoaded()).resolves.toBeUndefined();
+		});
+
+		it('is not loading any more after an error', async () => {
+			await expect(
+				geometryManager.setState({ elements: [{ type: 'unknown' }] } as unknown as StateRoot)
+			).rejects.toThrow();
+			expect(geometryManager.isLoading()).toBe(false);
+		});
+	});
+
 	describe('fitViewport', () => {
 		const shownBounds = () => map.fitBounds.mock.lastCall![0] as [[number, number], [number, number]];
 

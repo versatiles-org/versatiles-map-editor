@@ -68,7 +68,19 @@
 	// throttled, because browsers limit how often replaceState may be called.
 	let routerReady = false;
 	let persistRequested = false;
+	let waitingForLoad = false;
 	function requestPersist() {
+		// While a map loads, it misses its elements: the URL is written once it has loaded
+		if (geometryManager?.isLoading()) {
+			if (!waitingForLoad) {
+				waitingForLoad = true;
+				geometryManager.whenLoaded().then(() => {
+					waitingForLoad = false;
+					requestPersist();
+				});
+			}
+			return;
+		}
 		if (routerReady) persistState();
 		else persistRequested = true;
 	}
