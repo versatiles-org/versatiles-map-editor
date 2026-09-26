@@ -64,17 +64,23 @@ export class StateWriter {
 		return value;
 	}
 
+	/**
+	 * An integer in groups of 5 bits, each followed by a bit whether another group follows.
+	 * Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic instead of bit operators,
+	 * which would cut the values to 32 bits.
+	 */
 	writeVarint(value: number, signed?: true) {
-		if (value % 1 !== 0) throw new Error('value must be an integer');
+		if (!Number.isSafeInteger(value)) throw new Error(`value must be a safe integer: ${value}`);
 
 		if (signed) {
-			value = value < 0 ? ((-1 - value) << 1) | 1 : value << 1;
+			value = value < 0 ? -2 * value - 1 : 2 * value;
+			if (!Number.isSafeInteger(value)) throw new Error(`value too large: ${value}`);
 		} else {
 			if (value < 0) throw new Error('Unsigned varint cannot be negative');
 		}
 		while (true) {
-			this.writeInteger(value & 0x1f, 5);
-			value >>= 5;
+			this.writeInteger(value % 32, 5);
+			value = Math.floor(value / 32);
 			this.writeBit(value >= 1);
 			if (value < 1) break;
 		}

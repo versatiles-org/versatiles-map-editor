@@ -83,16 +83,18 @@ export class StateReader {
 		return value;
 	}
 
+	/** See `StateWriter.writeVarint`. */
 	readVarint(signed?: true): number {
 		try {
 			let value = 0;
-			let offset = 0;
+			let factor = 1;
 			do {
-				value += this.readInteger(5) << offset;
-				offset += 5;
+				if (factor > Number.MAX_SAFE_INTEGER) throw new Error('Varint too long');
+				value += this.readInteger(5) * factor;
+				factor *= 32;
 			} while (this.readBit());
 			if (!signed) return value;
-			return value & 1 ? -((value >> 1) + 1) : value >> 1;
+			return value % 2 === 1 ? -(value + 1) / 2 : value / 2;
 		} catch (cause) {
 			throw new Error(`Error reading readVarint`, { cause });
 		}
