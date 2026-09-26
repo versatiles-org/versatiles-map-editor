@@ -21,6 +21,14 @@
 	// The last selected place, which can be marked on the map
 	let selected: GeocodingResult | undefined = $state();
 
+	const statusText = $derived.by(() => {
+		if (status === 'searching') return 'Searching…';
+		if (status === 'empty') return 'No results';
+		if (status === 'error') return 'Search failed, please try again.';
+		if (open && results.length > 0) return results.length === 1 ? '1 result' : `${results.length} results`;
+		return '';
+	});
+
 	let timeout: ReturnType<typeof setTimeout> | undefined;
 	// the query of the results
 	let resultsQuery = '';
@@ -158,6 +166,8 @@
 		onfocus={() => (open = results.length > 0)}
 		onblur={() => (open = false)}
 	/>
+	<!-- for screen readers: the state of the search -->
+	<div class="sr-only" role="status">{statusText}</div>
 	{#if open}
 		<ul class="results" id="{uid}-results" role="listbox" aria-label="Search results">
 			{#each results as result, i (i)}
@@ -175,12 +185,13 @@
 					{result.label}
 				</li>
 			{/each}
+			<!-- announced by the status region below, so hidden from screen readers here -->
 			{#if status === 'searching' && results.length === 0}
-				<li class="status" role="presentation">Searching…</li>
+				<li class="status" role="presentation" aria-hidden="true">Searching…</li>
 			{:else if status === 'empty'}
-				<li class="status" role="presentation">No results</li>
+				<li class="status" role="presentation" aria-hidden="true">No results</li>
 			{:else if status === 'error'}
-				<li class="status" role="presentation">Search failed, please try again.</li>
+				<li class="status" role="presentation" aria-hidden="true">Search failed, please try again.</li>
 			{/if}
 		</ul>
 	{/if}
@@ -233,5 +244,16 @@
 	.add-marker {
 		width: 100%;
 		margin-top: var(--btn-gap);
+	}
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

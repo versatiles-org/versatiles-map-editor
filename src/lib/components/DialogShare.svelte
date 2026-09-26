@@ -80,10 +80,17 @@
 		);
 	}
 
+	// announced to screen readers, which do not see the ✓ of the button
+	let copied = $state('');
+
 	function flash(b?: HTMLButtonElement) {
 		if (!b) return;
 		b.classList.add('success');
-		setTimeout(() => b.classList.remove('success'), 2000);
+		copied = b === btnLink ? 'Link copied' : 'Embed code copied';
+		setTimeout(() => {
+			b.classList.remove('success');
+			copied = '';
+		}, 2000);
 	}
 
 	function selectPreview(event: Event) {
@@ -110,6 +117,7 @@
 					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
 				</label>
 				<button class="btn" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
+				<span class="sr-only" role="status">{copied}</span>
 			</p>
 			<p>
 				<label for="text-iframe">
@@ -272,5 +280,16 @@
 			text-align: center;
 			padding-top: 1rem;
 		}
+	}
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 </style>

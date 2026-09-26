@@ -20,6 +20,7 @@ const ariaResult = `- region "Map"
 - button "Redo ✓" [disabled]
 - separator
 - combobox "Search address or place"
+- status
 - separator
 - button "Map" [expanded]:
   - text: Map
@@ -1553,4 +1554,37 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	await page.getByRole('button', { name: /^Marker/ }).click();
 	await page.getByRole('button', { name: /^Symbol/ }).click();
 	await expect(page.getByRole('dialog', { name: 'Select a symbol' })).toBeVisible();
+});
+
+test('screen readers hear the state of the search and of copying', async ({ page, browserName, context }) => {
+	let answer: 'two' | 'none' | 'error' = 'two';
+	await page.route('https://geocode.versatiles.org/**', (route) => {
+		if (answer === 'error') return route.fulfill({ status: 500 });
+		const feature = (name: string) => ({
+			type: 'Feature',
+			properties: { name },
+			geometry: { type: 'Point', coordinates: [13.4, 52.5] }
+		});
+		const features = answer === 'two' ? [feature('Berlin'), feature('Bern')] : [];
+		return route.fulfill({ json: { type: 'FeatureCollection', features } });
+	});
+	await page.goto('/');
+	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/, /JSHandle/] });
+	const search = page.getByRole('combobox', { name: 'Search address or place' });
+	const status = page.locator('.search [role=status]');
+
+	await search.fill('Ber');
+	await expect(status).toHaveText('2 results');
+	answer = 'none';
+	await search.fill('Bxx');
+	await expect(status).toHaveText('No results');
+	answer = 'error';
+	await search.fill('Byy');
+	await expect(status).toHaveText('Search failed, please try again.');
+
+	// copying the link is announced, not only shown as a check mark
+	if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await page.getByRole('button', { name: /^Copy Link/ }).click();
+	await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
 });
