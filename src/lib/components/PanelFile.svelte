@@ -7,7 +7,8 @@
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
-	const defaultFilename = 'default.mapjson';
+	// like the other exports, map.geojson and map.kml
+	const defaultFilename = 'map.mapjson';
 	let filename = defaultFilename;
 	let dialog: Dialog | undefined = undefined;
 

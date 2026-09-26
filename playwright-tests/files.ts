@@ -21,7 +21,7 @@ test('downloads the map as GeoJSON and as map file', async ({ page }) => {
 		page.waitForEvent('download'),
 		page.getByRole('dialog').getByRole('button', { name: 'Download' }).click()
 	]);
-	expect(mapFile.suggestedFilename()).toBe('default.mapjson');
+	expect(mapFile.suggestedFilename()).toBe('map.mapjson');
 	const state = JSON.parse(readFileSync(await mapFile.path(), 'utf-8'));
 	expect(state.elements.map((e: { type: string }) => e.type)).toStrictEqual(['marker']);
 });
