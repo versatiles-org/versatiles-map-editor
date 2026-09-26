@@ -71,7 +71,12 @@ export default defineConfig({
 		target: 'esnext',
 		chunkSizeWarningLimit: 1500,
 		rollupOptions: {
-			treeshake: true
+			treeshake: true,
+			// For the bundle treemap in the README (npm run doc-bundle): all code of the app in one
+			// chunk, since the viewer loads the editor code only when it is needed. Not the worker.
+			output: process.env.DOC_BUNDLE
+				? { manualChunks: (id: string) => (id.includes('maplibre-gl-worker') ? undefined : 'app') }
+				: undefined
 		}
 	}
 });

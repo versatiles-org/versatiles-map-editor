@@ -190,7 +190,7 @@
 		width: 100%;
 		flex: 1;
 		min-height: 0;
-		// scrolls if the controls do not fit, e.g. on a small screen
+		/* scrolls if the controls do not fit, e.g. on a small screen */
 		overflow: auto;
 
 		.head {
@@ -285,13 +285,13 @@
 			flex-wrap: wrap;
 			justify-content: center;
 			align-items: flex-end;
-			// room for the caption above the aspect ratios, also when they wrap below "Reload"
+			/* room for the caption above the aspect ratios, also when they wrap below "Reload" */
 			gap: 1.8em var(--btn-gap);
 			padding-top: 1.5rem;
 		}
 	}
 
-	// On a small screen, the controls come first, and the preview gets a fixed height below them
+	/* On a small screen, the controls come first, and the preview gets a fixed height below them */
 	@media (max-width: 700px), (max-height: 560px) {
 		.grid {
 			grid-template-columns: 1fr;
