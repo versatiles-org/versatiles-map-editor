@@ -233,7 +233,8 @@
 					id="github_link"
 					href="https://github.com/versatiles-org/versatiles-map-editor/issues"
 					target="_blank"
-					aria-label="Repository on GitHub">GitHub Issues</a
+					rel="noopener noreferrer"
+					aria-label="GitHub Issues (opens in a new tab)">GitHub Issues</a
 				>
 			</p>
 		</SidebarPanel>

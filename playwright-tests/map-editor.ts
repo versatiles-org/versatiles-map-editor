@@ -1059,7 +1059,7 @@ test.describe('importing a table', () => {
 		await expect(dialog.getByRole('cell', { name: 'Bäckerei' })).toBeVisible();
 		await dialog.getByRole('button', { name: 'Import 2 rows' }).click();
 
-		await expect(dialog.getByText('Imported 1 markers.')).toBeVisible();
+		await expect(dialog.getByText('Imported 1 marker.')).toBeVisible();
 		await expect(dialog.getByRole('list', { name: 'Rows not imported' })).toHaveText(
 			'Row 2: Nirgendwo 5 — address not found'
 		);
@@ -1609,4 +1609,11 @@ test('a file that cannot be imported shows a message instead of a browser dialog
 	]);
 	await chooser.setFiles({ name: 'broken.geojson', mimeType: 'application/geo+json', buffer: Buffer.from('{ broken') });
 	await expect(page.getByRole('alert')).toHaveText(/Failed to import GeoJSON. Please check the file format./);
+});
+
+test('the page has a title and a description', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await expect(page).toHaveTitle('VersaTiles Map Editor');
+	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /map/);
 });

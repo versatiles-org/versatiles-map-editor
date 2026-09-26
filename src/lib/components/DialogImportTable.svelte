@@ -10,6 +10,7 @@
 	import { config } from '$lib/utils/config.js';
 	import { type StateStyle, SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { get } from 'svelte/store';
+	import { formatCount } from '../lib/utils/format.js';
 
 	// More values are no categories, e.g. names
 	const MAX_CATEGORIES = 30;
@@ -199,7 +200,7 @@
 						{/each}
 					</tbody>
 				</table>
-				{#if table.rows.length > 5}<p>… and {table.rows.length - 5} more rows</p>{/if}
+				{#if table.rows.length > 5}<p>… and {formatCount(table.rows.length - 5, 'more row')}</p>{/if}
 			</div>
 
 			<div class="mapping">
@@ -288,7 +289,7 @@
 			<div class="buttons">
 				<button class="btn" onclick={() => (step = 'input')}>Back</button>
 				<button class="btn" disabled={table.rows.length === 0} onclick={runImport}>
-					Import {table.rows.length} rows
+					Import {formatCount(table.rows.length, 'row')}
 				</button>
 			</div>
 		{:else if step === 'importing'}
@@ -299,7 +300,7 @@
 			{#if importError}
 				<p class="error" role="alert">The import failed: {importError}</p>
 			{:else}
-				<p>Imported {imported} markers.</p>
+				<p>Imported {formatCount(imported, 'marker')}.</p>
 			{/if}
 			{#if failed.length > 0}
 				<p>These rows could not be imported:</p>
