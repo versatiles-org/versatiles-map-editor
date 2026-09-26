@@ -83,9 +83,21 @@ The **Share/Embed** dialog creates the link and the embed code, with a preview i
 
 How a map is encoded (URL hash, GeoJSON, KML) is published as its own npm package,
 [`@versatiles/map-state`](packages/map-state), e.g. to render shared maps in other apps or to
-create links on a server. The editor uses it from `packages/map-state/src`. To publish a new
-version: raise the version in `packages/map-state/package.json`, then run
-`npm publish --workspace packages/map-state` (it builds before packing).
+create links on a server. The editor uses it from `packages/map-state/src`.
+
+To release a new version of the package:
+
+1. Raise the version in `packages/map-state/package.json` and move the entries under
+   _Unreleased_ in `packages/map-state/CHANGELOG.md` to it. Commit this and push it to `main`.
+2. Tag the commit with `map-state-v` and the version, and push the tag, e.g.
+   `git tag map-state-v1.1.0 && git push origin map-state-v1.1.0`.
+3. The workflow `release-map-state.yml` checks that the tag matches the version, runs the tests of
+   the package and publishes it to npm with provenance.
+
+The workflow uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so no token
+is stored in GitHub. It can only be set up for a package that exists: publish the first version
+once by hand (`npm publish --workspace packages/map-state --access public`, which builds before
+packing), then add the workflow as trusted publisher in the package settings on npmjs.com.
 
 ## Configuration
 

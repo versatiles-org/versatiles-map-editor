@@ -1,0 +1,44 @@
+name: Release @versatiles/map-state
+
+# Publishes the package when a tag like "map-state-v1.2.3" is pushed. The tag must match the
+# version in packages/map-state/package.json. ("v1.2.3" tags belong to the editor's history.)
+on:
+  push:
+    tags: ['map-state-v*']
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing and provenance
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          # npm 11.5.1 or newer is needed for trusted publishing
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Check that the tag matches the package version
+        run: |
+          version="$(node -p "require('./packages/map-state/package.json').version")"
+          if [ "${GITHUB_REF_NAME#map-state-v}" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in packages/map-state/package.json"
+            exit 1
+          fi
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm test --workspace packages/map-state
+
+      - name: Publish
+        run: npm publish --workspace packages/map-state --provenance --access public
