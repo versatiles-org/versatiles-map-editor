@@ -9,8 +9,9 @@ like the background map and a legend.
 - as **GeoJSON**, human-readable and for other tools,
 - as **KML**, for Google Earth, Google My Maps and many GIS tools.
 
-It has no dependencies and works in browsers and in Node.js, e.g. to render shared maps in other
-apps or to create links on a server.
+It has no runtime dependencies (`@types/geojson` only provides the TypeScript types). It is an ES
+module and works in browsers and in Node.js 18 or newer, e.g. to render shared maps in other apps
+or to create links on a server.
 
 ```sh
 npm install @versatiles/map-state
@@ -62,7 +63,11 @@ elements whose styles omit default values. The types are exported too (`StateEle
 
 ## Representations
 
-| Representation | Owner                       | Notes                                                                    |
+The following sections describe the formats in detail. File names refer to the sources in
+[`packages/map-state/src`](https://github.com/versatiles-org/versatiles-map-editor/tree/main/packages/map-state/src),
+which are internal: only the exports above are the public API.
+
+| Representation | Source                      | Notes                                                                    |
 | -------------- | --------------------------- | ------------------------------------------------------------------------ |
 | `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle` |
 | base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned; **backward compatible**            |
