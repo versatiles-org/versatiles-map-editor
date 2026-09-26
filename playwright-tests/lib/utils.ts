@@ -7,28 +7,51 @@ import { fileURLToPath } from 'url';
 
 const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '.request-cache');
 
+// Console messages that a test triggers on purpose, per page
+const expectedConsoleMessages = new WeakMap<Page, RegExp[]>();
+
 /**
- * Wait until `count` maps have reported "map_ready". Other console messages are printed,
- * except those matching `expectedMessages`, which a test triggers on purpose.
+ * Print the console messages of the page, except expected ones. Called once per page by the
+ * test fixture, so every message is printed once, from the start.
+ */
+export function printConsoleMessages(page: Page): void {
+	expectedConsoleMessages.set(page, []);
+	page.on('console', (msg) => {
+		const text = msg.text();
+		if (text === 'map_ready') return;
+		if (expectedConsoleMessages.get(page)?.some((pattern) => pattern.test(text))) return;
+		if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
+		if (text.includes('GPU stall due to ReadPixels')) return;
+		console.log(process.platform + ': ' + text);
+	});
+}
+
+/**
+ * Wait until `count` maps (in the page and its iframes) are ready. The page sets `window.mapReady`,
+ * which is polled, so the moment cannot be missed, e.g. when it happens before `page.goto` returns.
+ * `expectedMessages` are console messages that the test triggers on purpose, which are not printed.
  */
 export async function waitForMapIsReady(
 	page: Page,
 	{ count = 1, expectedMessages = [] }: { count?: number; expectedMessages?: RegExp[] } = {}
 ): Promise<void> {
-	await new Promise<void>((resolve) => {
-		page.on('console', (msg) => {
-			const text = msg.text();
-			if (text == 'map_ready') {
-				count--;
-				if (count < 1) resolve();
-				return;
-			}
-			if (expectedMessages.some((pattern) => pattern.test(text))) return;
-			if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
-			if (text.includes('GPU stall due to ReadPixels')) return;
-			console.log(process.platform + ': ' + text);
-		});
-	});
+	expectedConsoleMessages.get(page)?.push(...expectedMessages);
+	const readyMaps = async () => {
+		let ready = 0;
+		for (const frame of page.frames()) {
+			const isReady = await frame
+				.evaluate(() => (window as unknown as { mapReady?: boolean }).mapReady === true)
+				.catch(() => false); // e.g. a frame that is navigating
+			if (isReady) ready++;
+		}
+		return ready;
+	};
+	const timeout = 30_000;
+	const start = Date.now();
+	while ((await readyMaps()) < count) {
+		if (Date.now() - start > timeout) throw new Error(`Only ${await readyMaps()} of ${count} maps are ready`);
+		await page.waitForTimeout(50);
+	}
 }
 
 /**

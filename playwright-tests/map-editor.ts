@@ -1483,10 +1483,9 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	await expect.poll(types).toStrictEqual(['marker']);
 	await page.getByRole('button', { name: /^Redo/ }).click();
 	await expect.poll(types).toStrictEqual(['line']);
-	// kept in the URL; listening for the map before reloading, so its signal cannot be missed
-	const reloaded = waitForMapIsReady(page);
+	// kept in the URL
 	await page.reload();
-	await reloaded;
+	await waitForMapIsReady(page);
 	await expect.poll(types).toStrictEqual(['line']);
 
 	// a new map is empty, without legend, and undoable. Only the hash changes, so the editor
