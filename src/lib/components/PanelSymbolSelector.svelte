@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
-	import { SymbolLibrary } from '../lib/symbols.js';
+	import { getSymbol, SymbolLibrary } from '../lib/symbols.js';
 	import Dialog from './Dialog.svelte';
 
 	let dialog: Dialog | undefined;
@@ -50,7 +50,7 @@
 			></canvas>{/if}
 	{/key}
 	{#if symbolIndex !== undefined}
-		{symbolLibrary.getSymbol(symbolIndex)?.name}
+		{getSymbol(symbolIndex).name}
 	{:else}
 		{noneLabel ?? 'Select Symbol'}
 	{/if}

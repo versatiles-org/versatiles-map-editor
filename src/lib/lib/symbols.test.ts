@@ -64,15 +64,6 @@ describe('SymbolLibrary', () => {
 		symbolLibrary = new SymbolLibrary(map as unknown as maplibregl.Map);
 	});
 
-	it('should return the correct symbol for a given index', () => {
-		const symbol = symbolLibrary.getSymbol(1);
-		expect(symbol).toEqual({
-			index: 1,
-			name: 'airplane',
-			image: 'base:icon-airfield'
-		});
-	});
-
 	it('should draw the symbol on the canvas', () => {
 		const ctx = {
 			putImageData: vi.fn()

@@ -30,10 +30,6 @@ export class SymbolLibrary {
 		this.map = map;
 	}
 
-	getSymbol(index: number): SymbolInfo {
-		return symbols.get(index) ?? defaultSymbol!;
-	}
-
 	/**
 	 * Draw the symbol into the canvas: black, or in `color`, or with a white `halo` (in pixels).
 	 */
@@ -42,7 +38,7 @@ export class SymbolLibrary {
 	}
 
 	private draw(canvas: HTMLCanvasElement, index: number, options: { halo?: number; color?: string }, retry: boolean) {
-		const symbol = this.getSymbol(index);
+		const symbol = getSymbol(index);
 		if (!symbol.image) return;
 
 		// throws while the map has no style yet (e.g. a legend in a shared map)

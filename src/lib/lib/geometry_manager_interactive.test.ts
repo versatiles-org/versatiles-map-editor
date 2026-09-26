@@ -1,4 +1,4 @@
-import type { StateElement } from '@versatiles/map-state';
+import { decodeState, type StateElement } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MarkerElement } from './element/marker.js';
@@ -85,7 +85,7 @@ describe('GeometryManager', () => {
 			const hash = manager.state.getHash();
 			expect(hash).toBe('IGxYdVMa_BQ');
 
-			manager.state.setHash(hash);
+			await manager.setState(decodeState(hash));
 			expect(get(manager.elements).length).toBe(0);
 			const center = manager.map.getCenter();
 			expect(center).toStrictEqual({ lng: 12, lat: 34 });
@@ -110,7 +110,7 @@ describe('GeometryManager', () => {
 			const hash = manager.state.getHash();
 			expect(hash).toBe('IG2haCUQhQgukjiAgqjmQJI4COEA');
 
-			manager.state.setHash(hash);
+			await manager.setState(decodeState(hash));
 			const elements = get(manager.elements);
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
@@ -135,7 +135,7 @@ describe('GeometryManager', () => {
 			const hash = manager.state.getHash();
 			expect(hash).toBe('IVXm97bQtBKIQohAAAaTWAaTWIEAA');
 
-			manager.state.setHash(hash);
+			await manager.setState(decodeState(hash));
 			const elements = get(manager.elements);
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
@@ -162,7 +162,7 @@ describe('GeometryManager', () => {
 			const hash = manager.state.getHash();
 			expect(hash).toBe('IlXm94SNFZtoWglEIUYgAANJrANJrECAAgQEA');
 
-			manager.state.setHash(hash);
+			await manager.setState(decodeState(hash));
 			const elements = get(manager.elements);
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
@@ -295,7 +295,7 @@ describe('GeometryManager', () => {
 			const marker = manager.addNewElement('marker');
 			marker.layer.halo.set(0);
 
-			manager.state.setHash(manager.state.getHash());
+			await manager.setState(decodeState(manager.state.getHash()));
 			const [restoredPolygon, restoredMarker] = get(manager.elements).map((e) => e.getState());
 			expect(restoredPolygon).toMatchObject({ style: { opacity: 0 }, strokeStyle: { visible: false } });
 			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });

@@ -54,32 +54,12 @@ describe('StateManager', () => {
 		stateManager = new StateManager(geometryManager as unknown as GeometryManagerInteractive);
 	});
 
-	describe('getHash/setHash', () => {
+	describe('getHash', () => {
 		it('should return a base64 compressed hash of the geometry manager state', () => {
 			geometryManager.setState(state1);
 			const hash = stateManager.getHash();
 			expect(geometryManager.getState).toHaveBeenCalled();
 			expect(hash).toBe('IG2haCUQhQg0msA0msQJIECOEA');
-		});
-
-		it('should set the geometry manager state from a base64 compressed hash', () => {
-			geometryManager.setState(state1);
-			const hash = stateManager.getHash();
-
-			stateManager.setHash(hash);
-			expect(geometryManager.setState).toHaveBeenCalledWith(state1);
-		});
-
-		it('should not set the state if the hash is empty', () => {
-			stateManager.setHash('');
-			expect(geometryManager.setState).not.toHaveBeenCalled();
-		});
-
-		it('should handle errors gracefully', () => {
-			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-			stateManager.setHash('invalidHash');
-			expect(consoleErrorSpy).toHaveBeenCalledWith(expect.any(Error));
-			consoleErrorSpy.mockRestore();
 		});
 	});
 

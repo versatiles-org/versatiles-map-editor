@@ -157,7 +157,7 @@
 			<PanelFile manager={geometryManager} />
 			<div class="grid1">
 				<button class="btn" onclick={() => panelShareMap?.open()}>Share/Embed</button>
-				<DialogShareMap bind:this={panelShareMap} bind:state={() => geometryManager.state, () => {}} />
+				<DialogShareMap bind:this={panelShareMap} state={geometryManager.state} />
 			</div>
 		</SidebarPanel>
 		<hr class="thick" />

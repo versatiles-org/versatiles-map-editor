@@ -4,7 +4,7 @@
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
 	import { formatLength } from '../lib/utils/format.js';
 
-	const { state: stateManager = $bindable() }: { state: StateManager } = $props();
+	const { state: stateManager }: { state: StateManager } = $props();
 
 	let dialog: Dialog | undefined;
 	let iframe: HTMLIFrameElement | undefined;
@@ -36,7 +36,7 @@
 
 	function getLinkCode() {
 		const digits = precision === 'auto' ? autoDigits : precision;
-		return `${baseUrl}#${stateManager.getHash(undefined, { resolution: resolutionOfDigits(digits) })}`;
+		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfDigits(digits) })}`;
 	}
 
 	function getEmbedCode() {
