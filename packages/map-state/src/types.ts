@@ -1,4 +1,5 @@
-export interface StateRoot {
+/** A map: its viewport, its properties and its elements. */
+export interface MapState {
 	map?: {
 		center: [number, number];
 		radius: number;
@@ -6,6 +7,9 @@ export interface StateRoot {
 	meta?: StateMetadata;
 	elements: StateElement[];
 }
+
+/** @deprecated Use `MapState`. */
+export type StateRoot = MapState;
 
 export type StateElement = StateElementMarker | StateElementLine | StateElementPolygon | StateElementCircle;
 

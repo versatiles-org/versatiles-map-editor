@@ -122,7 +122,7 @@ describe('GeometryManager', () => {
 					[1, 2],
 					[3, 4]
 				] as GeoPath,
-				style: { color: '#ABCDEF' },
+				style: { color: '#abcdef' },
 				type: 'line'
 			};
 
@@ -147,7 +147,7 @@ describe('GeometryManager', () => {
 					[1, 2],
 					[3, 4]
 				] as GeoPath,
-				style: { color: '#ABCDEF' },
+				style: { color: '#abcdef' },
 				strokeStyle: { color: '#123456' },
 				type: 'polygon'
 			};
@@ -259,7 +259,7 @@ describe('GeometryManager', () => {
 					[1, 2],
 					[3, 4]
 				];
-				line.layer.color.set('#ABCDEF');
+				line.layer.color.set('#abcdef');
 
 				const copy = manager.duplicateElement(line) as LineElement;
 

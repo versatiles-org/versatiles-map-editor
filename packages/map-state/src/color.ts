@@ -65,9 +65,9 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
 	return [f(0), f(8), f(4)];
 }
 
-/** "#RRGGBB", or "#RRGGBBAA" for a transparent color. */
+/** "#rrggbb", or "#rrggbbaa" for a transparent color. */
 export function formatHex({ r, g, b, alpha }: RGBA): string {
-	const hex = (v: number) => Math.round(clamp(v, 255)).toString(16).padStart(2, '0').toUpperCase();
+	const hex = (v: number) => Math.round(clamp(v, 255)).toString(16).padStart(2, '0');
 	const a = Math.round(clamp(alpha, 1) * 255);
 	return '#' + hex(r) + hex(g) + hex(b) + (a < 255 ? hex(a) : '');
 }

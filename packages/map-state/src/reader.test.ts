@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
-import type { StateMetadata, StateRoot, StateStyle } from './types.js';
+import type { StateMetadata, MapState, StateStyle } from './types.js';
 import { StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 
@@ -217,7 +217,7 @@ describe('StateReader', () => {
 
 	describe('readMap', () => {
 		it('should write and read a map object 1', () => {
-			const map: StateRoot['map'] = {
+			const map: MapState['map'] = {
 				center: [1.0085728693898135, 2.017145738779627],
 				radius: 10085.53503412156
 			};
@@ -231,7 +231,7 @@ describe('StateReader', () => {
 		});
 
 		it('should write and read a map object 2', () => {
-			const map0: StateRoot['map'] = {
+			const map0: MapState['map'] = {
 				center: [-121.013, 82.65],
 				radius: 10.021315508993025
 			};
@@ -302,7 +302,7 @@ describe('StateReader', () => {
 						point: [3, 4]
 					}
 				]
-			} as StateRoot;
+			} as MapState;
 
 			const writer = new StateWriter({ version: 0 });
 			writer.writeRoot(root);
@@ -315,7 +315,7 @@ describe('StateReader', () => {
 		});
 
 		it('should read a root object correctly', () => {
-			const root: StateRoot = {
+			const root: MapState = {
 				map: {
 					radius: 1024,
 					center: [1, 2]
@@ -324,7 +324,7 @@ describe('StateReader', () => {
 					{
 						type: 'marker',
 						point: [3, 4],
-						style: { halo: 1.2, opacity: 3.4, color: '#FF0000' }
+						style: { halo: 1.2, opacity: 3.4, color: '#ff0000' }
 					},
 					{
 						type: 'line',
@@ -336,8 +336,8 @@ describe('StateReader', () => {
 					{
 						type: 'polygon',
 						points: path,
-						style: { halo: 1.5, opacity: 0.8, color: '#0000FF64' },
-						strokeStyle: { halo: 1.5, opacity: 0.8, color: '#FFFF00' }
+						style: { halo: 1.5, opacity: 0.8, color: '#0000ff64' },
+						strokeStyle: { halo: 1.5, opacity: 0.8, color: '#ffff00' }
 					},
 					{
 						type: 'circle',
@@ -378,7 +378,7 @@ describe('StateReader', () => {
 				align: 4,
 				label: 'test',
 				visible: false,
-				color: '#C400FF42'
+				color: '#c400ff42'
 			};
 			const writer = new StateWriter({ version: 0 });
 			writer.writeStyle(style);
@@ -416,7 +416,7 @@ describe('StateReader', () => {
 		it('should read a color', () => {
 			const reader = StateReader.fromBitString(['00000000', '01111011', '11111111', '1', '00110011'].join(''));
 			const color = reader.readColor();
-			expect(color).toBe('#007BFF33');
+			expect(color).toBe('#007bff33');
 			expect(reader.ended()).toBe(true);
 		});
 		it('should write and read a RGB color', () => {
@@ -465,7 +465,7 @@ describe('StateReader', () => {
 							[expect.closeTo(13.3519, 5), expect.closeTo(52.50677, 5)]
 						],
 						style: {
-							color: '#AA0000',
+							color: '#aa0000',
 							width: 5
 						},
 						type: 'line'
@@ -474,7 +474,7 @@ describe('StateReader', () => {
 						point: [expect.closeTo(13.35139, 5), expect.closeTo(52.50655, 5)],
 						style: {
 							align: 2,
-							color: '#AA0000',
+							color: '#aa0000',
 							label: 'End'
 						},
 						type: 'marker'
@@ -483,7 +483,7 @@ describe('StateReader', () => {
 						point: [expect.closeTo(13.37097, 5), expect.closeTo(52.51871, 5)],
 						style: {
 							align: 2,
-							color: '#AA0000',
+							color: '#aa0000',
 							label: 'Start'
 						},
 						type: 'marker'
@@ -496,11 +496,11 @@ describe('StateReader', () => {
 							[expect.closeTo(13.37115, 5), expect.closeTo(52.51794, 5)]
 						],
 						strokeStyle: {
-							color: '#AA0000',
+							color: '#aa0000',
 							width: 1
 						},
 						style: {
-							color: '#AA0000',
+							color: '#aa0000',
 							pattern: 2
 						},
 						type: 'polygon'
@@ -519,7 +519,7 @@ describe('popups', () => {
 	const text = 'Line 1\n**bold** [link](https://example.org) äöü € 🗺️';
 
 	it('round-trip for all element types', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			elements: [
 				{ type: 'marker', point: [1, 2], popup: { text } },
 				{
@@ -547,7 +547,7 @@ describe('popups', () => {
 	});
 
 	it('skip empty popups', () => {
-		const state: StateRoot = { elements: [{ type: 'marker', point: [1, 2], popup: { text: '' } }] };
+		const state: MapState = { elements: [{ type: 'marker', point: [1, 2], popup: { text: '' } }] };
 		expect(decodeState(encodeState(state))).toStrictEqual({ elements: [{ type: 'marker', point: [1, 2] }] });
 	});
 
@@ -560,7 +560,7 @@ describe('popups', () => {
 
 describe('background', () => {
 	it('round-trips any options', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			meta: {
 				background: {
 					builder: 'satellite',
@@ -586,7 +586,7 @@ describe('background', () => {
 
 describe('legend', () => {
 	it('round-trips positions, layouts and entries', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			meta: {
 				legend: {
 					position: 'top-right',
@@ -594,9 +594,9 @@ describe('legend', () => {
 					font: 'serif',
 					entries: [
 						// the decoder returns colors in upper case
-						{ color: '#FF0000', label: 'Red area' },
-						{ color: '#0000FF', symbol: 12, label: 'Blue marker' },
-						{ color: '#00FF00', label: '' }
+						{ color: '#ff0000', label: 'Red area' },
+						{ color: '#0000ff', symbol: 12, label: 'Blue marker' },
+						{ color: '#00ff00', label: '' }
 					]
 				}
 			},
@@ -621,14 +621,14 @@ describe('legend', () => {
 
 describe('color scheme', () => {
 	it('round-trips', () => {
-		const state: StateRoot = { meta: { colorScheme: 'okabe-ito' }, elements: [] };
+		const state: MapState = { meta: { colorScheme: 'okabe-ito' }, elements: [] };
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 });
 
 describe('search', () => {
 	it('round-trips as a flag', () => {
-		const state: StateRoot = { meta: { search: true }, elements: [] };
+		const state: MapState = { meta: { search: true }, elements: [] };
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 		expect(decodeState(encodeState({ meta: { search: false }, elements: [] })).meta).toStrictEqual({});
 	});

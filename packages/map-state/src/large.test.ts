@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { decodeState, encodeState } from './index.js';
 import { descendants, parseXml, type XmlElement } from './xml.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 
 // Spreading a long array into the arguments of a function overflows the stack
 describe('large inputs', () => {
 	const long = 'x'.repeat(200_000);
 
 	it('round-trip a very long popup and label', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			elements: [{ type: 'marker', point: [1, 2], style: { label: long }, popup: { text: long } }]
 		};
 		expect(decodeState(encodeState(state))).toStrictEqual(state);

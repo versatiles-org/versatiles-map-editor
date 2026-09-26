@@ -4,7 +4,7 @@
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"lib": ["ES2022"],
-		"types": ["geojson"],
+		"types": [],
 		"strict": true,
 		"declaration": true,
 		"outDir": "dist",

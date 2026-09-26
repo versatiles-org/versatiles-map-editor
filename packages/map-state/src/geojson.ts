@@ -1,5 +1,6 @@
+import type * as GeoJSON from 'geojson';
 import type {
-	StateRoot,
+	MapState,
 	StateElement,
 	StateElementCircle,
 	StateElementLine,
@@ -89,7 +90,7 @@ function circleToFeature(el: StateElementCircle): GeoJSON.Feature {
 }
 
 /** Convert a map state document into a GeoJSON FeatureCollection. */
-export function stateToGeoJSON(state: StateRoot): GeoJSONDocument {
+export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	const features = state.elements.map((el): GeoJSON.Feature => {
 		switch (el.type) {
 			case 'marker':
@@ -244,14 +245,14 @@ function toFeatures(doc: GeoJSON.GeoJSON): GeoJSON.Feature[] {
  * with the editor's `map` viewport), a single Feature or a bare Geometry. Features
  * with missing or invalid geometry are skipped.
  */
-export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): StateRoot {
+export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapState {
 	const elements: StateElement[] = [];
 	for (const feature of flatten(toFeatures(doc))) {
 		const element = featureToElement(feature);
 		if (element) elements.push(element);
 	}
 
-	const state: StateRoot = { elements };
+	const state: MapState = { elements };
 	if (doc.type === 'FeatureCollection' && 'map' in doc && doc.map) {
 		const center = toPoint(doc.map.center);
 		const radius = sanitizeNumber(doc.map.radius, 0);

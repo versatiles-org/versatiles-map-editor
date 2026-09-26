@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { StateRoot } from '@versatiles/map-state';
+import type { MapState } from '@versatiles/map-state';
 
 const MAXLENGTH = 100;
 
@@ -16,18 +16,18 @@ export class StateHistory {
 	public undoEnabled = writable(false);
 	public redoEnabled = writable(false);
 
-	constructor(state: StateRoot) {
+	constructor(state: MapState) {
 		this.reset(state);
 	}
 
-	public reset(state: StateRoot) {
+	public reset(state: MapState) {
 		this.history = [];
 		this.index = 0;
 		this.push(state);
 	}
 
 	/** Add a state to the history. Returns false if it equals the current state. */
-	public push(state: StateRoot): boolean {
+	public push(state: MapState): boolean {
 		// The viewport is not part of the history, so panning the map is not undoable
 		const entry = JSON.stringify({ ...state, map: undefined });
 
@@ -48,17 +48,17 @@ export class StateHistory {
 		return true;
 	}
 
-	private get(): StateRoot {
+	private get(): MapState {
 		return JSON.parse(this.history[this.index]);
 	}
 
-	public undo(): StateRoot {
+	public undo(): MapState {
 		if (this.index < this.history.length - 1) this.index++;
 		this.updateButtons();
 		return this.get();
 	}
 
-	public redo(): StateRoot {
+	public redo(): MapState {
 		if (this.index > 0) this.index--;
 		this.updateButtons();
 		return this.get();

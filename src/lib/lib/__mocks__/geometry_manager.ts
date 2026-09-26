@@ -1,5 +1,5 @@
 import type { AbstractElement } from '../element/abstract.js';
-import type { StateRoot } from '@versatiles/map-state';
+import type { MapState } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { writable, type Writable } from 'svelte/store';
 import { vi } from 'vitest';
@@ -19,7 +19,7 @@ export class MockGeometryManager {
 		this.state = new StateManager(this as unknown as GeometryManagerInteractive);
 	}
 
-	public getState = vi.fn((): StateRoot => ({ map: { center: [0, 0], radius: 1000 }, elements: [] }));
+	public getState = vi.fn((): MapState => ({ map: { center: [0, 0], radius: 1000 }, elements: [] }));
 	public setState = vi.fn();
 	public removeElement = vi.fn();
 	public isInteractive = vi.fn(() => true);

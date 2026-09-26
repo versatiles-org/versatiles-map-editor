@@ -10,12 +10,12 @@ describe('parseColor and formatHex', () => {
 
 	it('read hex colors', () => {
 		expect(['#f00', '#F00A', '#ff0000', '#FF000080', '#ff0000ff', ' #ff0000 '].map(hex)).toStrictEqual([
-			'#FF0000',
-			'#FF0000AA',
-			'#FF0000',
-			'#FF000080',
-			'#FF0000',
-			'#FF0000'
+			'#ff0000',
+			'#ff0000aa',
+			'#ff0000',
+			'#ff000080',
+			'#ff0000',
+			'#ff0000'
 		]);
 	});
 
@@ -29,7 +29,7 @@ describe('parseColor and formatHex', () => {
 				'hsla(120,100%,50%,0.5)',
 				'transparent'
 			].map(hex)
-		).toStrictEqual(['#010203', '#01020380', '#01020380', '#00FF00', '#00FF0080', '#00000000']);
+		).toStrictEqual(['#010203', '#01020380', '#01020380', '#00ff00', '#00ff0080', '#00000000']);
 	});
 
 	it('reject other values', () => {

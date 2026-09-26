@@ -12,7 +12,7 @@ import type {
 	StateMetadata,
 	StateLegend,
 	StatePopup,
-	StateRoot,
+	MapState,
 	StateStyle
 } from './types.js';
 
@@ -115,7 +115,7 @@ export class StateWriter {
 		});
 	}
 
-	writeRoot(root: StateRoot) {
+	writeRoot(root: MapState) {
 		this.writeInteger(this.version, 3);
 		if (this.version >= 1) {
 			this.writePalette(collectColors(root));
@@ -153,7 +153,7 @@ export class StateWriter {
 	}
 
 	/** Returns the center as the reader decodes it, or undefined without a map. */
-	writeMap(map: StateRoot['map']): [number, number] | undefined {
+	writeMap(map: MapState['map']): [number, number] | undefined {
 		// A degenerate viewport (e.g. from a zero-sized map container) is not worth storing
 		if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) {
 			this.writeBit(false);
@@ -435,7 +435,7 @@ export class StateWriter {
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */
-export function collectColors(root: StateRoot): string[] {
+export function collectColors(root: MapState): string[] {
 	const colors: string[] = [];
 	for (const element of root.elements) {
 		if (element.style?.color) colors.push(element.style.color);

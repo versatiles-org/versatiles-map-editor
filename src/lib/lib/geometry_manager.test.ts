@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManager, keepElements } from './geometry_manager.js';
 import { get } from 'svelte/store';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import type { StateRoot } from '@versatiles/map-state';
+import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.js';
 import { inlineSources } from '@versatiles/style';
 import type { StyleSpecification } from 'maplibre-gl';
@@ -123,7 +123,7 @@ describe('GeometryManager', () => {
 	});
 
 	it('should load a state', async () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			map: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
@@ -139,12 +139,12 @@ describe('GeometryManager', () => {
 	});
 
 	it('should propagate errors while loading a state', async () => {
-		const state = { elements: [{ type: 'unknown' }] } as unknown as StateRoot;
+		const state = { elements: [{ type: 'unknown' }] } as unknown as MapState;
 		await expect(geometryManager.loadState(state)).rejects.toThrow('Unknown element type');
 	});
 
 	it('should set a state and fit map bounds', async () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			map: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
@@ -231,7 +231,7 @@ describe('GeometryManager', () => {
 
 		it('is not loading any more after an error', async () => {
 			await expect(
-				geometryManager.setState({ elements: [{ type: 'unknown' }] } as unknown as StateRoot)
+				geometryManager.setState({ elements: [{ type: 'unknown' }] } as unknown as MapState)
 			).rejects.toThrow();
 			expect(geometryManager.isLoading()).toBe(false);
 		});

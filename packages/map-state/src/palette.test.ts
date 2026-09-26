@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { collectColors, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 
-function encode(state: StateRoot, version: number): string {
+function encode(state: MapState, version: number): string {
 	const writer = new StateWriter({ version });
 	writer.writeRoot(state);
 	return writer.asBase64();
@@ -12,8 +12,8 @@ function encode(state: StateRoot, version: number): string {
 
 // many elements in a few colors, as in a typical map
 // without a viewport, whose radius is stored lossy by design
-const state: StateRoot = {
-	meta: { legend: { entries: [{ color: '#0000FF', label: 'Water' }] } },
+const state: MapState = {
+	meta: { legend: { entries: [{ color: '#0000ff', label: 'Water' }] } },
 	elements: Array.from({ length: 20 }, (_, i) => ({
 		type: 'polygon' as const,
 		// from integers, so the coordinates are exact at the codec's resolution
@@ -22,14 +22,19 @@ const state: StateRoot = {
 			[(1301 + i) / 100, 52],
 			[(1301 + i) / 100, 52.01]
 		] as [number, number][],
-		style: { color: i % 2 ? '#0000FF' : '#00FF00' },
-		strokeStyle: { color: '#FFFFFF80' }
+		style: { color: i % 2 ? '#0000ff' : '#00ff00' },
+		strokeStyle: { color: '#ffffff80' }
 	}))
 };
 
 describe('color palette (version 1)', () => {
 	it('round-trips styles, stroke styles and legend colors', () => {
 		expect(StateReader.fromBase64(encode(state, 1)).readRoot()).toStrictEqual(state);
+	});
+
+	it('decodes colors as lowercase hex', () => {
+		const upper: MapState = { elements: [{ type: 'marker', point: [1, 2], style: { color: '#ABCDEF' } }] };
+		expect(decodeState(encodeState(upper)).elements[0].style).toStrictEqual({ color: '#abcdef' });
 	});
 
 	it('makes the hash shorter', () => {
@@ -39,18 +44,18 @@ describe('color palette (version 1)', () => {
 	});
 
 	it('lists each color once, most frequent first', () => {
-		expect(collectColors(state)).toStrictEqual(['#FFFFFF80', '#0000FF', '#00FF00']);
-		const mixedCase: StateRoot = {
+		expect(collectColors(state)).toStrictEqual(['#ffffff80', '#0000ff', '#00ff00']);
+		const mixedCase: MapState = {
 			elements: [
 				{ type: 'marker', point: [0, 0], style: { color: '#ff0000' } },
-				{ type: 'marker', point: [0, 0], style: { color: '#FF0000' } }
+				{ type: 'marker', point: [0, 0], style: { color: '#ff0000' } }
 			]
 		};
 		expect(collectColors(mixedCase)).toStrictEqual(['#ff0000']);
 	});
 
 	it('handles states without colors', () => {
-		const empty: StateRoot = { elements: [{ type: 'marker', point: [1, 2] }] };
+		const empty: MapState = { elements: [{ type: 'marker', point: [1, 2] }] };
 		expect(StateReader.fromBase64(encode(empty, 1)).readRoot()).toStrictEqual(empty);
 	});
 

@@ -2,21 +2,21 @@ import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
-import type { StateRoot } from '@versatiles/map-state';
+import type { MapState } from '@versatiles/map-state';
 import { get } from 'svelte/store';
 import { MockMap } from '$lib/__mocks__/map.js';
 
 describe('StateManager', () => {
 	let geometryManager: GeometryManagerInteractive;
 	let stateManager: StateManager;
-	const state1: StateRoot = {
+	const state1: MapState = {
 		map: {
 			center: [1, 2],
 			radius: 16
 		},
 		elements: [{ type: 'marker', point: [3, 4], style: { label: 'test' } }]
 	};
-	const state2: StateRoot = {
+	const state2: MapState = {
 		map: {
 			center: [3, 4],
 			radius: 1024

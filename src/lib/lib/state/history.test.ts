@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StateHistory } from './history.js';
-import type { StateRoot } from '@versatiles/map-state';
+import type { MapState } from '@versatiles/map-state';
 import { get } from 'svelte/store';
 
 describe('StateHistory', () => {
 	let history: StateHistory;
-	const state1: StateRoot = {
+	const state1: MapState = {
 		map: {
 			center: [1, 2],
 			radius: 16
 		},
 		elements: [{ type: 'marker', point: [3, 4], style: { label: 'test' } }]
 	};
-	const state2: StateRoot = {
+	const state2: MapState = {
 		map: {
 			center: [3, 4],
 			radius: 1024
@@ -94,7 +94,7 @@ describe('StateHistory', () => {
 	});
 
 	it('should not modify the pushed state', () => {
-		const state: StateRoot = { map: { center: [5, 6], radius: 100 }, elements: [] };
+		const state: MapState = { map: { center: [5, 6], radius: 100 }, elements: [] };
 		history.push(state);
 		expect(state).toStrictEqual({ map: { center: [5, 6], radius: 100 }, elements: [] });
 	});

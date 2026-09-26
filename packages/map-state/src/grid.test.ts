@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { digitsForResolution, LocalGrid, resolutionOfDigits } from './grid.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 
-function encode(state: StateRoot, version: number, resolution?: number): string {
+function encode(state: MapState, version: number, resolution?: number): string {
 	const writer = new StateWriter({ version, resolution });
 	writer.writeRoot(state);
 	return writer.asBase64();
@@ -28,7 +28,7 @@ describe('LocalGrid', () => {
 });
 
 // a map in Berlin, far from the origin of the coordinates
-const berlin: StateRoot = {
+const berlin: MapState = {
 	map: { center: [13.4, 52.5], radius: 10000 },
 	elements: [
 		{ type: 'marker', point: [13.41234, 52.51234] },
@@ -62,7 +62,7 @@ describe('coordinates relative to the map center (version 1)', () => {
 	});
 
 	it('work without a map viewport', () => {
-		const state: StateRoot = { elements: [{ type: 'marker', point: [-70.12345, -33.45678] }] };
+		const state: MapState = { elements: [{ type: 'marker', point: [-70.12345, -33.45678] }] };
 		expect(decode(encode(state, 1))).toStrictEqual(state);
 	});
 

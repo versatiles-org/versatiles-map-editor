@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from './geojson.js';
 import { encodeGeoJSON, decodeGeoJSON } from './index.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 
 describe('stateToGeoJSON', () => {
 	it('maps a marker to a Point feature with symbol properties', () => {
@@ -73,7 +73,7 @@ describe('stateToGeoJSON', () => {
 });
 
 describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
-	const state: StateRoot = {
+	const state: MapState = {
 		map: { center: [13.4, 52.5], radius: 1234 },
 		elements: [
 			{ type: 'marker', point: [13.4, 52.5] },

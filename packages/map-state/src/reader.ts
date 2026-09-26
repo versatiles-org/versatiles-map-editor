@@ -9,7 +9,7 @@ import type {
 	StateLegend,
 	StateLegendEntry,
 	StatePopup,
-	StateRoot,
+	MapState,
 	StateStyle
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
@@ -161,9 +161,9 @@ export class StateReader {
 		return points;
 	}
 
-	readRoot(): StateRoot {
+	readRoot(): MapState {
 		try {
-			const root: StateRoot = { elements: [] };
+			const root: MapState = { elements: [] };
 
 			const version = this.readInteger(3);
 			if (version > MAX_CODEC_VERSION) {
@@ -221,7 +221,7 @@ export class StateReader {
 		}
 	}
 
-	readMap(): StateRoot['map'] {
+	readMap(): MapState['map'] {
 		try {
 			if (!this.readBit()) return undefined;
 

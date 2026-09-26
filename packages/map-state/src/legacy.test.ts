@@ -20,7 +20,7 @@ describe('hashes of format version 0', () => {
 					[1, 2],
 					[3, 4]
 				],
-				style: { color: '#ABCDEF' }
+				style: { color: '#abcdef' }
 			}
 		]);
 		expect(decode('G2haCUQhiAqjmA0msA0msA0msYq83vBgSNFYA')).toStrictEqual([
@@ -30,7 +30,7 @@ describe('hashes of format version 0', () => {
 					[1, 2],
 					[3, 4]
 				],
-				style: { color: '#ABCDEF' },
+				style: { color: '#abcdef' },
 				strokeStyle: { color: '#123456' }
 			}
 		]);

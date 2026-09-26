@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import { STYLE_HISTORY_SIZE, StyleHistory } from './style_history.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 
-function encode(state: StateRoot, version: number): string {
+function encode(state: MapState, version: number): string {
 	const writer = new StateWriter({ version });
 	writer.writeRoot(state);
 	return writer.asBase64();
@@ -13,12 +13,12 @@ function encode(state: StateRoot, version: number): string {
 const decode = (base64: string) => StateReader.fromBase64(base64).readRoot();
 
 // markers that differ only in their label, as in an imported table
-const markers: StateRoot = {
+const markers: MapState = {
 	elements: Array.from({ length: 30 }, (_, i) => ({
 		type: 'marker' as const,
 		point: [(1300 + i) / 100, (5200 + i) / 100] as [number, number],
 		// upper case, as the decoder returns colors
-		style: { color: ['#E41A1C', '#377EB8', '#4DAF4A'][i % 3], pattern: 12, size: 1.5, label: `Place ${i}` }
+		style: { color: ['#e41a1c', '#377eb8', '#4daf4a'][i % 3], pattern: 12, size: 1.5, label: `Place ${i}` }
 	}))
 };
 
@@ -33,7 +33,7 @@ describe('style references (version 1)', () => {
 	});
 
 	it('remove fields that the referenced style has', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			elements: [
 				{
 					type: 'polygon',
@@ -69,7 +69,7 @@ describe('style references (version 1)', () => {
 	});
 
 	it('compare values as they are encoded', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			elements: [
 				{ type: 'marker', point: [0, 0], style: { halo: 1.5, size: 2 } },
 				{ type: 'marker', point: [0, 0], style: { halo: 1.504, size: 2 } }
@@ -82,7 +82,7 @@ describe('style references (version 1)', () => {
 	});
 
 	it('work with more styles than the history keeps', () => {
-		const state: StateRoot = {
+		const state: MapState = {
 			elements: Array.from({ length: STYLE_HISTORY_SIZE * 2 }, (_, i) => ({
 				type: 'marker' as const,
 				point: [0, 0] as [number, number],
@@ -115,9 +115,9 @@ describe('StyleHistory', () => {
 		history.remember({ color: '#00ff00' });
 		expect(history.get(1)).toStrictEqual({ color: '#00ff00' });
 		// the same style, as it is encoded
-		history.remember({ color: '#FF0000' });
+		history.remember({ color: '#ff0000' });
 		expect(history.length).toBe(2);
-		expect(history.get(1)).toStrictEqual({ color: '#FF0000' });
+		expect(history.get(1)).toStrictEqual({ color: '#ff0000' });
 		expect(history.get(2)).toStrictEqual({ color: '#00ff00' });
 		expect(history.get(0)).toBeUndefined();
 		expect(history.get(3)).toBeUndefined();

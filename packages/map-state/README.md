@@ -49,6 +49,9 @@ stateFromKML(kml: string): MapState
 - `resolution`: the precision of the coordinates in meters, rounded to decimal places of degrees.
   The default of 1 m keeps all detail; coarser values make shorter strings, e.g. for sharing.
   `digitsForResolution` and `resolutionOfDigits` convert between meters and decimal places.
+- Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
+- `CODEC_VERSION` is the format version that `encodeState` writes.
+- `StateRoot` is a deprecated alias of `MapState`.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `symbolEntries`, `removeDefaultFields`) helps to
   render the elements the way the editor does.

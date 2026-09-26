@@ -4,7 +4,7 @@ import type { GeometryManagerInteractive } from './geometry_manager_interactive.
 import type { SelectionHandler } from './selection.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.js';
-import type { StateBackground, StateLegend, StateRoot, StateElement } from '@versatiles/map-state';
+import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { getMapStyle } from '$lib/utils/map_style.js';
@@ -174,7 +174,7 @@ export class GeometryManager {
 		this.elements.update((elements) => elements.filter((e) => e !== element));
 	}
 
-	public async loadState(state: StateRoot) {
+	public async loadState(state: MapState) {
 		if (!state) return;
 		this.clear();
 		await this.setState(state);
@@ -182,7 +182,7 @@ export class GeometryManager {
 	}
 
 	/** Move the map to show the given viewport (center + radius in meters). */
-	public fitViewport(viewport: NonNullable<StateRoot['map']>) {
+	public fitViewport(viewport: NonNullable<MapState['map']>) {
 		const { center, radius } = viewport;
 		const dy = (radius * 360) / 40074000;
 		const dx = Math.min(180, dy / Math.max(Math.cos((center[1] * Math.PI) / 180), 1e-6));
@@ -211,7 +211,7 @@ export class GeometryManager {
 		return new Promise((resolve) => this.loadedCallbacks.push(resolve));
 	}
 
-	public async setState(state: StateRoot) {
+	public async setState(state: MapState) {
 		if (this.loadingStates++ === 0) this.loadingStore.set(true);
 		try {
 			await this.applyState(state);
@@ -225,7 +225,7 @@ export class GeometryManager {
 		}
 	}
 
-	private async applyState(state: StateRoot) {
+	private async applyState(state: MapState) {
 		if (!state) return;
 		// A newer state (e.g. a quick second redo) replaces this one while it waits
 		const request = ++this.stateRequest;

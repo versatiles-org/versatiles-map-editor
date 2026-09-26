@@ -1,3 +1,4 @@
+import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
 import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';

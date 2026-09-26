@@ -1,5 +1,6 @@
+import type * as GeoJSON from 'geojson';
 import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
-import type { StateRoot } from './types.js';
+import type { MapState } from './types.js';
 import { child, children, descendants, parseXml, text, xml, type XmlElement } from './xml.js';
 
 /**
@@ -24,7 +25,7 @@ type Point = [number, number];
 // ---------------------------------------------------------------------------
 
 /** The map state as a KML document. */
-export function stateToKML(state: StateRoot): string {
+export function stateToKML(state: MapState): string {
 	const doc = stateToGeoJSON(state);
 	const documentData: Record<string, string> = {};
 	if (doc.map) documentData[MAP_DATA] = JSON.stringify(doc.map);
@@ -159,7 +160,7 @@ function kmlColor(color: unknown, opacity = 1): string {
 // ---------------------------------------------------------------------------
 
 /** A KML document as map state. Throws if it is no KML. */
-export function stateFromKML(kml: string): StateRoot {
+export function stateFromKML(kml: string): MapState {
 	const root = parseXml(kml);
 	const kmlElement = child(root, 'kml');
 	if (!kmlElement) throw new Error('Not a KML document');

@@ -17,7 +17,7 @@ import {
 	type GeoJSONDocument,
 	type StateElement,
 	type StateMetadata,
-	type StateRoot
+	type MapState
 } from '@versatiles/map-state';
 import type { GeoPoint } from './utils/types.js';
 
@@ -128,7 +128,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		return stateToGeoJSON(this.getState());
 	}
 
-	public getState(): StateRoot {
+	public getState(): MapState {
 		const center = this.map.getCenter();
 		const bounds = this.map.getBounds();
 		const radiusDegrees =
@@ -163,7 +163,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 	 * Add the content of an imported file: its elements are added to the map, and the map
 	 * properties it has (e.g. the background) replace the current ones.
 	 */
-	public addState(state: StateRoot) {
+	public addState(state: MapState) {
 		if (state.map) this.fitViewport(state.map);
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
