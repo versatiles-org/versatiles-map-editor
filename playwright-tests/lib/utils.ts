@@ -144,8 +144,8 @@ export async function trackServerRequests(page: Page): Promise<() => string[]> {
 
 /**
  * Serve the responses of other servers (tile server, geocoder) from a cache on disk, so the tests
- * do not depend on them. Only successful GET responses are stored, so a temporary server error is
- * not replayed forever. Tests run in parallel, so files are written atomically: a response is
+ * do not depend on them. Only successful GET responses and 404s (e.g. a tile outside the data) are
+ * stored, so a temporary server error is not replayed forever. Tests run in parallel, so files are written atomically: a response is
  * complete once its meta file exists.
  */
 export async function setupRequestCache(page: Page): Promise<void> {
@@ -176,7 +176,7 @@ export async function setupRequestCache(page: Page): Promise<void> {
 			delete headers['content-length'];
 			const meta = { status: response.status(), headers, url };
 
-			if (response.ok()) {
+			if (isCacheable(meta.status)) {
 				// the body first: the meta file marks the entry as complete
 				writeFileAtomically(bodyPath, body);
 				writeFileAtomically(metaPath, JSON.stringify(meta, null, '\t'));
@@ -191,6 +191,11 @@ export async function setupRequestCache(page: Page): Promise<void> {
 	});
 }
 
+/** Success, or a resource that does not exist. Not a server error, which may be temporary. */
+function isCacheable(status: number): boolean {
+	return (status >= 200 && status < 300) || status === 404;
+}
+
 /** A cached response, or undefined if there is none or it cannot be read. */
 function readCachedResponse(
 	metaPath: string,
@@ -199,8 +204,8 @@ function readCachedResponse(
 	try {
 		if (!existsSync(metaPath)) return undefined;
 		const { status, headers } = JSON.parse(readFileSync(metaPath, 'utf-8'));
-		// an error that older versions of this cache stored
-		if (!(status >= 200 && status < 300)) return undefined;
+		// a server error that older versions of this cache stored
+		if (!isCacheable(status)) return undefined;
 		return { status, headers, body: readFileSync(bodyPath) };
 	} catch {
 		// e.g. a damaged file: fetched again and replaced
