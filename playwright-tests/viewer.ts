@@ -133,3 +133,29 @@ test.describe('overlays of the viewer on a phone', () => {
 		}
 	}
 });
+
+test.describe('the share dialog on the smallest editor screen', () => {
+	test.use({ viewport: { width: 600, height: 400 } });
+
+	test('keeps all its controls reachable', async ({ page }) => {
+		await page.goto('/');
+		await waitForMapIsReady(page);
+		await page.getByRole('button', { name: /^Share/ }).click();
+		const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+
+		for (const control of [
+			dialog.getByRole('button', { name: 'Copy Embed Code' }),
+			dialog.getByRole('combobox', { name: 'Precision:' }),
+			dialog.getByRole('checkbox', { name: 'Address search in the map' }),
+			dialog.getByRole('button', { name: 'Reload' })
+		]) {
+			await control.scrollIntoViewIfNeeded();
+			await expect(control).toBeInViewport();
+		}
+
+		// the caption of the aspect ratios does not cover the "Reload" button
+		const caption = (await dialog.getByText('Aspect ratio of the preview').boundingBox())!;
+		const reload = (await dialog.getByRole('button', { name: 'Reload' }).boundingBox())!;
+		expect(boxesOverlap(caption, reload)).toBe(false);
+	});
+});

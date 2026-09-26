@@ -190,7 +190,8 @@
 		width: 100%;
 		flex: 1;
 		min-height: 0;
-		overflow: hidden;
+		// scrolls if the controls do not fit, e.g. on a small screen
+		overflow: auto;
 
 		.head {
 			grid-column: 1 / -1;
@@ -280,8 +281,50 @@
 		.bottom {
 			grid-column: 1 / 1;
 			grid-row: 3 / 3;
-			text-align: center;
-			padding-top: 1rem;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			align-items: flex-end;
+			// room for the caption above the aspect ratios, also when they wrap below "Reload"
+			gap: 1.8em var(--btn-gap);
+			padding-top: 1.5rem;
+		}
+	}
+
+	// On a small screen, the controls come first, and the preview gets a fixed height below them
+	@media (max-width: 700px), (max-height: 560px) {
+		.grid {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto;
+
+			.head {
+				font-size: 1em;
+				margin-bottom: 0;
+			}
+
+			.right {
+				grid-column: 1;
+				grid-row: 2;
+
+				textarea,
+				.hint,
+				.copy-error {
+					width: 100%;
+					box-sizing: border-box;
+				}
+			}
+
+			.left {
+				grid-column: 1;
+				grid-row: 3;
+				height: 240px;
+				flex-shrink: 0;
+			}
+
+			.bottom {
+				grid-column: 1;
+				grid-row: 4;
+			}
 		}
 	}
 	.sr-only {
