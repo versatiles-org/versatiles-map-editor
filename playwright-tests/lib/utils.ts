@@ -1,8 +1,8 @@
 import { type Page } from '@playwright/test';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
-import { createHash } from 'crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { createHash, randomBytes } from 'crypto';
+import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -142,16 +142,21 @@ export async function trackServerRequests(page: Page): Promise<() => string[]> {
 	return () => tileServerRequests.sort();
 }
 
+/**
+ * Serve the responses of other servers (tile server, geocoder) from a cache on disk, so the tests
+ * do not depend on them. Only successful GET responses are stored, so a temporary server error is
+ * not replayed forever. Tests run in parallel, so files are written atomically: a response is
+ * complete once its meta file exists.
+ */
 export async function setupRequestCache(page: Page): Promise<void> {
-	if (!existsSync(CACHE_DIR)) {
-		mkdirSync(CACHE_DIR, { recursive: true });
-	}
+	mkdirSync(CACHE_DIR, { recursive: true });
 
 	await page.route('**', async (route) => {
-		const url = route.request().url();
+		const request = route.request();
+		const url = request.url();
 		const { hostname } = new URL(url);
 
-		if (hostname === 'localhost' || hostname === '127.0.0.1') {
+		if (hostname === 'localhost' || hostname === '127.0.0.1' || request.method() !== 'GET') {
 			return route.continue();
 		}
 
@@ -159,11 +164,8 @@ export async function setupRequestCache(page: Page): Promise<void> {
 		const metaPath = join(CACHE_DIR, hash + '.meta.json');
 		const bodyPath = join(CACHE_DIR, hash + '.body');
 
-		if (existsSync(metaPath) && existsSync(bodyPath)) {
-			const meta = JSON.parse(readFileSync(metaPath, 'utf-8'));
-			const body = readFileSync(bodyPath);
-			return route.fulfill({ status: meta.status, headers: meta.headers, body });
-		}
+		const cached = readCachedResponse(metaPath, bodyPath);
+		if (cached) return route.fulfill(cached);
 
 		try {
 			const response = await route.fetch();
@@ -174,12 +176,41 @@ export async function setupRequestCache(page: Page): Promise<void> {
 			delete headers['content-length'];
 			const meta = { status: response.status(), headers, url };
 
-			writeFileSync(metaPath, JSON.stringify(meta, null, '\t'));
-			writeFileSync(bodyPath, body);
+			if (response.ok()) {
+				// the body first: the meta file marks the entry as complete
+				writeFileAtomically(bodyPath, body);
+				writeFileAtomically(metaPath, JSON.stringify(meta, null, '\t'));
+			}
 
-			return route.fulfill({ status: meta.status, headers, body });
+			return await route.fulfill({ status: meta.status, headers, body });
 		} catch {
-			// Page may have been closed while request was in flight
+			// The server cannot be reached, or the page was closed while the request was in flight.
+			// Without an answer, the request would hang until the test times out.
+			await route.abort().catch(() => {});
 		}
 	});
+}
+
+/** A cached response, or undefined if there is none or it cannot be read. */
+function readCachedResponse(
+	metaPath: string,
+	bodyPath: string
+): { status: number; headers: Record<string, string>; body: Buffer } | undefined {
+	try {
+		if (!existsSync(metaPath)) return undefined;
+		const { status, headers } = JSON.parse(readFileSync(metaPath, 'utf-8'));
+		// an error that older versions of this cache stored
+		if (!(status >= 200 && status < 300)) return undefined;
+		return { status, headers, body: readFileSync(bodyPath) };
+	} catch {
+		// e.g. a damaged file: fetched again and replaced
+		return undefined;
+	}
+}
+
+/** Write to a temporary file and rename it, so no one reads a half-written file. */
+function writeFileAtomically(path: string, data: string | Buffer): void {
+	const temporary = `${path}.${process.pid}.${randomBytes(4).toString('hex')}.tmp`;
+	writeFileSync(temporary, data);
+	renameSync(temporary, path);
 }
