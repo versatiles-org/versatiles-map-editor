@@ -1617,3 +1617,18 @@ test('the page has a title and a description', async ({ page }) => {
 	await expect(page).toHaveTitle('VersaTiles Map Editor');
 	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /map/);
 });
+
+test('a loading indicator shows until the map has loaded', async ({ page }) => {
+	// hold back the tiles, so the map keeps loading
+	let release = () => {};
+	const released = new Promise<void>((resolve) => (release = resolve));
+	await page.route('**/tiles/**', async (route) => {
+		await released;
+		await route.fallback();
+	});
+	await page.goto(mapUrl);
+	await expect(page.getByRole('status').filter({ hasText: 'Loading map…' })).toBeVisible();
+	release();
+	await waitForMapIsReady(page);
+	await expect(page.getByText('Loading map…')).toHaveCount(0);
+});

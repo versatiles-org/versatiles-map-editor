@@ -30,7 +30,7 @@
 
 	let container: HTMLDivElement;
 	let map: MaplibreMapType | undefined;
-	let triggeredMapReady = false;
+	let triggeredMapReady = $state(false);
 	let showSidebar = $state(false);
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
@@ -38,6 +38,9 @@
 	const searchEnabled = $derived(geometryManager?.search ?? writable(false));
 	// only in the read-only viewer; the editor has its search in the sidebar
 	const showSearch = $derived(!showSidebar && $searchEnabled);
+	const loadingState = $derived(geometryManager?.loading ?? writable(false));
+	// until the map has loaded for the first time, and while a map from a link or file loads
+	const loading = $derived(!triggeredMapReady || $loadingState);
 	// the height of the search and the hint at the top of the viewer
 	let topOverlaysHeight = $state(0);
 
@@ -191,6 +194,11 @@
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
+	{#if loading}
+		<div class="loading" role="status" style:right="{showSidebar ? 250 : 0}px">
+			<span class="spinner" aria-hidden="true"></span>Loading map…
+		</div>
+	{/if}
 	<Notifications right={showSidebar ? 250 : 0} />
 	{#if geometryManager && $legend}
 		<!-- a legend at the top goes below the search and the hint -->
@@ -250,6 +258,55 @@
 		height: 100%;
 		position: relative;
 		min-height: 6em;
+	}
+
+	/* appears only after a moment, so a quick load does not flash */
+	.loading {
+		position: absolute;
+		left: 0;
+		bottom: 3em;
+		width: fit-content;
+		margin: 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+		padding: 0.4em 0.8em;
+		border-radius: var(--border-radius);
+		background: rgba(255, 255, 255, 0.9);
+		color: var(--color-text);
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		font-size: 0.875rem;
+		pointer-events: none;
+		z-index: 2;
+		opacity: 0;
+		animation: appear 0.2s 0.5s forwards;
+	}
+
+	.spinner {
+		width: 1em;
+		height: 1em;
+		border: 2px solid var(--color-disabled-bg);
+		border-top-color: var(--color-blue);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes appear {
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.spinner {
+			animation-duration: 3s;
+		}
 	}
 
 	.map {

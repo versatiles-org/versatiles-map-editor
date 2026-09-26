@@ -174,9 +174,11 @@ describe('GeometryManager', () => {
 	describe('loading', () => {
 		it('reports a state as loading until its elements exist', async () => {
 			expect(geometryManager.isLoading()).toBe(false);
+			expect(get(geometryManager.loading)).toBe(false);
 			// the style is not loaded yet, so the elements have to wait
 			const loading = geometryManager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			expect(geometryManager.isLoading()).toBe(true);
+			expect(get(geometryManager.loading)).toBe(true);
 			let loaded = false;
 			geometryManager.whenLoaded().then(() => (loaded = true));
 
@@ -185,6 +187,7 @@ describe('GeometryManager', () => {
 			await Promise.resolve();
 			expect(loaded).toBe(true);
 			expect(geometryManager.isLoading()).toBe(false);
+			expect(get(geometryManager.loading)).toBe(false);
 			expect(get(geometryManager.elements)).toHaveLength(1);
 		});
 
