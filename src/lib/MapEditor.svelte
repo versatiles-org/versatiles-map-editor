@@ -7,16 +7,13 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import Sidebar from './components/Sidebar.svelte';
-	import NodeDeleteButton from './components/NodeDeleteButton.svelte';
 	import Legend from './components/Legend.svelte';
 	import Notifications from './components/Notifications.svelte';
 	import { notify } from '$lib/utils/notify.js';
 	import SearchPlace from './components/SearchPlace.svelte';
 	import { writable } from 'svelte/store';
-	import { getCountryBoundingBox } from '$lib/utils/location.js';
 	import { GeometryManager } from './core/geometry_manager.js';
-	import { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
 	import { PopupHandler } from './core/popup_handler.js';
 	import { loadConfig } from '$lib/utils/config.js';
 	import { decodeState } from '@versatiles/map-state';
@@ -57,7 +54,31 @@
 		return destroy;
 	});
 
+	/**
+	 * The code of the editor, loaded only for the editor: embeds and phones show the read-only
+	 * viewer, which does not need the sidebar with its dialogs, importers and codecs.
+	 */
+	async function loadEditor() {
+		const [{ GeometryManagerInteractive }, { default: Sidebar }, { default: NodeDeleteButton }] = await Promise.all([
+			import('./core/geometry_manager_interactive.js'),
+			import('./components/Sidebar.svelte'),
+			import('./components/NodeDeleteButton.svelte')
+		]);
+		return { GeometryManagerInteractive, Sidebar, NodeDeleteButton };
+	}
+	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
+
+	/** Show the country of the user (from the time zone), when there is no map in the URL. */
+	async function showCountry(map: MaplibreMapType) {
+		// only needed without a map, so it is loaded only then
+		const { getCountryBoundingBox } = await import('$lib/utils/location.js');
+		const bbox = getCountryBoundingBox();
+		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
+	}
+
+	let destroyed = false;
 	function destroy(): void {
+		destroyed = true;
 		persistState.cancel();
 		removeEventListener('hashchange', onHashChange);
 		// before map.remove(), so the elements can still remove their layers
@@ -138,7 +159,7 @@
 			fadeDuration: 0
 		});
 
-		onMapInit(map, maplibre);
+		void onMapInit(map, maplibre);
 
 		map.on('idle', checkMapReady);
 
@@ -150,7 +171,7 @@
 		}
 	}
 
-	function onMapInit(map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) {
+	async function onMapInit(map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) {
 		// The editor needs room for the sidebar and the map. Smaller screens (phones) get the
 		// read-only viewer. The size is checked once, since switching modes would lose the editor state.
 		const embedded = window.self !== window.top;
@@ -167,10 +188,21 @@
 
 		map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-left');
 
-		if (showSidebar) {
+		let hash = location.hash.slice(1);
+		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
+
+		// The map has no style yet, so it shows nothing until the code has loaded
+		const [loadedEditor] = await Promise.all([
+			showSidebar ? loadEditor() : undefined,
+			hash ? undefined : showCountry(map)
+		]);
+		if (destroyed) return;
+
+		if (loadedEditor) {
+			editor = loadedEditor;
 			// the color schemes and fonts of this editor instance
 			void loadConfig();
-			const manager = new GeometryManagerInteractive(map);
+			const manager = new loadedEditor.GeometryManagerInteractive(map);
 			manager.state.events.on('change', requestPersist);
 			map.on('moveend', requestPersist);
 			geometryManager = manager;
@@ -179,12 +211,7 @@
 			new PopupHandler(geometryManager);
 		}
 
-		let hash = location.hash.slice(1);
-		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
-		if (!hash || !readHash(hash)) {
-			const bbox = getCountryBoundingBox();
-			if (bbox) map.fitBounds(bbox, { animate: false });
-		}
+		if (hash && !readHash(hash)) void showCountry(map);
 
 		addEventListener('hashchange', onHashChange);
 	}
@@ -221,9 +248,9 @@
 			{/if}
 		</div>
 	{/if}
-	{#if showSidebar && geometryManager && geometryManager.isInteractive()}
-		<NodeDeleteButton {geometryManager} />
-		<Sidebar {geometryManager} />
+	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
+		<editor.NodeDeleteButton {geometryManager} />
+		<editor.Sidebar {geometryManager} />
 
 		<style>
 			.page .container {

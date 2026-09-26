@@ -51,11 +51,15 @@ describe('MapEditor', () => {
 		unmount(component);
 	});
 
-	it('removes the map and the hashchange listener on unmount', () => {
+	// The editor code is loaded after the map is created
+	const editorLoaded = () => vi.waitFor(() => expect(document.querySelector('.sidebar')).not.toBeNull());
+
+	it('removes the map and the hashchange listener on unmount', async () => {
 		const addListener = vi.spyOn(window, 'addEventListener');
 		const removeListener = vi.spyOn(window, 'removeEventListener');
 		const component = mount(MapEditor, { target: document.body });
 		flushSync();
+		await editorLoaded();
 		const handler = addListener.mock.calls.find(([type]) => type === 'hashchange')?.[1];
 		expect(handler).toBeTypeOf('function');
 
@@ -68,10 +72,11 @@ describe('MapEditor', () => {
 		removeListener.mockRestore();
 	});
 
-	it('destroys the geometry manager before removing the map', () => {
+	it('destroys the geometry manager before removing the map', async () => {
 		const destroy = vi.spyOn(GeometryManagerInteractive.prototype, 'destroy');
 		const component = mount(MapEditor, { target: document.body });
 		flushSync();
+		await editorLoaded();
 
 		unmount(component);
 		flushSync();
@@ -79,5 +84,21 @@ describe('MapEditor', () => {
 		expect(destroy).toHaveBeenCalledTimes(1);
 		expect(destroy.mock.invocationCallOrder[0]).toBeLessThan(maps[0].remove.mock.invocationCallOrder[0]);
 		destroy.mockRestore();
+	});
+
+	it('does not start the editor when it is unmounted while its code loads', async () => {
+		const addListener = vi.spyOn(window, 'addEventListener');
+		const component = mount(MapEditor, { target: document.body });
+		flushSync();
+		unmount(component);
+		flushSync();
+		// give the editor code time to load
+		await import('./components/Sidebar.svelte');
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		expect(document.querySelector('.sidebar')).toBeNull();
+		expect(addListener.mock.calls.some(([type]) => type === 'hashchange')).toBe(false);
+		expect(maps[0].setStyle).not.toHaveBeenCalled();
+		addListener.mockRestore();
 	});
 });
