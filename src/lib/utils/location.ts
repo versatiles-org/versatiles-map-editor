@@ -1,14 +1,28 @@
-import { timezone2countrycode } from './zones.js';
-
+/**
+ * The country of the user: of the time zone, or else of the browser language (e.g. "de-AT").
+ * Null if neither tells.
+ */
 export function getCountryCode(): string | null {
 	try {
-		const options = Intl.DateTimeFormat().resolvedOptions();
-		let countryCode = timezone2countrycode(options.timeZone);
-		if (!countryCode) countryCode = navigator.language.split('-')[1];
+		const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
+		const countryCode = timeZoneCountry(timeZone) ?? navigator.language.split('-')[1];
 		return countryCode || null;
 	} catch {
 		return null;
 	}
+}
+
+/**
+ * The country of a time zone, among the countries with a bounding box. JavaScript can only list
+ * the time zones of a country (Intl.Locale#getTimeZones), not the other way round. The names are
+ * those of the browser, like the time zone it reports, e.g. "Asia/Calcutta" or "Asia/Kolkata".
+ * Undefined in browsers without getTimeZones.
+ */
+export function timeZoneCountry(timeZone: string): string | undefined {
+	for (const country of Object.keys(countryBoundingBoxes)) {
+		if (new Intl.Locale('und-' + country).getTimeZones?.()?.includes(timeZone)) return country;
+	}
+	return undefined;
 }
 
 const countryBoundingBoxes: { [key: string]: [number, number, number, number] } = {

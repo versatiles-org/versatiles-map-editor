@@ -62,8 +62,7 @@ export default defineConfig({
 				'src/vitest.setup.ts',
 				// only types or data
 				'**/types.ts',
-				'packages/map-state/src/symbols.ts',
-				'src/lib/utils/zones.ts'
+				'packages/map-state/src/symbols.ts'
 			]
 		}
 	},
