@@ -3,8 +3,8 @@ import { derived, get, writable, type Readable, type Writable } from 'svelte/sto
 import type { AbstractElement } from './element/abstract.js';
 import type { SelectionNode } from './element/types.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { GeoPoint } from './utils/types.js';
-import { lat2mercator } from './utils/geometry.js';
+import type { GeoPoint } from '../utils/types.js';
+import { lat2mercator } from '../utils/geometry.js';
 import {
 	claimEvent,
 	isMultiTouch,
@@ -12,7 +12,7 @@ import {
 	trackDrag,
 	TOUCH_TOLERANCE,
 	type MapPointerEvent
-} from './utils/drag.js';
+} from '../utils/drag.js';
 
 // Tolerance in pixels around the mouse, so thin lines are easier to hit
 const MOUSE_TOLERANCE = 3;

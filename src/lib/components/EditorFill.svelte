@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fillPatterns, type MapLayerFill } from '../lib/map_layer/fill.js';
+	import { fillPatterns, type MapLayerFill } from '../core/map_layer/fill.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';

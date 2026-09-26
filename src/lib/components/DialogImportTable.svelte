@@ -3,14 +3,14 @@
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
-	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { guessColumns, parseTable, type Table } from '$lib/utils/table.js';
 	import { boundsOf, columnValues, importTable, type FailedRow } from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.js';
 	import { type StateStyle, SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { get } from 'svelte/store';
-	import { formatCount } from '../lib/utils/format.js';
+	import { formatCount } from '../utils/format.js';
 
 	// More values are no categories, e.g. names
 	const MAX_CATEGORIES = 30;

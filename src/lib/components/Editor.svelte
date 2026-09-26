@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { AbstractElement } from '../lib/element/abstract.js';
+	import type { AbstractElement } from '../core/element/abstract.js';
 	import EditorFill from './EditorFill.svelte';
 	import EditorStroke from './EditorStroke.svelte';
 	import EditorSymbol from './EditorSymbol.svelte';
-	import { LineElement } from '../lib/element/line.js';
-	import { MarkerElement } from '../lib/element/marker.js';
-	import { PolygonElement } from '../lib/element/polygon.js';
+	import { LineElement } from '../core/element/line.js';
+	import { MarkerElement } from '../core/element/marker.js';
+	import { PolygonElement } from '../core/element/polygon.js';
 	import InputRow from './InputRow.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
 	import { writable } from 'svelte/store';
-	import { CircleElement } from '../lib/element/circle.js';
+	import { CircleElement } from '../core/element/circle.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */

@@ -1,4 +1,4 @@
-import type { GeoPoint } from '../utils/types.js';
+import type { GeoPoint } from '../../utils/types.js';
 
 export interface SelectionNode {
 	coordinates: GeoPoint;

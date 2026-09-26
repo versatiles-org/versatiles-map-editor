@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
 	import { config } from '$lib/utils/config.js';
 	import InputRow from './InputRow.svelte';

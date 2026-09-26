@@ -2,7 +2,7 @@
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import type { StateLegend } from '@versatiles/map-state';
-	import { SymbolLibrary } from '../lib/symbols.js';
+	import { SymbolLibrary } from '../core/symbols.js';
 
 	/** The legend over the map, in the editor and in the viewer. `right` keeps it clear of the sidebar. */
 	/** `top` keeps it clear of a search field. */

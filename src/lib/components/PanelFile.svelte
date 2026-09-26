@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '../lib/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import Dialog from './DialogFile.svelte';
 	import { downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.js';

@@ -1,8 +1,8 @@
 import { AbstractElement } from './abstract.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
-import { getMiddlePoint, movePoint } from '../utils/geometry.js';
-import type { GeoPath, GeoPoint } from '../utils/types.js';
+import { getMiddlePoint, movePoint } from '../../utils/geometry.js';
+import type { GeoPath, GeoPoint } from '../../utils/types.js';
 
 export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];

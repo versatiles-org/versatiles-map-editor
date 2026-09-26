@@ -36,7 +36,7 @@ vi.mock('$lib/utils/config.js', async (importOriginal) => ({
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
-const { GeometryManagerInteractive } = await import('./lib/geometry_manager_interactive.js');
+const { GeometryManagerInteractive } = await import('./core/geometry_manager_interactive.js');
 
 describe('MapEditor', () => {
 	afterEach(() => {

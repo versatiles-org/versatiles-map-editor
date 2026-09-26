@@ -4,8 +4,8 @@ import type { GeometryManager } from '../geometry_manager.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import { MapLayerSymbol } from '../map_layer/symbol.js';
 import type { StateElementMarker } from '@versatiles/map-state';
-import type { GeoPoint } from '../utils/types.js';
-import { movePoint } from '../utils/geometry.js';
+import type { GeoPoint } from '../../utils/types.js';
+import { movePoint } from '../../utils/geometry.js';
 
 export class MarkerElement extends AbstractElement {
 	public readonly layer: MapLayerSymbol;

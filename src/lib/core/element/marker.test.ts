@@ -4,7 +4,7 @@ import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateElementMarker } from '@versatiles/map-state';
-import type { GeoPoint } from '../utils/types.js';
+import type { GeoPoint } from '../../utils/types.js';
 
 describe('MarkerElement', () => {
 	let mockManager: GeometryManager;

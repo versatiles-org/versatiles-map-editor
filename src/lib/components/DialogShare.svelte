@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { StateManager } from '../lib/state/manager.js';
+	import type { StateManager } from '../core/state/manager.js';
 	import Dialog from './Dialog.svelte';
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
-	import { formatLength } from '../lib/utils/format.js';
+	import { formatLength } from '../utils/format.js';
 
 	const { state: stateManager }: { state: StateManager } = $props();
 

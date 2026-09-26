@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
-	import { getSymbol, SymbolLibrary } from '../lib/symbols.js';
+	import { getSymbol, SymbolLibrary } from '../core/symbols.js';
 	import Dialog from './Dialog.svelte';
 
 	let dialog: Dialog | undefined;

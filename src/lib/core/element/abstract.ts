@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Measurement, SelectionNode, SelectionNodeUpdater } from './types.js';
 import { get, writable, type Writable } from 'svelte/store';
-import type { GeoPoint } from '../utils/types.js';
+import type { GeoPoint } from '../../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateElement, StatePopup } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';

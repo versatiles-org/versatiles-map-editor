@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { hsvToRgb, parseHex, rgbToHsv, toHex, type HSV, type RGB } from '$lib/utils/color.js';
-	import type { ColorPalette } from '../lib/color_palette.js';
+	import type { ColorPalette } from '../core/color_palette.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.js';
 	import { writable } from 'svelte/store';

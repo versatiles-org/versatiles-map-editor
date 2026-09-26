@@ -7,7 +7,7 @@ import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import { get } from 'svelte/store';
-import type { GeoPath, GeoPoint } from './utils/types.js';
+import type { GeoPath, GeoPoint } from '../utils/types.js';
 
 describe('GeometryManager', () => {
 	let mockMap: MockMap;

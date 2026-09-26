@@ -15,9 +15,9 @@
 	import SearchPlace from './components/SearchPlace.svelte';
 	import { writable } from 'svelte/store';
 	import { getCountryBoundingBox } from '$lib/utils/location.js';
-	import { GeometryManager } from './lib/geometry_manager.js';
-	import { GeometryManagerInteractive } from './lib/geometry_manager_interactive.js';
-	import { PopupHandler } from './lib/popup_handler.js';
+	import { GeometryManager } from './core/geometry_manager.js';
+	import { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
+	import { PopupHandler } from './core/popup_handler.js';
 	import { loadConfig } from '$lib/utils/config.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';

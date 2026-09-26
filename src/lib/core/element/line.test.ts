@@ -4,7 +4,7 @@ import { LineElement } from './line.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.js';
 import type { StateElementLine } from '@versatiles/map-state';
-import type { GeoPoint } from '../utils/types.js';
+import type { GeoPoint } from '../../utils/types.js';
 
 describe('LineElement', () => {
 	let mockManager: GeometryManager;

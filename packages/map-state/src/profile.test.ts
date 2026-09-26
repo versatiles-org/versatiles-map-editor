@@ -4,10 +4,10 @@ import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, LABEL_ALIGN_NAMES, removeDefaul
 import { symbolName, symbolIndexByName, symbolEntries } from './symbols.js';
 import type { StateStyle } from './types.js';
 
-import { fillPatterns } from '$lib/lib/map_layer/fill.js';
-import { dashArrays } from '$lib/lib/map_layer/line.js';
-import { labelPositions } from '$lib/lib/map_layer/symbol.js';
-import { getSymbol } from '$lib/lib/symbols.js';
+import { fillPatterns } from '$lib/core/map_layer/fill.js';
+import { dashArrays } from '$lib/core/map_layer/line.js';
+import { labelPositions } from '$lib/core/map_layer/symbol.js';
+import { getSymbol } from '$lib/core/symbols.js';
 
 // The codec owns the style vocabulary and the editor derives its tables from it.
 // These guards ensure the editor has rendering data for every value the codec knows.

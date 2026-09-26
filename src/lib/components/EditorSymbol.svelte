@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { labelPositions, MapLayerSymbol } from '../lib/map_layer/symbol.js';
+	import { labelPositions, MapLayerSymbol } from '../core/map_layer/symbol.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';

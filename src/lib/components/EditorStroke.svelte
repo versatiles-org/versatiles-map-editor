@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dashArrays, MapLayerLine } from '../lib/map_layer/line.js';
+	import { dashArrays, MapLayerLine } from '../core/map_layer/line.js';
 	import { groupStore } from '$lib/utils/group_store.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
