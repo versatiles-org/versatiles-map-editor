@@ -11,6 +11,19 @@ import { getMapStyle } from '$lib/utils/map_style.js';
 import { getSettings } from '$lib/utils/background.js';
 import { elementFromState } from './element/registry.js';
 
+/** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
+export interface ElementIndex {
+	layerIds: string[];
+	bySource: Map<string, AbstractElement>;
+}
+
+export function indexElements(elements: AbstractElement[]): ElementIndex {
+	return {
+		layerIds: elements.flatMap((element) => element.getLayerIds()),
+		bySource: new Map(elements.map((element) => [element.sourceId, element]))
+	};
+}
+
 /** The northernmost latitude of the Web Mercator projection. */
 const MAX_LATITUDE = 85.051129;
 
@@ -133,18 +146,19 @@ export class GeometryManager {
 	public elementAt(
 		{ x, y }: { x: number; y: number },
 		tolerance = 0,
-		candidates: AbstractElement[] = get(this.elements)
+		candidates: AbstractElement[] | ElementIndex = get(this.elements)
 	): AbstractElement | undefined {
-		if (candidates.length === 0) return undefined;
+		const { layerIds, bySource } = Array.isArray(candidates) ? indexElements(candidates) : candidates;
+		if (layerIds.length === 0) return undefined;
 		const features = this.map.queryRenderedFeatures(
 			[
 				[x - tolerance, y - tolerance],
 				[x + tolerance, y + tolerance]
 			],
-			{ layers: candidates.flatMap((element) => element.getLayerIds()) }
+			{ layers: layerIds }
 		);
 		for (const feature of features) {
-			const element = candidates.find((e) => e.sourceId === feature.source);
+			const element = bySource.get(feature.source);
 			if (element) return element;
 		}
 		return undefined;
