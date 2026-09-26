@@ -24,12 +24,12 @@ export class ColorPalette {
 	}
 
 	public getColors(): string[] {
-		const used = new Set(this.getUsedColors().map((c) => c.toLowerCase()));
+		const used = this.getUsedColors().map((c) => c.toLowerCase());
+		const isUsed = new Set(used);
 		// Colors that were picked but are no longer used (e.g. after undo) are not offered
-		const colors = this.recent.filter((c) => used.has(c));
-		for (const color of [...used].reverse()) {
-			if (!colors.includes(color)) colors.push(color);
-		}
-		return colors.slice(0, PALETTE_SIZE);
+		const colors = new Set(this.recent.filter((c) => isUsed.has(c)));
+		// then each color at its newest element
+		for (let i = used.length - 1; i >= 0 && colors.size < PALETTE_SIZE; i--) colors.add(used[i]);
+		return [...colors].slice(0, PALETTE_SIZE);
 	}
 }

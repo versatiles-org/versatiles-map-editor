@@ -3,8 +3,9 @@ import { ColorPalette, PALETTE_SIZE } from './color_palette.svelte.js';
 
 describe('ColorPalette', () => {
 	it('lists the used colors once, newest element first', () => {
+		// red is used by the second newest element, green only by the oldest but one
 		const palette = new ColorPalette(() => ['#ff0000', '#00ff00', '#FF0000', '#0000ff']);
-		expect(palette.getColors()).toStrictEqual(['#0000ff', '#00ff00', '#ff0000']);
+		expect(palette.getColors()).toStrictEqual(['#0000ff', '#ff0000', '#00ff00']);
 	});
 
 	it('lists recently used colors first', () => {
