@@ -126,7 +126,7 @@
 	}
 
 	function deleteElements() {
-		$selectedElements.forEach((element) => element.delete());
+		geometryManager.deleteElements($selectedElements);
 		geometryManager.state.log();
 	}
 

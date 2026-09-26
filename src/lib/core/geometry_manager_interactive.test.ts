@@ -389,4 +389,35 @@ describe('GeometryManager', () => {
 			expect(get(manager.elements)).toHaveLength(0);
 		});
 	});
+
+	describe('many elements', () => {
+		const markers = (n: number): StateElement[] =>
+			Array.from({ length: n }, (_, i) => ({ type: 'marker', point: [i / 100, 0] }));
+
+		it('adds them in one change and selects them in one step', () => {
+			const lengths: number[] = [];
+			manager.elements.subscribe((elements) => lengths.push(elements.length));
+			const selections: number[] = [];
+			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
+
+			manager.addElements(markers(100));
+			expect(lengths).toStrictEqual([0, 100]);
+			expect(selections).toStrictEqual([0, 100]);
+		});
+
+		it('deletes them in one change, with their layers', () => {
+			const elements = manager.addElements(markers(3));
+			const destroy = elements.map((element) => vi.spyOn(element, 'destroy'));
+			const lengths: number[] = [];
+			manager.elements.subscribe((elements) => lengths.push(elements.length));
+			const selections: number[] = [];
+			manager.selection.selectedElements.subscribe((selected) => selections.push(selected.length));
+
+			manager.deleteElements(elements.slice(0, 2));
+			expect(lengths).toStrictEqual([3, 1]);
+			expect(selections).toStrictEqual([3, 1]);
+			expect(destroy.map((spy) => spy.mock.calls.length)).toStrictEqual([1, 1, 0]);
+			expect(get(manager.elements)).toStrictEqual([elements[2]]);
+		});
+	});
 });

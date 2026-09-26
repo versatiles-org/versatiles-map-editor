@@ -35,4 +35,17 @@ describe('groupStore', () => {
 	it('needs at least one store', () => {
 		expect(() => groupStore([])).toThrow();
 	});
+
+	it('decides whether the values are mixed once all stores are set', () => {
+		const stores = Array.from({ length: 5 }, () => writable(1));
+		const group = groupStore(stores);
+		const mixed: boolean[] = [];
+		group.mixed.subscribe((value) => mixed.push(value));
+		group.set(2);
+		group.update((v) => v + 1);
+		// never mixed in between, when only some stores have the new value
+		expect(mixed).toStrictEqual([false]);
+		stores[0].set(5);
+		expect(mixed).toStrictEqual([false, true]);
+	});
 });

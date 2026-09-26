@@ -183,7 +183,12 @@ export class SelectionHandler {
 	public selectElements(selection: AbstractElement[]) {
 		const current = get(this.selectedElements);
 		if (selection.length === current.length && selection.every((e, i) => e === current[i])) return;
-		get(this.manager.elements).forEach((e) => e.select(selection.includes(e)));
+		// only the elements whose selection changes, so selecting many elements takes linear time
+		const was = new Set(current);
+		const is = new Set(selection);
+		get(this.manager.elements).forEach((e) => {
+			if (was.has(e) !== is.has(e)) e.select(is.has(e));
+		});
 		this.selectedElements.set(selection);
 		this.selectedNodeIndex = undefined;
 		this.updateSelectionNodes();
@@ -196,7 +201,13 @@ export class SelectionHandler {
 	}
 
 	public deselectElement(element: AbstractElement) {
-		this.selectElements(get(this.selectedElements).filter((e) => e !== element));
+		this.deselectElements([element]);
+	}
+
+	public deselectElements(elements: AbstractElement[]) {
+		const removed = new Set(elements);
+		const current = get(this.selectedElements);
+		if (current.some((e) => removed.has(e))) this.selectElements(current.filter((e) => !removed.has(e)));
 	}
 
 	/** Select a vertex of the selected element, or no vertex. */

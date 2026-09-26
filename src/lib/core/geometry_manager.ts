@@ -118,7 +118,12 @@ export class GeometryManager {
 	}
 
 	protected appendElement(element: AbstractElement) {
-		this.elements.update((elements) => [...elements, element]);
+		this.appendElements([element]);
+	}
+
+	/** Append several elements at once, e.g. of an import, in linear time. */
+	protected appendElements(added: AbstractElement[]) {
+		if (added.length > 0) this.elements.update((elements) => [...elements, ...added]);
 	}
 
 	/**
@@ -146,7 +151,19 @@ export class GeometryManager {
 	}
 
 	public removeElement(element: AbstractElement) {
-		this.elements.update((elements) => elements.filter((e) => e !== element));
+		this.removeElements([element]);
+	}
+
+	/** Remove several elements from the map state at once, in linear time. */
+	public removeElements(removed: AbstractElement[]) {
+		const set = new Set(removed);
+		this.elements.update((elements) => elements.filter((e) => !set.has(e)));
+	}
+
+	/** Remove the elements and their map layers. */
+	public deleteElements(elements: AbstractElement[]) {
+		this.removeElements(elements);
+		elements.forEach((element) => element.destroy());
 	}
 
 	public async loadState(state: MapState) {

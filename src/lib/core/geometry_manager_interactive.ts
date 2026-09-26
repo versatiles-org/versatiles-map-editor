@@ -48,9 +48,9 @@ export class GeometryManagerInteractive extends GeometryManager {
 		return true;
 	}
 
-	public removeElement(element: AbstractElement) {
-		this.selection.deselectElement(element);
-		super.removeElement(element);
+	public removeElements(elements: AbstractElement[]) {
+		this.selection.deselectElements(elements);
+		super.removeElements(elements);
 	}
 
 	public addNewElement<T extends ElementType>(type: T): ElementOfType<T> {
@@ -85,11 +85,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 
 	/** Add elements from their states and select them all. */
 	public addElements(states: StateElement[]): AbstractElement[] {
-		const elements = states.map((state) => {
-			const element = elementFromState(this, state);
-			this.appendElement(element);
-			return element;
-		});
+		const elements = states.map((state) => elementFromState(this, state));
+		this.appendElements(elements);
 		this.selection.selectElements(elements);
 		return elements;
 	}
@@ -148,8 +145,6 @@ export class GeometryManagerInteractive extends GeometryManager {
 		if (meta.legend) this.legend.set(meta.legend);
 		if (meta.colorScheme) this.colors.scheme.set(meta.colorScheme);
 		if (meta.search) this.search.set(true);
-		for (const element of state.elements) {
-			this.appendElement(elementFromState(this, element));
-		}
+		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

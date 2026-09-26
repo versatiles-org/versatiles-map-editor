@@ -439,7 +439,8 @@ describe('SelectionHandler', () => {
 
 		it('selects, toggles and deselects elements', () => {
 			handler.selectElements([elements[0], elements[1]]);
-			expect(elements.map((e) => e.select.mock.lastCall![0])).toStrictEqual([true, true, false]);
+			// only the elements whose selection changes
+			expect(elements.map((e) => e.select.mock.calls)).toStrictEqual([[[true]], [[true]], []]);
 			expect(get(handler.selectedElement)).toBeUndefined();
 
 			handler.toggleElement(elements[2]);
