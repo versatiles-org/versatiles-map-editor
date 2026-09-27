@@ -18,8 +18,8 @@ export default defineConfig({
 	// but make every single test much slower
 	workers: 2,
 	timeout: 60_000,
-	// In CI: a forgotten test.only fails the run, a failed test gets one more try (with a trace),
-	// and the results are also written as an HTML report
+	// In CI: a forgotten test.only fails the run, a failed test gets one more try, and the results
+	// are also written as an HTML report
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
 	reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : 'list',
@@ -27,7 +27,9 @@ export default defineConfig({
 	testMatch: /\.ts$/,
 	testIgnore: ['**/lib/**'],
 	use: {
-		trace: 'on-first-retry',
+		// Recorded for the first run of every test, and kept if it failed, also locally and when a
+		// retry passes: a test that fails at random is seen in the run that failed
+		trace: 'retain-on-first-failure',
 		ignoreHTTPSErrors: true,
 		viewport: { width: 1280, height: 720 },
 		deviceScaleFactor: 1,
