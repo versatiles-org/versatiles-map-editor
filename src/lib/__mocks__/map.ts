@@ -13,6 +13,7 @@ export class MockMap {
 	constructor() {}
 	getCanvasContainer = vi.fn(() => mockedCanvas);
 	boxZoom = { disable: vi.fn(), enable: vi.fn() };
+	doubleClickZoom = { disable: vi.fn(), enable: vi.fn() };
 	setMissingStyleImageResolver = vi.fn();
 	// set once the map has a style
 	style: object | undefined = {};

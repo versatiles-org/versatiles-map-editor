@@ -3,6 +3,7 @@ import type { AbstractElement } from './element/abstract.svelte.js';
 import { GeometryManager } from './geometry_manager.svelte.js';
 import { createElement, elementFromState, type ElementOfType, type ElementType } from './element/registry.js';
 import { SelectionHandler } from './selection.svelte.js';
+import { DrawingHandler } from './drawing.svelte.js';
 import { Cursor } from './cursor.js';
 import { StateManager } from './state/manager.js';
 import { ColorPalette } from './color_palette.svelte.js';
@@ -19,6 +20,7 @@ import type { GeoPoint } from '../utils/types.js';
 
 export class GeometryManagerInteractive extends GeometryManager {
 	public readonly selection: SelectionHandler;
+	public readonly drawing: DrawingHandler;
 	public readonly cursor: Cursor;
 	public readonly state: StateManager;
 	public readonly styleClipboard = new StyleClipboard();
@@ -29,6 +31,8 @@ export class GeometryManagerInteractive extends GeometryManager {
 		this.cursor = new Cursor(map.getCanvasContainer());
 		// Shift+click selects several elements. Box zoom (Shift+drag) would swallow these clicks.
 		map.boxZoom.disable();
+		// before the selection, so a click with a drawing tool draws instead of selecting
+		this.drawing = new DrawingHandler(this);
 		this.selection = new SelectionHandler(this);
 		this.state = new StateManager(this);
 	}

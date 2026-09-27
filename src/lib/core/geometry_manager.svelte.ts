@@ -354,6 +354,41 @@ function buildStyle(background: StateBackground | undefined): StyleSpecification
 			'circle-stroke-width': 1
 		}
 	});
+
+	// the element being drawn, in the color of the editor's controls
+	style.sources.drawing = {
+		type: 'geojson',
+		data: { type: 'FeatureCollection', features: [] }
+	};
+	style.layers.push(
+		{
+			id: 'drawing_fill',
+			source: 'drawing',
+			type: 'fill',
+			filter: ['==', ['geometry-type'], 'Polygon'],
+			paint: { 'fill-color': '#115588', 'fill-opacity': 0.15 }
+		},
+		{
+			id: 'drawing_line',
+			source: 'drawing',
+			type: 'line',
+			filter: ['!=', ['geometry-type'], 'Point'],
+			layout: { 'line-cap': 'round', 'line-join': 'round' },
+			paint: { 'line-color': '#115588', 'line-width': 2, 'line-dasharray': [2, 2] }
+		},
+		{
+			id: 'drawing_nodes',
+			source: 'drawing',
+			type: 'circle',
+			filter: ['==', ['geometry-type'], 'Point'],
+			paint: {
+				'circle-color': '#ffffff',
+				'circle-radius': hasCoarsePointer() ? 6 : 4,
+				'circle-stroke-color': '#115588',
+				'circle-stroke-width': 2
+			}
+		}
+	);
 	return style;
 }
 
@@ -365,7 +400,7 @@ function buildStyle(background: StateBackground | undefined): StyleSpecification
 export function keepElements(previous: StyleSpecification | undefined, next: StyleSpecification): StyleSpecification {
 	if (!previous) return next;
 	const sources = { ...next.sources };
-	for (const id of [...Object.values(ELEMENT_LAYERS), 'highlight', 'selection_nodes']) {
+	for (const id of [...Object.values(ELEMENT_LAYERS), 'highlight', 'selection_nodes', 'drawing']) {
 		if (previous.sources[id]) sources[id] = previous.sources[id];
 	}
 	return { ...next, sources };

@@ -33,7 +33,8 @@ describe('SelectionHandler', () => {
 			cursor: mockCursor,
 			state: mockState,
 			elements: [],
-			elementAt: vi.fn(() => undefined)
+			elementAt: vi.fn(() => undefined),
+			drawing: { active: false }
 		} as unknown as GeometryManagerInteractive;
 
 		vi.clearAllMocks();

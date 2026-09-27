@@ -1,10 +1,19 @@
 import { expect, test } from './lib/test.js';
+import type { Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { project, stateInUrl, waitForMapIsIdle, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import {
+	drawElement,
+	project,
+	stateInUrl,
+	waitForMapIsIdle,
+	waitForMapIsReady,
+	type MapWindow,
+	type Point
+} from './lib/utils.js';
 
 test('dragging a slider creates a single undo step', async ({ page }) => {
 	const undo = page.getByRole('button', { name: 'Undo' });
-	const addPolygon = () => page.getByRole('button', { name: 'Polygon' }).click();
+	const addPolygon = () => drawElement(page, 'Polygon');
 
 	async function countUndoSteps(): Promise<number> {
 		let steps = 0;
@@ -42,7 +51,7 @@ test('adding an element creates an undo step', async ({ page }) => {
 	const redo = page.getByRole('button', { name: 'Redo' });
 	await expect(undo).toBeDisabled();
 
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	await expect(undo).toBeEnabled();
 
 	await undo.click();
@@ -55,8 +64,8 @@ test('undo and redo with the keyboard, but not in text fields', async ({ page })
 	await waitForMapIsReady(page);
 	const types = () => stateInUrl(page).elements.map((e) => e.type);
 
-	await page.getByRole('button', { name: 'Marker' }).click();
-	await page.getByRole('button', { name: 'Line' }).click();
+	await drawElement(page, 'Marker');
+	await drawElement(page, 'Line');
 	await expect.poll(types).toStrictEqual(['marker', 'line']);
 
 	await page.keyboard.press('ControlOrMeta+z');
@@ -68,7 +77,7 @@ test('undo and redo with the keyboard, but not in text fields', async ({ page })
 	await expect.poll(types).toStrictEqual(['marker', 'line']);
 
 	// in a text field (of the new, selected marker), the keys undo the typing, not the map
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	const popup = page.getByRole('textbox', { name: 'Popup' });
 	await popup.fill('Hello');
 	await popup.press('ControlOrMeta+z');
@@ -79,7 +88,7 @@ test('selecting a symbol closes the symbol picker', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	await page.getByRole('button', { name: 'flag' }).click();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
@@ -100,13 +109,13 @@ test('style editor controls have unique ids and labels', async ({ page }) => {
 	}
 
 	// polygon: fill and outline editors are shown together
-	await page.getByRole('button', { name: 'Polygon' }).click();
+	await drawElement(page, 'Polygon');
 	await expectUniqueIds();
 	await expect(page.getByLabel('Color')).toHaveCount(2);
 	await expect(page.getByLabel('Width')).toHaveCount(1);
 
 	// marker: symbol button and label field are labelled separately
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	await expectUniqueIds();
 	await expect(page.getByRole('button', { name: 'Symbol flag' })).toBeVisible();
 	await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible();
@@ -184,7 +193,7 @@ test('deleting nodes and elements with the keyboard', async ({ page }) => {
 test('color picker', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Polygon' }).click();
+	await drawElement(page, 'Polygon');
 	// the codec returns colors in upper case
 	const fill = () => (stateInUrl(page).elements[0] as { style?: { color?: string } })?.style?.color?.toLowerCase();
 	const stroke = () =>
@@ -455,4 +464,75 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 	expect(textField).toStrictEqual(['get', 'label']);
 	expect(labels).toStrictEqual(['Price {EUR}']);
 	expect(errors).toStrictEqual([]);
+});
+
+test.describe('drawing with the tools', () => {
+	const view = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [] } as MapState;
+	const types = (page: Page) => stateInUrl(page).elements.map((e) => e.type);
+	const tool = (page: Page, name: string) => page.getByRole('toolbar', { name: 'Tools' }).getByRole('button', { name });
+
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/#' + encodeState(view));
+		await waitForMapIsReady(page);
+	});
+
+	test('a line is finished with a double-click, which does not zoom', async ({ page }) => {
+		const [x, y] = await project(page, [13.4, 52.5]);
+		const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+		const before = await zoom();
+
+		await tool(page, 'Line').click();
+		await expect(tool(page, 'Line')).toHaveAttribute('aria-pressed', 'true');
+		await page.mouse.click(x - 80, y);
+		await page.mouse.click(x, y - 40);
+		await expect(page.getByRole('group', { name: 'Drawing' })).toContainText('2 nodes');
+		await page.mouse.dblclick(x + 80, y);
+
+		await expect.poll(() => types(page)).toStrictEqual(['line']);
+		expect((stateInUrl(page).elements[0] as { points: Point[] }).points).toHaveLength(3);
+		// back to selecting, with the new line selected
+		await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.getByRole('button', { name: 'Duplicate' })).toBeEnabled();
+		await page.waitForTimeout(500);
+		expect(await zoom()).toBe(before);
+	});
+
+	test('a polygon is closed with a click on its first node', async ({ page }) => {
+		const [x, y] = await project(page, [13.4, 52.5]);
+		await tool(page, 'Polygon').click();
+		for (const [dx, dy] of [
+			[-60, 40],
+			[60, 40],
+			[0, -60],
+			[-60, 40]
+		])
+			await page.mouse.click(x + dx, y + dy);
+		await expect.poll(() => types(page)).toStrictEqual(['polygon']);
+		expect((stateInUrl(page).elements[0] as { points: Point[] }).points).toHaveLength(3);
+	});
+
+	test('tools have keyboard shortcuts, and Escape cancels', async ({ page }) => {
+		const [x, y] = await project(page, [13.4, 52.5]);
+		await page.keyboard.press('m');
+		await expect(tool(page, 'Marker')).toHaveAttribute('aria-pressed', 'true');
+		await page.mouse.click(x, y);
+		await expect.poll(() => types(page)).toStrictEqual(['marker']);
+
+		// an unfinished line is dropped
+		await page.keyboard.press('l');
+		await page.mouse.click(x - 80, y + 60);
+		await page.keyboard.press('Escape');
+		await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.getByRole('group', { name: 'Drawing' })).toBeHidden();
+
+		// a circle, dragged from its center
+		await page.keyboard.press('c');
+		await page.mouse.move(x + 100, y + 100);
+		await page.mouse.down();
+		await page.mouse.move(x + 160, y + 100, { steps: 5 });
+		await page.mouse.up();
+		await expect.poll(() => types(page)).toStrictEqual(['marker', 'circle']);
+		const radius = (stateInUrl(page).elements[1] as { radius: number }).radius;
+		expect(radius).toBeGreaterThan(200);
+	});
 });

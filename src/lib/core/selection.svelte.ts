@@ -6,6 +6,7 @@ import type { GeoPoint } from '../utils/types.js';
 import { lat2mercator } from '../utils/geometry.js';
 import {
 	claimEvent,
+	isClaimed,
 	isMultiTouch,
 	isTouchEvent,
 	trackDrag,
@@ -79,6 +80,8 @@ export class SelectionHandler {
 		});
 
 		map.on('click', (e) => {
+			// e.g. a click that drew an element
+			if (isClaimed(e) || this.manager.drawing.active) return;
 			// A click on a node selects the node (in handleNodeDown) and keeps the element selected
 			if (this.findNode(e)) return;
 			e.preventDefault();
@@ -95,7 +98,7 @@ export class SelectionHandler {
 	}
 
 	private handleDown(e: MapPointerEvent) {
-		if (isMultiTouch(e)) return;
+		if (isMultiTouch(e) || isClaimed(e) || this.manager.drawing.active) return;
 		if (this.handleNodeDown(e)) return;
 		this.handleElementDown(e);
 	}

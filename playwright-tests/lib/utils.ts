@@ -30,6 +30,44 @@ export async function menuItem(page: Page, ...path: string[]): Promise<Locator> 
 	return menu.getByRole('menuitem', { name: path.at(-1), exact: true });
 }
 
+/**
+ * Draw an element with a tool of the editor, at pixel positions: a marker at a point, a line or
+ * polygon through its points (finished with Enter), a circle from its center to its edge.
+ * Without positions, the element is drawn around the center of the map.
+ */
+export async function drawElement(page: Page, tool: 'Marker' | 'Line' | 'Polygon' | 'Circle', points?: Point[]) {
+	if (!points) {
+		const [x, y] = await project(page, await mapCenter(page));
+		points = {
+			Marker: [[x, y]],
+			Line: [
+				[x - 60, y],
+				[x + 60, y]
+			],
+			Polygon: [
+				[x - 60, y + 40],
+				[x + 60, y + 40],
+				[x, y - 60]
+			],
+			Circle: [
+				[x, y],
+				[x + 50, y]
+			]
+		}[tool] as Point[];
+	}
+	await page.getByRole('button', { name: tool, exact: true }).click();
+	if (tool === 'Circle') {
+		const [[x0, y0], [x1, y1]] = points;
+		await page.mouse.move(x0, y0);
+		await page.mouse.down();
+		await page.mouse.move(x1, y1, { steps: 5 });
+		await page.mouse.up();
+		return;
+	}
+	for (const [x, y] of points) await page.mouse.click(x, y);
+	if (tool !== 'Marker') await page.keyboard.press('Enter');
+}
+
 /** The center of the map as [lng, lat]. */
 export async function mapCenter(page: Page): Promise<Point> {
 	return page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());

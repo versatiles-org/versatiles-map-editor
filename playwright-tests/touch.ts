@@ -140,3 +140,17 @@ test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 	await expect.poll(getZoom).toBeGreaterThan(zoom + 1);
 	expect(linePoints(page)).toStrictEqual(points);
 });
+
+test('drawing a line with taps and the Finish button', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+
+	await page.getByRole('button', { name: 'Line', exact: true }).tap();
+	await page.touchscreen.tap(x - 80, y);
+	await page.waitForTimeout(500);
+	await page.touchscreen.tap(x + 80, y);
+	await page.getByRole('button', { name: 'Finish' }).tap();
+	await expect.poll(() => linePoints(page).length).toBe(2);
+	await expect(page.getByRole('button', { name: 'Select' })).toHaveAttribute('aria-pressed', 'true');
+});

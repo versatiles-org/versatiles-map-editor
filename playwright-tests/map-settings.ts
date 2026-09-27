@@ -1,6 +1,7 @@
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
+	drawElement,
 	drawnElements,
 	project,
 	stateInUrl,
@@ -175,7 +176,7 @@ test('editing the legend', async ({ page }) => {
 test('choosing a color scheme', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Polygon' }).click();
+	await drawElement(page, 'Polygon');
 	const [fillColor, strokeColor] = await page.getByLabel('Color').all();
 	const swatches = (name: string) =>
 		page
@@ -227,7 +228,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
 
 	// only the corporate color scheme is offered, as the default
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	await page.getByLabel('Color').first().click();
 	const scheme = page.getByRole('combobox', { name: 'Color scheme' });
 	await expect(scheme.getByRole('option')).toHaveText(['Corporate']);

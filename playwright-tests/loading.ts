@@ -1,12 +1,19 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { drawnElements, menuItem, stateInUrl, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
+import {
+	drawElement,
+	drawnElements,
+	menuItem,
+	stateInUrl,
+	trackServerRequests,
+	waitForMapIsReady
+} from './lib/utils.js';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
 
-// The controls of the top bar and of the sidebar at the start, in this order. Only names and states
+// The controls of the top bar, the tools and the sidebar at the start, in this order. Only names and states
 // are compared, so e.g. a separator or an icon does not matter. "✓" is the (hidden) feedback of a button.
 const topbarAria = `
 - button "Menu" [expanded=false]
@@ -15,15 +22,18 @@ const topbarAria = `
 - button "Redo" [disabled]
 - button /^Share/
 `;
+const railAria = `
+- toolbar "Tools":
+  - button "Select" [pressed]
+  - button "Marker"
+  - button "Line"
+  - button "Polygon"
+  - button "Circle"
+`;
 const sidebarAria = `
 - combobox "Search address or place"
 - button "Background map" [expanded=false]
 - button "Legend" [expanded=false]
-- button "Add new" [expanded]
-- button /^Marker/
-- button /^Line/
-- button /^Polygon/
-- button /^Circle/
 - button "Elements"
 - button "Style" [disabled]
 - button "Actions" [disabled]
@@ -68,6 +78,7 @@ test('empty map', async ({ page }) => {
 	]);
 
 	await expect(page.getByRole('banner')).toMatchAriaSnapshot(topbarAria);
+	await expect(page.getByRole('toolbar', { name: 'Tools' })).toMatchAriaSnapshot(railAria);
 	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
@@ -119,7 +130,7 @@ test('keeps an opened map in the URL', async ({ page }) => {
 test('keeps the map in the URL across reloads', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 
 	// a single change is written to the hash immediately
 	const elementsInUrl = () => stateInUrl(page).elements.map((e) => e.type);

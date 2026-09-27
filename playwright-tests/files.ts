@@ -2,12 +2,12 @@ import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
 test('downloads the map as GeoJSON and as map file', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 
 	const exportGeoJSON = await menuItem(page, 'Export', 'GeoJSON');
 	const [geojson] = await Promise.all([page.waitForEvent('download'), exportGeoJSON.click()]);
@@ -29,7 +29,7 @@ test('downloads the map as GeoJSON and as map file', async ({ page }) => {
 test('file dialogs confirm and cancel', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Marker' }).click();
+	await drawElement(page, 'Marker');
 	const dialog = page.getByRole('dialog');
 	const deleteButton = page.getByRole('button', { name: 'Delete' });
 

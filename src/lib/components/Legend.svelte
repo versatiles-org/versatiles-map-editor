@@ -4,14 +4,15 @@
 	import type { StateLegend } from '@versatiles/map-state';
 	import { SymbolLibrary } from '../core/symbols.js';
 
-	/** The legend over the map, in the editor and in the viewer. `right` keeps it clear of the sidebar. */
+	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` keeps it clear of a search field. */
 	const {
 		legend,
 		map,
+		left = 0,
 		right = 0,
 		top = 0
-	}: { legend: StateLegend; map: MaplibreMap; right?: number; top?: number } = $props();
+	}: { legend: StateLegend; map: MaplibreMap; left?: number; right?: number; top?: number } = $props();
 
 	const symbolSize = 18;
 	const retina = window.devicePixelRatio || 1;
@@ -30,6 +31,7 @@
 {#if legend.entries.length > 0}
 	<div
 		class="legend position-{legend.position ?? 'bottom-left'} layout-{legend.layout ?? 'vertical'}"
+		style:--left="{left}px"
 		style:--sidebar="{right}px"
 		style:--top="{top}px"
 		style:font-family={legend.font ?? 'sans-serif'}
@@ -64,7 +66,7 @@
 		display: flex;
 		gap: 4px 12px;
 		box-sizing: border-box;
-		max-width: calc(100% - var(--sidebar) - 2 * var(--margin));
+		max-width: calc(100% - var(--left) - var(--sidebar) - 2 * var(--margin));
 		max-height: calc(100% - 2 * var(--margin) - 30px - var(--top));
 		overflow: auto;
 		padding: 6px 10px;
@@ -102,7 +104,7 @@
 	.position-top-left,
 	.position-left,
 	.position-bottom-left {
-		left: var(--margin);
+		left: calc(var(--left) + var(--margin));
 	}
 	.position-top-right,
 	.position-right,
@@ -111,7 +113,7 @@
 	}
 	.position-top,
 	.position-bottom {
-		left: calc((100% - var(--sidebar)) / 2);
+		left: calc(var(--left) + (100% - var(--left) - var(--sidebar)) / 2);
 		transform: translateX(-50%);
 	}
 	.position-left,

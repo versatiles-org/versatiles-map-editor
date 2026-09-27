@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { encodeState } from '../packages/map-state/src/index.js';
-import { menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
 test('dialogs are named, can be closed and are usable by keyboard', async ({ page }) => {
 	await page.goto('/');
@@ -25,7 +25,7 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	await expect(download).toBeHidden();
 
 	// the symbol picker
-	await page.getByRole('button', { name: /^Marker/ }).click();
+	await drawElement(page, 'Marker');
 	await page.getByRole('button', { name: /^Symbol/ }).click();
 	await expect(page.getByRole('dialog', { name: 'Select a symbol' })).toBeVisible();
 });

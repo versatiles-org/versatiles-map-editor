@@ -7,6 +7,7 @@
 	import PanelLegend from './PanelLegend.svelte';
 	import PanelElements from './PanelElements.svelte';
 	import * as commands from '../core/commands.js';
+	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
@@ -16,12 +17,7 @@
 	const selectedElements = $derived(selection.selectedElements);
 
 	function onKeydown(e: KeyboardEvent) {
-		// The shortcuts act on the map, not where the keys mean something else: in text fields (which
-		// undo their own typing), in sliders (e.g. the color field), in open dialogs (e.g. the symbol
-		// picker) and in the menu
-		const target = e.target as HTMLElement | null;
-		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open], [role="menu"]'))
-			return;
+		if (isOwnKeyTarget(e)) return;
 
 		// Undo: Cmd/Ctrl+Z. Redo: Shift+Cmd/Ctrl+Z, or Ctrl+Y as on Windows.
 		const key = e.key.toLowerCase();
@@ -55,11 +51,6 @@
 			else commands.deleteSelection(geometryManager);
 		}
 	}
-
-	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
-		geometryManager.addNewElement(type);
-		geometryManager.state.log();
-	}
 </script>
 
 <svelte:window onkeydown={onKeydown} />
@@ -80,15 +71,6 @@
 		<hr class="thick" />
 		<SidebarPanel title="Legend" open={false}>
 			<PanelLegend manager={geometryManager} />
-		</SidebarPanel>
-		<hr class="thick" />
-		<SidebarPanel title="Add new">
-			<div class="grid2">
-				<button class="btn" onclick={() => addNewElement('marker')}>Marker</button>
-				<button class="btn" onclick={() => addNewElement('line')}>Line</button>
-				<button class="btn" onclick={() => addNewElement('polygon')}>Polygon</button>
-				<button class="btn" onclick={() => addNewElement('circle')}>Circle</button>
-			</div>
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Elements" open={false} disabled={geometryManager.elements.length === 0}>

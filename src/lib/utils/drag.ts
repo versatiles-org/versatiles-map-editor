@@ -25,6 +25,11 @@ export function claimEvent(e: MapPointerEvent) {
 	e.preventDefault();
 }
 
+/** Whether an earlier listener has taken over the event with `claimEvent`. */
+export function isClaimed(e: MapPointerEvent): boolean {
+	return handledEvents.has(e.originalEvent);
+}
+
 /**
  * Follow a drag with the mouse or a single finger, which starts with the event `start`.
  * A second finger ends the drag, so a pinch-zoom is not mistaken for a drag.
