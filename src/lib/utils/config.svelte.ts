@@ -1,6 +1,6 @@
 import { fetchFontFaces } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
-import { FONTS } from './background.js';
+import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { TILE_SERVER } from './map_style.js';
 
 /**
@@ -15,7 +15,7 @@ export interface ConfigFile {
 	colorSchemes?: { id: string; name: string; colors: string[] }[];
 	/** Offer only the configured color schemes. */
 	replaceDefaultSchemes?: boolean;
-	/** Glyph names of the fonts offered for the map labels, e.g. "open_sans_regular". */
+	/** Glyph names of the font faces offered first for the map labels, e.g. "open_sans_regular". */
 	fonts?: string[];
 	/** Offer only the configured fonts. */
 	replaceDefaultFonts?: boolean;
@@ -23,40 +23,66 @@ export interface ConfigFile {
 
 export interface EditorConfig {
 	colorSchemes: ColorScheme[];
-	fonts: { id: string; name: string }[];
+	/** The font faces offered for the map labels, grouped by family. */
+	fonts: FontFace[];
 }
 
-export const DEFAULT_CONFIG: EditorConfig = { colorSchemes: COLOR_SCHEMES, fonts: FONTS };
+export const DEFAULT_CONFIG: EditorConfig = { colorSchemes: COLOR_SCHEMES, fonts: FALLBACK_FONTS };
 
 /** The configuration of this editor instance: `config.current`. Holds the defaults until the file is loaded. */
 export const config = new (class {
 	current: EditorConfig = $state.raw(DEFAULT_CONFIG);
 })();
 
-/** Load the configuration file into `config`. A missing file keeps the defaults. */
+/**
+ * Load the font faces of the tile server and the configuration file into `config`. Without the
+ * list of fonts, a few regular faces are offered; without a (valid) file, the defaults.
+ */
 export async function loadConfig(url = new URL(CONFIG_URL, document.baseURI).href): Promise<void> {
-	let file: unknown;
+	const [file, fonts] = await Promise.all([loadFile(url), loadFonts()]);
 	try {
-		const response = await fetch(url);
-		// no file: no configuration
-		if (!response.ok) return;
-		file = await response.json();
-	} catch (error) {
-		console.warn(`Failed to load the editor configuration from ${url}`, error);
-		return;
-	}
-
-	try {
-		config.current = await resolveConfig(file);
+		config.current = resolveConfig(file ?? {}, fonts);
 	} catch (error) {
 		console.warn(`Invalid editor configuration in ${url}`, error);
+		config.current = resolveConfig({}, fonts);
 	}
 }
 
-/** Check the file and merge it with the defaults. Throws if the file is invalid. */
-export async function resolveConfig(file: unknown): Promise<EditorConfig> {
+/** The content of the configuration file, or undefined without one. */
+async function loadFile(url: string): Promise<unknown> {
+	try {
+		const response = await fetch(url);
+		// no file: no configuration
+		if (!response.ok) return undefined;
+		return await response.json();
+	} catch (error) {
+		console.warn(`Failed to load the editor configuration from ${url}`, error);
+		return undefined;
+	}
+}
+
+/** The font faces of the tile server, or undefined if its list cannot be loaded. */
+async function loadFonts(): Promise<FontFace[] | undefined> {
+	try {
+		return (await fetchFontFaces({ base: TILE_SERVER }))?.map(fromFontFaceInfo);
+	} catch (error) {
+		console.warn('Failed to load the list of map fonts', error);
+		return undefined;
+	}
+}
+
+/**
+ * Check the file and merge it with the defaults. `fonts`: the faces of the tile server, if its list
+ * could be loaded. Throws if the file is invalid.
+ */
+export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
 	if (typeof file !== 'object' || file === null || Array.isArray(file)) throw new Error('Not an object');
-	const { colorSchemes = [], replaceDefaultSchemes, fonts = [], replaceDefaultFonts } = file as ConfigFile;
+	const {
+		colorSchemes = [],
+		replaceDefaultSchemes,
+		fonts: configuredFonts = [],
+		replaceDefaultFonts
+	} = file as ConfigFile;
 
 	if (!Array.isArray(colorSchemes)) throw new Error('"colorSchemes" must be an array');
 	const schemes = colorSchemes.map((scheme, i): ColorScheme => {
@@ -69,38 +95,33 @@ export async function resolveConfig(file: unknown): Promise<EditorConfig> {
 		return { id, name, colors: colors.map((c) => c.toLowerCase()) };
 	});
 
-	if (!Array.isArray(fonts) || !fonts.every((f) => typeof f === 'string')) {
+	if (!Array.isArray(configuredFonts) || !configuredFonts.every((f) => typeof f === 'string')) {
 		throw new Error('"fonts" must be a list of glyph names');
 	}
 
 	return {
 		colorSchemes: replaceDefaultSchemes && schemes.length > 0 ? schemes : [...schemes, ...COLOR_SCHEMES],
-		fonts: await resolveFonts(fonts, replaceDefaultFonts === true)
+		fonts: resolveFonts(configuredFonts, replaceDefaultFonts === true, fonts)
 	};
 }
 
-/** Only fonts the tile server has as map glyphs can be offered, with their names from the server. */
-async function resolveFonts(ids: string[], replace: boolean): Promise<EditorConfig['fonts']> {
-	if (ids.length === 0) return FONTS;
-	let faces: Awaited<ReturnType<typeof fetchFontFaces>>;
-	try {
-		faces = await fetchFontFaces({ base: TILE_SERVER });
-	} catch (error) {
-		console.warn('Failed to load the list of map fonts', error);
-	}
-
-	const fonts: EditorConfig['fonts'] = [];
+/**
+ * The faces of the tile server, with the configured ones first (and their families), or only them.
+ * Only faces the server has as map glyphs can be offered; without its list, they are not checked.
+ */
+function resolveFonts(ids: string[], replace: boolean, server?: FontFace[]): FontFace[] {
+	const available = server ?? FALLBACK_FONTS;
+	const configured: FontFace[] = [];
 	for (const id of ids) {
-		// without a list, the fonts cannot be checked, but are offered anyway
-		const face = faces?.find((f) => f.id === id);
-		if (faces && !face) {
+		const face = available.find((f) => f.id === id);
+		if (server && !face) {
 			console.warn(`The font "${id}" is not available as map glyphs and is not offered`);
 			continue;
 		}
-		fonts.push({ id, name: face?.title ?? id });
+		configured.push(face ?? unknownFace(id));
 	}
-	if (replace && fonts.length > 0) return fonts;
-	return [...fonts, ...FONTS.filter((font) => !fonts.some((f) => f.id === font.id))];
+	if (replace && configured.length > 0) return configured;
+	return [...configured, ...available.filter((font) => !configured.includes(font))];
 }
 
 function isHexColor(value: unknown): value is string {

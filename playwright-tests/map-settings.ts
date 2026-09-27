@@ -276,17 +276,28 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect(page.getByRole('group', { name: 'Corporate' }).getByRole('button')).toHaveCount(3);
 	await page.keyboard.press('Escape');
 
-	// the configured font comes first, with its name from the tile server. The map settings are
-	// shown after a click on the empty map.
+	// the configured face comes first, in its family, with the names from the tile server. The map
+	// settings are shown after a click on the empty map.
 	await page.mouse.click(150, 600);
-	const font = page.getByRole('combobox', { name: 'Font' });
-	await expect(font.getByRole('option').first()).toHaveText('Lato Bold');
+	const family = page.getByRole('combobox', { name: 'Font' });
+	const face = page.getByRole('combobox', { name: 'Style' });
+	await expect(family.getByRole('option').first()).toHaveText('Lato');
+	await expect(face).toHaveValue('noto_sans_regular');
+	await expect(face.getByRole('option')).toHaveText(['Regular', 'Italic', 'Bold', 'Bold Italic']);
 
-	// marker labels use the font of the map
+	// marker labels use the font of the map; another family keeps the regular face
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['noto_sans_regular']]);
-	await font.selectOption('Lato Bold');
+	await family.selectOption('Lato');
+	await expect(face.getByRole('option').first()).toHaveText('Bold');
+	await expect(face).toHaveValue('lato_regular');
+	await face.selectOption('Bold');
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
 	await expect.poll(() => stateInUrl(page).meta?.background?.options).toMatchObject({ text: { font: 'lato_bold' } });
+
+	// and another family keeps the bold face
+	await family.selectOption('Open Sans');
+	await expect(face).toHaveValue('open_sans_bold');
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['open_sans_bold']]);
 
 	// the legend has a generic font of its own
 	await page.getByRole('button', { name: 'Add a legend' }).click();

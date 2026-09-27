@@ -51,10 +51,12 @@ const sidebarAria = `
 /**
  * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
  * viewport and are compared exactly. The glyph ranges depend on the label texts in the
- * current tile data, so only the font and the basic Latin range are checked.
+ * current tile data, so only the font and the basic Latin range are checked. The editor also
+ * loads the list of the fonts, to offer them.
  */
 function expectServerRequests(requests: string[], expected: string[]) {
-	const glyphs = requests.filter((url) => url.startsWith('assets/glyphs/'));
+	expect(requests).toContain('assets/glyphs/font_families.json');
+	const glyphs = requests.filter((url) => url.startsWith('assets/glyphs/') && url.endsWith('.pbf'));
 	expect(glyphs).toContain('assets/glyphs/noto_sans_regular/0-255.pbf');
 	for (const url of glyphs) expect(url).toMatch(/^assets\/glyphs\/noto_sans_regular\/\d+-\d+\.pbf$/);
 	expect(requests.filter((url) => !url.startsWith('assets/glyphs/'))).toStrictEqual(expected);

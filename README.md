@@ -9,7 +9,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Draw** markers, lines, polygons and circles. Drag an element or its nodes to change it, select a node to delete it, and Shift-click to select several elements.
 - **Style** them: symbols with color, size, rotation, halo and a label; lines and outlines with color, width and dash patterns; fills with color, opacity and patterns. Elements can have a popup text, and lines, polygons and circles show their length, area or radius.
 - **Edit quickly**: undo and redo, duplicate (<kbd>Cmd/Ctrl</kbd>+<kbd>D</kbd>), copy and paste a style (<kbd>Cmd/Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd>/<kbd>V</kbd>), delete (<kbd>Delete</kbd>/<kbd>Backspace</kbd>).
-- **Background map**: vector map or satellite imagery, with or without streets and labels, with a theme, a label font, a label language and fewer or no labels.
+- **Background map**: vector map or satellite imagery, with or without streets and labels, with a theme, a label font in any face of the tile server (e.g. bold or condensed), a label language and fewer or no labels.
 - **Legend** with a position, a layout and a font. New entries start with a color of the map that the legend does not show yet.
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
@@ -113,7 +113,7 @@ An organisation running the editor can offer its own color schemes and fonts, e.
 ```
 
 - `colorSchemes` are offered in the color picker before the predefined schemes. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
-- `fonts` are glyph names of the tile server (see `https://tiles.versatiles.org/assets/glyphs/`). They are offered for the labels of the map and its markers. Fonts that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered.
+- The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and its markers. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.
 
 A missing or invalid file leaves the defaults. The legend uses a generic font (sans-serif, serif or monospace) instead, since the map's glyph fonts are usually not available as web fonts.
 

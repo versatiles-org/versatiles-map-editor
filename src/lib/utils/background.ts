@@ -29,20 +29,6 @@ export const THEMES = [
 	{ id: 'toner', name: 'Black & white' }
 ];
 
-// Faces available as map glyphs on tiles.versatiles.org
-export const FONTS = [
-	{ id: 'noto_sans_regular', name: 'Noto Sans' },
-	{ id: 'fira_sans_regular', name: 'Fira Sans' },
-	{ id: 'lato_regular', name: 'Lato' },
-	{ id: 'libre_baskerville_regular', name: 'Libre Baskerville' },
-	{ id: 'merriweather_sans_regular', name: 'Merriweather Sans' },
-	{ id: 'nunito_regular', name: 'Nunito' },
-	{ id: 'open_sans_regular', name: 'Open Sans' },
-	{ id: 'pt_sans_regular', name: 'PT Sans' },
-	{ id: 'roboto_regular', name: 'Roboto' },
-	{ id: 'source_sans_3_regular', name: 'Source Sans 3' }
-];
-
 // Languages of the names in the OSM tiles of tiles.versatiles.org
 export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
 

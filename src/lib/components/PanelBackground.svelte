@@ -2,6 +2,7 @@
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
 	import { config } from '$lib/utils/config.svelte.js';
+	import { closestFace, facesOf, familiesOf, unknownFace } from '$lib/utils/fonts.js';
 	import InputRow from './InputRow.svelte';
 	import ChoiceGroup from './ChoiceGroup.svelte';
 
@@ -10,8 +11,12 @@
 
 	const uid = $props.id();
 	const settings = $derived(getSettings(manager.background));
-	// the fonts of this editor instance
+	// the font faces of this editor instance
 	const fonts = $derived(config.current.fonts);
+	// the face of the map, also if it is not offered, e.g. from another tile server
+	const font = $derived(fonts.find((f) => f.id === settings.font) ?? unknownFace(settings.font));
+	const families = $derived(familiesOf(fonts.some((f) => f.id === font.id) ? fonts : [font, ...fonts]));
+	const faces = $derived(fonts.some((f) => f.id === font.id) ? facesOf(fonts, font.family) : [font]);
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>
@@ -70,10 +75,25 @@
 <!-- the imagery alone has no labels -->
 {#if settings.overlay}
 	<InputRow id="{uid}-font" label="Font">
-		<select id="{uid}-font" value={settings.font} onchange={(e) => change('font', e.currentTarget.value)}>
-			{#if !fonts.some((f) => f.id === settings.font)}<option value={settings.font}>{settings.font}</option>{/if}
-			{#each fonts as { id, name } (id)}
-				<option value={id}>{name}</option>
+		<!-- another family keeps the face, e.g. bold, as far as the family has it -->
+		<select
+			id="{uid}-font"
+			value={font.family}
+			onchange={(e) => {
+				const face = closestFace(fonts, e.currentTarget.value, font);
+				if (face) change('font', face.id);
+			}}
+		>
+			{#each families as family (family)}
+				<option value={family}>{family}</option>
+			{/each}
+		</select>
+	</InputRow>
+
+	<InputRow id="{uid}-face" label="Style">
+		<select id="{uid}-face" value={font.id} onchange={(e) => change('font', e.currentTarget.value)}>
+			{#each faces as { id, face } (id)}
+				<option value={id}>{face}</option>
 			{/each}
 		</select>
 	</InputRow>
