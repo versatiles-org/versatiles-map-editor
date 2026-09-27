@@ -140,3 +140,33 @@ test.describe('dark mode and reduced motion', () => {
 		expect(await page.locator('.page').evaluate((el) => getComputedStyle(el).colorScheme)).toBe('normal');
 	});
 });
+
+test('the drawer of elements opens with E, and chooses the map, the legend or elements', async ({ page }) => {
+	const state = encodeState({
+		map: { center: [13.4, 52.5], radius: 10000 },
+		meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
+		elements: [{ type: 'marker', point: [13.4, 52.5] }]
+	});
+	await page.goto('/#' + state);
+	await waitForMapIsReady(page);
+	const drawer = page.getByRole('complementary', { name: /^Elements/ });
+	const toggle = page.getByRole('toolbar', { name: 'Tools' }).getByRole('button', { name: 'Elements' });
+	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+
+	await expect(drawer).toBeHidden();
+	await page.keyboard.press('e');
+	await expect(drawer).toBeVisible();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+	await expect(drawer.getByRole('button', { name: 'Map settings' })).toHaveAttribute('aria-pressed', 'true');
+
+	await drawer.getByRole('button', { name: 'Legend' }).click();
+	await expect(title).toHaveText('Legend');
+	await drawer.getByRole('option', { name: 'Marker 1' }).click();
+	await expect(title).toHaveText('Marker 1');
+	await drawer.getByRole('button', { name: 'Map settings' }).click();
+	await expect(title).toHaveText('Map');
+
+	await drawer.getByRole('button', { name: 'Close the elements' }).click();
+	await expect(drawer).toBeHidden();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+});

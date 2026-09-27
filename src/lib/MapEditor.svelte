@@ -39,6 +39,11 @@
 	// the width of the map that the tools at the left cover
 	const RAIL_WIDTH = 48;
 	const railWidth = $derived(showSidebar ? RAIL_WIDTH : 0);
+	// the list of elements, in a drawer right of the tools, over the map
+	let drawerOpen = $state(false);
+	const DRAWER_WIDTH = 250;
+	// the width at the left that the tools and the drawer cover, e.g. for the legend
+	const coveredLeft = $derived(railWidth + (showSidebar && drawerOpen ? DRAWER_WIDTH : 0));
 	const MAP_PADDING = 10;
 
 	// The map centers its content in the part that the bars leave free. When the sidebar is
@@ -85,6 +90,7 @@
 			{ default: ToolRail },
 			{ default: DrawBar },
 			{ default: SelectionBar },
+			{ default: ElementsDrawer },
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
 			import('./core/geometry_manager_interactive.js'),
@@ -93,9 +99,19 @@
 			import('./components/ToolRail.svelte'),
 			import('./components/DrawBar.svelte'),
 			import('./components/SelectionBar.svelte'),
+			import('./components/ElementsDrawer.svelte'),
 			import('./components/NodeDeleteButton.svelte')
 		]);
-		return { GeometryManagerInteractive, Sidebar, TopBar, ToolRail, DrawBar, SelectionBar, NodeDeleteButton };
+		return {
+			GeometryManagerInteractive,
+			Sidebar,
+			TopBar,
+			ToolRail,
+			DrawBar,
+			SelectionBar,
+			ElementsDrawer,
+			NodeDeleteButton
+		};
 	}
 	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
 
@@ -253,7 +269,7 @@
 	}
 </script>
 
-<div class="page" class:editor={showSidebar}>
+<div class="page" class:editor={showSidebar} style:--covered-left="{coveredLeft}px">
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
@@ -268,7 +284,7 @@
 		<Legend
 			legend={geometryManager.legend}
 			map={geometryManager.map}
-			left={railWidth}
+			left={coveredLeft}
 			right={sidebarWidth}
 			top={topOverlaysHeight ? topOverlaysHeight + 10 : topbarHeight}
 			selected={geometryManager.selection?.legendSelected ?? false}
@@ -296,14 +312,24 @@
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:width="{RAIL_WIDTH}px">
 			{#if editor && geometryManager && geometryManager.isInteractive()}
-				<editor.ToolRail manager={geometryManager} />
+				<editor.ToolRail manager={geometryManager} bind:drawerOpen />
 			{/if}
 		</div>
 	{/if}
 	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
 		<editor.NodeDeleteButton {geometryManager} />
-		<editor.DrawBar manager={geometryManager} left={RAIL_WIDTH} right={sidebarWidth} />
-		<editor.SelectionBar manager={geometryManager} top={TOPBAR_HEIGHT} left={RAIL_WIDTH} right={sidebarWidth} />
+		<editor.DrawBar manager={geometryManager} left={coveredLeft} right={sidebarWidth} />
+		<editor.SelectionBar manager={geometryManager} top={TOPBAR_HEIGHT} left={coveredLeft} right={sidebarWidth} />
+		<!-- hidden, not removed, so the list keeps e.g. its scroll position -->
+		<div
+			class="drawer-slot"
+			style:top="{TOPBAR_HEIGHT}px"
+			style:left="{RAIL_WIDTH}px"
+			style:width="{DRAWER_WIDTH}px"
+			hidden={!drawerOpen}
+		>
+			<editor.ElementsDrawer manager={geometryManager} onclose={() => (drawerOpen = false)} />
+		</div>
 		<!-- hidden, not removed, so the sidebar keeps e.g. its open panels -->
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />
@@ -467,9 +493,15 @@
 		background: var(--color-bg);
 	}
 
-	/* the attribution of the map, right of the tools */
+	/* the attribution of the map, right of the tools and the drawer */
 	.page.editor .map :global(.maplibregl-ctrl-bottom-left) {
-		left: 48px;
+		left: var(--covered-left);
+	}
+
+	.drawer-slot {
+		position: absolute;
+		bottom: 0;
+		z-index: 3;
 	}
 
 	#sidebar {

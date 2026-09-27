@@ -51,6 +51,7 @@ describe('MapEditor', () => {
 			import('./components/ToolRail.svelte'),
 			import('./components/DrawBar.svelte'),
 			import('./components/SelectionBar.svelte'),
+			import('./components/ElementsDrawer.svelte'),
 			import('./components/NodeDeleteButton.svelte')
 		]);
 	}, 60_000);

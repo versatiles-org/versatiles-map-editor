@@ -1,9 +1,7 @@
 <script lang="ts">
 	import '../style/index.scss';
-	import SidebarPanel from './SidebarPanel.svelte';
 	import SearchPlace from './SearchPlace.svelte';
 	import Inspector from './Inspector.svelte';
-	import PanelElements from './PanelElements.svelte';
 	import * as commands from '../core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
@@ -74,10 +72,6 @@
 
 		<hr class="thick" />
 		<Inspector manager={geometryManager} />
-		<hr class="thick" />
-		<SidebarPanel title="Elements" open={false} disabled={geometryManager.elements.length === 0}>
-			<PanelElements manager={geometryManager} />
-		</SidebarPanel>
 	</div>
 </div>
 

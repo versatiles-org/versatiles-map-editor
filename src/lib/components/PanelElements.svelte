@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
+	import Icon, { type IconName } from './Icon.svelte';
 	import { elementNames } from '$lib/utils/element_names.js';
 
 	/**
@@ -95,7 +96,10 @@
 			aria-selected={selectedSet.has(element)}
 			class:active={i === activeIndex}
 		>
-			<ElementName {element} name={names[i]} />
+			<span class="type" style:color={element.getColors()[0]}
+				><Icon name={element.getState().type as IconName} size={14} /></span
+			>
+			<span class="name"><ElementName {element} name={names[i]} /></span>
 		</li>
 	{/each}
 </ul>
@@ -103,14 +107,9 @@
 
 <style>
 	.elements {
-		max-height: 12em;
-		overflow-y: auto;
 		margin: 0 0 var(--btn-gap);
 		padding: 0;
 		list-style: none;
-		border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
-		border-radius: 3px;
-		background: var(--color-bg);
 
 		&:focus-visible {
 			outline: 2px solid var(--color-blue);
@@ -118,11 +117,19 @@
 		}
 
 		li {
-			padding: 0.3em 0.5em;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 5px 8px;
+			border-radius: 6px;
 			cursor: pointer;
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
+		}
+
+		li:hover {
+			background: var(--color-hover);
 		}
 
 		li[aria-selected='true'] {
@@ -133,5 +140,16 @@
 			outline: 2px solid var(--color-blue);
 			outline-offset: -2px;
 		}
+	}
+
+	.type {
+		display: grid;
+		flex: none;
+	}
+
+	.name {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 </style>

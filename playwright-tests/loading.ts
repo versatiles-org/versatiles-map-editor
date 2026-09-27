@@ -29,6 +29,7 @@ const railAria = `
   - button "Line"
   - button "Polygon"
   - button "Circle"
+  - button "Elements" [expanded=false]
 `;
 const sidebarAria = `
 - combobox "Search address or place"
@@ -46,7 +47,6 @@ const sidebarAria = `
 - region "Shared map":
   - heading "Shared map" [level=3]
   - checkbox "Address search for visitors"
-- button "Elements"
 `;
 
 /**

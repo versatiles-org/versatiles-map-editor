@@ -4,8 +4,8 @@
 	import Icon from './Icon.svelte';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 
-	/** The tools at the left of the editor: selecting, and drawing each kind of element. */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
+	let { manager, drawerOpen = $bindable() }: { manager: GeometryManagerInteractive; drawerOpen: boolean } = $props();
 
 	const drawing = $derived(manager.drawing);
 
@@ -29,6 +29,11 @@
 			}
 		}
 		if (e.shiftKey) return;
+		if (e.key.toUpperCase() === 'E') {
+			e.preventDefault();
+			drawerOpen = !drawerOpen;
+			return;
+		}
 		const tool = TOOLS.find(({ key }) => key === e.key.toUpperCase());
 		if (!tool) return;
 		e.preventDefault();
@@ -51,6 +56,18 @@
 			<Icon name={id} size={20} />
 		</button>
 	{/each}
+	<hr />
+	<button
+		class="tool"
+		aria-label="Elements"
+		aria-expanded={drawerOpen}
+		aria-controls="elements-drawer"
+		aria-keyshortcuts="E"
+		title="Elements (E)"
+		onclick={() => (drawerOpen = !drawerOpen)}
+	>
+		<Icon name="layers" size={20} />
+	</button>
 </div>
 
 <style>
@@ -64,6 +81,14 @@
 		padding: 7px 0;
 		background: var(--color-bg);
 		border-right: 1px solid var(--color-border);
+	}
+
+	hr {
+		width: 24px;
+		margin: 4px 0;
+		border: none;
+		border-top: 1px solid var(--color-border);
+		opacity: 1;
 	}
 
 	.tool {
@@ -81,7 +106,8 @@
 		&:hover {
 			background: var(--color-hover);
 		}
-		&[aria-pressed='true'] {
+		&[aria-pressed='true'],
+		&[aria-expanded='true'] {
 			background: var(--color-blue);
 			color: var(--color-on-blue);
 		}
