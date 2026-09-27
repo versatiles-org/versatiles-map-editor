@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { GeometryManager } from './geometry_manager.svelte.js';
-import { createElement, elementFromState, type ElementOfType, type ElementType } from './element/registry.js';
+import { elementFromState } from './element/registry.js';
 import { SelectionHandler } from './selection.svelte.js';
 import { DrawingHandler } from './drawing.svelte.js';
 import { Cursor } from './cursor.js';
@@ -58,13 +58,6 @@ export class GeometryManagerInteractive extends GeometryManager {
 	public removeElements(elements: AbstractElement[]) {
 		this.selection.deselectElements(elements);
 		super.removeElements(elements);
-	}
-
-	public addNewElement<T extends ElementType>(type: T): ElementOfType<T> {
-		const element = createElement(this, type);
-		this.appendElement(element);
-		this.selection.selectElement(element);
-		return element;
 	}
 
 	/** Add a copy of the element, moved by the given offset in pixels, and select it. */

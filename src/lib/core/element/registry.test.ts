@@ -2,24 +2,14 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { StateElement } from '@versatiles/map-state';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
-import { createElement, elementFromState } from './registry.js';
-import { CircleElement } from './circle.js';
-import { LineElement } from './line.js';
-import { MarkerElement } from './marker.js';
-import { PolygonElement } from './polygon.js';
+import { elementFromState } from './registry.js';
+import { newElement } from '../__mocks__/elements.js';
 
 describe('element registry', () => {
 	let manager: GeometryManager;
 
 	beforeEach(() => {
 		manager = new MockGeometryManager() as unknown as GeometryManager;
-	});
-
-	it('creates a new element of each type', () => {
-		expect(createElement(manager, 'marker')).toBeInstanceOf(MarkerElement);
-		expect(createElement(manager, 'line')).toBeInstanceOf(LineElement);
-		expect(createElement(manager, 'polygon')).toBeInstanceOf(PolygonElement);
-		expect(createElement(manager, 'circle')).toBeInstanceOf(CircleElement);
 	});
 
 	it('builds each type from its state, with its popup', () => {
@@ -66,9 +56,9 @@ describe('style layers', () => {
 	});
 
 	it('name the layers by their role', () => {
-		const marker = createElement(manager, 'marker');
-		const line = createElement(manager, 'line');
-		const circle = createElement(manager, 'circle');
+		const marker = newElement(manager, 'marker');
+		const line = newElement(manager, 'line');
+		const circle = newElement(manager, 'circle');
 		expect(marker.getStyleLayers()).toStrictEqual({ symbol: marker.layer });
 		expect(line.getStyleLayers()).toStrictEqual({ stroke: line.layer });
 		expect(circle.getStyleLayers()).toStrictEqual({ fill: circle.fillLayer, stroke: circle.strokeLayer });
@@ -76,14 +66,14 @@ describe('style layers', () => {
 	});
 
 	it('give the colors, without the color of a hidden outline', () => {
-		const line = createElement(manager, 'line');
+		const line = newElement(manager, 'line');
 		line.layer.color = '#00ff00';
 		// a line cannot be hidden, so it is always drawn
 		line.layer.visible = false;
 		expect(line.layer.visible).toBe(true);
 		expect(line.getColors()).toStrictEqual(['#00ff00']);
 
-		const circle = createElement(manager, 'circle');
+		const circle = newElement(manager, 'circle');
 		circle.fillLayer.color = '#ff0000';
 		circle.strokeLayer.color = '#0000ff';
 		circle.strokeLayer.visible = true;

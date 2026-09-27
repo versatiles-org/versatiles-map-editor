@@ -7,6 +7,21 @@ import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 
+// elements of each type, where the geometry does not matter
+const newMarker = (manager: GeometryManager) => new MarkerElement(manager, [0, 0]);
+const newLine = (manager: GeometryManager) =>
+	new LineElement(manager, [
+		[0, 0],
+		[1, 1]
+	]);
+const newPolygon = (manager: GeometryManager) =>
+	new PolygonElement(manager, [
+		[0, 0],
+		[1, 0],
+		[0, 1]
+	]);
+const newCircle = (manager: GeometryManager) => new CircleElement(manager, [0, 0], 1000);
+
 describe('StyleClipboard', () => {
 	let manager: GeometryManager;
 	let clipboard: StyleClipboard;
@@ -25,10 +40,10 @@ describe('StyleClipboard', () => {
 	}
 
 	it('transfers the complete style between elements of the same type, including defaults', () => {
-		const source = new PolygonElement(manager);
+		const source = newPolygon(manager);
 		source.fillLayer.color = '#00ff00';
 		source.strokeLayer.width = 4;
-		const target = new PolygonElement(manager);
+		const target = newPolygon(manager);
 		target.fillLayer.opacity = 0.5;
 		target.strokeLayer.visible = false;
 
@@ -38,10 +53,10 @@ describe('StyleClipboard', () => {
 	});
 
 	it('does not transfer the label of a marker', () => {
-		const source = new MarkerElement(manager);
+		const source = newMarker(manager);
 		source.layer.label = 'Source';
 		source.layer.size = 2;
-		const target = new MarkerElement(manager);
+		const target = newMarker(manager);
 		target.layer.label = 'Target';
 
 		copyAndPaste(source, target);
@@ -50,10 +65,10 @@ describe('StyleClipboard', () => {
 	});
 
 	it('transfers a line style onto the outline of a polygon, but not onto its fill', () => {
-		const line = new LineElement(manager);
+		const line = newLine(manager);
 		line.layer.color = '#0000ff';
 		line.layer.width = 5;
-		const polygon = new PolygonElement(manager);
+		const polygon = newPolygon(manager);
 		polygon.strokeLayer.visible = false;
 
 		copyAndPaste(line, polygon);
@@ -62,21 +77,21 @@ describe('StyleClipboard', () => {
 	});
 
 	it('does not hide a line when pasting a hidden outline', () => {
-		const circle = new CircleElement(manager);
+		const circle = newCircle(manager);
 		circle.strokeLayer.visible = false;
 		circle.strokeLayer.color = '#123456';
-		const line = new LineElement(manager);
+		const line = newLine(manager);
 
 		copyAndPaste(circle, line);
 		expect(line.getState().style).toStrictEqual({ color: '#123456' });
 	});
 
 	it('transfers only the color between elements without common style parts', () => {
-		const marker = new MarkerElement(manager);
+		const marker = newMarker(manager);
 		marker.layer.color = '#00ff00';
 		marker.layer.size = 3;
-		const polygon = new PolygonElement(manager);
-		const line = new LineElement(manager);
+		const polygon = newPolygon(manager);
+		const line = newLine(manager);
 
 		copyAndPaste(marker, polygon, line);
 		expect(polygon.getState().style).toStrictEqual({ color: '#00ff00' });

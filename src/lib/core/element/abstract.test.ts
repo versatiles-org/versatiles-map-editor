@@ -47,13 +47,6 @@ describe('AbstractElement', () => {
 		expect(mockManager.map.addSource).not.toHaveBeenCalled();
 	});
 
-	it('should generate random positions', () => {
-		const element = new TestElement(mockManager);
-		const points = element['randomPositions'](3);
-		expect(points).toHaveLength(3);
-		expect(points[0]).toHaveLength(2);
-	});
-
 	it('should call destroy and delete itself', () => {
 		const element = new TestElement(mockManager);
 		vi.spyOn(element, 'destroy');

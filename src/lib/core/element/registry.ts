@@ -15,12 +15,6 @@ const ELEMENT_CLASSES = {
 };
 
 export type ElementType = keyof typeof ELEMENT_CLASSES;
-export type ElementOfType<T extends ElementType> = InstanceType<(typeof ELEMENT_CLASSES)[T]>;
-
-/** A new element of the type, at a random position in the viewport. */
-export function createElement<T extends ElementType>(manager: GeometryManager, type: T): ElementOfType<T> {
-	return new ELEMENT_CLASSES[type](manager) as ElementOfType<T>;
-}
 
 /** Build a live editor element from its serialized state. */
 export function elementFromState(manager: GeometryManager, state: StateElement): AbstractElement {

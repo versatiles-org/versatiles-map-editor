@@ -11,12 +11,10 @@ describe('LineElement', () => {
 
 	beforeEach(() => {
 		mockManager = new MockGeometryManager() as unknown as GeometryManager;
-		element = new LineElement(mockManager);
-	});
-
-	it('should initialize with a default path', () => {
-		expect(element).toBeDefined();
-		expect(element.path.length).toBe(2);
+		element = new LineElement(mockManager, [
+			[0, 0],
+			[1, 1]
+		]);
 	});
 
 	it('should initialize with a provided path', () => {

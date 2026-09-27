@@ -11,9 +11,9 @@ export class MarkerElement extends AbstractElement {
 
 	public point: GeoPoint;
 
-	constructor(manager: GeometryManager, point?: GeoPoint) {
+	constructor(manager: GeometryManager, point: GeoPoint) {
 		super(manager);
-		this.point = point ?? this.randomPositions(1)[0];
+		this.point = point;
 
 		this.layer = new MapLayerSymbol(() => this.updateSource());
 		this.updateSource();

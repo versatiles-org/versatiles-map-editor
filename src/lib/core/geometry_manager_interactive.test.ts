@@ -7,6 +7,7 @@ import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 import { LngLat, MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import type { GeoPath, GeoPoint } from '../utils/types.js';
+import { addElement } from './__mocks__/elements.js';
 
 describe('GeometryManager', () => {
 	let mockMap: MockMap;
@@ -24,27 +25,27 @@ describe('GeometryManager', () => {
 	});
 
 	it('should add a new marker', () => {
-		const element = manager.addNewElement('marker');
+		const element = addElement(manager, 'marker');
 		expect(element).toBeInstanceOf(MarkerElement);
 		expect(manager.elements).toBeDefined();
 	});
 
 	it('should add a new line', () => {
-		const element = manager.addNewElement('line');
+		const element = addElement(manager, 'line');
 		expect(element).toBeInstanceOf(LineElement);
 		expect(manager.elements).toBeDefined();
 	});
 
 	it('should add a new polygon', () => {
-		const element = manager.addNewElement('polygon');
+		const element = addElement(manager, 'polygon');
 		expect(element).toBeInstanceOf(PolygonElement);
 		expect(manager.elements).toBeDefined();
 	});
 
 	it('should not accumulate map listeners on undo/redo', () => {
-		manager.addNewElement('polygon');
+		addElement(manager, 'polygon');
 		manager.state.log();
-		manager.addNewElement('marker');
+		addElement(manager, 'marker');
 		manager.state.log();
 		const count = mockMap.listenerCount();
 
@@ -56,7 +57,7 @@ describe('GeometryManager', () => {
 	});
 
 	it('should delete an element', () => {
-		const element = manager.addNewElement('marker');
+		const element = addElement(manager, 'marker');
 		const { selection } = manager;
 		if (!selection) throw new Error('Selection is not defined');
 		selection.selectElement(element);
@@ -100,7 +101,7 @@ describe('GeometryManager', () => {
 				type: 'marker'
 			};
 
-			const marker = manager.addNewElement('marker');
+			const marker = addElement(manager, 'marker');
 			marker.point = element.point;
 			marker.layer.label = element.style.label;
 
@@ -125,7 +126,7 @@ describe('GeometryManager', () => {
 				type: 'line'
 			};
 
-			const line = manager.addNewElement('line');
+			const line = addElement(manager, 'line');
 			line.path = element.points;
 			line.layer.color = element.style.color;
 
@@ -151,7 +152,7 @@ describe('GeometryManager', () => {
 				type: 'polygon'
 			};
 
-			const polygon = manager.addNewElement('polygon');
+			const polygon = addElement(manager, 'polygon');
 			polygon.path = element.points;
 			polygon.fillLayer.color = element.style.color;
 			polygon.strokeLayer.color = element.strokeStyle.color;
@@ -168,7 +169,7 @@ describe('GeometryManager', () => {
 		});
 
 		it('should add an imported state: its elements and its map properties', () => {
-			manager.addNewElement('marker');
+			addElement(manager, 'marker');
 			manager.addState({
 				meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] }, colorScheme: 'dark2', search: true },
 				elements: [
@@ -217,8 +218,8 @@ describe('GeometryManager', () => {
 
 		describe('duplicate', () => {
 			it('should duplicate several elements and select all copies', () => {
-				const marker = manager.addNewElement('marker');
-				const line = manager.addNewElement('line');
+				const marker = addElement(manager, 'marker');
+				const line = addElement(manager, 'line');
 				const copies = manager.duplicateElements([marker, line]);
 				expect(copies.map((c) => c.getState())).toStrictEqual([marker.getState(), line.getState()]);
 				expect(manager.selection.selectedElements).toStrictEqual(copies);
@@ -226,15 +227,15 @@ describe('GeometryManager', () => {
 			});
 
 			it('should keep the other selected elements when one is removed', () => {
-				const marker = manager.addNewElement('marker');
-				const line = manager.addNewElement('line');
+				const marker = addElement(manager, 'marker');
+				const line = addElement(manager, 'line');
 				manager.selection.selectElements([marker, line]);
 				marker.delete();
 				expect(manager.selection.selectedElements).toStrictEqual([line]);
 			});
 
 			it('should duplicate a marker with an offset and select the copy', () => {
-				const marker = manager.addNewElement('marker');
+				const marker = addElement(manager, 'marker');
 				marker.point = [10, 20];
 				marker.layer.label = 'Test';
 
@@ -253,7 +254,7 @@ describe('GeometryManager', () => {
 			});
 
 			it('should duplicate a line without sharing its points', () => {
-				const line = manager.addNewElement('line');
+				const line = addElement(manager, 'line');
 				line.path = [
 					[1, 2],
 					[3, 4]
@@ -268,9 +269,9 @@ describe('GeometryManager', () => {
 			});
 
 			it('should duplicate polygons and circles with their outline style', () => {
-				const polygon = manager.addNewElement('polygon');
+				const polygon = addElement(manager, 'polygon');
 				polygon.strokeLayer.visible = false;
-				const circle = manager.addNewElement('circle');
+				const circle = addElement(manager, 'circle');
 				circle.strokeLayer.color = '#123456';
 
 				const polygonCopy = manager.duplicateElement(polygon, [0, 10]);
@@ -288,10 +289,10 @@ describe('GeometryManager', () => {
 		});
 
 		it('should restore falsy style values', async () => {
-			const polygon = manager.addNewElement('polygon');
+			const polygon = addElement(manager, 'polygon');
 			polygon.fillLayer.opacity = 0;
 			polygon.strokeLayer.visible = false;
-			const marker = manager.addNewElement('marker');
+			const marker = addElement(manager, 'marker');
 			marker.layer.halo = 0;
 
 			await manager.setState(decodeState(manager.state.getHash()));
@@ -304,7 +305,7 @@ describe('GeometryManager', () => {
 	describe('GeoJSON', () => {
 		it('returns a FeatureCollection delegating to the codec', () => {
 			vi.spyOn(mockMap, 'getCenter').mockReturnValue(new LngLat(10, 20));
-			manager.addNewElement('marker');
+			addElement(manager, 'marker');
 
 			const geojson = manager.getGeoJSON();
 			expect(geojson.type).toBe('FeatureCollection');
@@ -370,7 +371,7 @@ describe('GeometryManager', () => {
 		});
 
 		it('appends imported elements to the existing ones', () => {
-			manager.addNewElement('marker');
+			addElement(manager, 'marker');
 			manager.addGeoJSON({
 				type: 'FeatureCollection',
 				features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } }]
@@ -425,8 +426,8 @@ describe('GeometryManager', () => {
 		});
 
 		it('change the elements in place', async () => {
-			const polygon = manager.addNewElement('polygon');
-			const marker = manager.addNewElement('marker');
+			const polygon = addElement(manager, 'polygon');
+			const marker = addElement(manager, 'marker');
 			manager.state.log();
 			polygon.fillLayer.color = '#123456';
 			polygon.fillLayer.opacity = 0.2;
@@ -448,7 +449,7 @@ describe('GeometryManager', () => {
 		});
 
 		it('restore the geometry and the popup', async () => {
-			const line = manager.addNewElement('line');
+			const line = addElement(manager, 'line');
 			const path = structuredClone(line.path);
 			manager.state.log();
 			line.moveBy(1, 0);
@@ -461,11 +462,11 @@ describe('GeometryManager', () => {
 		});
 
 		it('build and remove only the elements that differ, in the right order', async () => {
-			const marker = manager.addNewElement('marker');
+			const marker = addElement(manager, 'marker');
 			manager.state.log();
 			marker.delete();
-			const line = manager.addNewElement('line');
-			manager.addNewElement('circle');
+			const line = addElement(manager, 'line');
+			addElement(manager, 'circle');
 			manager.state.log();
 			const destroyLine = vi.spyOn(line, 'destroy');
 

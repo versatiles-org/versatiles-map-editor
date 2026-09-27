@@ -1,6 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import type { GeoPoint } from '../../utils/types.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import {
 	FILL_DEFAULTS,
@@ -63,29 +62,6 @@ export abstract class AbstractElement {
 
 	/** Called when the element is removed; the renderer removes its features with the element list. */
 	public destroy(): void {}
-
-	protected randomPositions(length: number): GeoPoint[] {
-		const points: GeoPoint[] = [];
-		const bounds = this.map.getBounds();
-
-		for (let i = 0; i < length; i++) {
-			const xr = Math.random() * 0.5 + 0.25;
-			const yr = Math.random() * 0.5 + 0.25;
-			points.push([
-				(1 - xr) * bounds.getWest() + xr * bounds.getEast(),
-				(1 - yr) * bounds.getSouth() + yr * bounds.getNorth()
-			]);
-		}
-
-		return points;
-	}
-
-	protected randomRadius(): number {
-		const bounds = this.map.getBounds();
-		const width = bounds.getEast() - bounds.getWest();
-		const height = bounds.getNorth() - bounds.getSouth();
-		return Math.sqrt(width * height) * 10000;
-	}
 
 	/** Draw the element again, after a change of its geometry or style. */
 	protected updateSource() {

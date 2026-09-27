@@ -14,10 +14,10 @@ export class CircleElement extends AbstractElement {
 	public point: GeoPoint;
 	public radius: number;
 
-	constructor(manager: GeometryManager, point?: GeoPoint, radius?: number) {
+	constructor(manager: GeometryManager, point: GeoPoint, radius: number) {
 		super(manager);
-		this.point = point ?? this.randomPositions(1)[0];
-		this.radius = radius ?? this.randomRadius();
+		this.point = point;
+		this.radius = radius;
 
 		this.fillLayer = new MapLayerFill(() => this.updateSource());
 

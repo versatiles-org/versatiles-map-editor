@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
+import { addElement } from './__mocks__/elements.js';
 
 describe('DrawingHandler', () => {
 	let map: MockMap;
@@ -166,7 +167,7 @@ describe('DrawingHandler', () => {
 	});
 
 	it('deselects the elements when a drawing tool is chosen', () => {
-		const marker = manager.addNewElement('marker');
+		const marker = addElement(manager, 'marker');
 		expect(manager.selection.selectedElements).toStrictEqual([marker]);
 		manager.drawing.setTool('line');
 		expect(manager.selection.selectedElements).toStrictEqual([]);

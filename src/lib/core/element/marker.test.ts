@@ -11,7 +11,7 @@ describe('MarkerElement', () => {
 
 	beforeEach(() => {
 		mockManager = new MockGeometryManager() as unknown as GeometryManager;
-		element = new MarkerElement(mockManager);
+		element = new MarkerElement(mockManager, [0, 0]);
 	});
 
 	it('should move the whole marker with its node', () => {
@@ -20,11 +20,6 @@ describe('MarkerElement', () => {
 
 	it('should have no measurements', () => {
 		expect(element.measurements).toEqual([]);
-	});
-
-	it('should initialize with a default point', () => {
-		expect(element).toBeDefined();
-		expect(element['point'].length).toBe(2);
 	});
 
 	it('should initialize with a provided point', () => {

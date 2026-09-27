@@ -10,9 +10,9 @@ import { formatLength } from '../../utils/format.js';
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;
 
-	constructor(manager: GeometryManager, line?: GeoPath) {
+	constructor(manager: GeometryManager, line: GeoPath) {
 		super(manager, true);
-		this.path = line ?? this.randomPositions(2);
+		this.path = line;
 
 		this.layer = new MapLayerLine(() => this.updateSource(), { canHide: false });
 

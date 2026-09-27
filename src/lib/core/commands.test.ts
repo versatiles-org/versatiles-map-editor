@@ -10,6 +10,7 @@ import {
 	duplicateSelection,
 	pasteStyle
 } from './commands.js';
+import { addElement } from './__mocks__/elements.js';
 
 describe('commands', () => {
 	let manager: GeometryManagerInteractive;
@@ -21,8 +22,8 @@ describe('commands', () => {
 	const types = () => manager.elements.map((e) => e.getState().type);
 
 	it('duplicate the selected elements in one undo step and select the copies', () => {
-		const marker = manager.addNewElement('marker');
-		const line = manager.addNewElement('line');
+		const marker = addElement(manager, 'marker');
+		const line = addElement(manager, 'line');
 		manager.state.log();
 		manager.selection.selectElements([marker, line]);
 
@@ -35,8 +36,8 @@ describe('commands', () => {
 	});
 
 	it('delete the selected elements in one undo step', () => {
-		const marker = manager.addNewElement('marker');
-		manager.addNewElement('line');
+		const marker = addElement(manager, 'marker');
+		addElement(manager, 'line');
 		manager.state.log();
 		manager.selection.selectElement(marker);
 
@@ -48,7 +49,7 @@ describe('commands', () => {
 	});
 
 	it('do nothing without a selection', () => {
-		manager.addNewElement('marker');
+		addElement(manager, 'marker');
 		manager.state.log();
 		manager.selection.selectElements([]);
 
@@ -62,8 +63,8 @@ describe('commands', () => {
 	});
 
 	it('copy the style of one element and paste it onto the selection', () => {
-		const a = manager.addNewElement('marker');
-		const b = manager.addNewElement('marker');
+		const a = addElement(manager, 'marker');
+		const b = addElement(manager, 'marker');
 		manager.state.log();
 
 		manager.selection.selectElements([a, b]);
@@ -83,9 +84,9 @@ describe('commands', () => {
 describe('addLegendEntry', () => {
 	it('starts a legend, and adds entries with colors of the map that it does not show yet', () => {
 		const manager = new GeometryManagerInteractive(new MockMap() as unknown as MaplibreMap);
-		const a = manager.addNewElement('marker');
+		const a = addElement(manager, 'marker');
 		a.getStyleLayers().symbol!.color = '#111111';
-		const b = manager.addNewElement('marker');
+		const b = addElement(manager, 'marker');
 		b.getStyleLayers().symbol!.color = '#222222';
 
 		addLegendEntry(manager);

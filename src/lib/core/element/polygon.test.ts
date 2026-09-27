@@ -11,12 +11,11 @@ describe('PolygonElement', () => {
 
 	beforeEach(() => {
 		mockManager = new MockGeometryManager() as unknown as GeometryManager;
-		element = new PolygonElement(mockManager);
-	});
-
-	it('should initialize with a default polygon', () => {
-		expect(element).toBeDefined();
-		expect(element.path.length).toBe(3);
+		element = new PolygonElement(mockManager, [
+			[0, 0],
+			[1, 0],
+			[0, 1]
+		]);
 	});
 
 	it('should initialize with a provided polygon', () => {

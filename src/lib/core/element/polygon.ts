@@ -12,9 +12,9 @@ export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
 	public readonly strokeLayer: MapLayerLine;
 
-	constructor(manager: GeometryManager, polygon?: GeoPath) {
+	constructor(manager: GeometryManager, polygon: GeoPath) {
 		super(manager, false);
-		this.path = polygon ?? this.randomPositions(3);
+		this.path = polygon;
 
 		this.fillLayer = new MapLayerFill(() => this.updateSource());
 
