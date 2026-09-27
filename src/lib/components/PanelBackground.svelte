@@ -56,33 +56,47 @@
 	</InputRow>
 {/if}
 
-<InputRow id="{uid}-font" label="Font">
-	<select id="{uid}-font" value={settings.font} onchange={(e) => change('font', e.currentTarget.value)}>
-		{#if !fonts.some((f) => f.id === settings.font)}<option value={settings.font}>{settings.font}</option>{/if}
-		{#each fonts as { id, name } (id)}
-			<option value={id}>{name}</option>
-		{/each}
-	</select>
-</InputRow>
+{#if settings.base === 'satellite'}
+	<InputRow id="{uid}-overlay" label="Streets and labels">
+		<input
+			id="{uid}-overlay"
+			type="checkbox"
+			checked={settings.overlay}
+			onchange={(e) => change('overlay', e.currentTarget.checked)}
+		/>
+	</InputRow>
+{/if}
 
-<InputRow id="{uid}-language" label="Language">
-	<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
-		<option value="user">Browser language</option>
-		<option value="local">Local names</option>
-		{#if !['user', 'local', ...LANGUAGES].includes(settings.language)}
-			<option value={settings.language}>{settings.language}</option>
-		{/if}
-		{#each languages as { id, name } (id)}
-			<option value={id}>{name}</option>
-		{/each}
-	</select>
-</InputRow>
+<!-- the imagery alone has no labels -->
+{#if settings.overlay}
+	<InputRow id="{uid}-font" label="Font">
+		<select id="{uid}-font" value={settings.font} onchange={(e) => change('font', e.currentTarget.value)}>
+			{#if !fonts.some((f) => f.id === settings.font)}<option value={settings.font}>{settings.font}</option>{/if}
+			{#each fonts as { id, name } (id)}
+				<option value={id}>{name}</option>
+			{/each}
+		</select>
+	</InputRow>
 
-<InputRow id="{uid}-labels" label="Labels" group>
-	<ChoiceGroup
-		labelledby="{uid}-labels-label"
-		value={settings.labels}
-		onchange={(labels) => change('labels', labels)}
-		options={LABELS}
-	/>
-</InputRow>
+	<InputRow id="{uid}-language" label="Language">
+		<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
+			<option value="user">Browser language</option>
+			<option value="local">Local names</option>
+			{#if !['user', 'local', ...LANGUAGES].includes(settings.language)}
+				<option value={settings.language}>{settings.language}</option>
+			{/if}
+			{#each languages as { id, name } (id)}
+				<option value={id}>{name}</option>
+			{/each}
+		</select>
+	</InputRow>
+
+	<InputRow id="{uid}-labels" label="Labels" group>
+		<ChoiceGroup
+			labelledby="{uid}-labels-label"
+			value={settings.labels}
+			onchange={(labels) => change('labels', labels)}
+			options={LABELS}
+		/>
+	</InputRow>
+{/if}

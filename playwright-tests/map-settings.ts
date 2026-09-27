@@ -99,6 +99,36 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(labelsInGerman).toBe(true);
 });
 
+test('the satellite imagery without streets and labels', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [{ type: 'marker', point: [13.4, 52.5], style: { label: 'Cafe' } }]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const background = () => stateInUrl(page).meta?.background;
+	const sources = () =>
+		page.evaluate(() => Object.keys((window as unknown as MapWindow).map.getStyle()?.sources ?? {}));
+
+	await page.getByRole('radio', { name: 'Satellite' }).check();
+	const overlay = page.getByRole('checkbox', { name: 'Streets and labels' });
+	await expect(overlay).toBeChecked();
+	await overlay.uncheck();
+	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
+	// only the imagery and the elements, which are still drawn
+	await expect.poll(sources).not.toContain('versatiles-shortbread');
+	expect(await sources()).toContain('satellite');
+	await waitForMapIsIdle(page);
+	await expect.poll(async () => (await drawnElements(page)).symbol).toStrictEqual([1]);
+	// the imagery has no labels to set
+	await expect(page.getByRole('radiogroup', { name: 'Labels' })).toBeHidden();
+
+	await overlay.check();
+	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: {} });
+	await expect(page.getByRole('radiogroup', { name: 'Labels' })).toBeVisible();
+	await expect.poll(sources).toContain('versatiles-shortbread');
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

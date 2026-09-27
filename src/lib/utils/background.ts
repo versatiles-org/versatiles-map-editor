@@ -8,6 +8,8 @@ import type { StateBackground } from '@versatiles/map-state';
  */
 export interface BackgroundSettings {
 	base: 'vector' | 'satellite';
+	/** Whether the satellite map shows streets, borders and labels over the imagery. The vector map always does. */
+	overlay: boolean;
 	/** Color preset of the vector map. */
 	theme: string;
 	font: string;
@@ -69,6 +71,7 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 
 	return {
 		base: background.builder === 'satellite' ? 'satellite' : 'vector',
+		overlay: background.builder !== 'satellite' || background.options.osmOverlay !== false,
 		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
@@ -97,6 +100,13 @@ export function changeSettings(
 		options = newBuilder === 'osm' ? kept : { osmOverlay: kept };
 		builder = newBuilder;
 	}
+
+	// the imagery alone, or with the overlay, which starts with its defaults again
+	if (builder === 'satellite' && change.overlay !== undefined) {
+		options.osmOverlay = change.overlay ? {} : false;
+	}
+	// without an overlay, the satellite map has no labels to change
+	if (builder === 'satellite' && options.osmOverlay === false) return minimizeBackground({ builder, options });
 
 	let overlay: Options = options;
 	if (builder === 'satellite') {

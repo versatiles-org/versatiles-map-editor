@@ -5,6 +5,7 @@ describe('getSettings', () => {
 	it('reads the editor default', () => {
 		expect(getSettings()).toStrictEqual({
 			base: 'vector',
+			overlay: true,
 			theme: 'colorful',
 			font: 'noto_sans_regular',
 			language: 'user',
@@ -18,7 +19,14 @@ describe('getSettings', () => {
 				builder: 'osm',
 				options: { theme: 'gray', text: { font: 'lato_regular', spacing: 2 } }
 			})
-		).toStrictEqual({ base: 'vector', theme: 'gray', font: 'lato_regular', language: 'local', labels: 'fewer' });
+		).toStrictEqual({
+			base: 'vector',
+			overlay: true,
+			theme: 'gray',
+			font: 'lato_regular',
+			language: 'local',
+			labels: 'fewer'
+		});
 		expect(getSettings({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } })).toMatchObject(
 			{ base: 'satellite', labels: 'none' }
 		);
@@ -60,6 +68,20 @@ describe('changeSettings', () => {
 			builder: 'osm',
 			options: { text: { language: 'fr', spacing: 2 } }
 		});
+	});
+
+	it('shows the satellite imagery without the overlay, and with it again', () => {
+		const sat = changeSettings(undefined, { base: 'satellite', language: 'fr' });
+		expect(getSettings(sat).overlay).toBe(true);
+		const imagery = changeSettings(sat, { overlay: false });
+		expect(imagery).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
+		expect(getSettings(imagery)).toMatchObject({ base: 'satellite', overlay: false });
+		// labels need the overlay
+		expect(changeSettings(imagery, { labels: 'none' })).toStrictEqual(imagery);
+		// the overlay comes back with its defaults
+		expect(changeSettings(imagery, { overlay: true })).toStrictEqual({ builder: 'satellite', options: {} });
+		// the vector map always has its streets and labels
+		expect(getSettings(changeSettings(imagery, { base: 'vector' })).overlay).toBe(true);
 	});
 
 	it('keeps options the editor does not offer', () => {
