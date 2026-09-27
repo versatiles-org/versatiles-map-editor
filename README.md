@@ -56,7 +56,7 @@ npm run doc-graph       # dependency graph only
 
 [![JavaScript of the editor, without the map worker](docs/bundle-treemap.svg)](docs/bundle-treemap.svg?raw=true)
 
-Sized by the bundle's own source map: **1417.3 KB** raw, **401.7 KB** gzipped, across 176 modules.
+Sized by the bundle's own source map: **1403.7 KB** raw, **396.3 KB** gzipped, across 174 modules.
 
 ### Dependency Graph
 
