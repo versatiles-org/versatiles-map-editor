@@ -114,7 +114,7 @@
 		<div class="right">
 			<p>
 				<label for="text-link">
-					Link:
+					Link
 					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
 				</label>
 				<button class="btn" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
@@ -123,14 +123,14 @@
 			</p>
 			<p>
 				<label for="text-iframe">
-					Embed Code:
+					Embed Code
 					<textarea id="text-iframe" rows="5" readonly onclick={(e) => e.currentTarget.select()}>{embedCode}</textarea>
 				</label>
 
 				<button class="btn" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
 			</p>
 			<p>
-				<label for="share-precision">Precision:</label>
+				<label for="share-precision">Precision</label>
 				<select
 					id="share-precision"
 					value={String(precision)}

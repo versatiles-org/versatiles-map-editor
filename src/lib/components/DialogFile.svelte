@@ -90,7 +90,7 @@
 >
 	{#if mode == 'download'}
 		<label>
-			File name:
+			File name
 			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<div class="grid2">

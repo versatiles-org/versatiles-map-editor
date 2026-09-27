@@ -175,21 +175,21 @@
 		<hr class="thick" />
 		<SidebarPanel title="Import/Export" open={false}>
 			<div role="group" aria-labelledby="{uid}-geojson">
-				<span id="{uid}-geojson">GeoJSON:</span>
+				<span id="{uid}-geojson">GeoJSON</span>
 				<div class="grid2">
 					<button class="btn" onclick={importGeoJSON}>Import</button>
 					<button class="btn" onclick={exportGeoJSON} data-testid="btnExportGeoJSON">Export</button>
 				</div>
 			</div>
 			<div role="group" aria-labelledby="{uid}-kml">
-				<span id="{uid}-kml">KML (Google Earth):</span>
+				<span id="{uid}-kml">KML (Google Earth)</span>
 				<div class="grid2">
 					<button class="btn" onclick={importKML}>Import</button>
 					<button class="btn" onclick={exportKML} data-testid="btnExportKML">Export</button>
 				</div>
 			</div>
 			<div role="group" aria-labelledby="{uid}-table">
-				<span id="{uid}-table">Table (CSV/TSV):</span>
+				<span id="{uid}-table">Table (CSV/TSV)</span>
 				<div class="grid1">
 					<button class="btn" onclick={() => dialogImportTable?.open()}>Import table…</button>
 				</div>

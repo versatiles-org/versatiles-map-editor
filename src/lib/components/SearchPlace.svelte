@@ -24,7 +24,7 @@
 	const statusText = $derived.by(() => {
 		if (status === 'searching') return 'Searching…';
 		if (status === 'empty') return 'No results';
-		if (status === 'error') return 'Search failed, please try again.';
+		if (status === 'error') return 'Search failed. Please try again.';
 		if (open && results.length > 0) return results.length === 1 ? '1 result' : `${results.length} results`;
 		return '';
 	});
@@ -191,7 +191,7 @@
 			{:else if status === 'empty'}
 				<li class="status" role="presentation" aria-hidden="true">No results</li>
 			{:else if status === 'error'}
-				<li class="status" role="presentation" aria-hidden="true">Search failed, please try again.</li>
+				<li class="status" role="presentation" aria-hidden="true">Search failed. Please try again.</li>
 			{/if}
 		</ul>
 	{/if}

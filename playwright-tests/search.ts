@@ -105,7 +105,7 @@ test.describe('address search in the viewer', () => {
 		await option.check();
 
 		await expect.poll(() => stateInUrl(page).meta?.search).toBe(true);
-		const link = await page.getByLabel('Link:').inputValue();
+		const link = await page.getByLabel('Link', { exact: true }).inputValue();
 		expect(decodeState(new URL(link).hash.slice(1)).meta?.search).toBe(true);
 		// the preview is the embedded viewer, with the search
 		await expect(

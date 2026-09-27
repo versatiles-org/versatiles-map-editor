@@ -76,9 +76,9 @@ test('precision of a shared map', async ({ page }) => {
 	);
 	await waitForMapIsReady(page, { count: 1 });
 	await page.getByRole('button', { name: 'Share/Embed' }).click();
-	const precision = page.getByRole('combobox', { name: 'Precision:' });
+	const precision = page.getByRole('combobox', { name: 'Precision' });
 	const shared = async () => {
-		const link = await page.getByLabel('Link:').inputValue();
+		const link = await page.getByLabel('Link', { exact: true }).inputValue();
 		const element = decodeState(new URL(link).hash.slice(1)).elements[0] as StateElementMarker;
 		return { point: element.point, length: link.length };
 	};
@@ -145,7 +145,7 @@ test.describe('the share dialog on the smallest editor screen', () => {
 
 		for (const control of [
 			dialog.getByRole('button', { name: 'Copy Embed Code' }),
-			dialog.getByRole('combobox', { name: 'Precision:' }),
+			dialog.getByRole('combobox', { name: 'Precision' }),
 			dialog.getByRole('checkbox', { name: 'Address search in the map' }),
 			dialog.getByRole('button', { name: 'Reload' })
 		]) {

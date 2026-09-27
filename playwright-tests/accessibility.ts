@@ -20,7 +20,7 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	// the download dialog: the file name can be typed at once
 	await page.getByRole('button', { name: /^Download/ }).click();
 	const download = page.getByRole('dialog', { name: 'Download File' });
-	await expect(download.getByRole('textbox', { name: 'File name:' })).toBeFocused();
+	await expect(download.getByRole('textbox', { name: 'File name' })).toBeFocused();
 	await page.keyboard.press('Escape');
 	await expect(download).toBeHidden();
 
@@ -54,7 +54,7 @@ test('screen readers hear the state of the search and of copying', async ({ page
 	await expect(status).toHaveText('No results');
 	answer = 'error';
 	await search.fill('Byy');
-	await expect(status).toHaveText('Search failed, please try again.');
+	await expect(status).toHaveText('Search failed. Please try again.');
 
 	// copying the link is announced, not only shown as a check mark
 	if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);

@@ -41,7 +41,7 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 
 	// "Download" → Enter in the file name field confirms
 	await page.getByRole('button', { name: 'Download' }).click();
-	const fileName = dialog.getByRole('textbox', { name: 'File name:' });
+	const fileName = dialog.getByRole('textbox', { name: 'File name' });
 	await fileName.fill('my-map.mapjson');
 	const [download] = await Promise.all([page.waitForEvent('download'), fileName.press('Enter')]);
 	expect(download.suggestedFilename()).toBe('my-map.mapjson');
@@ -154,7 +154,7 @@ test('exporting and importing KML', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const group = page.getByRole('group', { name: 'KML (Google Earth):' });
+	const group = page.getByRole('group', { name: 'KML (Google Earth)' });
 	const [chooser] = await Promise.all([
 		page.waitForEvent('filechooser'),
 		group.getByRole('button', { name: /^Import/ }).click()
@@ -329,7 +329,7 @@ test('a file that cannot be imported shows a message instead of a browser dialog
 	const [chooser] = await Promise.all([
 		page.waitForEvent('filechooser'),
 		page
-			.getByRole('group', { name: 'GeoJSON:' })
+			.getByRole('group', { name: 'GeoJSON' })
 			.getByRole('button', { name: /^Import/ })
 			.click()
 	]);

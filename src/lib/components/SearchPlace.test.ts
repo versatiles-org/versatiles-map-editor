@@ -123,6 +123,6 @@ describe('SearchPlace', () => {
 		geocode.mockRejectedValueOnce(new Error('offline'));
 		type('Abc');
 		await settle();
-		expect(status()).toBe('Search failed, please try again.');
+		expect(status()).toBe('Search failed. Please try again.');
 	});
 });
