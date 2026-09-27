@@ -58,6 +58,8 @@ export class MapLayerSymbol extends MapLayer {
 	#symbolIndex: number = $state(SYMBOL_DEFAULTS.pattern);
 	#label: string = $state(SYMBOL_DEFAULTS.label);
 	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
+	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
+	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
 
 	get color(): string {
 		return this.#color;
@@ -116,6 +118,25 @@ export class MapLayerSymbol extends MapLayer {
 		this.changed();
 	}
 
+	/** The color of the text of the label. */
+	get labelColor(): string {
+		return this.#labelColor;
+	}
+	set labelColor(value: string) {
+		if (value === this.#labelColor) return;
+		this.#labelColor = value;
+		this.changed();
+	}
+	/** The color of the halo around the symbol and the label. */
+	get haloColor(): string {
+		return this.#haloColor;
+	}
+	set haloColor(value: string) {
+		if (value === this.#haloColor) return;
+		this.#haloColor = value;
+		this.changed();
+	}
+
 	readonly symbolInfo = $derived(getSymbol(this.symbolIndex));
 
 	/** The name of the label position, see `LABEL_POSITIONS`. */
@@ -136,6 +157,8 @@ export class MapLayerSymbol extends MapLayer {
 			size: this.size,
 			halo: this.halo,
 			label: this.label,
+			labelColor: Color.parse(this.labelColor).asString(),
+			haloColor: Color.parse(this.haloColor).asString(),
 			position: this.getPosition()
 		};
 	}
@@ -149,7 +172,9 @@ export class MapLayerSymbol extends MapLayer {
 				halo: this.halo,
 				pattern: this.symbolIndex,
 				label: this.label,
-				align: this.labelAlign
+				align: this.labelAlign,
+				labelColor: this.labelColor,
+				haloColor: this.haloColor
 			},
 			MapLayerSymbol.defaultStyle
 		);
@@ -163,6 +188,8 @@ export class MapLayerSymbol extends MapLayer {
 		if (state.pattern != null) this.symbolIndex = state.pattern;
 		if (state.label != null) this.label = state.label;
 		if (state.align != null) this.labelAlign = lookupLabelAlign(state.align).index;
+		if (state.labelColor != null) this.labelColor = state.labelColor;
+		if (state.haloColor != null) this.haloColor = state.haloColor;
 	}
 }
 

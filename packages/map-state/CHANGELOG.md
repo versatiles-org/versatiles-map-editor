@@ -7,6 +7,16 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The text color and the halo color of a marker's label: `labelColor` and `haloColor` in the style,
+  `symbol-label-color` and `symbol-halo-color` in GeoJSON, and the label color as `LabelStyle` in
+  KML. Without them, the text is black and the halo white, as before.
+
+### Changed
+
+- Base64 strings with these colors cannot be read by version 1.0.0, which rejects their style keys.
+
 ## [1.0.0]
 
 ### Added

@@ -55,6 +55,10 @@ export interface StateStyle {
 	color?: string;
 	label?: string;
 	visible?: boolean;
+	/** The color of the text of a marker's label. */
+	labelColor?: string;
+	/** The color of the halo around a marker's symbol and label. */
+	haloColor?: string;
 }
 
 export interface StateMetadata {

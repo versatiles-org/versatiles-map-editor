@@ -23,14 +23,18 @@ export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> 
 	visible: true,
 	width: 2
 };
-export const SYMBOL_DEFAULTS: Defaults<'color' | 'rotate' | 'size' | 'halo' | 'pattern' | 'label' | 'align'> = {
+export const SYMBOL_DEFAULTS: Defaults<
+	'color' | 'rotate' | 'size' | 'halo' | 'pattern' | 'label' | 'align' | 'labelColor' | 'haloColor'
+> = {
 	color: '#ff0000',
 	rotate: 0,
 	size: 1,
 	halo: 1,
 	pattern: 38,
 	label: '',
-	align: 0
+	align: 0,
+	labelColor: '#000000',
+	haloColor: '#ffffff'
 };
 
 // index -> name enum tables (the numeric index lives in State, the name in GeoJSON)
@@ -161,7 +165,9 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-size': s.size,
 		'symbol-pattern': symbolName(s.pattern!),
 		'symbol-label': s.label,
-		'symbol-label-align': nameOf(LABEL_ALIGN_NAMES, s.align)
+		'symbol-label-align': nameOf(LABEL_ALIGN_NAMES, s.align),
+		'symbol-label-color': s.labelColor,
+		'symbol-halo-color': s.haloColor
 	};
 }
 
@@ -174,6 +180,8 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'size', sanitizeNumber(p['symbol-size'], 0));
 		set(s, 'label', sanitizeString(p['symbol-label']));
 		set(s, 'align', indexOf(LABEL_ALIGN_NAMES, p['symbol-label-align']));
+		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));
+		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
 		if (typeof p['symbol-pattern'] === 'string') set(s, 'pattern', symbolIndexByName(p['symbol-pattern']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);

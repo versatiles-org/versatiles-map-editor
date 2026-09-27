@@ -95,11 +95,12 @@ export function elementStyle(font: string): {
 				paint: {
 					'icon-color': ['get', 'color'],
 					'icon-halo-blur': 0,
-					'icon-halo-color': '#FFFFFF',
+					'icon-halo-color': ['get', 'haloColor'],
 					'icon-halo-width': ['get', 'halo'],
 					'icon-opacity': 1,
+					'text-color': ['get', 'labelColor'],
 					'text-halo-blur': 0,
-					'text-halo-color': '#FFFFFF',
+					'text-halo-color': ['get', 'haloColor'],
 					'text-halo-width': ['get', 'halo']
 				}
 			}

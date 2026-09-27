@@ -446,6 +446,12 @@ export class StateReader {
 				case 10:
 					style.visible = false;
 					break;
+				case 11:
+					style.labelColor = this.readColorValue();
+					break;
+				case 12:
+					style.haloColor = this.readColorValue();
+					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readInteger(4);
 					const field = STYLE_FIELDS.find((f) => f.key === removed);

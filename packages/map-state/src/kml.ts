@@ -83,7 +83,9 @@ function featureToPlacemark(feature: GeoJSON.Feature): string {
 				xml('color', kmlColor(p['symbol-color'])),
 				xml('scale', String(p['symbol-size'] ?? 1)),
 				xml('heading', String(p['symbol-rotate'] ?? 0))
-			])
+			]),
+			// KML has a color for the label text, but none for its halo
+			xml('LabelStyle', [xml('color', kmlColor(p['symbol-label-color']))])
 		];
 	} else if (g.type === 'LineString') {
 		geometry = xml('LineString', [xml('coordinates', coordinates(g.coordinates as Point[]))]);
@@ -208,6 +210,7 @@ function placemarkToFeature(placemark: XmlElement, styles: Map<string, XmlElemen
 	const properties: Properties = {};
 	const name = text(child(placemark, 'name'))?.trim();
 	const iconColor = readColor(child(child(style, 'IconStyle'), 'color'));
+	const labelColor = readColor(child(child(style, 'LabelStyle'), 'color'));
 	const lineStyle = child(style, 'LineStyle');
 	const lineColor = readColor(child(lineStyle, 'color'));
 	const polyStyle = child(style, 'PolyStyle');
@@ -216,6 +219,7 @@ function placemarkToFeature(placemark: XmlElement, styles: Map<string, XmlElemen
 	if (name) properties['symbol-label'] = name;
 	// markers and lines have no opacity of their own, so it stays part of their color
 	if (iconColor) properties['symbol-color'] = iconColor.withAlpha;
+	if (labelColor) properties['symbol-label-color'] = labelColor.withAlpha;
 	if (lineColor) properties['stroke-color'] = lineColor.withAlpha;
 	const width = text(child(lineStyle, 'width'));
 	if (width) properties['stroke-width'] = width;

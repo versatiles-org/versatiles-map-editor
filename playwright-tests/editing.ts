@@ -679,3 +679,36 @@ test('the color picker is a popup, which stays in the viewport and opens where i
 	await page.setViewportSize({ width: 700, height: 440 });
 	await expect.poll(inViewport).toBe(true);
 });
+
+test('the text color and the halo color of a label', async ({ page }) => {
+	const center: Point = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				elements: [{ type: 'marker', point: center, style: { label: 'Cafe' } }]
+			})
+	);
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+	await page.mouse.click(x + 6, y - 8);
+	const setColor = async (name: string, hex: string) => {
+		await page.getByRole('button', { name: new RegExp(`^${name}`) }).click();
+		await page.getByLabel('Hex').fill(hex);
+		await page.getByLabel('Hex').press('Enter');
+		await page.keyboard.press('Escape');
+	};
+
+	await setColor('Text color', '#123456');
+	await setColor('Halo color', '#fedcba');
+	await expect
+		.poll(() => stateInUrl(page).elements[0].style)
+		.toMatchObject({ labelColor: '#123456', haloColor: '#fedcba' });
+
+	// the map draws the label with them
+	await waitForMapIsIdle(page);
+	const drawn = await page.evaluate(
+		() => (window as unknown as MapWindow).map.queryRenderedFeatures({ layers: ['elements_symbol'] })[0]?.properties
+	);
+	expect(drawn).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
+});

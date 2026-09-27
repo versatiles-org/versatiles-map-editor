@@ -12,7 +12,17 @@ describe('MapLayerSymbol', () => {
 
 	it('should have the correct keys in default style', () => {
 		const keys = Object.keys(MapLayerSymbol.defaultStyle).sort();
-		expect(keys).toStrictEqual(['align', 'color', 'halo', 'label', 'pattern', 'rotate', 'size']);
+		expect(keys).toStrictEqual([
+			'align',
+			'color',
+			'halo',
+			'haloColor',
+			'label',
+			'labelColor',
+			'pattern',
+			'rotate',
+			'size'
+		]);
 	});
 
 	it('should initialize layer with default values', () => {
@@ -39,9 +49,23 @@ describe('MapLayerSymbol', () => {
 			halo: 1,
 			// as it is: the layer reads it as a property, so "{…}" is not replaced
 			label: 'Price {EUR}',
+			labelColor: 'rgb(0,0,0)',
+			haloColor: 'rgb(255,255,255)',
 			position: 'auto'
 		});
 		expect(onChange).toHaveBeenCalledTimes(4);
+	});
+
+	it('has a text color and a halo color, stored only if changed', () => {
+		expect(layer.getState()).toBeUndefined();
+		layer.labelColor = '#123456';
+		layer.haloColor = '#fedcba';
+		expect(layer.getProperties()).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
+		expect(layer.getState()).toStrictEqual({ labelColor: '#123456', haloColor: '#fedcba' });
+
+		const copy = new MapLayerSymbol(() => {});
+		copy.setState(layer.getState()!);
+		expect([copy.labelColor, copy.haloColor]).toStrictEqual(['#123456', '#fedcba']);
 	});
 
 	it('places the label at the chosen side, or also on a symbol without image', () => {

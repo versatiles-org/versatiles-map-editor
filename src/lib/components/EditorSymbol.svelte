@@ -18,6 +18,8 @@
 	const halo = $derived(group(layers, 'halo'));
 	const label = $derived(group(layers, 'label'));
 	const labelAlign = $derived(group(layers, 'labelAlign'));
+	const labelColor = $derived(group(layers, 'labelColor'));
+	const haloColor = $derived(group(layers, 'haloColor'));
 	const size = $derived(group(layers, 'size'));
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
 	const CELLS: Record<string, [number, number]> = {
@@ -88,8 +90,16 @@
 	<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} format={(v) => `${v} px`} />
 </InputRow>
 
+<InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>
+	<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={manager.colors} />
+</InputRow>
+
 <InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
 	<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
+</InputRow>
+
+<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
+	<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={manager.colors} />
 </InputRow>
 
 <InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>

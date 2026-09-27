@@ -384,7 +384,9 @@ export class StateWriter {
 			case 'align':
 				return this.writeVarint(style.align!);
 			case 'color':
-				return this.writeColorValue(style.color!);
+			case 'labelColor':
+			case 'haloColor':
+				return this.writeColorValue(style[name]!);
 			case 'label':
 				return this.writeString(style.label!);
 			case 'visible':
@@ -441,6 +443,8 @@ export function collectColors(root: MapState): string[] {
 	const colors: string[] = [];
 	for (const element of root.elements) {
 		if (element.style?.color) colors.push(element.style.color);
+		if (element.style?.labelColor) colors.push(element.style.labelColor);
+		if (element.style?.haloColor) colors.push(element.style.haloColor);
 		if ('strokeStyle' in element && element.strokeStyle?.color) colors.push(element.strokeStyle.color);
 	}
 	for (const entry of root.meta?.legend?.entries ?? []) colors.push(entry.color);
