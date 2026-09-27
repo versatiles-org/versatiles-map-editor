@@ -84,10 +84,19 @@
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		// The shortcuts act on the selected elements, not where the keys mean something else:
-		// in text fields, in sliders (e.g. the color field) and in open dialogs (e.g. the symbol picker)
+		// The shortcuts act on the map, not where the keys mean something else: in text fields (which
+		// undo their own typing), in sliders (e.g. the color field) and in open dialogs (e.g. the symbol picker)
 		const target = e.target as HTMLElement | null;
 		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open]')) return;
+
+		// Undo: Cmd/Ctrl+Z. Redo: Shift+Cmd/Ctrl+Z, or Ctrl+Y as on Windows.
+		const key = e.key.toLowerCase();
+		if ((e.metaKey || e.ctrlKey) && !e.altKey && (key === 'z' || (key === 'y' && !e.shiftKey))) {
+			e.preventDefault();
+			if (key === 'z' && !e.shiftKey) void stateManager.undo();
+			else void stateManager.redo();
+			return;
+		}
 
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
 			if (selectedElements.length === 0) return;
@@ -129,8 +138,15 @@
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
 		<div class="grid2">
-			<button class="btn" onclick={() => stateManager.undo()} disabled={!history.undoEnabled}>Undo</button>
-			<button class="btn" onclick={() => stateManager.redo()} disabled={!history.redoEnabled}>Redo</button>
+			<button class="btn" onclick={() => stateManager.undo()} disabled={!history.undoEnabled} title="Undo (Cmd/Ctrl+Z)"
+				>Undo</button
+			>
+			<button
+				class="btn"
+				onclick={() => stateManager.redo()}
+				disabled={!history.redoEnabled}
+				title="Redo (Shift+Cmd/Ctrl+Z)">Redo</button
+			>
 		</div>
 		<hr class="thick" />
 		<SearchPlace

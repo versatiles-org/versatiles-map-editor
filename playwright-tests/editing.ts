@@ -50,6 +50,31 @@ test('adding an element creates an undo step', async ({ page }) => {
 	await expect(redo).toBeEnabled();
 });
 
+test('undo and redo with the keyboard, but not in text fields', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const types = () => stateInUrl(page).elements.map((e) => e.type);
+
+	await page.getByRole('button', { name: 'Marker' }).click();
+	await page.getByRole('button', { name: 'Line' }).click();
+	await expect.poll(types).toStrictEqual(['marker', 'line']);
+
+	await page.keyboard.press('ControlOrMeta+z');
+	await expect.poll(types).toStrictEqual(['marker']);
+	await page.keyboard.press('Shift+ControlOrMeta+z');
+	await expect.poll(types).toStrictEqual(['marker', 'line']);
+	await page.keyboard.press('ControlOrMeta+z');
+	await page.keyboard.press('Control+y');
+	await expect.poll(types).toStrictEqual(['marker', 'line']);
+
+	// in a text field (of the new, selected marker), the keys undo the typing, not the map
+	await page.getByRole('button', { name: 'Marker' }).click();
+	const popup = page.getByRole('textbox', { name: 'Popup' });
+	await popup.fill('Hello');
+	await popup.press('ControlOrMeta+z');
+	await expect.poll(types).toStrictEqual(['marker', 'line', 'marker']);
+});
+
 test('selecting a symbol closes the symbol picker', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
