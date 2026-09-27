@@ -6,7 +6,7 @@
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementNames } from '$lib/utils/element_names.js';
+	import { countTypes, elementNames, elementText } from '$lib/utils/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
@@ -30,9 +30,7 @@
 		const element = elements[0];
 		const index = manager.elements.indexOf(element);
 		const name = elementNames(manager.elements.map((e) => e.getState().type))[index];
-		// the first line, e.g. of a longer popup text
-		const text = ((element.getStyleLayers().symbol?.label ?? '').trim() || element.popup.trim()).split('\n')[0];
-		return { icon: types[0] as IconName, title: name, subtitle: text };
+		return { icon: types[0] as IconName, title: name, subtitle: elementText(element) };
 	});
 
 	function toggleSearch(search: boolean) {

@@ -1,3 +1,6 @@
+import type { AbstractElement } from '../core/element/abstract.svelte.js';
+import { popupToPlainText } from './popup_text.js';
+
 const TYPE_NAMES: Record<string, string> = { marker: 'Marker', line: 'Line', polygon: 'Polygon', circle: 'Circle' };
 
 /** The name of a type of element, e.g. "Marker". */
@@ -21,4 +24,14 @@ export function countTypes(types: string[]): string {
 	return [...counts]
 		.map(([type, count]) => `${count} ${typeName(type).toLowerCase()}${count === 1 ? '' : 's'}`)
 		.join(', ');
+}
+
+/**
+ * What describes an element beside its name: the label of a marker, or the first line of its
+ * popup, as plain text.
+ */
+export function elementText(element: AbstractElement): string {
+	const label = (element.getStyleLayers().symbol?.label ?? '').trim();
+	const text = label || popupToPlainText(element.popup).trim();
+	return text.split('\n')[0];
 }

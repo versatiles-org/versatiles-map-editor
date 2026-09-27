@@ -203,3 +203,27 @@ test('the status line explains the tool and the selection, and ? lists all short
 	await (await menuItem(page, 'Keyboard shortcuts')).click();
 	await expect(dialog).toBeVisible();
 });
+
+test('names show the popup text without its formatting', async ({ page }) => {
+	const state = encodeState({
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.35, 52.48],
+					[13.45, 52.48],
+					[13.4, 52.52]
+				],
+				popup: { text: '**Low-emission zone**\nSee [the rules](https://example.org)' }
+			}
+		]
+	});
+	await page.goto('/#' + state);
+	await waitForMapIsReady(page);
+	await page.keyboard.press('e');
+	const option = page.getByRole('listbox', { name: 'Elements' }).getByRole('option');
+	await expect(option).toHaveText('Polygon 1: Low-emission zone');
+	await option.click();
+	await expect(page.locator('.sidebar .subtitle')).toHaveText('Low-emission zone');
+});

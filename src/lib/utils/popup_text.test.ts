@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderPopupText } from './popup_text.js';
+import { popupToPlainText, renderPopupText } from './popup_text.js';
 
 function html(text: string): string {
 	const div = document.createElement('div');
@@ -50,5 +50,16 @@ describe('renderPopupText', () => {
 		expect(html('[x](javascript:alert(1))')).toBe('[x](javascript:alert(1))');
 		expect(html('[x](data:text/html,hi)')).toBe('[x](data:text/html,hi)');
 		expect(html('[x](not a url)')).toBe('[x](not a url)');
+	});
+});
+
+describe('popupToPlainText', () => {
+	it('is the text the popup shows, without its formatting', () => {
+		expect(popupToPlainText('**Low-emission zone**\nSince 2010')).toBe('Low-emission zone\nSince 2010');
+		expect(popupToPlainText('See [the website](https://example.org) or https://example.org/a.')).toBe(
+			'See the website or https://example.org/a.'
+		);
+		// only what the popup formats, e.g. not a single star or a link to a script
+		expect(popupToPlainText('5 * 3 and [x](javascript:alert(1))')).toBe('5 * 3 and [x](javascript:alert(1))');
 	});
 });

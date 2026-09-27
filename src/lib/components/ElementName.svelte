@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { AbstractElement } from '../core/element/abstract.svelte.js';
+	import { elementText } from '$lib/utils/element_names.js';
 
-	/** The name of an element in the list: its type and number, and its label or popup text. */
+	/** The name of an element in the list: its type and number, and its label or popup text as plain text. */
 	const { element, name }: { element: AbstractElement; name: string } = $props();
 
-	// the first line, e.g. of a longer popup text
-	const text = $derived(((element.getStyleLayers().symbol?.label ?? '').trim() || element.popup.trim()).split('\n')[0]);
+	const text = $derived(elementText(element));
 </script>
 
 {name}{#if text}: <span class="text">{text}</span>{/if}

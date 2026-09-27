@@ -16,6 +16,21 @@ export function renderPopupText(text: string, doc: Document = document): Documen
 	return fragment;
 }
 
+/**
+ * The popup text as plain text, as the popup shows it without its formatting: "**bold**" is
+ * "bold", and a link its label. E.g. for the name of an element in a list.
+ */
+export function popupToPlainText(text: string, doc: Document = document): string {
+	return text
+		.split(/\r?\n/)
+		.map((line) =>
+			renderInline(line, doc, true)
+				.map((node) => node.textContent)
+				.join('')
+		)
+		.join('\n');
+}
+
 // [label](url), a bare URL, or **bold**. URLs may contain parentheses, e.g. …/wiki/Foo_(bar).
 const INLINE = /\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)|\b(https?:\/\/[^\s<>]*[^\s<>.,;:!?'"\]])|\*\*(.+?)\*\*/g;
 
