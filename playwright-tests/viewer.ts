@@ -159,3 +159,28 @@ test.describe('the share dialog on the smallest editor screen', () => {
 		expect(boxesOverlap(caption, reload)).toBe(false);
 	});
 });
+
+test('the sidebar can be hidden, without moving the map content', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Background map' }).click();
+	const hide = page.getByRole('button', { name: 'Hide sidebar' });
+	await expect(hide).toHaveAttribute('aria-expanded', 'true');
+	const berlin = await project(page, [13.4, 52.5]);
+
+	await hide.click();
+	await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
+	const show = page.getByRole('button', { name: 'Show sidebar' });
+	await expect(show).toHaveAttribute('aria-expanded', 'false');
+	// the tab is at the right edge of the map now
+	expect((await show.boundingBox())!.x).toBeGreaterThan(page.viewportSize()!.width - 30);
+	const moved = await project(page, [13.4, 52.5]);
+	expect(moved[0]).toBeCloseTo(berlin[0], 0);
+	expect(moved[1]).toBeCloseTo(berlin[1], 0);
+
+	// the sidebar comes back as it was, e.g. with its open panels
+	await show.click();
+	await expect(page.getByRole('button', { name: 'Background map' })).toHaveAttribute('aria-expanded', 'true');
+	const back = await project(page, [13.4, 52.5]);
+	expect(back[0]).toBeCloseTo(berlin[0], 0);
+});

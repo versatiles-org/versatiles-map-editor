@@ -16,6 +16,8 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 		once = vi.fn();
 		off = vi.fn();
 		setPadding = vi.fn();
+		getPadding = vi.fn(() => ({ top: 10, right: 10, bottom: 10, left: 10 }));
+		panBy = vi.fn();
 		addControl = vi.fn();
 		fitBounds = vi.fn();
 		setStyle = vi.fn();

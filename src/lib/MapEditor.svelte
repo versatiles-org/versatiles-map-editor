@@ -28,6 +28,23 @@
 	let map: MaplibreMapType | undefined;
 	let triggeredMapReady = $state(false);
 	let showSidebar = $state(false);
+	// the sidebar can be collapsed, to see more of the map
+	let sidebarOpen = $state(true);
+	const SIDEBAR_WIDTH = 250;
+	// the width of the map that the sidebar covers
+	const sidebarWidth = $derived(showSidebar && sidebarOpen ? SIDEBAR_WIDTH : 0);
+	const MAP_PADDING = 10;
+
+	// The map centers its content in the part that the sidebar leaves free. When the sidebar is
+	// shown or hidden, the map is moved back, so its content stays where it is on the screen.
+	$effect(() => {
+		const right = MAP_PADDING + sidebarWidth;
+		if (!map) return;
+		const previous = map.getPadding().right ?? right;
+		if (previous === right) return;
+		map.setPadding({ top: MAP_PADDING, right, bottom: MAP_PADDING, left: MAP_PADDING });
+		map.panBy([(previous - right) / 2, 0], { duration: 0 });
+	});
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
 	// only in the read-only viewer; the editor has its search in the sidebar
@@ -174,12 +191,12 @@
 		screenTooSmall = !embedded && !matchMedia('(min-width: 600px) and (min-height: 400px)').matches;
 		showSidebar = !embedded && !screenTooSmall;
 
-		const padding = 10;
+		// before the first view is set
 		map.setPadding({
-			top: padding,
-			right: padding + (showSidebar ? 250 : 0),
-			bottom: padding,
-			left: padding
+			top: MAP_PADDING,
+			right: MAP_PADDING + (showSidebar ? SIDEBAR_WIDTH : 0),
+			bottom: MAP_PADDING,
+			left: MAP_PADDING
 		});
 
 		map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-left');
@@ -218,17 +235,17 @@
 		<div class="map" bind:this={container}></div>
 	</div>
 	{#if loading}
-		<div class="loading" role="status" style:right="{showSidebar ? 250 : 0}px">
+		<div class="loading" role="status" style:right="{sidebarWidth}px">
 			<span class="spinner" aria-hidden="true"></span>Loading map…
 		</div>
 	{/if}
-	<Notifications right={showSidebar ? 250 : 0} />
+	<Notifications right={sidebarWidth} />
 	{#if geometryManager?.legend}
 		<!-- a legend at the top goes below the search and the hint -->
 		<Legend
 			legend={geometryManager.legend}
 			map={geometryManager.map}
-			right={showSidebar ? 250 : 0}
+			right={sidebarWidth}
 			top={topOverlaysHeight ? topOverlaysHeight + 10 : 0}
 		/>
 	{/if}
@@ -246,7 +263,23 @@
 	{/if}
 	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
 		<editor.NodeDeleteButton {geometryManager} />
-		<editor.Sidebar {geometryManager} />
+		<!-- hidden, not removed, so the sidebar keeps e.g. its open panels -->
+		<div id="sidebar" hidden={!sidebarOpen}>
+			<editor.Sidebar {geometryManager} />
+		</div>
+		<button
+			class="sidebar-toggle"
+			style:right="{sidebarWidth}px"
+			aria-controls="sidebar"
+			aria-expanded={sidebarOpen}
+			aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+			title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+			onclick={() => (sidebarOpen = !sidebarOpen)}
+		>
+			<svg viewBox="0 0 7 12" aria-hidden="true" class:open={sidebarOpen}>
+				<path d="M6,0L0,6L6,12L7,11,L2,6L7,1z" />
+			</svg>
+		</button>
 
 		<style>
 			.page .container {
@@ -365,6 +398,40 @@
 	@media (prefers-reduced-motion: reduce) {
 		.spinner {
 			animation-duration: 3s;
+		}
+	}
+
+	/* a tab at the edge of the sidebar, which hides and shows it */
+	.sidebar-toggle {
+		position: absolute;
+		top: 50%;
+		translate: 0 -50%;
+		z-index: 2;
+		width: 20px;
+		height: 48px;
+		padding: 0;
+		border: none;
+		border-radius: 6px 0 0 6px;
+		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		backdrop-filter: blur(10px);
+		box-shadow: -1px 0 4px rgba(0, 0, 0, 0.2);
+		color: var(--color-text);
+		cursor: pointer;
+
+		&:focus-visible {
+			outline: 2px solid var(--color-blue);
+			outline-offset: 2px;
+		}
+
+		svg {
+			width: 7px;
+			height: 12px;
+			fill: currentColor;
+
+			/* pointing right: the sidebar goes that way */
+			&.open {
+				rotate: 180deg;
+			}
 		}
 	}
 
