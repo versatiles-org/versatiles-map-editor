@@ -57,13 +57,5 @@
 </InputRow>
 
 <InputRow id="{uid}-width" label="Width" mixed={width.mixed}>
-	<Slider
-		id="{uid}-width"
-		min={0.5}
-		max={5}
-		step={0.5}
-		bind:value={width.value}
-		onchange={log}
-		format={(v) => `${v} px`}
-	/>
+	<Slider id="{uid}-width" min={0.5} max={5} step={0.5} bind:value={width.value} onchange={log} unit="px" />
 </InputRow>

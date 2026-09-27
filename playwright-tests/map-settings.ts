@@ -147,7 +147,7 @@ test('changing the colors of the vector map and of the satellite imagery', async
 		.poll(background)
 		.toStrictEqual({ builder: 'osm', options: { recolor: { saturate: -1 }, text: { language: 'user' } } });
 	await expect.poll(water).not.toStrictEqual(colored);
-	await expect(page.locator('output', { hasText: '−100 %' })).toBeVisible();
+	await expect(page.getByRole('spinbutton', { name: 'Saturation' })).toHaveValue('-100');
 
 	// the satellite imagery keeps the change, as a property of its raster layer
 	await page.getByRole('radio', { name: 'Satellite' }).check();

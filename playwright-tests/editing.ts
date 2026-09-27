@@ -33,7 +33,7 @@ test('dragging a slider creates a single undo step', async ({ page }) => {
 
 	await addPolygon();
 	// a slider drag fires many input events, but only one change event on release
-	await page.getByLabel('Opacity').evaluate((input: HTMLInputElement) => {
+	await page.getByRole('slider', { name: 'Opacity' }).evaluate((input: HTMLInputElement) => {
 		for (const value of ['0.9', '0.8', '0.7', '0.6', '0.5']) {
 			input.value = value;
 			input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -112,7 +112,7 @@ test('style editor controls have unique ids and labels', async ({ page }) => {
 	await drawElement(page, 'Polygon');
 	await expectUniqueIds();
 	await expect(page.getByLabel('Color')).toHaveCount(2);
-	await expect(page.getByLabel('Width')).toHaveCount(1);
+	await expect(page.getByRole('slider', { name: 'Width' })).toHaveCount(1);
 
 	// marker: symbol button and label field are labelled separately
 	await drawElement(page, 'Marker');
@@ -602,7 +602,19 @@ test('style controls: pictures, a grid of positions, and sliders with their valu
 	// a slider shows its value
 	const opacity = page.getByRole('slider', { name: 'Opacity' });
 	await opacity.fill('0.4');
-	await expect(page.locator('output', { hasText: '40 %' })).toBeVisible();
+	await expect(page.getByRole('spinbutton', { name: 'Opacity' })).toHaveValue('40');
+
+	// or typed exactly, in percent, and kept within the range of the slider
+	const field = page.getByRole('spinbutton', { name: 'Opacity' });
+	await field.fill('25');
+	await field.press('Enter');
+	await expect.poll(() => polygon().style?.opacity).toBe(0.25);
+	// the slider shows the step next to it, the field the exact value
+	await expect(field).toHaveValue('25');
+	await field.fill('150');
+	await field.press('Enter');
+	await expect.poll(() => polygon().style?.opacity).toBeUndefined();
+	await expect(field).toHaveValue('100');
 
 	// the label of a marker, at its place around the symbol
 	const [x, y] = await project(page, [13.3, 52.5]);
@@ -611,6 +623,12 @@ test('style controls: pictures, a grid of positions, and sliders with their valu
 	await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
 	await positions.getByRole('radio', { name: 'Above' }).check();
 	await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { align?: number } }).style?.align).toBe(3);
+
+	// a typed value between the steps of the slider, e.g. 17° instead of 15° or 30°
+	const rotation = page.getByRole('spinbutton', { name: 'Rotation' });
+	await rotation.fill('17');
+	await rotation.press('Enter');
+	await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { rotate?: number } }).style?.rotate).toBe(17);
 });
 
 test('the color picker is a popup, which stays in the viewport and opens where it was moved to', async ({ page }) => {

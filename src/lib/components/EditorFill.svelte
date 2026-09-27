@@ -71,6 +71,7 @@
 		step={0.02}
 		bind:value={opacity.value}
 		onchange={log}
-		format={(v) => `${Math.round(v * 100)} %`}
+		scale={100}
+		unit="%"
 	/>
 </InputRow>

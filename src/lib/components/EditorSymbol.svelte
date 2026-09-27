@@ -63,31 +63,15 @@
 </InputRow>
 
 <InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
-	<Slider
-		id="{uid}-size"
-		min={0.5}
-		max={3}
-		step={0.1}
-		bind:value={size.value}
-		onchange={log}
-		format={(v) => `${v.toFixed(1)}×`}
-	/>
+	<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
 </InputRow>
 
 <InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
-	<Slider
-		id="{uid}-rotate"
-		min={-180}
-		max={180}
-		step={15}
-		bind:value={rotate.value}
-		onchange={log}
-		format={(v) => `${v}°`}
-	/>
+	<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
 </InputRow>
 
 <InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
-	<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} format={(v) => `${v} px`} />
+	<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} unit="px" />
 </InputRow>
 
 <InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>

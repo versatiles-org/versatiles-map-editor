@@ -46,8 +46,6 @@
 	// so the map changes when the slider is released. Set again by a change of the map, e.g. undo.
 	let colors: MapColors = $derived({ ...settings.colors });
 	const colorsChanged = $derived(JSON.stringify(settings.colors) !== JSON.stringify(DEFAULT_COLORS));
-	const percent = (value: number) => `${Math.round(value * 100)} %`;
-	const signed = (value: number) => (value > 0 ? '+' : value < 0 ? '−' : '') + percent(Math.abs(value));
 
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
@@ -97,7 +95,8 @@
 		step={0.05}
 		bind:value={colors.saturation}
 		onchange={() => change('colors', colors)}
-		format={signed}
+		scale={100}
+		unit="%"
 	/>
 </InputRow>
 <InputRow id="{uid}-brightness" label="Brightness">
@@ -108,7 +107,8 @@
 		step={0.05}
 		bind:value={colors.brightness}
 		onchange={() => change('colors', colors)}
-		format={signed}
+		scale={100}
+		unit="%"
 	/>
 </InputRow>
 <InputRow id="{uid}-contrast" label="Contrast">
@@ -119,7 +119,8 @@
 		step={0.05}
 		bind:value={colors.contrast}
 		onchange={() => change('colors', colors)}
-		format={signed}
+		scale={100}
+		unit="%"
 	/>
 </InputRow>
 <div class="grid1">
