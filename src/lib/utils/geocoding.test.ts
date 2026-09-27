@@ -32,8 +32,29 @@ describe('geocode', () => {
 		});
 		expect(await geocode('berlin')).toStrictEqual([
 			{ label: 'Berlin, Deutschland', point: [13.4, 52.5], bbox: [13.08, 52.33, 13.76, 52.67] },
-			{ label: 'Brandenburger Tor, Pariser Platz 1', point: [13.37, 52.51] }
+			{
+				label: 'Brandenburger Tor, Pariser Platz 1',
+				point: [13.37, 52.51],
+				address: { street: 'Pariser Platz', housenumber: '1' }
+			}
 		]);
+	});
+
+	it('returns the kind of place and the parts of its address', async () => {
+		mockFetch({
+			type: 'FeatureCollection',
+			features: [
+				feature({ type: 'house', street: 'Chausseestraße', housenumber: 5, postcode: '10115', city: 'Berlin' })
+			]
+		});
+		const [result] = await geocode('x');
+		expect(result.type).toBe('house');
+		expect(result.address).toStrictEqual({
+			street: 'Chausseestraße',
+			housenumber: '5',
+			postcode: '10115',
+			city: 'Berlin'
+		});
 	});
 
 	it('keeps only the first of several results with the same label', async () => {

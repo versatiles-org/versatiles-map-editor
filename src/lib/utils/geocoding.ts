@@ -17,6 +17,10 @@ export interface GeocodingResult {
 	point: [number, number];
 	/** Extent of the place (e.g. of a city) as [west, south, east, north], if known. */
 	bbox?: [number, number, number, number];
+	/** Kind of place, e.g. "house", "street" or "city", if known. */
+	type?: string;
+	/** The parts of its address, as far as known, e.g. to check that the right street was found. */
+	address?: { street?: string; housenumber?: string; postcode?: string; city?: string };
 }
 
 export interface GeocodingOptions {
@@ -59,7 +63,17 @@ function toResult(feature: GeoJSON.Feature): GeocodingResult | undefined {
 	const [lng, lat] = feature.geometry.coordinates;
 	if (!Number.isFinite(lng) || !Number.isFinite(lat)) return undefined;
 
-	const result: GeocodingResult = { label: formatLabel(feature.properties ?? {}), point: [lng, lat] };
+	const p = feature.properties ?? {};
+	const result: GeocodingResult = { label: formatLabel(p), point: [lng, lat] };
+	if (typeof p.type === 'string') result.type = p.type;
+	const part = (value: unknown) =>
+		typeof value === 'string' && value ? value : typeof value === 'number' ? String(value) : undefined;
+	const address = Object.fromEntries(
+		(['street', 'housenumber', 'postcode', 'city'] as const)
+			.map((key) => [key, part(p[key])])
+			.filter(([, value]) => value !== undefined)
+	);
+	if (Object.keys(address).length > 0) result.address = address;
 	// Photon's extent is [west, north, east, south]
 	const extent = feature.properties?.extent;
 	if (Array.isArray(extent) && extent.length === 4 && extent.every(Number.isFinite)) {

@@ -153,4 +153,40 @@ describe('DialogImportTable', () => {
 		await vi.waitFor(() => expect(geocode).toHaveBeenCalled());
 		expect(geocode.mock.lastCall![1]).not.toHaveProperty('near');
 	});
+
+	it('lists uncertain matches after the import, or does not import them if the user chooses', async () => {
+		const chaussee = {
+			label: 'Chausseestraße 5, 10115 Berlin',
+			point: [13.38, 52.53],
+			type: 'house',
+			address: { street: 'Chausseestraße', housenumber: '5' }
+		};
+		geocode.mockReset().mockResolvedValue([chaussee]);
+		paste('Name;Straße;Nr;Ort\nOffice;Hauptstraße;5;Berlin');
+		button('Import 1 row').click();
+		await vi.waitFor(() => expect(manager.addElements).toHaveBeenCalled());
+		await tick();
+		flushSync();
+		const list = (name: string) => document.querySelector(`[aria-label="${name}"]`)?.textContent?.trim();
+		expect(list('Uncertain matches')).toBe('Row 2: Hauptstraße 5, Berlin — found Chausseestraße 5, 10115 Berlin');
+
+		unmount(component);
+		document.body.innerHTML = '';
+		manager.addElements.mockClear();
+		component = mount(DialogImportTable, {
+			target: document.body,
+			props: { manager: manager as unknown as GeometryManagerInteractive }
+		});
+		(component as { open: () => void }).open();
+		flushSync();
+		paste('Name;Straße;Nr;Ort\nOffice;Hauptstraße;5;Berlin');
+		const checkbox = [...document.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')].find((c) =>
+			c.parentElement?.textContent?.includes('Also import uncertain matches')
+		)!;
+		checkbox.click();
+		flushSync();
+		button('Import 1 row').click();
+		await vi.waitFor(() => expect(document.body.textContent).toContain('Imported 0 markers.'));
+		expect(list('Rows not imported')).toContain('uncertain, found Chausseestraße 5');
+	});
 });

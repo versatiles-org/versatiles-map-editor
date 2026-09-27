@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
 	addressOf,
+	isUncertain,
 	biasOptions,
 	boundsOf,
 	columnValues,
@@ -213,5 +214,72 @@ describe('biasOptions', () => {
 		expect(biasOptions('region', [13.4, 52.5], 14)).toStrictEqual({ near: [13.4, 52.5], zoom: 5 });
 		expect(biasOptions('region', [13.4, 52.5], 3)).toStrictEqual({ near: [13.4, 52.5], zoom: 3 });
 		expect(biasOptions('none', [13.4, 52.5], 14)).toStrictEqual({});
+	});
+});
+
+describe('uncertain matches', () => {
+	const columns = { street: 0, housenumber: 1, postcode: 2, city: 3 };
+	const row = ['Hauptstraße', '5', '10115', 'Berlin'];
+	const found = (type: string, address: Record<string, string>) => ({
+		label: 'x',
+		point: [0, 0] as [number, number],
+		type,
+		address
+	});
+
+	it('are results with another street, house number or postcode', () => {
+		const exact = { street: 'Hauptstraße', housenumber: '5', postcode: '10115', city: 'Berlin' };
+		expect(isUncertain(row, columns, found('house', exact))).toBe(false);
+		// written differently, the same street and number
+		expect(isUncertain(['Hauptstr.', '5a', '10115', 'Berlin'], columns, found('house', exact))).toBe(false);
+		expect(isUncertain(row, columns, found('house', { ...exact, street: 'Chausseestraße' }))).toBe(true);
+		expect(isUncertain(row, columns, found('house', { ...exact, housenumber: '7' }))).toBe(true);
+		expect(isUncertain(row, columns, found('street', { street: 'Hauptstraße', postcode: '10115' }))).toBe(true);
+		expect(isUncertain(row, columns, found('house', { ...exact, postcode: '10117' }))).toBe(true);
+	});
+
+	it('are areas, e.g. the town, for an address with a street or house number', () => {
+		expect(isUncertain(row, columns, found('city', { city: 'Berlin' }))).toBe(true);
+		expect(isUncertain(['Hauptstraße 5, Berlin'], { address: 0 }, found('city', { city: 'Berlin' }))).toBe(true);
+		// a list of towns
+		expect(isUncertain(['Berlin'], { address: 0 }, found('city', { city: 'Berlin' }))).toBe(false);
+		expect(isUncertain(['Bonn', 'DE'], { city: 0, country: 1 }, found('city', { city: 'Bonn' }))).toBe(false);
+	});
+
+	it('are imported and listed, or reported as failed if the user chooses', async () => {
+		const table = parseTable('Straße;Nr;Ort\nHauptstraße;5;Berlin\nMarkt;1;Bonn');
+		const geocoder = vi.fn<typeof geocode>(async (query) =>
+			query.startsWith('Hauptstraße')
+				? [
+						{
+							label: 'Chausseestraße 5, Berlin',
+							point: [13.38, 52.53],
+							type: 'house',
+							address: { street: 'Chausseestraße', housenumber: '5' }
+						}
+					]
+				: [
+						{
+							label: 'Markt 1, Bonn',
+							point: [7.1, 50.7],
+							type: 'house',
+							address: { street: 'Markt', housenumber: '1' }
+						}
+					]
+		);
+		const mapping = { position: { address: { street: 0, housenumber: 1, city: 2 } } };
+
+		const imported = await importTable(table, mapping, { geocoder });
+		expect(imported.markers).toHaveLength(2);
+		expect(imported.uncertain).toStrictEqual([
+			{ row: 2, value: 'Hauptstraße 5, Berlin', found: 'Chausseestraße 5, Berlin' }
+		]);
+
+		const strict = await importTable(table, mapping, { geocoder, importUncertain: false });
+		expect(strict.markers).toHaveLength(1);
+		expect(strict.uncertain).toStrictEqual([]);
+		expect(strict.failed).toStrictEqual([
+			{ row: 2, value: 'Hauptstraße 5, Berlin', reason: 'uncertain, found Chausseestraße 5, Berlin' }
+		]);
 	});
 });

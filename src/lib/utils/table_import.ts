@@ -1,5 +1,5 @@
 import type { StateElementMarker, StateLegend, StateStyle } from '@versatiles/map-state';
-import { geocode, type GeocodingOptions } from './geocoding.js';
+import { geocode, type GeocodingOptions, type GeocodingResult } from './geocoding.js';
 import { parseNumber, type AddressPart, type Table } from './table.js';
 
 /** Which columns hold the position, the label and the popup of the markers. */
@@ -49,6 +49,43 @@ export function addressOf(row: string[], columns: AddressColumns): string {
 	);
 }
 
+// Kinds of places that are areas, not a building or a street
+const AREA_TYPES = new Set(['city', 'district', 'locality', 'county', 'state', 'country']);
+
+/** A street name to compare, e.g. "hauptstr" for "Hauptstraße", "Hauptstr." or "hauptstrasse". */
+function normalizeStreet(street: string): string {
+	return street
+		.toLowerCase()
+		.replace(/ß/g, 'ss')
+		.replace(/[^\p{L}\p{N}]/gu, '')
+		.replace(/(strasse|str|street|st)$/, 'str');
+}
+
+/** The number of a house number, e.g. "5" for "5a" or "5 A". */
+function houseNumber(value: string): string {
+	return value.match(/\d+/)?.[0] ?? value.trim().toLowerCase();
+}
+
+/**
+ * Whether the search result does not match the address of the row: another street, house number
+ * or postcode, or only an area (e.g. the town) for an address with a street or house number.
+ */
+export function isUncertain(row: string[], columns: AddressColumns, found: GeocodingResult): boolean {
+	const cell = (part: AddressPart) => (columns[part] === undefined ? '' : (row[columns[part]] ?? '').trim());
+	const street = cell('street');
+	const number = cell('housenumber');
+	const postcode = cell('postcode');
+	const address = found.address ?? {};
+
+	// e.g. "Hauptstraße 5" in one column: a house number
+	const precise = street !== '' || number !== '' || /\d/.test(cell('address'));
+	if (precise && found.type && AREA_TYPES.has(found.type)) return true;
+	if (street && (!address.street || normalizeStreet(address.street) !== normalizeStreet(street))) return true;
+	if (number && (!address.housenumber || houseNumber(address.housenumber) !== houseNumber(number))) return true;
+	if (postcode && address.postcode && address.postcode.replace(/\s/g, '') !== postcode.replace(/\s/g, '')) return true;
+	return false;
+}
+
 export interface FailedRow {
 	/** Number of the row in the table, like in a spreadsheet: counting a header and empty rows. */
 	row: number;
@@ -57,12 +94,25 @@ export interface FailedRow {
 	reason: string;
 }
 
+/** A row whose search result does not match its address, e.g. another street. */
+export interface UncertainRow {
+	row: number;
+	/** The address, as searched. */
+	value: string;
+	/** What was found, e.g. "Chausseestraße 5, 10115 Berlin". */
+	found: string;
+}
+
 export interface ImportResult {
 	markers: StateElementMarker[];
 	failed: FailedRow[];
+	/** Rows imported with a result that does not match the address, to be checked. */
+	uncertain: UncertainRow[];
 }
 
 export interface ImportOptions extends Pick<GeocodingOptions, 'language' | 'near' | 'zoom'> {
+	/** Import rows whose result does not match the address (default), or report them as failed. */
+	importUncertain?: boolean;
 	signal?: AbortSignal;
 	/** Called after each geocoded row. */
 	onProgress?: (done: number, total: number) => void;
@@ -135,8 +185,9 @@ export async function importTable(
 	mapping: TableMapping,
 	options: ImportOptions = {}
 ): Promise<ImportResult> {
-	const { signal, onProgress, geocoder = geocode, ...geocodingOptions } = options;
+	const { signal, onProgress, geocoder = geocode, importUncertain = true, ...geocodingOptions } = options;
 	const results: (StateElementMarker | FailedRow)[] = new Array(table.rows.length);
+	const uncertain: UncertainRow[] = [];
 
 	const marker = (row: string[], point: [number, number]): StateElementMarker => {
 		const element: StateElementMarker = { type: 'marker', point };
@@ -175,9 +226,19 @@ export async function importTable(
 				} else {
 					try {
 						const [found] = await geocoder(address, { ...geocodingOptions, limit: 1, signal });
-						results[i] = found
-							? marker(row, found.point)
-							: { row: table.rowNumbers[i], value: address, reason: 'address not found' };
+						const number = table.rowNumbers[i];
+						if (!found) {
+							results[i] = { row: number, value: address, reason: 'address not found' };
+						} else if (isUncertain(row, position.address, found)) {
+							if (importUncertain) {
+								results[i] = marker(row, found.point);
+								uncertain.push({ row: number, value: address, found: found.label });
+							} else {
+								results[i] = { row: number, value: address, reason: `uncertain, found ${found.label}` };
+							}
+						} else {
+							results[i] = marker(row, found.point);
+						}
 					} catch (error) {
 						signal?.throwIfAborted();
 						console.error(error);
@@ -196,7 +257,8 @@ export async function importTable(
 		if ('type' in result) markers.push(result);
 		else failed.push(result);
 	}
-	return { markers, failed };
+	uncertain.sort((a, b) => a.row - b.row);
+	return { markers, failed, uncertain };
 }
 
 /** The bounding box [[west, south], [east, north]] of the points, or undefined without points. */

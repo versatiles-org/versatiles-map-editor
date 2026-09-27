@@ -16,6 +16,7 @@
 		tableCategories,
 		type Category,
 		type FailedRow,
+		type UncertainRow,
 		type LocationBias
 	} from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
@@ -51,6 +52,7 @@
 	};
 	const hasAddress = $derived(ADDRESS_PARTS.some((part) => address[part] >= 0));
 	let bias: LocationBias = $state('region');
+	let importUncertain = $state(true);
 	// -1: none
 	let label = $state(-1);
 	let popup = $state(-1);
@@ -66,6 +68,7 @@
 	let controller: AbortController | undefined;
 	let imported = $state(0);
 	let failed: FailedRow[] = $state([]);
+	let uncertain: UncertainRow[] = $state([]);
 	let importError = $state('');
 
 	export function open() {
@@ -144,6 +147,7 @@
 					signal: controller.signal,
 					language: navigator.language,
 					...biasOptions(bias, [center.lng, center.lat], manager.map.getZoom()),
+					importUncertain,
 					onProgress: (done, total) => (progress = { done, total })
 				}
 			);
@@ -156,6 +160,7 @@
 			if (result.markers.length > 0) manager.state.log();
 			imported = result.markers.length;
 			failed = result.failed;
+			uncertain = result.uncertain;
 			step = 'done';
 		} catch (error) {
 			if (controller.signal.aborted) {
@@ -167,6 +172,7 @@
 			importError = error instanceof Error ? error.message : String(error);
 			imported = 0;
 			failed = [];
+			uncertain = [];
 			step = 'done';
 		}
 	}
@@ -253,6 +259,10 @@
 								<option value="none">anywhere</option>
 							</select>
 						</InputRow>
+						<label class="checkbox">
+							<input type="checkbox" bind:checked={importUncertain} />
+							Also import uncertain matches (e.g. another street found)
+						</label>
 					{/if}
 				</fieldset>
 
@@ -330,6 +340,14 @@
 				<p class="error" role="alert">The import failed: {importError}</p>
 			{:else}
 				<p>Imported {formatCount(imported, 'marker')}.</p>
+			{/if}
+			{#if uncertain.length > 0}
+				<p>These rows were placed where the search found something else. Please check them:</p>
+				<ul class="failed" aria-label="Uncertain matches">
+					{#each uncertain as { row, value, found } (row)}
+						<li>Row {row}: {value} — found {found}</li>
+					{/each}
+				</ul>
 			{/if}
 			{#if failed.length > 0}
 				<p>These rows could not be imported:</p>
