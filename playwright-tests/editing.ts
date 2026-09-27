@@ -101,6 +101,47 @@ test('selecting a symbol closes the symbol picker', async ({ page }) => {
 	await expect.poll(() => stateInUrl(page).elements[0].style).toMatchObject({ symbol: 'icons:anchor' });
 });
 
+test('the symbol picker filters the symbols while typing', async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	await drawElement(page, 'Marker');
+	await page.getByRole('button', { name: 'Symbol Map pin' }).click();
+	const dialog = page.getByRole('dialog');
+	const filter = dialog.getByRole('searchbox', { name: 'Filter symbols' });
+	await expect(filter).toBeFocused();
+
+	// at most 16 columns in a wide window, scrolling vertically
+	const list = dialog.locator('.list');
+	const columns = await list.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+	expect(columns).toBe(16);
+	expect(
+		await list.evaluate((el) => [el.scrollWidth <= el.clientWidth, el.scrollHeight > el.clientHeight])
+	).toStrictEqual([true, true]);
+
+	// by title, alias or name, ignoring case and accents
+	const items = list.getByRole('button');
+	await filter.fill('cafe');
+	await expect(items).toHaveText(['Café']);
+	await filter.fill('HARBOUR marina');
+	await expect(items).toHaveText(['Anchor']);
+	await filter.fill('nothing like this');
+	await expect(items).toHaveCount(0);
+	await expect(dialog.getByRole('status')).toHaveText('No symbol matches “nothing like this”.');
+
+	// Enter selects the first match
+	await filter.fill('anchor');
+	await filter.press('Enter');
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
+
+	// the filter is empty again when the picker opens again
+	await page.getByRole('button', { name: 'Symbol Anchor' }).click();
+	await expect(filter).toHaveValue('');
+	await expect(items.first()).toHaveText('No symbol');
+});
+
 test('style editor controls have unique ids and labels', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);

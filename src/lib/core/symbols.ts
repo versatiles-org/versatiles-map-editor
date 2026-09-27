@@ -118,6 +118,32 @@ export function allSymbols(): SymbolInfo[] {
 	return catalog.symbols;
 }
 
+/** The words of a text, in lower case and without accents, e.g. "Café-Bar" → ["cafe", "bar"]. */
+function words(text: string): string[] {
+	return text
+		.normalize('NFD')
+		.replace(/\p{Diacritic}/gu, '')
+		.toLowerCase()
+		.split(/[^\p{L}\p{N}]+/u)
+		.filter(Boolean);
+}
+
+/**
+ * Whether a text matches a filter: every word of the filter starts a word of the text, e.g.
+ * "fire st" matches "Fire station", but "pin" does not match "camping". An empty filter matches
+ * everything.
+ */
+export function matchesFilter(text: string, filter: string): boolean {
+	const textWords = words(text);
+	return words(filter).every((word) => textWords.some((textWord) => textWord.startsWith(word)));
+}
+
+/** The symbols whose title, aliases or name match a filter, see `matchesFilter`. */
+export function filterSymbols(symbols: SymbolInfo[], filter: string): SymbolInfo[] {
+	if (!filter.trim()) return symbols;
+	return symbols.filter((symbol) => matchesFilter([symbol.title, ...symbol.aliases, symbol.name].join(' '), filter));
+}
+
 /** The symbol of an image, or undefined for no symbol (""). An unknown image gets its name as title. */
 export function getSymbol(name: string): SymbolInfo | undefined {
 	if (!name) return undefined;

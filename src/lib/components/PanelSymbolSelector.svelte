@@ -1,10 +1,15 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
-	import { allSymbols, getSymbol, loadSymbols, SymbolLibrary } from '../core/symbols.js';
+	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter, SymbolLibrary } from '../core/symbols.js';
 	import Dialog from './Dialog.svelte';
 
 	let dialog: Dialog | undefined;
+	let filterInput: HTMLInputElement | undefined = $state();
+	// the symbols of the list: all, or those that match the text of the filter
+	let filter = $state('');
+	// at most this many columns, e.g. in a wide window
+	const maxColumns = 16;
 	const buttonIconSize = 20;
 	const listItemSize = 48;
 	const listIconSize = 32;
@@ -36,6 +41,19 @@
 		symbol = name;
 		dialog?.close();
 	}
+
+	// a new filter each time the list opens, ready to type
+	function onopen() {
+		filter = '';
+		filterInput?.focus();
+	}
+
+	// Enter selects the first symbol that matches, e.g. after typing its name
+	function onFilterKey(e: KeyboardEvent, first: string | undefined) {
+		if (e.key !== 'Enter' || !filter.trim() || first === undefined) return;
+		e.preventDefault();
+		selectSymbol(first);
+	}
 </script>
 
 <button
@@ -61,28 +79,67 @@
 	{/if}
 </button>
 
-<Dialog bind:this={dialog} title="Select a symbol">
-	<div class="list" style="--list-icon-size: {listIconSize}px; --list-item-size: {listItemSize}px">
-		<button class="item" onclick={() => selectSymbol('')}>{noneLabel}</button>
-		<!-- the symbols of the server, once they are loaded -->
-		{#await loadSymbols() then}
-			{#each allSymbols() as item (item.name)}
+<Dialog bind:this={dialog} title="Select a symbol" {onopen}>
+	<!-- the symbols of the server, once they are loaded -->
+	{#await loadSymbols() then}
+		{@const symbols = filterSymbols(allSymbols(), filter)}
+		{@const showNone = matchesFilter(noneLabel, filter)}
+		<input
+			bind:this={filterInput}
+			bind:value={filter}
+			class="filter"
+			type="search"
+			placeholder="Filter, e.g. cafe"
+			aria-label="Filter symbols"
+			autocomplete="off"
+			onkeydown={(e) => onFilterKey(e, symbols[0]?.name ?? (showNone ? '' : undefined))}
+		/>
+		<div
+			class="list"
+			style:--list-icon-size="{listIconSize}px"
+			style:--list-item-size="{listItemSize}px"
+			style:--max-columns={maxColumns}
+		>
+			{#if showNone}
+				<button class="item" onclick={() => selectSymbol('')}>{noneLabel}</button>
+			{/if}
+			{#each symbols as item (item.name)}
 				<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
 					><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
 					></canvas><br />{item.title}</button
 				>
 			{/each}
-		{/await}
-	</div>
+		</div>
+		{#if symbols.length === 0 && !showNone}
+			<p class="empty" role="status">No symbol matches “{filter.trim()}”.</p>
+		{/if}
+	{/await}
 </Dialog>
 
 <style lang="scss">
-	.list {
+	.filter {
+		flex-shrink: 0;
+		box-sizing: border-box;
 		width: 100%;
-		height: 100%;
+		margin-bottom: 10px;
+	}
+
+	.empty {
+		margin: 0;
+		color: var(--color-text-muted);
+	}
+
+	/* the remaining height of the dialog, scrolling vertically; columns of at least 64px, at most
+	   --max-columns of them */
+	.list {
+		flex: 1 1 auto;
+		min-height: 0;
+		width: 100%;
+		overflow-x: hidden;
 		overflow-y: auto;
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(max(64px, calc(100% / var(--max-columns))), 1fr));
+		align-content: start;
 		row-gap: 10px;
 		column-gap: 0px;
 		justify-items: center;

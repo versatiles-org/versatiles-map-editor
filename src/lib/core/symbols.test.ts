@@ -2,7 +2,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LEGACY_SYMBOLS } from '@versatiles/map-state';
 import { MockMap } from '$lib/__mocks__/map.js';
-import { SymbolLibrary } from './symbols.js';
+import { filterSymbols, SymbolLibrary } from './symbols.js';
 // Icon names of the "base" sprite that @versatiles/style loads. To update:
 // curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
 import spriteBase from './__fixtures__/sprite-base.json' with { type: 'json' };
@@ -209,5 +209,33 @@ describe('SymbolLibrary', () => {
 			map.emit('idle');
 			expect(map.listenerCount('idle')).toBe(0);
 		});
+	});
+});
+
+describe('filterSymbols', () => {
+	const symbols = [
+		{ name: 'base:icon-cafe', title: 'Café', aliases: ['coffee'], anchor: 'center' as const },
+		{ name: 'base:icon-fire_station', title: 'Fire station', aliases: ['firefighters'], anchor: 'center' as const },
+		{ name: 'icons:anchor', title: 'Anchor', aliases: ['harbour'], anchor: 'center' as const }
+	];
+	const names = (filter: string) => filterSymbols(symbols, filter).map((symbol) => symbol.name);
+
+	it('finds symbols by title, aliases and name, ignoring case and accents', () => {
+		expect(names('CAFE')).toStrictEqual(['base:icon-cafe']);
+		expect(names('coffee')).toStrictEqual(['base:icon-cafe']);
+		expect(names('harb')).toStrictEqual(['icons:anchor']);
+		expect(names('icons:')).toStrictEqual(['icons:anchor']);
+	});
+
+	it('needs every word of the filter, at the start of a word', () => {
+		expect(names('fire st')).toStrictEqual(['base:icon-fire_station']);
+		expect(names('fire anchor')).toStrictEqual([]);
+		// the start of a word, not any part of it
+		expect(names('station')).toStrictEqual(['base:icon-fire_station']);
+		expect(names('tation')).toStrictEqual([]);
+	});
+
+	it('keeps all symbols without a filter', () => {
+		expect(names('  ')).toHaveLength(3);
 	});
 });
