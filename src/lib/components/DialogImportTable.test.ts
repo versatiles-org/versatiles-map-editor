@@ -69,6 +69,27 @@ describe('DialogImportTable', () => {
 		paste('name,address\nTown hall,Rathausstraße 15 Berlin');
 		expect(document.querySelector<HTMLInputElement>('input[value="address"]')!.checked).toBe(true);
 		expect(selected('Address')).toBe('address');
+		expect(selected('City')).toBe('(none)');
+	});
+
+	it('recognizes an address spread over several columns', () => {
+		paste('Name;Straße;Nr;PLZ;Ort\nRathaus;Markt;1;53111;Bonn');
+		expect(document.querySelector<HTMLInputElement>('input[value="address"]')!.checked).toBe(true);
+		expect(selected('Address')).toBe('(none)');
+		expect(selected('Street')).toBe('Straße');
+		expect(selected('House number')).toBe('Nr');
+		expect(selected('Postcode')).toBe('PLZ');
+		expect(selected('City')).toBe('Ort');
+		expect(selected('Label')).toBe('Name');
+	});
+
+	it('cannot import addresses without an address column', () => {
+		paste('name,address\nTown hall,Rathausstraße 15 Berlin');
+		const address = select('Address');
+		address.value = '-1';
+		address.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+		expect(button('Import 1 row').disabled).toBe(true);
 	});
 
 	it('warns about a category column with too many values', () => {

@@ -1,16 +1,33 @@
 import type { StateElementMarker, StateLegend, StateStyle } from '@versatiles/map-state';
 import { geocode, type GeocodingOptions } from './geocoding.js';
-import { parseNumber, type Table } from './table.js';
+import { parseNumber, type AddressPart, type Table } from './table.js';
 
 /** Which columns hold the position, the label and the popup of the markers. */
 export interface TableMapping {
-	position: { latitude: number; longitude: number } | { address: number };
+	/** Coordinates, or an address, possibly spread over several columns (at least one). */
+	position: { latitude: number; longitude: number } | { address: AddressColumns };
 	label?: number;
 	popup?: number;
 	/** The style of all markers. */
 	style?: StateStyle;
 	/** A column whose values get their own style, e.g. a color per kind of place. */
 	category?: { column: number; styles: Record<string, StateStyle> };
+}
+
+/** The columns of the parts of an address, e.g. `{ street: 0, postcode: 1, city: 2 }`. */
+export type AddressColumns = Partial<Record<AddressPart, number>>;
+
+/** The address of a row as one search text, e.g. "Hauptstraße 5, 10115 Berlin, Deutschland". */
+export function addressOf(row: string[], columns: AddressColumns): string {
+	const cell = (part: AddressPart) => (columns[part] === undefined ? '' : (row[columns[part]] ?? '').trim());
+	const join = (separator: string, ...values: string[]) => values.filter((v) => v !== '').join(separator);
+	return join(
+		', ',
+		cell('address'),
+		join(' ', cell('street'), cell('housenumber')),
+		join(' ', cell('postcode'), cell('city')),
+		cell('country')
+	);
 }
 
 export interface FailedRow {
@@ -133,7 +150,7 @@ export async function importTable(
 				signal?.throwIfAborted();
 				const i = next++;
 				const row = table.rows[i];
-				const address = row[position.address].trim();
+				const address = addressOf(row, position.address);
 				if (!address) {
 					results[i] = { row: table.rowNumbers[i], value: '', reason: 'no address' };
 				} else {

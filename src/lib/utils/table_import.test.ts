@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+	addressOf,
 	boundsOf,
 	columnValues,
 	decodeTableFile,
@@ -53,7 +54,7 @@ describe('importTable', () => {
 
 		const result = await importTable(
 			table,
-			{ position: { address: 0 }, label: 1 },
+			{ position: { address: { address: 0 } }, label: 1 },
 			{ geocoder, onProgress, language: 'de' }
 		);
 		expect(result.markers).toStrictEqual([{ type: 'marker', point: [10, 20], style: { label: 'A' } }]);
@@ -74,7 +75,7 @@ describe('importTable', () => {
 			return [];
 		});
 		await expect(
-			importTable(table, { position: { address: 0 } }, { geocoder, signal: controller.signal })
+			importTable(table, { position: { address: { address: 0 } } }, { geocoder, signal: controller.signal })
 		).rejects.toThrow();
 		expect(geocoder.mock.calls.length).toBeLessThan(4);
 	});
@@ -177,5 +178,29 @@ describe('categories', () => {
 	it('style markers with the color and the chosen symbol', () => {
 		expect(markerStyle('#ff0000', 3)).toStrictEqual({ color: '#ff0000', pattern: 3 });
 		expect(markerStyle('#ff0000', undefined)).toStrictEqual({ color: '#ff0000' });
+	});
+});
+
+describe('addresses in several columns', () => {
+	it('are combined into one search text, leaving out empty parts', () => {
+		const columns = { street: 0, housenumber: 1, postcode: 2, city: 3, country: 4 };
+		expect(addressOf(['Hauptstraße', '5', '10115', 'Berlin', 'Deutschland'], columns)).toBe(
+			'Hauptstraße 5, 10115 Berlin, Deutschland'
+		);
+		expect(addressOf(['Hauptstraße', '', '', 'Berlin', ''], columns)).toBe('Hauptstraße, Berlin');
+		expect(addressOf(['Rathaus, Markt 1', 'Bonn'], { address: 0, city: 1 })).toBe('Rathaus, Markt 1, Bonn');
+		expect(addressOf(['', ''], columns)).toBe('');
+	});
+
+	it('are searched as one address', async () => {
+		const table = parseTable('Straße;Nr;PLZ;Ort\nHauptstraße;5;10115;Berlin\n;;;');
+		const geocoder = vi.fn<typeof geocode>(async (query) => [{ label: query, point: [13.4, 52.5] }]);
+		const { markers } = await importTable(
+			table,
+			{ position: { address: { street: 0, housenumber: 1, postcode: 2, city: 3 } } },
+			{ geocoder }
+		);
+		expect(geocoder).toHaveBeenCalledWith('Hauptstraße 5, 10115 Berlin', expect.anything());
+		expect(markers).toHaveLength(1);
 	});
 });

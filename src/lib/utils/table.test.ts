@@ -91,4 +91,22 @@ describe('guessColumns', () => {
 		});
 		expect(guessColumns(['Adresse', 'Titel', 'Kategorie'])).toStrictEqual({ address: 0, label: 1, category: 2 });
 	});
+
+	it('recognizes the parts of an address in several columns', () => {
+		expect(guessColumns(['Name', 'Straße', 'Hausnummer', 'PLZ', 'Ort', 'Land'])).toStrictEqual({
+			label: 0,
+			street: 1,
+			housenumber: 2,
+			postcode: 3,
+			city: 4,
+			country: 5
+		});
+		expect(guessColumns(['street', 'no.', 'zip', 'city', 'country'])).toStrictEqual({
+			street: 0,
+			housenumber: 1,
+			postcode: 2,
+			city: 3,
+			country: 4
+		});
+	});
 });

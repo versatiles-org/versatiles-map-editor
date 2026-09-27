@@ -4,7 +4,7 @@
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
-	import { guessColumns, parseTable, type Table } from '$lib/utils/table.js';
+	import { ADDRESS_PARTS, guessColumns, parseTable, type AddressPart, type Table } from '$lib/utils/table.js';
 	import {
 		boundsOf,
 		decodeTableFile,
@@ -35,7 +35,19 @@
 	let positionType: 'coordinates' | 'address' = $state('coordinates');
 	let latitude = $state(0);
 	let longitude = $state(1);
-	let address = $state(0);
+	// the columns of the address parts, -1: none
+	const noAddress = (): Record<AddressPart, number> =>
+		Object.fromEntries(ADDRESS_PARTS.map((part) => [part, -1])) as Record<AddressPart, number>;
+	let address = $state(noAddress());
+	const ADDRESS_NAMES: Record<AddressPart, string> = {
+		address: 'Address',
+		street: 'Street',
+		housenumber: 'House number',
+		postcode: 'Postcode',
+		city: 'City',
+		country: 'Country'
+	};
+	const hasAddress = $derived(ADDRESS_PARTS.some((part) => address[part] >= 0));
 	// -1: none
 	let label = $state(-1);
 	let popup = $state(-1);
@@ -71,10 +83,14 @@
 		const detected = parseTable(text, header);
 		hasHeader = detected.hasHeader;
 		const guess = guessColumns(detected.columns);
-		positionType = guess.latitude == null && guess.address != null ? 'address' : 'coordinates';
+		const guessedAddress = ADDRESS_PARTS.some((part) => guess[part] != null);
+		positionType = guess.latitude == null && guessedAddress ? 'address' : 'coordinates';
 		latitude = guess.latitude ?? 0;
 		longitude = guess.longitude ?? Math.min(1, detected.columns.length - 1);
-		address = guess.address ?? 0;
+		address = noAddress();
+		for (const part of ADDRESS_PARTS) address[part] = guess[part] ?? -1;
+		// without a guess, the first column holds the address
+		if (!guessedAddress) address.address = 0;
 		label = guess.label ?? -1;
 		popup = guess.popup ?? -1;
 		setCategory(guess.category ?? -1);
@@ -102,7 +118,14 @@
 			const result = await importTable(
 				table,
 				{
-					position: positionType === 'coordinates' ? { latitude, longitude } : { address },
+					position:
+						positionType === 'coordinates'
+							? { latitude, longitude }
+							: {
+									address: Object.fromEntries(
+										ADDRESS_PARTS.filter((part) => address[part] >= 0).map((part) => [part, address[part]])
+									)
+								},
 					label: label >= 0 ? label : undefined,
 					popup: popup >= 0 ? popup : undefined,
 					style: markerStyle(color, symbol),
@@ -211,12 +234,16 @@
 							(v) => (longitude = v)
 						)}
 					{:else}
-						{@render columnSelect(
-							'address',
-							'Address',
-							() => address,
-							(v) => (address = v)
-						)}
+						<!-- an address can be spread over several columns, e.g. street, postcode and city -->
+						{#each ADDRESS_PARTS as part (part)}
+							{@render columnSelect(
+								part,
+								ADDRESS_NAMES[part],
+								() => address[part],
+								(v) => (address[part] = v),
+								true
+							)}
+						{/each}
 					{/if}
 				</fieldset>
 
@@ -277,7 +304,11 @@
 
 			<div class="buttons">
 				<button class="btn" onclick={() => (step = 'input')}>Back</button>
-				<button class="btn" disabled={table.rows.length === 0} onclick={runImport}>
+				<button
+					class="btn"
+					disabled={table.rows.length === 0 || (positionType === 'address' && !hasAddress)}
+					onclick={runImport}
+				>
 					Import {formatCount(table.rows.length, 'row')}
 				</button>
 			</div>

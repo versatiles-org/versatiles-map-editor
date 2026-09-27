@@ -132,12 +132,22 @@ export function parseNumber(value: string | undefined): number | undefined {
 	return Number(text.replace(',', '.'));
 }
 
-export type ColumnRole = 'latitude' | 'longitude' | 'address' | 'label' | 'popup' | 'category';
+/** The columns that an address can be spread over, e.g. street, postcode and city. */
+export const ADDRESS_PARTS = ['address', 'street', 'housenumber', 'postcode', 'city', 'country'] as const;
+export type AddressPart = (typeof ADDRESS_PARTS)[number];
+
+export type ColumnRole = 'latitude' | 'longitude' | AddressPart | 'label' | 'popup' | 'category';
 
 const ROLE_NAMES: Record<ColumnRole, RegExp> = {
 	latitude: /^(lat|latitude|breite|breitengrad|y)$/i,
 	longitude: /^(lon|lng|long|longitude|länge|laenge|längengrad|x)$/i,
-	address: /^(address|adresse|anschrift|location|ort|place|standort|street|straße|strasse)$/i,
+	// the whole address in one column
+	address: /^(address|adresse|anschrift|location|place|standort)$/i,
+	street: /^(street|straße|strasse|str\.?)$/i,
+	housenumber: /^(house ?number|house no\.?|hausnummer|hausnr\.?|nr\.?|no\.?|number)$/i,
+	postcode: /^(postcode|post ?code|postal ?code|zip|zip ?code|plz|postleitzahl)$/i,
+	city: /^(city|town|ort|stadt|gemeinde|municipality)$/i,
+	country: /^(country|land|staat)$/i,
 	label: /^(name|title|titel|label|bezeichnung)$/i,
 	popup: /^(description|beschreibung|popup|info|text|details|notes?|notiz)$/i,
 	category: /^(category|kategorie|type|typ|art|kind|group|gruppe|class|klasse)$/i
