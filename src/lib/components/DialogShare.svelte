@@ -20,6 +20,9 @@
 
 	export function open() {
 		dialog?.open();
+		// The browser would focus the preview, the first control, whose page would then get the keys,
+		// so Escape would not close the dialog
+		btnLink?.focus();
 		update(1);
 	}
 
@@ -117,7 +120,7 @@
 					Link
 					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
 				</label>
-				<button class="btn" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
+				<button class="btn copy" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
 				<span class="sr-only" role="status">{copied}</span>
 				{#if copyError}<span class="copy-error" role="alert">{copyError}</span>{/if}
 			</p>
@@ -127,7 +130,7 @@
 					<textarea id="text-iframe" rows="5" readonly onclick={(e) => e.currentTarget.select()}>{embedCode}</textarea>
 				</label>
 
-				<button class="btn" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
+				<button class="btn copy" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
 			</p>
 			<p>
 				<label for="share-precision">Precision</label>
@@ -181,6 +184,32 @@
 </Dialog>
 
 <style lang="scss">
+	/* a check mark at the corner of a copy button, shown for a moment after copying */
+	.copy {
+		&::after {
+			content: '✓';
+			position: absolute;
+			top: -0.6em;
+			right: -0.6em;
+			display: block;
+			width: 1.6em;
+			height: 1.6em;
+			border-radius: 1em;
+			background-color: var(--color-green);
+			color: var(--color-on-blue);
+			font-size: 1em;
+			line-height: 1.6em;
+			text-align: center;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity 0.1s ease-in-out;
+		}
+
+		&:global(.success)::after {
+			opacity: 1;
+		}
+	}
+
 	.grid {
 		display: grid;
 		grid-template-columns: 1fr auto;

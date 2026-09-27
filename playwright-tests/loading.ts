@@ -14,7 +14,7 @@ const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
 
 // The controls of the top bar, the tools and the sidebar at the start, in this order. Only names and states
-// are compared, so e.g. a separator or an icon does not matter. "✓" is the (hidden) feedback of a button.
+// are compared, so e.g. a separator or an icon does not matter.
 const topbarAria = `
 - button "Menu" [expanded=false]
 - heading "VersaTiles Map Editor"

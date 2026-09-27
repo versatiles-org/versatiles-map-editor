@@ -116,11 +116,12 @@
 		text-align: center;
 		padding: 0;
 
-		/* a larger hit area for fingers, without a larger button */
+		/* a larger hit area for fingers, without a larger button; up to the edge of the dialog, not
+		   beyond it, where it would let the dialog scroll sideways */
 		&::after {
 			content: '';
 			position: absolute;
-			inset: -10px;
+			inset: -5px;
 		}
 	}
 </style>

@@ -17,6 +17,13 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	await share.getByRole('button', { name: 'Close' }).click();
 	await expect(share).toBeHidden();
 
+	// Escape closes it, also after the preview has loaded, which must not take the focus
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await expect(share.getByRole('button', { name: /^Copy Link/ })).toBeFocused();
+	await page.waitForTimeout(1000);
+	await page.keyboard.press('Escape');
+	await expect(share).toBeHidden();
+
 	// the download dialog: the file name can be typed at once
 	await (await menuItem(page, 'Download…')).click();
 	const download = page.getByRole('dialog', { name: 'Download File' });

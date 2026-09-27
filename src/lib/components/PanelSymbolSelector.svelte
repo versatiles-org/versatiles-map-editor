@@ -74,16 +74,18 @@
 	.list {
 		width: 100%;
 		height: 100%;
-		overflow-y: scroll;
+		overflow-y: auto;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
 		row-gap: 10px;
 		column-gap: 0px;
 		justify-items: center;
 
+		/* the width of the column, and long names wrap inside it, instead of reaching past the list */
 		.item {
-			width: var(--list-item-size);
-			height: var(--list-item-size);
+			width: 100%;
+			min-height: var(--list-item-size);
+			overflow-wrap: anywhere;
 			cursor: pointer;
 			border: none;
 			font-size: 10px;

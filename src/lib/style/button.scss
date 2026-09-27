@@ -36,32 +36,6 @@ button.btn {
 		color: var(--color-disabled-text);
 		cursor: default;
 	}
-
-	&:after {
-		content: '✓';
-		background-color: var(--color-green);
-		border-radius: 1em;
-		color: var(--color-on-blue);
-		display: block;
-		font-size: 1em;
-		height: 1.6em;
-		line-height: 1.6em;
-		margin-left: 5px;
-		opacity: 0;
-		pointer-events: none;
-		position: absolute;
-		right: -0.6em;
-		text-align: center;
-		top: -0.6em;
-		transition: opacity 0.1s ease-in-out;
-		width: 1.6em;
-	}
-
-	&.success {
-		&:after {
-			opacity: 1;
-		}
-	}
 }
 
 fieldset.btn {
