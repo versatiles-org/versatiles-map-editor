@@ -129,6 +129,40 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 	await expect.poll(sources).toContain('versatiles-shortbread');
 });
 
+test('changing the colors of the vector map and of the satellite imagery', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const background = () => stateInUrl(page).meta?.background;
+	const paint = (layer: string, property: string) =>
+		page.evaluate(
+			([layer, property]) => (window as unknown as MapWindow).map.getPaintProperty(layer, property as 'fill-color'),
+			[layer, property]
+		);
+	const water = () => paint('water-ocean', 'fill-color');
+	const colored = await water();
+
+	// the vector map in gray
+	await page.getByRole('slider', { name: 'Saturation' }).fill('-1');
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'osm', options: { recolor: { saturate: -1 }, text: { language: 'user' } } });
+	await expect.poll(water).not.toStrictEqual(colored);
+	await expect(page.locator('output', { hasText: '−100 %' })).toBeVisible();
+
+	// the satellite imagery keeps the change, as a property of its raster layer
+	await page.getByRole('radio', { name: 'Satellite' }).check();
+	await expect.poll(() => background()?.options.raster).toStrictEqual({ saturation: -1 });
+	await expect.poll(() => paint('satellite', 'raster-saturation')).toBe(-1);
+	// darker: white becomes gray
+	await page.getByRole('slider', { name: 'Brightness' }).fill('-0.2');
+	await expect.poll(() => paint('satellite', 'raster-brightness-max')).toBeCloseTo(0.8);
+
+	// all back
+	await page.getByRole('button', { name: 'Reset colors' }).click();
+	await expect.poll(() => background()?.options.raster).toBeUndefined();
+	await expect(page.getByRole('button', { name: 'Reset colors' })).toBeDisabled();
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

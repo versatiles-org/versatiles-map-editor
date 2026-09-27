@@ -1,10 +1,19 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
-	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
+	import {
+		changeSettings,
+		DEFAULT_COLORS,
+		getSettings,
+		LANGUAGES,
+		THEMES,
+		type BackgroundSettings,
+		type MapColors
+	} from '$lib/utils/background.js';
 	import { config } from '$lib/utils/config.svelte.js';
 	import { closestFace, facesOf, familiesOf, unknownFace } from '$lib/utils/fonts.js';
 	import InputRow from './InputRow.svelte';
 	import ChoiceGroup from './ChoiceGroup.svelte';
+	import Slider from './Slider.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -32,6 +41,13 @@
 		{ value: 'fewer', label: 'Fewer' },
 		{ value: 'none', label: 'None' }
 	];
+
+	// The colors while they are changed: a new style for each step of a slider would be too slow,
+	// so the map changes when the slider is released. Set again by a change of the map, e.g. undo.
+	let colors: MapColors = $derived({ ...settings.colors });
+	const colorsChanged = $derived(JSON.stringify(settings.colors) !== JSON.stringify(DEFAULT_COLORS));
+	const percent = (value: number) => `${Math.round(value * 100)} %`;
+	const signed = (value: number) => (value > 0 ? '+' : value < 0 ? '−' : '') + percent(Math.abs(value));
 
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
@@ -71,6 +87,44 @@
 		/>
 	</InputRow>
 {/if}
+
+<!-- the colors of the vector map or of the satellite imagery -->
+<InputRow id="{uid}-saturation" label="Saturation">
+	<Slider
+		id="{uid}-saturation"
+		min={-1}
+		max={1}
+		step={0.05}
+		bind:value={colors.saturation}
+		onchange={() => change('colors', colors)}
+		format={signed}
+	/>
+</InputRow>
+<InputRow id="{uid}-brightness" label="Brightness">
+	<Slider
+		id="{uid}-brightness"
+		min={-0.5}
+		max={0.5}
+		step={0.05}
+		bind:value={colors.brightness}
+		onchange={() => change('colors', colors)}
+		format={signed}
+	/>
+</InputRow>
+<InputRow id="{uid}-contrast" label="Contrast">
+	<Slider
+		id="{uid}-contrast"
+		min={-0.5}
+		max={1}
+		step={0.05}
+		bind:value={colors.contrast}
+		onchange={() => change('colors', colors)}
+		format={signed}
+	/>
+</InputRow>
+<div class="grid1">
+	<button class="btn" disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</button>
+</div>
 
 <!-- the imagery alone has no labels -->
 {#if settings.overlay}
