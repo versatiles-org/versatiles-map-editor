@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	circle,
 	circleArea,
+	coordinatesOf,
 	distance,
 	EARTH_RADIUS,
 	getMiddlePoint,
@@ -91,5 +92,27 @@ describe('Geometry Utils', () => {
 		expect(circleArea(1000)).toBeCloseTo(Math.PI * 1000 * 1000, 0);
 		// a hemisphere
 		expect(circleArea((Math.PI / 2) * EARTH_RADIUS)).toBeCloseTo(2 * Math.PI * EARTH_RADIUS ** 2, -3);
+	});
+});
+
+describe('coordinatesOf', () => {
+	it('returns all positions of a geometry', () => {
+		expect(coordinatesOf({ type: 'Point', coordinates: [1, 2] })).toStrictEqual([[1, 2]]);
+		expect(
+			coordinatesOf({
+				type: 'Polygon',
+				coordinates: [
+					[
+						[0, 0],
+						[1, 0],
+						[0, 1]
+					]
+				]
+			})
+		).toStrictEqual([
+			[0, 0],
+			[1, 0],
+			[0, 1]
+		]);
 	});
 });

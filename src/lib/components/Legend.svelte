@@ -5,14 +5,24 @@
 	import { SymbolLibrary } from '../core/symbols.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
-	/** `top` keeps it clear of a search field. */
+	/** `top` keeps it clear of a search field. In the editor, a click selects it (`onselect`). */
 	const {
 		legend,
 		map,
 		left = 0,
 		right = 0,
-		top = 0
-	}: { legend: StateLegend; map: MaplibreMap; left?: number; right?: number; top?: number } = $props();
+		top = 0,
+		selected = false,
+		onselect
+	}: {
+		legend: StateLegend;
+		map: MaplibreMap;
+		left?: number;
+		right?: number;
+		top?: number;
+		selected?: boolean;
+		onselect?: () => void;
+	} = $props();
 
 	const symbolSize = 18;
 	const retina = window.devicePixelRatio || 1;
@@ -29,8 +39,13 @@
 </script>
 
 {#if legend.entries.length > 0}
+	<!-- a click selects it in the editor; with the keyboard, "Edit legend" of the inspector does -->
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 	<div
 		class="legend position-{legend.position ?? 'bottom-left'} layout-{legend.layout ?? 'vertical'}"
+		class:selectable={onselect !== undefined}
+		class:selected
+		onclick={onselect}
 		style:--left="{left}px"
 		style:--sidebar="{right}px"
 		style:--top="{top}px"
@@ -76,6 +91,22 @@
 		color: #000;
 		font-size: 12px;
 		line-height: 1.3;
+	}
+
+	.selectable {
+		cursor: pointer;
+
+		&:hover {
+			box-shadow:
+				0 0 0 2px color-mix(in srgb, #158 50%, transparent),
+				0 1px 4px rgba(0, 0, 0, 0.25);
+		}
+	}
+	.selected,
+	.selected:hover {
+		box-shadow:
+			0 0 0 2px #158,
+			0 1px 4px rgba(0, 0, 0, 0.25);
 	}
 
 	.layout-vertical {

@@ -45,6 +45,27 @@ describe('SelectionHandler', () => {
 		expect(handler.selectedElement).toBeUndefined();
 	});
 
+	it('selects either the legend or elements', () => {
+		const element = {
+			select: vi.fn(),
+			getSelectionNodes: vi.fn().mockReturnValue([])
+		} as unknown as AbstractElement;
+		mockManager.elements = [element];
+		handler.selectElement(element);
+
+		handler.selectLegend();
+		expect(handler.legendSelected).toBe(true);
+		expect(handler.selectedElements).toStrictEqual([]);
+
+		handler.selectElement(element);
+		expect(handler.legendSelected).toBe(false);
+
+		// deselecting everything, e.g. with a click on the empty map
+		handler.selectLegend();
+		handler.selectElement();
+		expect(handler.legendSelected).toBe(false);
+	});
+
 	it('selectElement sets selected element and updates nodes', () => {
 		const selectMock = vi.fn();
 		const element = {

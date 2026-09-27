@@ -146,7 +146,10 @@ test('duplicating an element', async ({ page }) => {
 	expect(copy1![1]).toBeLessThan(center[1]);
 	expect(copy2![0]).toBeGreaterThan(copy1![0]);
 
-	// alt-drag moves a copy of the selected marker and keeps the original
+	// alt-drag moves a copy of the selected marker and keeps the original. Escape deselects the
+	// copy first, since the bar of its actions covers the original.
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('toolbar', { name: 'Selection' })).toBeHidden();
 	await page.mouse.click(x + 6, y - 8);
 	// the selection node is rendered asynchronously, and it can only be dragged once it is visible
 	await waitForMapIsIdle(page);
@@ -280,17 +283,18 @@ test('selecting multiple elements', async ({ page }) => {
 	const elements = () => stateInUrl(page).elements;
 	const fillColors = () =>
 		elements().map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
-	const styleTitle = page.getByRole('button', { name: /^Style/ });
+	// the heading of the inspector: the name of the selected element, or the number of elements
+	const styleTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
 
 	// Shift+click adds the second polygon; the fill colors differ
 	const a = await project(page, [13.34, 52.475]);
 	const b = await project(page, [13.41, 52.475]);
 	await page.mouse.click(...a);
-	await expect(styleTitle).toHaveText('Style');
+	await expect(styleTitle).toHaveText('Polygon 1');
 	await page.keyboard.down('Shift');
 	await page.mouse.click(...b);
 	await page.keyboard.up('Shift');
-	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await expect(styleTitle).toHaveText('2 elements');
 	const fillColor = page.getByRole('button', { name: /^Color/ }).first();
 	await expect(page.getByText('(mixed)').first()).toBeVisible();
 
@@ -312,30 +316,30 @@ test('selecting multiple elements', async ({ page }) => {
 	const after = firstLatitudes();
 	expect(after[1] - before[1]).toBeCloseTo(after[0] - before[0], 4);
 	expect(after[2]).toBe(before[2]);
-	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await expect(styleTitle).toHaveText('2 elements');
 
 	// duplicate and delete act on all selected elements
 	await page.keyboard.press('ControlOrMeta+d');
 	await expect.poll(() => elements().length).toBe(5);
-	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await expect(styleTitle).toHaveText('2 elements');
 	await page.keyboard.press('Delete');
 	await expect.poll(() => elements().length).toBe(3);
 
 	// a marker and polygons have no style properties in common
 	const moved = await project(page, [13.34, 52.465]);
 	await page.mouse.click(...moved);
-	await expect(styleTitle).toHaveText('Style');
+	await expect(styleTitle).toHaveText('Polygon 1');
 	await page.keyboard.down('Shift');
 	await page.mouse.click(...((await project(page, [13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
 	await page.keyboard.up('Shift');
-	await expect(styleTitle).toHaveText('Style of 2 elements');
+	await expect(styleTitle).toHaveText('2 elements');
 	await expect(page.getByText('These elements have no style properties in common.')).toBeVisible();
 
 	// Shift+click on a selected element removes it from the selection
 	await page.keyboard.down('Shift');
 	await page.mouse.click(...moved);
 	await page.keyboard.up('Shift');
-	await expect(styleTitle).toHaveText('Style');
+	await expect(styleTitle).toHaveText('Marker 1');
 	await expect(page.getByRole('button', { name: /^Symbol/ })).toBeVisible();
 });
 
@@ -389,7 +393,7 @@ test('copying and pasting a style', async ({ page }) => {
 	const [mx, my] = await project(page, [13.42, 52.5]);
 	await page.mouse.click(mx + 6, my - 8);
 	await page.keyboard.up('Shift');
-	await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 	await pasteButton.click();
 
 	// the outline of the polygon gets the line style, the marker only its color
@@ -535,4 +539,34 @@ test.describe('drawing with the tools', () => {
 		const radius = (stateInUrl(page).elements[1] as { radius: number }).radius;
 		expect(radius).toBeGreaterThan(200);
 	});
+});
+
+test('the inspector and the actions follow the selection', async ({ page }) => {
+	const center: Point = [13.4, 52.5];
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+	);
+	await waitForMapIsReady(page);
+	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const bar = page.getByRole('toolbar', { name: 'Selection' });
+
+	// nothing selected: the properties of the map, and no actions
+	await expect(title).toHaveText('Map');
+	await expect(page.getByRole('region', { name: 'Background map' })).toBeVisible();
+	await expect(bar).toBeHidden();
+
+	// a selected marker: its style, and its actions above it
+	const [x, y] = await project(page, center);
+	await page.mouse.click(x + 6, y - 8);
+	await expect(title).toHaveText('Marker 1');
+	await expect(page.getByRole('region', { name: 'Symbol' })).toBeVisible();
+	const box = (await bar.boundingBox())!;
+	expect(box.y + box.height).toBeLessThan(y - 8);
+	expect(Math.abs(box.x + box.width / 2 - x)).toBeLessThan(box.width / 2);
+
+	// the actions act on the selection
+	await bar.getByRole('button', { name: 'Delete' }).click();
+	await expect.poll(() => stateInUrl(page).elements).toStrictEqual([]);
+	await expect(bar).toBeHidden();
+	await expect(title).toHaveText('Map');
 });

@@ -100,7 +100,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1']);
 	await page.keyboard.press('Shift+ArrowDown');
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1', 'Polygon 1: Park']);
-	await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 
 	// Delete removes the selected elements
 	await page.keyboard.press('Delete');
@@ -111,7 +111,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await page.keyboard.press('Home');
 	await page.keyboard.press('Enter');
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Marker 1: Berlin']);
-	await expect(page.getByRole('button', { name: 'Style', exact: true })).toBeEnabled();
+	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Marker 1');
 });
 
 test.describe('dark mode and reduced motion', () => {

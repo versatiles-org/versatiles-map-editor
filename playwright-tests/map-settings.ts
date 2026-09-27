@@ -57,15 +57,18 @@ test('styling the background map', async ({ page }) => {
 	const before = await mapContent();
 	// a polygon (fill and outline) and a marker
 	expect(before).toStrictEqual({ drawn: [1, 1, 1], patterns: 1, selectionNodes: 6, satellite: false });
+	// the settings of the background are shown when nothing is selected
+	await page.keyboard.press('Escape');
+	const deselected = { ...before, selectionNodes: 0 };
+	await expect.poll(mapContent).toStrictEqual(deselected);
 
-	await page.getByRole('button', { name: 'Background map' }).click();
 	await page.getByRole('combobox', { name: 'Theme' }).selectOption('Gray');
 	await expect
 		.poll(background)
 		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });
-	// the elements, their patterns and the selection survive the new style
+	// the elements and their patterns survive the new style
 	await waitForMapIsIdle(page);
-	await expect.poll(mapContent).toStrictEqual(before);
+	await expect.poll(mapContent).toStrictEqual(deselected);
 
 	await page.getByRole('combobox', { name: 'Language' }).selectOption('German');
 	await page.getByRole('combobox', { name: 'Labels' }).selectOption('Fewer');
@@ -76,7 +79,7 @@ test('styling the background map', async ({ page }) => {
 		.toStrictEqual({ builder: 'satellite', options: { osmOverlay: { text: { language: 'de', spacing: 2 } } } });
 	await expect(page.getByRole('combobox', { name: 'Theme' })).toBeHidden();
 	await waitForMapIsIdle(page);
-	await expect.poll(mapContent).toStrictEqual({ ...before, satellite: true });
+	await expect.poll(mapContent).toStrictEqual({ ...deselected, satellite: true });
 
 	// undoable: back to the gray map with fewer German labels
 	const undone = { builder: 'osm', options: { theme: 'gray', text: { language: 'de', spacing: 2 } } };
@@ -123,9 +126,9 @@ test('editing the legend', async ({ page }) => {
 	};
 	const overlay = page.getByRole('list', { name: 'Legend' });
 
-	// a new entry starts with a color of the map
-	await page.getByRole('button', { name: 'Legend', exact: true }).click();
-	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	// a new legend starts with a color of the map, and is selected to edit it
+	await page.getByRole('button', { name: 'Add a legend' }).click();
+	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
 	await page.getByRole('textbox', { name: 'Text' }).fill('Park');
 	await page.getByRole('textbox', { name: 'Text' }).press('Enter');
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park']);
@@ -164,11 +167,19 @@ test('editing the legend', async ({ page }) => {
 	await page.reload();
 	await waitForMapIsReady(page);
 
+	// a click on the legend selects it, and Escape goes back to the map
+	const inspectorTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	await overlay.click();
+	await expect(inspectorTitle).toHaveText('Legend');
+	await page.keyboard.press('Escape');
+	await expect(inspectorTitle).toHaveText('Map');
+
 	// without entries, there is no legend
-	await page.getByRole('button', { name: 'Legend', exact: true }).click();
+	await page.getByRole('button', { name: 'Edit legend' }).click();
 	await page.getByRole('button', { name: 'Remove entry 2' }).click();
 	await page.getByRole('button', { name: 'Remove entry 1' }).click();
 	await expect(overlay).toBeHidden();
+	await expect(inspectorTitle).toHaveText('Map');
 	await expect.poll(legendInUrl).toBeUndefined();
 	expect(pageErrors).toStrictEqual([]);
 });
@@ -235,8 +246,9 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect(page.getByRole('group', { name: 'Corporate' }).getByRole('button')).toHaveCount(3);
 	await page.keyboard.press('Escape');
 
-	// the configured font comes first, with its name from the tile server
-	await page.getByRole('button', { name: 'Background map' }).click();
+	// the configured font comes first, with its name from the tile server. The map settings are
+	// shown after a click on the empty map.
+	await page.mouse.click(150, 600);
 	const font = page.getByRole('combobox', { name: 'Font' });
 	await expect(font.getByRole('option').first()).toHaveText('Lato Bold');
 
@@ -247,8 +259,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect.poll(() => stateInUrl(page).meta?.background?.options).toMatchObject({ text: { font: 'lato_bold' } });
 
 	// the legend has a generic font of its own
-	await page.getByRole('button', { name: 'Legend', exact: true }).click();
-	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	await page.getByRole('button', { name: 'Add a legend' }).click();
 	await page.getByRole('combobox', { name: 'Font' }).last().selectOption('Serif');
 	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
 	await expect.poll(() => stateInUrl(page).meta?.legend?.font).toBe('serif');

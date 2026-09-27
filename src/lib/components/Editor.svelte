@@ -5,7 +5,7 @@
 	import EditorStroke from './EditorStroke.svelte';
 	import EditorSymbol from './EditorSymbol.svelte';
 	import InputRow from './InputRow.svelte';
-	import SidebarPanel from './SidebarPanel.svelte';
+	import InspectorSection from './InspectorSection.svelte';
 	import { group } from '$lib/utils/group.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */
@@ -30,55 +30,57 @@
 </script>
 
 {#key elements}
-	<SidebarPanel
-		title={elements.length > 1 ? `Style of ${elements.length} elements` : 'Style'}
-		disabled={elements.length === 0}
-	>
-		<div class="style-editor">
-			{#if symbolLayers.length > 0}
-				<EditorSymbol layers={symbolLayers} manager={elements[0].manager} />
-			{/if}
-			{#if fillLayers.length > 0 && strokeVisible}
-				<EditorFill layers={fillLayers} manager={elements[0].manager} />
-				<hr />
-
-				<InputRow id="{uid}-showStroke" label="Draw Outline" mixed={strokeVisible.mixed}>
-					<input id="{uid}-showStroke" type="checkbox" bind:checked={strokeVisible.value} onchange={log} />
-				</InputRow>
-
-				{#if strokeVisible.value}
-					<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
-				{/if}
-			{:else if strokeLayers.length > 0}
+	{#if symbolLayers.length > 0}
+		<InspectorSection title="Symbol">
+			<EditorSymbol layers={symbolLayers} manager={elements[0].manager} />
+		</InspectorSection>
+	{/if}
+	{#if fillLayers.length > 0 && strokeVisible}
+		<InspectorSection title="Fill">
+			<EditorFill layers={fillLayers} manager={elements[0].manager} />
+		</InspectorSection>
+		<InspectorSection title="Outline">
+			{#snippet heading()}
+				<label class="switch" title="Draw an outline">
+					{#if strokeVisible.mixed}<span class="mixed">(mixed)</span>{/if}
+					<input type="checkbox" aria-label="Draw outline" bind:checked={strokeVisible.value} onchange={log} />
+				</label>
+			{/snippet}
+			{#if strokeVisible.value}
 				<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
 			{/if}
-			{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
-				<p class="label">These elements have no style properties in common.</p>
-			{/if}
-			{#if single}
-				<hr />
-				<label class="label" for="{uid}-popup">Popup</label>
-				<textarea
-					id="{uid}-popup"
-					class="popup"
-					rows="3"
-					bind:value={single.popup}
-					onchange={log}
-					placeholder="Shown on click: **bold**, [link](https://…)"></textarea>
-			{/if}
-			{#if single?.getStyleLayers().stroke}
-				<hr />
-				{#each single.measurements as { label, value }, i (label)}
-					<InputRow id="{uid}-measurement-{i}" {label}>
-						<output id="{uid}-measurement-{i}">{value}</output>
-					</InputRow>
-				{/each}
-				<p class="label" style="margin: 0.5em 0 1em;">
-					Drag points to move.<br />Drag a midpoint to add.<br />Select a point and press Delete or × to remove it.
-				</p>
-			{/if}
-		</div>
-	</SidebarPanel>
+		</InspectorSection>
+	{:else if strokeLayers.length > 0}
+		<InspectorSection title="Line">
+			<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
+		</InspectorSection>
+	{/if}
+	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
+		<p class="label">These elements have no style properties in common.</p>
+	{/if}
+	{#if single}
+		<InspectorSection title="Popup">
+			<textarea
+				class="popup"
+				rows="3"
+				aria-label="Popup"
+				bind:value={single.popup}
+				onchange={log}
+				placeholder="Shown on click: **bold**, [link](https://…)"></textarea>
+		</InspectorSection>
+	{/if}
+	{#if single?.getStyleLayers().stroke}
+		<InspectorSection title="Info">
+			{#each single.measurements as { label, value }, i (label)}
+				<InputRow id="{uid}-measurement-{i}" {label}>
+					<output id="{uid}-measurement-{i}">{value}</output>
+				</InputRow>
+			{/each}
+			<p class="label">
+				Drag points to move.<br />Drag a midpoint to add.<br />Select a point and press Delete or × to remove it.
+			</p>
+		</InspectorSection>
+	{/if}
 {/key}
 
 <style>
@@ -86,8 +88,20 @@
 		display: block;
 		width: 100%;
 		box-sizing: border-box;
-		margin: 0.3em 0 var(--gap);
+		margin: var(--gap) 0 0;
 		resize: vertical;
 		font: inherit;
+	}
+
+	.switch {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.mixed {
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-style: italic;
 	}
 </style>

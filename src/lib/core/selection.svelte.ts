@@ -29,6 +29,7 @@ export class SelectionHandler {
 	// replaced as a whole, so they need no deep reactivity
 	#selectedElements: AbstractElement[] = $state.raw([]);
 	#selectedNode: SelectedNode | undefined = $state.raw(undefined);
+	#legendSelected = $state(false);
 
 	/** All selected elements, in the order of selection. */
 	public get selectedElements(): AbstractElement[] {
@@ -43,6 +44,17 @@ export class SelectionHandler {
 	/** The selected vertex of the selected line or polygon. */
 	public get selectedNode(): SelectedNode | undefined {
 		return this.#selectedNode;
+	}
+
+	/** Whether the legend is selected, to edit it. The legend and elements are not selected together. */
+	public get legendSelected(): boolean {
+		return this.#legendSelected;
+	}
+
+	/** Select the legend instead of the elements, or deselect it. */
+	public selectLegend(selected = true) {
+		if (selected) this.selectElements([]);
+		this.#legendSelected = selected;
 	}
 
 	private selectedNodeIndex: number | undefined;
@@ -212,6 +224,7 @@ export class SelectionHandler {
 	}
 
 	public selectElements(selection: AbstractElement[]) {
+		this.#legendSelected = false;
 		const current = this.#selectedElements;
 		if (selection.length === current.length && selection.every((e, i) => e === current[i])) return;
 		// only the elements whose selection changes, so selecting many elements takes linear time

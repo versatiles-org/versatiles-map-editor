@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock; setStyle: Mock }[] }));
 
@@ -41,6 +41,20 @@ const { default: MapEditor } = await import('./MapEditor.svelte');
 const { GeometryManagerInteractive } = await import('./core/geometry_manager_interactive.js');
 
 describe('MapEditor', () => {
+	// The code of the editor, which MapEditor loads after the map is created. Its first import
+	// compiles all its components, which can take seconds with a cold cache and other test files
+	// running in parallel, so it is loaded once before the tests.
+	beforeAll(async () => {
+		await Promise.all([
+			import('./components/Sidebar.svelte'),
+			import('./components/TopBar.svelte'),
+			import('./components/ToolRail.svelte'),
+			import('./components/DrawBar.svelte'),
+			import('./components/SelectionBar.svelte'),
+			import('./components/NodeDeleteButton.svelte')
+		]);
+	}, 60_000);
+
 	afterEach(() => {
 		maps.length = 0;
 		document.body.innerHTML = '';

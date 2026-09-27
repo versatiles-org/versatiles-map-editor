@@ -202,7 +202,7 @@ test.describe('importing a table', () => {
 				[[13.41, 52.51], 'Shop', undefined]
 			]);
 		// the imported markers are selected, and one undo step removes them
-		await expect(page.getByRole('button', { name: 'Style of 2 elements' })).toBeVisible();
+		await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 		await page.getByRole('button', { name: 'Undo' }).click();
 		await expect.poll(() => markers(page).length).toBe(0);
 	});

@@ -33,6 +33,15 @@ export function canPasteStyle(manager: GeometryManagerInteractive): boolean {
 	return manager.selection.selectedElements.length > 0 && manager.styleClipboard.style !== undefined;
 }
 
+/** Add an entry to the legend, or start a legend. It starts with a color of the map that the legend does not show yet. */
+export function addLegendEntry(manager: GeometryManagerInteractive): void {
+	const entries = manager.legend?.entries ?? [];
+	const used = new Set(entries.map((entry) => entry.color.toLowerCase()));
+	const color = manager.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
+	manager.legend = { ...manager.legend, entries: [...entries, { color, label: '' }] };
+	manager.state.log();
+}
+
 export function pasteStyle(manager: GeometryManagerInteractive): void {
 	const style = manager.styleClipboard.style;
 	if (!canPasteStyle(manager) || !style) return;

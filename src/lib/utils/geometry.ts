@@ -89,3 +89,21 @@ export function polygonArea(path: GeoPath): number {
 export function circleArea(radius: number): number {
 	return 2 * Math.PI * EARTH_RADIUS * EARTH_RADIUS * (1 - Math.cos(radius / EARTH_RADIUS));
 }
+
+/** All positions of a geometry, e.g. of all rings of a polygon. */
+export function coordinatesOf(geometry: GeoJSON.Geometry): GeoJSON.Position[] {
+	switch (geometry.type) {
+		case 'Point':
+			return [geometry.coordinates];
+		case 'LineString':
+		case 'MultiPoint':
+			return geometry.coordinates;
+		case 'Polygon':
+		case 'MultiLineString':
+			return geometry.coordinates.flat();
+		case 'MultiPolygon':
+			return geometry.coordinates.flat(2);
+		case 'GeometryCollection':
+			return geometry.geometries.flatMap(coordinatesOf);
+	}
+}

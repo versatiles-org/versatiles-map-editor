@@ -161,15 +161,19 @@ test.describe('the share dialog on the smallest editor screen', () => {
 });
 
 test('the sidebar can be hidden, without moving the map content', async ({ page }) => {
-	await page.goto('/');
+	await page.goto(
+		'/#' +
+			encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point: [13.4, 52.5] }] })
+	);
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Background map' }).click();
+	const elements = page.getByRole('button', { name: 'Elements' });
+	await elements.click();
 	const hide = page.getByRole('button', { name: 'Hide sidebar' });
 	await expect(hide).toHaveAttribute('aria-expanded', 'true');
 	const berlin = await project(page, [13.4, 52.5]);
 
 	await hide.click();
-	await expect(page.getByRole('button', { name: 'Background map' })).toBeHidden();
+	await expect(elements).toBeHidden();
 	const show = page.getByRole('button', { name: 'Show sidebar' });
 	await expect(show).toHaveAttribute('aria-expanded', 'false');
 	// the tab is at the right edge of the map now
@@ -180,7 +184,7 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 
 	// the sidebar comes back as it was, e.g. with its open panels
 	await show.click();
-	await expect(page.getByRole('button', { name: 'Background map' })).toHaveAttribute('aria-expanded', 'true');
+	await expect(elements).toHaveAttribute('aria-expanded', 'true');
 	const back = await project(page, [13.4, 52.5]);
 	expect(back[0]).toBeCloseTo(berlin[0], 0);
 });

@@ -32,11 +32,21 @@ const railAria = `
 `;
 const sidebarAria = `
 - combobox "Search address or place"
-- button "Background map" [expanded=false]
-- button "Legend" [expanded=false]
+- heading "Map" [level=2]
+- region "Background map":
+  - heading "Background map" [level=3]
+  - combobox "Base map"
+  - combobox "Theme"
+  - combobox "Font"
+  - combobox "Language"
+  - combobox "Labels"
+- region "Legend":
+  - heading "Legend" [level=3]
+  - button /^Add a legend/
+- region "Shared map":
+  - heading "Shared map" [level=3]
+  - checkbox "Address search for visitors"
 - button "Elements"
-- button "Style" [disabled]
-- button "Actions" [disabled]
 `;
 
 /**

@@ -4,6 +4,7 @@
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import { addLegendEntry } from '../core/commands.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
@@ -35,14 +36,6 @@
 
 	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
 		update({ entries: legend.entries.map((entry, i) => (i === index ? { ...entry, ...change } : entry)) });
-	}
-
-	function addEntry() {
-		// a color of the map that the legend does not show yet, as a start
-		const used = new Set(legend.entries.map((entry) => entry.color.toLowerCase()));
-		const color = manager.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
-		update({ entries: [...legend.entries, { color, label: '' }] });
-		log();
 	}
 
 	function removeEntry(index: number) {
@@ -137,7 +130,7 @@
 {/if}
 
 <div class="grid1">
-	<button class="btn" onclick={addEntry}>Add legend entry</button>
+	<button class="btn" onclick={() => addLegendEntry(manager)}>Add legend entry</button>
 </div>
 
 <style>

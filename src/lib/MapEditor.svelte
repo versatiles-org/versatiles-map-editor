@@ -84,6 +84,7 @@
 			{ default: TopBar },
 			{ default: ToolRail },
 			{ default: DrawBar },
+			{ default: SelectionBar },
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
 			import('./core/geometry_manager_interactive.js'),
@@ -91,11 +92,17 @@
 			import('./components/TopBar.svelte'),
 			import('./components/ToolRail.svelte'),
 			import('./components/DrawBar.svelte'),
+			import('./components/SelectionBar.svelte'),
 			import('./components/NodeDeleteButton.svelte')
 		]);
-		return { GeometryManagerInteractive, Sidebar, TopBar, ToolRail, DrawBar, NodeDeleteButton };
+		return { GeometryManagerInteractive, Sidebar, TopBar, ToolRail, DrawBar, SelectionBar, NodeDeleteButton };
 	}
 	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
+
+	/** A click on the legend selects it in the editor, to edit it. */
+	function selectLegend() {
+		if (geometryManager?.isInteractive()) geometryManager.selection.selectLegend();
+	}
 
 	/** Show the country of the user (from the time zone), when there is no map in the URL. */
 	async function showCountry(map: MaplibreMapType) {
@@ -264,6 +271,8 @@
 			left={railWidth}
 			right={sidebarWidth}
 			top={topOverlaysHeight ? topOverlaysHeight + 10 : topbarHeight}
+			selected={geometryManager.selection?.legendSelected ?? false}
+			onselect={showSidebar ? selectLegend : undefined}
 		/>
 	{/if}
 	{#if geometryManager && (showSearch || screenTooSmall)}
@@ -294,6 +303,7 @@
 	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
 		<editor.NodeDeleteButton {geometryManager} />
 		<editor.DrawBar manager={geometryManager} left={RAIL_WIDTH} right={sidebarWidth} />
+		<editor.SelectionBar manager={geometryManager} top={TOPBAR_HEIGHT} left={RAIL_WIDTH} right={sidebarWidth} />
 		<!-- hidden, not removed, so the sidebar keeps e.g. its open panels -->
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />

@@ -2,6 +2,7 @@
 	import { tick } from 'svelte';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
+	import { elementNames } from '$lib/utils/element_names.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen
@@ -13,16 +14,8 @@
 	const selected = $derived(manager.selection.selectedElements);
 	const selectedSet = $derived(new Set(selected));
 
-	const TYPE_NAMES: Record<string, string> = { marker: 'Marker', line: 'Line', polygon: 'Polygon', circle: 'Circle' };
 	// the type and the number among the elements of this type, e.g. "Marker 2"
-	const names = $derived.by(() => {
-		const counts: Record<string, number> = {};
-		return manager.elements.map((element) => {
-			const type = element.getState().type;
-			counts[type] = (counts[type] ?? 0) + 1;
-			return `${TYPE_NAMES[type] ?? type} ${counts[type]}`;
-		});
-	});
+	const names = $derived(elementNames(manager.elements.map((element) => element.getState().type)));
 
 	// the option with the keyboard focus
 	let active = $state(0);

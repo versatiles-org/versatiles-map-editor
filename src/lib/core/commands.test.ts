@@ -1,7 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
-import { canCopyStyle, canPasteStyle, copyStyle, deleteSelection, duplicateSelection, pasteStyle } from './commands.js';
+import {
+	addLegendEntry,
+	canCopyStyle,
+	canPasteStyle,
+	copyStyle,
+	deleteSelection,
+	duplicateSelection,
+	pasteStyle
+} from './commands.js';
 
 describe('commands', () => {
 	let manager: GeometryManagerInteractive;
@@ -69,5 +77,22 @@ describe('commands', () => {
 		expect(canPasteStyle(manager)).toBe(true);
 		pasteStyle(manager);
 		expect(b.getStyleLayers().symbol!.color).toBe('#123456');
+	});
+});
+
+describe('addLegendEntry', () => {
+	it('starts a legend, and adds entries with colors of the map that it does not show yet', () => {
+		const manager = new GeometryManagerInteractive(new MockMap() as unknown as MaplibreMap);
+		const a = manager.addNewElement('marker');
+		a.getStyleLayers().symbol!.color = '#111111';
+		const b = manager.addNewElement('marker');
+		b.getStyleLayers().symbol!.color = '#222222';
+
+		addLegendEntry(manager);
+		addLegendEntry(manager);
+		expect(manager.legend?.entries.map((entry) => entry.color).sort()).toStrictEqual(['#111111', '#222222']);
+
+		manager.state.undo();
+		expect(manager.legend?.entries).toHaveLength(1);
 	});
 });

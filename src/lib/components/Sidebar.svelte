@@ -1,10 +1,8 @@
 <script lang="ts">
 	import '../style/index.scss';
-	import Editor from './Editor.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
 	import SearchPlace from './SearchPlace.svelte';
-	import PanelBackground from './PanelBackground.svelte';
-	import PanelLegend from './PanelLegend.svelte';
+	import Inspector from './Inspector.svelte';
 	import PanelElements from './PanelElements.svelte';
 	import * as commands from '../core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
@@ -18,6 +16,7 @@
 
 	function onKeydown(e: KeyboardEvent) {
 		if (isOwnKeyTarget(e)) return;
+		const target = e.target as HTMLElement | null;
 
 		// Undo: Cmd/Ctrl+Z. Redo: Shift+Cmd/Ctrl+Z, or Ctrl+Y as on Windows.
 		const key = e.key.toLowerCase();
@@ -42,6 +41,14 @@
 			else commands.pasteStyle(geometryManager);
 		}
 
+		// Escape deselects the elements or the legend, e.g. to see the properties of the map. Not in
+		// the sidebar, where it e.g. closes the color picker.
+		if (e.key === 'Escape' && !geometryManager.drawing.active && !target?.closest('.sidebar')) {
+			if (selection.selectedNode) selection.selectNode();
+			else selection.selectElement();
+			return;
+		}
+
 		if ((e.key === 'Delete' || e.key === 'Backspace') && !e.metaKey && !e.ctrlKey && !e.altKey) {
 			if (selectedElements.length === 0) return;
 			e.preventDefault();
@@ -64,45 +71,12 @@
 				geometryManager.state.log();
 			}}
 		/>
+
 		<hr class="thick" />
-		<SidebarPanel title="Background map" open={false}>
-			<PanelBackground manager={geometryManager} />
-		</SidebarPanel>
-		<hr class="thick" />
-		<SidebarPanel title="Legend" open={false}>
-			<PanelLegend manager={geometryManager} />
-		</SidebarPanel>
+		<Inspector manager={geometryManager} />
 		<hr class="thick" />
 		<SidebarPanel title="Elements" open={false} disabled={geometryManager.elements.length === 0}>
 			<PanelElements manager={geometryManager} />
-		</SidebarPanel>
-		<hr class="thick" />
-		<Editor elements={selectedElements} />
-		<hr class="thick" />
-		<SidebarPanel title="Actions" disabled={selectedElements.length === 0}>
-			<div class="grid2">
-				<button class="btn" onclick={() => commands.deleteSelection(geometryManager)} title="Delete (Delete/Backspace)"
-					>Delete</button
-				>
-				<button
-					class="btn"
-					onclick={() => commands.duplicateSelection(geometryManager)}
-					title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)">Duplicate</button
-				>
-				<button
-					class="btn"
-					onclick={() => commands.copyStyle(geometryManager)}
-					disabled={!commands.canCopyStyle(geometryManager)}
-					title="Copy the style of the element (Cmd/Ctrl+Alt+C)">Copy style</button
-				>
-				<button
-					class="btn"
-					onclick={() => commands.pasteStyle(geometryManager)}
-					disabled={!commands.canPasteStyle(geometryManager)}
-					title="Paste the style onto the selected elements (Cmd/Ctrl+Alt+V)">Paste style</button
-				>
-			</div>
-			<p class="label">Shift-click to select several elements.</p>
 		</SidebarPanel>
 	</div>
 </div>
