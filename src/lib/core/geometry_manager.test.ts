@@ -3,6 +3,7 @@ import { GeometryManager, keepElements } from './geometry_manager.svelte.js';
 import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
 import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
+import { MarkerElement } from './element/marker.js';
 import { inlineSources } from '@versatiles/style';
 import type { StyleSpecification } from 'maplibre-gl';
 import type * as maplibregl from 'maplibre-gl';
@@ -108,10 +109,13 @@ describe('GeometryManager', () => {
 		expect(geometryManager.elements).toBeDefined();
 	});
 
-	it('should append an element', () => {
-		const element = { id: 'test-element' } as unknown as AbstractElement;
+	it('should append an element', async () => {
+		// a real element: the renderer draws it later, in a microtask
+		const element = new MarkerElement(geometryManager, [0, 0]);
 		geometryManager['appendElement'](element);
 		expect(geometryManager.elements).toContain(element);
+		// drawn within the test, so an error would fail this test
+		await Promise.resolve();
 	});
 
 	it('should remove an element', () => {
