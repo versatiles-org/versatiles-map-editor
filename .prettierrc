@@ -11,6 +11,12 @@
 			"options": {
 				"parser": "svelte"
 			}
+		},
+		{
+			"files": "*.mapjson",
+			"options": {
+				"parser": "json"
+			}
 		}
 	]
 }

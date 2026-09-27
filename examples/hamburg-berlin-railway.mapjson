@@ -1,0 +1,137 @@
+{
+	"map": {
+		"center": [11.7, 53.07],
+		"radius": 105000
+	},
+	"meta": {
+		"background": {
+			"builder": "osm",
+			"options": {
+				"theme": "muted",
+				"text": {
+					"language": "local"
+				}
+			}
+		},
+		"legend": {
+			"position": "bottom-right",
+			"entries": [
+				{
+					"color": "#d55e00",
+					"label": "Closed for renovation, Aug 2025 – Apr 2026"
+				},
+				{
+					"color": "#0072b2",
+					"label": "Detour of long-distance trains"
+				}
+			]
+		}
+	},
+	"elements": [
+		{
+			"type": "line",
+			"points": [
+				[10.0069, 53.5528],
+				[10.2066, 53.4893],
+				[10.6231, 53.4799],
+				[11.164, 53.43],
+				[11.4964, 53.3301],
+				[11.7514, 52.9981],
+				[12.4497, 52.8523],
+				[12.5829, 52.7392],
+				[12.8876, 52.6089],
+				[13.1974, 52.5344],
+				[13.3695, 52.5251]
+			],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 1,
+				"width": 4
+			},
+			"popup": {
+				"text": "**Hamburg–Berlin railway**\nClosed for a general renovation by Deutsche Bahn from August 2025 to April 2026."
+			}
+		},
+		{
+			"type": "line",
+			"points": [
+				[10.0069, 53.5528],
+				[9.9912, 53.4564],
+				[10.4192, 53.2497],
+				[10.562, 52.9674],
+				[11.1583, 52.8523],
+				[11.8554, 52.5946],
+				[12.3403, 52.61],
+				[13.1974, 52.5344],
+				[13.3695, 52.5251]
+			],
+			"style": {
+				"color": "#0072b2",
+				"width": 3
+			},
+			"popup": {
+				"text": "**Detour**\nLong-distance trains ran via Uelzen and Stendal, which takes longer."
+			}
+		},
+		{
+			"type": "marker",
+			"point": [10.0069, 53.5528],
+			"style": {
+				"color": "#000000",
+				"size": 1.3,
+				"pattern": 76,
+				"label": "Hamburg Hbf"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.3695, 52.5251],
+			"style": {
+				"color": "#000000",
+				"size": 1.3,
+				"pattern": 76,
+				"label": "Berlin Hbf"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [11.4964, 53.3301],
+			"style": {
+				"color": "#555555",
+				"size": 0.9,
+				"pattern": 74,
+				"label": "Ludwigslust"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [11.7514, 52.9981],
+			"style": {
+				"color": "#555555",
+				"size": 0.9,
+				"pattern": 74,
+				"label": "Wittenberge"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [10.562, 52.9674],
+			"style": {
+				"color": "#555555",
+				"size": 0.9,
+				"pattern": 74,
+				"label": "Uelzen"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [11.8554, 52.5946],
+			"style": {
+				"color": "#555555",
+				"size": 0.9,
+				"pattern": 74,
+				"label": "Stendal"
+			}
+		}
+	]
+}

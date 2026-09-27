@@ -1,0 +1,332 @@
+{
+	"map": {
+		"center": [2.3, 48.865],
+		"radius": 22000
+	},
+	"meta": {
+		"background": {
+			"builder": "osm",
+			"options": {
+				"theme": "gray",
+				"text": {
+					"language": "local"
+				}
+			}
+		},
+		"legend": {
+			"position": "top-right",
+			"entries": [
+				{
+					"color": "#0072b2",
+					"symbol": 88,
+					"label": "Stadiums and arenas"
+				},
+				{
+					"color": "#d55e00",
+					"symbol": 61,
+					"label": "Temporary venues at landmarks"
+				},
+				{
+					"color": "#009e73",
+					"symbol": 66,
+					"label": "Venues in nature"
+				},
+				{
+					"color": "#e69f00",
+					"symbol": 38,
+					"label": "Olympic Village"
+				}
+			]
+		}
+	},
+	"elements": [
+		{
+			"type": "marker",
+			"point": [2.331, 48.9115],
+			"style": {
+				"color": "#e69f00",
+				"size": 1.4,
+				"label": "Olympic Village",
+				"align": 2
+			},
+			"popup": {
+				"text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3601, 48.9244],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Stade de France",
+				"align": 3
+			},
+			"popup": {
+				"text": "**Stade de France**\nAthletics, rugby sevens"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3542, 48.9204],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Aquatics Centre",
+				"align": 1
+			},
+			"popup": {
+				"text": "**Aquatics Centre**\nArtistic swimming, diving, water polo"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.229, 48.8955],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "La Défense Arena"
+			},
+			"popup": {
+				"text": "**La Défense Arena**\nSwimming, water polo"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3786, 48.8387],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Bercy Arena"
+			},
+			"popup": {
+				"text": "**Bercy Arena**\nArtistic gymnastics, trampoline, basketball"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3599, 48.8995],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Porte de La Chapelle Arena",
+				"align": 1
+			},
+			"popup": {
+				"text": "**Porte de La Chapelle Arena**\nBadminton, rhythmic gymnastics"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2873, 48.8319],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "South Paris Arena",
+				"align": 4
+			},
+			"popup": {
+				"text": "**South Paris Arena**\nVolleyball, handball, table tennis, weightlifting"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.5155, 48.9727],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "North Paris Arena"
+			},
+			"popup": {
+				"text": "**North Paris Arena**\nBoxing, modern pentathlon"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.253, 48.8414],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Parc des Princes",
+				"align": 2
+			},
+			"popup": {
+				"text": "**Parc des Princes**\nFootball"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2481, 48.847],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Roland-Garros",
+				"align": 3
+			},
+			"popup": {
+				"text": "**Roland-Garros**\nTennis, boxing"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2476, 48.929],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Yves-du-Manoir Stadium"
+			},
+			"popup": {
+				"text": "**Yves-du-Manoir Stadium**\nHockey"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.4271, 48.9361],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Le Bourget Climbing Venue"
+			},
+			"popup": {
+				"text": "**Le Bourget Climbing Venue**\nSport climbing"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.0374, 48.7883],
+			"style": {
+				"color": "#0072b2",
+				"pattern": 88,
+				"label": "Velodrome"
+			},
+			"popup": {
+				"text": "**Velodrome**\nTrack cycling, BMX racing, in Saint-Quentin-en-Yvelines"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2976, 48.8552],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Eiffel Tower Stadium**\nBeach volleyball"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3033, 48.8527],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Champ-de-Mars Arena**\nJudo, wrestling"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3126, 48.8661],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Grand Palais**\nFencing, taekwondo"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3137, 48.8639],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Pont Alexandre III**\nTriathlon, marathon swimming"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3125, 48.856],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Invalides**\nArchery"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3212, 48.8656],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**La Concorde**\nBMX freestyle, breaking, skateboarding, 3x3 basketball"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2885, 48.8616],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61
+			},
+			"popup": {
+				"text": "**Trocadéro**\nRoad cycling, race walking"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.1204, 48.8049],
+			"style": {
+				"color": "#d55e00",
+				"pattern": 61,
+				"label": "Château de Versailles"
+			},
+			"popup": {
+				"text": "**Château de Versailles**\nEquestrian, modern pentathlon"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.6393, 48.8659],
+			"style": {
+				"color": "#009e73",
+				"pattern": 66,
+				"label": "Vaires-sur-Marne Nautical Stadium"
+			},
+			"popup": {
+				"text": "**Vaires-sur-Marne Nautical Stadium**\nRowing, canoe"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [1.9588, 48.7822],
+			"style": {
+				"color": "#009e73",
+				"pattern": 66,
+				"label": "Élancourt Hill"
+			},
+			"popup": {
+				"text": "**Élancourt Hill**\nMountain bike"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.0745, 48.7543],
+			"style": {
+				"color": "#009e73",
+				"pattern": 45,
+				"label": "Le Golf National"
+			},
+			"popup": {
+				"text": "**Le Golf National**\nGolf"
+			}
+		}
+	]
+}
