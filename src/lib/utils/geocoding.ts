@@ -71,8 +71,10 @@ function toResult(feature: GeoJSON.Feature): GeocodingResult | undefined {
 
 /** A label from the address parts, without repetitions (e.g. a city named like its state). */
 export function formatLabel(p: Record<string, unknown>): string {
+	// texts, and numbers like a house number or a postcode given as a number
 	const text = (...values: unknown[]) =>
 		values
+			.map((v) => (typeof v === 'number' && Number.isFinite(v) ? String(v) : v))
 			.filter((v) => typeof v === 'string' && v)
 			.join(' ')
 			.trim();

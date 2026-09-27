@@ -97,7 +97,14 @@ describe('formatLabel', () => {
 
 	it('skips repetitions and missing parts', () => {
 		expect(formatLabel({ name: 'Berlin', state: 'Berlin', country: 'Deutschland' })).toBe('Berlin, Deutschland');
-		expect(formatLabel({ street: 'Hauptstraße', district: 'Mitte', housenumber: 3 })).toBe('Hauptstraße, Mitte');
+		expect(formatLabel({ street: 'Hauptstraße', district: 'Mitte', housenumber: null })).toBe('Hauptstraße, Mitte');
+	});
+
+	it('keeps numbers, e.g. a house number or a postcode given as a number', () => {
+		expect(formatLabel({ street: 'Hauptstraße', housenumber: 3, postcode: 10115, city: 'Berlin' })).toBe(
+			'Hauptstraße 3, 10115 Berlin'
+		);
+		expect(formatLabel({ street: 'Hauptstraße', housenumber: NaN })).toBe('Hauptstraße');
 		expect(formatLabel({})).toBe('');
 	});
 });
