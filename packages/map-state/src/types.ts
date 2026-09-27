@@ -70,6 +70,11 @@ export interface StateMetadata {
 	colorScheme?: string;
 	/** Show an address search in the read-only viewer, e.g. in an embedded map. */
 	search?: boolean;
+	/**
+	 * The glyph font of the labels of all markers, e.g. "noto_sans_bold". Without it, they have the
+	 * font of the labels of the background map.
+	 */
+	labelFont?: string;
 }
 
 export const LEGEND_POSITIONS = [

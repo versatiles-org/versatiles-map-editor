@@ -9,9 +9,8 @@
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/utils/background.js';
-	import { config } from '$lib/utils/config.svelte.js';
-	import { closestFace, facesOf, familiesOf, unknownFace } from '$lib/utils/fonts.js';
 	import InputRow from './InputRow.svelte';
+	import FontSelect from './FontSelect.svelte';
 	import ChoiceGroup from './ChoiceGroup.svelte';
 	import Slider from './Slider.svelte';
 
@@ -20,12 +19,6 @@
 
 	const uid = $props.id();
 	const settings = $derived(getSettings(manager.background));
-	// the font faces of this editor instance
-	const fonts = $derived(config.current.fonts);
-	// the face of the map, also if it is not offered, e.g. from another tile server
-	const font = $derived(fonts.find((f) => f.id === settings.font) ?? unknownFace(settings.font));
-	const families = $derived(familiesOf(fonts.some((f) => f.id === font.id) ? fonts : [font, ...fonts]));
-	const faces = $derived(fonts.some((f) => f.id === font.id) ? facesOf(fonts, font.family) : [font]);
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>
@@ -129,29 +122,7 @@
 
 <!-- the imagery alone has no labels -->
 {#if settings.overlay}
-	<InputRow id="{uid}-font" label="Font">
-		<!-- another family keeps the face, e.g. bold, as far as the family has it -->
-		<select
-			id="{uid}-font"
-			value={font.family}
-			onchange={(e) => {
-				const face = closestFace(fonts, e.currentTarget.value, font);
-				if (face) change('font', face.id);
-			}}
-		>
-			{#each families as family (family)}
-				<option value={family}>{family}</option>
-			{/each}
-		</select>
-	</InputRow>
-
-	<InputRow id="{uid}-face" label="Style">
-		<select id="{uid}-face" value={font.id} onchange={(e) => change('font', e.currentTarget.value)}>
-			{#each faces as { id, face } (id)}
-				<option value={id}>{face}</option>
-			{/each}
-		</select>
-	</InputRow>
+	<FontSelect id={uid} value={settings.font} onchange={(font) => font && change('font', font)} />
 
 	<InputRow id="{uid}-language" label="Language">
 		<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>

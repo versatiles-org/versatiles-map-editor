@@ -120,6 +120,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		const colorScheme = this.colors.scheme;
 		if (colorScheme) meta.colorScheme = colorScheme;
 		if (this.search) meta.search = true;
+		if (this.labelFont) meta.labelFont = this.labelFont;
 		return {
 			map: {
 				center: [center.lng, center.lat],
@@ -145,6 +146,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		if (meta.legend) this.legend = meta.legend;
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.search) this.search = true;
+		if (meta.labelFont) this.labelFont = meta.labelFont;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

@@ -5,6 +5,8 @@
 	import Icon, { type IconName } from './Icon.svelte';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
+	import FontSelect from './FontSelect.svelte';
+	import { getSettings } from '$lib/utils/background.js';
 	import PanelLegend from './PanelLegend.svelte';
 	import { countTypes, elementNames, elementText } from '$lib/utils/element_names.js';
 
@@ -14,6 +16,7 @@
 	 */
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 
+	const uid = $props.id();
 	const selection = $derived(manager.selection);
 	const elements = $derived(selection.selectedElements);
 	const legend = $derived(manager.legend);
@@ -32,6 +35,12 @@
 		const name = elementNames(manager.elements.map((e) => e.getState().type))[index];
 		return { icon: types[0] as IconName, title: name, subtitle: elementText(element) };
 	});
+
+	/** One font for the labels of all markers, or the one of the background map. */
+	function setLabelFont(font: string | undefined) {
+		manager.labelFont = font;
+		manager.state.log();
+	}
 
 	function toggleSearch(search: boolean) {
 		manager.search = search;
@@ -70,6 +79,15 @@
 	{:else}
 		<InspectorSection title="Background map">
 			<PanelBackground {manager} />
+		</InspectorSection>
+		<InspectorSection title="Labels of markers">
+			<FontSelect
+				id="{uid}-labels"
+				value={manager.labelFont}
+				inherit="Like the background map"
+				inherited={getSettings(manager.background).font}
+				onchange={setLabelFont}
+			/>
 		</InspectorSection>
 		<InspectorSection title="Legend">
 			{#if legend}

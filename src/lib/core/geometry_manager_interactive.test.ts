@@ -24,6 +24,33 @@ describe('GeometryManager', () => {
 		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 	});
 
+	it('gives all marker labels a font of their own, or the one of the background map', async () => {
+		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
+		mockMap.emit('style.load');
+		expect(manager.font).toBe('noto_sans_regular');
+		expect(manager.getState().meta?.labelFont).toBeUndefined();
+
+		// set on the layer of the markers, without a new style, and stored in the map
+		manager.labelFont = 'lato_bold';
+		expect(manager.font).toBe('lato_bold');
+		expect(mockMap.setLayoutProperty).toHaveBeenCalledWith('elements_symbol', 'text-font', ['literal', ['lato_bold']]);
+		expect(manager.getState().meta?.labelFont).toBe('lato_bold');
+
+		// a new background keeps it
+		const styles = mockMap.setStyle.mock.calls.length;
+		void manager.setBackground({ builder: 'osm', options: { text: { font: 'open_sans_regular' } } });
+		await vi.waitFor(() => expect(mockMap.setStyle.mock.calls.length).toBeGreaterThan(styles));
+		const style = (mockMap.setStyle.mock.calls.at(-1) as unknown[])[0] as { layers: { id: string; layout?: object }[] };
+		expect(style.layers.find((l) => l.id === 'elements_symbol')?.layout).toMatchObject({
+			'text-font': ['literal', ['lato_bold']]
+		});
+		expect(manager.font).toBe('lato_bold');
+
+		// without its own font, the labels follow the background map
+		manager.labelFont = undefined;
+		expect(manager.font).toBe('open_sans_regular');
+	});
+
 	it('should add a new marker', () => {
 		const element = addElement(manager, 'marker');
 		expect(element).toBeInstanceOf(MarkerElement);

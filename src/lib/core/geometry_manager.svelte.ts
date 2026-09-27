@@ -44,8 +44,10 @@ export class GeometryManager {
 	public legend: StateLegend | undefined = $state.raw(undefined);
 	/** The background map. Undefined for the editor's default background. */
 	#background: StateBackground | undefined = $state.raw(undefined);
-	/** The glyph font of the map labels, which the marker labels use too. */
-	public readonly font: string = $derived(getSettings(this.#background).font);
+	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
+	#labelFont: string | undefined = $state.raw(undefined);
+	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
+	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
 	private destroyed = false;
 	private readonly abortController = new AbortController();
 	// The map has no style until inlineSources() finishes, so elements must wait for it
@@ -60,7 +62,11 @@ export class GeometryManager {
 	constructor(map: maplibregl.Map) {
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
-		this.map.on('style.load', () => (this.styleLoaded = true));
+		this.map.on('style.load', () => {
+			this.styleLoaded = true;
+			// e.g. a label font that was set while the style loaded
+			this.applyLabelFont();
+		});
 		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
 		this.map.setMissingStyleImageResolver((id) => void addFillPatternImage(this.map, id));
 		this.renderer = new ElementRenderer(this.map);
@@ -86,6 +92,24 @@ export class GeometryManager {
 		return this.#loading;
 	}
 
+	/** The font of the labels of all markers, or undefined for the font of the background map. */
+	public get labelFont(): string | undefined {
+		return this.#labelFont;
+	}
+	public set labelFont(font: string | undefined) {
+		if (font === this.#labelFont) return;
+		this.#labelFont = font;
+		// without a new style; the next style has it too (see `loadStyle`)
+		this.applyLabelFont();
+	}
+
+	/** Set the font on the layer of the markers, once the style has it. */
+	private applyLabelFont() {
+		if (this.styleLoaded && this.map.getLayer(ELEMENT_LAYERS.symbol)) {
+			this.map.setLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font', ['literal', [this.font]]);
+		}
+	}
+
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
 	public async setBackground(background?: StateBackground) {
 		if (sameBackground(background, this.#background)) return;
@@ -95,7 +119,7 @@ export class GeometryManager {
 
 	private async loadStyle(background: StateBackground | undefined) {
 		const request = ++this.styleRequest;
-		const style = buildStyle(background);
+		const style = buildStyle(background, this.#labelFont);
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
 		// The download is aborted and its result ignored once the manager is destroyed.
@@ -261,6 +285,7 @@ export class GeometryManager {
 		if (state.map) this.fitViewport(state.map);
 		this.legend = state.meta?.legend;
 		this.search = state.meta?.search === true;
+		this.labelFont = state.meta?.labelFont;
 		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, this.#background)) {
@@ -306,7 +331,7 @@ function sameBackground(a: StateBackground | undefined, b: StateBackground | und
 }
 
 /** The background map with the editor's own layers: the highlight and the selection nodes. */
-function buildStyle(background: StateBackground | undefined): StyleSpecification {
+function buildStyle(background: StateBackground | undefined, labelFont?: string): StyleSpecification {
 	const style = getMapStyle(background);
 	style.transition = { duration: 0, delay: 0 };
 
@@ -330,7 +355,7 @@ function buildStyle(background: StateBackground | undefined): StyleSpecification
 	);
 
 	// All elements, between the highlight and the selection nodes
-	const elements = elementStyle(getSettings(background).font);
+	const elements = elementStyle(labelFont ?? getSettings(background).font);
 	Object.assign(style.sources, elements.sources);
 	style.layers.push(...elements.layers);
 

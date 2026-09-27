@@ -163,6 +163,53 @@ test('changing the colors of the vector map and of the satellite imagery', async
 	await expect(page.getByRole('button', { name: 'Reset colors' })).toBeDisabled();
 });
 
+test('one font for the labels of all markers, which need not be the one of the background map', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				elements: [
+					{ type: 'marker', point: center, style: { label: 'A' } },
+					{ type: 'marker', point: [13.45, 52.5], style: { label: 'B' } }
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	const symbolFont = () =>
+		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
+	const labels = page.getByRole('region', { name: 'Labels of markers' });
+	const background = page.getByRole('region', { name: 'Background map' });
+
+	// like the background map, at first
+	await expect(labels.getByRole('combobox', { name: 'Font' })).toHaveValue('');
+	await expect(labels.getByRole('combobox', { name: 'Style' })).toHaveCount(0);
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['noto_sans_regular']]);
+
+	// a font of their own, in all labels
+	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Lato');
+	await labels.getByRole('combobox', { name: 'Style' }).selectOption('Bold');
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
+	await expect.poll(() => stateInUrl(page).meta?.labelFont).toBe('lato_bold');
+
+	// which the font of the background map does not change
+	await background.getByRole('combobox', { name: 'Font' }).selectOption('Open Sans');
+	await expect
+		.poll(() => stateInUrl(page).meta?.background?.options)
+		.toMatchObject({ text: { font: 'open_sans_regular' } });
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
+
+	// kept in the map, e.g. when it is opened again
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
+
+	// like the background map again
+	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Like the background map');
+	await expect.poll(symbolFont).toStrictEqual(['literal', ['open_sans_regular']]);
+	await expect.poll(() => stateInUrl(page).meta?.labelFont).toBeUndefined();
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];
@@ -313,8 +360,9 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	// the configured face comes first, in its family, with the names from the tile server. The map
 	// settings are shown after a click on the empty map.
 	await page.mouse.click(150, 600);
-	const family = page.getByRole('combobox', { name: 'Font' });
-	const face = page.getByRole('combobox', { name: 'Style' });
+	const settings = page.getByRole('region', { name: 'Background map' });
+	const family = settings.getByRole('combobox', { name: 'Font' });
+	const face = settings.getByRole('combobox', { name: 'Style' });
 	await expect(family.getByRole('option').first()).toHaveText('Lato');
 	await expect(face).toHaveValue('noto_sans_regular');
 	await expect(face.getByRole('option')).toHaveText(['Regular', 'Italic', 'Bold', 'Bold Italic']);

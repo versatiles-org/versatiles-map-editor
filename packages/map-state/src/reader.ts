@@ -263,6 +263,9 @@ export class StateReader {
 					case 5:
 						metadata.search = true;
 						break;
+					case 6:
+						metadata.labelFont = this.readString();
+						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}
