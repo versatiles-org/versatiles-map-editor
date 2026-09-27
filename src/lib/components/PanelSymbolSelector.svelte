@@ -27,7 +27,7 @@
 
 	const drawIcon: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index);
 	const drawIconHalo: Action<HTMLCanvasElement, number> = (canvas, index) =>
-		symbolLibrary.drawSymbol(canvas, index, { halo: 3 });
+		symbolLibrary.drawSymbol(canvas, index, { halo: 2 });
 
 	function selectSymbol(index: number | undefined) {
 		symbolIndex = index;
