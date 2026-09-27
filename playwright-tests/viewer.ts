@@ -75,7 +75,7 @@ test('precision of a shared map', async ({ page }) => {
 		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point }] })
 	);
 	await waitForMapIsReady(page, { count: 1 });
-	await page.getByRole('button', { name: 'Share/Embed' }).click();
+	await page.getByRole('button', { name: /^Share/ }).click();
 	const precision = page.getByRole('combobox', { name: 'Precision' });
 	const shared = async () => {
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
@@ -169,7 +169,7 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 	const berlin = await project(page, [13.4, 52.5]);
 
 	await hide.click();
-	await expect(page.getByRole('button', { name: 'Undo' })).toBeHidden();
+	await expect(page.getByRole('button', { name: 'Background map' })).toBeHidden();
 	const show = page.getByRole('button', { name: 'Show sidebar' });
 	await expect(show).toHaveAttribute('aria-expanded', 'false');
 	// the tab is at the right edge of the map now

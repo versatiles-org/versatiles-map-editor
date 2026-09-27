@@ -33,16 +33,19 @@
 	const SIDEBAR_WIDTH = 250;
 	// the width of the map that the sidebar covers
 	const sidebarWidth = $derived(showSidebar && sidebarOpen ? SIDEBAR_WIDTH : 0);
+	// the height of the map that the top bar of the editor covers
+	const TOPBAR_HEIGHT = 44;
+	const topbarHeight = $derived(showSidebar ? TOPBAR_HEIGHT : 0);
 	const MAP_PADDING = 10;
 
-	// The map centers its content in the part that the sidebar leaves free. When the sidebar is
+	// The map centers its content in the part that the bars leave free. When the sidebar is
 	// shown or hidden, the map is moved back, so its content stays where it is on the screen.
 	$effect(() => {
 		const right = MAP_PADDING + sidebarWidth;
 		if (!map) return;
 		const previous = map.getPadding().right ?? right;
 		if (previous === right) return;
-		map.setPadding({ top: MAP_PADDING, right, bottom: MAP_PADDING, left: MAP_PADDING });
+		map.setPadding({ top: MAP_PADDING + topbarHeight, right, bottom: MAP_PADDING, left: MAP_PADDING });
 		map.panBy([(previous - right) / 2, 0], { duration: 0 });
 	});
 	let screenTooSmall = $state(false);
@@ -72,12 +75,14 @@
 	 * viewer, which does not need the sidebar with its dialogs, importers and codecs.
 	 */
 	async function loadEditor() {
-		const [{ GeometryManagerInteractive }, { default: Sidebar }, { default: NodeDeleteButton }] = await Promise.all([
-			import('./core/geometry_manager_interactive.js'),
-			import('./components/Sidebar.svelte'),
-			import('./components/NodeDeleteButton.svelte')
-		]);
-		return { GeometryManagerInteractive, Sidebar, NodeDeleteButton };
+		const [{ GeometryManagerInteractive }, { default: Sidebar }, { default: TopBar }, { default: NodeDeleteButton }] =
+			await Promise.all([
+				import('./core/geometry_manager_interactive.js'),
+				import('./components/Sidebar.svelte'),
+				import('./components/TopBar.svelte'),
+				import('./components/NodeDeleteButton.svelte')
+			]);
+		return { GeometryManagerInteractive, Sidebar, TopBar, NodeDeleteButton };
 	}
 	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
 
@@ -193,7 +198,7 @@
 
 		// before the first view is set
 		map.setPadding({
-			top: MAP_PADDING,
+			top: MAP_PADDING + (showSidebar ? TOPBAR_HEIGHT : 0),
 			right: MAP_PADDING + (showSidebar ? SIDEBAR_WIDTH : 0),
 			bottom: MAP_PADDING,
 			left: MAP_PADDING
@@ -246,7 +251,7 @@
 			legend={geometryManager.legend}
 			map={geometryManager.map}
 			right={sidebarWidth}
-			top={topOverlaysHeight ? topOverlaysHeight + 10 : 0}
+			top={topOverlaysHeight ? topOverlaysHeight + 10 : topbarHeight}
 		/>
 	{/if}
 	{#if geometryManager && (showSearch || screenTooSmall)}
@@ -261,14 +266,23 @@
 			{/if}
 		</div>
 	{/if}
+	{#if showSidebar}
+		<!-- from the start, so the map does not move when the code of the editor has loaded -->
+		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
+			{#if editor && geometryManager && geometryManager.isInteractive()}
+				<editor.TopBar manager={geometryManager} />
+			{/if}
+		</div>
+	{/if}
 	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
 		<editor.NodeDeleteButton {geometryManager} />
 		<!-- hidden, not removed, so the sidebar keeps e.g. its open panels -->
-		<div id="sidebar" hidden={!sidebarOpen}>
+		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />
 		</div>
 		<button
 			class="sidebar-toggle"
+			style:top="calc(50% + {TOPBAR_HEIGHT / 2}px)"
 			style:right="{sidebarWidth}px"
 			aria-controls="sidebar"
 			aria-expanded={sidebarOpen}
@@ -308,6 +322,9 @@
 		--color-blue-text: #158;
 		--color-error: #b00020;
 		--color-warning: #a40;
+		--color-border: rgba(21, 32, 43, 0.13);
+		--color-hover: rgba(21, 32, 43, 0.07);
+		--shadow: 0 1px 2px rgba(15, 25, 35, 0.14), 0 6px 22px rgba(15, 25, 35, 0.14);
 		--btn-gap: 5px;
 		--gap: 10px;
 		--border-radius: 1em;
@@ -341,6 +358,9 @@
 			--color-disabled-text: #c4c4c4;
 			--color-error: #ff8a95;
 			--color-warning: #ffb74d;
+			--color-border: rgba(255, 255, 255, 0.13);
+			--color-hover: rgba(255, 255, 255, 0.08);
+			--shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.45);
 		}
 	}
 
@@ -399,6 +419,23 @@
 		.spinner {
 			animation-duration: 3s;
 		}
+	}
+
+	/* over the map, like the sidebar, so the map keeps its size */
+	.topbar-slot {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 3;
+		background: var(--color-bg);
+	}
+
+	#sidebar {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		width: 250px;
 	}
 
 	/* a tab at the edge of the sidebar, which hides and shows it */

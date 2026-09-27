@@ -2,92 +2,26 @@
 	import '../style/index.scss';
 	import Editor from './Editor.svelte';
 	import SidebarPanel from './SidebarPanel.svelte';
-	import DialogShareMap from './DialogShare.svelte';
-	import PanelFile from './PanelFile.svelte';
 	import SearchPlace from './SearchPlace.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
 	import PanelElements from './PanelElements.svelte';
-	import DialogImportTable from './DialogImportTable.svelte';
-	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
-	import { notify } from '$lib/utils/notify.svelte.js';
-	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
-	import { stateFromKML, stateToKML } from '@versatiles/map-state';
+	import * as commands from '../core/commands.js';
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
 
-	const uid = $props.id();
-	let panelShareMap: DialogShareMap | null = null;
-	let dialogImportTable: DialogImportTable | undefined = $state();
 	const stateManager = $derived(geometryManager.state);
-	const history = $derived(geometryManager.state.history);
 	const selection = $derived(geometryManager.selection);
 	const selectedElements = $derived(selection.selectedElements);
-	const copiedStyle = $derived(geometryManager.styleClipboard.style);
-
-	/** Let the user choose a file, and add its content to the map. */
-	async function importFile(accept: string, read: (text: string) => void, format: string) {
-		try {
-			const file = await chooseTextFile(accept);
-			if (!file) return;
-			read(file.text);
-			geometryManager.state.log();
-		} catch (error) {
-			console.error(error);
-			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
-			else notify(`Failed to import ${format}. Please check the file format.`);
-		}
-	}
-
-	function importGeoJSON() {
-		importFile(
-			'.geojson,.json,application/geo+json,application/json',
-			(text) => geometryManager.addGeoJSON(JSON.parse(text)),
-			'GeoJSON'
-		);
-	}
-
-	function importKML() {
-		importFile(
-			'.kml,application/vnd.google-earth.kml+xml',
-			(text) => geometryManager.addState(stateFromKML(text)),
-			'KML'
-		);
-	}
-
-	function exportGeoJSON() {
-		downloadJSON(geometryManager.getGeoJSON(), 'map.geojson', 'application/geo+json');
-	}
-
-	function exportKML() {
-		const kml = stateToKML(geometryManager.getState());
-		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), 'map.kml');
-	}
-
-	function duplicateElements() {
-		if (selectedElements.length === 0) return;
-		geometryManager.duplicateElements(selectedElements, [20, 20]);
-		geometryManager.state.log();
-	}
-
-	function copyStyle() {
-		// the style of one element, since several elements can have different styles
-		if (selectedElements.length !== 1) return;
-		geometryManager.styleClipboard.copy(selectedElements[0]);
-	}
-
-	function pasteStyle() {
-		if (selectedElements.length === 0 || !copiedStyle) return;
-		geometryManager.styleClipboard.paste(selectedElements, copiedStyle);
-		geometryManager.state.log();
-	}
 
 	function onKeydown(e: KeyboardEvent) {
 		// The shortcuts act on the map, not where the keys mean something else: in text fields (which
-		// undo their own typing), in sliders (e.g. the color field) and in open dialogs (e.g. the symbol picker)
+		// undo their own typing), in sliders (e.g. the color field), in open dialogs (e.g. the symbol
+		// picker) and in the menu
 		const target = e.target as HTMLElement | null;
-		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open]')) return;
+		if (target?.closest('input, textarea, select, [contenteditable], [role="slider"], dialog[open], [role="menu"]'))
+			return;
 
 		// Undo: Cmd/Ctrl+Z. Redo: Shift+Cmd/Ctrl+Z, or Ctrl+Y as on Windows.
 		const key = e.key.toLowerCase();
@@ -101,15 +35,15 @@
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
 			if (selectedElements.length === 0) return;
 			e.preventDefault();
-			duplicateElements();
+			commands.duplicateSelection(geometryManager);
 		}
 
 		// Cmd/Ctrl+Alt+C/V, like in Keynote and PowerPoint. By e.code, since Alt changes e.key (e.g. to "ç" on macOS).
 		if ((e.metaKey || e.ctrlKey) && e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.code === 'KeyV')) {
 			if (selectedElements.length === 0) return;
 			e.preventDefault();
-			if (e.code === 'KeyC') copyStyle();
-			else pasteStyle();
+			if (e.code === 'KeyC') commands.copyStyle(geometryManager);
+			else commands.pasteStyle(geometryManager);
 		}
 
 		if ((e.key === 'Delete' || e.key === 'Backspace') && !e.metaKey && !e.ctrlKey && !e.altKey) {
@@ -118,13 +52,8 @@
 			// Delete the selected node, or the elements if no node is selected. A node the shape
 			// needs is kept, so the element is not deleted by accident.
 			if (selection.selectedNode) selection.deleteSelectedNode();
-			else deleteElements();
+			else commands.deleteSelection(geometryManager);
 		}
-	}
-
-	function deleteElements() {
-		geometryManager.deleteElements(selectedElements);
-		geometryManager.state.log();
 	}
 
 	function addNewElement(type: 'marker' | 'line' | 'polygon' | 'circle') {
@@ -137,18 +66,6 @@
 
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
-		<div class="grid2">
-			<button class="btn" onclick={() => stateManager.undo()} disabled={!history.undoEnabled} title="Undo (Cmd/Ctrl+Z)"
-				>Undo</button
-			>
-			<button
-				class="btn"
-				onclick={() => stateManager.redo()}
-				disabled={!history.redoEnabled}
-				title="Redo (Shift+Cmd/Ctrl+Z)">Redo</button
-			>
-		</div>
-		<hr class="thick" />
 		<SearchPlace
 			map={geometryManager.map}
 			onmark={(point) => {
@@ -157,44 +74,12 @@
 			}}
 		/>
 		<hr class="thick" />
-		<SidebarPanel title="Map">
-			<PanelFile manager={geometryManager} />
-			<div class="grid1">
-				<button class="btn" onclick={() => panelShareMap?.open()}>Share/Embed</button>
-				<DialogShareMap bind:this={panelShareMap} state={geometryManager.state} />
-			</div>
-		</SidebarPanel>
-		<hr class="thick" />
 		<SidebarPanel title="Background map" open={false}>
 			<PanelBackground manager={geometryManager} />
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Legend" open={false}>
 			<PanelLegend manager={geometryManager} />
-		</SidebarPanel>
-		<hr class="thick" />
-		<SidebarPanel title="Import/Export" open={false}>
-			<div role="group" aria-labelledby="{uid}-geojson">
-				<span id="{uid}-geojson">GeoJSON</span>
-				<div class="grid2">
-					<button class="btn" onclick={importGeoJSON}>Import</button>
-					<button class="btn" onclick={exportGeoJSON} data-testid="btnExportGeoJSON">Export</button>
-				</div>
-			</div>
-			<div role="group" aria-labelledby="{uid}-kml">
-				<span id="{uid}-kml">KML (Google Earth)</span>
-				<div class="grid2">
-					<button class="btn" onclick={importKML}>Import</button>
-					<button class="btn" onclick={exportKML} data-testid="btnExportKML">Export</button>
-				</div>
-			</div>
-			<div role="group" aria-labelledby="{uid}-table">
-				<span id="{uid}-table">Table (CSV/TSV)</span>
-				<div class="grid1">
-					<button class="btn" onclick={() => dialogImportTable?.open()}>Import table…</button>
-				</div>
-				<DialogImportTable bind:this={dialogImportTable} manager={geometryManager} />
-			</div>
 		</SidebarPanel>
 		<hr class="thick" />
 		<SidebarPanel title="Add new">
@@ -214,37 +99,28 @@
 		<hr class="thick" />
 		<SidebarPanel title="Actions" disabled={selectedElements.length === 0}>
 			<div class="grid2">
-				<button class="btn" onclick={deleteElements} title="Delete (Delete/Backspace)">Delete</button>
-				<button class="btn" onclick={duplicateElements} title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
-					>Duplicate</button
+				<button class="btn" onclick={() => commands.deleteSelection(geometryManager)} title="Delete (Delete/Backspace)"
+					>Delete</button
 				>
 				<button
 					class="btn"
-					onclick={copyStyle}
-					disabled={selectedElements.length !== 1}
+					onclick={() => commands.duplicateSelection(geometryManager)}
+					title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)">Duplicate</button
+				>
+				<button
+					class="btn"
+					onclick={() => commands.copyStyle(geometryManager)}
+					disabled={!commands.canCopyStyle(geometryManager)}
 					title="Copy the style of the element (Cmd/Ctrl+Alt+C)">Copy style</button
 				>
 				<button
 					class="btn"
-					onclick={pasteStyle}
-					disabled={!copiedStyle}
+					onclick={() => commands.pasteStyle(geometryManager)}
+					disabled={!commands.canPasteStyle(geometryManager)}
 					title="Paste the style onto the selected elements (Cmd/Ctrl+Alt+V)">Paste style</button
 				>
 			</div>
 			<p class="label">Shift-click to select several elements.</p>
-		</SidebarPanel>
-		<hr class="thick" />
-		<SidebarPanel title="Help" open={false}>
-			<p>
-				Submit bugs and feature requests as
-				<a
-					id="github_link"
-					href="https://github.com/versatiles-org/versatiles-map-editor/issues"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="GitHub Issues (opens in a new tab)">GitHub Issues</a
-				>
-			</p>
 		</SidebarPanel>
 	</div>
 </div>
@@ -263,9 +139,5 @@
 		right: 0;
 		top: 0;
 		width: 250px;
-	}
-
-	a {
-		color: var(--color-text);
 	}
 </style>

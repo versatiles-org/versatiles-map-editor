@@ -121,10 +121,7 @@ test('duplicating an element', async ({ page }) => {
 	await waitForMapIsReady(page);
 
 	const pointsInUrl = () => stateInUrl(page).elements.map((e) => ('point' in e ? e.point : undefined));
-	// the map is centered in the area left of the 250px sidebar
-	const viewport = page.viewportSize()!;
-	const x = (viewport.width - 250) / 2;
-	const y = viewport.height / 2;
+	const [x, y] = await project(page, center);
 
 	// select the marker by clicking its flag icon, which is drawn above and right of its point
 	await page.mouse.click(x + 6, y - 8);
@@ -218,13 +215,16 @@ test('color picker', async ({ page }) => {
 	await fillColor.click();
 	const field = page.getByRole('slider', { name: 'Saturation and brightness' });
 	const box = (await field.boundingBox())!;
-	await page.mouse.move(box.x + box.width - 1, box.y + 1);
+	// not at the very edge, where the scroll bar of the sidebar can be
+	await page.mouse.move(box.x + box.width * 0.9, box.y + box.height * 0.1);
 	await page.mouse.down();
 	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
 	await page.mouse.up();
-	// the center is half saturation and half brightness of the hue green
-	await expect.poll(() => fill()).toBe('#408040');
-	await expect(page.getByLabel('Green')).toHaveValue('128');
+	// the center is half saturation and half brightness of the hue green, #408040. Firefox rounds
+	// the mouse position to whole pixels, which can change the channels by 1.
+	const channels = (hex = '') => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+	await expect.poll(() => channels(fill()).every((c, i) => Math.abs(c - [0x40, 0x80, 0x40][i]) <= 2)).toBe(true);
+	expect(Math.abs(Number(await page.getByLabel('Green').inputValue()) - 128)).toBeLessThanOrEqual(2);
 	await page.screenshot({ path: 'test-results/color-picker.png' });
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(() => fill()).toBe('#00ff00');
@@ -236,9 +236,9 @@ test('editing a popup', async ({ page }) => {
 		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
-	const viewport = page.viewportSize()!;
+	const [x, y] = await project(page, center);
 	// select the marker by clicking its flag icon, which is drawn above and right of its point
-	await page.mouse.click((viewport.width - 250) / 2 + 6, viewport.height / 2 - 8);
+	await page.mouse.click(x + 6, y - 8);
 
 	const popup = page.getByRole('textbox', { name: 'Popup' });
 	await popup.fill('Hello **world**\nhttps://versatiles.org');
@@ -409,9 +409,9 @@ test('Delete and Backspace keep the elements in sliders and dialogs', async ({ p
 		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
-	const viewport = page.viewportSize()!;
+	const [x, y] = await project(page, center);
 	// select the marker by clicking its flag icon, which is drawn above and right of its point
-	const selectMarker = () => page.mouse.click((viewport.width - 250) / 2 + 6, viewport.height / 2 - 8);
+	const selectMarker = () => page.mouse.click(x + 6, y - 8);
 	await selectMarker();
 	const markers = () => stateInUrl(page).elements.length;
 

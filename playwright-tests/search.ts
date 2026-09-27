@@ -99,7 +99,7 @@ test.describe('address search in the viewer', () => {
 	test('is enabled in the share dialog', async ({ page }) => {
 		await page.goto('/');
 		await waitForMapIsReady(page, { count: 1 });
-		await page.getByRole('button', { name: 'Share/Embed' }).click();
+		await page.getByRole('button', { name: /^Share/ }).click();
 		const option = page.getByRole('checkbox', { name: 'Address search in the map' });
 		await expect(option).not.toBeChecked();
 		await option.check();

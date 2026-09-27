@@ -1,25 +1,24 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { drawnElements, stateInUrl, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
+import { drawnElements, menuItem, stateInUrl, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
 
 const mapUrl =
 	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
 
-// The controls of the sidebar at the start, in this order. Only names and states are compared,
-// so e.g. a separator or an icon does not matter. "✓" is the (hidden) feedback of a button.
+// The controls of the top bar and of the sidebar at the start, in this order. Only names and states
+// are compared, so e.g. a separator or an icon does not matter. "✓" is the (hidden) feedback of a button.
+const topbarAria = `
+- button "Menu" [expanded=false]
+- heading "VersaTiles Map Editor"
+- button "Undo" [disabled]
+- button "Redo" [disabled]
+- button /^Share/
+`;
 const sidebarAria = `
-- button /^Undo/ [disabled]
-- button /^Redo/ [disabled]
 - combobox "Search address or place"
-- button "Map" [expanded]
-- button /^New/
-- button /^Open…/
-- button /^Download/
-- button /^Share\\/Embed/
 - button "Background map" [expanded=false]
 - button "Legend" [expanded=false]
-- button "Import/Export" [expanded=false]
 - button "Add new" [expanded]
 - button /^Marker/
 - button /^Line/
@@ -28,7 +27,6 @@ const sidebarAria = `
 - button "Elements"
 - button "Style" [disabled]
 - button "Actions" [disabled]
-- button "Help" [expanded=false]
 `;
 
 /**
@@ -69,6 +67,7 @@ test('empty map', async ({ page }) => {
 		'tiles/osm/tiles.json'
 	]);
 
+	await expect(page.getByRole('banner')).toMatchAriaSnapshot(topbarAria);
 	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
@@ -129,8 +128,8 @@ test('keeps the map in the URL across reloads', async ({ page }) => {
 	await page.reload();
 	await waitForMapIsReady(page);
 
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
+	const exportGeoJSON = await menuItem(page, 'Export', 'GeoJSON');
+	const [download] = await Promise.all([page.waitForEvent('download'), exportGeoJSON.click()]);
 	const doc = JSON.parse(readFileSync(await download.path(), 'utf-8'));
 	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
 });

@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { encodeState } from '../packages/map-state/src/index.js';
-import { stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
 test('dialogs are named, can be closed and are usable by keyboard', async ({ page }) => {
 	await page.goto('/');
@@ -18,7 +18,7 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	await expect(share).toBeHidden();
 
 	// the download dialog: the file name can be typed at once
-	await page.getByRole('button', { name: /^Download/ }).click();
+	await (await menuItem(page, 'Download…')).click();
 	const download = page.getByRole('dialog', { name: 'Download File' });
 	await expect(download.getByRole('textbox', { name: 'File name' })).toBeFocused();
 	await page.keyboard.press('Escape');

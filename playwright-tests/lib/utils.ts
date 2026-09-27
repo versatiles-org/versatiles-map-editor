@@ -1,4 +1,4 @@
-import { type JSHandle, type Page } from '@playwright/test';
+import { type JSHandle, type Locator, type Page } from '@playwright/test';
 import type { Map as MaplibreMap } from 'maplibre-gl';
 import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
 import { createHash, randomBytes } from 'crypto';
@@ -17,6 +17,17 @@ export async function project(page: Page, point: Point): Promise<Point> {
 		const { x, y } = (window as unknown as MapWindow).map.project(point);
 		return [x, y] as Point;
 	}, point);
+}
+
+/**
+ * An item of the editor's menu (☰), e.g. `await (await menuItem(page, 'Export', 'GeoJSON')).click()`.
+ * Opens the menu, and expands the groups on the way.
+ */
+export async function menuItem(page: Page, ...path: string[]): Promise<Locator> {
+	await page.getByRole('button', { name: 'Menu' }).click();
+	const menu = page.getByRole('menu', { name: 'Menu' });
+	for (const name of path.slice(0, -1)) await menu.getByRole('menuitem', { name, exact: true }).click();
+	return menu.getByRole('menuitem', { name: path.at(-1), exact: true });
 }
 
 /** The center of the map as [lng, lat]. */

@@ -74,7 +74,7 @@ The editor reads its state from the URL hash, so it can be embedded in an `<ifra
 
 When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
 
-The **Share/Embed** dialog creates the link and the embed code, with a preview in different aspect ratios. Its options:
+The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
 - **Precision**: how exactly the positions are stored. _Automatic_ is fine enough for the current viewport; coarser positions make shorter links.
 - **Address search in the map**: visitors of the read-only map can search for a place, e.g. their street. The map content does not change. This option is stored in the map.

@@ -2,21 +2,21 @@ import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
 test('downloads the map as GeoJSON and as map file', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Marker' }).click();
 
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const [geojson] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportGeoJSON').click()]);
+	const exportGeoJSON = await menuItem(page, 'Export', 'GeoJSON');
+	const [geojson] = await Promise.all([page.waitForEvent('download'), exportGeoJSON.click()]);
 	expect(geojson.suggestedFilename()).toBe('map.geojson');
 	const doc = JSON.parse(readFileSync(await geojson.path(), 'utf-8'));
 	expect(doc.type).toBe('FeatureCollection');
 	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
 
-	await page.getByRole('button', { name: 'Download' }).click();
+	await (await menuItem(page, 'Download…')).click();
 	const [mapFile] = await Promise.all([
 		page.waitForEvent('download'),
 		page.getByRole('dialog').getByRole('button', { name: 'Download' }).click()
@@ -34,13 +34,13 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	const deleteButton = page.getByRole('button', { name: 'Delete' });
 
 	// "New" → Cancel keeps the map
-	await page.getByRole('button', { name: /^New/ }).click();
+	await (await menuItem(page, 'New map')).click();
 	await dialog.getByRole('button', { name: 'Cancel' }).click();
 	await expect(dialog).toBeHidden();
 	await expect(deleteButton).toBeVisible();
 
 	// "Download" → Enter in the file name field confirms
-	await page.getByRole('button', { name: 'Download' }).click();
+	await (await menuItem(page, 'Download…')).click();
 	const fileName = dialog.getByRole('textbox', { name: 'File name' });
 	await fileName.fill('my-map.mapjson');
 	const [download] = await Promise.all([page.waitForEvent('download'), fileName.press('Enter')]);
@@ -50,7 +50,7 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	await expect(dialog).toBeHidden();
 
 	// "New" → "Create new map" clears the map
-	await page.getByRole('button', { name: /^New/ }).click();
+	await (await menuItem(page, 'New map')).click();
 	await expect(dialog).toContainText('It replaces the current map.');
 	await dialog.getByRole('button', { name: /^Create new map/ }).click();
 	await expect(dialog).toBeHidden();
@@ -79,10 +79,8 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 		]
 	};
 	const openFile = async () => {
-		const [chooser] = await Promise.all([
-			page.waitForEvent('filechooser'),
-			page.getByRole('button', { name: /^Open/ }).click()
-		]);
+		const open = await menuItem(page, 'Open…');
+		const [chooser] = await Promise.all([page.waitForEvent('filechooser'), open.click()]);
 		await chooser.setFiles({
 			name: 'map.mapjson',
 			mimeType: 'application/json',
@@ -112,7 +110,7 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	// loads the map without reloading the page.
 	await page.goto('/#' + encodeState(state));
 	await expect.poll(types).toStrictEqual(['marker']);
-	await page.getByRole('button', { name: /^New/ }).click();
+	await (await menuItem(page, 'New map')).click();
 	await dialog.getByRole('button', { name: /^Create new map/ }).click();
 	await expect.poll(() => stateInUrl(page)).toMatchObject({ elements: [] });
 	expect(stateInUrl(page).meta).toBeUndefined();
@@ -144,8 +142,8 @@ test('exporting and importing KML', async ({ page }) => {
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const [download] = await Promise.all([page.waitForEvent('download'), page.getByTestId('btnExportKML').click()]);
+	const exportKML = await menuItem(page, 'Export', 'KML (Google Earth)');
+	const [download] = await Promise.all([page.waitForEvent('download'), exportKML.click()]);
 	expect(download.suggestedFilename()).toBe('map.kml');
 	const kml = readFileSync(await download.path(), 'utf-8');
 	expect(kml).toContain('<Placemark><name>Café</name><description>Open</description>');
@@ -153,12 +151,8 @@ test('exporting and importing KML', async ({ page }) => {
 	// importing it into an empty map restores the map
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const group = page.getByRole('group', { name: 'KML (Google Earth)' });
-	const [chooser] = await Promise.all([
-		page.waitForEvent('filechooser'),
-		group.getByRole('button', { name: /^Import/ }).click()
-	]);
+	const importKML = await menuItem(page, 'Import', 'KML (Google Earth)…');
+	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), importKML.click()]);
 	await chooser.setFiles({
 		name: 'map.kml',
 		mimeType: 'application/vnd.google-earth.kml+xml',
@@ -174,8 +168,7 @@ test.describe('importing a table', () => {
 	async function openImport(page: Page) {
 		await page.goto('/');
 		await waitForMapIsReady(page);
-		await page.getByRole('button', { name: 'Import/Export' }).click();
-		await page.getByRole('button', { name: 'Import table…' }).click();
+		await (await menuItem(page, 'Import', 'Table (CSV/TSV)…')).click();
 		return page.getByRole('dialog');
 	}
 	const markers = (page: Page) => stateInUrl(page).elements as StateElementMarker[];
@@ -302,8 +295,7 @@ test('Escape cancels a running table import', async ({ page }) => {
 	});
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	await page.getByRole('button', { name: 'Import table…' }).click();
+	await (await menuItem(page, 'Import', 'Table (CSV/TSV)…')).click();
 	const dialog = page.getByRole('dialog');
 	await dialog.getByLabel('Or paste the table here:').fill('Address\nMain St 1\nMain St 2\nMain St 3');
 	await dialog.getByRole('button', { name: /^Continue/ }).click();
@@ -325,14 +317,8 @@ test('a file that cannot be imported shows a message instead of a browser dialog
 	});
 	await page.goto('/');
 	await waitForMapIsReady(page, { expectedMessages: [/JSON/, /^SyntaxError/] });
-	await page.getByRole('button', { name: 'Import/Export' }).click();
-	const [chooser] = await Promise.all([
-		page.waitForEvent('filechooser'),
-		page
-			.getByRole('group', { name: 'GeoJSON' })
-			.getByRole('button', { name: /^Import/ })
-			.click()
-	]);
+	const importGeoJSON = await menuItem(page, 'Import', 'GeoJSON…');
+	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), importGeoJSON.click()]);
 	await chooser.setFiles({ name: 'broken.geojson', mimeType: 'application/geo+json', buffer: Buffer.from('{ broken') });
 	await expect(page.getByRole('alert')).toHaveText(/Failed to import GeoJSON. Please check the file format./);
 });
