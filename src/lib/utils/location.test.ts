@@ -15,19 +15,21 @@ describe('location', () => {
 	afterEach(() => vi.restoreAllMocks());
 
 	describe('timeZoneCountry', () => {
-		it('finds the country of a time zone, also of names with hyphens or three parts', () => {
+		it('finds the country of a time zone, also of names with three parts', () => {
 			expect(timeZoneCountry('Europe/Berlin')).toBe('DE');
-			expect(timeZoneCountry('Africa/Porto-Novo')).toBe('BJ');
-			expect(timeZoneCountry('America/Port-au-Prince')).toBe('HT');
-			expect(timeZoneCountry('America/Argentina/Salta')).toBe('AR');
+			expect(timeZoneCountry('Atlantic/Canary')).toBe('ES');
 			expect(timeZoneCountry('America/Indiana/Knox')).toBe('US');
 		});
 
 		it('uses the names of the JavaScript engine, like the time zone it reports', () => {
-			// e.g. "Asia/Calcutta" in Chromium, "Asia/Kolkata" in Firefox
-			const india = new Intl.Locale('und-IN').getTimeZones?.()?.[0];
-			expect(india).toBeDefined();
-			expect(timeZoneCountry(india!)).toBe('IN');
+			const us = new Intl.Locale('und-US').getTimeZones?.()?.[0];
+			expect(us).toBeDefined();
+			expect(timeZoneCountry(us!)).toBe('US');
+		});
+
+		it('knows only the countries with a map view: those of the EU and the US', () => {
+			expect(timeZoneCountry('Asia/Tokyo')).toBeUndefined();
+			expect(timeZoneCountry('America/Toronto')).toBeUndefined();
 		});
 
 		it('knows no country for an unknown time zone, or in a browser without getTimeZones', () => {
@@ -70,9 +72,20 @@ describe('location', () => {
 		});
 	});
 
-	it('gives the bounding box of the country', () => {
-		mockTimeZone('Europe/Berlin');
-		expect(getCountryBoundingBox()).toStrictEqual(expect.arrayContaining([expect.any(Number)]));
-		expect(getCountryBoundingBox()).toHaveLength(4);
+	describe('getCountryBoundingBox', () => {
+		it('gives the box of the country, without distant territories', () => {
+			mockTimeZone('Europe/Paris');
+			// mainland France and Corsica, without French Guiana
+			expect(getCountryBoundingBox()).toStrictEqual([-5.2, 41.3, 9.6, 51.1]);
+			mockTimeZone('America/New_York');
+			// the contiguous states, without Alaska and Hawaii
+			expect(getCountryBoundingBox()).toStrictEqual([-124.8, 24.4, -66.9, 49.4]);
+		});
+
+		it('gives none for other countries, so the map shows the whole world', () => {
+			mockTimeZone('Asia/Tokyo');
+			mockLanguage('ja-JP');
+			expect(getCountryBoundingBox()).toBeNull();
+		});
 	});
 });
