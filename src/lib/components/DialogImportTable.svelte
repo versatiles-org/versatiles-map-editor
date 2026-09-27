@@ -6,6 +6,7 @@
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 	import { ADDRESS_PARTS, guessColumns, parseTable, type AddressPart, type Table } from '$lib/utils/table.js';
 	import {
+		biasOptions,
 		boundsOf,
 		decodeTableFile,
 		MAX_CATEGORIES,
@@ -14,7 +15,8 @@
 		markerStyle,
 		tableCategories,
 		type Category,
-		type FailedRow
+		type FailedRow,
+		type LocationBias
 	} from '$lib/utils/table_import.js';
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.svelte.js';
@@ -48,6 +50,7 @@
 		country: 'Country'
 	};
 	const hasAddress = $derived(ADDRESS_PARTS.some((part) => address[part] >= 0));
+	let bias: LocationBias = $state('region');
 	// -1: none
 	let label = $state(-1);
 	let popup = $state(-1);
@@ -140,8 +143,7 @@
 				{
 					signal: controller.signal,
 					language: navigator.language,
-					near: [center.lng, center.lat],
-					zoom: manager.map.getZoom(),
+					...biasOptions(bias, [center.lng, center.lat], manager.map.getZoom()),
 					onProgress: (done, total) => (progress = { done, total })
 				}
 			);
@@ -244,6 +246,13 @@
 								true
 							)}
 						{/each}
+						<InputRow id="{uid}-bias" label="Prefer places">
+							<select id="{uid}-bias" value={bias} onchange={(e) => (bias = e.currentTarget.value as LocationBias)}>
+								<option value="view">near the map view</option>
+								<option value="region">in the region of the map view</option>
+								<option value="none">anywhere</option>
+							</select>
+						</InputRow>
 					{/if}
 				</fieldset>
 

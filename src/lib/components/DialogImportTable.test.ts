@@ -5,6 +5,9 @@ import { MockMap } from '$lib/__mocks__/map.js';
 import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 import DialogImportTable from './DialogImportTable.svelte';
 
+const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
+vi.mock('$lib/utils/geocoding.js', () => ({ geocode }));
+
 describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;
 	let manager: {
@@ -123,5 +126,31 @@ describe('DialogImportTable', () => {
 		expect(manager.map.fitBounds).toHaveBeenCalled();
 		expect(manager.state.log).toHaveBeenCalledTimes(1);
 		expect(document.body.textContent).toContain('Imported 3 markers.');
+	});
+
+	it('prefers places in the region of the map view, or as the user chooses', async () => {
+		geocode.mockReset().mockResolvedValue([{ label: 'Bonn', point: [7.1, 50.7] }]);
+		manager.map.setZoom(14);
+		paste('name,address\nTown hall,Markt 1 Bonn');
+		const bias = select('Prefer places');
+		expect(bias.value).toBe('region');
+
+		button('Import 1 row').click();
+		await vi.waitFor(() => expect(geocode).toHaveBeenCalled());
+		// at most at country level, although the map is zoomed in
+		expect(geocode.mock.lastCall![1]).toMatchObject({ near: [1, 2], zoom: 5 });
+	});
+
+	it('searches anywhere if the user chooses it', async () => {
+		geocode.mockReset().mockResolvedValue([{ label: 'Bonn', point: [7.1, 50.7] }]);
+		paste('name,address\nTown hall,Markt 1 Bonn');
+		const bias = select('Prefer places');
+		bias.value = 'none';
+		bias.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+
+		button('Import 1 row').click();
+		await vi.waitFor(() => expect(geocode).toHaveBeenCalled());
+		expect(geocode.mock.lastCall![1]).not.toHaveProperty('near');
 	});
 });

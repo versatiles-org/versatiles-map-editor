@@ -17,6 +17,25 @@ export interface TableMapping {
 /** The columns of the parts of an address, e.g. `{ street: 0, postcode: 1, city: 2 }`. */
 export type AddressColumns = Partial<Record<AddressPart, number>>;
 
+/**
+ * Where the search prefers places: near the map view (as strong as its zoom), in its region (at
+ * most at country level, e.g. for a list of a whole country), or anywhere.
+ */
+export type LocationBias = 'view' | 'region' | 'none';
+
+// About the size of a country
+const REGION_ZOOM = 5;
+
+/** The search options for the location bias, e.g. `{ near: [13.4, 52.5], zoom: 5 }`. */
+export function biasOptions(
+	bias: LocationBias,
+	center: [number, number],
+	zoom: number
+): Pick<ImportOptions, 'near' | 'zoom'> {
+	if (bias === 'none') return {};
+	return { near: center, zoom: bias === 'region' ? Math.min(zoom, REGION_ZOOM) : zoom };
+}
+
 /** The address of a row as one search text, e.g. "Hauptstraße 5, 10115 Berlin, Deutschland". */
 export function addressOf(row: string[], columns: AddressColumns): string {
 	const cell = (part: AddressPart) => (columns[part] === undefined ? '' : (row[columns[part]] ?? '').trim());

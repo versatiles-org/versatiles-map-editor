@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
 	addressOf,
+	biasOptions,
 	boundsOf,
 	columnValues,
 	decodeTableFile,
@@ -202,5 +203,15 @@ describe('addresses in several columns', () => {
 		);
 		expect(geocoder).toHaveBeenCalledWith('Hauptstraße 5, 10115 Berlin', expect.anything());
 		expect(markers).toHaveLength(1);
+	});
+});
+
+describe('biasOptions', () => {
+	it('prefers places near the map view, in its region, or anywhere', () => {
+		expect(biasOptions('view', [13.4, 52.5], 14)).toStrictEqual({ near: [13.4, 52.5], zoom: 14 });
+		// at most at country level
+		expect(biasOptions('region', [13.4, 52.5], 14)).toStrictEqual({ near: [13.4, 52.5], zoom: 5 });
+		expect(biasOptions('region', [13.4, 52.5], 3)).toStrictEqual({ near: [13.4, 52.5], zoom: 3 });
+		expect(biasOptions('none', [13.4, 52.5], 14)).toStrictEqual({});
 	});
 });
