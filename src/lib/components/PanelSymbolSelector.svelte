@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
-	import { getSymbol, SymbolLibrary } from '../core/symbols.js';
+	import { allSymbols, getSymbol, loadSymbols, SymbolLibrary } from '../core/symbols.js';
 	import Dialog from './Dialog.svelte';
 
 	let dialog: Dialog | undefined;
@@ -11,26 +11,29 @@
 	const retina = window.devicePixelRatio || 1;
 
 	let {
-		symbolIndex = $bindable(),
+		symbol = $bindable(),
 		map,
 		id,
-		noneLabel
+		noneLabel = 'No symbol'
 	}: {
-		symbolIndex: number | undefined;
+		/** The image of the symbol, e.g. "icons:anchor", "" for none, or undefined if none is chosen. */
+		symbol: string | undefined;
 		map: MaplibreMap;
 		id?: string;
-		/** If set, offers "no symbol" (undefined) with this name, e.g. for a plain color. */
+		/** The name of "no symbol" (""), e.g. "Color only" in a legend. */
 		noneLabel?: string;
 	} = $props();
 
 	const symbolLibrary = $derived(new SymbolLibrary(map));
 
-	const drawIcon: Action<HTMLCanvasElement, number> = (canvas, index) => symbolLibrary.drawSymbol(canvas, index);
-	const drawIconHalo: Action<HTMLCanvasElement, number> = (canvas, index) =>
-		symbolLibrary.drawSymbol(canvas, index, { halo: 2 });
+	const drawIcon: Action<HTMLCanvasElement, string> = (canvas, name) => symbolLibrary.drawSymbol(canvas, name);
+	const drawIconHalo: Action<HTMLCanvasElement, string> = (canvas, name) =>
+		symbolLibrary.drawSymbol(canvas, name, { halo: 2 });
 
-	function selectSymbol(index: number | undefined) {
-		symbolIndex = index;
+	const info = $derived(symbol ? getSymbol(symbol) : undefined);
+
+	function selectSymbol(name: string) {
+		symbol = name;
 		dialog?.close();
 	}
 </script>
@@ -41,32 +44,35 @@
 	onclick={() => dialog?.open()}
 	style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px"
 >
-	{#key symbolIndex}
-		{#if symbolIndex !== undefined}<canvas
+	{#key symbol}
+		{#if info}<canvas
 				width={buttonIconSize * retina}
 				height={buttonIconSize * retina}
-				use:drawIcon={symbolIndex}
+				use:drawIcon={info.name}
 				style="width:{buttonIconSize}px;height:{buttonIconSize}px;vertical-align:middle"
 			></canvas>{/if}
 	{/key}
-	{#if symbolIndex !== undefined}
-		{getSymbol(symbolIndex).name}
+	{#if info}
+		{info.title}
+	{:else if symbol === ''}
+		{noneLabel}
 	{:else}
-		{noneLabel ?? 'Select Symbol'}
+		Select Symbol
 	{/if}
 </button>
 
 <Dialog bind:this={dialog} title="Select a symbol">
 	<div class="list" style="--list-icon-size: {listIconSize}px; --list-item-size: {listItemSize}px">
-		{#if noneLabel}
-			<button class="item" onclick={() => selectSymbol(undefined)}>{noneLabel}</button>
-		{/if}
-		{#each symbolLibrary.asList() as symbol (symbol.index)}
-			<button class="item" onclick={() => selectSymbol(symbol.index)}
-				><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={symbol.index}
-				></canvas><br />{symbol.name}</button
-			>
-		{/each}
+		<button class="item" onclick={() => selectSymbol('')}>{noneLabel}</button>
+		<!-- the symbols of the server, once they are loaded -->
+		{#await loadSymbols() then}
+			{#each allSymbols() as item (item.name)}
+				<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
+					><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
+					></canvas><br />{item.title}</button
+				>
+			{/each}
+		{/await}
 	</div>
 </Dialog>
 

@@ -146,7 +146,8 @@ export interface Category {
 	value: string;
 	count: number;
 	color: string;
-	symbol: number | undefined;
+	/** The image of the symbol, or "" for none. */
+	symbol: string;
 }
 
 // More values are no categories, e.g. names
@@ -160,7 +161,7 @@ export function tableCategories(
 	table: Table,
 	column: number,
 	colors: string[],
-	symbol: number | undefined
+	symbol: string
 ): { categories: Category[]; tooMany: number } {
 	const values = columnValues(table, column);
 	if (values.length > MAX_CATEGORIES) return { categories: [], tooMany: values.length };
@@ -168,14 +169,18 @@ export function tableCategories(
 	return { categories, tooMany: 0 };
 }
 
-/** The style of markers with the color and, if chosen, the symbol. */
-export function markerStyle(color: string, symbol: number | undefined): StateStyle {
-	return { color, ...(symbol !== undefined ? { pattern: symbol } : {}) };
+/** The style of markers with the color and the symbol. */
+export function markerStyle(color: string, symbol: string): StateStyle {
+	return { color, symbol };
 }
 
 /** The legend with an entry for each category, after its existing entries. */
 export function legendWithCategories(legend: StateLegend | undefined, categories: Category[]): StateLegend {
-	const entries = categories.map((c) => ({ color: c.color, symbol: c.symbol, label: c.value || '(empty)' }));
+	const entries = categories.map((c) => ({
+		color: c.color,
+		...(c.symbol ? { symbol: c.symbol } : {}),
+		label: c.value || '(empty)'
+	}));
 	return { ...(legend ?? { entries: [] }), entries: [...(legend?.entries ?? []), ...entries] };
 }
 

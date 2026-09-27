@@ -253,7 +253,7 @@ test('editing the legend', async ({ page }) => {
 	await entry.getByLabel('Hex').fill('#0000ff');
 	await entry.getByLabel('Hex').press('Enter');
 	await entry.getByRole('button', { name: /^Symbol/ }).click();
-	await page.getByRole('button', { name: 'cafe', exact: true }).click();
+	await page.getByRole('button', { name: 'Café', exact: true }).click();
 
 	await page.getByRole('radiogroup', { name: 'Position' }).getByRole('radio', { name: 'Top right' }).check();
 	await page.getByRole('radiogroup', { name: 'Layout' }).getByRole('radio', { name: 'Horizontal' }).check();
@@ -262,7 +262,7 @@ test('editing the legend', async ({ page }) => {
 		layout: 'horizontal',
 		entries: [
 			{ color: '#00aa00', label: 'Park' },
-			{ color: '#0000ff', label: 'Cafe', symbol: expect.any(Number) }
+			{ color: '#0000ff', label: 'Cafe', symbol: 'base:icon-cafe' }
 		]
 	});
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park', 'Cafe']);

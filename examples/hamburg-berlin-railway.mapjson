@@ -79,7 +79,7 @@
 			"style": {
 				"color": "#000000",
 				"size": 1.3,
-				"pattern": 76,
+				"symbol": "base:icon-rail",
 				"label": "Hamburg Hbf"
 			}
 		},
@@ -89,7 +89,7 @@
 			"style": {
 				"color": "#000000",
 				"size": 1.3,
-				"pattern": 76,
+				"symbol": "base:icon-rail",
 				"label": "Berlin Hbf"
 			}
 		},
@@ -99,7 +99,7 @@
 			"style": {
 				"color": "#555555",
 				"size": 0.9,
-				"pattern": 74,
+				"symbol": "base:transport-tram",
 				"label": "Ludwigslust"
 			}
 		},
@@ -109,7 +109,7 @@
 			"style": {
 				"color": "#555555",
 				"size": 0.9,
-				"pattern": 74,
+				"symbol": "base:transport-tram",
 				"label": "Wittenberge"
 			}
 		},
@@ -119,7 +119,7 @@
 			"style": {
 				"color": "#555555",
 				"size": 0.9,
-				"pattern": 74,
+				"symbol": "base:transport-tram",
 				"label": "Uelzen"
 			}
 		},
@@ -129,7 +129,7 @@
 			"style": {
 				"color": "#555555",
 				"size": 0.9,
-				"pattern": 74,
+				"symbol": "base:transport-tram",
 				"label": "Stendal"
 			}
 		}

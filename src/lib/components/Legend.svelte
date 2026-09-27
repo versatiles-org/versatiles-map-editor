@@ -28,8 +28,8 @@
 	const retina = window.devicePixelRatio || 1;
 	const symbolLibrary = $derived(new SymbolLibrary(map));
 
-	const drawSymbol: Action<HTMLCanvasElement, { symbol: number; color: string }> = (canvas, params) => {
-		const draw = (p: { symbol: number; color: string }) => {
+	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {
+		const draw = (p: { symbol: string; color: string }) => {
 			canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
 			symbolLibrary.drawSymbol(canvas, p.symbol, { color: p.color });
 		};
@@ -55,7 +55,7 @@
 	>
 		{#each legend.entries as entry, i (i)}
 			<div class="entry" role="listitem">
-				{#if entry.symbol != null}
+				{#if entry.symbol}
 					<canvas
 						class="symbol"
 						width={symbolSize * retina}

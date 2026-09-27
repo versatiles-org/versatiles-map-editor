@@ -13,7 +13,8 @@ import type {
 	StateStyle
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
-import { sanitizeBackground } from './profile.js';
+import { legacyMarkerStyle, sanitizeBackground } from './profile.js';
+import { legacySymbol } from './symbols.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
@@ -278,7 +279,8 @@ export class StateReader {
 	readElementMarker(): StateElementMarker {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
-			if (this.readBit()) element.style = this.readStyle();
+			// a copy: the style can be shared with other elements, e.g. as the base of their styles
+			if (this.readBit()) element.style = legacyMarkerStyle({ ...this.readStyle() });
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
@@ -365,11 +367,17 @@ export class StateReader {
 				case 1:
 					entry.color = this.readColorValue();
 					break;
-				case 2:
-					entry.symbol = this.readVarint();
+				case 2: {
+					// the number of a symbol, in older links
+					const symbol = legacySymbol(this.readVarint());
+					if (symbol) entry.symbol = symbol;
 					break;
+				}
 				case 3:
 					entry.label = this.readString();
+					break;
+				case 4:
+					entry.symbol = this.readString();
 					break;
 				default:
 					throw new Error(`Invalid legend entry key: ${key}`);
@@ -454,6 +462,9 @@ export class StateReader {
 					break;
 				case 12:
 					style.haloColor = this.readColorValue();
+					break;
+				case 13:
+					style.symbol = this.readString();
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readInteger(4);

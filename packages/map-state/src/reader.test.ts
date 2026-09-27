@@ -601,7 +601,7 @@ describe('legend', () => {
 					entries: [
 						// the decoder returns colors in upper case
 						{ color: '#ff0000', label: 'Red area' },
-						{ color: '#0000ff', symbol: 12, label: 'Blue marker' },
+						{ color: '#0000ff', symbol: 'icons:anchor', label: 'Blue marker' },
 						{ color: '#00ff00', label: '' }
 					]
 				}

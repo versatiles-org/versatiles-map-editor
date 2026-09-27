@@ -14,6 +14,7 @@
 	import { GeometryManager } from './core/geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
 	import { PopupHandler } from './core/popup_handler.svelte.js';
+	import { NEW_MARKER_SYMBOL } from './core/symbols.js';
 	import { loadConfig } from '$lib/utils/config.svelte.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
@@ -131,7 +132,7 @@
 	/** Add a marker at a place that the search found. */
 	function markPlace(point: [number, number]) {
 		if (!geometryManager?.isInteractive()) return;
-		geometryManager.addElement({ type: 'marker', point });
+		geometryManager.addElement({ type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } });
 		geometryManager.state.log();
 	}
 

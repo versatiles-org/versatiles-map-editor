@@ -8,7 +8,7 @@ const state: MapState = {
 	map: { center: [13.4, 52.5], radius: 12345 },
 	meta: {
 		background: { builder: 'osm', options: { theme: 'gray' } },
-		legend: { position: 'top', entries: [{ color: '#ff0000', symbol: 12, label: 'Cafés & <shops>' }] },
+		legend: { position: 'top', entries: [{ color: '#ff0000', symbol: 'icons:anchor', label: 'Cafés & <shops>' }] },
 		colorScheme: 'dark2',
 		search: true
 	},
@@ -17,7 +17,7 @@ const state: MapState = {
 		{
 			type: 'marker',
 			point: [13.42, 52.52],
-			style: { color: '#0000ff', pattern: 12, size: 2, rotate: -45, halo: 2, label: '123', align: 3 },
+			style: { color: '#0000ff', symbol: 'icons:anchor', size: 2, rotate: -45, halo: 2, label: '123', align: 3 },
 			popup: { text: 'Line 1\n**bold** <b>not html</b> & [link](https://example.org)' }
 		},
 		{

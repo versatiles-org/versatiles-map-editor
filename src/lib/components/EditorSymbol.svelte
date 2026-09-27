@@ -12,7 +12,7 @@
 	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();
 	const uid = $props.id();
 	const log = () => manager.state?.log();
-	const symbolIndex = $derived(group(layers, 'symbolIndex'));
+	const symbol = $derived(group(layers, 'symbol'));
 	const color = $derived(group(layers, 'color'));
 	const rotate = $derived(group(layers, 'rotate'));
 	const halo = $derived(group(layers, 'halo'));
@@ -44,13 +44,13 @@
 	}));
 </script>
 
-<InputRow id="{uid}-symbol" label="Symbol" mixed={symbolIndex.mixed}>
+<InputRow id="{uid}-symbol" label="Symbol" mixed={symbol.mixed}>
 	<SymbolSelector
 		id="{uid}-symbol"
-		bind:symbolIndex={
-			() => symbolIndex.value,
+		bind:symbol={
+			() => symbol.value,
 			(v) => {
-				symbolIndex.value = v;
+				symbol.value = v ?? '';
 				log();
 			}
 		}

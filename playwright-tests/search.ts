@@ -49,7 +49,9 @@ test('searching a place', async ({ page }) => {
 	await options.first().click();
 	await expect.poll(() => mapCenter(page)).toStrictEqual([expect.closeTo(13.3777, 3), expect.closeTo(52.5163, 3)]);
 	await page.getByRole('button', { name: 'Add marker here' }).click();
-	await expect.poll(() => stateInUrl(page).elements).toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163] }]);
+	await expect
+		.poll(() => stateInUrl(page).elements)
+		.toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163], style: { symbol: 'extras:pin-teardrop' } }]);
 	await expect(page.getByRole('button', { name: 'Add marker here' })).toBeHidden();
 
 	// errors are shown

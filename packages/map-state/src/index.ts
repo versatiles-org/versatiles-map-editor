@@ -20,7 +20,9 @@ export {
 	LABEL_ALIGN_NAMES,
 	removeDefaultFields
 } from './profile.js';
-export { symbolEntries, type SymbolEntry } from './symbols.js';
+// the symbols of older links and files, e.g. for their markers in a `.mapjson` file
+export { LEGACY_SYMBOLS, legacySymbol, symbolFromName } from './symbols.js';
+export { legacyMarkerStyle } from './profile.js';
 
 /**
  * Encode a map state document into the compact base64 representation.

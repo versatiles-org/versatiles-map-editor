@@ -11,6 +11,7 @@ import { getSettings } from '$lib/utils/background.js';
 import { elementFromState } from './element/registry.js';
 import { ELEMENT_LAYERS, ElementRenderer, elementStyle } from './element_renderer.js';
 import { addFillPatternImage } from './map_layer/fill.svelte.js';
+import { loadSymbols, spriteSheets } from './symbols.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {
@@ -125,14 +126,18 @@ export class GeometryManager {
 		// The download is aborted and its result ignored once the manager is destroyed.
 		const signal = this.abortController.signal;
 		let inlined = style;
+		// the sprite sheets with all symbols, loaded once for all maps
+		const symbols = loadSymbols();
 		try {
 			inlined = await inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) });
 		} catch (error) {
 			if (this.destroyed) return; // includes the AbortError caused by destroy()
 			console.error('Failed to inline map style sources', error);
 		}
+		await symbols;
 		// a newer background replaces this one
 		if (this.destroyed || request !== this.styleRequest) return;
+		inlined.sprite = spriteSheets();
 
 		const previousStyle = this.map.style;
 		let onLoad!: () => void;

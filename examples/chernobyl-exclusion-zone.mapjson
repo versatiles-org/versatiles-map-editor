@@ -74,7 +74,7 @@
 			"point": [30.0569, 51.4056],
 			"style": {
 				"color": "#ffffff",
-				"pattern": 96,
+				"symbol": "base:icon-town_hall",
 				"label": "Pripyat"
 			},
 			"popup": {
@@ -86,7 +86,7 @@
 			"point": [30.2219, 51.2763],
 			"style": {
 				"color": "#ffffff",
-				"pattern": 96,
+				"symbol": "base:icon-town_hall",
 				"label": "Chernobyl"
 			},
 			"popup": {
@@ -98,7 +98,7 @@
 			"point": [30.7547, 51.5226],
 			"style": {
 				"color": "#ffffff",
-				"pattern": 96,
+				"symbol": "base:icon-town_hall",
 				"label": "Slavutych"
 			},
 			"popup": {

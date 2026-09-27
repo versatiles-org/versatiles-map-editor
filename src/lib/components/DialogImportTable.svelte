@@ -22,6 +22,7 @@
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.svelte.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
+	import { NEW_MARKER_SYMBOL } from '../core/symbols.js';
 	import { formatCount } from '../utils/format.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -57,7 +58,7 @@
 	let label = $state(-1);
 	let popup = $state(-1);
 	let color = $state(SYMBOL_DEFAULTS.color);
-	let symbol: number | undefined = $state(SYMBOL_DEFAULTS.pattern);
+	let symbol: string = $state(NEW_MARKER_SYMBOL);
 	// -1: none
 	let category = $state(-1);
 	let categories: Category[] = $state([]);
@@ -290,7 +291,7 @@
 						<ColorPicker id="{uid}-color" bind:value={color} palette={manager.colors} />
 					</InputRow>
 					<InputRow id="{uid}-symbol" label="Symbol">
-						<SymbolSelector id="{uid}-symbol" bind:symbolIndex={symbol} map={manager.map} />
+						<SymbolSelector id="{uid}-symbol" bind:symbol={() => symbol, (v) => (symbol = v ?? '')} map={manager.map} />
 					</InputRow>
 					{@render columnSelect('category', 'Category', () => category, setCategory, true)}
 				</fieldset>
@@ -311,7 +312,11 @@
 								<ColorPicker id="{uid}-category-{i}" bind:value={c.color} palette={manager.colors} />
 							</div>
 							<span id="{uid}-category-{i}-symbol-label" hidden>Symbol of {c.value || '(empty)'}</span>
-							<SymbolSelector id="{uid}-category-{i}-symbol" bind:symbolIndex={c.symbol} map={manager.map} />
+							<SymbolSelector
+								id="{uid}-category-{i}-symbol"
+								bind:symbol={() => c.symbol, (v) => (c.symbol = v ?? '')}
+								map={manager.map}
+							/>
 						</div>
 					{/each}
 					<label class="checkbox">

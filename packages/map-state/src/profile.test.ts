@@ -1,13 +1,18 @@
 import { describe, it, expect } from 'vitest';
 
-import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, LABEL_ALIGN_NAMES, removeDefaultFields } from './profile.js';
-import { symbolName, symbolIndexByName, symbolEntries } from './symbols.js';
+import {
+	FILL_PATTERN_NAMES,
+	STROKE_STYLE_NAMES,
+	LABEL_ALIGN_NAMES,
+	legacyMarkerStyle,
+	removeDefaultFields
+} from './profile.js';
+import { LEGACY_SYMBOLS, legacySymbol, symbolFromName } from './symbols.js';
 import type { StateStyle } from './types.js';
 
 import { fillPatterns } from '$lib/core/map_layer/fill.svelte.js';
 import { dashArrays } from '$lib/core/map_layer/line.svelte.js';
 import { labelPositions } from '$lib/core/map_layer/symbol.svelte.js';
-import { getSymbol } from '$lib/core/symbols.js';
 
 // The codec owns the style vocabulary and the editor derives its tables from it.
 // These guards ensure the editor has rendering data for every value the codec knows.
@@ -19,13 +24,32 @@ describe('profile drift guard', () => {
 		// only "auto" (index 0) has no fixed anchor
 		expect(labelPositions.filter((p) => p.anchor == null).map((p) => p.index)).toEqual([0]);
 	});
+});
 
-	it('symbol registry matches the editor symbol names', () => {
-		for (const [index, name] of symbolEntries) {
-			expect(symbolName(index)).toBe(name);
-			expect(symbolIndexByName(name)).toBe(index);
-			expect(getSymbol(index).name).toBe(name);
+describe('symbols of older links and files', () => {
+	it('reads the old numbers and names as the names of their images', () => {
+		for (const [index, name, image] of LEGACY_SYMBOLS) {
+			expect(legacySymbol(index)).toBe(image);
+			expect(legacySymbol(name)).toBe(image);
 		}
+		expect(legacySymbol(38)).toBe('base:icon-embassy');
+		expect(legacySymbol('flag')).toBe('base:icon-embassy');
+		expect(legacySymbol(999)).toBeUndefined();
+		expect(legacySymbol('unknown')).toBeUndefined();
+	});
+
+	it('keeps the full name of an image', () => {
+		expect(symbolFromName('icons:anchor')).toBe('icons:anchor');
+		expect(symbolFromName('')).toBe('');
+		expect(symbolFromName('bench')).toBe('base:icon-bench');
+		expect(symbolFromName('unknown')).toBeUndefined();
+	});
+
+	it('moves the number of a marker symbol to its name', () => {
+		expect(legacyMarkerStyle({ pattern: 12, size: 2 })).toStrictEqual({ symbol: 'base:icon-bench', size: 2 });
+		expect(legacyMarkerStyle({ pattern: 999 })).toStrictEqual({});
+		expect(legacyMarkerStyle({ pattern: 12, symbol: 'icons:anchor' })).toStrictEqual({ symbol: 'icons:anchor' });
+		expect(legacyMarkerStyle({ size: 2 })).toStrictEqual({ size: 2 });
 	});
 });
 

@@ -55,6 +55,8 @@ export interface StateStyle {
 	color?: string;
 	label?: string;
 	visible?: boolean;
+	/** The symbol of a marker: the name of its image, e.g. "icons:anchor", or "" for none. */
+	symbol?: string;
 	/** The color of the text of a marker's label. */
 	labelColor?: string;
 	/** The color of the halo around a marker's symbol and label. */
@@ -104,8 +106,8 @@ export interface StateLegend {
 /** A row of the legend: a color, or a symbol in this color, and a text. */
 export interface StateLegendEntry {
 	color: string;
-	/** Index of a marker symbol. Without it, the entry shows a color swatch. */
-	symbol?: number;
+	/** A marker symbol, by the name of its image. Without it, the entry shows a color swatch. */
+	symbol?: string;
 	label: string;
 }
 

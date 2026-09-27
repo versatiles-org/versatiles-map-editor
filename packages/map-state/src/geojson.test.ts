@@ -8,7 +8,7 @@ describe('stateToGeoJSON', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [13.4, 52.5] }] });
 		const f = doc.features[0];
 		expect(f.geometry).toEqual({ type: 'Point', coordinates: [13.4, 52.5] });
-		expect(f.properties).toMatchObject({ 'symbol-pattern': 'flag', 'symbol-color': '#ff0000' });
+		expect(f.properties).toMatchObject({ 'symbol-pattern': 'base:icon-embassy', 'symbol-color': '#ff0000' });
 	});
 
 	it('maps a line to a LineString feature with stroke properties', () => {
@@ -80,7 +80,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 			{
 				type: 'marker',
 				point: [1, 2],
-				style: { color: '#abcdef', pattern: 10, label: 'x', size: 2 },
+				style: { color: '#abcdef', symbol: 'icons:anchor', label: 'x', size: 2 },
 				popup: { text: 'A **marker**' }
 			},
 			{
@@ -230,7 +230,7 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 	it('round-trips a document through base64 (stable fixed point + geometry preserved)', () => {
 		const doc = stateToGeoJSON({
 			elements: [
-				{ type: 'marker', point: [13.4, 52.5], style: { label: 'hello', pattern: 10 } },
+				{ type: 'marker', point: [13.4, 52.5], style: { label: 'hello', symbol: 'base:icon-beer_mug' } },
 				{
 					type: 'line',
 					points: [
@@ -267,7 +267,10 @@ describe('background', () => {
 
 describe('legend', () => {
 	it('round-trips as the meta member', () => {
-		const legend = { position: 'top' as const, entries: [{ color: '#ff0000', symbol: 3, label: 'A' }] };
+		const legend = {
+			position: 'top' as const,
+			entries: [{ color: '#ff0000', symbol: 'extras:pin-teardrop', label: 'A' }]
+		};
 		const doc = stateToGeoJSON({ meta: { legend }, elements: [] });
 		expect(doc.meta).toStrictEqual({ legend });
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ legend });
@@ -282,12 +285,25 @@ describe('legend', () => {
 					position: 'middle',
 					layout: 'inline',
 					font: 'monospace',
-					entries: [{ color: '#F00', label: 5, symbol: '2.4' }, { color: 'nope', label: 'x' }, 'x']
+					entries: [
+						{ color: '#F00', label: 5, symbol: 2.4 },
+						{ color: '#00F', label: 'y', symbol: 'flag' },
+						{ color: 'nope', label: 'x' },
+						'x'
+					]
 				}
 			}
 		};
 		expect(stateFromGeoJSON(doc as unknown as GeoJSONDocument).meta).toStrictEqual({
-			legend: { layout: 'inline', font: 'monospace', entries: [{ color: '#ff0000', label: '5', symbol: 2 }] }
+			legend: {
+				layout: 'inline',
+				font: 'monospace',
+				entries: [
+					// an old number or name of a symbol is read as the name of its image
+					{ color: '#ff0000', label: '5', symbol: 'base:icon-airport' },
+					{ color: '#0000ff', label: 'y', symbol: 'base:icon-embassy' }
+				]
+			}
 		});
 	});
 });

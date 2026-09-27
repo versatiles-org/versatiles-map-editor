@@ -1,27 +1,127 @@
 import type * as maplibregl from 'maplibre-gl';
-import { symbolEntries as entries } from '@versatiles/map-state';
+import { LEGACY_SYMBOLS } from '@versatiles/map-state';
 import { parseHex } from '$lib/utils/color.js';
+import { TILE_SERVER } from '$lib/utils/map_style.js';
+
+/** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
+export type IconAnchor =
+	'center' | 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
 export interface SymbolInfo {
-	index: number;
+	/** The image in the map style, e.g. "icons:anchor": the sprite sheet and the name in it. */
 	name: string;
-	image?: string;
-	offset?: [number, number];
-	icon?: string;
+	title: string;
+	/** Other words for the symbol, e.g. to find it. */
+	aliases: string[];
+	anchor: IconAnchor;
 }
 
-const symbols = new Map<number, SymbolInfo>(
-	entries.map(([index, name, image, offset]) => [index, { index, name, image, offset }])
-);
-const defaultSymbol = symbols.get(38)!;
-
-export function getSymbol(index: number): SymbolInfo {
-	return symbols.get(index) ?? defaultSymbol!;
+/** The sprite sheets of the tile server, with their symbols. */
+export interface SymbolCatalog {
+	sheets: string[];
+	symbols: SymbolInfo[];
 }
 
-export function getSymbolIndexByName(name: string): number | undefined {
-	const entry = entries.find((entry) => entry[1] === name);
-	return entry ? entry[0] : undefined;
+/** The symbol of new markers. */
+export const NEW_MARKER_SYMBOL = 'extras:pin-teardrop';
+
+const SPRITES_URL = `${TILE_SERVER}/assets/sprites/`;
+
+/**
+ * The symbols of older maps, which were all in the "base" sheet. Used until the server's are
+ * loaded. Some of their names have the same image: the first one is its title, the others aliases.
+ */
+const LEGACY_CATALOG: SymbolCatalog = { sheets: ['base'], symbols: [] };
+for (const [, title, name] of LEGACY_SYMBOLS) {
+	if (!name) continue;
+	const known = LEGACY_CATALOG.symbols.find((symbol) => symbol.name === name);
+	if (known) known.aliases.push(title);
+	else LEGACY_CATALOG.symbols.push({ name, title, aliases: [], anchor: 'center' });
+}
+
+let catalog = LEGACY_CATALOG;
+let byName = indexByName(catalog);
+let loading: Promise<SymbolCatalog> | undefined;
+
+function indexByName({ symbols }: SymbolCatalog): Map<string, SymbolInfo> {
+	return new Map(symbols.map((symbol) => [symbol.name, symbol]));
+}
+
+/**
+ * Load the sprite sheets of the tile server once, with the titles and aliases of their symbols.
+ * Patterns are no symbols: only images that can be recolored (SDF) are. Without the server, the
+ * symbols of older maps are used.
+ */
+export function loadSymbols(): Promise<SymbolCatalog> {
+	loading ??= fetchCatalog().then(
+		(loaded) => {
+			catalog = loaded;
+			byName = indexByName(loaded);
+			return loaded;
+		},
+		(error) => {
+			console.warn('Failed to load the symbols of the map', error);
+			return catalog;
+		}
+	);
+	return loading;
+}
+
+async function fetchCatalog(): Promise<SymbolCatalog> {
+	const sheets = await fetchJSON<string[]>('index.json');
+	if (!Array.isArray(sheets) || sheets.some((sheet) => typeof sheet !== 'string')) throw new Error('Invalid index');
+	const images = await Promise.all(sheets.map((sheet) => fetchJSON<Record<string, SpriteImage>>(`${sheet}.json`)));
+	const symbols = sheets.flatMap((sheet, i) =>
+		Object.entries(images[i])
+			.filter(([, image]) => image.sdf)
+			.map(([name, image]) => ({
+				name: `${sheet}:${name}`,
+				title: typeof image.title === 'string' ? image.title : name,
+				aliases: Array.isArray(image.aliases) ? image.aliases.filter((a) => typeof a === 'string') : [],
+				anchor: anchorOf(image.center)
+			}))
+	);
+	return { sheets, symbols };
+}
+
+interface SpriteImage {
+	sdf?: boolean;
+	title?: unknown;
+	aliases?: unknown[];
+	/** The point of the image on the point of the map, as fractions of its width and height. */
+	center?: unknown;
+}
+
+async function fetchJSON<T>(path: string): Promise<T> {
+	const response = await fetch(SPRITES_URL + path);
+	if (!response.ok) throw new Error(`${response.status} for ${path}`);
+	return (await response.json()) as T;
+}
+
+/** The anchor of an image by its center, e.g. [0.5, 1] (a pin) is "bottom". */
+export function anchorOf(center: unknown): IconAnchor {
+	if (!Array.isArray(center) || center.length !== 2) return 'center';
+	const [x, y] = center as number[];
+	const horizontal = x <= 0.25 ? 'left' : x >= 0.75 ? 'right' : '';
+	const vertical = y <= 0.25 ? 'top' : y >= 0.75 ? 'bottom' : '';
+	if (horizontal && vertical) return `${vertical}-${horizontal}` as IconAnchor;
+	return (vertical || horizontal || 'center') as IconAnchor;
+}
+
+/** The sprite sheets for the map style, all with symbols. */
+export function spriteSheets(): { id: string; url: string }[] {
+	return catalog.sheets.map((id) => ({ id, url: SPRITES_URL + id }));
+}
+
+/** All symbols, in the order of their sheets. */
+export function allSymbols(): SymbolInfo[] {
+	return catalog.symbols;
+}
+
+/** The symbol of an image, or undefined for no symbol (""). An unknown image gets its name as title. */
+export function getSymbol(name: string): SymbolInfo | undefined {
+	if (!name) return undefined;
+	return byName.get(name) ?? { name, title: name.replace(/^.*:/, ''), aliases: [], anchor: 'center' };
 }
 
 export class SymbolLibrary {
@@ -33,19 +133,18 @@ export class SymbolLibrary {
 	/**
 	 * Draw the symbol into the canvas: black, or in `color`, or with a white `halo` (in pixels).
 	 */
-	drawSymbol(canvas: HTMLCanvasElement, index: number, options: { halo?: number; color?: string } = {}): void {
-		this.draw(canvas, index, options, true);
+	drawSymbol(canvas: HTMLCanvasElement, name: string, options: { halo?: number; color?: string } = {}): void {
+		this.draw(canvas, name, options, true);
 	}
 
-	private draw(canvas: HTMLCanvasElement, index: number, options: { halo?: number; color?: string }, retry: boolean) {
-		const symbol = getSymbol(index);
-		if (!symbol.image) return;
+	private draw(canvas: HTMLCanvasElement, name: string, options: { halo?: number; color?: string }, retry: boolean) {
+		if (!name) return;
 
 		// throws while the map has no style yet (e.g. a legend in a shared map)
-		const image = this.map.style ? this.map.getImage(symbol.image) : undefined;
+		const image = this.map.style ? this.map.getImage(name) : undefined;
 		if (!image) {
 			// The sprite is not loaded yet: try once more when the map has settled
-			if (retry) this.map.once('idle', () => this.draw(canvas, index, options, false));
+			if (retry) this.map.once('idle', () => this.draw(canvas, name, options, false));
 			return;
 		}
 		const halo = options.halo ?? 0;
@@ -107,9 +206,5 @@ export class SymbolLibrary {
 			const v1 = v10 * (1 - xa) + v11 * xa;
 			return v0 * (1 - ya) + v1 * ya;
 		}
-	}
-
-	asList(): SymbolInfo[] {
-		return Array.from(symbols.values());
 	}
 }

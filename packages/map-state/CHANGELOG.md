@@ -14,10 +14,22 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   KML. Without them, the text is black and the halo white, as before.
 - `labelFont` in the metadata: one glyph font for the labels of all markers, instead of the font
   of the background map's labels.
+- `symbol` in the style of a marker, and in legend entries: the name of an image of the tile
+  server's sprite sheets, e.g. `icons:anchor`, so all their symbols can be used. `legacySymbol`,
+  `symbolFromName` and `legacyMarkerStyle` convert the symbols of older maps.
 
 ### Changed
 
 - Base64 strings with these colors cannot be read by version 1.0.0, which rejects their style keys.
+- **Breaking:** markers store their symbol as `symbol` (base64 style key 13, legend key 4) instead
+  of a number in `pattern`, and GeoJSON's `symbol-pattern` is the name of the image, e.g.
+  `base:icon-embassy` instead of `flag`. Older links and files are still read: their numbers and
+  names become the names of the images.
+
+### Removed
+
+- `symbolEntries`, `symbolName` and `symbolIndexByName`: symbols are names now. `LEGACY_SYMBOLS`
+  has the table of the older symbols.
 
 ## [1.0.0]
 

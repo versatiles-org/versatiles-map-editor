@@ -89,13 +89,16 @@ test('selecting a symbol closes the symbol picker', async ({ page }) => {
 	await waitForMapIsReady(page);
 
 	await drawElement(page, 'Marker');
-	await page.getByRole('button', { name: 'flag' }).click();
+	// a new marker is a map pin
+	await page.getByRole('button', { name: 'Symbol Map pin' }).click();
 	const dialog = page.getByRole('dialog');
 	await expect(dialog).toBeVisible();
 
-	await dialog.getByRole('button', { name: 'airplane', exact: true }).click();
+	// the symbols of all sprite sheets of the server
+	await dialog.getByRole('button', { name: 'Anchor', exact: true }).click();
 	await expect(dialog).toBeHidden();
-	await expect(page.getByRole('button', { name: 'airplane' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
+	await expect.poll(() => stateInUrl(page).elements[0].style).toMatchObject({ symbol: 'icons:anchor' });
 });
 
 test('style editor controls have unique ids and labels', async ({ page }) => {
@@ -117,7 +120,7 @@ test('style editor controls have unique ids and labels', async ({ page }) => {
 	// marker: symbol button and label field are labelled separately
 	await drawElement(page, 'Marker');
 	await expectUniqueIds();
-	await expect(page.getByRole('button', { name: 'Symbol flag' })).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Symbol Map pin' })).toBeVisible();
 	await expect(page.getByRole('textbox', { name: 'Label' })).toBeVisible();
 });
 

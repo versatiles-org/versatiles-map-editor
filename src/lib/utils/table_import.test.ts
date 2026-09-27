@@ -86,14 +86,17 @@ describe('importTable', () => {
 		const table = parseTable('lat,lon,kind\n1,2,Cafe\n3,4,Shop\n5,6, Cafe \n7,8,Other');
 		const { markers } = await importTable(table, {
 			position: { latitude: 0, longitude: 1 },
-			style: { color: '#ff0000', pattern: 38 },
-			category: { column: 2, styles: { Cafe: { color: '#0000ff', pattern: 12 }, Shop: { color: '#00ff00' } } }
+			style: { color: '#ff0000', symbol: 'extras:pin-teardrop' },
+			category: {
+				column: 2,
+				styles: { Cafe: { color: '#0000ff', symbol: 'base:icon-cafe' }, Shop: { color: '#00ff00' } }
+			}
 		});
 		expect(markers.map((m) => m.style)).toStrictEqual([
-			{ color: '#0000ff', pattern: 12 },
-			{ color: '#00ff00', pattern: 38 },
-			{ color: '#0000ff', pattern: 12 },
-			{ color: '#ff0000', pattern: 38 }
+			{ color: '#0000ff', symbol: 'base:icon-cafe' },
+			{ color: '#00ff00', symbol: 'extras:pin-teardrop' },
+			{ color: '#0000ff', symbol: 'base:icon-cafe' },
+			{ color: '#ff0000', symbol: 'extras:pin-teardrop' }
 		]);
 	});
 });
@@ -139,12 +142,12 @@ describe('categories', () => {
 	const table = parseTable('name,kind\nA,cafe\nB,shop\nC,cafe\nD,', true);
 
 	it('give each value of the column the next color and the symbol', () => {
-		const { categories, tooMany } = tableCategories(table, 1, ['#111111', '#222222'], 5);
+		const { categories, tooMany } = tableCategories(table, 1, ['#111111', '#222222'], 'icons:anchor');
 		expect(tooMany).toBe(0);
 		expect(categories).toStrictEqual([
-			{ value: 'cafe', count: 2, color: '#111111', symbol: 5 },
-			{ value: 'shop', count: 1, color: '#222222', symbol: 5 },
-			{ value: '', count: 1, color: '#111111', symbol: 5 }
+			{ value: 'cafe', count: 2, color: '#111111', symbol: 'icons:anchor' },
+			{ value: 'shop', count: 1, color: '#222222', symbol: 'icons:anchor' },
+			{ value: '', count: 1, color: '#111111', symbol: 'icons:anchor' }
 		]);
 	});
 
@@ -153,14 +156,15 @@ describe('categories', () => {
 			['name', ...Array.from({ length: MAX_CATEGORIES + 1 }, (_, i) => `N${i}`)].join('\n'),
 			true
 		);
-		expect(tableCategories(names, 0, ['#111111'], undefined)).toStrictEqual({
+		expect(tableCategories(names, 0, ['#111111'], '')).toStrictEqual({
 			categories: [],
 			tooMany: MAX_CATEGORIES + 1
 		});
 	});
 
 	it('are added to the legend after its entries', () => {
-		const { categories } = tableCategories(table, 1, ['#111111', '#222222'], undefined);
+		const { categories } = tableCategories(table, 1, ['#111111', '#222222'], '');
+		categories[1].symbol = 'icons:anchor';
 		const legend = legendWithCategories(
 			{ position: 'top-left', entries: [{ color: '#000000', label: 'Old' }] },
 			categories
@@ -169,17 +173,18 @@ describe('categories', () => {
 			position: 'top-left',
 			entries: [
 				{ color: '#000000', label: 'Old' },
-				{ color: '#111111', symbol: undefined, label: 'cafe' },
-				{ color: '#222222', symbol: undefined, label: 'shop' },
-				{ color: '#111111', symbol: undefined, label: '(empty)' }
+				// "" is no symbol
+				{ color: '#111111', label: 'cafe' },
+				{ color: '#222222', symbol: 'icons:anchor', label: 'shop' },
+				{ color: '#111111', label: '(empty)' }
 			]
 		});
 		expect(legendWithCategories(undefined, []).entries).toStrictEqual([]);
 	});
 
 	it('style markers with the color and the chosen symbol', () => {
-		expect(markerStyle('#ff0000', 3)).toStrictEqual({ color: '#ff0000', pattern: 3 });
-		expect(markerStyle('#ff0000', undefined)).toStrictEqual({ color: '#ff0000' });
+		expect(markerStyle('#ff0000', 'icons:anchor')).toStrictEqual({ color: '#ff0000', symbol: 'icons:anchor' });
+		expect(markerStyle('#ff0000', '')).toStrictEqual({ color: '#ff0000', symbol: '' });
 	});
 });
 

@@ -1,12 +1,11 @@
-// Symbol vocabulary of the serialization format: the canonical index <-> name
-// mapping shared by the codec (GeoJSON `symbol-pattern`) and the editor (which
-// adds sprite/offset rendering data on top). Kept asset-free so the codec stays
-// independent of the editor.
-
-export type SymbolEntry = [number, string, string?, [number, number]?];
-
-export const symbolEntries: SymbolEntry[] = [
-	[0, 'none'],
+/**
+ * Symbols are named by their image in the sprites of the tile server, e.g. "icons:anchor" or
+ * "base:icon-embassy", and "" is no symbol. Before, the format had a number and a short name for
+ * some images of the "base" sprite. Older links and files use them, so they are read as the names of
+ * their images.
+ */
+export const LEGACY_SYMBOLS: [number, string, string][] = [
+	[0, 'none', ''],
 	[1, 'airplane', 'base:icon-airfield'],
 	[2, 'airport', 'base:icon-airport'],
 	[3, 'alcohol shop', 'base:icon-alcohol_shop'],
@@ -24,7 +23,7 @@ export const symbolEntries: SymbolEntry[] = [
 	[15, 'books', 'base:icon-books'],
 	[16, 'bus', 'base:icon-bus'],
 	[17, 'butcher', 'base:icon-butcher'],
-	[18, 'cafe', 'base:icon-cafe', [2, 0]],
+	[18, 'cafe', 'base:icon-cafe'],
 	[19, 'car rental', 'base:icon-car_rental'],
 	[20, 'car wash', 'base:icon-car_wash'],
 	[21, 'castle', 'base:icon-castle'],
@@ -44,7 +43,7 @@ export const symbolEntries: SymbolEntry[] = [
 	[35, 'emergency phone', 'base:icon-emergency_phone'],
 	[36, 'fast food', 'base:icon-fast_food'],
 	[37, 'fire station', 'base:icon-fire_station'],
-	[38, 'flag', 'base:icon-embassy', [0, 0]],
+	[38, 'flag', 'base:icon-embassy'],
 	[39, 'florist', 'base:icon-florist'],
 	[40, 'fountain', 'base:icon-fountain'],
 	[41, 'furniture', 'base:icon-furniture'],
@@ -77,7 +76,7 @@ export const symbolEntries: SymbolEntry[] = [
 	[68, 'picnic site', 'base:icon-picnic_site'],
 	[69, 'place of worship', 'base:icon-person_kneeling_and_praying'],
 	[70, 'playground', 'base:icon-seesaw'],
-	[71, 'police', 'base:icon-police_officer', [-1, -3]],
+	[71, 'police', 'base:icon-police_officer'],
 	[72, 'postbox', 'base:icon-postbox'],
 	[73, 'prison', 'base:icon-prison'],
 	[74, 'rail light', 'base:transport-tram'],
@@ -88,8 +87,8 @@ export const symbolEntries: SymbolEntry[] = [
 	[79, 'run', 'base:icon-pitch'],
 	[80, 'school', 'base:icon-school'],
 	[81, 'scissor', 'base:icon-scissors_and_comb'],
-	[82, 'shield', 'base:icon-historic', [0, -10]],
-	[83, 'shoes', 'base:icon-shoes', [-5, 0]],
+	[82, 'shield', 'base:icon-historic'],
+	[83, 'shoes', 'base:icon-shoes'],
 	[84, 'shop', 'base:icon-shop'],
 	[85, 'shrine', 'base:icon-shrine'],
 	[87, 'sports', 'base:icon-sports'],
@@ -108,7 +107,7 @@ export const symbolEntries: SymbolEntry[] = [
 	[100, 'vendingmachine', 'base:icon-vending_machine'],
 	[101, 'veterinary', 'base:icon-veterinary'],
 	[102, 'video', 'base:icon-video'],
-	[103, 'viewpoint', 'base:icon-viewpoint', [0, -6]],
+	[103, 'viewpoint', 'base:icon-viewpoint'],
 	[104, 'waste basket', 'base:icon-waste_basket'],
 	[105, 'watermill', 'base:icon-watermill'],
 	[106, 'waterpark', 'base:icon-water_park'],
@@ -116,15 +115,15 @@ export const symbolEntries: SymbolEntry[] = [
 	[108, 'zoo', 'base:icon-zoo']
 ];
 
-const nameByIndex = new Map<number, string>(symbolEntries.map(([index, name]) => [index, name]));
-const indexByName = new Map<string, number>(symbolEntries.map(([index, name]) => [name, index]));
+const legacyByIndex = new Map<number, string>(LEGACY_SYMBOLS.map(([index, , image]) => [index, image]));
+const legacyByName = new Map<string, string>(LEGACY_SYMBOLS.map(([, name, image]) => [name, image]));
 
-/** Name of the symbol with the given index, or undefined if unknown. */
-export function symbolName(index: number): string | undefined {
-	return nameByIndex.get(index);
+/** The image name of a symbol of older links and files: by its number, or by its short name. */
+export function legacySymbol(value: number | string): string | undefined {
+	return typeof value === 'number' ? legacyByIndex.get(value) : legacyByName.get(value);
 }
 
-/** Index of the symbol with the given name, or undefined if unknown. */
-export function symbolIndexByName(name: string): number | undefined {
-	return indexByName.get(name);
+/** A symbol name as stored, or as older files stored it: an image name, "", or a short name. */
+export function symbolFromName(name: string): string | undefined {
+	return name === '' || name.includes(':') ? name : legacySymbol(name);
 }

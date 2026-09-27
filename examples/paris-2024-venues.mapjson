@@ -18,22 +18,22 @@
 			"entries": [
 				{
 					"color": "#0072b2",
-					"symbol": 88,
+					"symbol": "base:icon-stadium",
 					"label": "Stadiums and arenas"
 				},
 				{
 					"color": "#d55e00",
-					"symbol": 61,
+					"symbol": "base:icon-monument",
 					"label": "Temporary venues at landmarks"
 				},
 				{
 					"color": "#009e73",
-					"symbol": 66,
+					"symbol": "base:icon-outdoor",
 					"label": "Venues in nature"
 				},
 				{
 					"color": "#e69f00",
-					"symbol": 38,
+					"symbol": "base:icon-embassy",
 					"label": "Olympic Village"
 				}
 			]
@@ -58,7 +58,7 @@
 			"point": [2.3601, 48.9244],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Stade de France",
 				"align": 3
 			},
@@ -71,7 +71,7 @@
 			"point": [2.3542, 48.9204],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Aquatics Centre",
 				"align": 1
 			},
@@ -84,7 +84,7 @@
 			"point": [2.229, 48.8955],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "La Défense Arena"
 			},
 			"popup": {
@@ -96,7 +96,7 @@
 			"point": [2.3786, 48.8387],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Bercy Arena"
 			},
 			"popup": {
@@ -108,7 +108,7 @@
 			"point": [2.3599, 48.8995],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Porte de La Chapelle Arena",
 				"align": 1
 			},
@@ -121,7 +121,7 @@
 			"point": [2.2873, 48.8319],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "South Paris Arena",
 				"align": 4
 			},
@@ -134,7 +134,7 @@
 			"point": [2.5155, 48.9727],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "North Paris Arena"
 			},
 			"popup": {
@@ -146,7 +146,7 @@
 			"point": [2.253, 48.8414],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Parc des Princes",
 				"align": 2
 			},
@@ -159,7 +159,7 @@
 			"point": [2.2481, 48.847],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Roland-Garros",
 				"align": 3
 			},
@@ -172,7 +172,7 @@
 			"point": [2.2476, 48.929],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Yves-du-Manoir Stadium"
 			},
 			"popup": {
@@ -184,7 +184,7 @@
 			"point": [2.4271, 48.9361],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Le Bourget Climbing Venue"
 			},
 			"popup": {
@@ -196,7 +196,7 @@
 			"point": [2.0374, 48.7883],
 			"style": {
 				"color": "#0072b2",
-				"pattern": 88,
+				"symbol": "base:icon-stadium",
 				"label": "Velodrome"
 			},
 			"popup": {
@@ -208,7 +208,7 @@
 			"point": [2.2976, 48.8552],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Eiffel Tower Stadium**\nBeach volleyball"
@@ -219,7 +219,7 @@
 			"point": [2.3033, 48.8527],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Champ-de-Mars Arena**\nJudo, wrestling"
@@ -230,7 +230,7 @@
 			"point": [2.3126, 48.8661],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Grand Palais**\nFencing, taekwondo"
@@ -241,7 +241,7 @@
 			"point": [2.3137, 48.8639],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Pont Alexandre III**\nTriathlon, marathon swimming"
@@ -252,7 +252,7 @@
 			"point": [2.3125, 48.856],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Invalides**\nArchery"
@@ -263,7 +263,7 @@
 			"point": [2.3212, 48.8656],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**La Concorde**\nBMX freestyle, breaking, skateboarding, 3x3 basketball"
@@ -274,7 +274,7 @@
 			"point": [2.2885, 48.8616],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61
+				"symbol": "base:icon-monument"
 			},
 			"popup": {
 				"text": "**Trocadéro**\nRoad cycling, race walking"
@@ -285,7 +285,7 @@
 			"point": [2.1204, 48.8049],
 			"style": {
 				"color": "#d55e00",
-				"pattern": 61,
+				"symbol": "base:icon-monument",
 				"label": "Château de Versailles"
 			},
 			"popup": {
@@ -297,7 +297,7 @@
 			"point": [2.6393, 48.8659],
 			"style": {
 				"color": "#009e73",
-				"pattern": 66,
+				"symbol": "base:icon-outdoor",
 				"label": "Vaires-sur-Marne Nautical Stadium"
 			},
 			"popup": {
@@ -309,7 +309,7 @@
 			"point": [1.9588, 48.7822],
 			"style": {
 				"color": "#009e73",
-				"pattern": 66,
+				"symbol": "base:icon-outdoor",
 				"label": "Élancourt Hill"
 			},
 			"popup": {
@@ -321,7 +321,7 @@
 			"point": [2.0745, 48.7543],
 			"style": {
 				"color": "#009e73",
-				"pattern": 45,
+				"symbol": "base:icon-golf",
 				"label": "Le Golf National"
 			},
 			"popup": {

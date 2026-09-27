@@ -112,10 +112,10 @@
 					id="{uid}-{i}-symbol"
 					noneLabel="Color only"
 					map={manager.map}
-					bind:symbolIndex={
-						() => entry.symbol,
+					bind:symbol={
+						() => entry.symbol ?? '',
 						(symbol) => {
-							updateEntry(i, { symbol });
+							updateEntry(i, { symbol: symbol || undefined });
 							log();
 						}
 					}

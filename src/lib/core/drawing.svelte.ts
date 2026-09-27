@@ -5,6 +5,7 @@ import type { ElementType } from './element/registry.js';
 import type { GeoPoint } from '../utils/types.js';
 import { circle, distance } from '../utils/geometry.js';
 import { claimEvent, isMultiTouch, trackDrag, type MapPointerEvent } from '../utils/drag.js';
+import { NEW_MARKER_SYMBOL } from './symbols.js';
 
 /** The tool of the editor: selecting elements, or drawing a new one. */
 export type Tool = 'select' | ElementType;
@@ -150,7 +151,7 @@ export class DrawingHandler {
 		if (!this.active) return;
 		claimEvent(e);
 		const point: GeoPoint = [e.lngLat.lng, e.lngLat.lat];
-		if (this.#tool === 'marker') this.create({ type: 'marker', point });
+		if (this.#tool === 'marker') this.create({ type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } });
 		else if (this.#tool === 'line' || this.#tool === 'polygon') this.addPoint(point, e.point);
 	}
 

@@ -19,9 +19,9 @@ describe('MapLayerSymbol', () => {
 			'haloColor',
 			'label',
 			'labelColor',
-			'pattern',
 			'rotate',
-			'size'
+			'size',
+			'symbol'
 		]);
 	});
 
@@ -31,18 +31,18 @@ describe('MapLayerSymbol', () => {
 		expect(layer.rotate).toBe(0);
 		expect(layer.size).toBe(1);
 		expect(layer.halo).toBe(1);
-		expect(layer.symbolIndex).toBe(38);
+		expect(layer.symbol).toBe('base:icon-embassy');
 		expect(layer.label).toBe('');
 	});
 
 	it('gives its style as feature properties', () => {
 		layer.color = '#00ff00';
 		layer.size = 2;
-		layer.symbolIndex = 1;
+		layer.symbol = 'base:icon-airfield';
 		layer.label = 'Price {EUR}';
 		expect(layer.getProperties()).toStrictEqual({
 			icon: 'base:icon-airfield',
-			symbol: 1,
+			anchor: 'center',
 			color: 'rgb(0,255,0)',
 			rotate: 0,
 			size: 2,
@@ -73,7 +73,7 @@ describe('MapLayerSymbol', () => {
 		expect(layer.getProperties().position).toBe('bottom');
 		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
 		layer.labelAlign = 0; // auto
-		layer.symbolIndex = 0; // no image
+		layer.symbol = ''; // no image
 		expect(layer.getProperties().position).toBe('auto-center');
 		expect(LABEL_POSITIONS['auto-center'].filter((a) => typeof a === 'string')).toStrictEqual([
 			'center',
@@ -89,7 +89,7 @@ describe('MapLayerSymbol', () => {
 		layer.rotate = 45;
 		layer.size = 2;
 		layer.halo = 3;
-		layer.symbolIndex = 1;
+		layer.symbol = 'icons:anchor';
 		layer.label = 'Test Label';
 		layer.labelAlign = 2;
 
@@ -98,7 +98,7 @@ describe('MapLayerSymbol', () => {
 			rotate: 45,
 			size: 2,
 			halo: 3,
-			pattern: 1,
+			symbol: 'icons:anchor',
 			label: 'Test Label',
 			align: 2
 		});
@@ -110,7 +110,7 @@ describe('MapLayerSymbol', () => {
 			rotate: 90,
 			size: 3,
 			halo: 2,
-			pattern: 5,
+			symbol: 'icons:anchor',
 			label: 'New Label',
 			align: 2
 		});
@@ -119,9 +119,15 @@ describe('MapLayerSymbol', () => {
 		expect(layer.rotate).toBe(90);
 		expect(layer.size).toBe(3);
 		expect(layer.halo).toBe(2);
-		expect(layer.symbolIndex).toBe(5);
+		expect(layer.symbol).toBe('icons:anchor');
 		expect(layer.label).toBe('New Label');
 		expect(layer.labelAlign).toBe(2);
+	});
+
+	it('reads the number of the symbol of an older file', () => {
+		layer.setState({ pattern: 12, size: 2 });
+		expect(layer.symbol).toBe('base:icon-bench');
+		expect(layer.getState()).toStrictEqual({ symbol: 'base:icon-bench', size: 2 });
 	});
 
 	it('should restore falsy values', () => {

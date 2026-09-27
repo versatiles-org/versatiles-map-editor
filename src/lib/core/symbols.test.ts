@@ -1,57 +1,104 @@
 import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getSymbol, getSymbolIndexByName, SymbolLibrary } from './symbols.js';
+import { LEGACY_SYMBOLS } from '@versatiles/map-state';
 import { MockMap } from '$lib/__mocks__/map.js';
+import { SymbolLibrary } from './symbols.js';
 // Icon names of the "base" sprite that @versatiles/style loads. To update:
 // curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
 import spriteBase from './__fixtures__/sprite-base.json' with { type: 'json' };
 
+vi.unmock('./symbols.js');
+
+// a new module for each test, since it loads the symbols only once
+async function symbolsModule() {
+	vi.resetModules();
+	return await import('./symbols.js');
+}
+
 describe('getSymbol', () => {
-	it('should return the correct symbol for a given index', () => {
-		const symbol = getSymbol(1);
-		expect(symbol).toEqual({
-			index: 1,
-			name: 'airplane',
-			image: 'base:icon-airfield'
+	it('knows the symbols of older maps before the symbols of the server are loaded', async () => {
+		const { getSymbol, spriteSheets } = await symbolsModule();
+		expect(getSymbol('base:icon-airfield')).toStrictEqual({
+			name: 'base:icon-airfield',
+			title: 'airplane',
+			aliases: [],
+			anchor: 'center'
 		});
+		expect(spriteSheets()).toStrictEqual([{ id: 'base', url: 'https://tiles.versatiles.org/assets/sprites/base' }]);
 	});
 
-	it('should return the default symbol for an unknown index', () => {
-		const symbol = getSymbol(999);
-		expect(symbol).toEqual({
-			index: 38,
-			name: 'flag',
-			image: 'base:icon-embassy',
-			offset: [0, 0]
-		});
+	it('names an unknown image by its name, and "" is no symbol', async () => {
+		const { getSymbol } = await symbolsModule();
+		expect(getSymbol('icons:unknown')).toMatchObject({ name: 'icons:unknown', title: 'unknown' });
+		expect(getSymbol('')).toBeUndefined();
 	});
 });
 
-describe('symbol images', () => {
+describe('the symbols of older maps', () => {
 	const icons = spriteBase as Record<string, { sdf: boolean }>;
 
 	it('should all exist in the base sprite and be recolorable', () => {
-		const symbols = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map).asList();
-		const invalid = symbols
-			.filter((s) => s.image != null)
-			.filter((s) => {
-				const [sprite, icon] = s.image!.split(':');
-				return sprite !== 'base' || !icons[icon]?.sdf;
-			})
-			.map((s) => `${s.name}: ${s.image}`);
+		const invalid = LEGACY_SYMBOLS.filter(([, , image]) => image).filter(([, , image]) => {
+			const [sprite, icon] = image.split(':');
+			return sprite !== 'base' || !icons[icon]?.sdf;
+		});
 		expect(invalid).toStrictEqual([]);
 	});
 });
 
-describe('getSymbolIndexByName', () => {
-	it('should return the correct index for a given symbol name', () => {
-		const index = getSymbolIndexByName('airplane');
-		expect(index).toBe(1);
+describe('loadSymbols', () => {
+	const files: Record<string, unknown> = {
+		'index.json': ['base', 'extras'],
+		'base.json': {
+			'icon-bench': { sdf: true, title: 'Bench', aliases: ['seat'] },
+			'pattern-hatch': { sdf: false, title: 'Hatch' }
+		},
+		'extras.json': { 'pin-teardrop': { sdf: true, title: 'Map pin', aliases: ['pin', 3], center: [0.5, 1] } }
+	};
+
+	it('loads the symbols of all sheets once, without patterns', async () => {
+		const fetchMock = vi.fn(async (url: string) => {
+			const file = files[url.replace('https://tiles.versatiles.org/assets/sprites/', '')];
+			return new Response(JSON.stringify(file), { status: file ? 200 : 404 });
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const { loadSymbols, allSymbols, getSymbol, spriteSheets } = await symbolsModule();
+
+		await Promise.all([loadSymbols(), loadSymbols()]);
+		expect(fetchMock).toHaveBeenCalledTimes(3);
+		expect(allSymbols()).toStrictEqual([
+			{ name: 'base:icon-bench', title: 'Bench', aliases: ['seat'], anchor: 'center' },
+			{ name: 'extras:pin-teardrop', title: 'Map pin', aliases: ['pin'], anchor: 'bottom' }
+		]);
+		expect(getSymbol('extras:pin-teardrop')?.anchor).toBe('bottom');
+		expect(spriteSheets().map((sheet) => sheet.id)).toStrictEqual(['base', 'extras']);
+		vi.unstubAllGlobals();
 	});
 
-	it('should return undefined for an unknown symbol name', () => {
-		const index = getSymbolIndexByName('unknown');
-		expect(index).toBeUndefined();
+	it('keeps the symbols of older maps without the server', async () => {
+		vi.stubGlobal('fetch', async () => new Response('', { status: 500 }));
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const { loadSymbols, allSymbols, spriteSheets } = await symbolsModule();
+
+		await loadSymbols();
+		// once per image, without "none"
+		expect(allSymbols().length).toBe(new Set(LEGACY_SYMBOLS.map(([, , image]) => image).filter(Boolean)).size);
+		expect(new Set(allSymbols().map((symbol) => symbol.name)).size).toBe(allSymbols().length);
+		expect(spriteSheets().map((sheet) => sheet.id)).toStrictEqual(['base']);
+		vi.unstubAllGlobals();
+		vi.restoreAllMocks();
+	});
+});
+
+describe('anchorOf', () => {
+	it('places the center of the image on the point, or the side that it names', async () => {
+		const { anchorOf } = await symbolsModule();
+		expect(anchorOf(undefined)).toBe('center');
+		expect(anchorOf([0.5, 0.5])).toBe('center');
+		expect(anchorOf([0.5, 1])).toBe('bottom');
+		expect(anchorOf([0, 0])).toBe('top-left');
+		expect(anchorOf([1, 0.5])).toBe('right');
+		expect(anchorOf('nope')).toBe('center');
 	});
 });
 
@@ -94,7 +141,7 @@ describe('SymbolLibrary', () => {
 			}
 		});
 
-		symbolLibrary.drawSymbol(canvas, 1);
+		symbolLibrary.drawSymbol(canvas, 'base:icon-airfield');
 		expect(map.getImage).toBeCalledWith('base:icon-airfield');
 		expect(canvas.getContext).toBeCalledWith('2d');
 		expect(ctx.putImageData).toBeCalledWith(expect.any(MyImageData), 0, 0);
@@ -113,7 +160,7 @@ describe('SymbolLibrary', () => {
 			data: { data: new Uint8ClampedArray(4 * 4 * 4).fill(255), width: 4, height: 4 }
 		} as unknown as ReturnType<maplibregl.Map['getImage']>);
 
-		symbolLibrary.drawSymbol(canvas, 1, { color: '#0080ff' });
+		symbolLibrary.drawSymbol(canvas, 'base:icon-airfield', { color: '#0080ff' });
 		const data = (vi.mocked(ctx.putImageData).mock.lastCall![0] as unknown as { data: Uint8ClampedArray }).data;
 		expect([...data.slice(0, 4)]).toStrictEqual([0, 128, 255, 255]);
 	});
@@ -134,12 +181,12 @@ describe('SymbolLibrary', () => {
 		});
 
 		it('should not throw and draw nothing', () => {
-			expect(() => symbolLibrary.drawSymbol(canvas, 1)).not.toThrow();
+			expect(() => symbolLibrary.drawSymbol(canvas, 'base:icon-airfield')).not.toThrow();
 			expect(ctx.putImageData).not.toHaveBeenCalled();
 		});
 
 		it('should draw once the map is idle', () => {
-			symbolLibrary.drawSymbol(canvas, 1);
+			symbolLibrary.drawSymbol(canvas, 'base:icon-airfield');
 			vi.spyOn(map, 'getImage').mockReturnValue(image);
 			map.emit('idle');
 			expect(ctx.putImageData).toHaveBeenCalledTimes(1);
@@ -148,7 +195,7 @@ describe('SymbolLibrary', () => {
 		it('should wait while the map has no style yet', () => {
 			map.style = undefined;
 			const getImage = vi.spyOn(map, 'getImage');
-			expect(() => symbolLibrary.drawSymbol(canvas, 1)).not.toThrow();
+			expect(() => symbolLibrary.drawSymbol(canvas, 'base:icon-airfield')).not.toThrow();
 			expect(getImage).not.toHaveBeenCalled();
 
 			map.style = {};
@@ -158,18 +205,9 @@ describe('SymbolLibrary', () => {
 		});
 
 		it('should retry only once', () => {
-			symbolLibrary.drawSymbol(canvas, 1);
+			symbolLibrary.drawSymbol(canvas, 'base:icon-airfield');
 			map.emit('idle');
 			expect(map.listenerCount('idle')).toBe(0);
-		});
-	});
-
-	it('should return the list of all symbols', () => {
-		const symbols = symbolLibrary.asList();
-		expect(symbols.length).toBeGreaterThan(0);
-		expect(symbols[0]).toEqual({
-			index: 0,
-			name: 'none'
 		});
 	});
 });

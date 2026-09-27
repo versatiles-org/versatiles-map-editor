@@ -49,7 +49,7 @@ const sidebarAria = `
 `;
 
 /**
- * Check the requests to the tile server. Tiles, sprites and TileJSON depend only on the
+ * Check the requests to the tile server. Tiles, sprite sheets and TileJSON depend only on the
  * viewport and are compared exactly. The glyph ranges depend on the label texts in the
  * current tile data, so only the font and the basic Latin range are checked. The editor also
  * loads the list of the fonts, to offer them.
@@ -77,8 +77,17 @@ test('empty map', async ({ page }) => {
 	});
 
 	expectServerRequests(tracker(), [
+		// the editor loads the list of the sheets and their symbols too
+		'assets/sprites/base.json',
 		'assets/sprites/base.json',
 		'assets/sprites/base.png',
+		'assets/sprites/extras.json',
+		'assets/sprites/extras.json',
+		'assets/sprites/extras.png',
+		'assets/sprites/icons.json',
+		'assets/sprites/icons.json',
+		'assets/sprites/icons.png',
+		'assets/sprites/index.json',
 		'tiles/osm/5/15/10',
 		'tiles/osm/5/15/11',
 		'tiles/osm/5/16/10',
@@ -106,8 +115,17 @@ test('filled map', async ({ page }) => {
 	await waitForMapIsReady(page);
 
 	expectServerRequests(tracker(), [
+		// the editor loads the list of the sheets and their symbols too
+		'assets/sprites/base.json',
 		'assets/sprites/base.json',
 		'assets/sprites/base.png',
+		'assets/sprites/extras.json',
+		'assets/sprites/extras.json',
+		'assets/sprites/extras.png',
+		'assets/sprites/icons.json',
+		'assets/sprites/icons.json',
+		'assets/sprites/icons.png',
+		'assets/sprites/index.json',
 		'tiles/osm/13/4399/2686',
 		'tiles/osm/13/4399/2687',
 		'tiles/osm/13/4400/2686',

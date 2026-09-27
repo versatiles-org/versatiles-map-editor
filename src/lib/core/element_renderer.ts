@@ -2,7 +2,6 @@ import type * as maplibregl from 'maplibre-gl';
 import type { ExpressionSpecification, LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { StyleLayers } from './element/types.js';
-import { symbolEntries } from '@versatiles/map-state';
 import { dashArrays } from './map_layer/line.svelte.js';
 import { LABEL_POSITIONS } from './map_layer/symbol.svelte.js';
 
@@ -37,11 +36,6 @@ const DASH_ARRAYS = lookup(
 	'dash',
 	[...dashArrays].flatMap(([index, { array }]) => (array ? [[index, array] as [number, number[]]] : [])),
 	[100]
-);
-const ICON_OFFSETS = lookup(
-	'symbol',
-	symbolEntries.flatMap(([index, , , offset]) => (offset ? [[index, offset] as [number, [number, number]]] : [])),
-	[0, 0]
 );
 const LABEL_ANCHORS = lookup('position', Object.entries(LABEL_POSITIONS), LABEL_POSITIONS.auto);
 
@@ -79,7 +73,8 @@ export function elementStyle(font: string): {
 				layout: {
 					'symbol-sort-key': ['get', 'order'],
 					'icon-image': ['get', 'icon'],
-					'icon-offset': ICON_OFFSETS,
+					// e.g. the tip of a pin on the point
+					'icon-anchor': ['coalesce', ['get', 'anchor'], 'center'],
 					'icon-allow-overlap': true,
 					'icon-rotate': ['get', 'rotate'],
 					'icon-size': ['get', 'size'],

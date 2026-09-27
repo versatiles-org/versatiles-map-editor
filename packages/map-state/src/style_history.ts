@@ -18,7 +18,8 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	// only "false" is stored, "true" is the default
 	{ key: 10, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
 	{ key: 11, name: 'labelColor', encoded: (v: string) => colorKey(v) },
-	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) }
+	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) },
+	{ key: 13, name: 'symbol', encoded: (v: string) => v }
 ];
 
 /** In a style patch: the next 4 bits are the key of a field to remove. */

@@ -316,9 +316,10 @@ export class StateWriter {
 		this.writeArray(legend.entries, (entry) => {
 			this.writeInteger(1, 4);
 			this.writeColorValue(entry.color);
-			if (entry.symbol != null) {
-				this.writeInteger(2, 4);
-				this.writeVarint(entry.symbol);
+			if (entry.symbol) {
+				// the image name; key 2 was the number of a symbol in older links
+				this.writeInteger(4, 4);
+				this.writeString(entry.symbol);
 			}
 			if (entry.label) {
 				this.writeInteger(3, 4);
@@ -395,6 +396,8 @@ export class StateWriter {
 				return this.writeColorValue(style[name]!);
 			case 'label':
 				return this.writeString(style.label!);
+			case 'symbol':
+				return this.writeString(style.symbol!);
 			case 'visible':
 				// the key alone means "false"
 				return;

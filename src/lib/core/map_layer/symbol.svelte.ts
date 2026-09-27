@@ -1,6 +1,12 @@
 import { MapLayer } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
-import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
+import {
+	type StateStyle,
+	LABEL_ALIGN_NAMES,
+	SYMBOL_DEFAULTS,
+	legacyMarkerStyle,
+	removeDefaultFields
+} from '@versatiles/map-state';
 import { getSymbol } from '../symbols.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
@@ -55,7 +61,7 @@ export class MapLayerSymbol extends MapLayer {
 	#halo: number = $state(SYMBOL_DEFAULTS.halo);
 	#rotate: number = $state(SYMBOL_DEFAULTS.rotate);
 	#size: number = $state(SYMBOL_DEFAULTS.size);
-	#symbolIndex: number = $state(SYMBOL_DEFAULTS.pattern);
+	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
 	#label: string = $state(SYMBOL_DEFAULTS.label);
 	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
@@ -93,12 +99,13 @@ export class MapLayerSymbol extends MapLayer {
 		this.#size = value;
 		this.changed();
 	}
-	get symbolIndex(): number {
-		return this.#symbolIndex;
+	/** The image of the symbol, e.g. "icons:anchor", or "" for none. */
+	get symbol(): string {
+		return this.#symbol;
 	}
-	set symbolIndex(value: number) {
-		if (value === this.#symbolIndex) return;
-		this.#symbolIndex = value;
+	set symbol(value: string) {
+		if (value === this.#symbol) return;
+		this.#symbol = value;
 		this.changed();
 	}
 	get label(): string {
@@ -137,21 +144,19 @@ export class MapLayerSymbol extends MapLayer {
 		this.changed();
 	}
 
-	readonly symbolInfo = $derived(getSymbol(this.symbolIndex));
+	readonly symbolInfo = $derived(getSymbol(this.symbol));
 
 	/** The name of the label position, see `LABEL_POSITIONS`. */
 	private getPosition(): string {
 		const anchor = lookupLabelAlign(this.labelAlign).anchor;
 		if (anchor) return anchor;
-		return this.symbolInfo.image == null ? 'auto-center' : 'auto';
+		return this.symbolInfo == null ? 'auto-center' : 'auto';
 	}
 
 	getProperties() {
-		const { image } = this.symbolInfo;
+		const info = this.symbolInfo;
 		return {
-			...(image == null ? {} : { icon: image }),
-			// the layer looks up the offset of the icon by the symbol
-			symbol: this.symbolIndex,
+			...(info == null ? {} : { icon: info.name, anchor: info.anchor }),
 			color: Color.parse(this.color).asString(),
 			rotate: this.rotate,
 			size: this.size,
@@ -170,7 +175,7 @@ export class MapLayerSymbol extends MapLayer {
 				rotate: this.rotate,
 				size: this.size,
 				halo: this.halo,
-				pattern: this.symbolIndex,
+				symbol: this.symbol,
 				label: this.label,
 				align: this.labelAlign,
 				labelColor: this.labelColor,
@@ -180,12 +185,14 @@ export class MapLayerSymbol extends MapLayer {
 		);
 	}
 
-	setState(state: StateStyle) {
+	setState(style: StateStyle) {
+		// e.g. a file of an older version, with the number of the symbol
+		const state = legacyMarkerStyle(style);
 		if (state.color != null) this.color = state.color;
 		if (state.rotate != null) this.rotate = state.rotate;
 		if (state.size != null) this.size = state.size;
 		if (state.halo != null) this.halo = state.halo;
-		if (state.pattern != null) this.symbolIndex = state.pattern;
+		if (state.symbol != null) this.symbol = state.symbol;
 		if (state.label != null) this.label = state.label;
 		if (state.align != null) this.labelAlign = lookupLabelAlign(state.align).index;
 		if (state.labelColor != null) this.labelColor = state.labelColor;
