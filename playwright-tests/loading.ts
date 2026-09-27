@@ -77,6 +77,8 @@ test('empty map', async ({ page }) => {
 	expectServerRequests(tracker(), [
 		'assets/sprites/base.json',
 		'assets/sprites/base.png',
+		'tiles/osm/5/15/10',
+		'tiles/osm/5/15/11',
 		'tiles/osm/5/16/10',
 		'tiles/osm/5/16/11',
 		'tiles/osm/5/17/10',

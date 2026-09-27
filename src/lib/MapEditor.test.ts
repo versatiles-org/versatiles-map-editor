@@ -10,6 +10,7 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 		boxZoom = { disable: vi.fn() };
 		setMissingStyleImageResolver = vi.fn();
 		getCenter = vi.fn(() => new original.LngLat(0, 0));
+		getZoom = vi.fn(() => 5);
 		getBounds = vi.fn(() => new original.LngLatBounds([-1, -1], [1, 1]));
 		getSource = vi.fn();
 		on = vi.fn();
@@ -52,6 +53,7 @@ describe('MapEditor', () => {
 			import('./components/DrawBar.svelte'),
 			import('./components/SelectionBar.svelte'),
 			import('./components/ElementsDrawer.svelte'),
+			import('./components/StatusBar.svelte'),
 			import('./components/NodeDeleteButton.svelte')
 		]);
 	}, 60_000);

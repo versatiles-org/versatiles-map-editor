@@ -130,7 +130,7 @@
 	.position-bottom-left,
 	.position-bottom,
 	.position-bottom-right {
-		bottom: calc(var(--margin) + 24px);
+		bottom: calc(var(--margin) + 24px + var(--covered-bottom, 0px));
 	}
 	.position-top-left,
 	.position-left,

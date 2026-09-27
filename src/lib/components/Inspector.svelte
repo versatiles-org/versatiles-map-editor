@@ -92,7 +92,6 @@
 			</label>
 			<p class="label">Visitors can search for a place, e.g. their street. The map content does not change.</p>
 		</InspectorSection>
-		<p class="label hint">Select an element on the map to change its style.</p>
 	{/if}
 </div>
 
@@ -167,9 +166,5 @@
 		align-items: center;
 		gap: 6px;
 		margin-top: var(--gap);
-	}
-
-	.hint {
-		padding-top: var(--gap);
 	}
 </style>

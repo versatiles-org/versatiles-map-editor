@@ -4,6 +4,7 @@
 	import * as commands from '../core/commands.js';
 	import DialogFile from './DialogFile.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
+	import DialogShortcuts from './DialogShortcuts.svelte';
 	import Icon from './Icon.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.svelte.js';
@@ -24,6 +25,7 @@
 	let menu: HTMLDivElement | undefined = $state();
 	let dialogFile: DialogFile | undefined = $state();
 	let dialogImportTable: DialogImportTable | undefined = $state();
+	let dialogShortcuts: DialogShortcuts | undefined = $state();
 
 	const history = $derived(manager.state.history);
 	const hasSelection = $derived(manager.selection.selectedElements.length > 0);
@@ -284,6 +286,7 @@
 			keys: ['⌫', 'Del', 'Delete']
 		})}
 		<hr />
+		{@render item('Keyboard shortcuts', () => dialogShortcuts?.open(), { keys: ['?', '?', '?'] })}
 		<a
 			class="item"
 			role="menuitem"
@@ -301,6 +304,7 @@
 
 <DialogFile bind:this={dialogFile} />
 <DialogImportTable bind:this={dialogImportTable} {manager} />
+<DialogShortcuts bind:this={dialogShortcuts} />
 
 <style>
 	.main-menu {

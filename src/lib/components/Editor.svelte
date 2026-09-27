@@ -76,9 +76,6 @@
 					<output id="{uid}-measurement-{i}">{value}</output>
 				</InputRow>
 			{/each}
-			<p class="label">
-				Drag points to move.<br />Drag a midpoint to add.<br />Select a point and press Delete or × to remove it.
-			</p>
 		</InspectorSection>
 	{/if}
 {/key}

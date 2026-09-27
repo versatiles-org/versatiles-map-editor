@@ -170,3 +170,29 @@ test('the drawer of elements opens with E, and chooses the map, the legend or el
 	await expect(drawer).toBeHidden();
 	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
+
+test('the status line explains the tool and the selection, and ? lists all shortcuts', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+	);
+	await waitForMapIsReady(page);
+	const status = page.locator('.statusbar');
+
+	await expect(status).toContainText('Click an element to select it');
+	await expect(status).toContainText('Zoom');
+	await page.keyboard.press('l');
+	await expect(status).toContainText('Double-click or Enter finishes');
+	await page.keyboard.press('Escape');
+	await expect(status).toContainText('Click an element to select it');
+
+	// the dialog of the shortcuts, with the key or from the menu
+	const dialog = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
+	await page.keyboard.press('?');
+	await expect(dialog).toBeVisible();
+	await expect(dialog.getByRole('table', { name: 'Tools' }).getByRole('row')).toHaveCount(6);
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	await (await menuItem(page, 'Keyboard shortcuts')).click();
+	await expect(dialog).toBeVisible();
+});

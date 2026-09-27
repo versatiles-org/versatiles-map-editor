@@ -44,6 +44,9 @@
 	const DRAWER_WIDTH = 250;
 	// the width at the left that the tools and the drawer cover, e.g. for the legend
 	const coveredLeft = $derived(railWidth + (showSidebar && drawerOpen ? DRAWER_WIDTH : 0));
+	// the height of the map that the status line at the bottom covers
+	const STATUS_HEIGHT = 26;
+	const statusHeight = $derived(showSidebar ? STATUS_HEIGHT : 0);
 	const MAP_PADDING = 10;
 
 	// The map centers its content in the part that the bars leave free. When the sidebar is
@@ -53,7 +56,12 @@
 		if (!map) return;
 		const previous = map.getPadding().right ?? right;
 		if (previous === right) return;
-		map.setPadding({ top: MAP_PADDING + topbarHeight, right, bottom: MAP_PADDING, left: MAP_PADDING + railWidth });
+		map.setPadding({
+			top: MAP_PADDING + topbarHeight,
+			right,
+			bottom: MAP_PADDING + statusHeight,
+			left: MAP_PADDING + railWidth
+		});
 		map.panBy([(previous - right) / 2, 0], { duration: 0 });
 	});
 	let screenTooSmall = $state(false);
@@ -93,6 +101,7 @@
 			{ default: DrawBar },
 			{ default: SelectionBar },
 			{ default: ElementsDrawer },
+			{ default: StatusBar },
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
 			import('./core/geometry_manager_interactive.js'),
@@ -102,6 +111,7 @@
 			import('./components/DrawBar.svelte'),
 			import('./components/SelectionBar.svelte'),
 			import('./components/ElementsDrawer.svelte'),
+			import('./components/StatusBar.svelte'),
 			import('./components/NodeDeleteButton.svelte')
 		]);
 		return {
@@ -112,6 +122,7 @@
 			DrawBar,
 			SelectionBar,
 			ElementsDrawer,
+			StatusBar,
 			NodeDeleteButton
 		};
 	}
@@ -243,7 +254,7 @@
 		map.setPadding({
 			top: MAP_PADDING + (showSidebar ? TOPBAR_HEIGHT : 0),
 			right: MAP_PADDING + (showSidebar ? SIDEBAR_WIDTH : 0),
-			bottom: MAP_PADDING,
+			bottom: MAP_PADDING + (showSidebar ? STATUS_HEIGHT : 0),
 			left: MAP_PADDING + (showSidebar ? RAIL_WIDTH : 0)
 		});
 
@@ -278,7 +289,12 @@
 	}
 </script>
 
-<div class="page" class:editor={showSidebar} style:--covered-left="{coveredLeft}px">
+<div
+	class="page"
+	class:editor={showSidebar}
+	style:--covered-left="{coveredLeft}px"
+	style:--covered-bottom="{statusHeight}px"
+>
 	<div class="container">
 		<div class="map" bind:this={container}></div>
 	</div>
@@ -325,20 +341,32 @@
 				<editor.TopBar manager={geometryManager} />
 			{/if}
 		</div>
-		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:width="{RAIL_WIDTH}px">
+		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
 			{#if editor && geometryManager && geometryManager.isInteractive()}
 				<editor.ToolRail manager={geometryManager} bind:drawerOpen />
+			{/if}
+		</div>
+		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
+			{#if editor && geometryManager && geometryManager.isInteractive()}
+				<editor.StatusBar manager={geometryManager} />
 			{/if}
 		</div>
 	{/if}
 	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
 		<editor.NodeDeleteButton {geometryManager} />
 		<editor.DrawBar manager={geometryManager} left={coveredLeft} right={sidebarWidth} />
-		<editor.SelectionBar manager={geometryManager} top={TOPBAR_HEIGHT} left={coveredLeft} right={sidebarWidth} />
+		<editor.SelectionBar
+			manager={geometryManager}
+			top={TOPBAR_HEIGHT}
+			left={coveredLeft}
+			right={sidebarWidth}
+			bottom={STATUS_HEIGHT}
+		/>
 		<!-- hidden, not removed, so the list keeps e.g. its scroll position -->
 		<div
 			class="drawer-slot"
 			style:top="{TOPBAR_HEIGHT}px"
+			style:bottom="{STATUS_HEIGHT}px"
 			style:left="{RAIL_WIDTH}px"
 			style:width="{DRAWER_WIDTH}px"
 			hidden={!drawerOpen}
@@ -346,12 +374,12 @@
 			<editor.ElementsDrawer manager={geometryManager} onclose={() => (drawerOpen = false)} />
 		</div>
 		<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
-		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" hidden={!sidebarOpen}>
+		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />
 		</div>
 		<button
 			class="sidebar-toggle"
-			style:top="calc(50% + {TOPBAR_HEIGHT / 2}px)"
+			style:top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
 			style:right="{sidebarWidth}px"
 			aria-controls="sidebar"
 			aria-expanded={sidebarOpen}
@@ -445,7 +473,7 @@
 	.loading {
 		position: absolute;
 		left: 0;
-		bottom: 3em;
+		bottom: calc(3em + var(--covered-bottom));
 		width: fit-content;
 		margin: 0 auto;
 		display: flex;
@@ -503,26 +531,33 @@
 	.rail-slot {
 		position: absolute;
 		left: 0;
+		z-index: 3;
+		background: var(--color-bg);
+	}
+
+	.statusbar-slot {
+		position: absolute;
+		left: 0;
+		right: 0;
 		bottom: 0;
 		z-index: 3;
 		background: var(--color-bg);
 	}
 
-	/* the attribution of the map, right of the tools and the drawer */
+	/* the attribution of the map, right of the tools and the drawer, above the status line */
 	.page.editor .map :global(.maplibregl-ctrl-bottom-left) {
 		left: var(--covered-left);
+		bottom: var(--covered-bottom);
 	}
 
 	.drawer-slot {
 		position: absolute;
-		bottom: 0;
 		z-index: 3;
 	}
 
 	#sidebar {
 		position: absolute;
 		right: 0;
-		bottom: 0;
 		width: 250px;
 	}
 

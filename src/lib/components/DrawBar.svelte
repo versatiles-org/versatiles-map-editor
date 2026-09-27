@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+	import { typeName } from '$lib/utils/element_names.js';
 
 	/**
-	 * A bar at the bottom of the map while a drawing tool is chosen: what to do next, and buttons
-	 * to finish or cancel, since touch screens have no Enter and no Escape key.
+	 * A bar at the bottom of the map while a drawing tool is chosen: what is drawn, and buttons to
+	 * finish or cancel, since touch screens have no Enter and no Escape key.
 	 * `left` and `right` keep it centered in the part of the map between the bars.
 	 */
 	const {
@@ -16,26 +17,15 @@
 	const path = $derived(drawing.tool === 'line' || drawing.tool === 'polygon');
 	const count = $derived(drawing.points.length);
 
-	const hint = $derived.by(() => {
-		switch (drawing.tool) {
-			case 'marker':
-				return 'Click the map to place the marker.';
-			case 'circle':
-				return 'Drag from the center to the edge of the circle.';
-			case 'line':
-			case 'polygon':
-				if (count === 0) return `Click the map to start the ${drawing.tool}.`;
-				return `${count} ${count === 1 ? 'node' : 'nodes'}. ${
-					drawing.canFinish ? 'Double-click or press Enter to finish.' : 'Click to add more nodes.'
-				}`;
-		}
-		return '';
-	});
+	// what is drawn; the status line says how
+	const title = $derived(
+		path ? `${typeName(drawing.tool)}: ${count} ${count === 1 ? 'node' : 'nodes'}` : typeName(drawing.tool)
+	);
 </script>
 
 {#if drawing.active}
 	<div class="drawbar" style:--left="{left}px" style:--right="{right}px" role="group" aria-label="Drawing">
-		<span class="hint" role="status">{hint}</span>
+		<span class="hint" role="status">{title}</span>
 		{#if path}
 			<button class="button" disabled={count === 0} onclick={() => drawing.removeLastPoint()}>Remove last node</button>
 		{/if}
@@ -50,7 +40,7 @@
 	.drawbar {
 		position: absolute;
 		z-index: 3;
-		bottom: 40px;
+		bottom: calc(40px + var(--covered-bottom, 0px));
 		left: calc(var(--left) + (100% - var(--left) - var(--right)) / 2);
 		translate: -50% 0;
 		display: flex;

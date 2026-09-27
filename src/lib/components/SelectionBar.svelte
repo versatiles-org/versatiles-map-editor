@@ -7,15 +7,16 @@
 	/**
 	 * The actions of the selected elements, next to them on the map. It works with a mouse and
 	 * with touch, unlike a context menu, which would also hide the browser's own menu.
-	 * `top`, `left` and `right` are the parts of the map that the bars of the editor cover.
+	 * `top`, `left`, `right` and `bottom` are the parts of the map that the bars of the editor cover.
 	 * While a node is selected, the node is edited, and its button to delete it is not covered.
 	 */
 	const {
 		manager,
 		top = 0,
 		left = 0,
-		right = 0
-	}: { manager: GeometryManagerInteractive; top?: number; left?: number; right?: number } = $props();
+		right = 0,
+		bottom = 0
+	}: { manager: GeometryManagerInteractive; top?: number; left?: number; right?: number; bottom?: number } = $props();
 
 	const GAP = 10;
 	const selected = $derived(manager.selection.selectedElements);
@@ -51,7 +52,7 @@
 		const x = (x0 + x1) / 2 - w / 2;
 		position = {
 			x: Math.max(left + GAP, Math.min(width - right - w - GAP, x)),
-			y: Math.max(top + GAP, Math.min(height - h - GAP, y))
+			y: Math.max(top + GAP, Math.min(height - bottom - h - GAP, y))
 		};
 	}
 
