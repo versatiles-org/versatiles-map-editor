@@ -570,3 +570,45 @@ test('the inspector and the actions follow the selection', async ({ page }) => {
 	await expect(bar).toBeHidden();
 	await expect(title).toHaveText('Map');
 });
+
+test('style controls: pictures, a grid of positions, and sliders with their value', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.35, 52.48],
+					[13.45, 52.48],
+					[13.4, 52.52]
+				]
+			},
+			{ type: 'marker', point: [13.3, 52.5], style: { label: 'Cafe' } }
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const polygon = () => stateInUrl(page).elements[0] as { style?: { pattern?: number; opacity?: number } };
+
+	// the fill pattern as pictures, chosen by click and by arrow keys
+	await page.mouse.click(...(await project(page, [13.4, 52.49])));
+	const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
+	await expect(patterns.getByRole('radio')).toHaveCount(3);
+	await patterns.getByRole('radio', { name: 'diagonal', exact: true }).check();
+	await expect.poll(() => polygon().style?.pattern).toBe(1);
+	await page.keyboard.press('ArrowRight');
+	await expect.poll(() => polygon().style?.pattern).toBe(2);
+
+	// a slider shows its value
+	const opacity = page.getByRole('slider', { name: 'Opacity' });
+	await opacity.fill('0.4');
+	await expect(page.locator('output', { hasText: '40 %' })).toBeVisible();
+
+	// the label of a marker, at its place around the symbol
+	const [x, y] = await project(page, [13.3, 52.5]);
+	await page.mouse.click(x + 6, y - 8);
+	const positions = page.getByRole('radiogroup', { name: 'Label position' });
+	await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
+	await positions.getByRole('radio', { name: 'Above' }).check();
+	await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { align?: number } }).style?.align).toBe(3);
+});

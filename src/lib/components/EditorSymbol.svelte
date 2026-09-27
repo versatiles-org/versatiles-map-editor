@@ -5,6 +5,8 @@
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import ChoiceGroup from './ChoiceGroup.svelte';
+	import Slider from './Slider.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
 	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();
@@ -17,6 +19,27 @@
 	const label = $derived(group(layers, 'label'));
 	const labelAlign = $derived(group(layers, 'labelAlign'));
 	const size = $derived(group(layers, 'size'));
+	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
+	const CELLS: Record<string, [number, number]> = {
+		auto: [2, 2],
+		right: [2, 3],
+		left: [2, 1],
+		top: [1, 2],
+		bottom: [3, 2]
+	};
+	const NAMES: Record<string, string> = {
+		auto: 'Automatic',
+		right: 'Right',
+		left: 'Left',
+		top: 'Above',
+		bottom: 'Below'
+	};
+	const alignments = labelPositions.map(({ index, name }) => ({
+		value: index,
+		label: NAMES[name] ?? name,
+		cell: CELLS[name],
+		short: name === 'auto' ? 'Auto' : undefined
+	}));
 </script>
 
 <InputRow id="{uid}-symbol" label="Symbol" mixed={symbolIndex.mixed}>
@@ -38,25 +61,47 @@
 </InputRow>
 
 <InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
-	<input id="{uid}-size" type="range" min="0.5" max="3" step="0.1" bind:value={size.value} onchange={log} />
+	<Slider
+		id="{uid}-size"
+		min={0.5}
+		max={3}
+		step={0.1}
+		bind:value={size.value}
+		onchange={log}
+		format={(v) => `${v.toFixed(1)}×`}
+	/>
 </InputRow>
 
 <InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
-	<input id="{uid}-rotate" type="range" min="-180" max="180" step="15" bind:value={rotate.value} onchange={log} />
+	<Slider
+		id="{uid}-rotate"
+		min={-180}
+		max={180}
+		step={15}
+		bind:value={rotate.value}
+		onchange={log}
+		format={(v) => `${v}°`}
+	/>
 </InputRow>
 
 <InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
-	<input id="{uid}-halo" type="range" min="0" max="3" step="0.5" bind:value={halo.value} onchange={log} />
+	<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} format={(v) => `${v} px`} />
 </InputRow>
 
 <InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
 	<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
 </InputRow>
 
-<InputRow id="{uid}-labelAlign" label="Align Label" mixed={labelAlign.mixed}>
-	<select id="{uid}-labelAlign" bind:value={labelAlign.value} onchange={log}>
-		{#each labelPositions as { index, name } (index)}
-			<option value={index}>{name}</option>
-		{/each}
-	</select>
+<InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>
+	<ChoiceGroup
+		layout="grid"
+		labelledby="{uid}-labelAlign-label"
+		value={labelAlign.value}
+		mixed={labelAlign.mixed}
+		onchange={(index) => {
+			labelAlign.value = index;
+			log();
+		}}
+		options={alignments}
+	/>
 </InputRow>

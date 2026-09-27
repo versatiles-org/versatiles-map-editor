@@ -35,11 +35,11 @@ const sidebarAria = `
 - heading "Map" [level=2]
 - region "Background map":
   - heading "Background map" [level=3]
-  - combobox "Base map"
+  - radiogroup "Base map"
   - combobox "Theme"
   - combobox "Font"
   - combobox "Language"
-  - combobox "Labels"
+  - radiogroup "Labels"
 - region "Legend":
   - heading "Legend" [level=3]
   - button /^Add a legend/

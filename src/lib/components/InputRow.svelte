@@ -5,22 +5,28 @@
 		children,
 		label,
 		id,
-		mixed = false
+		mixed = false,
+		group = false
 	}: {
 		children: Snippet;
 		label: string;
 		id: string;
 		/** The selected elements have different values, and the control shows only the first one. */
 		mixed?: boolean;
+		/** The control is a group, e.g. of radio buttons, which the label names (`{id}-label`). */
+		group?: boolean;
 	} = $props();
 </script>
 
 <div class="row">
-	<label class="label" for={id} id="{id}-label"
-		>{label}{#if mixed}<span class="mixed" title="The selected elements have different values">
-				(mixed)</span
-			>{/if}</label
-	>
+	{#snippet text()}
+		{label}{#if mixed}<span class="mixed" title="The selected elements have different values"> (mixed)</span>{/if}
+	{/snippet}
+	{#if group}
+		<span class="label" id="{id}-label">{@render text()}</span>
+	{:else}
+		<label class="label" for={id} id="{id}-label">{@render text()}</label>
+	{/if}
 	{@render children()}
 </div>
 
@@ -32,7 +38,8 @@
 		justify-content: space-between;
 		align-items: center;
 		color: var(--color-text);
-		& > label {
+		& > label,
+		& > .label {
 			flex-grow: 0;
 		}
 		& > :global(button),

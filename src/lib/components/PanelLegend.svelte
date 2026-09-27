@@ -4,6 +4,7 @@
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import ChoiceGroup from './ChoiceGroup.svelte';
 	import { addLegendEntry } from '../core/commands.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -12,26 +13,39 @@
 	const legend: StateLegend = $derived(manager.legend ?? { entries: [] });
 	const log = () => manager.state.log();
 
-	const positions: [NonNullable<StateLegend['position']>, string][] = [
-		['top-left', 'Top left'],
-		['top', 'Top'],
-		['top-right', 'Top right'],
-		['right', 'Right'],
-		['bottom-right', 'Bottom right'],
-		['bottom', 'Bottom'],
-		['bottom-left', 'Bottom left'],
-		['left', 'Left']
+	type Position = NonNullable<StateLegend['position']>;
+	// at their places in a 3×3 grid, without the center
+	const positions: { value: Position; label: string; cell: [number, number] }[] = [
+		{ value: 'top-left', label: 'Top left', cell: [1, 1] },
+		{ value: 'top', label: 'Top', cell: [1, 2] },
+		{ value: 'top-right', label: 'Top right', cell: [1, 3] },
+		{ value: 'left', label: 'Left', cell: [2, 1] },
+		{ value: 'right', label: 'Right', cell: [2, 3] },
+		{ value: 'bottom-left', label: 'Bottom left', cell: [3, 1] },
+		{ value: 'bottom', label: 'Bottom', cell: [3, 2] },
+		{ value: 'bottom-right', label: 'Bottom right', cell: [3, 3] }
 	];
-	const layouts: [NonNullable<StateLegend['layout']>, string][] = [
-		['vertical', 'Vertical'],
-		['horizontal', 'Horizontal'],
-		['inline', 'Inline']
+	const layouts: { value: NonNullable<StateLegend['layout']>; label: string }[] = [
+		{ value: 'vertical', label: 'Vertical' },
+		{ value: 'horizontal', label: 'Horizontal' },
+		{ value: 'inline', label: 'Inline' }
+	];
+	const fonts: { value: NonNullable<StateLegend['font']>; label: string }[] = [
+		{ value: 'sans-serif', label: 'Sans' },
+		{ value: 'serif', label: 'Serif' },
+		{ value: 'monospace', label: 'Mono' }
 	];
 
 	/** A legend without entries is no legend. */
 	function update(change: Partial<StateLegend>) {
 		const next = { ...legend, ...change };
 		manager.legend = next.entries.length > 0 ? next : undefined;
+	}
+
+	/** A property of the legend, as one undo step. */
+	function change(properties: Partial<StateLegend>) {
+		update(properties);
+		log();
 	}
 
 	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
@@ -45,49 +59,32 @@
 </script>
 
 {#if legend.entries.length > 0}
-	<InputRow id="{uid}-position" label="Position">
-		<select
-			id="{uid}-position"
+	<InputRow id="{uid}-position" label="Position" group>
+		<ChoiceGroup
+			layout="grid"
+			labelledby="{uid}-position-label"
 			value={legend.position ?? 'bottom-left'}
-			onchange={(e) => {
-				update({ position: e.currentTarget.value as StateLegend['position'] });
-				log();
-			}}
-		>
-			{#each positions as [id, name] (id)}
-				<option value={id}>{name}</option>
-			{/each}
-		</select>
+			onchange={(position) => change({ position })}
+			options={positions}
+		/>
 	</InputRow>
 
-	<InputRow id="{uid}-layout" label="Layout">
-		<select
-			id="{uid}-layout"
+	<InputRow id="{uid}-layout" label="Layout" group>
+		<ChoiceGroup
+			labelledby="{uid}-layout-label"
 			value={legend.layout ?? 'vertical'}
-			onchange={(e) => {
-				update({ layout: e.currentTarget.value as StateLegend['layout'] });
-				log();
-			}}
-		>
-			{#each layouts as [id, name] (id)}
-				<option value={id}>{name}</option>
-			{/each}
-		</select>
+			onchange={(layout) => change({ layout })}
+			options={layouts}
+		/>
 	</InputRow>
 
-	<InputRow id="{uid}-font" label="Font">
-		<select
-			id="{uid}-font"
+	<InputRow id="{uid}-font" label="Font" group>
+		<ChoiceGroup
+			labelledby="{uid}-font-label"
 			value={legend.font ?? 'sans-serif'}
-			onchange={(e) => {
-				update({ font: e.currentTarget.value as StateLegend['font'] });
-				log();
-			}}
-		>
-			<option value="sans-serif">Sans-serif</option>
-			<option value="serif">Serif</option>
-			<option value="monospace">Monospace</option>
-		</select>
+			onchange={(font) => change({ font })}
+			options={fonts}
+		/>
 	</InputRow>
 
 	{#each legend.entries as entry, i (i)}

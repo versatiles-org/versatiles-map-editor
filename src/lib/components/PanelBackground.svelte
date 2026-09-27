@@ -3,6 +3,7 @@
 	import { changeSettings, getSettings, LANGUAGES, THEMES, type BackgroundSettings } from '$lib/utils/background.js';
 	import { config } from '$lib/utils/config.svelte.js';
 	import InputRow from './InputRow.svelte';
+	import ChoiceGroup from './ChoiceGroup.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
@@ -17,6 +18,16 @@
 		a.name.localeCompare(b.name)
 	);
 
+	const BASES: { value: BackgroundSettings['base']; label: string }[] = [
+		{ value: 'vector', label: 'Vector map' },
+		{ value: 'satellite', label: 'Satellite' }
+	];
+	const LABELS: { value: BackgroundSettings['labels']; label: string }[] = [
+		{ value: 'normal', label: 'Normal' },
+		{ value: 'fewer', label: 'Fewer' },
+		{ value: 'none', label: 'None' }
+	];
+
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
 		// and quick changes are separate undo steps.
@@ -25,11 +36,13 @@
 	}
 </script>
 
-<InputRow id="{uid}-base" label="Base map">
-	<select id="{uid}-base" value={settings.base} onchange={(e) => change('base', e.currentTarget.value as 'vector')}>
-		<option value="vector">Vector map</option>
-		<option value="satellite">Satellite</option>
-	</select>
+<InputRow id="{uid}-base" label="Base map" group>
+	<ChoiceGroup
+		labelledby="{uid}-base-label"
+		value={settings.base}
+		onchange={(base) => change('base', base)}
+		options={BASES}
+	/>
 </InputRow>
 
 {#if settings.base === 'vector'}
@@ -65,14 +78,11 @@
 	</select>
 </InputRow>
 
-<InputRow id="{uid}-labels" label="Labels">
-	<select
-		id="{uid}-labels"
+<InputRow id="{uid}-labels" label="Labels" group>
+	<ChoiceGroup
+		labelledby="{uid}-labels-label"
 		value={settings.labels}
-		onchange={(e) => change('labels', e.currentTarget.value as 'normal')}
-	>
-		<option value="normal">Normal</option>
-		<option value="fewer">Fewer</option>
-		<option value="none">None</option>
-	</select>
+		onchange={(labels) => change('labels', labels)}
+		options={LABELS}
+	/>
 </InputRow>

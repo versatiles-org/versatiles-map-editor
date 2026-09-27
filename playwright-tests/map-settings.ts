@@ -71,8 +71,8 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(mapContent).toStrictEqual(deselected);
 
 	await page.getByRole('combobox', { name: 'Language' }).selectOption('German');
-	await page.getByRole('combobox', { name: 'Labels' }).selectOption('Fewer');
-	await page.getByRole('combobox', { name: 'Base map' }).selectOption('Satellite');
+	await page.getByRole('radiogroup', { name: 'Labels' }).getByRole('radio', { name: 'Fewer' }).check();
+	await page.getByRole('radiogroup', { name: 'Base map' }).getByRole('radio', { name: 'Satellite' }).check();
 	// the colors of the vector map do not apply to the satellite map, the labels are kept
 	await expect
 		.poll(background)
@@ -86,7 +86,7 @@ test('styling the background map', async ({ page }) => {
 	await page.getByRole('button', { name: 'Undo' }).click();
 	// the URL is written throttled, so wait for the final state before reloading
 	await expect.poll(background).toStrictEqual(undone);
-	await expect(page.getByRole('combobox', { name: 'Base map' })).toHaveValue('vector');
+	await expect(page.getByRole('radio', { name: 'Vector map' })).toBeChecked();
 
 	// kept in the URL, and shown in the read-only viewer
 	await page.setViewportSize({ width: 500, height: 500 });
@@ -144,8 +144,8 @@ test('editing the legend', async ({ page }) => {
 	await entry.getByRole('button', { name: /^Symbol/ }).click();
 	await page.getByRole('button', { name: 'cafe', exact: true }).click();
 
-	await page.getByRole('combobox', { name: 'Position' }).selectOption('Top right');
-	await page.getByRole('combobox', { name: 'Layout' }).selectOption('Horizontal');
+	await page.getByRole('radiogroup', { name: 'Position' }).getByRole('radio', { name: 'Top right' }).check();
+	await page.getByRole('radiogroup', { name: 'Layout' }).getByRole('radio', { name: 'Horizontal' }).check();
 	await expect.poll(legendInUrl).toMatchObject({
 		position: 'top-right',
 		layout: 'horizontal',
@@ -260,7 +260,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 
 	// the legend has a generic font of its own
 	await page.getByRole('button', { name: 'Add a legend' }).click();
-	await page.getByRole('combobox', { name: 'Font' }).last().selectOption('Serif');
+	await page.getByRole('radiogroup', { name: 'Font' }).getByRole('radio', { name: 'Serif' }).check();
 	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
 	await expect.poll(() => stateInUrl(page).meta?.legend?.font).toBe('serif');
 });
