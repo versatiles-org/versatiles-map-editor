@@ -612,3 +612,70 @@ test('style controls: pictures, a grid of positions, and sliders with their valu
 	await positions.getByRole('radio', { name: 'Above' }).check();
 	await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { align?: number } }).style?.align).toBe(3);
 });
+
+test('the color picker is a popup, which stays in the viewport and opens where it was moved to', async ({ page }) => {
+	await page.setViewportSize({ width: 900, height: 560 });
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.35, 52.48],
+					[13.45, 52.48],
+					[13.4, 52.52]
+				]
+			}
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await page.mouse.click(...(await project(page, [13.4, 52.49])));
+	const [fillColor, strokeColor] = await page.getByRole('button', { name: /^Color/ }).all();
+	const popup = page.getByRole('dialog', { name: 'Color' });
+	const box = async () => (await popup.boundingBox())!;
+	const viewport = () => page.viewportSize()!;
+	const inViewport = async () => {
+		const { x, y, width, height } = await box();
+		const { width: w, height: h } = viewport();
+		return x >= 0 && y >= 0 && x + width <= w && y + height <= h;
+	};
+
+	// next to the sidebar, over the map, and not inside the scrolling sidebar
+	await fillColor.click();
+	await expect(popup).toBeVisible();
+	const sidebar = (await page.locator('.sidebar').boundingBox())!;
+	expect((await box()).x + (await box()).width).toBeLessThanOrEqual(sidebar.x);
+	expect(await inViewport()).toBe(true);
+
+	// moved by its title bar
+	const title = popup.getByText('Color', { exact: true });
+	const start = await box();
+	const handle = (await title.boundingBox())!;
+	await page.mouse.move(handle.x + 5, handle.y + 5);
+	await page.mouse.down();
+	await page.mouse.move(handle.x - 95, handle.y - 25, { steps: 5 });
+	await page.mouse.up();
+	expect((await box()).x).toBeCloseTo(start.x - 100, 0);
+	expect((await box()).y).toBeCloseTo(start.y - 30, 0);
+
+	// but not out of the viewport
+	await page.mouse.move(handle.x - 95, handle.y - 25);
+	await page.mouse.down();
+	await page.mouse.move(-500, -500, { steps: 5 });
+	await page.mouse.up();
+	expect(await inViewport()).toBe(true);
+	expect((await box()).x).toBe(8);
+	expect((await box()).y).toBe(8);
+
+	// another color picker opens where the popup was moved to
+	await page.keyboard.press('Escape');
+	await expect(popup).toBeHidden();
+	await strokeColor.click();
+	expect((await box()).x).toBe(8);
+	expect((await box()).y).toBe(8);
+
+	// and a smaller window keeps it in the viewport
+	await page.setViewportSize({ width: 700, height: 440 });
+	await expect.poll(inViewport).toBe(true);
+});
