@@ -1,5 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { LABEL_POSITIONS, MapLayerSymbol } from './symbol.svelte.js';
+import { iconBox, LABEL_POSITIONS, labelPositionTable, MapLayerSymbol } from './symbol.svelte.js';
+import { getSymbol, type SymbolInfo } from '../symbols.js';
 
 describe('MapLayerSymbol', () => {
 	let onChange: Mock<() => void>;
@@ -82,6 +83,34 @@ describe('MapLayerSymbol', () => {
 			'top',
 			'bottom'
 		]);
+	});
+
+	it('places the label around the image, e.g. beside the head of a pin on the point', () => {
+		const pin = { ...getSymbol('base:icon-bench')!, name: 'extras:pin-teardrop', height: 38, center: [0.5, 1] };
+		// the center is 19 px (1.1875 em) above the point, and the pin is 3 px (0.1875 em) higher than 32 px
+		expect(iconBox(pin as SymbolInfo)).toStrictEqual([0, -1.1875, 0, 0.1875]);
+		expect(iconBox(getSymbol('base:icon-bench'))).toStrictEqual([0, 0, 0, 0]);
+
+		const table = labelPositionTable([getSymbol('base:icon-bench')!, pin as SymbolInfo]);
+		const suffix = '@0,-1.1875,0,0.1875';
+		expect(Object.keys(table)).toStrictEqual([
+			...Object.keys(LABEL_POSITIONS),
+			...Object.keys(LABEL_POSITIONS).map((name) => name + suffix)
+		]);
+		// right of the head, and above it, farther away than above a symbol of 32 px
+		const near = (x: number, y: number) => [expect.closeTo(x), expect.closeTo(y)];
+		expect(table['left' + suffix]).toStrictEqual(['left', near(0.7, -1.1875)]);
+		expect(table['bottom' + suffix]).toStrictEqual(['bottom', near(0, -2.075)]);
+		expect(table['top' + suffix]).toStrictEqual(['top', near(0, -0.3)]);
+	});
+
+	it('names the label position by the box of the image', () => {
+		layer.symbol = 'extras:pin-teardrop';
+		// an unknown image, e.g. before the symbols are loaded, is 32×32 pixels on the point
+		expect(layer.getProperties().position).toBe('auto');
+		layer.symbol = 'base:icon-bench';
+		layer.labelAlign = 1; // right
+		expect(layer.getProperties().position).toBe('left');
 	});
 
 	it('should return correct state object', () => {

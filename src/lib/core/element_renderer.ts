@@ -3,7 +3,8 @@ import type { ExpressionSpecification, LayerSpecification, SourceSpecification }
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { StyleLayers } from './element/types.js';
 import { dashArrays } from './map_layer/line.svelte.js';
-import { LABEL_POSITIONS } from './map_layer/symbol.svelte.js';
+import { LABEL_POSITIONS, labelPositionTable } from './map_layer/symbol.svelte.js';
+import { allSymbols } from './symbols.js';
 
 /** The parts of a style that elements have, each drawn by one layer for all elements. */
 export type Role = keyof StyleLayers;
@@ -37,9 +38,11 @@ const DASH_ARRAYS = lookup(
 	[...dashArrays].flatMap(([index, { array }]) => (array ? [[index, array] as [number, number[]]] : [])),
 	[100]
 );
-const LABEL_ANCHORS = lookup('position', Object.entries(LABEL_POSITIONS), LABEL_POSITIONS.auto);
 
-/** The sources and layers that draw all elements. Every map style gets them. */
+/**
+ * The sources and layers that draw all elements. Every map style gets them. The label positions
+ * are those of the symbols that are loaded (see `loadSymbols`).
+ */
 export function elementStyle(font: string): {
 	sources: Record<string, SourceSpecification>;
 	layers: LayerSpecification[];
@@ -85,7 +88,11 @@ export function elementStyle(font: string): {
 					'text-size': ['*', ['get', 'size'], 16],
 					'text-justify': 'left',
 					'text-overlap': 'always',
-					'text-variable-anchor-offset': LABEL_ANCHORS
+					'text-variable-anchor-offset': lookup(
+						'position',
+						Object.entries(labelPositionTable(allSymbols())),
+						LABEL_POSITIONS.auto
+					)
 				},
 				paint: {
 					'icon-color': ['get', 'color'],

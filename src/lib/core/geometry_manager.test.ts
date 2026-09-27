@@ -27,9 +27,11 @@ describe('GeometryManager', () => {
 
 	describe('destroy', () => {
 		// Let the test decide when the TileJSON download finishes
-		function deferInlineSources() {
+		// async: the style is built once the symbols are loaded
+		async function deferInlineSources() {
 			let resolve!: (style: StyleSpecification) => void;
 			let reject!: (error: unknown) => void;
+			vi.mocked(inlineSources).mockClear();
 			vi.mocked(inlineSources).mockImplementationOnce(
 				() =>
 					new Promise((res, rej) => {
@@ -38,18 +40,19 @@ describe('GeometryManager', () => {
 					})
 			);
 			const manager = new GeometryManager(map as unknown as MaplibreMap);
+			await vi.waitFor(() => expect(inlineSources).toHaveBeenCalled());
 			map.setStyle.mockClear();
 			return { manager, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
 		}
 
 		it('sets the style once it is loaded', async () => {
-			const { resolve } = deferInlineSources();
+			const { resolve } = await deferInlineSources();
 			resolve({ version: 8, sources: {}, layers: [] });
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
 		});
 
 		it('does not set the style after destroy', async () => {
-			const { manager, resolve } = deferInlineSources();
+			const { manager, resolve } = await deferInlineSources();
 			manager.destroy();
 			resolve({ version: 8, sources: {}, layers: [] });
 			await new Promise((r) => setTimeout(r, 0));
@@ -58,7 +61,7 @@ describe('GeometryManager', () => {
 
 		it('does not fall back to the uninlined style after destroy', async () => {
 			const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-			const { manager, reject } = deferInlineSources();
+			const { manager, reject } = await deferInlineSources();
 			manager.destroy();
 			reject(new DOMException('The operation was aborted.', 'AbortError'));
 			await new Promise((r) => setTimeout(r, 0));
@@ -67,8 +70,8 @@ describe('GeometryManager', () => {
 			consoleError.mockRestore();
 		});
 
-		it('aborts the TileJSON download', () => {
-			const { manager } = deferInlineSources();
+		it('aborts the TileJSON download', async () => {
+			const { manager } = await deferInlineSources();
 			const fetchMock = vi.fn<typeof fetch>();
 			vi.stubGlobal('fetch', fetchMock);
 			const options = vi.mocked(inlineSources).mock.lastCall?.[1];
@@ -82,7 +85,7 @@ describe('GeometryManager', () => {
 		});
 
 		it('creates elements only once the style is loaded', async () => {
-			const { manager, resolve } = deferInlineSources();
+			const { manager, resolve } = await deferInlineSources();
 			const loading = manager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			await new Promise((r) => setTimeout(r, 0));
 			expect(manager.elements).toHaveLength(0);

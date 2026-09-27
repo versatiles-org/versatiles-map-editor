@@ -22,7 +22,10 @@ describe('getSymbol', () => {
 			name: 'base:icon-airfield',
 			title: 'airplane',
 			aliases: [],
-			anchor: 'center'
+			anchor: 'center',
+			width: 32,
+			height: 32,
+			center: [0.5, 0.5]
 		});
 		expect(spriteSheets()).toStrictEqual([{ id: 'base', url: 'https://tiles.versatiles.org/assets/sprites/base' }]);
 	});
@@ -53,7 +56,17 @@ describe('loadSymbols', () => {
 			'icon-bench': { sdf: true, title: 'Bench', aliases: ['seat'] },
 			'pattern-hatch': { sdf: false, title: 'Hatch' }
 		},
-		'extras.json': { 'pin-teardrop': { sdf: true, title: 'Map pin', aliases: ['pin', 3], center: [0.5, 1] } }
+		'extras.json': {
+			'pin-teardrop': {
+				sdf: true,
+				title: 'Map pin',
+				aliases: ['pin', 3],
+				width: 64,
+				height: 76,
+				pixelRatio: 2,
+				center: [0.5, 1]
+			}
+		}
 	};
 
 	it('loads the symbols of all sheets once, without patterns', async () => {
@@ -67,8 +80,26 @@ describe('loadSymbols', () => {
 		await Promise.all([loadSymbols(), loadSymbols()]);
 		expect(fetchMock).toHaveBeenCalledTimes(3);
 		expect(allSymbols()).toStrictEqual([
-			{ name: 'base:icon-bench', title: 'Bench', aliases: ['seat'], anchor: 'center' },
-			{ name: 'extras:pin-teardrop', title: 'Map pin', aliases: ['pin'], anchor: 'bottom' }
+			// without a size or center: 32×32 pixels, on the point
+			{
+				name: 'base:icon-bench',
+				title: 'Bench',
+				aliases: ['seat'],
+				anchor: 'center',
+				width: 32,
+				height: 32,
+				center: [0.5, 0.5]
+			},
+			// the size without the pixel ratio
+			{
+				name: 'extras:pin-teardrop',
+				title: 'Map pin',
+				aliases: ['pin'],
+				anchor: 'bottom',
+				width: 32,
+				height: 38,
+				center: [0.5, 1]
+			}
 		]);
 		expect(getSymbol('extras:pin-teardrop')?.anchor).toBe('bottom');
 		expect(spriteSheets().map((sheet) => sheet.id)).toStrictEqual(['base', 'extras']);
@@ -214,9 +245,33 @@ describe('SymbolLibrary', () => {
 
 describe('filterSymbols', () => {
 	const symbols = [
-		{ name: 'base:icon-cafe', title: 'Café', aliases: ['coffee'], anchor: 'center' as const },
-		{ name: 'base:icon-fire_station', title: 'Fire station', aliases: ['firefighters'], anchor: 'center' as const },
-		{ name: 'icons:anchor', title: 'Anchor', aliases: ['harbour'], anchor: 'center' as const }
+		{
+			name: 'base:icon-cafe',
+			title: 'Café',
+			aliases: ['coffee'],
+			anchor: 'center' as const,
+			width: 32,
+			height: 32,
+			center: [0.5, 0.5] as [number, number]
+		},
+		{
+			name: 'base:icon-fire_station',
+			title: 'Fire station',
+			aliases: ['firefighters'],
+			anchor: 'center' as const,
+			width: 32,
+			height: 32,
+			center: [0.5, 0.5] as [number, number]
+		},
+		{
+			name: 'icons:anchor',
+			title: 'Anchor',
+			aliases: ['harbour'],
+			anchor: 'center' as const,
+			width: 32,
+			height: 32,
+			center: [0.5, 0.5] as [number, number]
+		}
 	];
 	const names = (filter: string) => filterSymbols(symbols, filter).map((symbol) => symbol.name);
 

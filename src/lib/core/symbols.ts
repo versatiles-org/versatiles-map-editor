@@ -14,6 +14,16 @@ export interface SymbolInfo {
 	/** Other words for the symbol, e.g. to find it. */
 	aliases: string[];
 	anchor: IconAnchor;
+	/** The size of the image in pixels, at an icon size of 1. */
+	width: number;
+	height: number;
+	/** The point of the image on the point of the marker, as fractions of its width and height. */
+	center: [number, number];
+}
+
+/** The image of 32×32 pixels, centered on the point, of the symbols of older maps. */
+function centered(): Pick<SymbolInfo, 'anchor' | 'width' | 'height' | 'center'> {
+	return { anchor: 'center', width: 32, height: 32, center: [0.5, 0.5] };
 }
 
 /** The sprite sheets of the tile server, with their symbols. */
@@ -36,7 +46,7 @@ for (const [, title, name] of LEGACY_SYMBOLS) {
 	if (!name) continue;
 	const known = LEGACY_CATALOG.symbols.find((symbol) => symbol.name === name);
 	if (known) known.aliases.push(title);
-	else LEGACY_CATALOG.symbols.push({ name, title, aliases: [], anchor: 'center' });
+	else LEGACY_CATALOG.symbols.push({ name, title, aliases: [], ...centered() });
 }
 
 let catalog = LEGACY_CATALOG;
@@ -74,18 +84,40 @@ async function fetchCatalog(): Promise<SymbolCatalog> {
 	const symbols = sheets.flatMap((sheet, i) =>
 		Object.entries(images[i])
 			.filter(([, image]) => image.sdf)
-			.map(([name, image]) => ({
-				name: `${sheet}:${name}`,
-				title: typeof image.title === 'string' ? image.title : name,
-				aliases: Array.isArray(image.aliases) ? image.aliases.filter((a) => typeof a === 'string') : [],
-				anchor: anchorOf(image.center)
-			}))
+			.map(([name, image]): SymbolInfo => {
+				const pixelRatio = positive(image.pixelRatio) ?? 1;
+				const center = validCenter(image.center);
+				return {
+					name: `${sheet}:${name}`,
+					title: typeof image.title === 'string' ? image.title : name,
+					aliases: Array.isArray(image.aliases) ? image.aliases.filter((a) => typeof a === 'string') : [],
+					anchor: anchorOf(center),
+					width: (positive(image.width) ?? 32 * pixelRatio) / pixelRatio,
+					height: (positive(image.height) ?? 32 * pixelRatio) / pixelRatio,
+					center
+				};
+			})
 	);
 	return { sheets, symbols };
 }
 
+/** A positive number, or undefined. */
+function positive(value: unknown): number | undefined {
+	return typeof value === 'number' && value > 0 ? value : undefined;
+}
+
+/** The center of a sprite image, or the middle of the image without a valid one. */
+function validCenter(center: unknown): [number, number] {
+	if (!Array.isArray(center) || center.length !== 2) return [0.5, 0.5];
+	const [x, y] = center as unknown[];
+	return typeof x === 'number' && typeof y === 'number' ? [x, y] : [0.5, 0.5];
+}
+
 interface SpriteImage {
 	sdf?: boolean;
+	width?: unknown;
+	height?: unknown;
+	pixelRatio?: unknown;
 	title?: unknown;
 	aliases?: unknown[];
 	/** The point of the image on the point of the map, as fractions of its width and height. */
@@ -147,7 +179,7 @@ export function filterSymbols(symbols: SymbolInfo[], filter: string): SymbolInfo
 /** The symbol of an image, or undefined for no symbol (""). An unknown image gets its name as title. */
 export function getSymbol(name: string): SymbolInfo | undefined {
 	if (!name) return undefined;
-	return byName.get(name) ?? { name, title: name.replace(/^.*:/, ''), aliases: [], anchor: 'center' };
+	return byName.get(name) ?? { name, title: name.replace(/^.*:/, ''), aliases: [], ...centered() };
 }
 
 export class SymbolLibrary {

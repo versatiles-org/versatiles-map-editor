@@ -120,24 +120,25 @@ export class GeometryManager {
 
 	private async loadStyle(background: StateBackground | undefined) {
 		const request = ++this.styleRequest;
+		// The sprite sheets with all symbols, loaded once for all maps. The style needs them for
+		// its sprites and for the places of the labels around the symbols.
+		await loadSymbols();
+		if (this.destroyed || request !== this.styleRequest) return;
 		const style = buildStyle(background, this.#labelFont);
+		style.sprite = spriteSheets();
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
 		// The download is aborted and its result ignored once the manager is destroyed.
 		const signal = this.abortController.signal;
 		let inlined = style;
-		// the sprite sheets with all symbols, loaded once for all maps
-		const symbols = loadSymbols();
 		try {
 			inlined = await inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) });
 		} catch (error) {
 			if (this.destroyed) return; // includes the AbortError caused by destroy()
 			console.error('Failed to inline map style sources', error);
 		}
-		await symbols;
 		// a newer background replaces this one
 		if (this.destroyed || request !== this.styleRequest) return;
-		inlined.sprite = spriteSheets();
 
 		const previousStyle = this.map.style;
 		let onLoad!: () => void;

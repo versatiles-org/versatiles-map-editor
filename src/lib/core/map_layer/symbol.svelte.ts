@@ -7,31 +7,79 @@ import {
 	legacyMarkerStyle,
 	removeDefaultFields
 } from '@versatiles/map-state';
-import { getSymbol } from '../symbols.js';
+import { getSymbol, type SymbolInfo } from '../symbols.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
 
-// The distance of the label from the point, in ems, in the direction of its anchor
+// The distance of the label from the center of a symbol of 32×32 pixels, in ems, in the direction of its anchor
 const LABEL_OFFSET = 0.7;
-const anchorOffsets: Record<TextAnchor, [number, number]> = {
-	center: [0, 0],
-	left: [LABEL_OFFSET, 0],
-	right: [-LABEL_OFFSET, 0],
-	top: [0, LABEL_OFFSET],
-	bottom: [0, -LABEL_OFFSET]
-};
-const withOffsets = (anchors: TextAnchor[]) => anchors.flatMap((anchor) => [anchor, anchorOffsets[anchor]]);
+// The pixels of an image per em of its label, which have the same scale (`size`)
+const EM = 16;
+
+/**
+ * Where the image of a symbol is, in ems of its label: the shift of its center from the point
+ * (dx, dy), and how much larger than 32×32 pixels its half width and height are (ex, ey). E.g. a
+ * pin of 32×38 pixels stands on the point: [0, -1.1875, 0, 0.1875].
+ */
+export type IconBox = [number, number, number, number];
+const NO_BOX: IconBox = [0, 0, 0, 0];
+
+export function iconBox(symbol: SymbolInfo | undefined): IconBox {
+	if (!symbol) return NO_BOX;
+	const { width, height, center } = symbol;
+	// in ems from pixels rounded to hundredths, and without -0, since the box is part of the name of
+	// the label position
+	const em = (pixels: number) => Math.round(pixels * 100) / 100 / EM + 0;
+	return [em((0.5 - center[0]) * width), em((0.5 - center[1]) * height), em(width / 2 - EM), em(height / 2 - EM)];
+}
+
+/** The suffix of the name of a label position for an image, "" for one of 32×32 pixels on the point. */
+function boxSuffix(box: IconBox): string {
+	return box.every((value) => value === 0) ? '' : '@' + box.join(',');
+}
+
+/** The possible places of a label around an image, see `LABEL_POSITIONS`. */
+function positionsAround([dx, dy, ex, ey]: IconBox): Record<string, (TextAnchor | [number, number])[]> {
+	const offsets: Record<TextAnchor, [number, number]> = {
+		center: [dx, dy],
+		left: [dx + LABEL_OFFSET + ex, dy],
+		right: [dx - LABEL_OFFSET - ex, dy],
+		top: [dx, dy + LABEL_OFFSET + ey],
+		bottom: [dx, dy - LABEL_OFFSET - ey]
+	};
+	const withOffsets = (anchors: TextAnchor[]) => anchors.flatMap((anchor) => [anchor, offsets[anchor]]);
+	return {
+		auto: withOffsets(['left', 'right', 'top', 'bottom']),
+		'auto-center': withOffsets(['center', 'left', 'right', 'top', 'bottom']),
+		...Object.fromEntries(
+			(['left', 'right', 'top', 'bottom'] as const).map((anchor) => [anchor, withOffsets([anchor])])
+		)
+	};
+}
 
 /**
  * The possible places of a label with their offsets, by the name of the label position:
  * the chosen side, or the first side that fits ("auto"; "auto-center" also on the point, for
  * markers without image). The layer looks them up, since features cannot have array properties.
+ * These are for images of 32×32 pixels on the point; `labelPositionTable` adds the others.
  */
-export const LABEL_POSITIONS: Record<string, (TextAnchor | [number, number])[]> = {
-	auto: withOffsets(['left', 'right', 'top', 'bottom']),
-	'auto-center': withOffsets(['center', 'left', 'right', 'top', 'bottom']),
-	...Object.fromEntries((['left', 'right', 'top', 'bottom'] as const).map((anchor) => [anchor, withOffsets([anchor])]))
-};
+export const LABEL_POSITIONS = positionsAround(NO_BOX);
+
+/**
+ * The label positions for all images of the symbols: around the image, e.g. beside the head of
+ * a pin instead of its tip. The names of other images than those of `LABEL_POSITIONS` end with
+ * their box, e.g. "left@0,-1.1875,0,0.1875".
+ */
+export function labelPositionTable(symbols: SymbolInfo[]): Record<string, (TextAnchor | [number, number])[]> {
+	const table = { ...LABEL_POSITIONS };
+	for (const symbol of symbols) {
+		const box = iconBox(symbol);
+		const suffix = boxSuffix(box);
+		if (!suffix || table['auto' + suffix]) continue;
+		for (const [name, places] of Object.entries(positionsAround(box))) table[name + suffix] = places;
+	}
+	return table;
+}
 
 interface LabelAlign {
 	index: number;
@@ -149,8 +197,9 @@ export class MapLayerSymbol extends MapLayer {
 	/** The name of the label position, see `LABEL_POSITIONS`. */
 	private getPosition(): string {
 		const anchor = lookupLabelAlign(this.labelAlign).anchor;
-		if (anchor) return anchor;
-		return this.symbolInfo == null ? 'auto-center' : 'auto';
+		const suffix = boxSuffix(iconBox(this.symbolInfo));
+		if (anchor) return anchor + suffix;
+		return this.symbolInfo == null ? 'auto-center' : 'auto' + suffix;
 	}
 
 	getProperties() {
