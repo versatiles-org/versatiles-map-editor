@@ -38,6 +38,7 @@
 <style>
 	.delete-node {
 		position: absolute;
+		z-index: var(--z-floating, 2);
 		width: 24px;
 		height: 24px;
 		padding: 0;

@@ -17,10 +17,10 @@
 <style>
 	.notifications {
 		position: absolute;
-		z-index: 3;
+		z-index: var(--z-messages, 5);
 		/* above the attribution, centered in the map */
 		bottom: calc(40px + var(--covered-bottom, 0px));
-		left: 10px;
+		left: calc(var(--covered-left, 0px) + 10px);
 		right: calc(var(--sidebar) + 10px);
 		display: flex;
 		flex-direction: column;

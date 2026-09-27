@@ -425,6 +425,20 @@
 		--btn-gap: 5px;
 		--gap: 10px;
 		--border-radius: 1em;
+		/* The stacking order of everything over the map, from the bottom up. Each overlay takes its
+		   level from here, so a new one cannot end up behind or in front of the wrong ones. */
+		/* the legend, part of the map */
+		--z-legend: 1;
+		/* bars that float over the map: the selection, the drawing, the tab of the sidebar */
+		--z-floating: 2;
+		/* the search, whose results may cover the floating bars */
+		--z-search: 3;
+		/* the panels at the edges: the tools, the drawer, the sidebar, the status line */
+		--z-panels: 4;
+		/* messages, which must not be hidden by a panel */
+		--z-messages: 5;
+		/* the top bar, whose menu opens over everything else */
+		--z-topbar: 6;
 	}
 
 	.page,
@@ -486,7 +500,7 @@
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 		font-size: 0.875rem;
 		pointer-events: none;
-		z-index: 2;
+		z-index: var(--z-floating);
 		opacity: 0;
 		animation: appear 0.2s 0.5s forwards;
 	}
@@ -524,14 +538,14 @@
 		top: 0;
 		left: 0;
 		right: 0;
-		z-index: 3;
+		z-index: var(--z-topbar);
 		background: var(--color-bg);
 	}
 
 	.rail-slot {
 		position: absolute;
 		left: 0;
-		z-index: 3;
+		z-index: var(--z-panels);
 		background: var(--color-bg);
 	}
 
@@ -540,7 +554,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		z-index: 3;
+		z-index: var(--z-panels);
 		background: var(--color-bg);
 	}
 
@@ -552,11 +566,12 @@
 
 	.drawer-slot {
 		position: absolute;
-		z-index: 3;
+		z-index: var(--z-panels);
 	}
 
 	#sidebar {
 		position: absolute;
+		z-index: var(--z-panels);
 		right: 0;
 		width: 250px;
 	}
@@ -566,7 +581,7 @@
 		position: absolute;
 		top: 50%;
 		translate: 0 -50%;
-		z-index: 2;
+		z-index: var(--z-floating);
 		width: 20px;
 		height: 48px;
 		padding: 0;
@@ -607,7 +622,7 @@
 	   expand to the full width. Stacked, so they do not overlap. */
 	.top-overlays {
 		position: absolute;
-		z-index: 2;
+		z-index: var(--z-search);
 		display: flex;
 		flex-direction: column;
 		gap: var(--gap);

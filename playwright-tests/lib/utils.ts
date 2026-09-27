@@ -68,6 +68,34 @@ export async function drawElement(page: Page, tool: 'Marker' | 'Line' | 'Polygon
 	if (tool !== 'Marker') await page.keyboard.press('Enter');
 }
 
+/**
+ * The places of an element that something else covers: its center and points near its corners,
+ * where `document.elementFromPoint` does not find the element itself (or its content). Empty if
+ * the element is on top everywhere, e.g. `expect(await coveredPoints(menu)).toStrictEqual([])`.
+ */
+export async function coveredPoints(locator: Locator): Promise<string[]> {
+	await locator.scrollIntoViewIfNeeded();
+	return locator.evaluate((element) => {
+		const box = element.getBoundingClientRect();
+		const inset = Math.min(4, box.width / 4, box.height / 4);
+		const points: [number, number][] = [
+			[box.left + box.width / 2, box.top + box.height / 2],
+			[box.left + inset, box.top + inset],
+			[box.right - inset, box.top + inset],
+			[box.left + inset, box.bottom - inset],
+			[box.right - inset, box.bottom - inset]
+		];
+		const covered: string[] = [];
+		for (const [x, y] of points) {
+			const top = document.elementFromPoint(x, y);
+			if (top && (top === element || element.contains(top))) continue;
+			const name = top ? `${top.tagName.toLowerCase()}.${[...top.classList].join('.')}` : 'nothing';
+			covered.push(`${Math.round(x)},${Math.round(y)} by ${name}`);
+		}
+		return covered;
+	});
+}
+
 /** The center of the map as [lng, lat]. */
 export async function mapCenter(page: Page): Promise<Point> {
 	return page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());

@@ -77,7 +77,7 @@
 	.legend {
 		--margin: 10px;
 		position: absolute;
-		z-index: 1;
+		z-index: var(--z-legend, 1);
 		display: flex;
 		gap: 4px 12px;
 		box-sizing: border-box;

@@ -137,7 +137,7 @@
 <style>
 	.selection-bar {
 		position: absolute;
-		z-index: 2;
+		z-index: var(--z-floating, 2);
 		display: flex;
 		align-items: center;
 		gap: 2px;

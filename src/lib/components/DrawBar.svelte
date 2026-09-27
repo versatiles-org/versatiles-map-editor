@@ -39,7 +39,7 @@
 <style>
 	.drawbar {
 		position: absolute;
-		z-index: 3;
+		z-index: var(--z-floating, 2);
 		bottom: calc(40px + var(--covered-bottom, 0px));
 		left: calc(var(--left) + (100% - var(--left) - var(--right)) / 2);
 		translate: -50% 0;
