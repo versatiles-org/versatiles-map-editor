@@ -94,7 +94,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;
 features without geometry, with invalid coordinates, lines with fewer than 2
-points and polygons with fewer than 3 vertices are skipped. Altitudes and
+points, polygons with fewer than 3 vertices and circles without a positive radius
+are skipped. Altitudes and
 polygon holes are dropped. Style values are sanitized (clamped, rounded,
 colors normalized to lowercase hex) or fall back to the defaults.
 

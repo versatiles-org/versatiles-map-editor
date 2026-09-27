@@ -183,8 +183,10 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 		case 'Point': {
 			const point = toPoint(g.coordinates);
 			if (!point) return undefined;
-			const radius = sanitizeNumber(p.radius, 0);
-			if (p.subType === 'Circle' && radius !== undefined) {
+			if (p.subType === 'Circle') {
+				// a circle without a positive radius cannot be drawn: skipped, not turned into a marker
+				const radius = sanitizeNumber(p.radius);
+				if (radius === undefined || radius <= 0) return undefined;
 				return {
 					type: 'circle',
 					point,

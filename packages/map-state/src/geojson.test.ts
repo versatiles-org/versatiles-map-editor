@@ -363,8 +363,15 @@ describe('stateFromGeoJSON with foreign property values', () => {
 		).toEqual({ type: 'marker', point: [13.4, 52.5] });
 	});
 
-	it('treats a circle with an invalid radius as a marker', () => {
-		expect(styleOf({ subType: 'Circle', radius: 'wide' })).toMatchObject({ type: 'marker' });
+	it('skips a circle with an invalid radius, like other features it cannot map', () => {
+		const circle = (radius: unknown): GeoJSON.Feature => ({
+			type: 'Feature',
+			properties: { subType: 'Circle', radius, 'fill-color': '#00ff00' },
+			geometry: { type: 'Point', coordinates: [13.4, 52.5] }
+		});
+		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [circle('wide')] }).elements).toStrictEqual([]);
+		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [circle(-5)] }).elements).toStrictEqual([]);
+		expect(stateFromGeoJSON(circle(50)).elements).toMatchObject([{ type: 'circle', radius: 50 }]);
 	});
 
 	it('always produces encodable documents', () => {
