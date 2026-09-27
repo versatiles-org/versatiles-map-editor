@@ -32,7 +32,6 @@ const railAria = `
   - button "Elements" [expanded=false]
 `;
 const sidebarAria = `
-- combobox "Search address or place"
 - heading "Map" [level=2]
 - region "Background map":
   - heading "Background map" [level=3]
@@ -90,6 +89,10 @@ test('empty map', async ({ page }) => {
 	await expect(page.getByRole('banner')).toMatchAriaSnapshot(topbarAria);
 	await expect(page.getByRole('toolbar', { name: 'Tools' })).toMatchAriaSnapshot(railAria);
 	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
+	// the search is on the map, right of the tools
+	const search = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
+	expect(search.x).toBeGreaterThan(48);
+	expect(search.y).toBeGreaterThan(44);
 });
 
 test('filled map', async ({ page }) => {

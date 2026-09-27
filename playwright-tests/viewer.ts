@@ -161,20 +161,16 @@ test.describe('the share dialog on the smallest editor screen', () => {
 });
 
 test('the sidebar can be hidden, without moving the map content', async ({ page }) => {
-	// the search finds nothing, only the typed text matters
-	await page.route('https://geocode.versatiles.org/**', (route) =>
-		route.fulfill({ json: { type: 'FeatureCollection', features: [] } })
-	);
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	const search = page.getByRole('combobox', { name: 'Search address or place' });
-	await search.fill('Berlin');
+	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	await expect(title).toHaveText('Map');
 	const hide = page.getByRole('button', { name: 'Hide sidebar' });
 	await expect(hide).toHaveAttribute('aria-expanded', 'true');
 	const berlin = await project(page, [13.4, 52.5]);
 
 	await hide.click();
-	await expect(search).toBeHidden();
+	await expect(title).toBeHidden();
 	const show = page.getByRole('button', { name: 'Show sidebar' });
 	await expect(show).toHaveAttribute('aria-expanded', 'false');
 	// the tab is at the right edge of the map now
@@ -183,9 +179,9 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 	expect(moved[0]).toBeCloseTo(berlin[0], 0);
 	expect(moved[1]).toBeCloseTo(berlin[1], 0);
 
-	// the sidebar comes back as it was, e.g. with the typed search
+	// the sidebar comes back
 	await show.click();
-	await expect(search).toHaveValue('Berlin');
+	await expect(title).toHaveText('Map');
 	const back = await project(page, [13.4, 52.5]);
 	expect(back[0]).toBeCloseTo(berlin[0], 0);
 });

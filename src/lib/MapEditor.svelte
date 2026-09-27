@@ -58,8 +58,10 @@
 	});
 	let screenTooSmall = $state(false);
 	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
-	// only in the read-only viewer; the editor has its search in the sidebar
-	const showSearch = $derived(!showSidebar && geometryManager?.search === true);
+	// always in the editor, where a found place can be marked; in the viewer if the map offers it
+	const showSearch = $derived(
+		showSidebar ? geometryManager?.isInteractive() === true : geometryManager?.search === true
+	);
 	// until the map has loaded for the first time, and while a map from a link or file loads
 	const loading = $derived(!triggeredMapReady || geometryManager?.loading === true);
 	// the height of the search and the hint at the top of the viewer
@@ -114,6 +116,13 @@
 		};
 	}
 	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
+
+	/** Add a marker at a place that the search found. */
+	function markPlace(point: [number, number]) {
+		if (!geometryManager?.isInteractive()) return;
+		geometryManager.addElement({ type: 'marker', point });
+		geometryManager.state.log();
+	}
 
 	/** A click on the legend selects it in the editor, to edit it. */
 	function selectLegend() {
@@ -280,22 +289,28 @@
 	{/if}
 	<Notifications right={sidebarWidth} />
 	{#if geometryManager?.legend}
-		<!-- a legend at the top goes below the search and the hint -->
+		<!-- a legend at the top goes below the bar, the search and the hint -->
 		<Legend
 			legend={geometryManager.legend}
 			map={geometryManager.map}
 			left={coveredLeft}
 			right={sidebarWidth}
-			top={topOverlaysHeight ? topOverlaysHeight + 10 : topbarHeight}
+			top={topbarHeight + (topOverlaysHeight ? topOverlaysHeight + 10 : 0)}
 			selected={geometryManager.selection?.legendSelected ?? false}
 			onselect={showSidebar ? selectLegend : undefined}
 		/>
 	{/if}
 	{#if geometryManager && (showSearch || screenTooSmall)}
-		<div class="top-overlays" bind:offsetHeight={topOverlaysHeight}>
+		<div
+			class="top-overlays"
+			style:top="{topbarHeight + 10}px"
+			style:left="{coveredLeft + 10}px"
+			style:right="{sidebarWidth + 10}px"
+			bind:offsetHeight={topOverlaysHeight}
+		>
 			{#if showSearch}
-				<div class="viewer-search">
-					<SearchPlace map={geometryManager.map} />
+				<div class="map-search">
+					<SearchPlace map={geometryManager.map} onmark={showSidebar ? markPlace : undefined} />
 				</div>
 			{/if}
 			{#if screenTooSmall}
@@ -330,7 +345,7 @@
 		>
 			<editor.ElementsDrawer manager={geometryManager} onclose={() => (drawerOpen = false)} />
 		</div>
-		<!-- hidden, not removed, so the sidebar keeps e.g. its open panels -->
+		<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />
 		</div>
@@ -553,14 +568,11 @@
 		height: 100%;
 	}
 
-	/* The search and the hint of the viewer, at the top, since the attribution at the bottom can
+	/* The search, and the hint of the viewer, at the top, since the attribution at the bottom can
 	   expand to the full width. Stacked, so they do not overlap. */
 	.top-overlays {
 		position: absolute;
 		z-index: 2;
-		top: var(--gap);
-		left: var(--gap);
-		right: var(--gap);
 		display: flex;
 		flex-direction: column;
 		gap: var(--gap);
@@ -583,7 +595,7 @@
 		text-align: center;
 	}
 
-	.viewer-search {
+	.map-search {
 		width: min(260px, 100%);
 		font-size: 13px;
 		:global(input) {

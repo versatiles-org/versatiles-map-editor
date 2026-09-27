@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../style/index.scss';
-	import SearchPlace from './SearchPlace.svelte';
 	import Inspector from './Inspector.svelte';
 	import * as commands from '../core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
@@ -62,15 +61,6 @@
 
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
-		<SearchPlace
-			map={geometryManager.map}
-			onmark={(point) => {
-				geometryManager.addElement({ type: 'marker', point });
-				geometryManager.state.log();
-			}}
-		/>
-
-		<hr class="thick" />
 		<Inspector manager={geometryManager} />
 	</div>
 </div>
