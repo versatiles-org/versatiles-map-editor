@@ -7,14 +7,14 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import Legend from './components/map/Legend.svelte';
-	import Notifications from './components/ui/Notifications.svelte';
+	import Legend from '$lib/components/map/Legend.svelte';
+	import Notifications from '$lib/components/ui/Notifications.svelte';
 	import { notify } from '$lib/utils/notify.svelte.js';
-	import SearchPlace from './components/map/SearchPlace.svelte';
-	import { GeometryManager } from './core/geometry_manager.svelte.js';
-	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
-	import { PopupHandler } from './core/popup_handler.svelte.js';
-	import { NEW_MARKER_SYMBOL } from './core/symbols/catalog.js';
+	import SearchPlace from '$lib/components/map/SearchPlace.svelte';
+	import { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import { PopupHandler } from '$lib/core/popup_handler.svelte.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
 	import { loadConfig } from '$lib/background/config.svelte.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
@@ -156,15 +156,15 @@
 			{ default: StatusBar },
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
-			import('./core/geometry_manager_interactive.js'),
-			import('./components/shell/Sidebar.svelte'),
-			import('./components/shell/TopBar.svelte'),
-			import('./components/shell/ToolRail.svelte'),
-			import('./components/map/DrawBar.svelte'),
-			import('./components/map/SelectionBar.svelte'),
-			import('./components/shell/ElementsDrawer.svelte'),
-			import('./components/shell/StatusBar.svelte'),
-			import('./components/map/NodeDeleteButton.svelte')
+			import('$lib/core/geometry_manager_interactive.js'),
+			import('$lib/components/shell/Sidebar.svelte'),
+			import('$lib/components/shell/TopBar.svelte'),
+			import('$lib/components/shell/ToolRail.svelte'),
+			import('$lib/components/map/DrawBar.svelte'),
+			import('$lib/components/map/SelectionBar.svelte'),
+			import('$lib/components/shell/ElementsDrawer.svelte'),
+			import('$lib/components/shell/StatusBar.svelte'),
+			import('$lib/components/map/NodeDeleteButton.svelte')
 		]);
 		return {
 			GeometryManagerInteractive,
