@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { SelectionHandler } from './selection.svelte.js';
+import type { SelectionHandler } from './interaction/index.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';

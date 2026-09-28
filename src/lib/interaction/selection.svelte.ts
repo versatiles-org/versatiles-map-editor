@@ -1,8 +1,8 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from './element/abstract.svelte.js';
-import type { SelectionNode } from './element/types.js';
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { GeoPoint } from './types.js';
+import type { AbstractElement } from '../element/abstract.svelte.js';
+import type { SelectionNode } from '../element/types.js';
+import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { GeoPoint } from '../types.js';
 import { SelectionPointer } from './selection_pointer.js';
 
 /** The selected vertex of the selected line or polygon. */

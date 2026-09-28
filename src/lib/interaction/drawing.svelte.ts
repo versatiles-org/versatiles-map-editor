@@ -1,11 +1,11 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateElement } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { ElementType } from './element/registry.js';
-import type { GeoPoint } from './types.js';
-import { circle, distance } from './geometry.js';
+import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { ElementType } from '../element/registry.js';
+import type { GeoPoint } from '../types.js';
+import { circle, distance } from '../geometry.js';
 import { claimEvent, isMultiTouch, trackDrag, type MapPointerEvent } from './drag.js';
-import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
+import { NEW_MARKER_SYMBOL } from '../symbols_catalog.js';
 
 /** The tool of the editor: selecting elements, or drawing a new one. */
 export type Tool = 'select' | ElementType;

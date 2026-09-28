@@ -1,8 +1,8 @@
-import type { AbstractElement } from './element/abstract.svelte.js';
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+import type { AbstractElement } from '../element/abstract.svelte.js';
+import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import type { SelectionHandler } from './selection.svelte.js';
-import type { GeoPoint } from './types.js';
-import { lat2mercator } from './geometry.js';
+import type { GeoPoint } from '../types.js';
+import { lat2mercator } from '../geometry.js';
 import {
 	claimEvent,
 	isClaimed,
