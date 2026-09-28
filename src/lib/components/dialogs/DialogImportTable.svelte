@@ -4,8 +4,12 @@
 	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
 	import SymbolSelector from '$lib/components/inspector/PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import { ADDRESS_PARTS, guessColumns, parseTable, type AddressPart, type Table } from '$lib/table_import/table.js';
 	import {
+		ADDRESS_PARTS,
+		guessColumns,
+		parseTable,
+		type AddressPart,
+		type Table,
 		biasOptions,
 		boundsOf,
 		decodeTableFile,
@@ -18,7 +22,7 @@
 		type FailedRow,
 		type UncertainRow,
 		type LocationBias
-	} from '$lib/table_import/table_import.js';
+	} from '$lib/components/dialogs/table_import/index.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
