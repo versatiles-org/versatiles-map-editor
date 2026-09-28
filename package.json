@@ -31,7 +31,7 @@
     "upgrade": "vrt deps-upgrade"
   },
   "dependencies": {
-    "@versatiles/style": "^6.0.2",
+    "@versatiles/style": "^6.0.3",
     "maplibre-gl": "^6.11.2"
   },
   "devDependencies": {
