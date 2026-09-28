@@ -4,7 +4,7 @@ import { osm, satellite } from '@versatiles/style';
 
 vi.mock('@versatiles/style', { spy: true });
 
-describe('src/lib/utils/map_style.ts', () => {
+describe('src/lib/background/map_style.ts', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});

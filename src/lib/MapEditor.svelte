@@ -15,7 +15,7 @@
 	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
 	import { PopupHandler } from './core/popup_handler.svelte.js';
 	import { NEW_MARKER_SYMBOL } from './core/symbols.js';
-	import { loadConfig } from '$lib/utils/config.svelte.js';
+	import { loadConfig } from '$lib/background/config.svelte.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from '$lib/utils/throttle.js';
 

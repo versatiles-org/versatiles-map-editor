@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { config } from '$lib/utils/config.svelte.js';
-	import { closestFace, facesOf, familiesOf, unknownFace } from '$lib/utils/fonts.js';
+	import { config } from '$lib/background/config.svelte.js';
+	import { closestFace, facesOf, familiesOf, unknownFace } from '$lib/background/fonts.js';
 	import InputRow from './InputRow.svelte';
 
 	/**

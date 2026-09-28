@@ -19,8 +19,8 @@
 		type RGB
 	} from '$lib/utils/color.js';
 	import type { ColorPalette } from '$lib/core/color_palette.svelte.js';
-	import { getColorScheme } from '$lib/utils/color_schemes.js';
-	import { config } from '$lib/utils/config.svelte.js';
+	import { getColorScheme } from '$lib/background/color_schemes.js';
+	import { config } from '$lib/background/config.svelte.js';
 
 	let {
 		value = $bindable(),

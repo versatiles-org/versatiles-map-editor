@@ -8,7 +8,7 @@
 		THEMES,
 		type BackgroundSettings,
 		type MapColors
-	} from '$lib/utils/background.js';
+	} from '$lib/background/background.js';
 	import InputRow from './InputRow.svelte';
 	import FontSelect from './FontSelect.svelte';
 	import ChoiceGroup from './ChoiceGroup.svelte';
