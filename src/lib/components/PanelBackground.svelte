@@ -78,12 +78,13 @@
 {/if}
 
 {#if settings.base === 'satellite'}
-	<InputRow id="{uid}-overlay" label="Streets and labels">
+	<!-- the labels are set below, independently -->
+	<InputRow id="{uid}-streets" label="Streets">
 		<input
-			id="{uid}-overlay"
+			id="{uid}-streets"
 			type="checkbox"
-			checked={settings.overlay}
-			onchange={(e) => change('overlay', e.currentTarget.checked)}
+			checked={settings.streets}
+			onchange={(e) => change('streets', e.currentTarget.checked)}
 		/>
 	</InputRow>
 {/if}
@@ -130,8 +131,8 @@
 	<button class="btn" disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</button>
 </div>
 
-<!-- the imagery alone has no labels -->
-{#if settings.overlay}
+<!-- the font and language of the labels, unless the satellite map has none -->
+{#if settings.base === 'vector' || settings.labels !== 'none'}
 	<FontSelect id={uid} value={settings.font} onchange={(font) => font && change('font', font)} />
 
 	<InputRow id="{uid}-language" label="Language">
@@ -146,13 +147,13 @@
 			{/each}
 		</select>
 	</InputRow>
-
-	<InputRow id="{uid}-labels" label="Labels" group>
-		<ChoiceGroup
-			labelledby="{uid}-labels-label"
-			value={settings.labels}
-			onchange={(labels) => change('labels', labels)}
-			options={LABELS}
-		/>
-	</InputRow>
 {/if}
+
+<InputRow id="{uid}-labels" label="Labels" group>
+	<ChoiceGroup
+		labelledby="{uid}-labels-label"
+		value={settings.labels}
+		onchange={(labels) => change('labels', labels)}
+		options={LABELS}
+	/>
+</InputRow>

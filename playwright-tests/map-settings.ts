@@ -112,22 +112,43 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 		page.evaluate(() => Object.keys((window as unknown as MapWindow).map.getStyle()?.sources ?? {}));
 
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	const overlay = page.getByRole('checkbox', { name: 'Streets and labels' });
-	await expect(overlay).toBeChecked();
-	await overlay.uncheck();
+	const streets = page.getByRole('checkbox', { name: 'Streets' });
+	const labels = page.getByRole('radiogroup', { name: 'Labels' });
+	const layerIds = () =>
+		page.evaluate(() => (window as unknown as MapWindow).map.getStyle()?.layers.map((l) => l.id) ?? []);
+	await expect(streets).toBeChecked();
+
+	// the labels without the streets
+	await streets.uncheck();
+	await expect
+		.poll(() => background()?.options.osmOverlay)
+		.toMatchObject({ layers: { roads: false, transit: false, markings: false } });
+	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(false);
+	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(true);
+
+	// neither: only the imagery and the elements, which are still drawn
+	await labels.getByRole('radio', { name: 'None' }).check();
 	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
-	// only the imagery and the elements, which are still drawn
 	await expect.poll(sources).not.toContain('versatiles-shortbread');
 	expect(await sources()).toContain('satellite');
 	await waitForMapIsIdle(page);
 	await expect.poll(async () => (await drawnElements(page)).symbol).toStrictEqual([1]);
-	// the imagery has no labels to set
-	await expect(page.getByRole('radiogroup', { name: 'Labels' })).toBeHidden();
+	// without labels, there is no font or language to set
+	await expect(page.getByRole('combobox', { name: 'Language' })).toBeHidden();
 
-	await overlay.check();
-	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: {} });
-	await expect(page.getByRole('radiogroup', { name: 'Labels' })).toBeVisible();
+	// the streets without the labels
+	await streets.check();
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } });
 	await expect.poll(sources).toContain('versatiles-shortbread');
+	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(true);
+	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(false);
+
+	// and both again
+	await labels.getByRole('radio', { name: 'Normal' }).check();
+	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: {} });
+	await expect(page.getByRole('combobox', { name: 'Language' })).toBeVisible();
 });
 
 test('changing the colors of the vector map and of the satellite imagery', async ({ page }) => {
@@ -218,7 +239,7 @@ test('black and white become exactly what is set, on both maps', async ({ page }
 
 	// the satellite map with the same levels, also for its streets and labels
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await expect(page.getByRole('checkbox', { name: 'Streets and labels' })).toBeChecked();
+	await expect(page.getByRole('checkbox', { name: 'Streets' })).toBeChecked();
 	await waitForMapIsIdle(page);
 	await expect.poll(async () => (await channelRange(page))[0]).toBeGreaterThanOrEqual(near(127.5)[0]);
 

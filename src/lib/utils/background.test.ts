@@ -5,7 +5,7 @@ describe('getSettings', () => {
 	it('reads the editor default', () => {
 		expect(getSettings()).toStrictEqual({
 			base: 'vector',
-			overlay: true,
+			streets: true,
 			theme: 'colorful',
 			font: 'noto_sans_regular',
 			language: 'user',
@@ -22,7 +22,7 @@ describe('getSettings', () => {
 			})
 		).toStrictEqual({
 			base: 'vector',
-			overlay: true,
+			streets: true,
 			theme: 'gray',
 			font: 'lato_regular',
 			language: 'local',
@@ -72,18 +72,39 @@ describe('changeSettings', () => {
 		});
 	});
 
-	it('shows the satellite imagery without the overlay, and with it again', () => {
+	it('shows the streets and the labels over the imagery independently', () => {
 		const sat = changeSettings(undefined, { base: 'satellite', language: 'fr' });
-		expect(getSettings(sat).overlay).toBe(true);
-		const imagery = changeSettings(sat, { overlay: false });
+		expect(getSettings(sat)).toMatchObject({ streets: true, labels: 'normal' });
+
+		// labels without streets: the roads, railways, ferries and one-way arrows are hidden
+		const labelsOnly = changeSettings(sat, { streets: false });
+		expect(labelsOnly?.options.osmOverlay).toStrictEqual({
+			text: { language: 'fr' },
+			layers: { roads: false, transit: false, markings: false }
+		});
+		expect(getSettings(labelsOnly)).toMatchObject({ streets: false, labels: 'normal' });
+
+		// streets without labels
+		const streetsOnly = changeSettings(sat, { labels: 'none' });
+		expect(getSettings(streetsOnly)).toMatchObject({ streets: true, labels: 'none' });
+
+		// neither: the imagery alone
+		const imagery = changeSettings(labelsOnly, { labels: 'none' });
 		expect(imagery).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
-		expect(getSettings(imagery)).toMatchObject({ base: 'satellite', overlay: false });
-		// labels need the overlay
+		expect(changeSettings(streetsOnly, { streets: false })).toStrictEqual(imagery);
+		expect(getSettings(imagery)).toMatchObject({ base: 'satellite', streets: false, labels: 'none' });
+		// hiding more changes nothing
 		expect(changeSettings(imagery, { labels: 'none' })).toStrictEqual(imagery);
-		// the overlay comes back with its defaults
-		expect(changeSettings(imagery, { overlay: true })).toStrictEqual({ builder: 'satellite', options: {} });
-		// the vector map always has its streets and labels
-		expect(getSettings(changeSettings(imagery, { base: 'vector' })).overlay).toBe(true);
+
+		// from the imagery alone, each comes back on its own
+		expect(getSettings(changeSettings(imagery, { streets: true }))).toMatchObject({ streets: true, labels: 'none' });
+		expect(getSettings(changeSettings(imagery, { labels: 'fewer' }))).toMatchObject({
+			streets: false,
+			labels: 'fewer'
+		});
+
+		// the vector map always has its streets
+		expect(getSettings(changeSettings(imagery, { base: 'vector' })).streets).toBe(true);
 	});
 
 	it('changes the colors of the vector map, and stores only changed values', () => {
@@ -146,11 +167,11 @@ describe('changeSettings', () => {
 			osmOverlay: { text: { language: 'user' }, recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
 		});
 		// the imagery alone keeps its colors, and the overlay gets them again when it is shown
-		const imagery = changeSettings(faded, { overlay: false });
+		const imagery = changeSettings(changeSettings(faded, { streets: false }), { labels: 'none' });
 		expect(imagery?.options).toStrictEqual({ osmOverlay: false, raster: { saturation: -1, brightnessMin: 0.5 } });
-		expect(changeSettings(imagery, { overlay: true })?.options).toStrictEqual({
+		expect(changeSettings(imagery, { streets: true })?.options).toStrictEqual({
 			raster: { saturation: -1, brightnessMin: 0.5 },
-			osmOverlay: { recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
+			osmOverlay: { layers: { labels: false }, recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
 		});
 		// and back to the unchanged colors
 		expect(changeSettings(faded, { colors: DEFAULT_COLORS })?.options).toStrictEqual({

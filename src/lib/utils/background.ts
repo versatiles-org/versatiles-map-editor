@@ -8,8 +8,11 @@ import type { StateBackground } from '@versatiles/map-state';
  */
 export interface BackgroundSettings {
 	base: 'vector' | 'satellite';
-	/** Whether the satellite map shows streets, borders and labels over the imagery. The vector map always does. */
-	overlay: boolean;
+	/**
+	 * Whether the satellite map shows streets, railways and ferries over the imagery. The vector
+	 * map always does. Without them and without labels, the satellite map is the imagery alone.
+	 */
+	streets: boolean;
 	/** Color preset of the vector map. */
 	theme: string;
 	font: string;
@@ -52,6 +55,9 @@ export const THEMES = [
 // Languages of the names in the OSM tiles of tiles.versatiles.org
 export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
 
+/** The layer groups of the streets over the imagery, hidden. */
+const STREETS_HIDDEN = (): Options => ({ roads: false, transit: false, markings: false });
+
 // Fewer labels by keeping more space between them
 const FEWER_LABELS_SPACING = 2;
 
@@ -71,13 +77,14 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 	const overlay = overlayOf(background);
 	const text = isObject(overlay.text) ? overlay.text : {};
 	const layers = isObject(overlay.layers) ? overlay.layers : {};
+	const imageryAlone = background.builder === 'satellite' && background.options.osmOverlay === false;
 	let labels: BackgroundSettings['labels'] = 'normal';
-	if (layers.labels === false) labels = 'none';
+	if (imageryAlone || layers.labels === false) labels = 'none';
 	else if (typeof text.spacing === 'number' && text.spacing > 1) labels = 'fewer';
 
 	return {
 		base: background.builder === 'satellite' ? 'satellite' : 'vector',
-		overlay: background.builder !== 'satellite' || background.options.osmOverlay !== false,
+		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
 		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
@@ -165,18 +172,17 @@ export function changeSettings(
 
 	if (change.colors) setColors(builder, options, change.colors);
 
-	// the imagery alone, or with the overlay, which starts with its defaults again
-	if (builder === 'satellite' && change.overlay !== undefined) {
-		const colors = getColors({ builder, options });
-		options.osmOverlay = change.overlay ? {} : false;
-		// with the colors of the imagery
-		setColors(builder, options, colors);
-	}
-	// without an overlay, the satellite map has no labels to change
-	if (builder === 'satellite' && options.osmOverlay === false) return minimizeBackground({ builder, options });
-
 	let overlay: Options = options;
 	if (builder === 'satellite') {
+		if (options.osmOverlay === false) {
+			// the imagery alone: showing streets or labels again starts the overlay with its defaults,
+			// and with the colors of the imagery, but only with what is shown
+			const shown = change.streets === true || (change.labels !== undefined && change.labels !== 'none');
+			if (!shown) return minimizeBackground({ builder, options });
+			const colors = getColors({ builder, options });
+			options.osmOverlay = { layers: change.streets ? { labels: false } : STREETS_HIDDEN() };
+			setColors(builder, options, colors);
+		}
 		if (!isObject(options.osmOverlay)) options.osmOverlay = {};
 		overlay = options.osmOverlay as Options;
 	}
@@ -194,6 +200,19 @@ export function changeSettings(
 		else delete layers.labels;
 		if (change.labels === 'fewer') text.spacing = FEWER_LABELS_SPACING;
 		else delete text.spacing;
+	}
+	if (builder === 'satellite' && change.streets !== undefined) {
+		if (!isObject(overlay.layers)) overlay.layers = {};
+		const layers = overlay.layers as Options;
+		for (const [group, value] of Object.entries(STREETS_HIDDEN())) {
+			if (change.streets) delete layers[group];
+			else layers[group] = value;
+		}
+	}
+	// neither streets nor labels: the imagery alone, also without borders and points of interest
+	if (builder === 'satellite') {
+		const { streets, labels } = getSettings({ builder, options });
+		if (!streets && labels === 'none') options.osmOverlay = false;
 	}
 
 	return minimizeBackground({ builder, options });
