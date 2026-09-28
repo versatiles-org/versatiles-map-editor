@@ -222,7 +222,7 @@
 		background: var(--color-bg);
 		border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
 		border-radius: 3px;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+		box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
 
 		li {
 			padding: 0.4em 0.6em;

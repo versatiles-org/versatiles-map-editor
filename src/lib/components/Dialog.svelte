@@ -69,7 +69,7 @@
 		background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
 		color: var(--color-text);
 		backdrop-filter: blur(10px);
-		box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+		box-shadow: 5px 5px 10px rgb(0 0 0 / 20%);
 		z-index: 10000;
 		border: 0.5px solid color-mix(in srgb, var(--color-text) 30%, transparent);
 		border-radius: 10px;

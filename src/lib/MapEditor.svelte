@@ -473,9 +473,9 @@
 		--color-blue-text: #158;
 		--color-error: #b00020;
 		--color-warning: #a40;
-		--color-border: rgba(21, 32, 43, 0.13);
-		--color-hover: rgba(21, 32, 43, 0.07);
-		--shadow: 0 1px 2px rgba(15, 25, 35, 0.14), 0 6px 22px rgba(15, 25, 35, 0.14);
+		--color-border: rgb(21 32 43 / 13%);
+		--color-hover: rgb(21 32 43 / 7%);
+		--shadow: 0 1px 2px rgb(15 25 35 / 14%), 0 6px 22px rgb(15 25 35 / 14%);
 		--btn-gap: 5px;
 		--gap: 10px;
 		--border-radius: 1em;
@@ -523,9 +523,9 @@
 			--color-disabled-text: #c4c4c4;
 			--color-error: #ff8a95;
 			--color-warning: #ffb74d;
-			--color-border: rgba(255, 255, 255, 0.13);
-			--color-hover: rgba(255, 255, 255, 0.08);
-			--shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 22px rgba(0, 0, 0, 0.45);
+			--color-border: rgb(255 255 255 / 13%);
+			--color-hover: rgb(255 255 255 / 8%);
+			--shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
 		}
 	}
 
@@ -551,7 +551,7 @@
 		border-radius: var(--border-radius);
 		background: color-mix(in srgb, var(--color-bg) 90%, transparent);
 		color: var(--color-text);
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
 		font-size: 0.875rem;
 		pointer-events: none;
 		z-index: var(--z-floating);
@@ -647,7 +647,7 @@
 		border-radius: 6px 0 0 6px;
 		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
 		backdrop-filter: blur(10px);
-		box-shadow: -1px 0 4px rgba(0, 0, 0, 0.2);
+		box-shadow: -1px 0 4px rgb(0 0 0 / 20%);
 		color: var(--color-text);
 		cursor: pointer;
 
@@ -659,7 +659,7 @@
 		svg {
 			width: 7px;
 			height: 12px;
-			fill: currentColor;
+			fill: currentcolor;
 
 			/* pointing right: the sidebar goes that way */
 			&.open {
@@ -712,9 +712,9 @@
 		font-size: 13px;
 		:global(input) {
 			padding: 6px 8px;
-			border: 1px solid rgba(0, 0, 0, 0.3);
+			border: 1px solid rgb(0 0 0 / 30%);
 			border-radius: 4px;
-			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+			box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
 		}
 	}
 

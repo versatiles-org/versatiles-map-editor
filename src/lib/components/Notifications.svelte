@@ -39,7 +39,7 @@
 		padding: 8px 8px 8px 12px;
 		border-radius: 6px;
 		background: var(--color-bg);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
 		color: var(--color-text);
 		font:
 			14px/1.3 system-ui,

@@ -135,13 +135,11 @@
 		flex: 1 1 auto;
 		min-height: 0;
 		width: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
+		overflow: hidden auto;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(max(64px, calc(100% / var(--max-columns))), 1fr));
 		align-content: start;
-		row-gap: 10px;
-		column-gap: 0px;
+		gap: 10px 0;
 		justify-items: center;
 
 		/* the width of the column, and long names wrap inside it, instead of reaching past the list */

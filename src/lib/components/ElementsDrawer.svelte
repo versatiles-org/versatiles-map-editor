@@ -49,7 +49,7 @@
 		background: color-mix(in srgb, var(--color-bg) 85%, transparent);
 		backdrop-filter: blur(10px);
 		border-right: 1px solid var(--color-border);
-		box-shadow: 4px 0 14px rgba(0, 0, 0, 0.08);
+		box-shadow: 4px 0 14px rgb(0 0 0 / 8%);
 		color: var(--color-text);
 		font-size: 0.875em;
 		/* e.g. Shift+click to select several elements must not select text */

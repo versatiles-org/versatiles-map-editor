@@ -235,7 +235,7 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			container-name: myContainer;
+			container-name: preview;
 			container-type: size;
 
 			iframe {
@@ -246,31 +246,25 @@
 				box-sizing: border-box;
 				background: #fff;
 
-				@container myContainer (min-aspect-ratio: 16 / 9) {
-					& {
-						width: auto;
-						height: 100%;
-					}
+				@container preview (min-aspect-ratio: 16 / 9) {
+					width: auto;
+					height: 100%;
 				}
 			}
 
 			iframe.aspect-tall {
 				aspect-ratio: 9 / 16;
-				@container myContainer (min-aspect-ratio: 9 / 16) {
-					& {
-						width: auto;
-						height: 100%;
-					}
+				@container preview (min-aspect-ratio: 9 / 16) {
+					width: auto;
+					height: 100%;
 				}
 			}
 
 			iframe.aspect-square {
-				aspect-ratio: 1/1;
-				@container myContainer (min-aspect-ratio: 1/1) {
-					& {
-						width: auto;
-						height: 100%;
-					}
+				aspect-ratio: 1 / 1;
+				@container preview (min-aspect-ratio: 1 / 1) {
+					width: auto;
+					height: 100%;
 				}
 			}
 		}
@@ -320,7 +314,7 @@
 	}
 
 	/* On a small screen, the controls come first, and the preview gets a fixed height below them */
-	@media (max-width: 700px), (max-height: 560px) {
+	@media (width <= 700px), (height <= 560px) {
 		.grid {
 			grid-template-columns: 1fr;
 			grid-template-rows: auto;

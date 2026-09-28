@@ -109,7 +109,7 @@
 		padding: 6px 10px;
 		border-radius: 6px;
 		background: color-mix(in srgb, #fff 85%, transparent);
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+		box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
 		color: #000;
 		font-size: 12px;
 		line-height: 1.3;
@@ -121,14 +121,14 @@
 		&:hover {
 			box-shadow:
 				0 0 0 2px color-mix(in srgb, #158 50%, transparent),
-				0 1px 4px rgba(0, 0, 0, 0.25);
+				0 1px 4px rgb(0 0 0 / 25%);
 		}
 	}
 	.selected,
 	.selected:hover {
 		box-shadow:
 			0 0 0 2px #158,
-			0 1px 4px rgba(0, 0, 0, 0.25);
+			0 1px 4px rgb(0 0 0 / 25%);
 	}
 
 	.layout-vertical {
@@ -139,8 +139,7 @@
 		white-space: nowrap;
 	}
 	.layout-inline {
-		flex-direction: row;
-		flex-wrap: wrap;
+		flex-flow: row wrap;
 	}
 
 	/* sides are centered, corners are corners; the attribution goes to the other bottom corner */
@@ -186,7 +185,7 @@
 		width: 14px;
 		height: 14px;
 		border-radius: 2px;
-		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
 	}
 
 	.symbol {

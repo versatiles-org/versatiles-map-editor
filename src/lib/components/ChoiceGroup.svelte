@@ -126,7 +126,7 @@
 			&:has(input:checked) {
 				background: var(--color-bg);
 				color: var(--color-text);
-				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+				box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
 				font-weight: 600;
 			}
 		}

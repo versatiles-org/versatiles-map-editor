@@ -47,7 +47,7 @@
 	.icon {
 		flex: none;
 		fill: none;
-		stroke: currentColor;
+		stroke: currentcolor;
 		stroke-width: 1.75;
 		stroke-linecap: round;
 		stroke-linejoin: round;
