@@ -1,6 +1,6 @@
 import type { GeoPath, GeoPoint } from './types.js';
 
-export const EARTH_RADIUS = 6371008.8; // Radius of the Earth in meters
+const EARTH_RADIUS = 6371008.8; // Radius of the Earth in meters
 
 export function getMiddlePoint(p0: GeoPoint, p1: GeoPoint): GeoPoint {
 	const y0 = lat2mercator(p0[1]);
@@ -12,7 +12,7 @@ export function lat2mercator(lat: number): number {
 	return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
 }
 
-export function mercator2lat(y: number): number {
+function mercator2lat(y: number): number {
 	return ((2 * Math.atan(Math.exp(y)) - Math.PI / 2) * 180) / Math.PI;
 }
 
@@ -35,11 +35,11 @@ export function distance(point1: GeoPoint, point2: GeoPoint): number {
 	return EARTH_RADIUS * c; // Distance in meters
 }
 
-export function degreesToRadians(degrees: number): number {
+function degreesToRadians(degrees: number): number {
 	return ((degrees % 360) * Math.PI) / 180;
 }
 
-export function radiansToDegrees(radians: number): number {
+function radiansToDegrees(radians: number): number {
 	return ((radians / Math.PI) % 2) * 180;
 }
 

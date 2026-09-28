@@ -4,15 +4,16 @@ import {
 	circleArea,
 	coordinatesOf,
 	distance,
-	EARTH_RADIUS,
 	getMiddlePoint,
 	lat2mercator,
-	mercator2lat,
+	movePoint,
 	pathLength,
 	polygonArea
 } from './geometry.js';
 import type { GeoPoint } from './types.js';
-import { degreesToRadians, radiansToDegrees } from './geometry.js';
+
+// the mean radius of the Earth in meters, as in the module
+const EARTH_RADIUS = 6371008.8;
 
 describe('Geometry Utils', () => {
 	it('should convert latitude to Mercator projection correctly', () => {
@@ -21,10 +22,12 @@ describe('Geometry Utils', () => {
 		expect(lat2mercator(-85.051128)).toBeCloseTo(-Math.PI);
 	});
 
-	it('should convert Mercator projection back to latitude correctly', () => {
-		expect(mercator2lat(0)).toBeCloseTo(0);
-		expect(mercator2lat(lat2mercator(45))).toBeCloseTo(45, 5);
-		expect(mercator2lat(lat2mercator(-30))).toBeCloseTo(-30, 5);
+	it('should move a point in Mercator units, and back', () => {
+		expect(movePoint([10, 45], 0, 0)).toStrictEqual([10, expect.closeTo(45, 5)]);
+		const moved = movePoint([10, -30], 5, lat2mercator(45) - lat2mercator(-30));
+		expect(moved[0]).toBe(15);
+		expect(moved[1]).toBeCloseTo(45, 5);
+		expect(movePoint(moved, -5, lat2mercator(-30) - lat2mercator(45))[1]).toBeCloseTo(-30, 5);
 	});
 
 	it('should get the middle point correctly', () => {
@@ -33,7 +36,8 @@ describe('Geometry Utils', () => {
 		const middle = getMiddlePoint(p0, p1);
 
 		expect(middle[0]).toBeCloseTo(5);
-		expect(middle[1]).toBeCloseTo(mercator2lat((lat2mercator(0) + lat2mercator(10)) / 2));
+		// halfway on the map, i.e. in Mercator units
+		expect(lat2mercator(middle[1])).toBeCloseTo((lat2mercator(0) + lat2mercator(10)) / 2);
 	});
 
 	it('should calculate distance between two points correctly', () => {
@@ -43,23 +47,17 @@ describe('Geometry Utils', () => {
 		expect(d).toBeCloseTo(877464.54);
 	});
 
-	it('should convert degrees to radians and back', () => {
-		expect(degreesToRadians(180)).toBeCloseTo(Math.PI);
-		expect(degreesToRadians(90)).toBeCloseTo(Math.PI / 2);
-		expect(radiansToDegrees(Math.PI)).toBeCloseTo(180);
-		expect(radiansToDegrees(Math.PI / 2)).toBeCloseTo(90);
-	});
-
 	it('should generate a circle with correct number of steps', () => {
 		const center: GeoPoint = [0, 0];
 		const radius = 1000; // meters
 		const steps = 36;
 		const points = circle(center, radius, steps);
 		expect(points.length).toBe(steps);
-		points.forEach((pt) => {
-			expect(Array.isArray(pt)).toBe(true);
-			expect(pt.length).toBe(2);
-		});
+		// every point at the radius from the center, also away from the equator
+		for (const point of points) expect(distance(center, point)).toBeCloseTo(radius, 3);
+		for (const point of circle([13.4, 52.5], radius, steps)) {
+			expect(distance([13.4, 52.5], point)).toBeCloseTo(radius, 3);
+		}
 	});
 
 	it('should calculate the length of a path', () => {

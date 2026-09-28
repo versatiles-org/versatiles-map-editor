@@ -4,7 +4,7 @@ import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
-import { getMiddlePoint, lat2mercator } from '../../utils/geometry.js';
+import { getMiddlePoint, lat2mercator } from '../geometry.js';
 
 class TestPathElement extends AbstractPathElement {
 	constructor(manager: GeometryManager, isLine: boolean) {

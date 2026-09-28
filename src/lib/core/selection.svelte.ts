@@ -2,8 +2,8 @@ import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { SelectionNode } from './element/types.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import type { GeoPoint } from '../utils/types.js';
-import { lat2mercator } from '../utils/geometry.js';
+import type { GeoPoint } from './types.js';
+import { lat2mercator } from './geometry.js';
 import {
 	claimEvent,
 	isClaimed,

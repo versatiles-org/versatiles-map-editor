@@ -1,4 +1,4 @@
-import type { GeoPoint } from '../../utils/types.js';
+import type { GeoPoint } from '../types.js';
 import type { MapLayerFill } from '../map_layer/fill.svelte.js';
 import type { MapLayerLine } from '../map_layer/line.svelte.js';
 import type { MapLayerSymbol } from '../map_layer/symbol.svelte.js';

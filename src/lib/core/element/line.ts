@@ -1,10 +1,10 @@
 import type { GeometryManager } from '../geometry_manager.svelte.js';
-import type { GeoPath } from '../../utils/types.js';
+import type { GeoPath } from '../types.js';
 import { MapLayerLine } from '../map_layer/line.svelte.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
-import { pathLength } from '../../utils/geometry.js';
+import { pathLength } from '../geometry.js';
 import { formatLength } from '../../utils/format.js';
 
 export class LineElement extends AbstractPathElement {

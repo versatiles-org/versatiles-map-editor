@@ -2,7 +2,7 @@
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import * as commands from '$lib/core/commands.js';
 	import Icon from './Icon.svelte';
-	import { coordinatesOf } from '$lib/utils/geometry.js';
+	import { coordinatesOf } from '$lib/core/geometry.js';
 
 	/**
 	 * The actions of the selected elements, next to them on the map. It works with a mouse and

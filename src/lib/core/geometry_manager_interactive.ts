@@ -16,7 +16,7 @@ import {
 	type StateMetadata,
 	type MapState
 } from '@versatiles/map-state';
-import type { GeoPoint } from '../utils/types.js';
+import type { GeoPoint } from './types.js';
 
 export class GeometryManagerInteractive extends GeometryManager {
 	public readonly selection: SelectionHandler;
