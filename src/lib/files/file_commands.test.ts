@@ -4,14 +4,14 @@ import { FileCommands, type FileQuestions } from './file_commands.js';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
-import { notify } from '../utils/index.js';
+import { notify } from '../notify.svelte.js';
 
 vi.mock('./file.js', async (importOriginal) => ({
 	...(await importOriginal<typeof import('./file.js')>()),
 	chooseTextFile: vi.fn()
 }));
 vi.mock('./download.js', () => ({ downloadBlob: vi.fn(), downloadJSON: vi.fn() }));
-vi.mock('../utils/notify.svelte.js', () => ({ notify: vi.fn() }));
+vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 describe('FileCommands', () => {
 	let state: MapState;

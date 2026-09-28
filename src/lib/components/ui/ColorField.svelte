@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { moveInField, type HSV } from '$lib/utils/index.js';
+	import { moveInField, type HSV } from '$lib/components/color.js';
 
 	/**
 	 * The field of saturation and brightness, and the slider of the hue, of a color picker. It works

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { geocode, type GeocodingResult } from '$lib/utils/index.js';
+	import { geocode, type GeocodingResult } from '$lib/components/geocoding.js';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 
 	const {

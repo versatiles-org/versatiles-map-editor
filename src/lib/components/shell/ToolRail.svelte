@@ -2,7 +2,7 @@
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import type { Tool } from '$lib/drawing.svelte.js';
 	import { Icon } from '$lib/components/ui/index.js';
-	import { isOwnKeyTarget } from '$lib/utils/index.js';
+	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
 	let { manager, drawerOpen = $bindable() }: { manager: GeometryManagerInteractive; drawerOpen: boolean } = $props();

@@ -2,7 +2,7 @@
 	import { ColorPicker, InputRow } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/inspector/PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
-	import { formatCount } from '$lib/utils/index.js';
+	import { formatCount } from '$lib/format.js';
 	import { ADDRESS_PARTS, type AddressPart, type Table } from './table.js';
 	import { MAX_CATEGORIES, type LocationBias } from './table_import.js';
 	import { applyCategory, hasPosition, type ImportSettings } from './import_settings.js';

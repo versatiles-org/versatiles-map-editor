@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dismiss, notifications } from '$lib/utils/index.js';
+	import { dismiss, notifications } from '$lib/notify.svelte.js';
 
 	/** `right` keeps the messages clear of the sidebar. */
 	const { right = 0 }: { right?: number } = $props();

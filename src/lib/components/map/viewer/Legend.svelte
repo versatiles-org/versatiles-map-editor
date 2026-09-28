@@ -3,7 +3,7 @@
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import type { StateLegend } from '@versatiles/map-state';
 	import { SymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { parseHex, toHex } from '$lib/utils/index.js';
+	import { parseHex, toHex } from '$lib/components/color.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */

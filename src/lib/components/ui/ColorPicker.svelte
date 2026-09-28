@@ -17,7 +17,7 @@
 		toHexKeepingAlpha,
 		type HSV,
 		type RGB
-	} from '$lib/utils/index.js';
+	} from '$lib/components/color.js';
 	import type { ColorPalette } from '$lib/color_palette.svelte.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 

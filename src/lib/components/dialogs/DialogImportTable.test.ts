@@ -6,7 +6,7 @@ import type { GeometryManagerInteractive } from '../../geometry_manager_interact
 import DialogImportTable from './DialogImportTable.svelte';
 
 const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
-vi.mock('../../utils/geocoding.js', () => ({ geocode }));
+vi.mock('../geocoding.js', () => ({ geocode }));
 
 describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;

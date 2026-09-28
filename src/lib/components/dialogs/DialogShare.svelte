@@ -2,7 +2,7 @@
 	import type { StateManager } from '$lib/state/manager.js';
 	import { Dialog } from '$lib/components/ui/index.js';
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
-	import { formatLength } from '$lib/utils/index.js';
+	import { formatLength } from '$lib/format.js';
 
 	const { state: stateManager }: { state: StateManager } = $props();
 
