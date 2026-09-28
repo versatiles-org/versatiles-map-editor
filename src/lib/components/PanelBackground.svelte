@@ -26,7 +26,7 @@
 	);
 
 	const BASES: { value: BackgroundSettings['base']; label: string }[] = [
-		{ value: 'vector', label: 'Vector map' },
+		{ value: 'vector', label: 'OpenStreetMap' },
 		{ value: 'satellite', label: 'Satellite' }
 	];
 	const LABELS: { value: BackgroundSettings['labels']; label: string }[] = [

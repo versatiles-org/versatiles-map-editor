@@ -87,7 +87,7 @@ test('styling the background map', async ({ page }) => {
 	await page.getByRole('button', { name: 'Undo' }).click();
 	// the URL is written throttled, so wait for the final state before reloading
 	await expect.poll(background).toStrictEqual(undone);
-	await expect(page.getByRole('radio', { name: 'Vector map' })).toBeChecked();
+	await expect(page.getByRole('radio', { name: 'OpenStreetMap' })).toBeChecked();
 
 	// kept in the URL, and shown in the read-only viewer
 	await page.setViewportSize({ width: 500, height: 500 });
