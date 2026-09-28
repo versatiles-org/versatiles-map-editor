@@ -15,6 +15,7 @@
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
 	import { UrlHash } from './url_hash.js';
+	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
 
 	let {
 		onMapLoad
@@ -77,51 +78,29 @@
 	const legendPosition = $derived(
 		geometryManager?.legend?.entries.length ? (geometryManager.legend.position ?? 'bottom-left') : undefined
 	);
-	const searchRight = $derived(legendPosition === 'top-left');
-	const attributionCorner = $derived(legendPosition === 'bottom-left' ? 'bottom-right' : 'bottom-left');
 	let pageWidth = $state(0);
 	let searchWidth = $state(0);
 	let legendWidth = $state(0);
-	// the width of the attribution, and the height from the bottom of the map to its top
-	let attributionSize = $state({ width: 0, top: 0 });
-	// the width of the map between the bars, without the margins at the sides and between two controls
-	const freeWidth = $derived(pageWidth - coveredLeft - sidebarWidth - 3 * MAP_PADDING);
-	/** Whether the legend and a control at the side of the legend's position do not fit side by side. */
-	function collide(width: number): boolean {
-		// a legend at the center reaches half of its width to each side
-		const centered = legendPosition === 'top' || legendPosition === 'bottom';
-		return centered ? legendWidth / 2 + width > freeWidth / 2 : legendWidth + width > freeWidth;
-	}
-	// A legend at the top goes below the search and the hint only if it would cover them. The hint
-	// of the viewer is at the center and nearly as wide as the map.
-	const legendBelowOverlays = $derived(
-		topOverlaysHeight > 0 && legendPosition?.startsWith('top') === true && (screenTooSmall || collide(searchWidth))
-	);
-	// Likewise, a legend at the bottom goes above the attribution, e.g. while it is expanded
-	const legendAboveAttribution = $derived(
-		legendPosition?.startsWith('bottom') === true && collide(attributionSize.width)
+	let attributionSize: AttributionSize = $state({ width: 0, top: 0 });
+	const layout = $derived(
+		layoutOverlays(legendPosition, {
+			freeWidth: pageWidth - coveredLeft - sidebarWidth - 3 * MAP_PADDING,
+			legendWidth,
+			searchWidth,
+			attributionWidth: attributionSize.width,
+			topOverlaysHeight,
+			hint: screenTooSmall
+		})
 	);
 
-	// the attribution in the bottom corner without the legend
+	// the attribution in the bottom corner without the legend; a value of its own, since the
+	// layout changes with the size of the attribution, which must not add it again
+	const attributionCorner = $derived(layout.attributionCorner);
 	$effect(() => {
 		const corner = attributionCorner;
 		const m = geometryManager?.map;
 		if (!m) return;
-		const attribution = new maplibre.AttributionControl({ compact: true });
-		m.addControl(attribution, corner);
-		// it changes its size when it is expanded or collapsed, or gets other sources
-		const element = m.getContainer().querySelector<HTMLElement>('.maplibregl-ctrl-attrib');
-		if (!element) return;
-		const observer = new ResizeObserver(() => {
-			const map = m.getContainer().getBoundingClientRect();
-			const box = element.getBoundingClientRect();
-			attributionSize = { width: box.width, top: map.bottom - box.top };
-		});
-		observer.observe(element);
-		return () => {
-			observer.disconnect();
-			if (m.hasControl(attribution)) m.removeControl(attribution);
-		};
+		return addAttribution(m, corner, (size) => (attributionSize = size));
 	});
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
@@ -293,8 +272,8 @@
 			map={geometryManager.map}
 			left={coveredLeft}
 			right={sidebarWidth}
-			top={topbarHeight + (legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
-			bottom={legendAboveAttribution ? attributionSize.top : statusHeight}
+			top={topbarHeight + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
+			bottom={layout.legendAboveAttribution ? attributionSize.top : statusHeight}
 			bind:width={legendWidth}
 			selected={geometryManager.selection?.legendSelected ?? false}
 			onselect={showSidebar ? selectLegend : undefined}
@@ -309,7 +288,7 @@
 			bind:offsetHeight={topOverlaysHeight}
 		>
 			{#if showSearch}
-				<div class="map-search" class:right={searchRight} bind:offsetWidth={searchWidth}>
+				<div class="map-search" class:right={layout.searchRight} bind:offsetWidth={searchWidth}>
 					<SearchPlace map={geometryManager.map} onmark={showSidebar ? markPlace : undefined} />
 				</div>
 			{/if}
