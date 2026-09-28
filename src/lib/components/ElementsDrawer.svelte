@@ -52,6 +52,9 @@
 		box-shadow: 4px 0 14px rgba(0, 0, 0, 0.08);
 		color: var(--color-text);
 		font-size: 0.875em;
+		/* e.g. Shift+click to select several elements must not select text */
+		-webkit-user-select: none;
+		user-select: none;
 	}
 
 	.header {
