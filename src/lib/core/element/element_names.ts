@@ -1,4 +1,4 @@
-import type { AbstractElement } from '../core/element/abstract.svelte.js';
+import type { AbstractElement } from './abstract.svelte.js';
 import { popupToPlainText } from './popup_text.js';
 
 const TYPE_NAMES: Record<string, string> = { marker: 'Marker', line: 'Line', polygon: 'Polygon', circle: 'Circle' };

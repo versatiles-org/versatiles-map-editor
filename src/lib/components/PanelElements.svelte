@@ -3,7 +3,7 @@
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
-	import { elementNames } from '$lib/utils/element_names.js';
+	import { elementNames } from '$lib/core/element/element_names.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen

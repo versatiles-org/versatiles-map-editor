@@ -8,7 +8,7 @@
 	import FontSelect from './FontSelect.svelte';
 	import { getSettings } from '$lib/utils/background.js';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementNames, elementText } from '$lib/utils/element_names.js';
+	import { countTypes, elementNames, elementText } from '$lib/core/element/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
