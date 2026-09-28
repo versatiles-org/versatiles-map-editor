@@ -120,7 +120,7 @@
 	async function loadEditor() {
 		const [
 			{ GeometryManagerInteractive },
-			{ Sidebar, TopBar, ToolRail, ElementsDrawer, StatusBar },
+			{ Sidebar, SidebarToggle, TopBar, ToolRail, ElementsDrawer, StatusBar },
 			{ DrawBar, SelectionBar, NodeDeleteButton }
 		] = await Promise.all([
 			import('./geometry_manager_interactive.js'),
@@ -130,6 +130,7 @@
 		return {
 			GeometryManagerInteractive,
 			Sidebar,
+			SidebarToggle,
 			TopBar,
 			ToolRail,
 			DrawBar,
@@ -339,20 +340,11 @@
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
 			<editor.Sidebar {geometryManager} />
 		</div>
-		<button
-			class="sidebar-toggle"
-			style:top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
-			style:right="{sidebarWidth}px"
-			aria-controls="sidebar"
-			aria-expanded={sidebarOpen}
-			aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-			title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-			onclick={() => (sidebarOpen = !sidebarOpen)}
-		>
-			<svg viewBox="0 0 7 12" aria-hidden="true" class:open={sidebarOpen}>
-				<path d="M6,0L0,6L6,12L7,11,L2,6L7,1z" />
-			</svg>
-		</button>
+		<editor.SidebarToggle
+			bind:open={sidebarOpen}
+			top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
+			right={sidebarWidth}
+		/>
 
 		<style>
 			.page .container {
@@ -410,40 +402,6 @@
 		z-index: var(--z-panels);
 		right: 0;
 		width: 250px;
-	}
-
-	/* a tab at the edge of the sidebar, which hides and shows it */
-	.sidebar-toggle {
-		position: absolute;
-		top: 50%;
-		translate: 0 -50%;
-		z-index: var(--z-floating);
-		width: 20px;
-		height: 48px;
-		padding: 0;
-		border: none;
-		border-radius: 6px 0 0 6px;
-		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
-		backdrop-filter: blur(10px);
-		box-shadow: -1px 0 4px rgb(0 0 0 / 20%);
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-			outline-offset: 2px;
-		}
-
-		svg {
-			width: 7px;
-			height: 12px;
-			fill: currentcolor;
-
-			/* pointing right: the sidebar goes that way */
-			&.open {
-				rotate: 180deg;
-			}
-		}
 	}
 
 	.map {
