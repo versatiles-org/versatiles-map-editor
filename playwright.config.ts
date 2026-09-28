@@ -14,9 +14,10 @@ export default defineConfig({
 		port: 4173,
 		reuseExistingServer: !process.env.CI
 	},
-	// Parallel browsers compete for rendering, so more workers barely increase the throughput,
-	// but make every single test much slower
-	workers: 2,
+	// Parallel browsers compete for rendering, so each test gets slower with more workers. Locally
+	// on macOS (GPU rendering), 4 workers still finish a third faster than 2; 6 are not faster.
+	// CI runners have fewer cores, and Linux renders on the CPU, so they keep 2.
+	workers: process.platform === 'darwin' && !process.env.CI ? 4 : 2,
 	timeout: 60_000,
 	// In CI: a forgotten test.only fails the run, a failed test gets one more try, and the results
 	// are also written as an HTML report
