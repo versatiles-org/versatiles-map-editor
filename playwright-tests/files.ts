@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
 import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
-test('downloads the map as GeoJSON and as map file', async ({ page }) => {
+test('downloads the map as GeoJSON and as map file', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	await drawElement(page, 'Marker');
@@ -119,7 +119,7 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	await expect.poll(() => stateInUrl(page).meta?.legend?.entries.length).toBe(1);
 });
 
-test('exporting and importing KML', async ({ page }) => {
+test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) => {
 	const state: MapState = {
 		map: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
@@ -173,7 +173,7 @@ test.describe('importing a table', () => {
 	}
 	const markers = (page: Page) => stateInUrl(page).elements as StateElementMarker[];
 
-	test('pasted from a spreadsheet, with coordinates', async ({ page }) => {
+	test('pasted from a spreadsheet, with coordinates', { tag: '@cross-browser' }, async ({ page }) => {
 		const dialog = await openImport(page);
 		await dialog
 			.getByLabel('Or paste the table here:')
@@ -207,7 +207,7 @@ test.describe('importing a table', () => {
 		await expect.poll(() => markers(page).length).toBe(0);
 	});
 
-	test('from a file, with addresses', async ({ page }) => {
+	test('from a file, with addresses', { tag: '@cross-browser' }, async ({ page }) => {
 		await page.route('https://geocode.versatiles.org/**', (route) => {
 			const q = new URL(route.request().url()).searchParams.get('q');
 			const features =

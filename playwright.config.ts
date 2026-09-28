@@ -7,6 +7,11 @@ const chromiumArgs =
 		? ['--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist']
 		: ['--enable-unsafe-swiftshader'];
 
+// Most tests check the editor itself, the same in every browser. Locally, Firefox runs only the
+// tests tagged @cross-browser, where the browsers differ: input, dialogs and focus, clipboard,
+// files, scrolling and rendering. CI, and ALL_TESTS=1 (npm run test-playwright-all), run all of them.
+const allTests = !!process.env.CI || !!process.env.ALL_TESTS;
+
 export default defineConfig({
 	webServer: {
 		// Types are checked by "npm run check", so a plain vite build is enough here
@@ -46,7 +51,8 @@ export default defineConfig({
 		},
 		{
 			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] }
+			use: { ...devices['Desktop Firefox'] },
+			grep: allTests ? undefined : /@cross-browser/
 		}
 	]
 });

@@ -25,7 +25,7 @@ test.describe('viewer', () => {
 	// small screens show the read-only viewer, like embedded maps
 	test.use({ viewport: { width: 500, height: 500 } });
 
-	test('opens popups on click', async ({ page }) => {
+	test('opens popups on click', { tag: '@cross-browser' }, async ({ page }) => {
 		const state: MapState = {
 			map: { center: [13.4, 52.5], radius: 10000 },
 			elements: [
@@ -134,7 +134,7 @@ test.describe('overlays of the viewer on a phone', () => {
 	}
 });
 
-test.describe('the share dialog on the smallest editor screen', () => {
+test.describe('the share dialog on the smallest editor screen', { tag: '@cross-browser' }, () => {
 	test.use({ viewport: { width: 600, height: 400 } });
 
 	test('keeps all its controls reachable', async ({ page }) => {

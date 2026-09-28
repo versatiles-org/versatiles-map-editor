@@ -35,9 +35,14 @@ npm run check-types            # svelte-check (TypeScript + Svelte)
 npm run format:check           # Prettier
 npm run test-unit              # Vitest unit tests
 npm run test-coverage          # Vitest unit tests with a coverage report
-npm run test-playwright        # Playwright visual/e2e tests in Chromium and Firefox
-npm run test-playwright-docker # Playwright tests in a Linux container with a virtual display
+npm run test-playwright        # Playwright e2e tests: all in Chromium, those tagged @cross-browser in Firefox
+npm run test-playwright-all    # Playwright e2e tests: all in Chromium and Firefox, like CI
+npm run test-playwright-docker # all Playwright tests in a Linux container with a virtual display
 ```
+
+Most Playwright tests check the editor itself, which works the same in every browser. So locally,
+Firefox runs only the tests tagged `@cross-browser`: input, dialogs and focus, clipboard, files,
+scrolling and rendering. Tag a new test like this if the browsers may differ in what it checks.
 
 Headless Firefox on Linux cannot create a WebGL context, so MapLibre never renders there and
 every Firefox test times out. That is why CI runs the Playwright tests on macOS.

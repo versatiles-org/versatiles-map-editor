@@ -3,7 +3,7 @@ import { trackServerRequests, waitForMapIsReady } from './lib/utils.js';
 
 test.use({ viewport: { width: 903, height: 903 }, deviceScaleFactor: 1 });
 
-test('works in iframe1', async ({ page }) => {
+test('works in iframe1', { tag: '@cross-browser' }, async ({ page }) => {
 	const tracker = await trackServerRequests(page);
 
 	await page.goto('/iframe-test');

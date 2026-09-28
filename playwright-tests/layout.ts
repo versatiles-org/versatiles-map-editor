@@ -172,7 +172,7 @@ for (const viewport of [
 	{ width: 1280, height: 720 },
 	{ width: 800, height: 500 }
 ]) {
-	test.describe(`no needless scrolling at ${viewport.width}×${viewport.height}`, () => {
+	test.describe(`no needless scrolling at ${viewport.width}×${viewport.height}`, { tag: '@cross-browser' }, () => {
 		test.use({ viewport });
 
 		test('in the panels', async ({ page }) => {

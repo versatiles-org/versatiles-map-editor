@@ -261,7 +261,7 @@ async function channelRange(page: Page): Promise<[number, number]> {
 	}, png.toString('base64'));
 }
 
-test('black and white become exactly what is set, on both maps', async ({ page }) => {
+test('black and white become exactly what is set, on both maps', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.39, 52.51], radius: 2500 }, elements: [] }));
 	await waitForMapIsReady(page);
 	const setLevel = async (name: string, percent: string) => {

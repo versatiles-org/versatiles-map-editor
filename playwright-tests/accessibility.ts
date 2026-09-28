@@ -2,7 +2,7 @@ import { expect, test } from './lib/test.js';
 import { encodeState } from '../packages/map-state/src/index.js';
 import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
 
-test('dialogs are named, can be closed and are usable by keyboard', async ({ page }) => {
+test('dialogs are named, can be closed and are usable by keyboard', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 
@@ -37,38 +37,42 @@ test('dialogs are named, can be closed and are usable by keyboard', async ({ pag
 	await expect(page.getByRole('dialog', { name: 'Select a symbol' })).toBeVisible();
 });
 
-test('screen readers hear the state of the search and of copying', async ({ page, browserName, context }) => {
-	let answer: 'two' | 'none' | 'error' = 'two';
-	await page.route('https://geocode.versatiles.org/**', (route) => {
-		if (answer === 'error') return route.fulfill({ status: 500 });
-		const feature = (name: string) => ({
-			type: 'Feature',
-			properties: { name },
-			geometry: { type: 'Point', coordinates: [13.4, 52.5] }
+test(
+	'screen readers hear the state of the search and of copying',
+	{ tag: '@cross-browser' },
+	async ({ page, browserName, context }) => {
+		let answer: 'two' | 'none' | 'error' = 'two';
+		await page.route('https://geocode.versatiles.org/**', (route) => {
+			if (answer === 'error') return route.fulfill({ status: 500 });
+			const feature = (name: string) => ({
+				type: 'Feature',
+				properties: { name },
+				geometry: { type: 'Point', coordinates: [13.4, 52.5] }
+			});
+			const features = answer === 'two' ? [feature('Berlin'), feature('Bern')] : [];
+			return route.fulfill({ json: { type: 'FeatureCollection', features } });
 		});
-		const features = answer === 'two' ? [feature('Berlin'), feature('Bern')] : [];
-		return route.fulfill({ json: { type: 'FeatureCollection', features } });
-	});
-	await page.goto('/');
-	await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/] });
-	const search = page.getByRole('combobox', { name: 'Search address or place' });
-	const status = page.locator('.search [role=status]');
+		await page.goto('/');
+		await waitForMapIsReady(page, { expectedMessages: [/status of 500/, /Geocoding failed/, /^Error$/] });
+		const search = page.getByRole('combobox', { name: 'Search address or place' });
+		const status = page.locator('.search [role=status]');
 
-	await search.fill('Ber');
-	await expect(status).toHaveText('2 results');
-	answer = 'none';
-	await search.fill('Bxx');
-	await expect(status).toHaveText('No results');
-	answer = 'error';
-	await search.fill('Byy');
-	await expect(status).toHaveText('Search failed. Please try again.');
+		await search.fill('Ber');
+		await expect(status).toHaveText('2 results');
+		answer = 'none';
+		await search.fill('Bxx');
+		await expect(status).toHaveText('No results');
+		answer = 'error';
+		await search.fill('Byy');
+		await expect(status).toHaveText('Search failed. Please try again.');
 
-	// copying the link is announced, not only shown as a check mark
-	if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-	await page.getByRole('button', { name: /^Share/ }).click();
-	await page.getByRole('button', { name: /^Copy Link/ }).click();
-	await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
-});
+		// copying the link is announced, not only shown as a check mark
+		if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+		await page.getByRole('button', { name: /^Share/ }).click();
+		await page.getByRole('button', { name: /^Copy Link/ }).click();
+		await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
+	}
+);
 
 test('elements can be chosen and deleted with the keyboard in the list of elements', async ({ page }) => {
 	const state = encodeState({
@@ -121,7 +125,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Marker 1');
 });
 
-test.describe('dark mode and reduced motion', () => {
+test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 	test.use({ colorScheme: 'dark', reducedMotion: 'reduce' });
 
 	test('the editor follows the dark mode and does without transitions', async ({ page }) => {

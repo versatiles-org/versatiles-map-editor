@@ -13,4 +13,5 @@ docker run \
   -v "$(pwd)/packages/map-state/src:/code/packages/map-state/src" \
   -v "$(pwd)/playwright-tests:/code/playwright-tests" \
   -v "$(pwd)/test-results:/code/test-results" \
+  -e ALL_TESTS=1 \
   --ipc=host --rm playwright-tests /bin/bash -c "npx playwright test"

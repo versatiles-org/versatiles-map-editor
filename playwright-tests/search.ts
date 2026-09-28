@@ -2,7 +2,7 @@ import { expect, test } from './lib/test.js';
 import { decodeState, encodeState, type MapState } from '../packages/map-state/src/index.js';
 import { boxesOverlap, mapCenter, stateInUrl, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
-test('searching a place', async ({ page }) => {
+test('searching a place', { tag: '@cross-browser' }, async ({ page }) => {
 	const requests: URLSearchParams[] = [];
 	let fail = false;
 	await page.route('https://geocode.versatiles.org/**', (route) => {

@@ -62,7 +62,7 @@ function expectServerRequests(requests: string[], expected: string[]) {
 	expect(requests.filter((url) => !url.startsWith('assets/glyphs/'))).toStrictEqual(expected);
 }
 
-test('empty map', async ({ page }) => {
+test('empty map', { tag: '@cross-browser' }, async ({ page }) => {
 	const tracker = await trackServerRequests(page);
 
 	await page.goto('/');
