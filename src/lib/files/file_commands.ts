@@ -1,5 +1,5 @@
 import { stateFromKML, stateToKML } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { notify } from '../utils/index.js';

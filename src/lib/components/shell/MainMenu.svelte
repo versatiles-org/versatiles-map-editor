@@ -6,7 +6,7 @@
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
 	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
 	import { Icon } from '$lib/components/ui/index.js';
-	import { FileCommands } from '$lib/core/file_commands.js';
+	import { FileCommands } from '$lib/files/file_commands.js';
 
 	/**
 	 * The menu (☰) of the editor: the commands that are used rarely, like files, import and export,
