@@ -37,7 +37,11 @@
 
 	// The colors while they are changed: a new style for each step of a slider would be too slow,
 	// so the map changes when the slider is released. Set again by a change of the map, e.g. undo.
-	let colors: MapColors = $derived({ ...settings.colors });
+	// One value each, since a slider cannot bind to a field of a derived object.
+	let saturation = $derived(settings.colors.saturation);
+	let black = $derived(settings.colors.black);
+	let white = $derived(settings.colors.white);
+	const colors = (): MapColors => ({ saturation, black, white });
 	// the same for the size and halo of the labels
 	let labelSize = $derived(settings.labelSize);
 	let haloWidth = $derived(settings.haloWidth);
@@ -45,11 +49,11 @@
 
 	/** Black is never lighter than white: the changed one pushes the other along. */
 	function changeLevels(changed: 'black' | 'white') {
-		if (colors.black > colors.white) {
-			if (changed === 'black') colors.white = colors.black;
-			else colors.black = colors.white;
+		if (black > white) {
+			if (changed === 'black') white = black;
+			else black = white;
 		}
-		change('colors', colors);
+		change('colors', colors());
 	}
 
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
@@ -99,8 +103,8 @@
 		min={-1}
 		max={1}
 		step={0.05}
-		bind:value={colors.saturation}
-		onchange={() => change('colors', colors)}
+		bind:value={saturation}
+		onchange={() => change('colors', colors())}
 		scale={100}
 		unit="%"
 	/>
@@ -112,7 +116,7 @@
 		min={0}
 		max={1}
 		step={0.05}
-		bind:value={colors.black}
+		bind:value={black}
 		onchange={() => changeLevels('black')}
 		scale={100}
 		unit="%"
@@ -124,7 +128,7 @@
 		min={0}
 		max={1}
 		step={0.05}
-		bind:value={colors.white}
+		bind:value={white}
 		onchange={() => changeLevels('white')}
 		scale={100}
 		unit="%"
