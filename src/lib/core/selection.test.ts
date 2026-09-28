@@ -361,7 +361,10 @@ describe('SelectionHandler', () => {
 
 		beforeEach(() => {
 			setDataMock = vi.fn();
-			mockMap.getSource.mockReturnValue({ setData: setDataMock } as unknown as maplibregl.Source);
+			mockMap.getSource.mockImplementation(
+				(id: string) =>
+					(id === 'selection_nodes' ? { setData: setDataMock } : undefined) as unknown as maplibregl.Source
+			);
 			element = {
 				select: vi.fn(),
 				getSelectionNodes: vi.fn(() => nodes),
@@ -469,13 +472,18 @@ describe('SelectionHandler', () => {
 			expect(handler.selectedElement).toBe(elements[2]);
 		});
 
-		it('shows the nodes of a single element only', () => {
-			const setData = vi.fn();
-			mockMap.getSource.mockReturnValue({ setData } as unknown as maplibregl.Source);
+		it('shows the nodes of a single element, and marks several elements', () => {
+			const sources = { selection_nodes: { setData: vi.fn() }, selection_marks: { setData: vi.fn() } };
+			mockMap.getSource.mockImplementation(
+				(id: string) => sources[id as keyof typeof sources] as unknown as maplibregl.Source
+			);
+			const count = (id: keyof typeof sources) => sources[id].setData.mock.lastCall![0].features.length;
 			handler.selectElements([elements[0]]);
-			expect(setData.mock.lastCall![0].features.length).toBe(1);
+			expect([count('selection_nodes'), count('selection_marks')]).toStrictEqual([1, 0]);
 			handler.selectElements([elements[0], elements[1]]);
-			expect(setData.mock.lastCall![0].features.length).toBe(0);
+			expect([count('selection_nodes'), count('selection_marks')]).toStrictEqual([0, 2]);
+			handler.selectElements([]);
+			expect([count('selection_nodes'), count('selection_marks')]).toStrictEqual([0, 0]);
 		});
 
 		it('selects the clicked element, or adds it with Shift+click', () => {

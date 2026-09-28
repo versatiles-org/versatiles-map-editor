@@ -300,5 +300,18 @@ export class SelectionHandler {
 				geometry: { type: 'Point', coordinates: n.coordinates }
 			}))
 		});
+
+		// Several selected elements cannot be reshaped, so their nodes only mark them
+		const elements = this.#selectedElements;
+		const marks =
+			elements.length > 1 ? elements.flatMap((e) => e.getSelectionNodes().filter((n) => !n.transparent)) : [];
+		this.manager.map.getSource<maplibregl.GeoJSONSource>('selection_marks')?.setData({
+			type: 'FeatureCollection',
+			features: marks.map((n) => ({
+				type: 'Feature',
+				properties: {},
+				geometry: { type: 'Point', coordinates: n.coordinates }
+			}))
+		});
 	}
 }
