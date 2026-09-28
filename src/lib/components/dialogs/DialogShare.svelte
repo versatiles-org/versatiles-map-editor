@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/core/state/manager.js';
-	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import { Dialog } from '$lib/components/ui/index.js';
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
 	import { formatLength } from '$lib/utils/index.js';
 

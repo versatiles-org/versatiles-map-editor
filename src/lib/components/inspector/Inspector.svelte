@@ -2,10 +2,9 @@
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import { addLegendEntry } from '$lib/core/commands.js';
 	import Editor from './Editor.svelte';
-	import Icon, { type IconName } from '$lib/components/ui/Icon.svelte';
+	import { Icon, type IconName, FontSelect } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
-	import FontSelect from '$lib/components/ui/FontSelect.svelte';
 	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
 	import { countTypes, elementNames, elementText } from '$lib/core/element/element_names.js';

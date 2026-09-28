@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import type { Tool } from '$lib/core/drawing.svelte.js';
-	import Icon from '$lib/components/ui/Icon.svelte';
+	import { Icon } from '$lib/components/ui/index.js';
 	import { isOwnKeyTarget } from '$lib/utils/index.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */

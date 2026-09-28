@@ -9,10 +9,7 @@
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/background/index.js';
-	import InputRow from '$lib/components/ui/InputRow.svelte';
-	import FontSelect from '$lib/components/ui/FontSelect.svelte';
-	import ChoiceGroup from '$lib/components/ui/ChoiceGroup.svelte';
-	import Slider from '$lib/components/ui/Slider.svelte';
+	import { InputRow, FontSelect, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { manager }: { manager: GeometryManagerInteractive } = $props();

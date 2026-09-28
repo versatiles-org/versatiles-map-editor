@@ -1,7 +1,5 @@
 <script lang="ts">
-	import Dialog from '$lib/components/ui/Dialog.svelte';
-	import InputRow from '$lib/components/ui/InputRow.svelte';
-	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
+	import { Dialog, InputRow, ColorPicker } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/inspector/PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import {

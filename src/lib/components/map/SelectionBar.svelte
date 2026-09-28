@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import * as commands from '$lib/core/commands.js';
-	import Icon from '$lib/components/ui/Icon.svelte';
+	import { Icon } from '$lib/components/ui/index.js';
 	import { coordinatesOf } from '$lib/core/geometry.js';
 
 	/**
