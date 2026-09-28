@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$lib/style/index.scss';
-	import Inspector from './Inspector.svelte';
+	import Inspector from '$lib/components/inspector/Inspector.svelte';
 	import * as commands from '$lib/core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';

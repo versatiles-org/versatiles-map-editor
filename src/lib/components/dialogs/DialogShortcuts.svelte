@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Dialog from './Dialog.svelte';
+	import Dialog from '$lib/components/ui/Dialog.svelte';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 
 	/** All keyboard shortcuts of the editor in one place, opened with "?" or from the menu. */

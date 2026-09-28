@@ -2,10 +2,10 @@
 	import { tick } from 'svelte';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import * as commands from '$lib/core/commands.js';
-	import DialogFile from './DialogFile.svelte';
-	import DialogImportTable from './DialogImportTable.svelte';
-	import DialogShortcuts from './DialogShortcuts.svelte';
-	import Icon from './Icon.svelte';
+	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
+	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
+	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
 	import { notify } from '$lib/utils/notify.svelte.js';
 	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';

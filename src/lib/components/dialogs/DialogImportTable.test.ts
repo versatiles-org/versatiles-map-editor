@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
 import type { StateElementMarker, StateLegend } from '@versatiles/map-state';
-import { MockMap } from '../__mocks__/map.js';
-import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+import { MockMap } from '../../__mocks__/map.js';
+import type { GeometryManagerInteractive } from '../../core/geometry_manager_interactive.js';
 import DialogImportTable from './DialogImportTable.svelte';
 
 const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
-vi.mock('../utils/geocoding.js', () => ({ geocode }));
+vi.mock('../../utils/geocoding.js', () => ({ geocode }));
 
 describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;

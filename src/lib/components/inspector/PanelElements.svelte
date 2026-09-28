@@ -2,7 +2,7 @@
 	import { tick } from 'svelte';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
-	import Icon, { type IconName } from './Icon.svelte';
+	import Icon, { type IconName } from '$lib/components/ui/Icon.svelte';
 	import { elementNames } from '$lib/core/element/element_names.js';
 
 	/**

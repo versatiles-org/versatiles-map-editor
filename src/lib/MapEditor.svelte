@@ -7,10 +7,10 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import Legend from './components/Legend.svelte';
-	import Notifications from './components/Notifications.svelte';
+	import Legend from './components/map/Legend.svelte';
+	import Notifications from './components/ui/Notifications.svelte';
 	import { notify } from '$lib/utils/notify.svelte.js';
-	import SearchPlace from './components/SearchPlace.svelte';
+	import SearchPlace from './components/map/SearchPlace.svelte';
 	import { GeometryManager } from './core/geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './core/geometry_manager_interactive.js';
 	import { PopupHandler } from './core/popup_handler.svelte.js';
@@ -157,14 +157,14 @@
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
 			import('./core/geometry_manager_interactive.js'),
-			import('./components/Sidebar.svelte'),
-			import('./components/TopBar.svelte'),
-			import('./components/ToolRail.svelte'),
-			import('./components/DrawBar.svelte'),
-			import('./components/SelectionBar.svelte'),
-			import('./components/ElementsDrawer.svelte'),
-			import('./components/StatusBar.svelte'),
-			import('./components/NodeDeleteButton.svelte')
+			import('./components/shell/Sidebar.svelte'),
+			import('./components/shell/TopBar.svelte'),
+			import('./components/shell/ToolRail.svelte'),
+			import('./components/map/DrawBar.svelte'),
+			import('./components/map/SelectionBar.svelte'),
+			import('./components/shell/ElementsDrawer.svelte'),
+			import('./components/shell/StatusBar.svelte'),
+			import('./components/map/NodeDeleteButton.svelte')
 		]);
 		return {
 			GeometryManagerInteractive,

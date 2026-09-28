@@ -9,7 +9,7 @@
 		matchesFilter,
 		SymbolLibrary
 	} from '$lib/core/symbols.js';
-	import Dialog from './Dialog.svelte';
+	import Dialog from '$lib/components/ui/Dialog.svelte';
 
 	let dialog: Dialog | undefined;
 	let filterInput: HTMLInputElement | undefined = $state();

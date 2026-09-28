@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Dialog from './Dialog.svelte';
-	import InputRow from './InputRow.svelte';
-	import ColorPicker from './ColorPicker.svelte';
-	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import Dialog from '$lib/components/ui/Dialog.svelte';
+	import InputRow from '$lib/components/ui/InputRow.svelte';
+	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
+	import SymbolSelector from '$lib/components/inspector/PanelSymbolSelector.svelte';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import { ADDRESS_PARTS, guessColumns, parseTable, type AddressPart, type Table } from '$lib/table_import/table.js';
 	import {

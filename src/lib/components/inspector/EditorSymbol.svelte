@@ -2,11 +2,11 @@
 	import type { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
 	import { labelPositions, MapLayerSymbol } from '$lib/core/map_layer/symbol.svelte.js';
 	import { group } from '$lib/utils/group.js';
-	import InputRow from './InputRow.svelte';
-	import ColorPicker from './ColorPicker.svelte';
+	import InputRow from '$lib/components/ui/InputRow.svelte';
+	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
-	import ChoiceGroup from './ChoiceGroup.svelte';
-	import Slider from './Slider.svelte';
+	import ChoiceGroup from '$lib/components/ui/ChoiceGroup.svelte';
+	import Slider from '$lib/components/ui/Slider.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
 	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();

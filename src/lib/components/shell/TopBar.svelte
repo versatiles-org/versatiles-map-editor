@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '$lib/style/index.scss';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import DialogShare from './DialogShare.svelte';
-	import Icon from './Icon.svelte';
+	import DialogShare from '$lib/components/dialogs/DialogShare.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
 	import MainMenu from './MainMenu.svelte';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */

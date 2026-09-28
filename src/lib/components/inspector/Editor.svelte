@@ -4,7 +4,7 @@
 	import EditorFill from './EditorFill.svelte';
 	import EditorStroke from './EditorStroke.svelte';
 	import EditorSymbol from './EditorSymbol.svelte';
-	import InputRow from './InputRow.svelte';
+	import InputRow from '$lib/components/ui/InputRow.svelte';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from '$lib/utils/group.js';
 

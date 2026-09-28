@@ -2,10 +2,10 @@
 	import type { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
 	import { dashArrays, MapLayerLine } from '$lib/core/map_layer/line.svelte.js';
 	import { group } from '$lib/utils/group.js';
-	import InputRow from './InputRow.svelte';
-	import ColorPicker from './ColorPicker.svelte';
-	import ChoiceGroup from './ChoiceGroup.svelte';
-	import Slider from './Slider.svelte';
+	import InputRow from '$lib/components/ui/InputRow.svelte';
+	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
+	import ChoiceGroup from '$lib/components/ui/ChoiceGroup.svelte';
+	import Slider from '$lib/components/ui/Slider.svelte';
 
 	/** The line layers of all selected elements, which are edited together. */
 	const { layers, manager }: { layers: MapLayerLine[]; manager: GeometryManager } = $props();

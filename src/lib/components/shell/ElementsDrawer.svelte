@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import Icon from './Icon.svelte';
-	import PanelElements from './PanelElements.svelte';
+	import Icon from '$lib/components/ui/Icon.svelte';
+	import PanelElements from '$lib/components/inspector/PanelElements.svelte';
 
 	/**
 	 * All elements of the map in a drawer at the left, with the map and its legend at the top, so

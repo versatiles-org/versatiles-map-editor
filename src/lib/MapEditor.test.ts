@@ -50,14 +50,14 @@ describe('MapEditor', () => {
 	// running in parallel, so it is loaded once before the tests.
 	beforeAll(async () => {
 		await Promise.all([
-			import('./components/Sidebar.svelte'),
-			import('./components/TopBar.svelte'),
-			import('./components/ToolRail.svelte'),
-			import('./components/DrawBar.svelte'),
-			import('./components/SelectionBar.svelte'),
-			import('./components/ElementsDrawer.svelte'),
-			import('./components/StatusBar.svelte'),
-			import('./components/NodeDeleteButton.svelte')
+			import('./components/shell/Sidebar.svelte'),
+			import('./components/shell/TopBar.svelte'),
+			import('./components/shell/ToolRail.svelte'),
+			import('./components/map/DrawBar.svelte'),
+			import('./components/map/SelectionBar.svelte'),
+			import('./components/shell/ElementsDrawer.svelte'),
+			import('./components/shell/StatusBar.svelte'),
+			import('./components/map/NodeDeleteButton.svelte')
 		]);
 	}, 60_000);
 
@@ -115,7 +115,7 @@ describe('MapEditor', () => {
 		unmount(component);
 		flushSync();
 		// give the editor code time to load
-		await import('./components/Sidebar.svelte');
+		await import('./components/shell/Sidebar.svelte');
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		expect(document.querySelector('.sidebar')).toBeNull();
