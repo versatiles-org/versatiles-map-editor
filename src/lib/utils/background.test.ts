@@ -89,27 +89,52 @@ describe('changeSettings', () => {
 	it('changes the colors of the vector map, and stores only changed values', () => {
 		const gray = changeSettings(undefined, { colors: { ...DEFAULT_COLORS, saturation: -1 } });
 		expect(gray?.options.recolor).toStrictEqual({ saturate: -1 });
-		const changed = changeSettings(gray, { colors: { saturation: -1, brightness: 0.2, contrast: 0.5 } });
-		// the contrast of the vector map is a factor
-		expect(changed?.options.recolor).toStrictEqual({ saturate: -1, brightness: 0.2, contrast: 1.5 });
-		expect(getSettings(changed).colors).toStrictEqual({ saturation: -1, brightness: 0.2, contrast: 0.5 });
+		// black becomes 20 % and white 90 %: a contrast factor, then a lightness added
+		const changed = changeSettings(gray, { colors: { saturation: -1, black: 0.2, white: 0.9 } });
+		expect(changed?.options.recolor).toStrictEqual({ saturate: -1, brightness: 0.05, contrast: 0.7 });
+		expect(getSettings(changed).colors).toStrictEqual({ saturation: -1, black: 0.2, white: 0.9 });
 		// back to the unchanged colors: the default background again
 		expect(changeSettings(changed, { colors: DEFAULT_COLORS })).toBeUndefined();
 	});
 
+	it('maps black and white of the vector map exactly where they are set', () => {
+		for (const [black, white] of [
+			[0.5, 1],
+			[0, 0.3],
+			[0.35, 0.35],
+			[0.1, 0.75]
+		]) {
+			const recolor = changeSettings(undefined, { colors: { ...DEFAULT_COLORS, black, white } })!.options.recolor as {
+				brightness?: number;
+				contrast?: number;
+			};
+			// as @versatiles/style computes it: scaled around mid-gray, then shifted, without clipping in between
+			const channel = (c: number) => (c - 127.5) * (recolor.contrast ?? 1) + 127.5 + 255 * (recolor.brightness ?? 0);
+			expect(channel(0)).toBeCloseTo(255 * black);
+			expect(channel(255)).toBeCloseTo(255 * white);
+		}
+	});
+
+	it('reads colors of older maps as black and white', () => {
+		const older = { builder: 'osm' as const, options: { recolor: { brightness: 0.1, contrast: 1.5 } } };
+		// too much contrast: black and white are kept within black and white
+		expect(getSettings(older).colors).toStrictEqual({ saturation: 0, black: 0, white: 1 });
+		const faded = { builder: 'osm' as const, options: { recolor: { brightness: 0.25, contrast: 0.5 } } };
+		expect(getSettings(faded).colors).toStrictEqual({ saturation: 0, black: 0.5, white: 1 });
+	});
+
 	it('changes the colors of the satellite imagery with its raster properties', () => {
 		const sat = changeSettings(undefined, { base: 'satellite' });
-		const brighter = changeSettings(sat, { colors: { saturation: -0.5, brightness: 0.2, contrast: 0.3 } });
-		expect(brighter?.options.raster).toStrictEqual({ saturation: -0.5, contrast: 0.3, brightnessMin: 0.2 });
-		expect(getSettings(brighter).colors).toStrictEqual({ saturation: -0.5, brightness: 0.2, contrast: 0.3 });
-		const darker = changeSettings(sat, { colors: { ...DEFAULT_COLORS, brightness: -0.3 } });
+		const faded = changeSettings(sat, { colors: { saturation: -0.5, black: 0.2, white: 1 } });
+		expect(faded?.options.raster).toStrictEqual({ saturation: -0.5, brightnessMin: 0.2 });
+		expect(getSettings(faded).colors).toStrictEqual({ saturation: -0.5, black: 0.2, white: 1 });
+		const darker = changeSettings(sat, { colors: { ...DEFAULT_COLORS, white: 0.7 } });
 		expect(darker?.options.raster).toStrictEqual({ brightnessMax: 0.7 });
-		expect(getSettings(darker).colors.brightness).toBeCloseTo(-0.3);
-		// also without the overlay
-		const imagery = changeSettings(sat, { overlay: false });
-		expect(changeSettings(imagery, { colors: { ...DEFAULT_COLORS, contrast: 0.4 } })?.options).toStrictEqual({
+		// the contrast of older maps is removed, since it would move black and white again
+		const older = { builder: 'satellite' as const, options: { osmOverlay: false, raster: { contrast: 0.4 } } };
+		expect(changeSettings(older, { colors: { ...DEFAULT_COLORS, black: 0.1 } })?.options).toStrictEqual({
 			osmOverlay: false,
-			raster: { contrast: 0.4 }
+			raster: { brightnessMin: 0.1 }
 		});
 	});
 

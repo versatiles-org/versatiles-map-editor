@@ -21,18 +21,22 @@ export interface BackgroundSettings {
 }
 
 /**
- * The changes of the colors that the editor offers, for both maps, each from -1 to 1, and 0 keeps
- * the colors: `recolor` of the vector map, and the raster properties of the satellite imagery.
+ * The changes of the colors that the editor offers, the same for both maps: `recolor` of the vector
+ * map, and the raster properties of the satellite imagery.
  */
 export interface MapColors {
-	/** -1 is gray. */
+	/** From -1 (gray) to 1, 0 keeps the colors. */
 	saturation: number;
-	/** -1 is black, 1 is white. */
-	brightness: number;
-	contrast: number;
+	/**
+	 * The lightness that black becomes, and the one that white becomes, from 0 (black) to 1
+	 * (white). All other colors are between them, e.g. black 0.5 fades the map with white, and
+	 * white 0.5 with black. Black is never lighter than white.
+	 */
+	black: number;
+	white: number;
 }
 
-export const DEFAULT_COLORS: MapColors = { saturation: 0, brightness: 0, contrast: 0 };
+export const DEFAULT_COLORS: MapColors = { saturation: 0, black: 0, white: 1 };
 
 /** The editor's default: the vector map with labels in the browser language. */
 export const DEFAULT_BACKGROUND: StateBackground = { builder: 'osm', options: { text: { language: 'user' } } };
@@ -84,43 +88,43 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 
 const number = (value: unknown, fallback: number) => (typeof value === 'number' ? value : fallback);
 
+/** Rounded, e.g. to keep 0.3 from becoming 0.30000000000000004 in a link. */
+const round = (value: number) => Math.round(value * 10000) / 10000 + 0;
+const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/**
+ * The colors of a map. The vector map scales the colors around mid-gray (`contrast`, a factor), then
+ * adds a lightness (`brightness`), without clipping in between: black becomes
+ * `brightness + (1 − contrast) / 2`, white that plus `contrast`. The imagery maps black and white
+ * with `brightnessMin` and `brightnessMax`.
+ */
 function getColors({ builder, options }: StateBackground): MapColors {
 	if (builder === 'osm') {
-		// `recolor` of the vector map, whose contrast is a factor
 		const recolor = isObject(options.recolor) ? options.recolor : {};
-		return {
-			saturation: number(recolor.saturate, 0),
-			brightness: number(recolor.brightness, 0),
-			contrast: number(recolor.contrast, 1) - 1
-		};
+		const contrast = number(recolor.contrast, 1);
+		const black = number(recolor.brightness, 0) + (1 - contrast) / 2;
+		return levels(number(recolor.saturate, 0), black, black + contrast);
 	}
-	// the raster properties of the imagery, whose brightness is a range from 0 to 1
 	const raster = isObject(options.raster) ? options.raster : {};
-	const min = number(raster.brightnessMin, 0);
-	const max = number(raster.brightnessMax, 1);
-	return {
-		saturation: number(raster.saturation, 0),
-		brightness: min > 0 ? min : max - 1,
-		contrast: number(raster.contrast, 0)
-	};
+	return levels(number(raster.saturation, 0), number(raster.brightnessMin, 0), number(raster.brightnessMax, 1));
+}
+
+function levels(saturation: number, black: number, white: number): MapColors {
+	return { saturation, black: round(clamp01(black)), white: round(clamp01(Math.max(black, white))) };
 }
 
 /** The options of `@versatiles/style` for the colors; other options of the builder are kept. */
 function setColors(builder: StateBackground['builder'], options: Options, colors: MapColors) {
-	const { saturation, brightness, contrast } = colors;
+	const { saturation, black, white } = colors;
 	if (builder === 'osm') {
 		const recolor = isObject(options.recolor) ? options.recolor : {};
-		options.recolor = { ...recolor, saturate: saturation, brightness, contrast: 1 + contrast };
+		// see getColors
+		const contrast = round(white - black);
+		options.recolor = { ...recolor, saturate: saturation, brightness: round((black + white - 1) / 2), contrast };
 	} else {
-		const raster = isObject(options.raster) ? options.raster : {};
-		options.raster = {
-			...raster,
-			saturation,
-			contrast,
-			// brighter: black becomes gray; darker: white becomes gray
-			brightnessMin: Math.max(0, brightness),
-			brightnessMax: 1 + Math.min(0, brightness)
-		};
+		// the contrast of the imagery would move black and white again
+		const { contrast: _, ...raster } = isObject(options.raster) ? options.raster : {};
+		options.raster = { ...raster, saturation, brightnessMin: black, brightnessMax: white };
 	}
 }
 

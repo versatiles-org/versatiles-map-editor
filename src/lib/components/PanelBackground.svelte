@@ -40,6 +40,15 @@
 	let colors: MapColors = $derived({ ...settings.colors });
 	const colorsChanged = $derived(JSON.stringify(settings.colors) !== JSON.stringify(DEFAULT_COLORS));
 
+	/** Black is never lighter than white: the changed one pushes the other along. */
+	function changeLevels(changed: 'black' | 'white') {
+		if (colors.black > colors.white) {
+			if (changed === 'black') colors.white = colors.black;
+			else colors.black = colors.white;
+		}
+		change('colors', colors);
+	}
+
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
 		// and quick changes are separate undo steps.
@@ -92,26 +101,27 @@
 		unit="%"
 	/>
 </InputRow>
-<InputRow id="{uid}-brightness" label="Brightness">
+<!-- what black and white become, and all other colors between them: e.g. faded with white or black -->
+<InputRow id="{uid}-black" label="Black becomes">
 	<Slider
-		id="{uid}-brightness"
-		min={-0.5}
-		max={0.5}
+		id="{uid}-black"
+		min={0}
+		max={1}
 		step={0.05}
-		bind:value={colors.brightness}
-		onchange={() => change('colors', colors)}
+		bind:value={colors.black}
+		onchange={() => changeLevels('black')}
 		scale={100}
 		unit="%"
 	/>
 </InputRow>
-<InputRow id="{uid}-contrast" label="Contrast">
+<InputRow id="{uid}-white" label="White becomes">
 	<Slider
-		id="{uid}-contrast"
-		min={-0.5}
+		id="{uid}-white"
+		min={0}
 		max={1}
 		step={0.05}
-		bind:value={colors.contrast}
-		onchange={() => change('colors', colors)}
+		bind:value={colors.white}
+		onchange={() => changeLevels('white')}
 		scale={100}
 		unit="%"
 	/>

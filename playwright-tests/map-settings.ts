@@ -1,4 +1,5 @@
 import { expect, test } from './lib/test.js';
+import type { Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	drawElement,
@@ -154,13 +155,75 @@ test('changing the colors of the vector map and of the satellite imagery', async
 	await expect.poll(() => background()?.options.raster).toStrictEqual({ saturation: -1 });
 	await expect.poll(() => paint('satellite', 'raster-saturation')).toBe(-1);
 	// darker: white becomes gray
-	await page.getByRole('slider', { name: 'Brightness' }).fill('-0.2');
+	await page.getByRole('slider', { name: 'White becomes' }).fill('0.8');
 	await expect.poll(() => paint('satellite', 'raster-brightness-max')).toBeCloseTo(0.8);
+	// black is never lighter than white: it pushes white along
+	await page.getByRole('spinbutton', { name: 'Black becomes' }).fill('90');
+	await page.getByRole('spinbutton', { name: 'Black becomes' }).press('Enter');
+	await expect(page.getByRole('spinbutton', { name: 'White becomes' })).toHaveValue('90');
+	await expect
+		.poll(() => background()?.options.raster)
+		.toStrictEqual({
+			saturation: -1,
+			brightnessMin: 0.9,
+			brightnessMax: 0.9
+		});
 
 	// all back
 	await page.getByRole('button', { name: 'Reset colors' }).click();
 	await expect.poll(() => background()?.options.raster).toBeUndefined();
 	await expect(page.getByRole('button', { name: 'Reset colors' })).toBeDisabled();
+});
+
+/** The darkest and the lightest channel of all pixels of the map, e.g. of a faded map. */
+async function channelRange(page: Page): Promise<[number, number]> {
+	// the map without the controls on it
+	const png = await page.screenshot({ clip: { x: 100, y: 120, width: 800, height: 500 } });
+	return page.evaluate(async (base64) => {
+		const image = new Image();
+		image.src = 'data:image/png;base64,' + base64;
+		await image.decode();
+		const canvas = new OffscreenCanvas(image.width, image.height);
+		const context = canvas.getContext('2d')!;
+		context.drawImage(image, 0, 0);
+		const { data } = context.getImageData(0, 0, image.width, image.height);
+		let min = 255;
+		let max = 0;
+		for (let i = 0; i < data.length; i++) {
+			if (i % 4 === 3) continue;
+			min = Math.min(min, data[i]);
+			max = Math.max(max, data[i]);
+		}
+		return [min, max] as [number, number];
+	}, png.toString('base64'));
+}
+
+test('black and white become exactly what is set, on both maps', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.39, 52.51], radius: 2500 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const setLevel = async (name: string, percent: string) => {
+		await page.getByRole('spinbutton', { name }).fill(percent);
+		await page.getByRole('spinbutton', { name }).press('Enter');
+		await waitForMapIsIdle(page);
+	};
+	// e.g. 50 % of 255, give or take the rounding and smoothing of the edges
+	const near = (value: number) => [value - 2, value + 2];
+
+	// the vector map, faded with white: its darkest lines and labels become mid-gray
+	await setLevel('Black becomes', '50');
+	await expect.poll(async () => (await channelRange(page))[0]).toBeGreaterThanOrEqual(near(127.5)[0]);
+	expect((await channelRange(page))[1]).toBe(255);
+
+	// the satellite map, with the same levels
+	await page.getByRole('radio', { name: 'Satellite' }).check();
+	await page.getByRole('checkbox', { name: 'Streets and labels' }).uncheck();
+	await waitForMapIsIdle(page);
+	await expect.poll(async () => (await channelRange(page))[0]).toBeGreaterThanOrEqual(near(127.5)[0]);
+
+	// faded with black instead: nothing is lighter than white becomes
+	await setLevel('Black becomes', '0');
+	await setLevel('White becomes', '40');
+	await expect.poll(async () => (await channelRange(page))[1]).toBeLessThanOrEqual(near(102)[1]);
 });
 
 test('one font for the labels of all markers, which need not be the one of the background map', async ({ page }) => {
