@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import { Icon } from '$lib/components/ui/index.js';
-	import PanelElements from '$lib/components/inspector/PanelElements.svelte';
+	import ElementList from './ElementList.svelte';
 
 	/**
 	 * All elements of the map in a drawer at the left, with the map and its legend at the top, so
@@ -33,7 +33,7 @@
 		{/if}
 		<hr />
 		{#if count > 0}
-			<PanelElements {manager} />
+			<ElementList {manager} />
 		{:else}
 			<p class="label">No elements yet. Draw them with the tools on the left.</p>
 		{/if}
