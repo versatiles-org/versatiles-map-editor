@@ -7,10 +7,9 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import Legend from '$lib/components/map/Legend.svelte';
+	import { Legend, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { notify } from '$lib/utils/index.js';
-	import SearchPlace from '$lib/components/map/SearchPlace.svelte';
 	import { GeometryManager } from './geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
@@ -147,24 +146,12 @@
 	async function loadEditor() {
 		const [
 			{ GeometryManagerInteractive },
-			{ default: Sidebar },
-			{ default: TopBar },
-			{ default: ToolRail },
-			{ default: DrawBar },
-			{ default: SelectionBar },
-			{ default: ElementsDrawer },
-			{ default: StatusBar },
-			{ default: NodeDeleteButton }
+			{ Sidebar, TopBar, ToolRail, ElementsDrawer, StatusBar },
+			{ DrawBar, SelectionBar, NodeDeleteButton }
 		] = await Promise.all([
 			import('./geometry_manager_interactive.js'),
-			import('$lib/components/shell/Sidebar.svelte'),
-			import('$lib/components/shell/TopBar.svelte'),
-			import('$lib/components/shell/ToolRail.svelte'),
-			import('$lib/components/map/DrawBar.svelte'),
-			import('$lib/components/map/SelectionBar.svelte'),
-			import('$lib/components/shell/ElementsDrawer.svelte'),
-			import('$lib/components/shell/StatusBar.svelte'),
-			import('$lib/components/map/NodeDeleteButton.svelte')
+			import('$lib/components/shell/index.js'),
+			import('$lib/components/map/editor/index.js')
 		]);
 		return {
 			GeometryManagerInteractive,
