@@ -1,8 +1,13 @@
 {
 	"deps-graph": {
-		"barrel":["packages/**", "src/lib/**"],
-		"collapse-dir": ["src/lib/utils/*", "src/lib/components/ui/*"],
+		"barrel": ["packages/**", "src/lib/**"],
+		"collapse-dir": [
+			"src/lib/components/map/editor/*",
+			"src/lib/components/map/viewer/*",
+			"src/lib/components/ui/*",
+			"src/lib/utils/*"
+		],
 		"include": ["src", "packages/map-state/src"],
-		"merge-outgoing": ["src/lib/components","src/lib/components/*","src/lib/element"]
+		"merge-outgoing": ["src/lib/components", "src/lib/components/*", "src/lib/element"]
 	}
 }
