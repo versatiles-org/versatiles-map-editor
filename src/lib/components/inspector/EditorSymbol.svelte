@@ -3,7 +3,7 @@
 	import { labelPositions, MapLayerSymbol } from '$lib/map_layer/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
-	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
 	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();

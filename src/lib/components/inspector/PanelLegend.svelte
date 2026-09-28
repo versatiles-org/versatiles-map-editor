@@ -2,7 +2,7 @@
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
 	import { InputRow, ColorPicker, ChoiceGroup } from '$lib/components/ui/index.js';
-	import SymbolSelector from './PanelSymbolSelector.svelte';
+	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
