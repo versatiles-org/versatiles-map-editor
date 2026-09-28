@@ -1,5 +1,6 @@
 {
 	"deps-graph": {
-		"include": ["src", "packages/map-state/src"]
+		"include": ["src", "packages/map-state/src"],
+		"barrel":["packages/**", "src/lib/**"]
 	}
 }
