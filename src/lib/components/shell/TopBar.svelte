@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '$lib/style/index.scss';
+	import '$lib/components/style/index.scss';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import DialogShare from '$lib/components/dialogs/DialogShare.svelte';
 	import { Icon } from '$lib/components/ui/index.js';

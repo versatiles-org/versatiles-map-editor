@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '$lib/style/index.scss';
+	import '$lib/components/style/index.scss';
 	import Inspector from '$lib/components/inspector/Inspector.svelte';
 	import * as commands from '$lib/core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/index.js';
