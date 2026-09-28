@@ -12,7 +12,7 @@ import {
 	trackDrag,
 	TOUCH_TOLERANCE,
 	type MapPointerEvent
-} from '../utils/drag.js';
+} from './drag.js';
 
 // Tolerance in pixels around the mouse, so thin lines are easier to hit
 const MOUSE_TOLERANCE = 3;

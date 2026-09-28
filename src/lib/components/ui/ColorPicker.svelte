@@ -1,12 +1,12 @@
 <script lang="ts" module>
-	import type { Position } from '$lib/utils/popup_position.js';
+	import type { Position } from './popup_position.js';
 
 	// Where the user dragged a color picker to: all of them open there, until the page is reloaded
 	let dragged: Position | undefined;
 </script>
 
 <script lang="ts">
-	import { besideElement, keepInViewport } from '$lib/utils/popup_position.js';
+	import { besideElement, keepInViewport } from './popup_position.js';
 	import {
 		hsvKeeping,
 		hsvToRgb,

@@ -6,7 +6,7 @@
 	import EditorSymbol from './EditorSymbol.svelte';
 	import InputRow from '$lib/components/ui/InputRow.svelte';
 	import InspectorSection from './InspectorSection.svelte';
-	import { group } from '$lib/utils/group.js';
+	import { group } from './group.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */
 	const { elements }: { elements: AbstractElement[] } = $props();
