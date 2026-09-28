@@ -151,6 +151,46 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 	await expect(page.getByRole('combobox', { name: 'Language' })).toBeVisible();
 });
 
+test('the size and the halo of the labels of both maps', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const layerIds = () => page.evaluate(() => (window as unknown as MapWindow).map.getStyle().layers.map((l) => l.id));
+	const cityLabel = () =>
+		page.evaluate(() => {
+			const layer = (window as unknown as MapWindow).map.getStyle().layers.find((l) => l.id === 'label-place-city');
+			return layer?.type === 'symbol'
+				? { size: layer.layout?.['text-size'], halo: layer.paint?.['text-halo-width'] }
+				: {};
+		});
+	const setValue = async (name: string, value: string) => {
+		await page.getByRole('spinbutton', { name }).fill(value);
+		await page.getByRole('spinbutton', { name }).press('Enter');
+	};
+	expect(await layerIds()).toContain('label-place-city');
+	const before = await cityLabel();
+	expect(before.halo).toBe(2);
+	await expect(page.getByRole('spinbutton', { name: 'Halo width' })).toHaveValue('2');
+
+	// larger labels with a wider halo
+	await setValue('Label size', '150');
+	await setValue('Halo width', '3');
+	await expect.poll(async () => (await cityLabel()).halo).toBe(3);
+	expect((await cityLabel()).size).not.toStrictEqual(before.size);
+	await expect
+		.poll(() => stateInUrl(page).meta?.background?.options.text)
+		.toMatchObject({ scale: 1.5, places: { haloWidth: 3 } });
+
+	// the satellite map keeps them
+	await page.getByRole('radio', { name: 'Satellite' }).check();
+	await expect.poll(async () => (await cityLabel()).halo).toBe(3);
+	await expect(page.getByRole('spinbutton', { name: 'Label size' })).toHaveValue('150');
+
+	// without labels, there is nothing to set
+	await page.getByRole('radiogroup', { name: 'Labels' }).getByRole('radio', { name: 'None' }).check();
+	await expect(page.getByRole('slider', { name: 'Label size' })).toBeHidden();
+	await expect(page.getByRole('slider', { name: 'Halo width' })).toBeHidden();
+});
+
 test('changing the colors of the vector map and of the satellite imagery', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);

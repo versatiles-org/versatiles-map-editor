@@ -19,6 +19,10 @@ export interface BackgroundSettings {
 	/** "user" (browser language), "local" (local names) or a language code. */
 	language: string;
 	labels: 'none' | 'fewer' | 'normal';
+	/** The size of the labels, as a factor of their own size. */
+	labelSize: number;
+	/** The width of the halo around the labels, in pixels. */
+	haloWidth: number;
 	/** Changes of the colors of the vector map or the satellite imagery. */
 	colors: MapColors;
 }
@@ -58,6 +62,15 @@ export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 
 /** The layer groups of the streets over the imagery, hidden. */
 const STREETS_HIDDEN = (): Options => ({ roads: false, transit: false, markings: false });
 
+/**
+ * The labels whose halo width the editor sets: those of places, borders, streets, water and
+ * transit stops. The others keep theirs, e.g. the thin halos of the points of interest and of the
+ * numbers on road shields of the vector map.
+ */
+const HALO_GROUPS = [['places'], ['boundaries'], ['streets', 'names'], ['water'], ['pois', 'transit']];
+/** The halo of these labels: 2 pixels on the vector map, 1 over the imagery. */
+const DEFAULT_HALO_WIDTH = { vector: 2, satellite: 1 };
+
 // Fewer labels by keeping more space between them
 const FEWER_LABELS_SPACING = 2;
 
@@ -77,23 +90,53 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 	const overlay = overlayOf(background);
 	const text = isObject(overlay.text) ? overlay.text : {};
 	const layers = isObject(overlay.layers) ? overlay.layers : {};
-	const imageryAlone = background.builder === 'satellite' && background.options.osmOverlay === false;
+	const base = background.builder === 'satellite' ? 'satellite' : 'vector';
+	const imageryAlone = base === 'satellite' && background.options.osmOverlay === false;
 	let labels: BackgroundSettings['labels'] = 'normal';
 	if (imageryAlone || layers.labels === false) labels = 'none';
 	else if (typeof text.spacing === 'number' && text.spacing > 1) labels = 'fewer';
 
 	return {
-		base: background.builder === 'satellite' ? 'satellite' : 'vector',
+		base,
 		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
 		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
 		labels,
+		labelSize: number(text.scale, 1),
+		haloWidth: inherited(text, HALO_GROUPS[0], 'haloWidth') ?? DEFAULT_HALO_WIDTH[base],
 		colors: getColors(background)
 	};
 }
 
 const number = (value: unknown, fallback: number) => (typeof value === 'number' ? value : fallback);
+
+/**
+ * A number set at a path or at one of its parents, the nearest one, e.g. `text.places.haloWidth`
+ * or else `text.haloWidth`: minimized options can keep a value shared by all labels at the root.
+ */
+function inherited(options: Options, path: string[], key: string): number | undefined {
+	let value: number | undefined;
+	let current: unknown = options;
+	for (const step of [undefined, ...path]) {
+		if (step !== undefined) current = isObject(current) ? current[step] : undefined;
+		if (isObject(current) && typeof current[key] === 'number') value = current[key];
+	}
+	return value;
+}
+
+/** The options at a path, e.g. `text.streets.names`; `create` adds the missing ones. */
+function childOf(options: Options, path: string[], create = false): Options {
+	let current = options;
+	for (const key of path) {
+		if (!isObject(current[key])) {
+			if (!create) return {};
+			current[key] = {};
+		}
+		current = current[key] as Options;
+	}
+	return current;
+}
 
 /** Rounded, e.g. to keep 0.3 from becoming 0.30000000000000004 in a link. */
 const round = (value: number) => Math.round(value * 10000) / 10000 + 0;
@@ -192,6 +235,10 @@ export function changeSettings(
 	if (change.theme) overlay.theme = change.theme;
 
 	if (change.font) text.font = change.font;
+	if (change.labelSize !== undefined) text.scale = change.labelSize;
+	if (change.haloWidth !== undefined) {
+		for (const path of HALO_GROUPS) childOf(text, path, true).haloWidth = change.haloWidth;
+	}
 	if (change.language) text.language = change.language;
 	if (change.labels) {
 		if (!isObject(overlay.layers)) overlay.layers = {};

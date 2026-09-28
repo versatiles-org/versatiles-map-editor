@@ -38,6 +38,9 @@
 	// The colors while they are changed: a new style for each step of a slider would be too slow,
 	// so the map changes when the slider is released. Set again by a change of the map, e.g. undo.
 	let colors: MapColors = $derived({ ...settings.colors });
+	// the same for the size and halo of the labels
+	let labelSize = $derived(settings.labelSize);
+	let haloWidth = $derived(settings.haloWidth);
 	const colorsChanged = $derived(JSON.stringify(settings.colors) !== JSON.stringify(DEFAULT_COLORS));
 
 	/** Black is never lighter than white: the changed one pushes the other along. */
@@ -157,3 +160,29 @@
 		options={LABELS}
 	/>
 </InputRow>
+
+{#if settings.labels !== 'none'}
+	<InputRow id="{uid}-label-size" label="Label size">
+		<Slider
+			id="{uid}-label-size"
+			min={0.5}
+			max={2}
+			step={0.05}
+			bind:value={labelSize}
+			onchange={() => change('labelSize', labelSize)}
+			scale={100}
+			unit="%"
+		/>
+	</InputRow>
+	<InputRow id="{uid}-halo-width" label="Halo width">
+		<Slider
+			id="{uid}-halo-width"
+			min={0}
+			max={5}
+			step={0.25}
+			bind:value={haloWidth}
+			onchange={() => change('haloWidth', haloWidth)}
+			unit="px"
+		/>
+	</InputRow>
+{/if}

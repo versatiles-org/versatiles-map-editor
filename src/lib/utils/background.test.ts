@@ -10,6 +10,8 @@ describe('getSettings', () => {
 			font: 'noto_sans_regular',
 			language: 'user',
 			labels: 'normal',
+			labelSize: 1,
+			haloWidth: 2,
 			colors: DEFAULT_COLORS
 		});
 	});
@@ -27,6 +29,8 @@ describe('getSettings', () => {
 			font: 'lato_regular',
 			language: 'local',
 			labels: 'fewer',
+			labelSize: 1,
+			haloWidth: 2,
 			colors: DEFAULT_COLORS
 		});
 		expect(getSettings({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } })).toMatchObject(
@@ -105,6 +109,41 @@ describe('changeSettings', () => {
 
 		// the vector map always has its streets
 		expect(getSettings(changeSettings(imagery, { base: 'vector' })).streets).toBe(true);
+	});
+
+	it('changes the size and the halo of the labels of both maps', () => {
+		const larger = changeSettings(undefined, { labelSize: 1.5, haloWidth: 3 });
+		const halo = { haloWidth: 3 };
+		expect(larger?.options.text).toStrictEqual({
+			language: 'user',
+			scale: 1.5,
+			places: halo,
+			boundaries: halo,
+			streets: { names: halo },
+			water: halo,
+			pois: { transit: halo }
+		});
+		expect(getSettings(larger)).toMatchObject({ labelSize: 1.5, haloWidth: 3 });
+		// back to their defaults: nothing is stored
+		expect(changeSettings(larger, { labelSize: 1, haloWidth: 2 })).toBeUndefined();
+
+		// the satellite map keeps them, in the labels over the imagery
+		const sat = changeSettings(larger, { base: 'satellite' });
+		expect(getSettings(sat)).toMatchObject({ labelSize: 1.5, haloWidth: 3 });
+		expect(getSettings(changeSettings(sat, { haloWidth: 0 })).haloWidth).toBe(0);
+		// whose labels have a halo of 1 pixel
+		expect(getSettings(changeSettings(undefined, { base: 'satellite' })).haloWidth).toBe(1);
+		expect(getSettings(changeSettings(undefined, { base: 'satellite', haloWidth: 1 }))).toMatchObject({ haloWidth: 1 });
+	});
+
+	it('reads a halo width that is shared by all labels', () => {
+		const shared = {
+			builder: 'osm' as const,
+			options: { text: { haloWidth: 3, streets: { refs: { haloWidth: 0 } } } }
+		};
+		expect(getSettings(shared).haloWidth).toBe(3);
+		const overridden = { builder: 'osm' as const, options: { text: { haloWidth: 3, places: { haloWidth: 1 } } } };
+		expect(getSettings(overridden).haloWidth).toBe(1);
 	});
 
 	it('changes the colors of the vector map, and stores only changed values', () => {
