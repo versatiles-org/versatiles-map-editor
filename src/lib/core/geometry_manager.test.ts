@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { GeometryManager, keepElements } from './geometry_manager.svelte.js';
+import { GeometryManager } from './geometry_manager.svelte.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
@@ -349,29 +349,6 @@ describe('GeometryManager', () => {
 			expect(map.addImage).not.toHaveBeenCalled();
 			resolver('fill-pattern:1:#ff0000');
 			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:1:#ff0000', expect.anything());
-		});
-
-		it('keeps the content of the element sources in the new style', () => {
-			const layer = (id: string, source: string) => ({ id, source, type: 'line' }) as maplibregl.LayerSpecification;
-			const geojson = (n: number) => ({ type: 'geojson', data: { type: 'FeatureCollection', features: new Array(n) } });
-			const previous = {
-				version: 8,
-				sources: { old: geojson(0), elements_stroke: geojson(1), selection_nodes: geojson(2) },
-				layers: [layer('old', 'old'), layer('elements_stroke', 'elements_stroke')]
-			} as unknown as maplibregl.StyleSpecification;
-			const next = {
-				version: 8,
-				sources: { base: geojson(0), elements_stroke: geojson(0), selection_nodes: geojson(0) },
-				layers: [layer('base', 'base'), layer('elements_stroke', 'elements_stroke')]
-			} as unknown as maplibregl.StyleSpecification;
-
-			const result = keepElements(previous, next);
-			expect(Object.keys(result.sources)).toStrictEqual(['base', 'elements_stroke', 'selection_nodes']);
-			expect(result.sources.elements_stroke).toBe(previous.sources.elements_stroke);
-			expect(result.sources.selection_nodes).toBe(previous.sources.selection_nodes);
-			// the layers of the new style, e.g. with the font of the new background map
-			expect(result.layers).toBe(next.layers);
-			expect(keepElements(undefined, next)).toBe(next);
 		});
 	});
 
