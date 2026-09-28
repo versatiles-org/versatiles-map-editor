@@ -1,7 +1,7 @@
 import { AbstractElement } from './abstract.svelte.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import { MapLayerSymbol } from '../map_layer/symbol.svelte.js';
+import { MapLayerSymbol } from '../map_layer/index.js';
 import type { StateElement, StateElementMarker } from '@versatiles/map-state';
 import type { GeoPoint } from '../types.js';
 import { movePoint } from '../geometry.js';

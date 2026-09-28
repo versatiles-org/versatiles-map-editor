@@ -1,8 +1,7 @@
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import type { GeoPoint } from '../types.js';
-import { MapLayerFill } from '../map_layer/fill.svelte.js';
-import { MapLayerLine } from '../map_layer/line.svelte.js';
+import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
 import { circle, circleArea, distance, movePoint } from '../geometry.js';

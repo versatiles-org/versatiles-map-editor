@@ -1,6 +1,6 @@
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { GeoPath } from '../types.js';
-import { MapLayerLine } from '../map_layer/line.svelte.js';
+import { MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';

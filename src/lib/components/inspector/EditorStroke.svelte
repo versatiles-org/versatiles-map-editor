@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
-	import { dashArrays, MapLayerLine } from '$lib/core/map_layer/line.svelte.js';
+	import { dashArrays, MapLayerLine } from '$lib/core/map_layer/index.js';
 	import { group } from './group.js';
 	import InputRow from '$lib/components/ui/InputRow.svelte';
 	import ColorPicker from '$lib/components/ui/ColorPicker.svelte';
