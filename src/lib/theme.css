@@ -1,0 +1,75 @@
+/*
+ * The colors, spacings and stacking order of the editor and the viewer, as variables on their
+ * root element (class "map-editor-theme"). A global stylesheet, since the variables are used by
+ * all components.
+ */
+.map-editor-theme {
+	--color-blue: #158;
+	--color-blue-dark: #0c3c63;
+	--color-green: #1a1;
+	--color-bg: #fff;
+	--color-text: #000;
+	/* at least 4.5:1 on the (translucent) white of the sidebar */
+	--color-text-muted: #505050;
+	--color-disabled-bg: #d4d8dc;
+	--color-disabled-text: #4d4d4d;
+	--color-on-blue: #fff;
+	/* blue text, e.g. of options that are not selected */
+	--color-blue-text: #158;
+	--color-error: #b00020;
+	--color-warning: #a40;
+	--color-border: rgb(21 32 43 / 13%);
+	--color-hover: rgb(21 32 43 / 7%);
+	--shadow: 0 1px 2px rgb(15 25 35 / 14%), 0 6px 22px rgb(15 25 35 / 14%);
+	--btn-gap: 5px;
+	--gap: 10px;
+	--border-radius: 1em;
+	/* The stacking order of everything over the map, from the bottom up. Each overlay takes its
+	   level from here, so a new one cannot end up behind or in front of the wrong ones. */
+	/* the legend, part of the map */
+	--z-legend: 1;
+	/* bars that float over the map: the selection, the drawing, the tab of the sidebar */
+	--z-floating: 2;
+	/* the search, whose results may cover the floating bars */
+	--z-search: 3;
+	/* the panels at the edges: the tools, the drawer, the sidebar, the status line */
+	--z-panels: 4;
+	/* messages, which must not be hidden by a panel */
+	--z-messages: 5;
+	/* the top bar, whose menu opens over everything else */
+	--z-topbar: 6;
+}
+
+/*
+ * The editor follows the dark mode of the system. The map, its legend and the viewer keep
+ * their colors: they are part of the map that the author designed and shares.
+ */
+@media (prefers-color-scheme: dark) {
+	.map-editor-theme.editor {
+		color-scheme: dark;
+		/* white text on it: 5.4:1; as focus ring on the background: 3:1 */
+		--color-blue: #2b6cb0;
+		--color-blue-dark: #1f5a96;
+		--color-blue-text: #9ccbff;
+		--color-green: #2a2;
+		--color-bg: #1c1d20;
+		--color-text: #e6e6e6;
+		/* at least 4.5:1 on the (translucent) dark sidebar, also above a light map */
+		--color-text-muted: #bdbdbd;
+		--color-disabled-bg: #3a3d42;
+		--color-disabled-text: #c4c4c4;
+		--color-error: #ff8a95;
+		--color-warning: #ffb74d;
+		--color-border: rgb(255 255 255 / 13%);
+		--color-hover: rgb(255 255 255 / 8%);
+		--shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
+	}
+}
+
+/* no transitions, e.g. of the panels and buttons, for people who get dizzy from motion */
+@media (prefers-reduced-motion: reduce) {
+	.map-editor-theme *,
+	.map-editor-theme *::after {
+		transition: none !important;
+	}
+}
