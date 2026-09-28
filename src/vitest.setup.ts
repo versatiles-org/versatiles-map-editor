@@ -8,9 +8,9 @@ vi.mock('@versatiles/style', async (importOriginal) => ({
 }));
 
 // loadSymbols() downloads the sprite sheets of the tile server. In unit tests, the map has the
-// symbols of older maps at once. symbols.test.ts tests the download itself.
-vi.mock('./lib/core/symbols.js', async (importOriginal) => {
-	const original = await importOriginal<typeof import('./lib/core/symbols.js')>();
+// symbols of older maps at once. symbols/catalog.test.ts tests the download itself.
+vi.mock('./lib/core/symbols/catalog.js', async (importOriginal) => {
+	const original = await importOriginal<typeof import('./lib/core/symbols/catalog.js')>();
 	return {
 		...original,
 		loadSymbols: vi.fn(async () => ({

@@ -22,7 +22,7 @@
 	import { getColorScheme } from '$lib/background/color_schemes.js';
 	import { config } from '$lib/background/config.svelte.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
 	import { formatCount } from '$lib/utils/format.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();

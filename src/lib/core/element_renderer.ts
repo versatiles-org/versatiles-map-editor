@@ -4,7 +4,7 @@ import type { AbstractElement } from './element/abstract.svelte.js';
 import type { StyleLayers } from './element/types.js';
 import { dashArrays } from './map_layer/line.svelte.js';
 import { LABEL_POSITIONS, labelPositionTable } from './map_layer/symbol.svelte.js';
-import { allSymbols } from './symbols.js';
+import { allSymbols } from './symbols/catalog.js';
 
 /** The parts of a style that elements have, each drawn by one layer for all elements. */
 export type Role = keyof StyleLayers;

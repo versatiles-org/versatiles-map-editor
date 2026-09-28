@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { iconBox, LABEL_POSITIONS, labelPositionTable, MapLayerSymbol } from './symbol.svelte.js';
-import { getSymbol, type SymbolInfo } from '../symbols.js';
+import { getSymbol, type SymbolInfo } from '../symbols/catalog.js';
 
 describe('MapLayerSymbol', () => {
 	let onChange: Mock<() => void>;
