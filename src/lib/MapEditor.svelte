@@ -9,14 +9,12 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import { Legend, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
-	import { notify } from '$lib/utils/index.js';
 	import { GeometryManager } from './geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
-	import { decodeState } from '@versatiles/map-state';
-	import { throttle } from './throttle.js';
+	import { UrlHash } from './url_hash.js';
 
 	let {
 		onMapLoad
@@ -130,12 +128,8 @@
 	onMount(() => {
 		init();
 		// SvelteKit's replaceState fails until its router has finished starting, which happens
-		// after all components are mounted. Changes during startup (e.g. the initial viewport)
-		// are written once it is ready, without delaying the first edit by the throttle.
-		tick().then(() => {
-			routerReady = true;
-			if (persistRequested) writeHash();
-		});
+		// after all components are mounted
+		tick().then(() => urlHash.start());
 		return destroy;
 	});
 
@@ -190,8 +184,7 @@
 	let destroyed = false;
 	function destroy(): void {
 		destroyed = true;
-		persistState.cancel();
-		removeEventListener('hashchange', onHashChange);
+		urlHash.destroy();
 		// before map.remove(), so the elements can still remove their layers
 		geometryManager?.destroy();
 		geometryManager = undefined;
@@ -199,62 +192,12 @@
 		map = undefined;
 	}
 
-	// Keep the URL hash in sync with the edited map, so a reload keeps the work and the
-	// address bar always holds a shareable link. replaceState does not fire "hashchange".
-	// A single edit is written immediately. Bursts (e.g. zooming with the mouse wheel) are
-	// throttled, because browsers limit how often replaceState may be called.
-	let routerReady = false;
-	let persistRequested = false;
-	let waitingForLoad = false;
-	function requestPersist() {
-		// While a map loads, it misses its elements: the URL is written once it has loaded
-		if (geometryManager?.isLoading()) {
-			if (!waitingForLoad) {
-				waitingForLoad = true;
-				geometryManager.whenLoaded().then(() => {
-					waitingForLoad = false;
-					requestPersist();
-				});
-			}
-			return;
-		}
-		if (routerReady) persistState();
-		else persistRequested = true;
-	}
-	function writeHash() {
-		if (!geometryManager?.isInteractive()) return;
-		try {
-			// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
-			replaceState('#' + geometryManager.state.getHash(), {});
-		} catch (error) {
-			console.error('Failed to store the map state in the URL', error);
-		}
-	}
-	const persistState = throttle(writeHash, 300);
-
-	function onHashChange() {
-		readHash(location.hash.slice(1));
-	}
-
-	/** Load the state from a hash. Returns false if the hash could not be decoded. */
-	function readHash(hash: string): boolean {
-		if (!geometryManager) return false;
-		let state;
-		try {
-			state = decodeState(hash);
-		} catch (error) {
-			console.error('Invalid map state in URL hash', error);
-			notify('The map in the link could not be read. The link may be incomplete.');
-			return false;
-		}
-		// The viewport changes (and is persisted) at once, but the elements only after the style has
-		// loaded, so the URL must be written again. Otherwise a reload would lose the elements.
-		geometryManager.loadState(state).then(requestPersist, (error) => {
-			console.error('Failed to load map state', error);
-			notify('The map could not be loaded completely.');
-		});
-		return true;
-	}
+	// the map in the URL; replaceState does not fire "hashchange"
+	const urlHash = new UrlHash(
+		() => geometryManager,
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
+		(hash) => replaceState('#' + hash, {})
+	);
 
 	function init(): void {
 		if (map) return;
@@ -312,17 +255,17 @@
 			// the color schemes and fonts of this editor instance
 			void loadConfig();
 			const manager = new loadedEditor.GeometryManagerInteractive(map);
-			manager.state.events.on('change', requestPersist);
-			map.on('moveend', requestPersist);
+			manager.state.events.on('change', urlHash.request);
+			map.on('moveend', urlHash.request);
 			geometryManager = manager;
 		} else {
 			geometryManager = new GeometryManager(map);
 			new PopupHandler(geometryManager);
 		}
 
-		if (hash && !readHash(hash)) void showCountry(map);
+		if (hash && !urlHash.read(hash)) void showCountry(map);
 
-		addEventListener('hashchange', onHashChange);
+		urlHash.listen();
 	}
 </script>
 
