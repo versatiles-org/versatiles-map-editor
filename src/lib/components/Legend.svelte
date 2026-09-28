@@ -67,7 +67,7 @@
 				{:else}
 					<span class="swatch" style:background-color={entry.color}></span>
 				{/if}
-				<span class="label">{entry.label}</span>
+				<span class="text">{entry.label}</span>
 			</div>
 		{/each}
 	</div>
