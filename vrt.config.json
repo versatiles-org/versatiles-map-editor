@@ -1,7 +1,7 @@
 {
 	"deps-graph": {
 		"barrel":["packages/**", "src/lib/**"],
-		"collapse-dir": ["src/lib/utils/**"],
+		"collapse-dir": ["src/lib/utils/*", "src/lib/components/ui/*"],
 		"include": ["src", "packages/map-state/src"],
 		"merge-outgoing": ["src/lib/components","src/lib/components/*","src/lib/element"]
 	}
