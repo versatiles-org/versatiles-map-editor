@@ -1,0 +1,5 @@
+{
+	"deps-graph": {
+		"include": ["src", "packages/map-state/src"]
+	}
+}
