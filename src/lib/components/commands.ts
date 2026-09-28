@@ -1,4 +1,4 @@
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 
 /*
  * The commands for the selected elements, shared by the menu, the sidebar and the keyboard

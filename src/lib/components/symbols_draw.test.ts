@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { MockMap } from './__mocks__/map.js';
+import { MockMap } from '../__mocks__/map.js';
 import { SymbolLibrary } from './symbols_draw.js';
 
 describe('SymbolLibrary', () => {

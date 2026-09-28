@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import {
 	addLegendEntry,
 	canCopyStyle,
@@ -10,7 +10,7 @@ import {
 	duplicateSelection,
 	pasteStyle
 } from './commands.js';
-import { addElement } from './__mocks__/elements.js';
+import { addElement } from '../__mocks__/elements.js';
 
 describe('commands', () => {
 	let manager: GeometryManagerInteractive;

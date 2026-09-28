@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
-	import * as commands from '$lib/commands.js';
+	import * as commands from '$lib/components/commands.js';
 	import { Icon } from '$lib/components/ui/index.js';
 	import { coordinatesOf } from '$lib/geometry.js';
 
