@@ -6,23 +6,29 @@
 	import { parseHex, toHex } from '../utils/color.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
-	/** `top` keeps it clear of a search field. In the editor, a click selects it (`onselect`). */
-	const {
+	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
+	/** In the editor, a click selects it (`onselect`). */
+	/** `width` is its width, e.g. to move it below the search if both do not fit side by side. */
+	let {
 		legend,
 		map,
 		left = 0,
 		right = 0,
 		top = 0,
+		bottom = 0,
 		selected = false,
-		onselect
+		onselect,
+		width = $bindable(0)
 	}: {
 		legend: StateLegend;
 		map: MaplibreMap;
 		left?: number;
 		right?: number;
 		top?: number;
+		bottom?: number;
 		selected?: boolean;
 		onselect?: () => void;
+		width?: number;
 	} = $props();
 
 	const symbolSize = 18;
@@ -63,7 +69,9 @@
 		style:--left="{left}px"
 		style:--sidebar="{right}px"
 		style:--top="{top}px"
+		style:--bottom="{bottom}px"
 		style:font-family={legend.font ?? 'sans-serif'}
+		bind:offsetWidth={width}
 		role="list"
 		aria-label="Legend"
 	>
@@ -96,7 +104,7 @@
 		gap: 4px 12px;
 		box-sizing: border-box;
 		max-width: calc(100% - var(--left) - var(--sidebar) - 2 * var(--margin));
-		max-height: calc(100% - 2 * var(--margin) - 30px - var(--top));
+		max-height: calc(100% - 2 * var(--margin) - var(--top) - var(--bottom));
 		overflow: auto;
 		padding: 6px 10px;
 		border-radius: 6px;
@@ -135,7 +143,7 @@
 		flex-wrap: wrap;
 	}
 
-	/* sides are centered, corners are corners; the bottom keeps clear of the attribution */
+	/* sides are centered, corners are corners; the attribution goes to the other bottom corner */
 	.position-top-left,
 	.position-top,
 	.position-top-right {
@@ -144,7 +152,7 @@
 	.position-bottom-left,
 	.position-bottom,
 	.position-bottom-right {
-		bottom: calc(var(--margin) + 24px + var(--covered-bottom, 0px));
+		bottom: calc(var(--margin) + var(--bottom));
 	}
 	.position-top-left,
 	.position-left,

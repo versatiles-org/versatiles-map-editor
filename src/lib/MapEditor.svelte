@@ -76,6 +76,57 @@
 	// the height of the search and the hint at the top of the viewer
 	let topOverlaysHeight = $state(0);
 
+	// The legend keeps its corner: the search and the attribution go to the other side
+	const legendPosition = $derived(
+		geometryManager?.legend?.entries.length ? (geometryManager.legend.position ?? 'bottom-left') : undefined
+	);
+	const searchRight = $derived(legendPosition === 'top-left');
+	const attributionCorner = $derived(legendPosition === 'bottom-left' ? 'bottom-right' : 'bottom-left');
+	let pageWidth = $state(0);
+	let searchWidth = $state(0);
+	let legendWidth = $state(0);
+	// the width of the attribution, and the height from the bottom of the map to its top
+	let attributionSize = $state({ width: 0, top: 0 });
+	// the width of the map between the bars, without the margins at the sides and between two controls
+	const freeWidth = $derived(pageWidth - coveredLeft - sidebarWidth - 3 * MAP_PADDING);
+	/** Whether the legend and a control at the side of the legend's position do not fit side by side. */
+	function collide(width: number): boolean {
+		// a legend at the center reaches half of its width to each side
+		const centered = legendPosition === 'top' || legendPosition === 'bottom';
+		return centered ? legendWidth / 2 + width > freeWidth / 2 : legendWidth + width > freeWidth;
+	}
+	// A legend at the top goes below the search and the hint only if it would cover them. The hint
+	// of the viewer is at the center and nearly as wide as the map.
+	const legendBelowOverlays = $derived(
+		topOverlaysHeight > 0 && legendPosition?.startsWith('top') === true && (screenTooSmall || collide(searchWidth))
+	);
+	// Likewise, a legend at the bottom goes above the attribution, e.g. while it is expanded
+	const legendAboveAttribution = $derived(
+		legendPosition?.startsWith('bottom') === true && collide(attributionSize.width)
+	);
+
+	// the attribution in the bottom corner without the legend
+	$effect(() => {
+		const corner = attributionCorner;
+		const m = geometryManager?.map;
+		if (!m) return;
+		const attribution = new maplibre.AttributionControl({ compact: true });
+		m.addControl(attribution, corner);
+		// it changes its size when it is expanded or collapsed, or gets other sources
+		const element = m.getContainer().querySelector<HTMLElement>('.maplibregl-ctrl-attrib');
+		if (!element) return;
+		const observer = new ResizeObserver(() => {
+			const map = m.getContainer().getBoundingClientRect();
+			const box = element.getBoundingClientRect();
+			attributionSize = { width: box.width, top: map.bottom - box.top };
+		});
+		observer.observe(element);
+		return () => {
+			observer.disconnect();
+			if (m.hasControl(attribution)) m.removeControl(attribution);
+		};
+	});
+
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
 		init();
@@ -232,7 +283,7 @@
 			fadeDuration: 0
 		});
 
-		void onMapInit(map, maplibre);
+		void onMapInit(map);
 
 		map.on('idle', checkMapReady);
 
@@ -244,7 +295,7 @@
 		}
 	}
 
-	async function onMapInit(map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) {
+	async function onMapInit(map: MaplibreMapType) {
 		// The editor needs room for the sidebar and the map. Smaller screens (phones) get the
 		// read-only viewer. The size is checked once, since switching modes would lose the editor state.
 		const embedded = window.self !== window.top;
@@ -258,8 +309,6 @@
 			bottom: MAP_PADDING + (showSidebar ? STATUS_HEIGHT : 0),
 			left: MAP_PADDING + (showSidebar ? RAIL_WIDTH : 0)
 		});
-
-		map.addControl(new maplibre.AttributionControl({ compact: true }), 'bottom-left');
 
 		let hash = location.hash.slice(1);
 		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
@@ -293,7 +342,9 @@
 <div
 	class="page"
 	class:editor={showSidebar}
+	bind:clientWidth={pageWidth}
 	style:--covered-left="{coveredLeft}px"
+	style:--covered-right="{sidebarWidth}px"
 	style:--covered-bottom="{statusHeight}px"
 >
 	<div class="container">
@@ -306,13 +357,15 @@
 	{/if}
 	<Notifications right={sidebarWidth} />
 	{#if geometryManager?.legend}
-		<!-- a legend at the top goes below the bar, the search and the hint -->
+		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
 		<Legend
 			legend={geometryManager.legend}
 			map={geometryManager.map}
 			left={coveredLeft}
 			right={sidebarWidth}
-			top={topbarHeight + (topOverlaysHeight ? topOverlaysHeight + 10 : 0)}
+			top={topbarHeight + (legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
+			bottom={legendAboveAttribution ? attributionSize.top : statusHeight}
+			bind:width={legendWidth}
 			selected={geometryManager.selection?.legendSelected ?? false}
 			onselect={showSidebar ? selectLegend : undefined}
 		/>
@@ -326,7 +379,7 @@
 			bind:offsetHeight={topOverlaysHeight}
 		>
 			{#if showSearch}
-				<div class="map-search">
+				<div class="map-search" class:right={searchRight} bind:offsetWidth={searchWidth}>
 					<SearchPlace map={geometryManager.map} onmark={showSidebar ? markPlace : undefined} />
 				</div>
 			{/if}
@@ -559,9 +612,13 @@
 		background: var(--color-bg);
 	}
 
-	/* the attribution of the map, right of the tools and the drawer, above the status line */
+	/* the attribution of the map, clear of the tools, the drawer, the sidebar and the status line */
 	.page.editor .map :global(.maplibregl-ctrl-bottom-left) {
 		left: var(--covered-left);
+		bottom: var(--covered-bottom);
+	}
+	.page.editor .map :global(.maplibregl-ctrl-bottom-right) {
+		right: var(--covered-right);
 		bottom: var(--covered-bottom);
 	}
 
@@ -648,6 +705,10 @@
 
 	.map-search {
 		width: min(260px, 100%);
+		/* at the right, if the legend is at the top left */
+		&.right {
+			align-self: flex-end;
+		}
 		font-size: 13px;
 		:global(input) {
 			padding: 6px 8px;

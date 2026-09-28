@@ -125,6 +125,40 @@ test('a message is above the drawer and the bars', async ({ page }) => {
 	await expectOnTop(page.getByRole('alert'));
 });
 
+// one page for all positions: a new map in the URL hash replaces the legend without a reload
+test('the legend keeps its corner, and the search and the attribution go to the other side', async ({ page }) => {
+	const legendList = page.getByRole('list', { name: 'Legend' });
+	const search = page.getByRole('combobox', { name: 'Search address or place' });
+	const attribution = page.locator('.maplibregl-ctrl-attrib');
+	for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
+		await test.step(`a legend at ${position}`, async () => {
+			await page.goto('/#' + encodeState({ ...state, meta: { legend: { ...state.meta!.legend!, position } } }));
+			await waitForMapIsReady(page);
+			await expect(legendList).toContainClass(`position-${position}`);
+			const map = (await page.locator('.map').boundingBox())!;
+			const [vertical, horizontal] = position.split('-');
+			// the legend is at most 10px from the edges of the map between the bars, e.g. of the tools
+			const legend = async () => {
+				const box = (await legendList.boundingBox())!;
+				return { top: box.y, bottom: box.y + box.height, left: box.x, right: box.x + box.width };
+			};
+			await expect
+				.poll(async () => (await legend())[vertical as 'top' | 'bottom'])
+				.toBeCloseTo(vertical === 'top' ? map.y + 44 + 10 : map.y + map.height - 26 - 10, -1);
+			await expect
+				.poll(async () => (await legend())[horizontal as 'left' | 'right'])
+				.toBeCloseTo(horizontal === 'left' ? map.x + 48 + 10 : map.x + map.width - 250 - 10, -1);
+
+			// the search at the top and the attribution at the bottom are on the other side of the map
+			const other = vertical === 'top' ? search : attribution;
+			const box = (await other.boundingBox())!;
+			const middle = map.x + map.width / 2;
+			if (horizontal === 'left') expect(box.x).toBeGreaterThan(middle);
+			else expect(box.x + box.width).toBeLessThan(middle);
+		});
+	}
+});
+
 test.describe('in the viewer', () => {
 	test.use({ viewport: { width: 500, height: 500 } });
 
