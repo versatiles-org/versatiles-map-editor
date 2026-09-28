@@ -115,17 +115,27 @@ function levels(saturation: number, black: number, white: number): MapColors {
 
 /** The options of `@versatiles/style` for the colors; other options of the builder are kept. */
 function setColors(builder: StateBackground['builder'], options: Options, colors: MapColors) {
-	const { saturation, black, white } = colors;
 	if (builder === 'osm') {
-		const recolor = isObject(options.recolor) ? options.recolor : {};
-		// see getColors
-		const contrast = round(white - black);
-		options.recolor = { ...recolor, saturate: saturation, brightness: round((black + white - 1) / 2), contrast };
-	} else {
-		// the contrast of the imagery would move black and white again
-		const { contrast: _, ...raster } = isObject(options.raster) ? options.raster : {};
-		options.raster = { ...raster, saturation, brightnessMin: black, brightnessMax: white };
+		setRecolor(options, colors);
+		return;
 	}
+	const { saturation, black, white } = colors;
+	// the contrast of the imagery would move black and white again
+	const { contrast: _, ...raster } = isObject(options.raster) ? options.raster : {};
+	options.raster = { ...raster, saturation, brightnessMin: black, brightnessMax: white };
+	// the streets and labels over the imagery get the same colors (`true` or none: the default overlay)
+	if (options.osmOverlay !== false) {
+		const overlay = isObject(options.osmOverlay) ? options.osmOverlay : {};
+		setRecolor(overlay, colors);
+		options.osmOverlay = overlay;
+	}
+}
+
+/** `recolor` of the vector map or of the overlay of the imagery, see getColors. */
+function setRecolor(options: Options, { saturation, black, white }: MapColors) {
+	const recolor = isObject(options.recolor) ? options.recolor : {};
+	const contrast = round(white - black);
+	options.recolor = { ...recolor, saturate: saturation, brightness: round((black + white - 1) / 2), contrast };
 }
 
 /**
@@ -157,7 +167,10 @@ export function changeSettings(
 
 	// the imagery alone, or with the overlay, which starts with its defaults again
 	if (builder === 'satellite' && change.overlay !== undefined) {
+		const colors = getColors({ builder, options });
 		options.osmOverlay = change.overlay ? {} : false;
+		// with the colors of the imagery
+		setColors(builder, options, colors);
 	}
 	// without an overlay, the satellite map has no labels to change
 	if (builder === 'satellite' && options.osmOverlay === false) return minimizeBackground({ builder, options });

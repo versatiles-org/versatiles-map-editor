@@ -138,6 +138,32 @@ describe('changeSettings', () => {
 		});
 	});
 
+	it('gives the streets and labels over the imagery the colors of the imagery', () => {
+		const sat = changeSettings(undefined, { base: 'satellite' });
+		const faded = changeSettings(sat, { colors: { saturation: -1, black: 0.5, white: 1 } });
+		expect(faded?.options).toStrictEqual({
+			raster: { saturation: -1, brightnessMin: 0.5 },
+			osmOverlay: { text: { language: 'user' }, recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
+		});
+		// the imagery alone keeps its colors, and the overlay gets them again when it is shown
+		const imagery = changeSettings(faded, { overlay: false });
+		expect(imagery?.options).toStrictEqual({ osmOverlay: false, raster: { saturation: -1, brightnessMin: 0.5 } });
+		expect(changeSettings(imagery, { overlay: true })?.options).toStrictEqual({
+			raster: { saturation: -1, brightnessMin: 0.5 },
+			osmOverlay: { recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
+		});
+		// and back to the unchanged colors
+		expect(changeSettings(faded, { colors: DEFAULT_COLORS })?.options).toStrictEqual({
+			osmOverlay: { text: { language: 'user' } }
+		});
+		// the vector map gets them from the imagery
+		expect(changeSettings(faded, { base: 'vector' })?.options.recolor).toStrictEqual({
+			saturate: -1,
+			brightness: 0.25,
+			contrast: 0.5
+		});
+	});
+
 	it('keeps other options of recolor, and the colors when switching the map', () => {
 		const background = { builder: 'osm' as const, options: { recolor: { rotateHue: 90 } } };
 		const changed = changeSettings(background, { colors: { ...DEFAULT_COLORS, saturation: -1 } });

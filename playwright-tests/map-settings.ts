@@ -168,6 +168,8 @@ test('changing the colors of the vector map and of the satellite imagery', async
 			brightnessMin: 0.9,
 			brightnessMax: 0.9
 		});
+	// the streets and labels over the imagery get the same colors
+	expect(background()?.options.osmOverlay).toMatchObject({ recolor: { saturate: -1, brightness: 0.4, contrast: 0 } });
 
 	// all back
 	await page.getByRole('button', { name: 'Reset colors' }).click();
@@ -214,13 +216,13 @@ test('black and white become exactly what is set, on both maps', async ({ page }
 	await expect.poll(async () => (await channelRange(page))[0]).toBeGreaterThanOrEqual(near(127.5)[0]);
 	expect((await channelRange(page))[1]).toBe(255);
 
-	// the satellite map, with the same levels
+	// the satellite map with the same levels, also for its streets and labels
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await page.getByRole('checkbox', { name: 'Streets and labels' }).uncheck();
+	await expect(page.getByRole('checkbox', { name: 'Streets and labels' })).toBeChecked();
 	await waitForMapIsIdle(page);
 	await expect.poll(async () => (await channelRange(page))[0]).toBeGreaterThanOrEqual(near(127.5)[0]);
 
-	// faded with black instead: nothing is lighter than white becomes
+	// faded with black instead: nothing is lighter than white becomes, not even the white labels
 	await setLevel('Black becomes', '0');
 	await setLevel('White becomes', '40');
 	await expect.poll(async () => (await channelRange(page))[1]).toBeLessThanOrEqual(near(102)[1]);
