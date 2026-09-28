@@ -11,7 +11,7 @@ import { ELEMENT_LAYERS, ElementRenderer } from './element_renderer.js';
 import { buildStyle, keepElements } from './editor_style.js';
 import { getSettings } from '../background/index.js';
 import { addFillPatternImage } from './map_layer/index.js';
-import { loadSymbols, spriteSheets } from './symbols/catalog.js';
+import { loadSymbols, spriteSheets } from './symbols_catalog.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {

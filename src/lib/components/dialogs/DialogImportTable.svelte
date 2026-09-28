@@ -23,7 +23,7 @@
 	} from '$lib/components/dialogs/table_import/index.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols_catalog.js';
 	import { formatCount } from '$lib/utils/index.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();

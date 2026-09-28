@@ -7,7 +7,7 @@ import {
 	legacyMarkerStyle,
 	removeDefaultFields
 } from '@versatiles/map-state';
-import { getSymbol, type SymbolInfo } from '../symbols/catalog.js';
+import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
 

@@ -1,16 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
 import { LEGACY_SYMBOLS } from '@versatiles/map-state';
-import { filterSymbols } from './catalog.js';
+import { filterSymbols } from './symbols_catalog.js';
 // Icon names of the "base" sprite that @versatiles/style loads. To update:
 // curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
-import spriteBase from '../__fixtures__/sprite-base.json' with { type: 'json' };
+import spriteBase from './__fixtures__/sprite-base.json' with { type: 'json' };
 
-vi.unmock('./catalog.js');
+vi.unmock('./symbols_catalog.js');
 
 // a new module for each test, since it loads the symbols only once
 async function symbolsModule() {
 	vi.resetModules();
-	return await import('./catalog.js');
+	return await import('./symbols_catalog.js');
 }
 
 describe('getSymbol', () => {
