@@ -1,5 +1,5 @@
 import { LEGACY_SYMBOLS } from '@versatiles/map-state';
-import { TILE_SERVER } from '../../background/map_style.js';
+import { TILE_SERVER } from '../../background/index.js';
 
 /** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
 export type IconAnchor =

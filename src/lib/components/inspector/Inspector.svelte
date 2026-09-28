@@ -6,7 +6,7 @@
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import FontSelect from '$lib/components/ui/FontSelect.svelte';
-	import { getSettings } from '$lib/background/background.js';
+	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
 	import { countTypes, elementNames, elementText } from '$lib/core/element/element_names.js';
 
