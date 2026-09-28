@@ -106,6 +106,10 @@ test('empty map', { tag: '@cross-browser' }, async ({ page }) => {
 	const search = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
 	expect(search.x).toBeGreaterThan(48);
 	expect(search.y).toBeGreaterThan(44);
+
+	// the page has a title and a description
+	await expect(page).toHaveTitle('VersaTiles Map Editor');
+	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /map/);
 });
 
 test('filled map', async ({ page }) => {
@@ -219,13 +223,6 @@ test('the URL keeps the elements while the map is loading', async ({ page }) => 
 	release();
 	await waitForMapIsReady(page);
 	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
-});
-
-test('the page has a title and a description', async ({ page }) => {
-	await page.goto('/');
-	await waitForMapIsReady(page);
-	await expect(page).toHaveTitle('VersaTiles Map Editor');
-	await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /map/);
 });
 
 test('a loading indicator shows until the map has loaded', async ({ page }) => {

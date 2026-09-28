@@ -84,62 +84,58 @@ test('undo and redo with the keyboard, but not in text fields', { tag: '@cross-b
 	await expect.poll(types).toStrictEqual(['marker', 'line', 'marker']);
 });
 
-test('selecting a symbol closes the symbol picker', async ({ page }) => {
-	await page.goto('/');
-	await waitForMapIsReady(page);
-
-	await drawElement(page, 'Marker');
-	// a new marker is a map pin
-	await page.getByRole('button', { name: 'Symbol Map pin' }).click();
-	const dialog = page.getByRole('dialog');
-	await expect(dialog).toBeVisible();
-
-	// the symbols of all sprite sheets of the server
-	await dialog.getByRole('button', { name: 'Anchor', exact: true }).click();
-	await expect(dialog).toBeHidden();
-	await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
-	await expect.poll(() => stateInUrl(page).elements[0].style).toMatchObject({ symbol: 'icons:anchor' });
-});
-
-test('the symbol picker filters the symbols while typing', async ({ page }) => {
+test('the symbol picker', async ({ page }) => {
 	await page.setViewportSize({ width: 1600, height: 900 });
 	await page.goto('/');
 	await waitForMapIsReady(page);
-
 	await drawElement(page, 'Marker');
-	await page.getByRole('button', { name: 'Symbol Map pin' }).click();
 	const dialog = page.getByRole('dialog');
-	const filter = dialog.getByRole('searchbox', { name: 'Filter symbols' });
-	await expect(filter).toBeFocused();
 
-	// at most 16 columns in a wide window, scrolling vertically
-	const list = dialog.locator('.list');
-	const columns = await list.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
-	expect(columns).toBe(16);
-	expect(
-		await list.evaluate((el) => [el.scrollWidth <= el.clientWidth, el.scrollHeight > el.clientHeight])
-	).toStrictEqual([true, true]);
+	await test.step('selecting a symbol closes the picker', async () => {
+		// a new marker is a map pin
+		await page.getByRole('button', { name: 'Symbol Map pin' }).click();
+		await expect(dialog).toBeVisible();
+		// the symbols of all sprite sheets of the server
+		await dialog.getByRole('button', { name: 'Anchor', exact: true }).click();
+		await expect(dialog).toBeHidden();
+		await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
+		await expect.poll(() => stateInUrl(page).elements[0].style).toMatchObject({ symbol: 'icons:anchor' });
+	});
 
-	// by title, alias or name, ignoring case and accents
-	const items = list.getByRole('button');
-	await filter.fill('cafe');
-	await expect(items).toHaveText(['Café']);
-	await filter.fill('HARBOUR marina');
-	await expect(items).toHaveText(['Anchor']);
-	await filter.fill('nothing like this');
-	await expect(items).toHaveCount(0);
-	await expect(dialog.getByRole('status')).toHaveText('No symbol matches “nothing like this”.');
+	await test.step('the picker filters the symbols while typing', async () => {
+		await page.getByRole('button', { name: 'Symbol Anchor' }).click();
+		const filter = dialog.getByRole('searchbox', { name: 'Filter symbols' });
+		await expect(filter).toBeFocused();
 
-	// Enter selects the first match
-	await filter.fill('anchor');
-	await filter.press('Enter');
-	await expect(dialog).toBeHidden();
-	await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
+		// at most 16 columns in a wide window, scrolling vertically
+		const list = dialog.locator('.list');
+		const columns = await list.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+		expect(columns).toBe(16);
+		expect(
+			await list.evaluate((el) => [el.scrollWidth <= el.clientWidth, el.scrollHeight > el.clientHeight])
+		).toStrictEqual([true, true]);
 
-	// the filter is empty again when the picker opens again
-	await page.getByRole('button', { name: 'Symbol Anchor' }).click();
-	await expect(filter).toHaveValue('');
-	await expect(items.first()).toHaveText('No symbol');
+		// by title, alias or name, ignoring case and accents
+		const items = list.getByRole('button');
+		await filter.fill('cafe');
+		await expect(items).toHaveText(['Café']);
+		await filter.fill('HARBOUR marina');
+		await expect(items).toHaveText(['Anchor']);
+		await filter.fill('nothing like this');
+		await expect(items).toHaveCount(0);
+		await expect(dialog.getByRole('status')).toHaveText('No symbol matches “nothing like this”.');
+
+		// Enter selects the first match
+		await filter.fill('cafe');
+		await filter.press('Enter');
+		await expect(dialog).toBeHidden();
+		await expect(page.getByRole('button', { name: 'Symbol Café' })).toBeVisible();
+
+		// the filter is empty again when the picker opens again
+		await page.getByRole('button', { name: 'Symbol Café' }).click();
+		await expect(filter).toHaveValue('');
+		await expect(items.first()).toHaveText('No symbol');
+	});
 });
 
 test('style editor controls have unique ids and labels', async ({ page }) => {

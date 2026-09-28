@@ -39,35 +39,8 @@ async function expectOnTop(...locators: Locator[]) {
 	}
 }
 
-test('the menu is above the bars, the drawer and the sidebar', async ({ page }) => {
-	await open(page);
-	await page.keyboard.press('e');
-	await page.getByRole('button', { name: 'Menu' }).click();
-	const menu = page.getByRole('menu', { name: 'Menu' });
-	// the longest menu, over the rail, the drawer and down to the status line
-	await menu.getByRole('menuitem', { name: 'Import', exact: true }).click();
-	await menu.getByRole('menuitem', { name: 'Export', exact: true }).click();
-	await expectOnTop(menu.getByRole('menuitem'));
-});
-
-test('the bars, the drawer and the sidebar are above the map and its overlays', async ({ page }) => {
-	await open(page);
-	await page.keyboard.press('e');
-	// a selected polygon, whose bar of actions floats over the map
-	await page.mouse.click(...(await project(page, [13.4, 52.49])));
-	await expectOnTop(
-		page.getByRole('banner').getByRole('button'),
-		page.getByRole('toolbar', { name: 'Tools' }).getByRole('button'),
-		page.getByRole('complementary', { name: /^Elements/ }).getByRole('button'),
-		page.getByRole('toolbar', { name: 'Selection' }).getByRole('button'),
-		page.locator('.statusbar'),
-		page.getByRole('combobox', { name: 'Search address or place' }),
-		page.getByRole('list', { name: 'Legend' }),
-		page.getByRole('button', { name: 'Hide sidebar' })
-	);
-});
-
-test('the search results are above the legend and the bar of the selection', async ({ page }) => {
+// one page for all situations of the editor, which are opened and closed one after another
+test('overlays of the editor are above what they open over', async ({ page }) => {
 	await page.route('https://geocode.versatiles.org/**', (route) => {
 		const feature = (name: string) => ({
 			type: 'Feature',
@@ -79,20 +52,70 @@ test('the search results are above the legend and the bar of the selection', asy
 		});
 	});
 	await open(page);
-	// the marker, near the search, with its bar of actions
-	const [x, y] = await project(page, [13.3, 52.52]);
-	await page.mouse.click(x + 6, y - 8);
-	await page.getByRole('combobox', { name: 'Search address or place' }).fill('Place');
-	const results = page.getByRole('listbox', { name: 'Search results' });
-	await expect(results.getByRole('option')).toHaveCount(6);
-	await expectOnTop(results.getByRole('option'));
-});
-
-test('drawing: the bar of the drawing is above the map overlays', async ({ page }) => {
-	await open(page);
 	await page.keyboard.press('e');
-	await page.keyboard.press('l');
-	await expectOnTop(page.getByRole('group', { name: 'Drawing' }).getByRole('button'));
+
+	await test.step('the bars, the drawer and the sidebar are above the map and its overlays', async () => {
+		// a selected polygon, whose bar of actions floats over the map
+		await page.mouse.click(...(await project(page, [13.4, 52.49])));
+		await expect(page.getByRole('toolbar', { name: 'Selection' })).toBeVisible();
+		await expectOnTop(
+			page.getByRole('banner').getByRole('button'),
+			page.getByRole('toolbar', { name: 'Tools' }).getByRole('button'),
+			page.getByRole('complementary', { name: /^Elements/ }).getByRole('button'),
+			page.getByRole('toolbar', { name: 'Selection' }).getByRole('button'),
+			page.locator('.statusbar'),
+			page.getByRole('combobox', { name: 'Search address or place' }),
+			page.getByRole('list', { name: 'Legend' }),
+			page.getByRole('button', { name: 'Hide sidebar' })
+		);
+	});
+
+	await test.step('the color picker is above the rest of the sidebar', async () => {
+		await page
+			.getByRole('button', { name: /^Color/ })
+			.first()
+			.click();
+		await expect(page.getByLabel('Hex')).toBeVisible();
+		await expectOnTop(
+			page.getByRole('slider', { name: 'Saturation and brightness' }),
+			page.getByLabel('Hex'),
+			page.getByRole('group', { name: 'Used colors' }).getByRole('button')
+		);
+		await page.keyboard.press('Escape');
+		await expect(page.getByLabel('Hex')).toBeHidden();
+	});
+
+	await test.step('the search results are above the legend and the bar of the selection', async () => {
+		// the marker, near the search, with its bar of actions
+		const [x, y] = await project(page, [13.3, 52.52]);
+		await page.mouse.click(x + 6, y - 8);
+		const search = page.getByRole('combobox', { name: 'Search address or place' });
+		await search.fill('Place');
+		const results = page.getByRole('listbox', { name: 'Search results' });
+		await expect(results.getByRole('option')).toHaveCount(6);
+		await expectOnTop(results.getByRole('option'));
+		await search.press('Escape');
+		await expect(results).toBeHidden();
+	});
+
+	await test.step('the bar of the drawing is above the map overlays', async () => {
+		await page.locator('.map canvas').focus();
+		await page.keyboard.press('l');
+		await expect(page.getByRole('group', { name: 'Drawing' })).toBeVisible();
+		await expectOnTop(page.getByRole('group', { name: 'Drawing' }).getByRole('button'));
+		await page.keyboard.press('Escape');
+		await expect(page.getByRole('group', { name: 'Drawing' })).toBeHidden();
+	});
+
+	await test.step('the menu is above the bars, the drawer and the sidebar', async () => {
+		await page.getByRole('button', { name: 'Menu' }).click();
+		const menu = page.getByRole('menu', { name: 'Menu' });
+		// the longest menu, over the rail, the drawer and down to the status line
+		await menu.getByRole('menuitem', { name: 'Import', exact: true }).click();
+		await menu.getByRole('menuitem', { name: 'Export', exact: true }).click();
+		await expect(menu.getByRole('menuitem').first()).toBeVisible();
+		await expectOnTop(menu.getByRole('menuitem'));
+	});
 });
 
 test('a message is above the drawer and the bars', async ({ page }) => {
@@ -100,20 +123,6 @@ test('a message is above the drawer and the bars', async ({ page }) => {
 	await waitForMapIsReady(page, { expectedMessages: [/^Invalid map state in URL hash/] });
 	await page.keyboard.press('e');
 	await expectOnTop(page.getByRole('alert'));
-});
-
-test('the color picker is above the rest of the sidebar', async ({ page }) => {
-	await open(page);
-	await page.mouse.click(...(await project(page, [13.4, 52.49])));
-	await page
-		.getByRole('button', { name: /^Color/ })
-		.first()
-		.click();
-	await expectOnTop(
-		page.getByRole('slider', { name: 'Saturation and brightness' }),
-		page.getByLabel('Hex'),
-		page.getByRole('group', { name: 'Used colors' }).getByRole('button')
-	);
 });
 
 test.describe('in the viewer', () => {
@@ -175,7 +184,8 @@ for (const viewport of [
 	test.describe(`no needless scrolling at ${viewport.width}×${viewport.height}`, { tag: '@cross-browser' }, () => {
 		test.use({ viewport });
 
-		test('in the panels', async ({ page }) => {
+		// one page for the panels and the dialogs, which are opened one after another
+		test('in the panels and the dialogs', async ({ page }) => {
 			await open(page);
 			expect(await needlessScrolling(page), 'map settings').toStrictEqual([]);
 			await page.keyboard.press('e');
@@ -199,10 +209,9 @@ for (const viewport of [
 			await page.getByRole('menuitem', { name: 'Import', exact: true }).click();
 			await page.getByRole('menuitem', { name: 'Export', exact: true }).click();
 			expect(await needlessScrolling(page), 'menu').toStrictEqual([]);
-		});
+			await page.keyboard.press('Escape');
+			await expect(page.getByRole('menu', { name: 'Menu' })).toBeHidden();
 
-		test('in the dialogs', async ({ page }) => {
-			await open(page);
 			const dialog = page.getByRole('dialog');
 			await page.getByRole('button', { name: /^Share/ }).click();
 			await expect(dialog.locator('iframe')).toBeVisible();

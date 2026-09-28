@@ -102,36 +102,47 @@ test.describe('overlays of the viewer on a phone', () => {
 	// narrow, so the hint wraps into two lines
 	test.use({ viewport: { width: 390, height: 700 } });
 
-	for (const search of [false, true]) {
-		for (const position of ['top-left', 'top', 'top-right'] as const) {
-			test(`a legend at ${position}${search ? ', with search,' : ''} does not cover the hint`, async ({ page }) => {
-				const state: MapState = {
-					map: { center: [13.4, 52.5], radius: 10000 },
-					meta: {
-						search,
-						legend: {
-							position,
-							entries: [
-								{ color: '#ff0000', label: 'A long legend entry' },
-								{ color: '#00ff00', label: 'Another entry' }
-							]
-						}
-					},
-					elements: []
-				};
-				await page.goto('/#' + encodeState(state));
-				await waitForMapIsReady(page);
-				const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
-				const hint = (await page.getByText('Open this page on a larger screen').boundingBox())!;
-				expect(boxesOverlap(legend, hint)).toBe(false);
-				if (search) {
-					const field = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
-					expect(boxesOverlap(legend, field)).toBe(false);
-					expect(boxesOverlap(hint, field)).toBe(false);
-				}
-			});
+	// one page for all cases: a new map in the URL hash replaces the legend without a reload
+	test('a legend does not cover the hint or the search, wherever it is at the top', async ({ page }) => {
+		for (const search of [false, true]) {
+			for (const position of ['top-left', 'top', 'top-right'] as const) {
+				await test.step(`a legend at ${position}${search ? ', with search' : ''}`, async () => {
+					const state: MapState = {
+						map: { center: [13.4, 52.5], radius: 10000 },
+						meta: {
+							search,
+							legend: {
+								position,
+								entries: [
+									{ color: '#ff0000', label: 'A long legend entry' },
+									{ color: '#00ff00', label: 'Another entry' }
+								]
+							}
+						},
+						elements: []
+					};
+					await page.goto('/#' + encodeState(state));
+					await waitForMapIsReady(page);
+					const legendList = page.getByRole('list', { name: 'Legend' });
+					await expect(legendList).toContainClass(`position-${position}`);
+					const field = page.getByRole('combobox', { name: 'Search address or place' });
+					await expect(field).toHaveCount(search ? 1 : 0);
+					// the legend moves below the search a moment after a new map, so the layout is polled
+					const overlaps = async () => {
+						const legend = (await legendList.boundingBox())!;
+						const hint = (await page.getByText('Open this page on a larger screen').boundingBox())!;
+						const box = search ? (await field.boundingBox())! : undefined;
+						return [
+							boxesOverlap(legend, hint),
+							box ? boxesOverlap(legend, box) : false,
+							box ? boxesOverlap(hint, box) : false
+						];
+					};
+					await expect.poll(overlaps).toStrictEqual([false, false, false]);
+				});
+			}
 		}
-	}
+	});
 });
 
 test.describe('the share dialog on the smallest editor screen', { tag: '@cross-browser' }, () => {
