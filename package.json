@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "npm run check-types && vite build",
-    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && tsc -p playwright-tests",
+    "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings && tsc -p playwright-tests",
     "check-watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "check": "npm run lint && npm run build && npm run build --workspaces && npm run test && npm run format:check",
     "dev": "vite dev",
