@@ -8,7 +8,7 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import { Legend, SearchPlace } from '$lib/components/map/viewer/index.js';
+	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { GeometryManager } from './geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
@@ -261,9 +261,7 @@
 		<div class="map" bind:this={container}></div>
 	</div>
 	{#if loading}
-		<div class="loading" role="status" style:right="{sidebarWidth}px">
-			<span class="spinner" aria-hidden="true"></span>Loading map…
-		</div>
+		<LoadingIndicator right={sidebarWidth} />
 	{/if}
 	<Notifications right={sidebarWidth} />
 	{#if geometryManager?.legend}
@@ -374,55 +372,6 @@
 		height: 100%;
 		position: relative;
 		min-height: 6em;
-	}
-
-	/* appears only after a moment, so a quick load does not flash */
-	.loading {
-		position: absolute;
-		left: 0;
-		bottom: calc(3em + var(--covered-bottom));
-		width: fit-content;
-		margin: 0 auto;
-		display: flex;
-		align-items: center;
-		gap: 0.5em;
-		padding: 0.4em 0.8em;
-		border-radius: var(--border-radius);
-		background: color-mix(in srgb, var(--color-bg) 90%, transparent);
-		color: var(--color-text);
-		box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
-		font-size: 0.875rem;
-		pointer-events: none;
-		z-index: var(--z-floating);
-		opacity: 0;
-		animation: appear 0.2s 0.5s forwards;
-	}
-
-	.spinner {
-		width: 1em;
-		height: 1em;
-		border: 2px solid var(--color-disabled-bg);
-		border-top-color: var(--color-blue);
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes appear {
-		to {
-			opacity: 1;
-		}
-	}
-
-	@keyframes spin {
-		to {
-			transform: rotate(360deg);
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.spinner {
-			animation-duration: 3s;
-		}
 	}
 
 	/* over the map, like the sidebar, so the map keeps its size */
