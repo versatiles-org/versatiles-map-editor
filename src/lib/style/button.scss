@@ -1,8 +1,3 @@
-button.btn,
-fieldset.btn {
-	font-size: 0.8rem;
-}
-
 // Solid colors instead of opacity, so white on blue has a contrast of about 8:1
 button.btn,
 fieldset.btn > div > label {
@@ -21,6 +16,8 @@ fieldset.btn > div > label {
 }
 
 button.btn {
+	font-size: 0.8rem;
+
 	&:focus-visible {
 		outline: 2px solid var(--color-blue);
 		outline-offset: 2px;
@@ -39,6 +36,7 @@ button.btn {
 }
 
 fieldset.btn {
+	font-size: 0.8rem;
 	position: relative;
 	display: inline-block;
 	border: none;

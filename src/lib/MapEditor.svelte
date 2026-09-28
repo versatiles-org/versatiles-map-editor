@@ -612,16 +612,6 @@
 		background: var(--color-bg);
 	}
 
-	/* the attribution of the map, clear of the tools, the drawer, the sidebar and the status line */
-	.page.editor .map :global(.maplibregl-ctrl-bottom-left) {
-		left: var(--covered-left);
-		bottom: var(--covered-bottom);
-	}
-	.page.editor .map :global(.maplibregl-ctrl-bottom-right) {
-		right: var(--covered-right);
-		bottom: var(--covered-bottom);
-	}
-
 	.drawer-slot {
 		position: absolute;
 		z-index: var(--z-panels);
@@ -674,6 +664,31 @@
 		top: 0;
 		width: 100%;
 		height: 100%;
+
+		:global(canvas) {
+			outline: none !important;
+		}
+
+		:global(.maplibregl-ctrl-attrib) {
+			background-color: color-mix(in srgb, var(--color-bg) 50%, transparent) !important;
+			color: var(--color-text) !important;
+			opacity: 0.5;
+			font-size: 0.85em;
+			line-height: normal !important;
+		}
+		:global(.maplibregl-ctrl-attrib a) {
+			color: var(--color-text) !important;
+		}
+
+		/* the attribution, clear of the tools, the drawer, the sidebar and the status line */
+		.page.editor & :global(.maplibregl-ctrl-bottom-left) {
+			left: var(--covered-left);
+			bottom: var(--covered-bottom);
+		}
+		.page.editor & :global(.maplibregl-ctrl-bottom-right) {
+			right: var(--covered-right);
+			bottom: var(--covered-bottom);
+		}
 	}
 
 	/* The search, and the hint of the viewer, at the top, since the attribution at the bottom can
@@ -716,20 +731,6 @@
 			border-radius: 4px;
 			box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
 		}
-	}
-
-	.map :global(canvas) {
-		outline: none !important;
-	}
-	.map :global(.maplibregl-ctrl-attrib) {
-		background-color: color-mix(in srgb, var(--color-bg) 50%, transparent) !important;
-		color: var(--color-text) !important;
-		opacity: 0.5;
-		font-size: 0.85em;
-		line-height: normal !important;
-	}
-	.map :global(.maplibregl-ctrl-attrib a) {
-		color: var(--color-text) !important;
 	}
 
 	:global(.maplibregl-ctrl-attrib) {
