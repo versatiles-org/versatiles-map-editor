@@ -2,15 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapState } from '@versatiles/map-state';
 import { FileCommands, type FileQuestions } from './file_commands.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import { chooseTextFile, FileReadError } from '../utils/file.js';
-import { downloadBlob, downloadJSON } from '../utils/download.js';
+import { chooseTextFile, FileReadError } from './file.js';
+import { downloadBlob, downloadJSON } from './download.js';
 import { notify } from '../utils/notify.svelte.js';
 
-vi.mock('../utils/file.js', async (importOriginal) => ({
-	...(await importOriginal<typeof import('../utils/file.js')>()),
+vi.mock('./file.js', async (importOriginal) => ({
+	...(await importOriginal<typeof import('./file.js')>()),
 	chooseTextFile: vi.fn()
 }));
-vi.mock('../utils/download.js', () => ({ downloadBlob: vi.fn(), downloadJSON: vi.fn() }));
+vi.mock('./download.js', () => ({ downloadBlob: vi.fn(), downloadJSON: vi.fn() }));
 vi.mock('../utils/notify.svelte.js', () => ({ notify: vi.fn() }));
 
 describe('FileCommands', () => {

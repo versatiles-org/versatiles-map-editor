@@ -1,7 +1,7 @@
 import { stateFromKML, stateToKML } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
-import { downloadBlob, downloadJSON } from '../utils/download.js';
-import { chooseTextFile, FileReadError } from '../utils/file.js';
+import { downloadBlob, downloadJSON } from './download.js';
+import { chooseTextFile, FileReadError } from './file.js';
 import { notify } from '../utils/notify.svelte.js';
 
 /** The questions that the file commands ask the user, e.g. in a dialog. */

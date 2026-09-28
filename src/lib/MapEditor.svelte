@@ -17,7 +17,7 @@
 	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
 	import { loadConfig } from '$lib/background/config.svelte.js';
 	import { decodeState } from '@versatiles/map-state';
-	import { throttle } from '$lib/utils/throttle.js';
+	import { throttle } from './throttle.js';
 
 	let {
 		onMapLoad
@@ -195,7 +195,7 @@
 	/** Show the country of the user (from the time zone), when there is no map in the URL. */
 	async function showCountry(map: MaplibreMapType) {
 		// only needed without a map, so it is loaded only then
-		const { getCountryBoundingBox } = await import('$lib/utils/location.js');
+		const { getCountryBoundingBox } = await import('./location.js');
 		const bbox = getCountryBoundingBox();
 		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
 	}
