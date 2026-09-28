@@ -26,7 +26,7 @@
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols/catalog.js';
-	import { formatCount } from '$lib/utils/format.js';
+	import { formatCount } from '$lib/utils/index.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 

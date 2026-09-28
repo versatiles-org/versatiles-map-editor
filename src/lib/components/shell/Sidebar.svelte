@@ -2,7 +2,7 @@
 	import '$lib/style/index.scss';
 	import Inspector from '$lib/components/inspector/Inspector.svelte';
 	import * as commands from '$lib/core/commands.js';
-	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
+	import { isOwnKeyTarget } from '$lib/utils/index.js';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();

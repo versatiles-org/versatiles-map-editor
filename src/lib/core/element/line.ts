@@ -5,7 +5,7 @@ import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
 import { pathLength } from '../geometry.js';
-import { formatLength } from '../../utils/format.js';
+import { formatLength } from '../../utils/index.js';
 
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;

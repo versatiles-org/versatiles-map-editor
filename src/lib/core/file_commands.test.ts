@@ -4,7 +4,7 @@ import { FileCommands, type FileQuestions } from './file_commands.js';
 import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
-import { notify } from '../utils/notify.svelte.js';
+import { notify } from '../utils/index.js';
 
 vi.mock('./file.js', async (importOriginal) => ({
 	...(await importOriginal<typeof import('./file.js')>()),

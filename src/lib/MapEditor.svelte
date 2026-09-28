@@ -9,7 +9,7 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import Legend from '$lib/components/map/Legend.svelte';
 	import Notifications from '$lib/components/ui/Notifications.svelte';
-	import { notify } from '$lib/utils/notify.svelte.js';
+	import { notify } from '$lib/utils/index.js';
 	import SearchPlace from '$lib/components/map/SearchPlace.svelte';
 	import { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
 	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';

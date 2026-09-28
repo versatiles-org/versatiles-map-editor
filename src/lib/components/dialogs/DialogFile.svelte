@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import Dialog from '$lib/components/ui/Dialog.svelte';
-	import { EventHandler } from '$lib/utils/event_handler.js';
+	import { EventHandler } from '$lib/utils/index.js';
 
 	type Mode = 'download' | 'new' | 'replace' | null;
 	let mode: Mode = $state(null);

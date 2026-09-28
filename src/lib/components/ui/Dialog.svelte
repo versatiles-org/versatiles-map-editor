@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { EventHandler } from '$lib/utils/event_handler.js';
+	import { EventHandler } from '$lib/utils/index.js';
 
 	const {
 		children,

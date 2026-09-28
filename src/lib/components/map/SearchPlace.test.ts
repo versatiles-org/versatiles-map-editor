@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
 import type { Map as MaplibreMap } from 'maplibre-gl';
-import type { GeocodingResult } from '../../utils/geocoding.js';
+import type { GeocodingResult } from '../../utils/index.js';
 
 const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
 vi.mock('../../utils/geocoding.js', () => ({ geocode }));

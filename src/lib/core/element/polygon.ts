@@ -6,7 +6,7 @@ import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
 import { polygonArea } from '../geometry.js';
-import { formatArea } from '../../utils/format.js';
+import { formatArea } from '../../utils/index.js';
 
 export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;

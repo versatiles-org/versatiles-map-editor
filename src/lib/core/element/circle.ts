@@ -6,7 +6,7 @@ import { MapLayerLine } from '../map_layer/line.svelte.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
 import { circle, circleArea, distance, movePoint } from '../geometry.js';
-import { formatArea, formatLength } from '../../utils/format.js';
+import { formatArea, formatLength } from '../../utils/index.js';
 
 export class CircleElement extends AbstractElement {
 	public readonly fillLayer: MapLayerFill;
