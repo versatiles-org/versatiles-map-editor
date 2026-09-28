@@ -3,6 +3,7 @@
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import type { StateLegend } from '@versatiles/map-state';
 	import { SymbolLibrary } from '../core/symbols.js';
+	import { parseHex, toHex } from '../utils/color.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` keeps it clear of a search field. In the editor, a click selects it (`onselect`). */
@@ -25,13 +26,26 @@
 	} = $props();
 
 	const symbolSize = 18;
-	const retina = window.devicePixelRatio || 1;
+	// twice the pixels of the screen, which the browser scales down to smooth edges
+	const resolution = 2 * (window.devicePixelRatio || 1);
 	const symbolLibrary = $derived(new SymbolLibrary(map));
+
+	/** A darker shade of the color, for the outline, so e.g. white symbols show on the white legend. */
+	function darker(color: string): string {
+		const rgb = parseHex(color) ?? { r: 0, g: 0, b: 0 };
+		return toHex({ r: rgb.r / 2, g: rgb.g / 2, b: rgb.b / 2 });
+	}
 
 	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {
 		const draw = (p: { symbol: string; color: string }) => {
 			canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
-			symbolLibrary.drawSymbol(canvas, p.symbol, { color: p.color });
+			// the shape fills the canvas, with an outline 1px wide
+			symbolLibrary.drawSymbol(canvas, p.symbol, {
+				color: p.color,
+				outline: darker(p.color),
+				outlineWidth: resolution,
+				crop: true
+			});
 		};
 		draw(params);
 		return { update: draw };
@@ -58,8 +72,8 @@
 				{#if entry.symbol}
 					<canvas
 						class="symbol"
-						width={symbolSize * retina}
-						height={symbolSize * retina}
+						width={symbolSize * resolution}
+						height={symbolSize * resolution}
 						style:width="{symbolSize}px"
 						style:height="{symbolSize}px"
 						use:drawSymbol={{ symbol: entry.symbol, color: entry.color }}
