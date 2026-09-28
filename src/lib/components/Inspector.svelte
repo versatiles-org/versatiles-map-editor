@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
-	import { addLegendEntry } from '../core/commands.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import { addLegendEntry } from '$lib/core/commands.js';
 	import Editor from './Editor.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
 	import InspectorSection from './InspectorSection.svelte';

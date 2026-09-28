@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { AbstractElement } from '../core/element/abstract.svelte.js';
-	import type { StyleLayers } from '../core/element/types.js';
+	import type { AbstractElement } from '$lib/core/element/abstract.svelte.js';
+	import type { StyleLayers } from '$lib/core/element/types.js';
 	import EditorFill from './EditorFill.svelte';
 	import EditorStroke from './EditorStroke.svelte';
 	import EditorSymbol from './EditorSymbol.svelte';

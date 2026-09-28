@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { LEGACY_SYMBOLS } from '@versatiles/map-state';
-import { MockMap } from '$lib/__mocks__/map.js';
+import { MockMap } from '../__mocks__/map.js';
 import { filterSymbols, SymbolLibrary } from './symbols.js';
 // Icon names of the "base" sprite that @versatiles/style loads. To update:
 // curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'

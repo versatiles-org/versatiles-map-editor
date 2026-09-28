@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import Icon, { type IconName } from './Icon.svelte';
 	import { elementNames } from '$lib/utils/element_names.js';

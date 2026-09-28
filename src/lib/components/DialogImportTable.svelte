@@ -3,7 +3,7 @@
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import { ADDRESS_PARTS, guessColumns, parseTable, type AddressPart, type Table } from '$lib/utils/table.js';
 	import {
 		biasOptions,
@@ -22,8 +22,8 @@
 	import { getColorScheme } from '$lib/utils/color_schemes.js';
 	import { config } from '$lib/utils/config.svelte.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { NEW_MARKER_SYMBOL } from '../core/symbols.js';
-	import { formatCount } from '../utils/format.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols.js';
+	import { formatCount } from '$lib/utils/format.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 

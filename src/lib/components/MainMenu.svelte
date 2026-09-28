@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
-	import * as commands from '../core/commands.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import * as commands from '$lib/core/commands.js';
 	import DialogFile from './DialogFile.svelte';
 	import DialogImportTable from './DialogImportTable.svelte';
 	import DialogShortcuts from './DialogShortcuts.svelte';

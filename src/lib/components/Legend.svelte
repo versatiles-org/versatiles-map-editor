@@ -2,8 +2,8 @@
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import type { StateLegend } from '@versatiles/map-state';
-	import { SymbolLibrary } from '../core/symbols.js';
-	import { parseHex, toHex } from '../utils/color.js';
+	import { SymbolLibrary } from '$lib/core/symbols.js';
+	import { parseHex, toHex } from '$lib/utils/color.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */

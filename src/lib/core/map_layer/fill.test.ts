@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { addFillPatternImage, fillPatternName, MapLayerFill } from './fill.svelte.js';
-import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../../__mocks__/map.js';
 
 describe('MapLayerFill', () => {
 	let onChange: Mock<() => void>;

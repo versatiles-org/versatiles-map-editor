@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { LEGACY_SYMBOLS } from '@versatiles/map-state';
-import { parseHex } from '$lib/utils/color.js';
-import { TILE_SERVER } from '$lib/utils/map_style.js';
+import { parseHex } from '../utils/color.js';
+import { TILE_SERVER } from '../utils/map_style.js';
 
 /** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
 export type IconAnchor =

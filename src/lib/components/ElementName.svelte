@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AbstractElement } from '../core/element/abstract.svelte.js';
+	import type { AbstractElement } from '$lib/core/element/abstract.svelte.js';
 	import { elementText } from '$lib/utils/element_names.js';
 
 	/** The name of an element in the list: its type and number, and its label or popup text as plain text. */

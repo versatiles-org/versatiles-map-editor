@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { GeometryManager } from './geometry_manager.svelte.js';
 import { ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
 import type { PolygonElement } from './element/polygon.js';

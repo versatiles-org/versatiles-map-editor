@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
-	import type { Tool } from '../core/drawing.svelte.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { Tool } from '$lib/core/drawing.svelte.js';
 	import Icon from './Icon.svelte';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
 

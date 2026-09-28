@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { GeometryManager } from '../core/geometry_manager.svelte.js';
-	import { fillPatterns, type MapLayerFill } from '../core/map_layer/fill.svelte.js';
+	import type { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
+	import { fillPatterns, type MapLayerFill } from '$lib/core/map_layer/fill.svelte.js';
 	import { group } from '$lib/utils/group.js';
 	import InputRow from './InputRow.svelte';
 	import ColorPicker from './ColorPicker.svelte';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 	import Icon from './Icon.svelte';
 	import PanelElements from './PanelElements.svelte';
 

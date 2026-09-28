@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { GeometryManager, keepElements } from './geometry_manager.svelte.js';
-import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { MarkerElement } from './element/marker.js';

@@ -2,7 +2,7 @@ import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapState } from '@versatiles/map-state';
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { vi } from 'vitest';
-import { MockMap } from '$lib/__mocks__/map.js';
+import { MockMap } from '../../__mocks__/map.js';
 import { MockCursor } from './cursor.js';
 import { StateManager } from '../state/manager.js';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { MapGeoJSONFeature } from 'maplibre-gl';
-import { MockMap, type MaplibreMap } from '$lib/__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { GeometryManager } from './geometry_manager.svelte.js';
 import { PopupHandler } from './popup_handler.svelte.js';
 

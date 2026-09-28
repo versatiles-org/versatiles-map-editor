@@ -1,9 +1,9 @@
 <script lang="ts">
-	import '../style/index.scss';
+	import '$lib/style/index.scss';
 	import Inspector from './Inspector.svelte';
-	import * as commands from '../core/commands.js';
+	import * as commands from '$lib/core/commands.js';
 	import { isOwnKeyTarget } from '$lib/utils/shortcuts.js';
-	import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
 
 	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
 
