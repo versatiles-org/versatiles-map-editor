@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
 	import { InputRow, ColorPicker, ChoiceGroup } from '$lib/components/ui/index.js';
 	import SymbolSelector from './PanelSymbolSelector.svelte';
-	import { addLegendEntry } from '$lib/core/commands.js';
+	import { addLegendEntry } from '$lib/commands.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();
 

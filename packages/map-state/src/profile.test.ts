@@ -10,9 +10,9 @@ import {
 import { LEGACY_SYMBOLS, legacySymbol, symbolFromName } from './symbols.js';
 import type { StateStyle } from './types.js';
 
-import { fillPatterns } from '$lib/core/map_layer/fill.svelte.js';
-import { dashArrays } from '$lib/core/map_layer/line.svelte.js';
-import { labelPositions } from '$lib/core/map_layer/symbol.svelte.js';
+import { fillPatterns } from '$lib/map_layer/fill.svelte.js';
+import { dashArrays } from '$lib/map_layer/line.svelte.js';
+import { labelPositions } from '$lib/map_layer/symbol.svelte.js';
 
 // The codec owns the style vocabulary and the editor derives its tables from it.
 // These guards ensure the editor has rendering data for every value the codec knows.

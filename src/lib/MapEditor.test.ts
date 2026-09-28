@@ -42,7 +42,7 @@ vi.mock('./background/config.svelte.js', async (importOriginal) => ({
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
-const { GeometryManagerInteractive } = await import('./core/geometry_manager_interactive.js');
+const { GeometryManagerInteractive } = await import('./geometry_manager_interactive.js');
 
 describe('MapEditor', () => {
 	// The code of the editor, which MapEditor loads after the map is created. Its first import

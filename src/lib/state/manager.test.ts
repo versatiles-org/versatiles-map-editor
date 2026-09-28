@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
 import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import type { MapState } from '@versatiles/map-state';
-import { MockMap } from '../../__mocks__/map.js';
+import { MockMap } from '../__mocks__/map.js';
 
 describe('StateManager', () => {
 	let geometryManager: GeometryManagerInteractive;

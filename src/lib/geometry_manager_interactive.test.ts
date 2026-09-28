@@ -5,7 +5,7 @@ import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
-import { LngLat, MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import { LngLat, MockMap, type MaplibreMap } from './__mocks__/map.js';
 import type { GeoPath, GeoPoint } from './types.js';
 import { addElement } from './__mocks__/elements.js';
 

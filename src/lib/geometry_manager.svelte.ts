@@ -9,7 +9,7 @@ import { inlineSources } from '@versatiles/style';
 import { elementFromState } from './element/registry.js';
 import { ELEMENT_LAYERS, ElementRenderer } from './element_renderer.js';
 import { buildStyle, keepElements } from './editor_style.js';
-import { getSettings } from '../background/index.js';
+import { getSettings } from './background/index.js';
 import { addFillPatternImage } from './map_layer/index.js';
 import { loadSymbols, spriteSheets } from './symbols_catalog.js';
 

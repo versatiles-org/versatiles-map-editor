@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapState } from '@versatiles/map-state';
 import { FileCommands, type FileQuestions } from './file_commands.js';
-import type { GeometryManagerInteractive } from '../core/geometry_manager_interactive.js';
+import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { notify } from '../utils/index.js';

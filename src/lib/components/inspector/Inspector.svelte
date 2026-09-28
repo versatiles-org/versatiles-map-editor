@@ -1,13 +1,13 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import { addLegendEntry } from '$lib/core/commands.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import { addLegendEntry } from '$lib/commands.js';
 	import Editor from './Editor.svelte';
 	import { Icon, type IconName, FontSelect } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementNames, elementText } from '$lib/core/element/element_names.js';
+	import { countTypes, elementNames, elementText } from '$lib/element/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a

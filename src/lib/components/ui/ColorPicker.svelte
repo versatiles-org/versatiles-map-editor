@@ -18,7 +18,7 @@
 		type HSV,
 		type RGB
 	} from '$lib/utils/index.js';
-	import type { ColorPalette } from '$lib/core/color_palette.svelte.js';
+	import type { ColorPalette } from '$lib/color_palette.svelte.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 
 	let {

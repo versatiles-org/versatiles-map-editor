@@ -1,7 +1,7 @@
 import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
 import { encodeState } from '@versatiles/map-state';
 import { StateHistory } from './history.svelte.js';
-import { EventHandler } from '../../utils/index.js';
+import { EventHandler } from '../utils/index.js';
 
 export class StateManager {
 	public geometryManager: GeometryManagerInteractive;

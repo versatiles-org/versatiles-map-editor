@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import * as commands from '$lib/core/commands.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import * as commands from '$lib/commands.js';
 	import { Icon } from '$lib/components/ui/index.js';
-	import { coordinatesOf } from '$lib/core/geometry.js';
+	import { coordinatesOf } from '$lib/geometry.js';
 
 	/**
 	 * The actions of the selected elements, next to them on the map. It works with a mouse and

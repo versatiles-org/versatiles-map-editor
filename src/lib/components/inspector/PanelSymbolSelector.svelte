@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
-	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/core/symbols_catalog.js';
-	import { SymbolLibrary } from '$lib/core/symbols_draw.js';
+	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/symbols_catalog.js';
+	import { SymbolLibrary } from '$lib/symbols_draw.js';
 	import { Dialog } from '$lib/components/ui/index.js';
 
 	let dialog: Dialog | undefined;

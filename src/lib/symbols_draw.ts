@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { parseHex } from '../utils/index.js';
+import { parseHex } from './utils/index.js';
 
 /** Options for drawing a symbol, see `SymbolLibrary.drawSymbol`. */
 export interface DrawOptions {

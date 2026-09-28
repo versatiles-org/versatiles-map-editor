@@ -11,10 +11,10 @@
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { notify } from '$lib/utils/index.js';
 	import SearchPlace from '$lib/components/map/SearchPlace.svelte';
-	import { GeometryManager } from '$lib/core/geometry_manager.svelte.js';
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
-	import { PopupHandler } from '$lib/core/popup_handler.svelte.js';
-	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols_catalog.js';
+	import { GeometryManager } from './geometry_manager.svelte.js';
+	import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+	import { PopupHandler } from './popup_handler.svelte.js';
+	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
 	import { decodeState } from '@versatiles/map-state';
 	import { throttle } from './throttle.js';
@@ -156,7 +156,7 @@
 			{ default: StatusBar },
 			{ default: NodeDeleteButton }
 		] = await Promise.all([
-			import('$lib/core/geometry_manager_interactive.js'),
+			import('./geometry_manager_interactive.js'),
 			import('$lib/components/shell/Sidebar.svelte'),
 			import('$lib/components/shell/TopBar.svelte'),
 			import('$lib/components/shell/ToolRail.svelte'),

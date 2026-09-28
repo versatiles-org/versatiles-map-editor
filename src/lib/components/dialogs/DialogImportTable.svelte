@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Dialog, InputRow, ColorPicker } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/inspector/PanelSymbolSelector.svelte';
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import {
 		ADDRESS_PARTS,
 		guessColumns,
@@ -23,7 +23,7 @@
 	} from '$lib/components/dialogs/table_import/index.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { NEW_MARKER_SYMBOL } from '$lib/core/symbols_catalog.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
 	import { formatCount } from '$lib/utils/index.js';
 
 	const { manager }: { manager: GeometryManagerInteractive } = $props();

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 
 	/**
 	 * The line at the bottom of the editor: what the current tool or selection does, so the

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import { Icon, type IconName } from '$lib/components/ui/index.js';
-	import { elementNames } from '$lib/core/element/element_names.js';
+	import { elementNames } from '$lib/element/element_names.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen

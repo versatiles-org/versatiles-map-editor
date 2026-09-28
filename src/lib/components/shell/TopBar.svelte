@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '$lib/components/style/index.scss';
-	import type { GeometryManagerInteractive } from '$lib/core/geometry_manager_interactive.js';
+	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import DialogShare from '$lib/components/dialogs/DialogShare.svelte';
 	import { Icon } from '$lib/components/ui/index.js';
 	import MainMenu from './MainMenu.svelte';
