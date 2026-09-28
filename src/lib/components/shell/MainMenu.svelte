@@ -6,10 +6,7 @@
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
 	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
 	import Icon from '$lib/components/ui/Icon.svelte';
-	import { downloadBlob, downloadJSON } from '$lib/utils/download.js';
-	import { notify } from '$lib/utils/notify.svelte.js';
-	import { chooseTextFile, FileReadError } from '$lib/utils/file.js';
-	import { stateFromKML, stateToKML } from '@versatiles/map-state';
+	import { FileCommands } from '$lib/core/file_commands.js';
 
 	/**
 	 * The menu (☰) of the editor: the commands that are used rarely, like files, import and export,
@@ -102,89 +99,14 @@
 		await tick();
 	}
 
-	// like the other exports, map.geojson and map.kml
-	const defaultFilename = 'map.mapjson';
-	let filename = defaultFilename;
-
-	/** Whether the map has anything to lose: elements or map properties like a legend. */
-	function hasContent(): boolean {
-		const state = manager.getState();
-		return state.elements.length > 0 || state.meta !== undefined;
-	}
-
-	async function newFile(): Promise<void> {
-		if (!(await dialogFile?.askCreateNew())) return;
-		// an empty map in the current view, without legend or background; undoable
-		await manager.setState({ elements: [] });
-		manager.state.log();
-		filename = defaultFilename;
-	}
-
-	async function openFile(): Promise<void> {
-		if (!dialogFile) return;
-		try {
-			const file = await chooseTextFile('.mapjson');
-			if (!file) return;
-			const state = JSON.parse(file.text);
-			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
-			if (hasContent() && !(await dialogFile?.askReplace())) return;
-			// a change like any other, so it can be undone and is kept in the URL
-			await manager.setState(state);
-			manager.state.log();
-			filename = file.name;
-		} catch (error) {
-			console.error(error);
-			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
-			else notify('Failed to open the map. Please check the file format.');
-		}
-	}
-
-	async function downloadFile(): Promise<void> {
-		if (!dialogFile) return;
-		const response = await dialogFile.askDownloadFilename(filename);
-		if (!response) return;
-		filename = response;
-		downloadJSON(manager.getState(), filename);
-	}
-
-	/** Let the user choose a file, and add its content to the map. */
-	async function importFile(accept: string, read: (text: string) => void, format: string) {
-		try {
-			const file = await chooseTextFile(accept);
-			if (!file) return;
-			read(file.text);
-			manager.state.log();
-		} catch (error) {
-			console.error(error);
-			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
-			else notify(`Failed to import ${format}. Please check the file format.`);
-		}
-	}
-
-	function importGeoJSON() {
-		return importFile(
-			'.geojson,.json,application/geo+json,application/json',
-			(text) => manager.addGeoJSON(JSON.parse(text)),
-			'GeoJSON'
-		);
-	}
-
-	function importKML() {
-		return importFile(
-			'.kml,application/vnd.google-earth.kml+xml',
-			(text) => manager.addState(stateFromKML(text)),
-			'KML'
-		);
-	}
-
-	function exportGeoJSON() {
-		downloadJSON(manager.getGeoJSON(), 'map.geojson', 'application/geo+json');
-	}
-
-	function exportKML() {
-		const kml = stateToKML(manager.getState());
-		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), 'map.kml');
-	}
+	// the questions of the file commands, in the dialog, which exists once the menu is mounted
+	const files = $derived(
+		new FileCommands(manager, {
+			askCreateNew: async () => (await dialogFile?.askCreateNew()) ?? false,
+			askReplace: async () => (await dialogFile?.askReplace()) ?? false,
+			askDownloadFilename: async (name) => (await dialogFile?.askDownloadFilename(name)) ?? null
+		})
+	);
 </script>
 
 <svelte:window onpointerdown={onWindowPointerdown} />
@@ -246,19 +168,19 @@
 		onkeydown={onKeydown}
 		tabindex="-1"
 	>
-		{@render item('New map', newFile)}
-		{@render item('Open…', openFile)}
-		{@render item('Download…', downloadFile)}
+		{@render item('New map', () => files.newFile())}
+		{@render item('Open…', () => files.openFile())}
+		{@render item('Download…', () => files.downloadFile())}
 		{@render group('import', 'Import')}
 		<div id="{uid}-import" class="group" role="group" aria-label="Import" hidden={expanded !== 'import'}>
-			{@render item('GeoJSON…', importGeoJSON)}
-			{@render item('KML (Google Earth)…', importKML)}
+			{@render item('GeoJSON…', () => files.importGeoJSON())}
+			{@render item('KML (Google Earth)…', () => files.importKML())}
 			{@render item('Table (CSV/TSV)…', () => dialogImportTable?.open())}
 		</div>
 		{@render group('export', 'Export')}
 		<div id="{uid}-export" class="group" role="group" aria-label="Export" hidden={expanded !== 'export'}>
-			{@render item('GeoJSON', exportGeoJSON)}
-			{@render item('KML (Google Earth)', exportKML)}
+			{@render item('GeoJSON', () => files.exportGeoJSON())}
+			{@render item('KML (Google Earth)', () => files.exportKML())}
 		</div>
 		<hr />
 		{@render item('Undo', () => manager.state.undo(), {
