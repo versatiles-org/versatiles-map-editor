@@ -12,7 +12,7 @@ import type {
 	MapState,
 	StateStyle
 } from './types.js';
-import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
+import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION } from './constants.js';
 import { sanitizeBackground } from './profile.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
@@ -21,11 +21,11 @@ import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 export class StateReader {
 	public bits: boolean[];
 	public offset: number = 0;
-	// Since version 1: the colors, which are referenced by index
-	private palette: string[] | undefined;
-	// Since version 1: the styles read so far
-	private styleHistory: StyleHistory | undefined;
-	// Since version 1: the coordinates of the elements are steps on this grid
+	// the colors, which are referenced by index (see `readPalette`)
+	private palette: string[] = [];
+	// the styles read so far
+	private styleHistory = new StyleHistory();
+	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 
 	constructor(bits: boolean[]) {
@@ -122,33 +122,20 @@ export class StateReader {
 		}
 	}
 
-	readPoints(resolutionInMeters: number = 1): [number, number][] {
-		try {
-			const length = this.readVarint();
-			const scale = Math.round(1e5 / resolutionInMeters);
-			let x = 0;
-			let y = 0;
-			const points: [number, number][] = [];
-			for (let i = 0; i < length; i++) {
-				x += this.readVarint(true);
-				y += this.readVarint(true);
-				points[i] = [x / scale, y / scale];
-			}
-			return points;
-		} catch (cause) {
-			throw new Error(`Error reading points`, { cause });
-		}
+	/** The grid of the element coordinates, which the map of the root sets. */
+	private get elementGrid(): LocalGrid {
+		if (!this.grid) throw new Error('Element points need the grid of the map');
+		return this.grid;
 	}
 
-	/** A point of an element: absolute (version 0), or on the local grid. */
+	/** A point of an element, on the grid. */
 	readElementPoint(): [number, number] {
-		if (!this.grid) return this.readPoint();
-		return this.grid.fromGrid([this.readVarint(true), this.readVarint(true)]);
+		return this.elementGrid.fromGrid([this.readVarint(true), this.readVarint(true)]);
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
 	readElementPoints(): [number, number][] {
-		if (!this.grid) return this.readPoints();
+		const grid = this.elementGrid;
 		const length = this.readVarint();
 		const points: [number, number][] = [];
 		let x = 0;
@@ -156,7 +143,7 @@ export class StateReader {
 		for (let i = 0; i < length; i++) {
 			x += this.readVarint(true);
 			y += this.readVarint(true);
-			points.push(this.grid.fromGrid([x, y]));
+			points.push(grid.fromGrid([x, y]));
 		}
 		return points;
 	}
@@ -166,23 +153,17 @@ export class StateReader {
 			const root: MapState = { elements: [] };
 
 			const version = this.readInteger(3);
-			if (version > MAX_CODEC_VERSION) {
-				throw new Error(`Unsupported version: ${version}`);
-			}
-			if (version >= 1) {
-				this.palette = this.readArray(() => this.readColor());
-				this.styleHistory = new StyleHistory();
-			}
+			if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+			this.readPalette();
+			this.styleHistory = new StyleHistory();
 
 			// Read the map element
 			root.map = this.readMap();
 			if (!root.map) delete root.map;
 
-			if (version >= 1) {
-				const digits = this.readVarint();
-				if (digits > MAX_DIGITS) throw new Error(`Invalid resolution: ${digits}`);
-				this.grid = new LocalGrid(root.map?.center ?? [0, 0], digits);
-			}
+			const digits = this.readVarint();
+			if (digits > MAX_DIGITS) throw new Error(`Invalid resolution: ${digits}`);
+			this.grid = new LocalGrid(root.map?.center ?? [0, 0], digits);
 
 			// Read the metadata
 			root.meta = this.readMetadata();
@@ -398,10 +379,9 @@ export class StateReader {
 		}
 	}
 
-	/** A style. Since version 1: a reference to an earlier style (0: none) and the differences to it. */
+	/** A style: a reference to an earlier style (0: none) and the differences to it. */
 	readStyle(): StateStyle {
 		try {
-			if (!this.styleHistory) return this.readStylePatch({});
 			const ref = this.readVarint();
 			const base = this.styleHistory.get(ref);
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
@@ -472,9 +452,13 @@ export class StateReader {
 		}
 	}
 
-	/** A color: its index in the palette, or the color itself (version 0). */
+	/** The colors, each once, which are referenced by index afterwards. */
+	readPalette() {
+		this.palette = this.readArray(() => this.readColor());
+	}
+
+	/** A color, as its index in the palette. */
 	readColorValue(): string {
-		if (!this.palette) return this.readColor();
 		const index = this.readVarint();
 		const color = this.palette[index];
 		if (color === undefined) throw new Error(`Invalid palette index: ${index}`);

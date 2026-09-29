@@ -72,7 +72,7 @@ which are internal: only the exports above are the public API.
 | Representation | Source                      | Notes                                                                    |
 | -------------- | --------------------------- | ------------------------------------------------------------------------ |
 | `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle` |
-| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned; **backward compatible**            |
+| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                     |
 | GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` and `meta` foreign members                   |
 | KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`              |
 
@@ -124,23 +124,18 @@ properties:
 
 A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
-## Backward compatibility
+## Format version
 
-The base64 starts with a 3-bit format version, and every version can be read, so existing
-hashes keep decoding (`legacy.test.ts`). `encodeState` writes `CODEC_VERSION` (`constants.ts`):
+The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
+this version is read; a later version can be told apart by it. To keep hashes short:
 
-- **0**: the original format. Coordinates are absolute, with 5 decimal places. New fields use the
-  extension points v0 reserved: e.g. popups use the per-element popup flag, which old hashes
-  always leave at `0`.
-- **1**: shorter hashes, with the same content:
-  - the colors of all styles and of the legend are stored once in a palette, most frequent
-    first, and referenced by index (#5);
-  - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
-    or that it does not have (#4, `style_history.ts`);
-  - element coordinates are whole steps from the map center, with a global resolution in decimal
-    places of degrees (#3, `grid.ts`). `encodeState(state, { resolution })` takes it in meters:
-    the default of 1 m is as precise as version 0; coarser values make shorter hashes, e.g. for
-    sharing.
+- the colors of all styles and of the legend are stored once in a palette, most frequent first,
+  and referenced by index (#5);
+- a style refers to a similar one of the last 32 styles and stores only the fields that differ,
+  or that it does not have (#4, `style_history.ts`);
+- element coordinates are whole steps from the map center, with a global resolution in decimal
+  places of degrees (#3, `grid.ts`). `encodeState(state, { resolution })` takes it in meters: the
+  default is 1 m; coarser values make shorter hashes, e.g. for sharing.
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.

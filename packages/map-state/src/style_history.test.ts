@@ -4,8 +4,8 @@ import { StateWriter } from './writer.js';
 import { STYLE_HISTORY_SIZE, StyleHistory } from './style_history.js';
 import type { MapState } from './types.js';
 
-function encode(state: MapState, version: number): string {
-	const writer = new StateWriter({ version });
+function encode(state: MapState): string {
+	const writer = new StateWriter();
 	writer.writeRoot(state);
 	return writer.asBase64();
 }
@@ -22,14 +22,9 @@ const markers: MapState = {
 	}))
 };
 
-describe('style references (version 1)', () => {
+describe('style references', () => {
 	it('round-trip', () => {
-		expect(decode(encode(markers, 1))).toStrictEqual(markers);
-	});
-
-	it('make the hash shorter', () => {
-		// 919 → 726 characters: the labels differ, but the rest of each style is a reference
-		expect(encode(markers, 1).length).toBeLessThan(encode(markers, 0).length * 0.85);
+		expect(decode(encode(markers))).toStrictEqual(markers);
 	});
 
 	it('remove fields that the referenced style has', () => {
@@ -65,7 +60,7 @@ describe('style references (version 1)', () => {
 				}
 			]
 		};
-		expect(decode(encode(state, 1))).toStrictEqual(decode(encode(state, 0)));
+		expect(decode(encode(state))).toStrictEqual(state);
 	});
 
 	it('compare values as they are encoded', () => {
@@ -75,7 +70,7 @@ describe('style references (version 1)', () => {
 				{ type: 'marker', point: [0, 0], style: { halo: 1.504, size: 2 } }
 			]
 		};
-		expect(decode(encode(state, 1)).elements.map((e) => e.style)).toStrictEqual([
+		expect(decode(encode(state)).elements.map((e) => e.style)).toStrictEqual([
 			{ halo: 1.5, size: 2 },
 			{ halo: 1.5, size: 2 }
 		]);
@@ -89,11 +84,11 @@ describe('style references (version 1)', () => {
 				style: { rotate: i % (STYLE_HISTORY_SIZE + 5), label: 'x' }
 			}))
 		};
-		expect(decode(encode(state, 1))).toStrictEqual(state);
+		expect(decode(encode(state))).toStrictEqual(state);
 	});
 
 	it('reject an invalid reference', () => {
-		const writer = new StateWriter({ version: 1 });
+		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
 		writer.writeBit(false); // no map

@@ -4,8 +4,8 @@ import { collectColors, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { MapState } from './types.js';
 
-function encode(state: MapState, version: number): string {
-	const writer = new StateWriter({ version });
+function encode(state: MapState): string {
+	const writer = new StateWriter();
 	writer.writeRoot(state);
 	return writer.asBase64();
 }
@@ -27,20 +27,14 @@ const state: MapState = {
 	}))
 };
 
-describe('color palette (version 1)', () => {
+describe('color palette', () => {
 	it('round-trips styles, stroke styles and legend colors', () => {
-		expect(StateReader.fromBase64(encode(state, 1)).readRoot()).toStrictEqual(state);
+		expect(StateReader.fromBase64(encode(state)).readRoot()).toStrictEqual(state);
 	});
 
 	it('decodes colors as lowercase hex', () => {
 		const upper: MapState = { elements: [{ type: 'marker', point: [1, 2], style: { color: '#ABCDEF' } }] };
 		expect(decodeState(encodeState(upper)).elements[0].style).toStrictEqual({ color: '#abcdef' });
-	});
-
-	it('makes the hash shorter', () => {
-		const v0 = encode(state, 0);
-		const v1 = encode(state, 1);
-		expect(v1.length).toBeLessThan(v0.length * 0.8);
 	});
 
 	it('lists each color once, most frequent first', () => {
@@ -56,11 +50,11 @@ describe('color palette (version 1)', () => {
 
 	it('handles states without colors', () => {
 		const empty: MapState = { elements: [{ type: 'marker', point: [1, 2] }] };
-		expect(StateReader.fromBase64(encode(empty, 1)).readRoot()).toStrictEqual(empty);
+		expect(StateReader.fromBase64(encode(empty)).readRoot()).toStrictEqual(empty);
 	});
 
 	it('rejects an index outside the palette', () => {
-		const writer = new StateWriter({ version: 1 });
+		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray(['#ff0000'], (c) => writer.writeColor(c));
 		writer.writeBit(false); // no map
@@ -82,10 +76,11 @@ describe('versions', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('rejects unknown versions', () => {
-		expect(() => new StateWriter({ version: 7 })).toThrow('Unsupported version');
-		const writer = new StateWriter();
-		writer.writeInteger(7, 3);
-		expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+	it('rejects other versions, also the original version 0', () => {
+		for (const version of [0, 2, 7]) {
+			const writer = new StateWriter();
+			writer.writeInteger(version, 3);
+			expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+		}
 	});
 });

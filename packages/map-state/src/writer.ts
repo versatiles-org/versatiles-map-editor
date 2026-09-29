@@ -1,5 +1,5 @@
 import { parseColor } from './color.js';
-import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, MAX_CODEC_VERSION } from './constants.js';
+import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION } from './constants.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
@@ -18,24 +18,20 @@ import type {
 
 export class StateWriter {
 	bits: boolean[] = [];
-	readonly version: number;
-	// Since version 1: the colors of the state, most frequent first, by their color key
-	private palette: Map<string, number> | undefined;
-	// Since version 1: the styles written so far
-	private styleHistory: StyleHistory | undefined;
-
-	// Since version 1: the coordinates of the elements are steps on this grid
+	// the colors of the state, most frequent first, by their color key (see `writePalette`)
+	private palette = new Map<string, number>();
+	// the styles written so far
+	private styleHistory = new StyleHistory();
+	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 	private readonly resolution: number;
 
 	/**
-	 * `resolution`: the precision of the element coordinates in meters (since version 1),
-	 * rounded to decimal places of degrees. Coarser is shorter. Default: 1 m, as precise as version 0.
+	 * `resolution`: the precision of the element coordinates in meters, rounded to decimal places of
+	 * degrees. Coarser is shorter. Default: 1 m.
 	 */
-	constructor({ version = CODEC_VERSION, resolution = 1 }: { version?: number; resolution?: number } = {}) {
-		if (version < 0 || version > MAX_CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+	constructor({ resolution = 1 }: { resolution?: number } = {}) {
 		if (!(resolution > 0) || !Number.isFinite(resolution)) throw new Error(`Invalid resolution: ${resolution}`);
-		this.version = version;
 		this.resolution = resolution;
 	}
 
@@ -100,34 +96,15 @@ export class StateWriter {
 		this.writeVarint(Math.round(point[1] * scale), true);
 	}
 
-	writePoints(points: [number, number][], resolutionInMeters: number = 1) {
-		this.writeVarint(points.length);
-		const scale = Math.round(1e5 / resolutionInMeters);
-		let x = 0;
-		let y = 0;
-		points.forEach((point) => {
-			const xi = Math.round(point[0] * scale);
-			const yi = Math.round(point[1] * scale);
-			this.writeVarint(xi - x, true);
-			this.writeVarint(yi - y, true);
-			x = xi;
-			y = yi;
-		});
-	}
-
 	writeRoot(root: MapState) {
-		this.writeInteger(this.version, 3);
-		if (this.version >= 1) {
-			this.writePalette(collectColors(root));
-			this.styleHistory = new StyleHistory();
-		}
+		this.writeInteger(CODEC_VERSION, 3);
+		this.writePalette(collectColors(root));
+		this.styleHistory = new StyleHistory();
 
 		const center = this.writeMap(root.map);
-		if (this.version >= 1) {
-			const digits = digitsForResolution(this.resolution);
-			this.writeVarint(digits);
-			this.grid = new LocalGrid(center ?? [0, 0], digits);
-		}
+		const digits = digitsForResolution(this.resolution);
+		this.writeVarint(digits);
+		this.grid = new LocalGrid(center ?? [0, 0], digits);
 		this.writeMetadata(root.meta);
 
 		root.elements.forEach((element) => {
@@ -175,22 +152,27 @@ export class StateWriter {
 		return [Math.round(map.center[0] * scale) / scale, Math.round(map.center[1] * scale) / scale];
 	}
 
-	/** A point of an element: absolute (version 0), or on the local grid. */
+	/** The grid of the element coordinates, which the map of the root sets. */
+	private get elementGrid(): LocalGrid {
+		if (!this.grid) throw new Error('Element points need the grid of the map');
+		return this.grid;
+	}
+
+	/** A point of an element, on the grid. */
 	writeElementPoint(point: [number, number]) {
-		if (!this.grid) return this.writePoint(point);
-		const [x, y] = this.grid.toGrid(point);
+		const [x, y] = this.elementGrid.toGrid(point);
 		this.writeVarint(x, true);
 		this.writeVarint(y, true);
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
 	writeElementPoints(points: [number, number][]) {
-		if (!this.grid) return this.writePoints(points);
+		const grid = this.elementGrid;
 		this.writeVarint(points.length);
 		let px = 0;
 		let py = 0;
 		for (const point of points) {
-			const [x, y] = this.grid.toGrid(point);
+			const [x, y] = grid.toGrid(point);
 			this.writeVarint(x - px, true);
 			this.writeVarint(y - py, true);
 			px = x;
@@ -340,12 +322,10 @@ export class StateWriter {
 	}
 
 	/**
-	 * A style. Since version 1: a reference to a similar earlier style (0: none) and only the
-	 * differences to it, whichever is shortest.
+	 * A style: a reference to a similar earlier style (0: none) and only the differences to it,
+	 * whichever is shortest.
 	 */
 	writeStyle(style: StateStyle) {
-		if (!this.styleHistory) return this.writeStylePatch({}, style);
-
 		let best: boolean[] | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
 			const writer = this.fork();
@@ -406,20 +386,19 @@ export class StateWriter {
 
 	/** A writer for trying out an encoding, with the same palette. */
 	private fork(): StateWriter {
-		const writer = new StateWriter({ version: this.version, resolution: this.resolution });
+		const writer = new StateWriter({ resolution: this.resolution });
 		writer.palette = this.palette;
 		return writer;
 	}
 
-	/** The colors, each once, and afterwards only their index (since version 1). */
+	/** The colors, each once, and afterwards only their index. */
 	writePalette(colors: string[]) {
 		this.writeArray(colors, (color) => this.writeColor(color));
 		this.palette = new Map(colors.map((color, index) => [colorKey(color), index]));
 	}
 
-	/** A color: its index in the palette, or the color itself (version 0). */
+	/** A color, as its index in the palette. */
 	writeColorValue(color: string) {
-		if (!this.palette) return this.writeColor(color);
 		const index = this.palette.get(colorKey(color));
 		if (index === undefined) throw new Error(`Color not in the palette: ${color}`);
 		this.writeVarint(index);

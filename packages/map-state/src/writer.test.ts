@@ -5,12 +5,12 @@ import type { StateMetadata } from './types.js';
 
 describe('StateWriter', () => {
 	it('should initialize with an empty bits array', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		expect(writer.asBitString()).toBe('');
 	});
 
 	it('should write a single bit correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeBit(true);
 		expect(writer.asBitString()).toBe('1');
 		writer.writeBit(false);
@@ -18,14 +18,14 @@ describe('StateWriter', () => {
 	});
 
 	it('should write an integer correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeInteger(3, 4);
 		expect(writer.asBitString()).toBe('0011');
 	});
 
 	it('should write signed varint correctly', () => {
 		function test(value: number): string {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writeVarint(value, true);
 			return writer.asBitString();
 		}
@@ -46,26 +46,26 @@ describe('StateWriter', () => {
 	});
 
 	it('should write a signed varint correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeVarint(-5, true); // Encoded as signed varint
 		expect(writer.asBitString()).toBe('010010'); // Example encoding
 	});
 
 	it('should write an array correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeArray([1, 2, 3], (value) => writer.writeInteger(value, 3));
 		expect(writer.asBitString()).toBe('000110001010011'); // Example encoding
 	});
 
 	describe('writePoint', () => {
 		it('should write a point correctly', () => {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writePoint([0, 0]);
 			expect(writer.asBitString()).toBe('000000000000');
 		});
 
 		it('should write SW correctly', () => {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writePoint([-180, -90], 1e5);
 			expect(writer.asBitString()).toBe('001111010110100111001010');
 
@@ -75,7 +75,7 @@ describe('StateWriter', () => {
 		});
 
 		it('should write NE correctly', () => {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writePoint([180, 90], 1e5);
 			expect(writer.asBitString()).toBe('010001010110101001001010');
 
@@ -85,17 +85,8 @@ describe('StateWriter', () => {
 		});
 	});
 
-	it('should write multiple points correctly', () => {
-		const writer = new StateWriter({ version: 0 });
-		writer.writePoints([
-			[0, 0],
-			[1, 1]
-		]);
-		expect(writer.asBase64()).toBe('EAABVHMBVHM');
-	});
-
 	it('should write a map object correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeMap({
 			radius: 128,
 			center: [5, 6]
@@ -105,7 +96,7 @@ describe('StateWriter', () => {
 
 	describe('writeMap edge cases', () => {
 		function roundTrip(map: { radius: number; center: [number, number] }) {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writeMap(map);
 			return new StateReader(writer.bits).readMap();
 		}
@@ -130,7 +121,7 @@ describe('StateWriter', () => {
 
 	describe('writeMetadata', () => {
 		function test(metadata: StateMetadata, expected: string) {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writeMetadata(metadata);
 			expect(writer.asBase64()).toBe(expected);
 		}
@@ -140,7 +131,7 @@ describe('StateWriter', () => {
 	});
 
 	it('should write a root object correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeRoot({
 			map: { radius: 1024, center: [1, 2] },
 			elements: [
@@ -177,12 +168,12 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'FkIb_SgX-1gg-pyAot4ReKESP8AAAEIDLD4DzOSEDSawDSaxF4oRIAP8AAYwOvdoQJIfYQNJrANJrANJrANJrEXihEgAAP8EXihEj__wACA2x7iAg1hjRSUCVAA'
+			'JH-AAAA_wAAAH-__8AWQhv9KBf7WFCDSawDSaxAF4oRIAAhAUW8AUW8AaTWAaTWIUBAYwMOsIQMOsIQNJrANJrANJrANJrEKBAhQMCAsu1iAsu1iRQCUCAVAA'
 		);
 	});
 
 	it('should write an empty root object correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeRoot({
 			map: {
 				radius: 1024,
@@ -190,11 +181,13 @@ describe('StateWriter', () => {
 			},
 			elements: []
 		});
-		expect(writer.asBitString()).toBe('0001011001000000000000000000');
+		expect(writer.asBitString()).toBe('0010000001011001000000000000000000010100');
 	});
 
 	it('should write a style correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
+		// the palette of the colors, which the style refers to
+		writer.writePalette(['#ff0000']);
 		writer.writeStyle({
 			halo: 1.5,
 			opacity: 0.8,
@@ -207,31 +200,31 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('F4oRDGTMRcmuciP8AAEkCBHCUA');
+		expect(writer.asBase64()).toBe('C_wAAAC8UIhjJmIuTXORAEkCBHCUA');
 	});
 
 	it('should write a RGB color correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeColor('#ff0000');
 		expect(writer.asBase64()).toBe('_wAAA');
 	});
 
 	it('should write a RGBA color correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeColor('#ff000080');
 		expect(writer.asBase64()).toBe('_wAAwA');
 	});
 
 	describe('writeString', () => {
 		it('should write a string correctly', () => {
-			const writer = new StateWriter({ version: 0 });
+			const writer = new StateWriter();
 			writer.writeString('Teddy: 🧸');
 			expect(writer.asBase64()).toBe('S4CUUmNEA9DtCxfvC');
 		});
 
 		it('should have to correct bit length', () => {
 			function test(text: string) {
-				const writer = new StateWriter({ version: 0 });
+				const writer = new StateWriter();
 				writer.writeString(text);
 				return writer.bits.length;
 			}
@@ -244,7 +237,7 @@ describe('StateWriter', () => {
 	});
 
 	it('should convert bits to Base64 correctly', () => {
-		const writer = new StateWriter({ version: 0 });
+		const writer = new StateWriter();
 		writer.writeInteger(63, 6);
 		expect(writer.asBase64()).toBe('_');
 	});

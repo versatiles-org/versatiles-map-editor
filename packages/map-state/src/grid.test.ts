@@ -4,8 +4,8 @@ import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
 
-function encode(state: MapState, version: number, resolution?: number): string {
-	const writer = new StateWriter({ version, resolution });
+function encode(state: MapState, resolution?: number): string {
+	const writer = new StateWriter({ resolution });
 	writer.writeRoot(state);
 	return writer.asBase64();
 }
@@ -44,31 +44,26 @@ const berlin: MapState = {
 	]
 };
 
-describe('coordinates relative to the map center (version 1)', () => {
+describe('coordinates relative to the map center', () => {
 	it('round-trip exactly at the default resolution', () => {
-		const decoded = decode(encode(berlin, 1));
+		const decoded = decode(encode(berlin));
 		expect(decoded.elements).toStrictEqual(berlin.elements);
 	});
 
-	it('make the hash shorter', () => {
-		// 59 → 49 characters: only the first point of each element is relative to the center
-		expect(encode(berlin, 1).length).toBeLessThan(encode(berlin, 0).length * 0.9);
-	});
-
 	it('can be coarser, which is shorter', () => {
-		const coarse = encode(berlin, 1, 100);
-		expect(coarse.length).toBeLessThan(encode(berlin, 1).length);
+		const coarse = encode(berlin, 100);
+		expect(coarse.length).toBeLessThan(encode(berlin).length);
 		expect(decode(coarse).elements[0]).toStrictEqual({ type: 'marker', point: [13.412, 52.512] });
 	});
 
 	it('work without a map viewport', () => {
 		const state: MapState = { elements: [{ type: 'marker', point: [-70.12345, -33.45678] }] };
-		expect(decode(encode(state, 1))).toStrictEqual(state);
+		expect(decode(encode(state))).toStrictEqual(state);
 	});
 
 	it('reject invalid resolutions', () => {
-		expect(() => new StateWriter({ version: 1, resolution: 0 })).toThrow('Invalid resolution');
-		const writer = new StateWriter({ version: 1 });
+		expect(() => new StateWriter({ resolution: 0 })).toThrow('Invalid resolution');
+		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
 		writer.writeBit(false); // no map

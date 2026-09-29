@@ -1,7 +1,7 @@
 /** Meters per degree of latitude, and of longitude at the equator. */
 const METERS_PER_DEGREE = 111320;
 
-/** Decimal places of the coordinates in degrees: 5 ≈ 1.1 m (like version 0), 4 ≈ 11 m, 3 ≈ 111 m, … */
+/** Decimal places of the coordinates in degrees: 5 ≈ 1.1 m, 4 ≈ 11 m, 3 ≈ 111 m, … */
 export const MAX_DIGITS = 9;
 
 /** The decimal places that give about this resolution in meters. */
@@ -16,7 +16,7 @@ export function resolutionOfDigits(digits: number): number {
 }
 
 /**
- * Coordinates as whole steps of 10^-digits degrees from an origin (since version 1): the center
+ * Coordinates as whole steps of 10^-digits degrees from an origin: the center
  * of the map, so the numbers stay small. Decoded coordinates have exactly `digits` decimal places.
  */
 export class LocalGrid {

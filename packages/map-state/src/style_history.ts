@@ -47,7 +47,7 @@ function canonical(style: StateStyle): string {
 export const STYLE_HISTORY_SIZE = 32;
 
 /**
- * The styles written or read so far (since version 1), so a style can refer to a similar earlier
+ * The styles written or read so far, so a style can refer to a similar earlier
  * one. Writer and reader update it identically. A style that is used again moves to the end,
  * so frequently used styles have short references.
  */

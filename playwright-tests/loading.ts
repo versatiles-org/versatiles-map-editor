@@ -11,7 +11,7 @@ import {
 } from './lib/utils.js';
 
 const mapUrl =
-	'/#Fk2UZ1xMayU0hNExzxiEwxgqXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxWlCiqAAAAm2vxielvgqXEiqAABIz4RCgDLDPGJ7HGCpcSKoAAElbCDICAZDotMYhLcYKhyKDbAAZB6ExIqgAABZSKoAAAA';
+	'/#IVUAACybKM64mNZKaQomnQRMQQr0K4L5RjzgxOQoxnQpyAgxrwsgxGQkxJRBwsRskTI9PRn4oDShQAAv6hNphQvZxJGfCIUAefwpRQoUlbCDICAZGMYmPRyKDbAAZB6EYxPYJDKA';
 
 // The controls of the top bar, the tools and the sidebar at the start, in this order. Only names and states
 // are compared, so e.g. a separator or an icon does not matter.
