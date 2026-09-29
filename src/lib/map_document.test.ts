@@ -231,6 +231,14 @@ describe('MapDocument', () => {
 			await mapDocument.setState({ elements: [] });
 			expect(mapDocument.background).toBeUndefined();
 		});
+
+		it('loads no style for an unchanged background', async () => {
+			map.setStyle();
+			await mapDocument.setBackground(gray);
+			map.setStyle.mockClear();
+			await mapDocument.setBackground({ ...gray });
+			expect(map.setStyle).not.toHaveBeenCalled();
+		});
 	});
 
 	it('should identify as non-interactive', () => {

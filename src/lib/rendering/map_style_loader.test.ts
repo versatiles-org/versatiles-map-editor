@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { inlineSources } from '@versatiles/style';
 import { deferInlineSources } from '../__mocks__/inline_sources.js';
-import { MapStyleLoader } from './map_style_loader.svelte.js';
+import { MapStyleLoader } from './map_style_loader.js';
 import type { ElementRenderer } from './element_renderer.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
@@ -71,25 +71,20 @@ describe('MapStyleLoader', () => {
 			map.setStyle.mockClear();
 			// the mocked map changes its style object, like MapLibre with a diff: nothing has to load
 			map.setStyle.mockImplementation(() => {});
-			await loader.setBackground(gray);
-			expect(loader.background).toStrictEqual(gray);
+			await loader.setBackground(gray, 'noto_sans_regular');
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
 			expect((map.setStyle.mock.lastCall as unknown[])[1]).toMatchObject({
 				transformStyle: expect.any(Function)
 			});
 			// only the permanent listener is left
 			expect(map.listenerCount('style.load')).toBe(1);
-
-			// an unchanged background loads no style
-			await loader.setBackground({ ...gray });
-			expect(map.setStyle).toHaveBeenCalledTimes(1);
 		});
 		it('waits for a new style object to load', async () => {
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
 			// a full reload: MapLibre replaces the style object, which loads later
 			map.setStyle.mockImplementation(() => (map.style = {}));
 			let done = false;
-			const loading = loader.setBackground(gray).then(() => (done = true));
+			const loading = loader.setBackground(gray, 'noto_sans_regular').then(() => (done = true));
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(2));
 			await new Promise((r) => setTimeout(r, 0));
 			expect(done).toBe(false);

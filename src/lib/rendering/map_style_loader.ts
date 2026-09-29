@@ -3,24 +3,19 @@ import type { StateBackground } from '@versatiles/map-state';
 import { inlineSources } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
 import { buildStyle, keepElements } from './editor_style.js';
-import { getSettings } from '../background/index.js';
 import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
 
 /**
  * Loads the style of the map: the background map with the editor's layers, and the font of the
- * labels of the markers. A newer background replaces one that is still loading. The elements
- * keep their sources and layers across styles.
+ * labels of the markers, as the document has them. A newer background replaces one that is still
+ * loading. The elements keep their sources and layers across styles.
  */
 export class MapStyleLoader {
 	readonly #map: maplibregl.Map;
 	readonly #renderer: ElementRenderer;
-	/** The background map. Undefined for the editor's default background. */
-	#background: StateBackground | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
-	#labelFont: string | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
-	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
+	/** The glyph font of the labels of the markers. Undefined for the one of the default background. */
+	#font: string | undefined;
 	// The map has no style until inlineSources() finishes, so elements must wait for it
 	#loaded = false;
 	#request = 0;
@@ -33,39 +28,27 @@ export class MapStyleLoader {
 		map.on('style.load', () => {
 			this.#loaded = true;
 			// e.g. a label font that was set while the style loaded
-			this.#applyLabelFont();
+			this.#applyFont();
 		});
 		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
 		map.setMissingStyleImageResolver((id) => void addFillPatternImage(map, id));
 		void this.#load(undefined);
 	}
 
-	/** The background map. Undefined for the editor's default background. See `setBackground`. */
-	public get background(): StateBackground | undefined {
-		return this.#background;
+	/** Show the glyph font on the labels of the markers, without a new style; the next style has it too. */
+	public setFont(font: string) {
+		if (font === this.#font) return;
+		this.#font = font;
+		this.#applyFont();
 	}
 
-	/** The font of the labels of all markers, or undefined for the font of the background map. */
-	public get labelFont(): string | undefined {
-		return this.#labelFont;
-	}
-	public set labelFont(font: string | undefined) {
-		if (font === this.#labelFont) return;
-		this.#labelFont = font;
-		// without a new style; the next style has it too (see `#load`)
-		this.#applyLabelFont();
-	}
-
-	/** Show another background map. The background is set at once; resolves when its style is loaded. */
-	public async setBackground(background?: StateBackground) {
-		if (sameBackground(background, this.#background)) return;
-		this.#background = background;
+	/**
+	 * Show another background map (undefined for the editor's default), with the glyph font of the
+	 * labels of the markers. Resolves when its style is loaded.
+	 */
+	public async setBackground(background: StateBackground | undefined, font: string) {
+		this.#font = font;
 		await this.#load(background);
-	}
-
-	/** Whether the background is `background`, e.g. to load a state without reloading the same style. */
-	public hasBackground(background: StateBackground | undefined): boolean {
-		return sameBackground(background, this.#background);
 	}
 
 	/** Whether the map has a style, so elements can be added to it. */
@@ -85,9 +68,9 @@ export class MapStyleLoader {
 	}
 
 	/** Set the font on the layer of the markers, once the style has it. */
-	#applyLabelFont() {
-		if (this.#loaded && this.#map.getLayer(ELEMENT_LAYERS.symbol)) {
-			this.#map.setLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font', ['literal', [this.font]]);
+	#applyFont() {
+		if (this.#font && this.#loaded && this.#map.getLayer(ELEMENT_LAYERS.symbol)) {
+			this.#map.setLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font', ['literal', [this.#font]]);
 		}
 	}
 
@@ -97,7 +80,7 @@ export class MapStyleLoader {
 		// its sprites and for the places of the labels around the symbols.
 		await loadSymbols();
 		if (this.#destroyed || request !== this.#request) return;
-		const style = buildStyle(background, this.#labelFont);
+		const style = buildStyle(background, this.#font);
 		style.sprite = spriteSheets();
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
@@ -134,8 +117,4 @@ export class MapStyleLoader {
 		}
 		await loaded;
 	}
-}
-
-function sameBackground(a: StateBackground | undefined, b: StateBackground | undefined): boolean {
-	return JSON.stringify(a) === JSON.stringify(b);
 }

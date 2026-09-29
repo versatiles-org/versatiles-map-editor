@@ -7,6 +7,7 @@ import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
 import { MapView, type ElementIndex } from './rendering/index.js';
+import { getSettings, sameBackground } from './background/index.js';
 
 export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity
@@ -18,6 +19,12 @@ export class MapDocument {
 	public readonly colors: ColorPalette | null = null;
 	/** Whether the read-only viewer shows an address search. */
 	public search = $state(false);
+	/** The background map. Undefined for the editor's default background. See `setBackground`. */
+	#background: StateBackground | undefined = $state.raw(undefined);
+	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
+	#labelFont: string | undefined = $state.raw(undefined);
+	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
+	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
 	/** The legend of the map, if it has one. Replaced as a whole on every change. */
 	public legend: StateLegend | undefined = $state.raw(undefined);
 	private destroyed = false;
@@ -47,7 +54,7 @@ export class MapDocument {
 
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	public get background(): StateBackground | undefined {
-		return this.view.style.background;
+		return this.#background;
 	}
 
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
@@ -57,20 +64,19 @@ export class MapDocument {
 
 	/** The font of the labels of all markers, or undefined for the font of the background map. */
 	public get labelFont(): string | undefined {
-		return this.view.style.labelFont;
+		return this.#labelFont;
 	}
 	public set labelFont(font: string | undefined) {
-		this.view.style.labelFont = font;
-	}
-
-	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
-	public get font(): string {
-		return this.view.style.font;
+		if (font === this.#labelFont) return;
+		this.#labelFont = font;
+		this.view.style.setFont(this.font);
 	}
 
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
-	public setBackground(background?: StateBackground): Promise<void> {
-		return this.view.style.setBackground(background);
+	public async setBackground(background?: StateBackground): Promise<void> {
+		if (sameBackground(background, this.#background)) return;
+		this.#background = background;
+		await this.view.style.setBackground(background, this.font);
 	}
 
 	/** Stop pending work and remove all elements. Call before removing the map. */
@@ -173,7 +179,7 @@ export class MapDocument {
 		this.labelFont = state.meta?.labelFont;
 		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!this.view.style.hasBackground(state.meta?.background)) {
+		if (!sameBackground(state.meta?.background, this.#background)) {
 			await this.setBackground(state.meta?.background);
 			if (outdated()) return;
 		}

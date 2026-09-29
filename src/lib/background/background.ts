@@ -273,3 +273,8 @@ export function minimizeBackground({ builder, options }: StateBackground): State
 	const result: StateBackground = { builder, options: minimized as Options };
 	return JSON.stringify(result) === JSON.stringify(DEFAULT_BACKGROUND) ? undefined : result;
 }
+
+/** Whether both are the same background map, e.g. to keep the style that shows it. */
+export function sameBackground(a: StateBackground | undefined, b: StateBackground | undefined): boolean {
+	return JSON.stringify(a) === JSON.stringify(b);
+}

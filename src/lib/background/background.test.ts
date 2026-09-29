@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { changeSettings, DEFAULT_COLORS, getSettings, minimizeBackground } from './background.js';
+import { changeSettings, DEFAULT_COLORS, getSettings, minimizeBackground, sameBackground } from './background.js';
 
 describe('getSettings', () => {
 	it('reads the editor default', () => {
@@ -245,5 +245,15 @@ describe('minimizeBackground', () => {
 			builder: 'osm',
 			options: {}
 		});
+	});
+});
+
+describe('sameBackground', () => {
+	it('compares the options, not the objects', () => {
+		const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
+		expect(sameBackground(gray, { ...gray })).toBe(true);
+		expect(sameBackground(gray, { builder: 'osm', options: { theme: 'colorful' } })).toBe(false);
+		expect(sameBackground(undefined, undefined)).toBe(true);
+		expect(sameBackground(gray, undefined)).toBe(false);
 	});
 });
