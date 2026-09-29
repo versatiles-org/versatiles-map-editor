@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { typeName } from '$lib/element/element_names.js';
+	import { typeName } from '$lib/components/element_names.js';
 
 	/**
 	 * A bar at the bottom of the map while a drawing tool is chosen: what is drawn, and buttons to

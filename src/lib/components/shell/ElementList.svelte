@@ -3,7 +3,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import { Icon, type IconName, Hint } from '$lib/components/ui/index.js';
-	import { elementNames } from '$lib/element/element_names.js';
+	import { elementNames } from '$lib/components/element_names.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen

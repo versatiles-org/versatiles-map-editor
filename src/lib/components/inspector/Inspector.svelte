@@ -7,7 +7,7 @@
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementNames, elementText } from '$lib/element/element_names.js';
+	import { countTypes, elementNames, elementText } from '$lib/components/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
