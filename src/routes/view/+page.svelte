@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MapViewer from '$lib/MapViewer.svelte';
+	import MapViewer from '$lib/app/MapViewer.svelte';
 </script>
 
 <svelte:head>

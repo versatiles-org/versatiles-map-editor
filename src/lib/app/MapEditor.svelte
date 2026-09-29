@@ -3,13 +3,13 @@
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	import MapFrame, { type Insets } from './MapFrame.svelte';
 	import MapViewer from './MapViewer.svelte';
-	import type { MapDocument } from './map_document.svelte.js';
+	import type { MapDocument } from '$lib/map_document.svelte.js';
 	// Imported with the page, not loaded once the editor starts: on a slow network (300 ms latency),
 	// the editor then starts about 0.5 s sooner. Phones, which get the viewer, load ~95 KiB more.
-	import { MapDocumentInteractive } from './map_document_interactive.js';
+	import { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { ElementsDrawer, Sidebar, SidebarToggle, StatusBar, ToolRail, TopBar } from '$lib/components/shell/index.js';
 	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
-	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
+	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
 
 	let {

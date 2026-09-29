@@ -12,7 +12,7 @@
 	import { onMount, tick, type Snippet } from 'svelte';
 	import { replaceState } from '$app/navigation';
 	import 'maplibre-gl/dist/maplibre-gl.css';
-	import '$lib/page/theme.css';
+	import './theme.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
@@ -21,9 +21,9 @@
 	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import type { MapDocument } from './map_document.svelte.js';
-	import { UrlHash } from '$lib/page/url_hash.js';
-	import { addAttribution, layoutOverlays, type AttributionSize } from '$lib/page/overlay_layout.js';
+	import type { MapDocument } from '$lib/map_document.svelte.js';
+	import { UrlHash } from './url_hash.js';
+	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
 
 	/**
 	 * The map with what the viewer and the editor share: the map in the URL, the legend, the search,
@@ -139,7 +139,7 @@
 	/** Show the country of the user (from the time zone), when there is no map in the URL. */
 	async function showCountry(map: MaplibreMapType) {
 		// only needed without a map, so it is loaded only then
-		const { getCountryBoundingBox } = await import('$lib/page/location.js');
+		const { getCountryBoundingBox } = await import('./location.js');
 		const bbox = getCountryBoundingBox();
 		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
 	}

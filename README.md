@@ -28,20 +28,26 @@ npm run preview  # preview the production build
 
 ### Project structure
 
-The code is in `src/lib`. `MapEditor.svelte` is the editor (page `/`) and `MapViewer.svelte` the
-read-only viewer (page `/view`), both around the map in `MapFrame.svelte`; `map_document*.ts` hold
-the map with its elements, legend and background. Next to them are the modules that several
-folders share.
+The code is in `src/lib`. `map_document*.ts` hold the map with its elements, legend and
+background. Next to them are the modules that several folders share.
+
+- `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
+  viewer (`/view`), both around the map in `MapFrame.svelte`, with the URL, the layout and the theme
 
 - `components/`: the Svelte components: `ui/` generic controls, `shell/` the frame of the editor,
   `inspector/` the sidebar, `dialogs/`, and `map/` what floats over the map, split into `viewer/`
   (also in the viewer) and `editor/` (only in the editor)
+
 - `element/`, `map_layer/`, `state/`: the elements, their styles, and the state with undo and redo
+
 - `interaction/`: selecting, moving, reshaping and drawing with the mouse and fingers
+
 - `rendering/`: how the map is drawn: the layers of the elements, the editor's layers over the
   background map, and loading this style
+
 - `background/`: the background map, its style, and the configuration
-- `files/`, `page/`: the file commands of the menu, and the page around the map (URL, layout, theme)
+
+- `files/`: the file commands of the menu
 
 Rules:
 

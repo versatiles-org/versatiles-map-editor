@@ -35,14 +35,14 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 });
 
 // The editor loads its optional configuration file, which unit tests must not download
-vi.mock('./background/config.svelte.js', async (importOriginal) => ({
-	...(await importOriginal<typeof import('./background/config.svelte.js')>()),
+vi.mock('../background/config.svelte.js', async (importOriginal) => ({
+	...(await importOriginal<typeof import('../background/config.svelte.js')>()),
 	loadConfig: vi.fn(async () => {})
 }));
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
-const { MapDocumentInteractive } = await import('./map_document_interactive.js');
+const { MapDocumentInteractive } = await import('../map_document_interactive.js');
 
 describe('MapEditor', () => {
 	afterEach(() => {
@@ -99,7 +99,7 @@ describe('MapEditor', () => {
 		unmount(component);
 		flushSync();
 		// give the map time to show the country
-		await import('./page/location.js');
+		await import('./location.js');
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		expect(document.querySelector('.sidebar')).toBeNull();
