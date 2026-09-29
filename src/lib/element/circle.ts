@@ -1,10 +1,9 @@
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import type { GeoPoint } from '../types.js';
+import { type GeoPoint, circle, circleArea, distance, movePoint } from '../geometry.js';
 import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
-import { circle, circleArea, distance, movePoint } from '../geometry.js';
 import { formatArea, formatLength } from '../format.js';
 
 export class CircleElement extends AbstractElement {

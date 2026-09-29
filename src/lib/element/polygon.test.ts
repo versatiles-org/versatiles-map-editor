@@ -3,7 +3,7 @@ import { PolygonElement } from './polygon.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
-import type { GeoPath } from '../types.js';
+import type { GeoPath } from '../geometry.js';
 
 describe('PolygonElement', () => {
 	let mockManager: GeometryManager;

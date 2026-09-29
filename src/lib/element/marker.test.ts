@@ -3,7 +3,7 @@ import { MarkerElement } from './marker.js';
 import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
 import type { GeometryManager } from '../geometry_manager.svelte.js';
 import type { StateElementMarker } from '@versatiles/map-state';
-import type { GeoPoint } from '../types.js';
+import type { GeoPoint } from '../geometry.js';
 
 describe('MarkerElement', () => {
 	let mockManager: GeometryManager;

@@ -8,9 +8,9 @@ import {
 	lat2mercator,
 	movePoint,
 	pathLength,
-	polygonArea
+	polygonArea,
+	type GeoPoint
 } from './geometry.js';
-import type { GeoPoint } from './types.js';
 
 // the mean radius of the Earth in meters, as in the module
 const EARTH_RADIUS = 6371008.8;

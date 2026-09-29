@@ -1,4 +1,7 @@
-import type { GeoPath, GeoPoint } from './types.js';
+/** A position as [longitude, latitude], in degrees. */
+export type GeoPoint = [number, number];
+/** A line of positions, e.g. of a line or of the ring of a polygon. */
+export type GeoPath = GeoPoint[];
 
 const EARTH_RADIUS = 6371008.8; // Radius of the Earth in meters
 

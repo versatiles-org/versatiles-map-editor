@@ -1,4 +1,4 @@
-import type { GeoPoint } from '../types.js';
+import type { GeoPoint } from '../geometry.js';
 import type { MapLayerFill, MapLayerLine, MapLayerSymbol } from '../map_layer/index.js';
 
 /**

@@ -1,10 +1,9 @@
 import type { GeometryManager } from '../geometry_manager.svelte.js';
-import type { GeoPath } from '../types.js';
+import { type GeoPath, polygonArea } from '../geometry.js';
 import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
-import { polygonArea } from '../geometry.js';
 import { formatArea } from '../format.js';
 
 export class PolygonElement extends AbstractPathElement {
