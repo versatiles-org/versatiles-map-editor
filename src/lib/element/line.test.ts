@@ -51,9 +51,9 @@ describe('LineElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(mockDoc.renderer.update).mockClear();
+		vi.mocked(mockDoc.elementChanged).mockClear();
 		element.layer.color = '#00ff00';
-		expect(mockDoc.renderer.update).toHaveBeenCalledWith(element);
+		expect(mockDoc.elementChanged).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {

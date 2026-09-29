@@ -14,8 +14,8 @@ export class MarkerElement extends AbstractElement {
 		super(doc);
 		this.point = point;
 
-		this.layer = new MapLayerSymbol(() => this.updateSource());
-		this.updateSource();
+		this.layer = new MapLayerSymbol(() => this.changed());
+		this.changed();
 	}
 
 	getStyleLayers(): StyleLayers {
@@ -46,7 +46,7 @@ export class MarkerElement extends AbstractElement {
 			update: (lng, lat) => {
 				this.point[0] = lng;
 				this.point[1] = lat;
-				this.updateSource();
+				this.changed();
 			}
 		};
 	}
@@ -57,7 +57,7 @@ export class MarkerElement extends AbstractElement {
 
 	moveBy(dx: number, dy: number) {
 		this.point = movePoint(this.point, dx, dy);
-		this.updateSource();
+		this.changed();
 	}
 
 	getState(): StateElementMarker {

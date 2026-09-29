@@ -61,6 +61,11 @@ export class MapDocument {
 		this.renderer.setElements(elements);
 	}
 
+	/** Draw an element again, after a change of its geometry or style, which the element reports. */
+	public elementChanged(element: AbstractElement) {
+		this.renderer.update(element);
+	}
+
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	public get background(): StateBackground | undefined {
 		return this.#style.background;

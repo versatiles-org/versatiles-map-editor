@@ -66,9 +66,9 @@ describe('CircleElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(doc.renderer.update).mockClear();
+		vi.mocked(doc.elementChanged).mockClear();
 		circleElement.strokeLayer.visible = false;
-		expect(doc.renderer.update).toHaveBeenCalledWith(circleElement);
+		expect(doc.elementChanged).toHaveBeenCalledWith(circleElement);
 	});
 
 	it('should return state representation', () => {

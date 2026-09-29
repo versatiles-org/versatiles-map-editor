@@ -16,11 +16,11 @@ export class CircleElement extends AbstractElement {
 		this.point = point;
 		this.radius = radius;
 
-		this.fillLayer = new MapLayerFill(() => this.updateSource());
+		this.fillLayer = new MapLayerFill(() => this.changed());
 
-		this.strokeLayer = new MapLayerLine(() => this.updateSource());
+		this.strokeLayer = new MapLayerLine(() => this.changed());
 
-		this.updateSource();
+		this.changed();
 	}
 
 	getSelectionNodes(): SelectionNode[] {
@@ -45,14 +45,14 @@ export class CircleElement extends AbstractElement {
 				update: (lng: number, lat: number) => {
 					this.point[0] = lng;
 					this.point[1] = lat;
-					this.updateSource();
+					this.changed();
 				}
 			};
 		} else {
 			return {
 				update: (lng: number, lat: number) => {
 					this.radius = distance([lng, lat], this.point);
-					this.updateSource();
+					this.changed();
 				}
 			};
 		}
@@ -88,7 +88,7 @@ export class CircleElement extends AbstractElement {
 
 	moveBy(dx: number, dy: number) {
 		this.point = movePoint(this.point, dx, dy);
-		this.updateSource();
+		this.changed();
 	}
 
 	getState(): StateElementCircle {

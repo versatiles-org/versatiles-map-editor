@@ -10,7 +10,7 @@ export class MockMapDocument {
 	public elements: AbstractElement[] = [];
 	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
-	public readonly renderer = { update: vi.fn(), redraw: vi.fn(), flush: vi.fn() };
+	public elementChanged = vi.fn();
 	public readonly font = 'noto_sans_regular';
 	public readonly state;
 

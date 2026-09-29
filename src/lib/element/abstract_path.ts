@@ -19,7 +19,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 
 	moveBy(dx: number, dy: number) {
 		this.path = this.path.map((point) => movePoint(point, dx, dy));
-		this.updateSource();
+		this.changed();
 	}
 
 	getSelectionNodes(): SelectionNode[] {
@@ -56,7 +56,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 			update: (lng: number, lat: number) => {
 				point[0] = lng;
 				point[1] = lat;
-				this.updateSource();
+				this.changed();
 			},
 			vertex
 		};
@@ -70,7 +70,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 	public deleteNode(index: number): boolean {
 		if (!this.canDeleteNode(index)) return false;
 		this.path.splice(index, 1);
-		this.updateSource();
+		this.changed();
 		return true;
 	}
 }

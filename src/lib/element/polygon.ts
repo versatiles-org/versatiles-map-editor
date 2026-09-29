@@ -13,11 +13,11 @@ export class PolygonElement extends AbstractPathElement {
 		super(doc, false);
 		this.path = polygon;
 
-		this.fillLayer = new MapLayerFill(() => this.updateSource());
+		this.fillLayer = new MapLayerFill(() => this.changed());
 
-		this.strokeLayer = new MapLayerLine(() => this.updateSource());
+		this.strokeLayer = new MapLayerLine(() => this.changed());
 
-		this.updateSource();
+		this.changed();
 	}
 
 	getStyleLayers(): StyleLayers {

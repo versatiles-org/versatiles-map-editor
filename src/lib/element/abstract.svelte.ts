@@ -55,12 +55,12 @@ export abstract class AbstractElement {
 		return colors;
 	}
 
-	/** Called when the element is removed; the renderer removes its features with the element list. */
+	/** Called when the element is removed; its features go with the list of the document's elements. */
 	public destroy(): void {}
 
-	/** Draw the element again, after a change of its geometry or style. */
-	protected updateSource() {
-		this.doc.renderer.update(this);
+	/** Report a change of the geometry or the style, e.g. so the map draws the element again. */
+	protected changed() {
+		this.doc.elementChanged(this);
 		this.measurements = this.getMeasurements();
 	}
 
@@ -110,7 +110,7 @@ export abstract class AbstractElement {
 		const strokeStyle = fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style;
 		if (stroke) stroke.setState({ ...LINE_DEFAULTS, ...strokeStyle });
 		this.popup = state.popup?.text ?? '';
-		this.updateSource();
+		this.changed();
 		return true;
 	}
 

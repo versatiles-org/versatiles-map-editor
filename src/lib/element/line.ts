@@ -12,9 +12,9 @@ export class LineElement extends AbstractPathElement {
 		super(doc, true);
 		this.path = line;
 
-		this.layer = new MapLayerLine(() => this.updateSource(), { canHide: false });
+		this.layer = new MapLayerLine(() => this.changed(), { canHide: false });
 
-		this.updateSource();
+		this.changed();
 	}
 
 	getStyleLayers(): StyleLayers {
