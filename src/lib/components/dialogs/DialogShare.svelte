@@ -12,7 +12,8 @@
 	let btnEmbed: HTMLButtonElement | undefined = $state();
 	let previewAspectRatio: 'wide' | 'square' | 'tall' = $state('wide');
 
-	const baseUrl = window.location.href.replace(/#.*$/, '');
+	// the shared map opens in the read-only viewer, next to the editor
+	const baseUrl = new URL('view', window.location.href.replace(/#.*$/, '')).href;
 
 	let timeout: ReturnType<typeof setTimeout> | null = null;
 	let linkCode = $state('');

@@ -14,7 +14,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
 - **Save** the map as a file and open it again. The address bar always holds the whole map, so a reload keeps the work.
-- **Share** a link or embed the map in a website, with a selectable precision and an optional search. Embedded maps and phones show a read-only viewer.
+- **Share** a link or embed the map in a website, with a selectable precision and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
 - **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
 
 ## Development
@@ -98,13 +98,13 @@ Sized by the bundle's own source map: **1451.6 KB** raw, **412.6 KB** gzipped, a
 
 ## Embedding
 
-The editor reads its state from the URL hash, so it can be embedded in an `<iframe>`:
+The read-only viewer at `/view` reads the map from the URL hash, so it can be embedded in an `<iframe>`:
 
 ```html
-<iframe src="https://your-host/#<state-hash>" style="width: 600px; height: 600px;"></iframe>
+<iframe src="https://your-host/view#<state-hash>" style="width: 600px; height: 600px;"></iframe>
 ```
 
-When embedded (i.e. not the top-level window) the editing sidebar is hidden and the map renders in read-only mode. The state can alternatively be provided via the iframe's `data` attribute.
+The state can alternatively be provided via the iframe's `data` attribute. The editor (`/`) takes the same hash, e.g. to edit a shared map further.
 
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 

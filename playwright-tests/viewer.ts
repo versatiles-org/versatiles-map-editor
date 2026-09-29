@@ -38,7 +38,7 @@ test.describe('view page', () => {
 });
 
 test.describe('viewer', () => {
-	// small screens show the read-only viewer, like embedded maps
+	// the size of an embedded map
 	test.use({ viewport: { width: 500, height: 500 } });
 
 	test('opens popups on click', { tag: '@cross-browser' }, async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe('viewer', () => {
 				{ type: 'circle', point: [13.5, 52.55], radius: 1000 }
 			]
 		};
-		await page.goto('/#' + encodeState(state));
+		await page.goto('/view#' + encodeState(state));
 		await waitForMapIsReady(page);
 		await waitForMapIsIdle(page);
 		const cursor = () =>
@@ -95,6 +95,8 @@ test('precision of a shared map', async ({ page }) => {
 	const precision = page.getByRole('combobox', { name: 'Precision' });
 	const shared = async () => {
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
+		// the shared map opens in the viewer
+		expect(new URL(link).pathname).toBe('/view');
 		const element = decodeState(new URL(link).hash.slice(1)).elements[0] as StateElementMarker;
 		return { point: element.point, length: link.length };
 	};

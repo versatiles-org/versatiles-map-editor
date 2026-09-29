@@ -18,14 +18,12 @@
 		onMapLoad?: (map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) => void;
 	} = $props();
 
-	// The editor needs room for the sidebar and the map. Smaller screens (phones) and embeds get the
-	// read-only viewer (see also the page /view). The size is checked once, since switching modes would lose the editor state.
+	// The editor needs room for the sidebar and the map. Smaller screens (phones) get the read-only
+	// viewer, like shared and embedded maps (the page /view). The size is checked once, since
+	// switching modes would lose the editor state.
 	let mode: 'editor' | 'viewer' | undefined = $state();
-	let screenTooSmall = $state(false);
 	onMount(() => {
-		const embedded = window.self !== window.top;
-		screenTooSmall = !embedded && !matchMedia('(min-width: 600px) and (min-height: 400px)').matches;
-		mode = embedded || screenTooSmall ? 'viewer' : 'editor';
+		mode = matchMedia('(min-width: 600px) and (min-height: 400px)').matches ? 'editor' : 'viewer';
 	});
 
 	// the sidebar can be collapsed, to see more of the map
@@ -70,7 +68,7 @@
 </script>
 
 {#if mode === 'viewer'}
-	<MapViewer hint={screenTooSmall ? 'Open this page on a larger screen to edit the map.' : undefined} {onMapLoad} />
+	<MapViewer hint="Open this page on a larger screen to edit the map." {onMapLoad} />
 {:else if mode === 'editor'}
 	<!-- a found place can be marked -->
 	<MapFrame
