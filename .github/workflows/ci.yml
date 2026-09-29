@@ -36,6 +36,10 @@ jobs:
       - name: Lint Code
         run: npm run lint
 
+      # the graph in the README must match the code; regenerate it with "npm run doc-graph"
+      - name: Check that the dependency graph is up to date
+        run: npm run doc-graph && git diff --exit-code -- docs/dependency-graph.svg README.md
+
       - name: Build the project
         run: npm run build
 

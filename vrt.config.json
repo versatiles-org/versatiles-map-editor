@@ -1,11 +1,7 @@
 {
 	"deps-graph": {
 		"barrel": ["packages/**", "src/lib/**"],
-		"collapse-dir": [
-			"src/lib/components/map/editor/*",
-			"src/lib/components/map/viewer/*",
-			"src/lib/components/ui/*"
-		],
+		"collapse-dir": ["src/lib/components/map/editor/*", "src/lib/components/map/viewer/*", "src/lib/components/ui/*"],
 		"include": ["src", "packages/map-state/src"],
 		"merge-outgoing": ["src/lib/**"]
 	}
