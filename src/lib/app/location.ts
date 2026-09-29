@@ -14,15 +14,24 @@ export function getCountryCode(): string | null {
 
 /**
  * The country of a time zone, among the countries with a bounding box. JavaScript can only list
- * the time zones of a country (Intl.Locale#getTimeZones), not the other way round. The names are
- * those of the browser, like the time zone it reports, e.g. "Asia/Calcutta" or "Asia/Kolkata".
- * Undefined in browsers without getTimeZones.
+ * the time zones of a country, not the other way round. The names are those of the browser, like
+ * the time zone it reports, e.g. "Asia/Calcutta" or "Asia/Kolkata". Undefined in browsers that
+ * cannot list them.
  */
 export function timeZoneCountry(timeZone: string): string | undefined {
 	for (const country of Object.keys(countryBoundingBoxes)) {
-		if (new Intl.Locale('und-' + country).getTimeZones?.()?.includes(timeZone)) return country;
+		if (timeZonesOf(country)?.includes(timeZone)) return country;
 	}
 	return undefined;
+}
+
+/**
+ * The time zones of a country: from `Intl.Locale#getTimeZones()`, or from the getter `timeZones`
+ * of older engines (e.g. Node.js 22 and older Chrome and Safari). Undefined without both.
+ */
+export function timeZonesOf(country: string): string[] | undefined {
+	const locale = new Intl.Locale('und-' + country) as Intl.Locale & { timeZones?: string[] };
+	return locale.getTimeZones?.() ?? locale.timeZones;
 }
 
 /**

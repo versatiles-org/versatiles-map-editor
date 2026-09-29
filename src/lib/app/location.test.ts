@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getCountryBoundingBox, getCountryCode, timeZoneCountry } from './location.js';
+import { getCountryBoundingBox, getCountryCode, timeZoneCountry, timeZonesOf } from './location.js';
 
 describe('location', () => {
 	function mockTimeZone(timeZone: string): void {
@@ -14,6 +14,21 @@ describe('location', () => {
 
 	afterEach(() => vi.restoreAllMocks());
 
+	/** Run `test` as in an engine without the properties of Intl.Locale, e.g. without getTimeZones. */
+	function without(keys: string[], test: () => void): void {
+		const prototype = Intl.Locale.prototype;
+		const originals = keys.map((key) => [key, Object.getOwnPropertyDescriptor(prototype, key)] as const);
+		for (const key of keys) Object.defineProperty(prototype, key, { value: undefined, configurable: true });
+		try {
+			test();
+		} finally {
+			for (const [key, original] of originals) {
+				if (original) Object.defineProperty(prototype, key, original);
+				else delete (prototype as unknown as Record<string, unknown>)[key];
+			}
+		}
+	}
+
 	describe('timeZoneCountry', () => {
 		it('finds the country of a time zone, also of names with three parts', () => {
 			expect(timeZoneCountry('Europe/Berlin')).toBe('DE');
@@ -22,7 +37,7 @@ describe('location', () => {
 		});
 
 		it('uses the names of the JavaScript engine, like the time zone it reports', () => {
-			const us = new Intl.Locale('und-US').getTimeZones?.()?.[0];
+			const us = timeZonesOf('US')?.[0];
 			expect(us).toBeDefined();
 			expect(timeZoneCountry(us!)).toBe('US');
 		});
@@ -32,16 +47,13 @@ describe('location', () => {
 			expect(timeZoneCountry('America/Toronto')).toBeUndefined();
 		});
 
-		it('knows no country for an unknown time zone, or in a browser without getTimeZones', () => {
+		it('uses the getter timeZones of older engines, e.g. Node.js 22', () => {
+			without(['getTimeZones'], () => expect(timeZoneCountry('Europe/Berlin')).toBe('DE'));
+		});
+
+		it('knows no country for an unknown time zone, or in a browser that cannot list time zones', () => {
 			expect(timeZoneCountry('Mars/Olympus_Mons')).toBeUndefined();
-			const prototype = Intl.Locale.prototype;
-			const original = Object.getOwnPropertyDescriptor(prototype, 'getTimeZones')!;
-			Object.defineProperty(prototype, 'getTimeZones', { value: undefined, configurable: true });
-			try {
-				expect(timeZoneCountry('Europe/Berlin')).toBeUndefined();
-			} finally {
-				Object.defineProperty(prototype, 'getTimeZones', original);
-			}
+			without(['getTimeZones', 'timeZones'], () => expect(timeZoneCountry('Europe/Berlin')).toBeUndefined());
 		});
 	});
 
