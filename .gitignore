@@ -12,3 +12,5 @@
 /test-results
 /playwright-report
 Thumbs.db
+# plans for upcoming work, kept out of the repository
+*_PLAN.md
