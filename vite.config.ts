@@ -41,8 +41,47 @@ function maplibreWorker(): Plugin {
 	};
 }
 
+/**
+ * For the bundle treemaps in the README (npm run doc-bundle): the code of one page in one chunk,
+ * without the map worker. DOC_BUNDLE=editor: all code of the app, which the editor page loads.
+ * DOC_BUNDLE=viewer: only what the viewer page (/view) loads, i.e. what its page and SvelteKit's
+ * start code import, without the modules that are only loaded later with import().
+ */
+function docBundle(page: string | undefined): { plugin?: Plugin; manualChunks?: (id: string) => string | undefined } {
+	if (!page) return {};
+	// the modules of the viewer, found once all modules are loaded, before the chunks are made
+	let viewerModules = new Set<string>();
+	const plugin: Plugin = {
+		name: 'doc-bundle',
+		buildEnd() {
+			if (page !== 'viewer') return;
+			// SvelteKit's start code and the root layout (node 0), and the viewer page. The other
+			// pages are entries too, like the map worker.
+			const isRoot = (id: string) =>
+				(!!this.getModuleInfo(id)?.isEntry && !/\/nodes\/[1-9]|maplibre-gl-worker/.test(id)) ||
+				id.endsWith('/src/routes/view/+page.svelte');
+			const todo = [...this.getModuleIds()].filter(isRoot);
+			viewerModules = new Set(todo);
+			for (const id of todo) {
+				for (const imported of this.getModuleInfo(id)?.importedIds ?? []) {
+					if (!viewerModules.has(imported)) {
+						viewerModules.add(imported);
+						todo.push(imported);
+					}
+				}
+			}
+		}
+	};
+	const manualChunks = (id: string) => {
+		if (id.includes('maplibre-gl-worker')) return undefined;
+		return page === 'editor' || viewerModules.has(id) ? page : undefined;
+	};
+	return { plugin, manualChunks };
+}
+const doc = docBundle(process.env.DOC_BUNDLE);
+
 export default defineConfig({
-	plugins: [maplibreWorker(), sveltekit()],
+	plugins: [maplibreWorker(), sveltekit(), doc.plugin],
 	// Component tests need Svelte's client build, which is only resolved with the browser condition
 	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
@@ -71,11 +110,7 @@ export default defineConfig({
 		chunkSizeWarningLimit: 1500,
 		rollupOptions: {
 			treeshake: true,
-			// For the bundle treemap in the README (npm run doc-bundle): all code of the app in one
-			// chunk, since the viewer loads the editor code only when it is needed. Not the worker.
-			output: process.env.DOC_BUNDLE
-				? { manualChunks: (id: string) => (id.includes('maplibre-gl-worker') ? undefined : 'app') }
-				: undefined
+			output: doc.manualChunks ? { manualChunks: doc.manualChunks } : undefined
 		}
 	}
 });
