@@ -6,39 +6,20 @@ import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
-import { ElementRenderer, MapStyleLoader } from './rendering/index.js';
-
-/** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
-export interface ElementIndex {
-	layerIds: string[];
-	byId: Map<number, AbstractElement>;
-}
-
-export function indexElements(elements: AbstractElement[]): ElementIndex {
-	return {
-		layerIds: [...new Set(elements.flatMap((element) => element.getLayerIds()))],
-		byId: new Map(elements.map((element) => [element.id, element]))
-	};
-}
-
-/** The northernmost latitude of the Web Mercator projection. */
-const MAX_LATITUDE = 85.051129;
+import { MapView, type ElementIndex } from './rendering/index.js';
 
 export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity
 	#elements: AbstractElement[] = $state.raw([]);
-	public readonly map: maplibregl.Map;
+	/** The map on the screen, which shows the elements. */
+	public readonly view: MapView;
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
 	public readonly colors: ColorPalette | null = null;
-	/** Draws all elements. */
-	public readonly renderer: ElementRenderer;
 	/** Whether the read-only viewer shows an address search. */
 	public search = $state(false);
 	/** The legend of the map, if it has one. Replaced as a whole on every change. */
 	public legend: StateLegend | undefined = $state.raw(undefined);
-	/** The background map and the font of the labels, and loading their style. */
-	readonly #style: MapStyleLoader;
 	private destroyed = false;
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
 	#loading = $state(false);
@@ -47,9 +28,15 @@ export class MapDocument {
 	private loadedCallbacks: (() => void)[] = [];
 
 	constructor(map: maplibregl.Map) {
-		this.map = map;
-		this.renderer = new ElementRenderer(this.map);
-		this.#style = new MapStyleLoader(this.map, this.renderer);
+		this.view = new MapView(map);
+	}
+
+	public get map(): maplibregl.Map {
+		return this.view.map;
+	}
+
+	public get renderer() {
+		return this.view.renderer;
 	}
 
 	/** All elements of the map, in drawing order. Replaced as a whole on every change. */
@@ -68,7 +55,7 @@ export class MapDocument {
 
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	public get background(): StateBackground | undefined {
-		return this.#style.background;
+		return this.view.style.background;
 	}
 
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
@@ -78,26 +65,26 @@ export class MapDocument {
 
 	/** The font of the labels of all markers, or undefined for the font of the background map. */
 	public get labelFont(): string | undefined {
-		return this.#style.labelFont;
+		return this.view.style.labelFont;
 	}
 	public set labelFont(font: string | undefined) {
-		this.#style.labelFont = font;
+		this.view.style.labelFont = font;
 	}
 
 	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
 	public get font(): string {
-		return this.#style.font;
+		return this.view.style.font;
 	}
 
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
 	public setBackground(background?: StateBackground): Promise<void> {
-		return this.#style.setBackground(background);
+		return this.view.style.setBackground(background);
 	}
 
 	/** Stop pending work and remove all elements. Call before removing the map. */
 	public destroy() {
 		this.destroyed = true;
-		this.#style.destroy();
+		this.view.destroy();
 		this.clear();
 	}
 
@@ -125,25 +112,11 @@ export class MapDocument {
 	 * Only `candidates` are considered, e.g. the elements with a popup.
 	 */
 	public elementAt(
-		{ x, y }: { x: number; y: number },
+		point: { x: number; y: number },
 		tolerance = 0,
 		candidates: AbstractElement[] | ElementIndex = this.elements
 	): AbstractElement | undefined {
-		const { layerIds, byId } = Array.isArray(candidates) ? indexElements(candidates) : candidates;
-		if (layerIds.length === 0) return undefined;
-		const features = this.map.queryRenderedFeatures(
-			[
-				[x - tolerance, y - tolerance],
-				[x + tolerance, y + tolerance]
-			],
-			{ layers: layerIds }
-		);
-		// the topmost first; the element layers share the element ids as feature ids
-		for (const feature of features) {
-			const element = typeof feature.id === 'number' ? byId.get(feature.id) : undefined;
-			if (element) return element;
-		}
-		return undefined;
+		return this.view.elementAt(point, tolerance, candidates);
 	}
 
 	public removeElement(element: AbstractElement) {
@@ -167,25 +140,6 @@ export class MapDocument {
 		this.clear();
 		await this.setState(state);
 		this.state?.history.reset(state);
-	}
-
-	/** Move the map to show the given viewport (center + radius in meters). */
-	public fitViewport(viewport: NonNullable<MapState['map']>) {
-		const { center, radius } = viewport;
-		const dy = (radius * 360) / 40074000;
-		const dx = Math.min(180, dy / Math.max(Math.cos((center[1] * Math.PI) / 180), 1e-6));
-		// A viewport near a pole can reach beyond the latitudes of the map, where MapLibre throws
-		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
-		const bounds: [[number, number], [number, number]] = [
-			[center[0] - dx, lat(center[1] - dy)],
-			[center[0] + dx, lat(center[1] + dy)]
-		];
-		try {
-			this.map.fitBounds(bounds, { animate: false });
-		} catch (error) {
-			// the elements must be shown anyway
-			console.error('Failed to show the viewport of the map', error);
-		}
 	}
 
 	/** Whether a state is being loaded: until then, the map misses (some of) its elements. */
@@ -221,19 +175,19 @@ export class MapDocument {
 
 		this.deselectAll();
 
-		if (state.map) this.fitViewport(state.map);
+		if (state.map) this.view.fitViewport(state.map);
 		this.legend = state.meta?.legend;
 		this.search = state.meta?.search === true;
 		this.labelFont = state.meta?.labelFont;
 		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!this.#style.hasBackground(state.meta?.background)) {
+		if (!this.view.style.hasBackground(state.meta?.background)) {
 			await this.setBackground(state.meta?.background);
 			if (outdated()) return;
 		}
 
-		if (!this.#style.ready) {
-			await this.#style.whenReady();
+		if (!this.view.style.ready) {
+			await this.view.style.whenReady();
 			if (outdated()) return;
 		}
 

@@ -65,12 +65,7 @@ export class MapDocumentInteractive extends MapDocument {
 
 	/** Add copies of the elements, moved by the given offset in pixels, and select them. */
 	public duplicateElements(elements: AbstractElement[], offset: [number, number] = [0, 0]): AbstractElement[] {
-		const move = (point: GeoPoint): GeoPoint => {
-			if (offset[0] === 0 && offset[1] === 0) return point;
-			const { x, y } = this.map.project(point);
-			const { lng, lat } = this.map.unproject([x + offset[0], y + offset[1]]);
-			return [lng, lat];
-		};
+		const move = (point: GeoPoint): GeoPoint => this.view.offsetPoint(point, offset);
 
 		const states = elements.map((element) => {
 			const state: StateElement = structuredClone(element.getState());
@@ -102,14 +97,6 @@ export class MapDocumentInteractive extends MapDocument {
 	}
 
 	public getState(): MapState {
-		const center = this.map.getCenter();
-		const bounds = this.map.getBounds();
-		const radiusDegrees =
-			Math.min(
-				bounds.getNorth() - bounds.getSouth(),
-				(bounds.getEast() - bounds.getWest()) * Math.cos((center.lat * Math.PI) / 180)
-			) / 2;
-		const radius = 40074000 * (radiusDegrees / 360);
 		const meta: StateMetadata = {};
 		const background = this.background;
 		if (background) meta.background = background;
@@ -120,10 +107,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.search) meta.search = true;
 		if (this.labelFont) meta.labelFont = this.labelFont;
 		return {
-			map: {
-				center: [center.lng, center.lat],
-				radius
-			},
+			map: this.view.getViewport(),
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
 			elements: this.elements.map((element) => element.getState())
 		};
@@ -138,7 +122,7 @@ export class MapDocumentInteractive extends MapDocument {
 	 * properties it has (e.g. the background) replace the current ones.
 	 */
 	public addState(state: MapState) {
-		if (state.map) this.fitViewport(state.map);
+		if (state.map) this.view.fitViewport(state.map);
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
 		if (meta.legend) this.legend = meta.legend;
