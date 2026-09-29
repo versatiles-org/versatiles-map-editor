@@ -26,6 +26,28 @@ npm run build    # build the static site (adapter-static)
 npm run preview  # preview the production build
 ```
 
+### Project structure
+
+The code is in `src/lib`. `MapEditor.svelte` is the entry point, for the editor and for the
+read-only viewer; `map_document*.ts` hold the map with its elements, legend and background. Next
+to them are the modules that several folders share.
+
+- `components/`: the Svelte components: `ui/` generic controls, `shell/` the frame of the editor,
+  `inspector/` the sidebar, `dialogs/`, and `map/` what floats over the map, split into `viewer/`
+  (loaded at once) and `editor/` (loaded only by the editor)
+- `element/`, `map_layer/`, `state/`: the elements, their styles, and the state with undo and redo
+- `interaction/`: selecting, moving, reshaping and drawing with the mouse and fingers
+- `background/`: the background map, its style, and the configuration
+- `files/`, `page/`: the file commands of the menu, and the page around the map (URL, layout, theme)
+
+Rules:
+
+- A module lives next to its users: in their folder, or in the nearest folder above all of them.
+- Components import other folders with `$lib/…`, TypeScript modules with relative paths.
+- A folder with an `index.ts` is imported through it, while its own modules import each other
+  directly. Code that loads at different times (viewer and editor) gets no shared `index.ts`: it
+  would put the editor's code into the viewer's first load.
+
 ### Quality checks
 
 ```bash
