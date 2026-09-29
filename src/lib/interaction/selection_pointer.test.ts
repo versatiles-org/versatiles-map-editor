@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, type Mock, type Mocked } from 'vitest';
 import { SelectionHandler } from './selection.svelte.js';
-import { MockMap } from '../__mocks__/map.js';
+import type { MockMap } from '../__mocks__/map.js';
+import { createMockDoc } from './__mocks__/doc.js';
 import type * as maplibregl from 'maplibre-gl';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { Cursor } from './cursor.js';
@@ -16,24 +17,7 @@ describe('SelectionPointer', () => {
 	let mockDoc: MapDocumentInteractive;
 
 	beforeEach(() => {
-		mockMap = new MockMap();
-		mockCursor = {
-			togglePrecise: vi.fn(),
-			toggleHover: vi.fn(),
-			toggleGrab: vi.fn()
-		} as unknown as Mocked<Cursor>;
-		mockState = {
-			log: vi.fn()
-		} as unknown as Mocked<StateManager>;
-		mockDoc = {
-			map: mockMap,
-			cursor: mockCursor,
-			state: mockState,
-			elements: [],
-			elementAt: vi.fn(() => undefined),
-			drawing: { active: false }
-		} as unknown as MapDocumentInteractive;
-
+		({ map: mockMap, cursor: mockCursor, state: mockState, doc: mockDoc } = createMockDoc());
 		vi.clearAllMocks();
 		handler = new SelectionHandler(mockDoc);
 	});

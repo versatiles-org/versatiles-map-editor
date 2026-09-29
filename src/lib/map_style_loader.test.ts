@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { inlineSources } from '@versatiles/style';
-import type { StyleSpecification } from 'maplibre-gl';
+import { deferInlineSources } from './__mocks__/inline_sources.js';
 import { MapStyleLoader } from './map_style_loader.svelte.js';
 import type { ElementRenderer } from './element_renderer.js';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
@@ -18,31 +18,21 @@ describe('MapStyleLoader', () => {
 
 	describe('loading and destroy', () => {
 		// Let the test decide when the TileJSON download finishes
-		// async: the style is built once the symbols are loaded
-		async function deferInlineSources() {
-			let resolve!: (style: StyleSpecification) => void;
-			let reject!: (error: unknown) => void;
-			vi.mocked(inlineSources).mockClear();
-			vi.mocked(inlineSources).mockImplementationOnce(
-				() =>
-					new Promise((res, rej) => {
-						resolve = res;
-						reject = rej;
-					})
-			);
+		async function deferStyle() {
+			const inline = deferInlineSources();
 			const loader = new MapStyleLoader(map as unknown as MaplibreMap, renderer);
-			await vi.waitFor(() => expect(inlineSources).toHaveBeenCalled());
+			await inline.started();
 			map.setStyle.mockClear();
-			return { loader, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
+			return { loader, resolve: inline.resolve, reject: inline.reject };
 		}
 
 		it('sets the style once it is loaded', async () => {
-			const { resolve } = await deferInlineSources();
+			const { resolve } = await deferStyle();
 			resolve({ version: 8, sources: {}, layers: [] });
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
 		});
 		it('does not set the style after destroy', async () => {
-			const { loader, resolve } = await deferInlineSources();
+			const { loader, resolve } = await deferStyle();
 			loader.destroy();
 			resolve({ version: 8, sources: {}, layers: [] });
 			await new Promise((r) => setTimeout(r, 0));
@@ -50,7 +40,7 @@ describe('MapStyleLoader', () => {
 		});
 		it('does not fall back to the uninlined style after destroy', async () => {
 			const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-			const { loader, reject } = await deferInlineSources();
+			const { loader, reject } = await deferStyle();
 			loader.destroy();
 			reject(new DOMException('The operation was aborted.', 'AbortError'));
 			await new Promise((r) => setTimeout(r, 0));
@@ -59,7 +49,7 @@ describe('MapStyleLoader', () => {
 			consoleError.mockRestore();
 		});
 		it('aborts the TileJSON download', async () => {
-			const { loader } = await deferInlineSources();
+			const { loader } = await deferStyle();
 			const fetchMock = vi.fn<typeof fetch>();
 			vi.stubGlobal('fetch', fetchMock);
 			const options = vi.mocked(inlineSources).mock.lastCall?.[1];

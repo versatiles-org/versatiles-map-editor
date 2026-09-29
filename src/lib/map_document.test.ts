@@ -5,6 +5,7 @@ import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { MarkerElement } from './element/marker.js';
 import { inlineSources } from '@versatiles/style';
+import { deferInlineSources } from './__mocks__/inline_sources.js';
 import type { StyleSpecification } from 'maplibre-gl';
 import type * as maplibregl from 'maplibre-gl';
 
@@ -27,26 +28,16 @@ describe('MapDocument', () => {
 
 	describe('destroy', () => {
 		// Let the test decide when the TileJSON download finishes
-		// async: the style is built once the symbols are loaded
-		async function deferInlineSources() {
-			let resolve!: (style: StyleSpecification) => void;
-			let reject!: (error: unknown) => void;
-			vi.mocked(inlineSources).mockClear();
-			vi.mocked(inlineSources).mockImplementationOnce(
-				() =>
-					new Promise((res, rej) => {
-						resolve = res;
-						reject = rej;
-					})
-			);
+		async function deferStyle() {
+			const inline = deferInlineSources();
 			const doc = new MapDocument(map as unknown as MaplibreMap);
-			await vi.waitFor(() => expect(inlineSources).toHaveBeenCalled());
+			await inline.started();
 			map.setStyle.mockClear();
-			return { doc, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
+			return { doc, resolve: inline.resolve, reject: inline.reject };
 		}
 
 		it('creates elements only once the style is loaded', async () => {
-			const { doc, resolve } = await deferInlineSources();
+			const { doc, resolve } = await deferStyle();
 			const loading = doc.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			await new Promise((r) => setTimeout(r, 0));
 			expect(doc.elements).toHaveLength(0);
