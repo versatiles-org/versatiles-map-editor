@@ -5,4 +5,5 @@
  */
 export * from './editor_style.js';
 export * from './element_renderer.js';
+export * from './fill_patterns.js';
 export * from './map_style_loader.svelte.js';

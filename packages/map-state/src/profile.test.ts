@@ -9,7 +9,7 @@ import {
 } from './profile.js';
 import type { StateStyle } from './types.js';
 
-import { fillPatterns } from '$lib/map_layer/fill.svelte.js';
+import { patternFills } from '$lib/rendering/fill_patterns.js';
 import { dashArrays } from '$lib/map_layer/line.svelte.js';
 import { labelPositions } from '$lib/map_layer/symbol.svelte.js';
 
@@ -17,7 +17,7 @@ import { labelPositions } from '$lib/map_layer/symbol.svelte.js';
 // These guards ensure the editor has rendering data for every value the codec knows.
 describe('profile drift guard', () => {
 	it('the editor can render every enum value of the codec', () => {
-		expect(FILL_PATTERN_NAMES.map((_, i) => fillPatterns.has(i))).not.toContain(false);
+		expect(patternFills).toHaveLength(FILL_PATTERN_NAMES.length);
 		expect(STROKE_STYLE_NAMES.map((_, i) => dashArrays.get(i)?.array)).not.toContain(undefined);
 		expect(labelPositions.map((p) => p.name)).toEqual(LABEL_ALIGN_NAMES);
 		// only "auto" (index 0) has no fixed anchor

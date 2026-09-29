@@ -4,7 +4,7 @@ import { inlineSources } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
 import { buildStyle, keepElements } from './editor_style.js';
 import { getSettings } from '../background/index.js';
-import { addFillPatternImage } from '../map_layer/index.js';
+import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
 
 /**
