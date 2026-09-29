@@ -129,6 +129,9 @@ function selectionLayers(coarse: boolean): StylePart {
 	};
 }
 
+/** The color of the editor's own marks on the map: `--color-accent-line` of the theme. */
+const EDITOR_COLOR = '#9d35ff';
+
 /** The element being drawn, in the color of the editor's controls. */
 function drawingLayers(coarse: boolean): StylePart {
 	return {
@@ -139,7 +142,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				source: 'drawing',
 				type: 'fill',
 				filter: ['==', ['geometry-type'], 'Polygon'],
-				paint: { 'fill-color': '#115588', 'fill-opacity': 0.15 }
+				paint: { 'fill-color': EDITOR_COLOR, 'fill-opacity': 0.15 }
 			},
 			{
 				id: 'drawing_line',
@@ -147,7 +150,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				type: 'line',
 				filter: ['!=', ['geometry-type'], 'Point'],
 				layout: { 'line-cap': 'round', 'line-join': 'round' },
-				paint: { 'line-color': '#115588', 'line-width': 2, 'line-dasharray': [2, 2] }
+				paint: { 'line-color': EDITOR_COLOR, 'line-width': 2, 'line-dasharray': [2, 2] }
 			},
 			{
 				id: 'drawing_nodes',
@@ -157,7 +160,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				paint: {
 					'circle-color': '#ffffff',
 					'circle-radius': coarse ? 6 : 4,
-					'circle-stroke-color': '#115588',
+					'circle-stroke-color': EDITOR_COLOR,
 					'circle-stroke-width': 2
 				}
 			}

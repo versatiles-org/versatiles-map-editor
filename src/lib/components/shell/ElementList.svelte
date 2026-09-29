@@ -112,7 +112,7 @@
 		list-style: none;
 
 		&:focus-visible {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: 1px;
 		}
 
@@ -137,7 +137,7 @@
 		}
 
 		&:focus-visible li.active {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: -2px;
 		}
 	}

@@ -1,29 +1,65 @@
 /*
- * The colors, spacings and stacking order of the editor and the viewer, as variables on their
- * root element (class "map-editor-theme"). A global stylesheet, since the variables are used by
- * all components.
+ * The design of the editor and the viewer: colors, type, sizes, spacing, corners, shadows and
+ * stacking order, as variables on their root element (class "map-editor-theme"). A global
+ * stylesheet, since the variables are used by all components.
+ *
+ * The colors come from the VersaTiles logo and versatiles.org: the purples #9d35ff, #810098 and
+ * #6b0075, the greens #93a813 and #005034, and the dark grays of the website.
+ *
+ * The scales of the design, whose variables are added with the components that use them:
+ * - font sizes 11, 12, 13, 15 and 17 px, weights 400 and 600
+ * - heights of controls 24 (cells of grids), 28 (the sidebar), 32 (bars, menus, dialogs) and
+ *   36 px (the tools)
+ * - corners 4 (small parts), 6 (controls) and 10 px (surfaces), no pills
+ * - spacing on a 4 px grid: 4, 8, 12, 16 and 24 px
+ * - shadows: none for the parts at the edges, small for parts on the map, large for what opens
+ *   over everything
+ * - one "selected": solid accent for a text choice or a tool, an accent ring for pictures and
+ *   colors, an accent tint for rows of a list
  */
 .map-editor-theme {
-	--color-blue: #158;
-	--color-blue-dark: #0c3c63;
-	--color-green: #1a1;
+	/* the main action and the chosen option, e.g. of a switch or a tool; white text 4.8:1 */
+	--color-accent: #9d35ff;
+	/* darker than the accent in the light mode, brighter in the dark mode */
+	--color-accent-hover: #810098;
+	--color-on-accent: #fff;
+	/* thin lines: the focus ring (as on versatiles.org) and the ring of chosen pictures */
+	--color-accent-line: #9d35ff;
+	/* purple text, e.g. of links */
+	--color-accent-text: #810098;
+
+	/* bars, menus, popups, dialogs */
 	--color-bg: #fff;
 	--color-text: #000;
 	/* at least 4.5:1 on the (translucent) white of the sidebar */
-	--color-text-muted: #505050;
-	--color-disabled-bg: #d4d8dc;
-	--color-disabled-text: #4d4d4d;
-	--color-on-blue: #fff;
-	/* blue text, e.g. of options that are not selected */
-	--color-blue-text: #158;
+	--color-text-muted: #555;
+	/* edges of surfaces, dividers */
+	--color-border: rgb(27 27 31 / 13%);
+	/* every hover, and the track of switches */
+	--color-hover: rgb(27 27 31 / 7%);
+	--color-disabled-bg: #e6e6e9;
+	--color-disabled-text: #6b6b70;
 	--color-error: #b00020;
 	--color-warning: #a40;
-	--color-border: rgb(21 32 43 / 13%);
-	--color-hover: rgb(21 32 43 / 7%);
-	--shadow: 0 1px 2px rgb(15 25 35 / 14%), 0 6px 22px rgb(15 25 35 / 14%);
+	--color-success: #006636;
+
+	/* what opens over everything, e.g. menus, popups and dialogs */
+	--shadow-lg: 0 1px 2px rgb(15 15 20 / 14%), 0 6px 22px rgb(15 15 20 / 16%);
+
+	/* the system font */
+	--font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+
+	/* The names before the design system, until all components use the new ones */
+	--color-blue: var(--color-accent);
+	--color-blue-dark: var(--color-accent-hover);
+	--color-on-blue: var(--color-on-accent);
+	--color-blue-text: var(--color-accent-text);
+	--color-green: var(--color-success);
+	--shadow: var(--shadow-lg);
 	--btn-gap: 5px;
 	--gap: 10px;
 	--border-radius: 1em;
+
 	/* The stacking order of everything over the map, from the bottom up. Each overlay takes its
 	   level from here, so a new one cannot end up behind or in front of the wrong ones. */
 	/* the legend, part of the map */
@@ -38,6 +74,8 @@
 	--z-messages: 5;
 	/* the top bar, whose menu opens over everything else */
 	--z-topbar: 6;
+
+	font-family: var(--font-family);
 }
 
 /*
@@ -47,22 +85,23 @@
 @media (prefers-color-scheme: dark) {
 	.map-editor-theme.editor {
 		color-scheme: dark;
-		/* white text on it: 5.4:1; as focus ring on the background: 3:1 */
-		--color-blue: #2b6cb0;
-		--color-blue-dark: #1f5a96;
-		--color-blue-text: #9ccbff;
-		--color-green: #2a2;
-		--color-bg: #1c1d20;
-		--color-text: #e6e6e6;
+		/* the dark purple of the logo; the bright one is too strong on the dark background */
+		--color-accent: #6b0075;
+		--color-accent-text: #c28bff;
+		/* the background of versatiles.org */
+		--color-bg: #1b1b1f;
+		--color-text: #fff;
 		/* at least 4.5:1 on the (translucent) dark sidebar, also above a light map */
-		--color-text-muted: #bdbdbd;
-		--color-disabled-bg: #3a3d42;
-		--color-disabled-text: #c4c4c4;
-		--color-error: #ff8a95;
-		--color-warning: #ffb74d;
+		--color-text-muted: #aaa;
 		--color-border: rgb(255 255 255 / 13%);
 		--color-hover: rgb(255 255 255 / 8%);
-		--shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
+		--color-disabled-bg: #2e2e34;
+		--color-disabled-text: #9a9aa0;
+		--color-error: #ff8a95;
+		/* the amber and the green of versatiles.org */
+		--color-warning: #c9850a;
+		--color-success: #3da660;
+		--shadow-lg: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
 	}
 }
 

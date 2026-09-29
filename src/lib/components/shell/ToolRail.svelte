@@ -112,7 +112,7 @@
 			color: var(--color-on-blue);
 		}
 		&:focus-visible {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: 2px;
 		}
 	}

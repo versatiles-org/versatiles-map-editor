@@ -423,7 +423,7 @@
 			}
 
 			input:focus-visible + label {
-				outline: 2px solid var(--color-blue);
+				outline: 2px solid var(--color-accent-line);
 				outline-offset: -4px;
 			}
 

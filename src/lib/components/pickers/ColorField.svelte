@@ -90,7 +90,7 @@
 	}
 
 	.field:focus-visible {
-		outline: 1px solid var(--color-blue);
+		outline: 1px solid var(--color-accent-line);
 		outline-offset: 2px;
 	}
 

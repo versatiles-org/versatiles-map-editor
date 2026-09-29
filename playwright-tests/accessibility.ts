@@ -138,8 +138,9 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 				.evaluate((el, property) => getComputedStyle(el).getPropertyValue(property), property);
 
 		expect(await style('.page', 'color-scheme')).toBe('dark');
-		expect(await style('.sidebar', 'color')).toBe('rgb(230, 230, 230)');
-		// white on blue, also in dark mode
+		// pure white text
+		expect(await style('.sidebar', 'color')).toBe('rgb(255, 255, 255)');
+		// white on the accent, also in dark mode
 		expect(await style('button.btn:not([disabled])', 'color')).toBe('rgb(255, 255, 255)');
 		expect(await style('button.btn', 'transition-duration')).toBe('0s');
 	});

@@ -411,7 +411,7 @@
 		}
 
 		.swatch.active {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: 1px;
 		}
 	}

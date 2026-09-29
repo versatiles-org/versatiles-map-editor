@@ -111,7 +111,7 @@
 			background: color-mix(in srgb, var(--color-blue) 20%, transparent);
 		}
 		&:focus-visible {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: -2px;
 		}
 	}

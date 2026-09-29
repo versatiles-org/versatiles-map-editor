@@ -117,14 +117,14 @@
 
 		&:hover {
 			box-shadow:
-				0 0 0 2px color-mix(in srgb, #158 50%, transparent),
+				0 0 0 2px color-mix(in srgb, var(--color-accent-line) 50%, transparent),
 				0 1px 4px rgb(0 0 0 / 25%);
 		}
 	}
 	.selected,
 	.selected:hover {
 		box-shadow:
-			0 0 0 2px #158,
+			0 0 0 2px var(--color-accent-line),
 			0 1px 4px rgb(0 0 0 / 25%);
 	}
 

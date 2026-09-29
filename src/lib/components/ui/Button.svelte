@@ -38,7 +38,7 @@
 		transition: background-color 0.1s ease-in-out;
 
 		&:focus-visible {
-			outline: 2px solid var(--color-blue);
+			outline: 2px solid var(--color-accent-line);
 			outline-offset: 2px;
 		}
 		&:not([disabled]):hover {
