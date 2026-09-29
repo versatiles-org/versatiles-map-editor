@@ -21,7 +21,7 @@
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
-	import { formatCount } from '$lib/format.js';
+	import { formatCount } from '$lib/components/format.js';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 

@@ -1,3 +1,5 @@
+import type { Measurement } from '../element/types.js';
+
 // Numbers use the browser's locale unless a locale is given
 function formatNumber(value: number, locale?: string): string {
 	return value.toLocaleString(locale, { maximumSignificantDigits: 3 });
@@ -21,4 +23,12 @@ const pluralRules = new Intl.PluralRules('en-US');
 // Formats a count with the matching English noun, e.g. "1 row" or "3 rows"
 export function formatCount(count: number, singular: string, plural = singular + 's'): string {
 	return `${count} ${pluralRules.select(count) === 'one' ? singular : plural}`;
+}
+
+const MEASUREMENT_LABELS: Record<Measurement['kind'], string> = { length: 'Length', radius: 'Radius', area: 'Area' };
+
+/** A measurement of an element as its label and its formatted value, e.g. "Area" and "4.5 km²". */
+export function measurementText({ kind, value }: Measurement, locale?: string): { label: string; value: string } {
+	const text = kind === 'area' ? formatArea(value, locale) : formatLength(value, locale);
+	return { label: MEASUREMENT_LABELS[kind], value: text };
 }

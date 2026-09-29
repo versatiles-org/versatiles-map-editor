@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { measurementText } from '$lib/components/format.js';
 	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
 	import type { StyleLayers } from '$lib/element/types.js';
 	import StyleFill from './StyleFill.svelte';
@@ -71,7 +72,7 @@
 	{/if}
 	{#if single?.getStyleLayers().stroke}
 		<InspectorSection title="Info">
-			{#each single.measurements as { label, value }, i (label)}
+			{#each single.measurements.map((m) => measurementText(m)) as { label, value }, i (label)}
 				<InputRow id="{uid}-measurement-{i}" {label}>
 					<output id="{uid}-measurement-{i}">{value}</output>
 				</InputRow>

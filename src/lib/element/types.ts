@@ -23,7 +23,8 @@ export interface SelectionNodeUpdater {
 	vertex?: number;
 }
 
+/** A measurement of the geometry of an element: a length or a radius in meters, or an area in square meters. */
 export interface Measurement {
-	label: string;
-	value: string;
+	kind: 'length' | 'radius' | 'area';
+	value: number;
 }

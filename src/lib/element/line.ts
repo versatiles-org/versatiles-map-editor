@@ -4,7 +4,6 @@ import { MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
-import { formatLength } from '../format.js';
 
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;
@@ -31,7 +30,7 @@ export class LineElement extends AbstractPathElement {
 	}
 
 	protected getMeasurements(): Measurement[] {
-		return [{ label: 'Length', value: formatLength(pathLength(this.path)) }];
+		return [{ kind: 'length', value: pathLength(this.path) }];
 	}
 
 	getState(): StateElementLine {

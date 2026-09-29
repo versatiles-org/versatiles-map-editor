@@ -4,7 +4,6 @@ import { type GeoPoint, circle, circleArea, distance, movePoint } from '../geome
 import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
-import { formatArea, formatLength } from '../format.js';
 
 export class CircleElement extends AbstractElement {
 	public readonly fillLayer: MapLayerFill;
@@ -76,8 +75,8 @@ export class CircleElement extends AbstractElement {
 
 	protected getMeasurements(): Measurement[] {
 		return [
-			{ label: 'Radius', value: formatLength(this.radius) },
-			{ label: 'Area', value: formatArea(circleArea(this.radius)) }
+			{ kind: 'radius', value: this.radius },
+			{ kind: 'area', value: circleArea(this.radius) }
 		];
 	}
 

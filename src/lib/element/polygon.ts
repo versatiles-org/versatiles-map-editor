@@ -4,7 +4,6 @@ import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { Measurement, StyleLayers } from './types.js';
-import { formatArea } from '../format.js';
 
 export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
@@ -34,7 +33,7 @@ export class PolygonElement extends AbstractPathElement {
 	}
 
 	protected getMeasurements(): Measurement[] {
-		return [{ label: 'Area', value: formatArea(polygonArea(this.path)) }];
+		return [{ kind: 'area', value: polygonArea(this.path) }];
 	}
 
 	getState(): StateElementPolygon {

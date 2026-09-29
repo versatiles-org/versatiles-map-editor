@@ -22,12 +22,14 @@ describe('CircleElement', () => {
 	});
 
 	it('should provide radius and area as measurements', () => {
-		expect(circleElement.measurements).toEqual([
-			{ label: 'Radius', value: '300 km' },
-			{ label: 'Area', value: '283,000 km²' }
-		]);
+		const [radius, area] = circleElement.measurements;
+		expect(radius).toStrictEqual({ kind: 'radius', value: 300000 });
+		// about 283,000 km², on the sphere a little less than π r²
+		expect(area.kind).toBe('area');
+		expect(area.value / 1e6).toBeCloseTo(282000, -4);
+		expect(area.value).toBeLessThan(Math.PI * 300000 ** 2);
 		circleElement.getSelectionNodeUpdater({ index: 1 })?.update(10, 20.01);
-		expect(circleElement.measurements[0]).toEqual({ label: 'Radius', value: '1.11 km' });
+		expect(circleElement.measurements[0]).toStrictEqual({ kind: 'radius', value: expect.closeTo(1112, 0) });
 	});
 
 	it('should generate selection nodes', () => {

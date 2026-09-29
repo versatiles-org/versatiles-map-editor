@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatArea, formatCount, formatLength } from './format.js';
+import { formatArea, formatCount, formatLength, measurementText } from './format.js';
 
 describe('formatLength', () => {
 	it('should format short lengths in meters', () => {
@@ -53,5 +53,22 @@ describe('formatCount', () => {
 
 	it('should accept an irregular plural', () => {
 		expect(formatCount(3, 'entry', 'entries')).toBe('3 entries');
+	});
+});
+
+describe('measurementText', () => {
+	it('names a measurement and formats its value', () => {
+		expect(measurementText({ kind: 'length', value: 111195 }, 'en-US')).toStrictEqual({
+			label: 'Length',
+			value: '111 km'
+		});
+		expect(measurementText({ kind: 'radius', value: 300000 }, 'en-US')).toStrictEqual({
+			label: 'Radius',
+			value: '300 km'
+		});
+		expect(measurementText({ kind: 'area', value: 12363718145 }, 'en-US')).toStrictEqual({
+			label: 'Area',
+			value: '12,400 km²'
+		});
 	});
 });

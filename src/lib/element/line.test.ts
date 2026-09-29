@@ -32,9 +32,10 @@ describe('LineElement', () => {
 			[0, 0],
 			[1, 0]
 		]);
-		expect(element.measurements).toEqual([{ label: 'Length', value: '111 km' }]);
+		// a degree of longitude at the equator, in meters
+		expect(element.measurements).toEqual([{ kind: 'length', value: expect.closeTo(111195, 0) }]);
 		element.getSelectionNodeUpdater({ index: 1 })?.update(0, 0.001);
-		expect(element.measurements).toEqual([{ label: 'Length', value: '111 m' }]);
+		expect(element.measurements).toEqual([{ kind: 'length', value: expect.closeTo(111.2, 1) }]);
 	});
 
 	it('should set isSelected correctly', () => {

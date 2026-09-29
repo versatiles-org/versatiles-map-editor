@@ -36,7 +36,8 @@ describe('PolygonElement', () => {
 			[1, 1],
 			[0, 1]
 		]);
-		expect(element.measurements).toEqual([{ label: 'Area', value: '12,400 km²' }]);
+		// about 12,400 km², in square meters
+		expect(element.measurements).toEqual([{ kind: 'area', value: expect.closeTo(12363718145, -1) }]);
 	});
 
 	it('should list the colors of the fill and the visible outline', () => {
