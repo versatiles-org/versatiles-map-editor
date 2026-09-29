@@ -28,7 +28,6 @@ export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity
 	#elements: AbstractElement[] = $state.raw([]);
 	public readonly map: maplibregl.Map;
-	public readonly canvas: HTMLElement;
 	public readonly state: StateManager | null = null;
 	public readonly selection: SelectionHandler | null = null;
 	public readonly colors: ColorPalette | null = null;
@@ -49,7 +48,6 @@ export class MapDocument {
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
-		this.canvas = this.map.getCanvasContainer();
 		this.renderer = new ElementRenderer(this.map);
 		this.#style = new MapStyleLoader(this.map, this.renderer);
 	}

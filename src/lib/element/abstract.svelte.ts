@@ -1,4 +1,3 @@
-import type * as maplibregl from 'maplibre-gl';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import type { MapDocument } from '../map_document.svelte.js';
 import {
@@ -15,8 +14,6 @@ import { ELEMENT_LAYERS, type Role } from '../rendering/index.js';
 let nextId = 1;
 
 export abstract class AbstractElement {
-	protected readonly canvas: HTMLElement;
-	protected readonly map: maplibregl.Map;
 	protected isSelected = false;
 
 	public readonly doc: MapDocument | MapDocumentInteractive;
@@ -29,8 +26,6 @@ export abstract class AbstractElement {
 
 	constructor(doc: MapDocument | MapDocumentInteractive) {
 		this.doc = doc;
-		this.map = doc.map;
-		this.canvas = this.map.getCanvasContainer();
 	}
 
 	/** The map layers that draw the element, by their role in its style. */

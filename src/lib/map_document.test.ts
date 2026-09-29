@@ -21,7 +21,6 @@ describe('MapDocument', () => {
 	it('should initialize with default values', () => {
 		expect(mapDocument.elements).toBeDefined();
 		expect(mapDocument.map).toBe(map);
-		expect(mapDocument.canvas).toBe(map.getCanvasContainer());
 		expect(mapDocument.state).toBeNull();
 		expect(mapDocument.selection).toBeNull();
 	});
