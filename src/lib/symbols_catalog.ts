@@ -29,9 +29,6 @@ export interface SymbolCatalog {
 	symbols: SymbolInfo[];
 }
 
-/** The symbol of new markers. */
-export const NEW_MARKER_SYMBOL = 'extras:pin-teardrop';
-
 const SPRITES_URL = `${TILE_SERVER}/assets/sprites/`;
 
 // empty until the symbols of the server are loaded

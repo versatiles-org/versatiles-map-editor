@@ -9,7 +9,7 @@
 	import { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { ElementsDrawer, Sidebar, SidebarToggle, StatusBar, ToolRail, TopBar } from '$lib/components/shell/index.js';
 	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
-	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
+	import { newMarkerState } from '$lib/element/marker.js';
 	import { loadConfig } from '$lib/background/index.js';
 
 	let {
@@ -57,7 +57,7 @@
 	/** Add a marker at a place that the search found. */
 	function markPlace(point: [number, number]) {
 		if (!mapDocument?.isInteractive()) return;
-		mapDocument.addElement({ type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } });
+		mapDocument.addElement(newMarkerState(point));
 		mapDocument.state.log();
 	}
 

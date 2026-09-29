@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { MarkerElement } from './marker.js';
+import { MarkerElement, NEW_MARKER_SYMBOL, newMarkerState } from './marker.js';
 import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner } from './types.js';
 import type { StateElementMarker } from '@versatiles/map-state';
@@ -95,5 +95,13 @@ describe('MarkerElement', () => {
 		element.point = [10, 20];
 		element.moveBy(1, 0);
 		expect(element.point).toStrictEqual([11, expect.closeTo(20)]);
+	});
+});
+
+describe('newMarkerState', () => {
+	it('gives the markers of the editor a pin, not the flag of markers without a symbol', () => {
+		const state = newMarkerState([1, 2]);
+		expect(state).toStrictEqual({ type: 'marker', point: [1, 2], style: { symbol: NEW_MARKER_SYMBOL } });
+		expect(MarkerElement.fromState(new MockElementOwner(), state).layer.symbol).toBe('extras:pin-teardrop');
 	});
 });
