@@ -4,10 +4,9 @@
 		"collapse-dir": [
 			"src/lib/components/map/editor/*",
 			"src/lib/components/map/viewer/*",
-			"src/lib/components/ui/*",
-			"src/lib/utils/*"
+			"src/lib/components/ui/*"
 		],
 		"include": ["src", "packages/map-state/src"],
-		"merge-outgoing": ["src/lib/components", "src/lib/components/*", "src/lib/element"]
+		"merge-outgoing": ["src/lib/**"]
 	}
 }
