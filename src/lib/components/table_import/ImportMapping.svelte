@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ColorPicker, InputRow, Button } from '$lib/components/ui/index.js';
-	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
+	import { InputRow, Button } from '$lib/components/ui/index.js';
+	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { formatCount } from '$lib/components/format.js';
 	import { ADDRESS_PARTS, type AddressPart, type Table } from './table.js';

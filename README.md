@@ -34,9 +34,10 @@ background. Next to them are the modules that several folders share.
 - `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
   viewer (`/view`), both around the map in `MapFrame.svelte`, with the URL, the layout and the theme
 
-- `components/`: the Svelte components: `ui/` generic controls, `shell/` the frame of the editor,
-  `inspector/` the sidebar, `dialogs/`, and `map/` what floats over the map, split into `viewer/`
-  (also in the viewer) and `editor/` (only in the editor)
+- `components/`: the Svelte components: `ui/` generic controls, `pickers/` for a color, a font or
+  a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`, and
+  `map/` what floats over the map, split into `viewer/` (also in the viewer) and `editor/` (only
+  in the editor)
 
 - `element/`, `style/`, `state/`: the elements, their styles, and the state with undo and redo
 

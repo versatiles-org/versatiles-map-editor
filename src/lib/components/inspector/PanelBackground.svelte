@@ -9,7 +9,8 @@
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/background/index.js';
-	import { InputRow, FontSelect, ChoiceGroup, Slider, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Slider, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import { FontSelect } from '$lib/components/pickers/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { doc }: { doc: MapDocumentInteractive } = $props();

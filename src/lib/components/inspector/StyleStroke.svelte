@@ -2,7 +2,8 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { dashArrays, LineStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
+	import { ColorPicker } from '$lib/components/pickers/index.js';
 
 	/** The line layers of all selected elements, which are edited together. */
 	const { layers, doc }: { layers: LineStyle[]; doc: MapDocumentInteractive } = $props();

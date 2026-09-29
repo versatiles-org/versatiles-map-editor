@@ -2,7 +2,8 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, IconButton, type IconName, FontSelect, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, type IconName, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
+	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';

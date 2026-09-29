@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
-	import { InputRow, ColorPicker, ChoiceGroup, Button, ButtonGroup } from '$lib/components/ui/index.js';
-	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
+	import { InputRow, ChoiceGroup, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
