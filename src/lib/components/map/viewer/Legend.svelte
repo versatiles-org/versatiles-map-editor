@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
-	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import type { StateLegend } from '@versatiles/map-state';
-	import { SymbolLibrary } from '$lib/components/symbols_draw.js';
+	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { parseHex, toHex } from '$lib/components/color.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
@@ -11,7 +10,6 @@
 	/** `width` is its width, e.g. to move it below the search if both do not fit side by side. */
 	let {
 		legend,
-		map,
 		left = 0,
 		right = 0,
 		top = 0,
@@ -21,7 +19,6 @@
 		width = $bindable(0)
 	}: {
 		legend: StateLegend;
-		map: MaplibreMap;
 		left?: number;
 		right?: number;
 		top?: number;
@@ -34,7 +31,7 @@
 	const symbolSize = 18;
 	// twice the pixels of the screen, which the browser scales down to smooth edges
 	const resolution = 2 * (window.devicePixelRatio || 1);
-	const symbolLibrary = $derived(new SymbolLibrary(map));
+	const symbolLibrary = getSymbolLibrary();
 
 	/** A darker shade of the color, for the outline, so e.g. white symbols show on the white legend. */
 	function darker(color: string): string {

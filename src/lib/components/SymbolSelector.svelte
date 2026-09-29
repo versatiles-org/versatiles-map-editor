@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
-	import type { Map as MaplibreMap } from 'maplibre-gl';
 	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/symbols_catalog.js';
-	import { SymbolLibrary } from './symbols_draw.js';
+	import { getSymbolLibrary } from './symbols_draw.js';
 	import { Dialog } from '$lib/components/ui/index.js';
 
 	let dialog: Dialog | undefined;
@@ -18,19 +17,17 @@
 
 	let {
 		symbol = $bindable(),
-		map,
 		id,
 		noneLabel = 'No symbol'
 	}: {
 		/** The image of the symbol, e.g. "icons:anchor", "" for none, or undefined if none is chosen. */
 		symbol: string | undefined;
-		map: MaplibreMap;
 		id?: string;
 		/** The name of "no symbol" (""), e.g. "Color only" in a legend. */
 		noneLabel?: string;
 	} = $props();
 
-	const symbolLibrary = $derived(new SymbolLibrary(map));
+	const symbolLibrary = getSymbolLibrary();
 
 	const drawIcon: Action<HTMLCanvasElement, string> = (canvas, name) => symbolLibrary.drawSymbol(canvas, name);
 	const drawIconHalo: Action<HTMLCanvasElement, string> = (canvas, name) =>

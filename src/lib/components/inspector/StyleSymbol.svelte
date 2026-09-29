@@ -51,7 +51,6 @@
 				log();
 			}
 		}
-		map={doc.map}
 	/>
 </InputRow>
 

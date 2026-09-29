@@ -1,4 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
+import { getContext, setContext } from 'svelte';
 import { parseHex } from './color.js';
 
 /** Options for drawing a symbol, see `SymbolLibrary.drawSymbol`. */
@@ -18,9 +19,11 @@ export interface DrawOptions {
 const SDF_EDGE = 191.25;
 const SDF_PER_PIXEL = 32;
 
+/** Draws the symbols of the map's sprites, e.g. into the legend. */
 export class SymbolLibrary {
-	private map: maplibregl.Map;
-	constructor(map: maplibregl.Map) {
+	/** The map with the sprites. Nothing is drawn before it is set. */
+	public map: maplibregl.Map | undefined;
+	constructor(map?: maplibregl.Map) {
 		this.map = map;
 	}
 
@@ -33,19 +36,41 @@ export class SymbolLibrary {
 	}
 
 	private draw(canvas: HTMLCanvasElement, name: string, options: DrawOptions, retry: boolean) {
-		if (!name) return;
+		const map = this.map;
+		if (!name || !map) return;
 
 		// throws while the map has no style yet (e.g. a legend in a shared map)
-		const image = this.map.style ? this.map.getImage(name) : undefined;
+		const image = map.style ? map.getImage(name) : undefined;
 		if (!image) {
 			// The sprite is not loaded yet: try again when the map has settled, e.g. after it has
 			// loaded the style and then the sprite. Only once for a canvas that is not on the page.
-			if (retry) this.map.once('idle', () => this.draw(canvas, name, options, canvas.isConnected === true));
+			if (retry) map.once('idle', () => this.draw(canvas, name, options, canvas.isConnected === true));
 			return;
 		}
 		const pixels = drawImage(image.data, image.sdf, canvas, options);
 		canvas.getContext('2d')!.putImageData(new ImageData(pixels, canvas.width, canvas.height), 0, 0);
 	}
+}
+
+const contextKey = Symbol('symbol library');
+
+/**
+ * The symbol library of the editor, for the components that draw symbols, e.g. the legend and
+ * the symbol selector. MapEditor sets it.
+ */
+export function getSymbolLibrary(): SymbolLibrary {
+	const library = getContext<SymbolLibrary | undefined>(contextKey);
+	if (!library) throw new Error('no symbol library: MapEditor sets it, or the context of mount()');
+	return library;
+}
+
+export function setSymbolLibrary(library: SymbolLibrary): void {
+	setContext(contextKey, library);
+}
+
+/** The context of `mount()` with the symbol library, e.g. to mount a component in a test. */
+export function symbolLibraryContext(library: SymbolLibrary): Map<symbol, SymbolLibrary> {
+	return new Map([[contextKey, library]]);
 }
 
 /** The pixels of an image, 4 values (red, green, blue, alpha) per pixel, row by row. */

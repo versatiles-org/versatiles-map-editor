@@ -109,7 +109,6 @@
 				<SymbolSelector
 					id="{uid}-{i}-symbol"
 					noneLabel="Color only"
-					map={doc.map}
 					bind:symbol={
 						() => entry.symbol ?? '',
 						(symbol) => {

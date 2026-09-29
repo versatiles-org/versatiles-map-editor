@@ -10,6 +10,7 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
+	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { MapDocument } from './map_document.svelte.js';
 	import type { MapDocumentInteractive } from './map_document_interactive.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
@@ -26,6 +27,9 @@
 
 	let container: HTMLDivElement;
 	let map: MaplibreMapType | undefined;
+	// draws the symbols of the map's sprites for the components, e.g. the legend
+	const symbolLibrary = new SymbolLibrary();
+	setSymbolLibrary(symbolLibrary);
 	let triggeredMapReady = $state(false);
 	let showSidebar = $state(false);
 	// the sidebar can be collapsed, to see more of the map
@@ -169,6 +173,7 @@
 		mapDocument = undefined;
 		map?.remove();
 		map = undefined;
+		symbolLibrary.map = undefined;
 	}
 
 	// the map in the URL; replaceState does not fire "hashchange"
@@ -191,6 +196,7 @@
 			attributionControl: false,
 			fadeDuration: 0
 		});
+		symbolLibrary.map = map;
 
 		void onMapInit(map);
 
@@ -267,7 +273,6 @@
 		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
 		<Legend
 			legend={mapDocument.legend}
-			map={mapDocument.map}
 			left={coveredLeft}
 			right={sidebarWidth}
 			top={topbarHeight + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}

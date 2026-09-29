@@ -3,6 +3,8 @@ import { flushSync, mount, tick, unmount } from 'svelte';
 import type { StateElementMarker, StateLegend } from '@versatiles/map-state';
 import { MockMap } from '../../__mocks__/map.js';
 import type { MapDocumentInteractive } from '../../map_document_interactive.js';
+import type * as maplibregl from 'maplibre-gl';
+import { SymbolLibrary, symbolLibraryContext } from '../symbols_draw.js';
 import DialogImportTable from './DialogImportTable.svelte';
 
 const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
@@ -28,7 +30,8 @@ describe('DialogImportTable', () => {
 		};
 		component = mount(DialogImportTable, {
 			target: document.body,
-			props: { doc: doc as unknown as MapDocumentInteractive }
+			props: { doc: doc as unknown as MapDocumentInteractive },
+			context: symbolLibraryContext(new SymbolLibrary(doc.map as unknown as maplibregl.Map))
 		});
 		(component as { open: () => void }).open();
 		flushSync();
@@ -175,7 +178,8 @@ describe('DialogImportTable', () => {
 		doc.addElements.mockClear();
 		component = mount(DialogImportTable, {
 			target: document.body,
-			props: { doc: doc as unknown as MapDocumentInteractive }
+			props: { doc: doc as unknown as MapDocumentInteractive },
+			context: symbolLibraryContext(new SymbolLibrary(doc.map as unknown as maplibregl.Map))
 		});
 		(component as { open: () => void }).open();
 		flushSync();
