@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { Icon, IconButton } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, Hint } from '$lib/components/ui/index.js';
 	import ElementList from './ElementList.svelte';
 
 	/**
@@ -33,7 +33,7 @@
 		{#if count > 0}
 			<ElementList {doc} />
 		{:else}
-			<p class="label">No elements yet. Draw them with the tools on the left.</p>
+			<Hint>No elements yet. Draw them with the tools on the left.</Hint>
 		{/if}
 	</div>
 </aside>

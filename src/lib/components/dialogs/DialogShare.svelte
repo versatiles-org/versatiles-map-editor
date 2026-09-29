@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/state/manager.js';
-	import { Dialog } from '$lib/components/ui/index.js';
+	import { Dialog, Button } from '$lib/components/ui/index.js';
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
 	import { formatLength } from '$lib/format.js';
 
@@ -8,8 +8,8 @@
 
 	let dialog: Dialog | undefined;
 	let iframe: HTMLIFrameElement | undefined;
-	let btnLink: HTMLButtonElement | undefined;
-	let btnEmbed: HTMLButtonElement | undefined;
+	let btnLink: HTMLButtonElement | undefined = $state();
+	let btnEmbed: HTMLButtonElement | undefined = $state();
 	let previewAspectRatio: 'wide' | 'square' | 'tall' = $state('wide');
 
 	const baseUrl = window.location.href.replace(/#.*$/, '');
@@ -120,7 +120,7 @@
 					Link
 					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
 				</label>
-				<button class="btn copy" bind:this={btnLink} onclick={copyLink}>Copy Link</button>
+				<Button class="copy" bind:element={btnLink} onclick={copyLink}>Copy Link</Button>
 				<span class="sr-only" role="status">{copied}</span>
 				{#if copyError}<span class="copy-error" role="alert">{copyError}</span>{/if}
 			</p>
@@ -130,7 +130,7 @@
 					<textarea id="text-iframe" rows="5" readonly onclick={(e) => e.currentTarget.select()}>{embedCode}</textarea>
 				</label>
 
-				<button class="btn copy" bind:this={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</button>
+				<Button class="copy" bind:element={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</Button>
 			</p>
 			<p>
 				<label for="share-precision">Precision</label>
@@ -167,8 +167,8 @@
 			</p>
 		</div>
 		<div class="bottom">
-			<button class="btn" onclick={() => update(0)}>Reload</button>
-			<fieldset class="btn">
+			<Button onclick={() => update(0)}>Reload</Button>
+			<fieldset class="aspect-ratio">
 				<legend>Aspect ratio of the preview</legend>
 				<div>
 					<input type="radio" id="preview-wide" name="preview-ratio" value="wide" onclick={selectPreview} checked />
@@ -184,8 +184,8 @@
 </Dialog>
 
 <style lang="scss">
-	/* a check mark at the corner of a copy button, shown for a moment after copying */
-	.copy {
+	/* a check mark at the corner of a copy button (of the component Button), shown for a moment after copying */
+	.grid :global(.copy) {
 		&::after {
 			content: '✓';
 			position: absolute;
@@ -366,5 +366,71 @@
 		margin-top: 0.3em;
 		color: var(--color-error);
 		font-size: 0.8em;
+	}
+
+	/* the aspect ratio of the preview, as a row of buttons */
+	fieldset.aspect-ratio {
+		position: relative;
+		display: inline-block;
+		padding: 0;
+		border: none;
+		font-size: 0.8rem;
+
+		legend {
+			position: absolute;
+			top: -1.3em;
+			right: 0;
+			left: 0;
+			display: block;
+			padding-inline: 0;
+			text-align: center;
+		}
+
+		& > div {
+			display: inline-flex;
+			overflow: hidden;
+			padding: 0;
+			border: none;
+			border-radius: var(--border-radius);
+
+			/* the options that are not selected, in the colors of a light button */
+			& > label {
+				position: relative;
+				display: inline-block;
+				margin: 0;
+				padding: 0.6em 1.2em;
+				border: none;
+				border-left: 0.5px solid color-mix(in srgb, var(--color-blue) 30%, transparent);
+				background-color: color-mix(in srgb, var(--color-blue) 15%, var(--color-bg));
+				color: var(--color-blue-text);
+				font-weight: 600;
+				cursor: pointer;
+				transition: background-color 0.1s ease-in-out;
+
+				&:first-of-type {
+					border-left: none;
+				}
+			}
+
+			/* hidden visually, but reachable by keyboard and screen readers (unlike display: none) */
+			input[type='radio'] {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				margin: 0;
+				opacity: 0;
+			}
+
+			input:focus-visible + label {
+				outline: 2px solid var(--color-blue);
+				outline-offset: -4px;
+			}
+
+			input:checked + label,
+			label:hover {
+				background-color: var(--color-blue);
+				color: var(--color-on-blue);
+			}
+		}
 	}
 </style>

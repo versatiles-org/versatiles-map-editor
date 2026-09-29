@@ -2,7 +2,7 @@
 	import '$lib/components/style/index.scss';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import DialogShare from '$lib/components/dialogs/DialogShare.svelte';
-	import { Icon, IconButton } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, Button } from '$lib/components/ui/index.js';
 	import MainMenu from './MainMenu.svelte';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */
@@ -31,7 +31,7 @@
 		onclick={() => doc.state.redo()}
 	/>
 	<span class="spacer"></span>
-	<button class="btn share" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</button>
+	<Button class="share" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</Button>
 	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>
 
@@ -69,7 +69,8 @@
 		flex: 1;
 	}
 
-	.share {
+	/* the button of the component Button */
+	.topbar :global(.share) {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;

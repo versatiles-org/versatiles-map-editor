@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog } from '$lib/components/ui/index.js';
+	import { Dialog, Button } from '$lib/components/ui/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import {
 		applyCategory,
@@ -120,7 +120,7 @@
 	<div class="import">
 		{#if step === 'input'}
 			<p>A CSV or TSV file, or a table copied from a spreadsheet, with one place per row.</p>
-			<button class="btn file" onclick={() => fileInput?.click()}>Choose a file…</button>
+			<Button class="file" onclick={() => fileInput?.click()}>Choose a file…</Button>
 			<input
 				bind:this={fileInput}
 				type="file"
@@ -130,7 +130,7 @@
 			/>
 			<label for="{uid}-paste">Or paste the table here:</label>
 			<textarea id="{uid}-paste" rows="8" bind:value={text}></textarea>
-			<button class="btn" disabled={!text.trim()} onclick={() => startMapping(undefined)}>Continue</button>
+			<Button disabled={!text.trim()} onclick={() => startMapping(undefined)}>Continue</Button>
 		{:else if step === 'mapping' && table}
 			<ImportMapping
 				{table}
@@ -144,7 +144,7 @@
 		{:else if step === 'importing'}
 			<p>Searching the addresses: {progress.done} of {progress.total}</p>
 			<progress max={progress.total} value={progress.done}></progress>
-			<button class="btn" onclick={() => controller?.abort()}>Cancel</button>
+			<Button onclick={() => controller?.abort()}>Cancel</Button>
 		{:else if step === 'done'}
 			{#if importError}
 				<p class="error" role="alert">The import failed: {importError}</p>
@@ -167,7 +167,7 @@
 					{/each}
 				</ul>
 			{/if}
-			<button class="btn" onclick={() => dialog?.close()}>Done</button>
+			<Button onclick={() => dialog?.close()}>Done</Button>
 		{/if}
 	</div>
 </Dialog>
@@ -188,7 +188,8 @@
 		resize: vertical;
 	}
 
-	.file {
+	/* the button of the component Button */
+	.import :global(.file) {
 		align-self: flex-start;
 	}
 

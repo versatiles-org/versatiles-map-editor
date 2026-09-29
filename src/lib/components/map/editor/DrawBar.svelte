@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { typeName } from '$lib/element/element_names.js';
 
@@ -27,7 +28,7 @@
 		{/if}
 		<button class="button" onclick={() => drawing.setTool('select')}>Cancel</button>
 		{#if path}
-			<button class="btn finish" disabled={!drawing.canFinish} onclick={() => drawing.finish()}>Finish</button>
+			<Button class="finish" disabled={!drawing.canFinish} onclick={() => drawing.finish()}>Finish</Button>
 		{/if}
 	</div>
 {/if}
@@ -83,7 +84,8 @@
 		}
 	}
 
-	.finish {
+	/* the button of the component Button */
+	.drawbar :global(.finish) {
 		flex: none;
 		border-radius: 7px;
 		padding-block: 6px;

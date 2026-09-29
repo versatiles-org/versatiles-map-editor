@@ -2,7 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, IconButton, type IconName, FontSelect } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, type IconName, FontSelect, Button, Hint } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
@@ -89,14 +89,14 @@
 		</InspectorSection>
 		<InspectorSection title="Legend">
 			{#if legend}
-				<p class="label">
+				<Hint>
 					{legend.entries.length}
 					{legend.entries.length === 1 ? 'entry' : 'entries'}. Click the legend on the map to edit it.
-				</p>
-				<div class="grid1"><button class="btn" onclick={() => selection.selectLegend()}>Edit legend</button></div>
+				</Hint>
+				<div class="grid1"><Button onclick={() => selection.selectLegend()}>Edit legend</Button></div>
 			{:else}
-				<p class="label">A legend explains the colors and symbols of the map.</p>
-				<div class="grid1"><button class="btn" onclick={addLegend}>Add a legend</button></div>
+				<Hint>A legend explains the colors and symbols of the map.</Hint>
+				<div class="grid1"><Button onclick={addLegend}>Add a legend</Button></div>
 			{/if}
 		</InspectorSection>
 		<InspectorSection title="Shared map">
@@ -104,7 +104,7 @@
 				<input type="checkbox" checked={doc.search} onchange={(e) => toggleSearch(e.currentTarget.checked)} />
 				Address search for visitors
 			</label>
-			<p class="label">Visitors can search for a place, e.g. their street. The map content does not change.</p>
+			<Hint>Visitors can search for a place, e.g. their street. The map content does not change.</Hint>
 		</InspectorSection>
 	{/if}
 </div>
@@ -149,7 +149,8 @@
 		white-space: nowrap;
 	}
 
-	p.label {
+	/* the paragraph of the component Hint */
+	.inspector :global(.hint) {
 		margin: 0.5em 0;
 	}
 

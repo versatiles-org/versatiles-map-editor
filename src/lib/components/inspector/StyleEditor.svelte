@@ -4,7 +4,7 @@
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
-	import { InputRow } from '$lib/components/ui/index.js';
+	import { InputRow, Hint } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
 
@@ -56,7 +56,7 @@
 		</InspectorSection>
 	{/if}
 	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
-		<p class="label">These elements have no style properties in common.</p>
+		<Hint>These elements have no style properties in common.</Hint>
 	{/if}
 	{#if single}
 		<InspectorSection title="Popup">

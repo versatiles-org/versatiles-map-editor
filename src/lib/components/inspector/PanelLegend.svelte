@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
-	import { InputRow, ColorPicker, ChoiceGroup } from '$lib/components/ui/index.js';
+	import { InputRow, ColorPicker, ChoiceGroup, Button } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
@@ -119,13 +119,13 @@
 					}
 				/>
 			</InputRow>
-			<button class="btn remove" onclick={() => removeEntry(i)}>Remove entry {i + 1}</button>
+			<Button wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
 		</fieldset>
 	{/each}
 {/if}
 
 <div class="grid1">
-	<button class="btn" onclick={() => addLegendEntry(doc)}>Add legend entry</button>
+	<Button onclick={() => addLegendEntry(doc)}>Add legend entry</Button>
 </div>
 
 <style>
@@ -139,9 +139,5 @@
 			font-size: 0.9em;
 			opacity: 0.7;
 		}
-	}
-
-	.remove {
-		width: 100%;
 	}
 </style>

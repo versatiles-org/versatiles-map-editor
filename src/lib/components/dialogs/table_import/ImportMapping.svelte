@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ColorPicker, InputRow } from '$lib/components/ui/index.js';
+	import { ColorPicker, InputRow, Button } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { formatCount } from '$lib/format.js';
@@ -179,10 +179,10 @@
 {/if}
 
 <div class="buttons">
-	<button class="btn" onclick={onback}>Back</button>
-	<button class="btn" disabled={table.rows.length === 0 || !hasPosition(settings)} onclick={onimport}>
+	<Button onclick={onback}>Back</Button>
+	<Button disabled={table.rows.length === 0 || !hasPosition(settings)} onclick={onimport}>
 		Import {formatCount(table.rows.length, 'row')}
-	</button>
+	</Button>
 </div>
 
 {#snippet columnSelect(id: string, name: string, get: () => number, set: (value: number) => void, optional = false)}

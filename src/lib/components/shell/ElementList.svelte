@@ -2,7 +2,7 @@
 	import { tick } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import ElementName from './ElementName.svelte';
-	import { Icon, type IconName } from '$lib/components/ui/index.js';
+	import { Icon, type IconName, Hint } from '$lib/components/ui/index.js';
 	import { elementNames } from '$lib/element/element_names.js';
 
 	/**
@@ -103,7 +103,7 @@
 		</li>
 	{/each}
 </ul>
-<p class="label">Arrow keys choose an element, Shift adds it to the selection.</p>
+<Hint>Arrow keys choose an element, Shift adds it to the selection.</Hint>
 
 <style>
 	.elements {

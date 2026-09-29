@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Button } from '$lib/components/ui/index.js';
 	import { geocode, type GeocodingResult } from '$lib/components/geocoding.js';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 
@@ -196,7 +197,7 @@
 		</ul>
 	{/if}
 	{#if selected && onmark}
-		<button class="btn add-marker" onclick={addMarker}>Add marker here</button>
+		<Button class="add-marker" wide onclick={addMarker}>Add marker here</Button>
 	{/if}
 </div>
 
@@ -241,8 +242,8 @@
 		}
 	}
 
-	.add-marker {
-		width: 100%;
+	/* the button of the component Button */
+	.search :global(.add-marker) {
 		margin-top: var(--btn-gap);
 	}
 	.sr-only {

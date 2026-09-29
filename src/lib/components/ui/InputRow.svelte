@@ -53,6 +53,13 @@
 			width: auto;
 		}
 	}
+	/* readable: a darker gray instead of transparency, and at least 12px */
+	.label {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-weight: normal;
+	}
 	.mixed {
 		opacity: 0.6;
 		font-style: italic;

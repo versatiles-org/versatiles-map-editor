@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Dialog } from '$lib/components/ui/index.js';
+	import { Dialog, Button } from '$lib/components/ui/index.js';
 	import { EventHandler } from '$lib/event_handler.js';
 
 	type Mode = 'download' | 'new' | 'replace' | null;
@@ -94,8 +94,8 @@
 			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<div class="grid2">
-			<button class="btn" onclick={cancel}>Cancel</button>
-			<button class="btn" onclick={confirm}>Download</button>
+			<Button onclick={cancel}>Cancel</Button>
+			<Button onclick={confirm}>Download</Button>
 		</div>
 	{/if}
 	{#if mode == 'new' || mode == 'replace'}
@@ -107,8 +107,8 @@
 			You can undo this.
 		</p>
 		<div class="grid2">
-			<button class="btn" onclick={confirm}>{mode == 'new' ? 'Create new map' : 'Replace map'}</button>
-			<button class="btn" onclick={cancel} data-focus>Cancel</button>
+			<Button onclick={confirm}>{mode == 'new' ? 'Create new map' : 'Replace map'}</Button>
+			<Button onclick={cancel} data-focus>Cancel</Button>
 		</div>
 	{/if}
 </Dialog>
