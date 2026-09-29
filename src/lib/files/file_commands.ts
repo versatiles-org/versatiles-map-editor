@@ -1,4 +1,4 @@
-import { stateFromKML, stateToKML } from '@versatiles/map-state';
+import { stateFromKML, stateToKML, type MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
@@ -6,12 +6,14 @@ import { notify } from '../notify.svelte.js';
 
 /** The questions that the file commands ask the user, e.g. in a dialog. */
 export interface FileQuestions {
-	/** Whether to start a new, empty map. */
-	askCreateNew(): Promise<boolean>;
-	/** Whether to replace the map with the opened file. */
-	askReplace(): Promise<boolean>;
 	/** The name of the downloaded file, or null to cancel. */
 	askDownloadFilename(initialFilename: string): Promise<string | null>;
+}
+
+/** The maps of the editor (see `SessionSync`): a new or opened map is a new one, the one before is kept. */
+export interface MapList {
+	newMap(): Promise<void>;
+	openMap(state: MapState): Promise<void>;
 }
 
 const EXTENSION = /\.mapjson$/i;
@@ -35,17 +37,20 @@ export function fileBaseName(title: string): string {
 
 /**
  * The commands of the menu for files: a new map, opening and downloading it, and the import and
- * export of GeoJSON and KML. Each change is one undo step. The name of an opened or downloaded
+ * export of GeoJSON and KML. A new or opened map is a new map of the list, so nothing is lost and
+ * nothing is asked; an import is one undo step. The name of an opened or downloaded
  * file is suggested for the next download and names the exports; else the title of the map does.
  */
 export class FileCommands {
 	readonly #doc: MapDocumentInteractive;
+	readonly #maps: MapList;
 	readonly #questions: FileQuestions;
 	/** The name of the opened or downloaded file, if there is one. */
 	#filename: string | undefined;
 
-	constructor(doc: MapDocumentInteractive, questions: FileQuestions) {
+	constructor(doc: MapDocumentInteractive, maps: MapList, questions: FileQuestions) {
 		this.#doc = doc;
+		this.#maps = maps;
 		this.#questions = questions;
 	}
 
@@ -59,11 +64,9 @@ export class FileCommands {
 		return this.#filename ? this.#filename.replace(EXTENSION, '') : fileBaseName(this.#doc.title);
 	}
 
+	/** An empty map in the current view, without legend or background. */
 	public async newFile(): Promise<void> {
-		if (!(await this.#questions.askCreateNew())) return;
-		// an empty map in the current view, without legend or background; undoable
-		await this.#doc.setState({ elements: [] });
-		this.#doc.state.log();
+		await this.#maps.newMap();
 		this.#filename = undefined;
 	}
 
@@ -71,12 +74,11 @@ export class FileCommands {
 		try {
 			const file = await chooseTextFile('.mapjson');
 			if (!file) return;
-			const state = JSON.parse(file.text);
+			const state: MapState = JSON.parse(file.text);
 			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
-			if (this.#hasContent() && !(await this.#questions.askReplace())) return;
-			// a change like any other, so it can be undone and is kept in the URL
-			await this.#doc.setState(state);
-			this.#doc.state.log();
+			// named after the file, without a title of its own
+			const title = state.meta?.title || file.name.replace(EXTENSION, '');
+			await this.#maps.openMap({ ...state, meta: { ...state.meta, title } });
 			this.#filename = file.name;
 		} catch (error) {
 			console.error(error);
@@ -115,12 +117,6 @@ export class FileCommands {
 	public exportKML(): void {
 		const kml = stateToKML(this.#doc.getState());
 		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), `${this.#baseName}.kml`);
-	}
-
-	/** Whether the map has anything to lose: elements or map properties like a legend. */
-	#hasContent(): boolean {
-		const state = this.#doc.getState();
-		return state.elements.length > 0 || state.meta !== undefined;
 	}
 
 	/** Let the user choose a file, and add its content to the map. */

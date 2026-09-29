@@ -32,7 +32,7 @@ The code is in `src/lib`. `map_document*.ts` hold the map with its elements, leg
 background. Next to them are the modules that several folders share.
 
 - `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
-  viewer (`/view`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`session_sync.ts`), the layout and the theme
+  viewer (`/view`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`src/lib/session_sync.svelte.ts`), the layout and the theme
 
 - `components/`: the Svelte components: `ui/` generic controls, `pickers/` for a color, a font or
   a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`, and

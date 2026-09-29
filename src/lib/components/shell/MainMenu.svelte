@@ -2,25 +2,25 @@
 	import { tick } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import * as commands from '$lib/components/commands.js';
-	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
 	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
 	import { Icon, IconButton } from '$lib/components/ui/index.js';
-	import { FileCommands } from '$lib/files/file_commands.js';
+	import type { FileCommands } from '$lib/files/file_commands.js';
+	import type { RecentMap, SessionSync } from '$lib/session_sync.svelte.js';
 
 	/**
-	 * The menu (☰) of the editor: the commands that are used rarely, like files, import and export,
-	 * and the edit commands with their shortcuts. Import and export expand in place instead of
-	 * flying out, which also works on touch screens.
+	 * The menu (☰) of the editor: the commands that are used rarely, like files, the recent maps,
+	 * import and export, and the edit commands with their shortcuts. The groups expand in place
+	 * instead of flying out, which also works on touch screens.
 	 */
-	const { doc }: { doc: MapDocumentInteractive } = $props();
+	const { doc, sync, files }: { doc: MapDocumentInteractive; sync: SessionSync; files: FileCommands } = $props();
 
 	const uid = $props.id();
 	let open = $state(false);
-	let expanded: 'import' | 'export' | undefined = $state();
+	type Group = 'recent' | 'import' | 'export';
+	let expanded: Group | undefined = $state();
 	let button: HTMLButtonElement | undefined = $state();
 	let menu: HTMLDivElement | undefined = $state();
-	let dialogFile: DialogFile | undefined = $state();
 	let dialogImportTable: DialogImportTable | undefined = $state();
 	let dialogShortcuts: DialogShortcuts | undefined = $state();
 
@@ -94,19 +94,37 @@
 		if (open && !menu?.contains(target) && !button?.contains(target)) close(false);
 	}
 
-	async function toggleGroup(group: 'import' | 'export') {
+	async function toggleGroup(group: Group) {
 		expanded = expanded === group ? undefined : group;
 		await tick();
 	}
 
-	// the questions of the file commands, in the dialog, which exists once the menu is mounted
-	const files = $derived(
-		new FileCommands(doc, {
-			askCreateNew: async () => (await dialogFile?.askCreateNew()) ?? false,
-			askReplace: async () => (await dialogFile?.askReplace()) ?? false,
-			askDownloadFilename: async (name) => (await dialogFile?.askDownloadFilename(name)) ?? null
-		})
-	);
+	// the recent maps, while the menu is open, also after changes in other tabs
+	let recent: RecentMap[] = $state([]);
+	$effect(() => {
+		if (!open) return;
+		const refresh = async () => (recent = await sync.recent());
+		void refresh();
+		return sync.onChange(() => void refresh());
+	});
+	const changedFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+	// a map is deleted with a second click on its button, which asks first
+	let confirmingDelete: string | undefined = $state();
+	async function deleteMap(map: RecentMap) {
+		if (confirmingDelete !== map.id) {
+			confirmingDelete = map.id;
+			return;
+		}
+		confirmingDelete = undefined;
+		await sync.deleteRecent(map.id);
+		// the menu keeps the focus
+		await tick();
+		items()[0]?.focus();
+	}
+	$effect(() => {
+		if (!open) confirmingDelete = undefined;
+	});
 </script>
 
 <svelte:window onpointerdown={onWindowPointerdown} />
@@ -129,7 +147,7 @@
 	</button>
 {/snippet}
 
-{#snippet group(id: 'import' | 'export', label: string)}
+{#snippet group(id: Group, label: string)}
 	<button
 		class="item"
 		role="menuitem"
@@ -167,6 +185,45 @@
 	>
 		{@render item('New map', () => files.newFile())}
 		{@render item('Open…', () => files.openFile())}
+		{@render group('recent', 'Recent maps')}
+		<div id="{uid}-recent" class="group" role="group" aria-label="Recent maps" hidden={expanded !== 'recent'}>
+			{#each recent as map (map.id)}
+				<div class="recent">
+					<button
+						class="item"
+						role="menuitem"
+						disabled={map.openElsewhere}
+						aria-current={map.current ? 'true' : undefined}
+						onclick={() => run(() => sync.openRecent(map.id))}
+					>
+						<span class="name">
+							{map.name}
+							<span class="changed">
+								{map.current
+									? 'This map'
+									: map.openElsewhere
+										? 'Open in another tab'
+										: changedFormat.format(map.changed)}
+							</span>
+						</span>
+					</button>
+					{#if !map.current && !map.openElsewhere}
+						<button
+							class="item delete"
+							class:confirming={confirmingDelete === map.id}
+							role="menuitem"
+							aria-label={confirmingDelete === map.id ? `Really delete ${map.name}` : `Delete ${map.name}`}
+							title={confirmingDelete === map.id ? 'Click again to delete' : 'Delete'}
+							onclick={() => deleteMap(map)}
+						>
+							{#if confirmingDelete === map.id}Delete{:else}<Icon name="trash" size={14} />{/if}
+						</button>
+					{/if}
+				</div>
+			{:else}
+				<p class="empty">No maps yet</p>
+			{/each}
+		</div>
 		{@render item('Download…', () => files.downloadFile())}
 		{@render group('import', 'Import')}
 		<div id="{uid}-import" class="group" role="group" aria-label="Import" hidden={expanded !== 'import'}>
@@ -221,7 +278,6 @@
 	</div>
 </div>
 
-<DialogFile bind:this={dialogFile} />
 <DialogImportTable bind:this={dialogImportTable} {doc} />
 <DialogShortcuts bind:this={dialogShortcuts} />
 
@@ -312,6 +368,53 @@
 
 	.group .item {
 		padding-left: 24px;
+	}
+
+	.recent {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+
+		.item {
+			flex: 1;
+			min-width: 0;
+			padding-block: 4px;
+		}
+
+		.name {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.changed {
+			color: var(--color-text-muted);
+			font-size: 0.75rem;
+		}
+
+		.item:hover:not(:disabled) .changed,
+		.item:focus-visible .changed {
+			color: inherit;
+		}
+
+		.delete {
+			flex: none;
+			width: auto;
+			padding: 0 8px;
+			color: var(--color-text-muted);
+		}
+
+		.delete.confirming {
+			color: var(--color-error);
+		}
+	}
+
+	.empty {
+		margin: 4px 10px 4px 24px;
+		color: var(--color-text-muted);
 	}
 
 	.visually-hidden {

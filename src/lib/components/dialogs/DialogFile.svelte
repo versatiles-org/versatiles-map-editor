@@ -3,7 +3,8 @@
 	import { Dialog, Button, ButtonGroup } from '$lib/components/ui/index.js';
 	import { EventHandler } from '$lib/event_handler.js';
 
-	type Mode = 'download' | 'new' | 'replace' | null;
+	/** The dialog that asks for the name of a downloaded file. */
+	type Mode = 'download' | null;
 	let mode: Mode = $state(null);
 	let dialog: Dialog | null = null;
 	let input: HTMLInputElement | null = $state(null);
@@ -21,8 +22,6 @@
 
 		dialog.open();
 		await tick();
-		dialog.getNode()?.querySelector<HTMLButtonElement>('button[data-focus]')?.focus();
-		return;
 	}
 
 	async function closeDialog() {
@@ -44,20 +43,6 @@
 		}
 		const { confirmed, value } = await getResponse();
 		return (confirmed && value?.trim()) || null;
-	}
-
-	export async function askCreateNew(): Promise<boolean> {
-		if (!dialog) return false;
-		await openDialog('new');
-		const { confirmed } = await getResponse();
-		return confirmed;
-	}
-
-	export async function askReplace(): Promise<boolean> {
-		if (!dialog) return false;
-		await openDialog('replace');
-		const { confirmed } = await getResponse();
-		return confirmed;
 	}
 
 	async function getResponse(): Promise<{ confirmed: boolean; value: string | null }> {
@@ -83,11 +68,7 @@
 	}
 </script>
 
-<Dialog
-	bind:this={dialog}
-	size="small"
-	title={mode == 'download' ? 'Download File' : mode == 'new' ? 'New Map' : 'Open Map'}
->
+<Dialog bind:this={dialog} size="small" title="Download File">
 	{#if mode == 'download'}
 		<label>
 			File name
@@ -98,24 +79,10 @@
 			<Button onclick={confirm}>Download</Button>
 		</ButtonGroup>
 	{/if}
-	{#if mode == 'new' || mode == 'replace'}
-		<!-- the buttons name the action, so it is clear without the question, e.g. for screen readers -->
-		<p>
-			{mode == 'new'
-				? 'Create a new, empty map? It replaces the current map.'
-				: 'Open this map? It replaces the current map.'}
-			You can undo this.
-		</p>
-		<ButtonGroup columns={2} spaced={false}>
-			<Button onclick={confirm}>{mode == 'new' ? 'Create new map' : 'Replace map'}</Button>
-			<Button onclick={cancel} data-focus>Cancel</Button>
-		</ButtonGroup>
-	{/if}
 </Dialog>
 
 <style>
-	label,
-	p {
+	label {
 		display: block;
 		margin-bottom: 10px;
 	}

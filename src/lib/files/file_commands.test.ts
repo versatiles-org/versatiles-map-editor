@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapState } from '@versatiles/map-state';
-import { FileCommands, fileBaseName, type FileQuestions } from './file_commands.js';
+import { FileCommands, fileBaseName, type FileQuestions, type MapList } from './file_commands.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
@@ -17,6 +17,7 @@ describe('FileCommands', () => {
 	let state: MapState;
 	let doc: MapDocumentInteractive;
 	let questions: { [K in keyof FileQuestions]: ReturnType<typeof vi.fn> };
+	let maps: { [K in keyof MapList]: ReturnType<typeof vi.fn> };
 	let files: FileCommands;
 	const choose = (name: string, text: string) => vi.mocked(chooseTextFile).mockResolvedValue({ name, text });
 
@@ -33,45 +34,34 @@ describe('FileCommands', () => {
 			addState: vi.fn(),
 			state: { log: vi.fn() }
 		} as unknown as MapDocumentInteractive;
-		questions = {
-			askCreateNew: vi.fn(async () => true),
-			askReplace: vi.fn(async () => true),
-			askDownloadFilename: vi.fn(async (name: string) => name)
-		};
-		files = new FileCommands(doc, questions as unknown as FileQuestions);
+		maps = { newMap: vi.fn(async () => {}), openMap: vi.fn(async () => {}) };
+		questions = { askDownloadFilename: vi.fn(async (name: string) => name) };
+		files = new FileCommands(doc, maps as unknown as MapList, questions as unknown as FileQuestions);
 	});
 
-	it('starts a new map if the user agrees, as one undo step', async () => {
-		questions.askCreateNew.mockResolvedValueOnce(false);
+	it('starts a new map, which keeps the one before, so it asks nothing', async () => {
+		questions.askDownloadFilename.mockResolvedValueOnce('trip.mapjson');
+		await files.downloadFile();
 		await files.newFile();
-		expect(doc.setState).not.toHaveBeenCalled();
-
-		await files.newFile();
-		expect(doc.setState).toHaveBeenCalledWith({ elements: [] });
-		expect(doc.state.log).toHaveBeenCalledTimes(1);
+		expect(maps.newMap).toHaveBeenCalledTimes(1);
+		expect(files.filename).toBe('map.mapjson');
 	});
 
 	describe('openFile', () => {
 		const map = { elements: [{ type: 'marker', point: [1, 2] }] };
 
-		it('opens a map, and suggests its name for the next download', async () => {
+		it('opens a map as a new map, named after the file, and suggests its name for the next download', async () => {
 			choose('trip.mapjson', JSON.stringify(map));
 			await files.openFile();
-			// an empty map is replaced without asking
-			expect(questions.askReplace).not.toHaveBeenCalled();
-			expect(doc.setState).toHaveBeenCalledWith(map);
-			expect(doc.state.log).toHaveBeenCalledTimes(1);
+			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'trip' } });
+			expect(doc.setState).not.toHaveBeenCalled();
 			expect(files.filename).toBe('trip.mapjson');
 		});
 
-		it('asks before it replaces a map with content', async () => {
-			state = { elements: [], meta: { legend: { entries: [] } } };
-			questions.askReplace.mockResolvedValueOnce(false);
-			choose('trip.mapjson', JSON.stringify(map));
+		it('keeps the title of the map in the file', async () => {
+			choose('trip.mapjson', JSON.stringify({ ...map, meta: { title: 'Holidays', search: true } }));
 			await files.openFile();
-			expect(questions.askReplace).toHaveBeenCalled();
-			expect(doc.setState).not.toHaveBeenCalled();
-			expect(files.filename).toBe('map.mapjson');
+			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'Holidays', search: true } });
 		});
 
 		it('tells the user about a file that is no map, or cannot be read', async () => {
@@ -82,13 +72,13 @@ describe('FileCommands', () => {
 			vi.mocked(chooseTextFile).mockRejectedValue(new FileReadError('Failed to read the file'));
 			await files.openFile();
 			expect(notify).toHaveBeenLastCalledWith('Failed to read the file. Please try again.');
-			expect(doc.setState).not.toHaveBeenCalled();
+			expect(maps.openMap).not.toHaveBeenCalled();
 		});
 
 		it('does nothing if the user chooses no file', async () => {
 			vi.mocked(chooseTextFile).mockResolvedValue(undefined);
 			await files.openFile();
-			expect(doc.setState).not.toHaveBeenCalled();
+			expect(maps.openMap).not.toHaveBeenCalled();
 			expect(notify).not.toHaveBeenCalled();
 		});
 	});

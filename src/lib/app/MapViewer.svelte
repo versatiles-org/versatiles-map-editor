@@ -3,7 +3,7 @@
 	import MapFrame from './MapFrame.svelte';
 	import { MapDocument } from '$lib/map_document.svelte.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
-	import type { SessionSync } from './session_sync.js';
+	import type { SessionSync } from '$lib/session_sync.svelte.js';
 
 	/** The read-only viewer of a map, e.g. embedded in a website: its elements show their popups. */
 	let {

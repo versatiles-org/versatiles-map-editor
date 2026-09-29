@@ -1,14 +1,14 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
-import { MapDocumentInteractive } from '../map_document_interactive.js';
-import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
-import { SessionStore } from '../session_store.js';
-import { SessionSync } from './session_sync.js';
-import { notify } from '../notify.svelte.js';
-import { FakeLockManager } from '../__mocks__/locks.js';
+import { MapDocumentInteractive } from './map_document_interactive.js';
+import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { SessionStore } from './session_store.js';
+import { SessionSync } from './session_sync.svelte.js';
+import { notify } from './notify.svelte.js';
+import { FakeLockManager } from './__mocks__/locks.js';
 
-vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
+vi.mock('./notify.svelte.js', () => ({ notify: vi.fn() }));
 
 const camera = { center: [13.4, 52.5] as [number, number], radius: 1000 };
 const marker = (lng: number): MapState['elements'][number] => ({ type: 'marker', point: [lng, 52.5] });
@@ -202,6 +202,114 @@ describe('SessionSync', () => {
 		expect(doc.title).toBe('Linked');
 	});
 
+	describe('recent maps', () => {
+		it('lists the maps by their title, else by their content, the current one marked', async () => {
+			const now = vi.spyOn(Date, 'now');
+			now.mockReturnValue(1000);
+			store.create(step([]));
+			now.mockReturnValue(2000);
+			store.create(
+				step([
+					marker(1),
+					marker(2),
+					{
+						type: 'line',
+						points: [
+							[1, 2],
+							[3, 4]
+						]
+					}
+				])
+			);
+			now.mockReturnValue(3000);
+			const titled = store.create(encodeState({ meta: { title: 'Cafés' }, elements: [] }), { title: 'Cafés' });
+			now.mockRestore();
+			await sync.attach(doc, await sync.prepare(''));
+
+			const recent = await sync.recent();
+			expect(recent.map(({ name, current }) => [name, current])).toStrictEqual([
+				['Cafés', true],
+				['2 markers, 1 line', false],
+				['Untitled map', false]
+			]);
+			expect(recent[0]).toMatchObject({ id: titled, changed: 3000, openElsewhere: false });
+		});
+
+		it('opens a map of the list, with its history', async () => {
+			const other = store.create(step([marker(1)]), { camera });
+			store.push(other, step([marker(1), marker(2)]));
+			vi.spyOn(Date, 'now').mockReturnValueOnce(Date.now() + 1000);
+			store.create(step([]));
+			vi.restoreAllMocks();
+			await sync.attach(doc, await sync.prepare(''));
+			expect(doc.elements).toHaveLength(0);
+
+			expect(await sync.openRecent(other)).toBe(true);
+			expect(doc.elements).toHaveLength(2);
+			expect(doc.state.history.undoEnabled).toBe(true);
+			// changes go to the opened map
+			doc.addElement(marker(3));
+			doc.state.log();
+			await store.flush();
+			expect((await store.load(other))?.states).toHaveLength(3);
+		});
+
+		it('starts a new map, and keeps the one before', async () => {
+			await sync.attach(doc, await sync.prepare(encodeState({ map: camera, elements: [marker(1)] })));
+			await sync.newMap();
+			expect(doc.elements).toHaveLength(0);
+			expect(doc.state.history.undoEnabled).toBe(false);
+			doc.addElement(marker(2));
+			doc.state.log();
+			expect((await stored()).map((s) => s.elements)).toStrictEqual([[0, 1], [1]]);
+		});
+
+		it('opens a map of a file as a new map', async () => {
+			await sync.attach(doc, await sync.prepare(''));
+			await sync.openMap({ meta: { title: 'File' }, elements: [marker(1)] });
+			expect(doc.elements).toHaveLength(1);
+			expect(doc.title).toBe('File');
+			expect((await store.list())[0].title).toBe('File');
+		});
+
+		it('deletes a map, but not the open one', async () => {
+			const old = store.create(step([marker(1)]));
+			vi.spyOn(Date, 'now').mockReturnValueOnce(Date.now() + 1000);
+			const current = store.create(step([]));
+			vi.restoreAllMocks();
+			await sync.attach(doc, await sync.prepare(''));
+			await sync.deleteRecent(current);
+			await sync.deleteRecent(old);
+			expect((await sync.recent()).map((map) => map.id)).toStrictEqual([current]);
+		});
+
+		it('tells about changes of the maps, until it is stopped', async () => {
+			const listener = vi.fn();
+			const stop = sync.onChange(listener);
+			store.create(step([]));
+			await store.flush();
+			expect(listener).toHaveBeenCalledTimes(1);
+			stop();
+			store.create(step([]));
+			await store.flush();
+			expect(listener).toHaveBeenCalledTimes(1);
+		});
+
+		it('has the status of saving', async () => {
+			expect(sync.status).toBe('saved');
+			expect(new SessionSync(undefined, removeHash).status).toBe('memory');
+			await sync.attach(doc, await sync.prepare(''));
+			const put = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(() => {
+				throw new DOMException('The storage is full', 'QuotaExceededError');
+			});
+			doc.addElement(marker(1));
+			doc.state.log();
+			await store.flush();
+			put.mockRestore();
+			expect(sync.status).toBe('failed');
+		});
+	});
+
 	describe('tabs', () => {
 		let locks: FakeLockManager;
 		const others: SessionSync[] = [];
@@ -317,6 +425,21 @@ describe('SessionSync', () => {
 			// and all when it is closed
 			sync.destroy();
 			await vi.waitFor(async () => expect(await lockedSessions()).toStrictEqual([]));
+		});
+
+		it('marks the maps that other tabs have open, which cannot be opened or deleted here', async () => {
+			const [a, b] = await createSessions(1, 2);
+			await (await openTab()).prepare('');
+			await sync.attach(doc, await sync.prepare(''));
+			const recent = await sync.recent();
+			expect(recent.map(({ id, current, openElsewhere }) => [id, current, openElsewhere])).toStrictEqual([
+				[b, false, true],
+				[a, true, false]
+			]);
+			expect(await sync.openRecent(b)).toBe(false);
+			expect(notify).toHaveBeenCalledWith('This map is open in another tab.', 'info');
+			await sync.deleteRecent(b);
+			expect((await store.list()).length).toBe(2);
 		});
 	});
 });

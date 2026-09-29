@@ -57,7 +57,8 @@ for (const name of EXAMPLES) {
 				page.getByRole('dialog').getByRole('button', { name: 'Download' }).click()
 			]);
 			const downloaded: MapState = JSON.parse(readFileSync(await download.path(), 'utf-8'));
-			expect({ ...downloaded, map: state.map }).toStrictEqual(state);
+			// the map is named after the file, since it has no title
+			expect({ ...downloaded, map: state.map }).toStrictEqual({ ...state, meta: { ...state.meta, title: name } });
 		});
 
 		test('shared as a link, in the viewer', async ({ page }) => {

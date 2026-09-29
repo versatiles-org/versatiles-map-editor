@@ -22,7 +22,7 @@
 	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import type { MapDocument } from '$lib/map_document.svelte.js';
 	import { UrlHash } from './url_hash.js';
-	import type { SessionSync } from './session_sync.js';
+	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
 
 	/**

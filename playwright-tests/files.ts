@@ -62,20 +62,16 @@ test('the title of the map names the page, the files and the shared map', async 
 	await expect(page).toHaveTitle('VersaTiles Map Editor');
 });
 
-test('file dialogs confirm and cancel', async ({ page }) => {
+test('the download dialog confirms with Enter, and cancels', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	await drawElement(page, 'Marker');
 	const dialog = page.getByRole('dialog');
-	const deleteButton = page.getByRole('button', { name: 'Delete' });
 
-	// "New" → Cancel keeps the map
-	await (await menuItem(page, 'New map')).click();
+	await (await menuItem(page, 'Download…')).click();
 	await dialog.getByRole('button', { name: 'Cancel' }).click();
 	await expect(dialog).toBeHidden();
-	await expect(deleteButton).toBeVisible();
 
-	// "Download" → Enter in the file name field confirms
 	await (await menuItem(page, 'Download…')).click();
 	const fileName = dialog.getByRole('textbox', { name: 'File name' });
 	await fileName.fill('my-map.mapjson');
@@ -84,75 +80,89 @@ test('file dialogs confirm and cancel', async ({ page }) => {
 	// otherwise closing the page has to cancel the unfinished download, which is slow in Firefox
 	await download.path();
 	await expect(dialog).toBeHidden();
-
-	// "New" → "Create new map" clears the map
-	await (await menuItem(page, 'New map')).click();
-	await expect(dialog).toContainText('It replaces the current map.');
-	await dialog.getByRole('button', { name: /^Create new map/ }).click();
-	await expect(dialog).toBeHidden();
-	await expect(deleteButton).toBeHidden();
 });
 
-test('opening a map file and a new map can be undone and are kept in the URL', async ({ page }) => {
+test('a new or opened map is a new map, and the one before is kept in the recent maps', async ({ page }) => {
 	const state: MapState = {
 		map: { center: [13.4, 52.5], radius: 10000 },
-		meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
+		meta: { title: 'Markers', legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	const types = async () => (await storedState(page)).elements.map((e) => e.type);
-	const dialog = page.getByRole('dialog');
-	const file: MapState = {
-		elements: [
-			{
-				type: 'line',
-				points: [
-					[13.3, 52.4],
-					[13.5, 52.6]
+	const title = page.getByRole('textbox', { name: 'Title' });
+	await expect.poll(types).toStrictEqual(['marker']);
+
+	// opening a file asks nothing, and names the map after the file
+	const open = await menuItem(page, 'Open…');
+	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), open.click()]);
+	await chooser.setFiles({
+		name: 'lines.mapjson',
+		mimeType: 'application/json',
+		buffer: Buffer.from(
+			JSON.stringify({
+				elements: [
+					{
+						type: 'line',
+						points: [
+							[13.3, 52.4],
+							[13.5, 52.6]
+						]
+					}
 				]
-			}
-		]
-	};
-	const openFile = async () => {
-		const open = await menuItem(page, 'Open…');
-		const [chooser] = await Promise.all([page.waitForEvent('filechooser'), open.click()]);
-		await chooser.setFiles({
-			name: 'map.mapjson',
-			mimeType: 'application/json',
-			buffer: Buffer.from(JSON.stringify(file))
-		});
-	};
-
-	// opening asks before replacing the map
-	await openFile();
-	await expect(dialog).toContainText('Open this map? It replaces the current map.');
-	await dialog.getByRole('button', { name: /^Cancel/ }).click();
-	await expect.poll(types).toStrictEqual(['marker']);
-
-	await openFile();
-	await dialog.getByRole('button', { name: /^Replace map/ }).click();
+			})
+		)
+	});
 	await expect.poll(types).toStrictEqual(['line']);
-	await page.getByRole('button', { name: /^Undo/ }).click();
-	await expect.poll(types).toStrictEqual(['marker']);
-	await page.getByRole('button', { name: /^Redo/ }).click();
-	await expect.poll(types).toStrictEqual(['line']);
-	// kept in the URL
-	await page.reload();
-	await waitForMapIsReady(page);
-	await expect.poll(types).toStrictEqual(['line']);
+	await expect(title).toHaveValue('lines');
+	// a new start of the history
+	await expect(page.getByRole('button', { name: 'Undo' })).toBeDisabled();
 
-	// a new map is empty, without legend, and undoable. Only the hash changes, so the editor
-	// loads the map without reloading the page.
-	await page.goto('/#' + encodeState(state));
-	await expect.poll(types).toStrictEqual(['marker']);
+	// a new map asks nothing either, and is empty, without legend
 	await (await menuItem(page, 'New map')).click();
-	await dialog.getByRole('button', { name: /^Create new map/ }).click();
-	await expect.poll(async () => await storedState(page)).toMatchObject({ elements: [] });
+	await expect(page.getByRole('dialog')).toBeHidden();
+	await expect(title).toHaveValue('');
+	await drawElement(page, 'Circle');
+	await expect.poll(types).toStrictEqual(['circle']);
 	expect((await storedState(page)).meta).toBeUndefined();
-	await page.getByRole('button', { name: /^Undo/ }).click();
+
+	// the maps before are in the recent maps, the most recently changed first, with the time of the change
+	await (await menuItem(page, 'Recent maps', 'Markers')).isVisible();
+	// the maps, without the buttons that delete them (an icon, or "Delete" to confirm)
+	const recent = page
+		.getByRole('group', { name: 'Recent maps' })
+		.getByRole('menuitem')
+		.filter({ hasNotText: /^(Delete)?$/ });
+	await expect(recent).toHaveText([/^1 circle\s*This map$/, /^lines\s*\S/, /^Markers\s*\S/]);
+	await recent.filter({ hasText: 'Markers' }).click();
 	await expect.poll(types).toStrictEqual(['marker']);
-	await expect.poll(async () => (await storedState(page)).meta?.legend?.entries.length).toBe(1);
+	await expect(title).toHaveValue('Markers');
+	await expect(page.getByRole('list', { name: 'Legend' })).toBeVisible();
+
+	// a map can be deleted, with a second click
+	await (await menuItem(page, 'Recent maps', 'lines')).isVisible();
+	const deleteLines = page.getByRole('menuitem', { name: 'Delete lines' });
+	await deleteLines.click();
+	await page.getByRole('menuitem', { name: 'Really delete lines' }).click();
+	await expect(recent.filter({ hasText: 'lines' })).toHaveCount(0);
+	await expect(recent).toHaveCount(2);
+});
+
+test('the status line tells whether the map is saved, and downloads it', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const status = page.locator('.statusbar');
+	await expect(status).toContainText('Saved in this browser');
+	await drawElement(page, 'Marker');
+	await status.getByRole('button', { name: 'Download' }).click();
+	const dialog = page.getByRole('dialog');
+	await expect(dialog.getByRole('textbox', { name: 'File name' })).toHaveValue('map.mapjson');
+	const [download] = await Promise.all([
+		page.waitForEvent('download'),
+		dialog.getByRole('button', { name: 'Download' }).click()
+	]);
+	expect(JSON.parse(readFileSync(await download.path(), 'utf-8')).elements).toHaveLength(1);
 });
 
 test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) => {

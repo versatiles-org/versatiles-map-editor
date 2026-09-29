@@ -1,8 +1,9 @@
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
-import { SessionStore, type StoredSession } from '../session_store.js';
-import { notify } from '../notify.svelte.js';
+import type { MapDocumentInteractive } from './map_document_interactive.js';
+import { SessionStore, type StoredSession } from './session_store.js';
+import { notify } from './notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
+import { countTypes } from './components/element_names.js';
 
 /** How many of the most recent sessions are compared with the map of a link. */
 const RECENT = 10;
@@ -16,6 +17,25 @@ export type Opening =
 	| { kind: 'session'; stored: StoredSession; camera?: MapState['map'] }
 	| { kind: 'link'; state: MapState; encoded: string; camera?: MapState['map'] }
 	| { kind: 'new'; camera?: undefined };
+
+/** A map of the list of recent maps. */
+export interface RecentMap {
+	id: string;
+	/** Its title, else what it contains, e.g. "3 markers, 1 line", else "Untitled map". */
+	name: string;
+	/** When it was last changed, in milliseconds since 1970. */
+	changed: number;
+	/** Whether this tab has it open. */
+	current: boolean;
+	/** Whether another tab has it open, so it cannot be opened or deleted here. */
+	openElsewhere: boolean;
+}
+
+/**
+ * Whether the map is kept: "saved" in the browser storage, only in "memory" since the browser has
+ * no storage, or "failed" since a write failed, e.g. with a full storage.
+ */
+export type SaveStatus = 'saved' | 'memory' | 'failed';
 
 /** A state as the history and the storage keep it: encoded, without the viewport. */
 function encodeStep(state: MapState): string {
@@ -42,16 +62,18 @@ export class SessionSync {
 	#first: string | undefined;
 	/** The title of the map as its session has it, e.g. for the list of maps. */
 	#title: string | undefined;
-	#failed = false;
+	/** Whether the map is kept in the browser storage, e.g. for the status line. */
+	public status: SaveStatus = $state('saved');
 
 	/** `removeHash` removes the map of a link from the URL, without loading the page again. */
 	constructor(store: SessionStore | undefined, removeHash: () => void) {
 		this.#store = store;
 		this.#removeHash = removeHash;
+		if (!store) this.status = 'memory';
 		store?.onError(() => {
 			// once: e.g. a full storage fails every write
-			if (this.#failed) return;
-			this.#failed = true;
+			if (this.status === 'failed') return;
+			this.status = 'failed';
 			notify('The map could not be saved in this browser. Download it to keep it.');
 		});
 	}
@@ -127,6 +149,73 @@ export class SessionSync {
 		if (!stored) return undefined;
 		const state = decodeState(stored.states[stored.position]);
 		return { ...state, map: stored.session.camera };
+	}
+
+	/** The most recently changed maps, e.g. for the menu. */
+	public async recent(count = RECENT): Promise<RecentMap[]> {
+		const store = this.#store;
+		if (!store) return [];
+		const elsewhere = await this.#locks.openElsewhere();
+		const sessions = (await store.list()).slice(0, count);
+		return Promise.all(
+			sessions.map(async ({ id, title, changed }): Promise<RecentMap> => {
+				let name = title;
+				if (!name) {
+					// what the map contains
+					const stored = await store.load(id);
+					const current = stored?.states[stored.position];
+					name = current ? countTypes(decodeState(current).elements.map((e) => e.type)) : '';
+				}
+				return {
+					id,
+					name: name || 'Untitled map',
+					changed,
+					current: id === this.#id,
+					openElsewhere: elsewhere.has(id)
+				};
+			})
+		);
+	}
+
+	/** Call `listener` after a change of a map, in this tab or another one. Returns a function that stops it. */
+	public onChange(listener: () => void): () => void {
+		return this.#store?.onChange(listener) ?? (() => {});
+	}
+
+	/** Open a map of the storage, unless another tab has it open. Resolves to whether it was opened. */
+	public async openRecent(id: string): Promise<boolean> {
+		if (id === this.#id) return true;
+		const store = this.#store;
+		if (!store || !(await this.#locks.acquire(id))) {
+			notify('This map is open in another tab.', 'info');
+			return false;
+		}
+		const stored = await store.load(id);
+		if (!stored || stored.states.length === 0) {
+			this.#locks.release(id);
+			return false;
+		}
+		await this.#open({ kind: 'session', stored, camera: stored.session.camera });
+		return true;
+	}
+
+	/** Start a new, empty map in the current view. The map before stays in the storage. */
+	public async newMap() {
+		const doc = this.#doc;
+		if (!doc) return;
+		await doc.loadState({ elements: [] });
+		await this.#open({ kind: 'new' });
+	}
+
+	/** Open a map, e.g. of a file, as a new map in the storage. */
+	public async openMap(state: MapState) {
+		await this.#open({ kind: 'link', state, encoded: encodeStep(state), camera: state.map });
+	}
+
+	/** Delete a map of the storage, unless it is open, here or in another tab. */
+	public async deleteRecent(id: string) {
+		if (id === this.#id || (await this.#locks.openElsewhere()).has(id)) return;
+		this.#store?.delete(id);
 	}
 
 	/** Open it in the map document, and keep the document's changes from now on. */

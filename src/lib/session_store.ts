@@ -126,8 +126,9 @@ export class SessionStore {
 	 * Call `listener` with the id of a session after a change of it, in this tab or in another one,
 	 * e.g. to update a list of the maps.
 	 */
-	public onChange(listener: (id: string) => void) {
+	public onChange(listener: (id: string) => void): () => void {
 		this.#changeListeners.push(listener);
+		return () => (this.#changeListeners = this.#changeListeners.filter((l) => l !== listener));
 	}
 
 	#changed(id: string, here: boolean) {

@@ -1,11 +1,24 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
+	import type { SessionSync } from '$lib/session_sync.svelte.js';
+	import type { FileCommands } from '$lib/files/file_commands.js';
 
 	/**
 	 * The line at the bottom of the editor: what the current tool or selection does, so the
-	 * sidebar needs no help texts, and the zoom and the position of the mouse on the map.
+	 * sidebar needs no help texts, whether the map is saved, and the zoom and the position of the
+	 * mouse on the map.
 	 */
-	const { doc }: { doc: MapDocumentInteractive } = $props();
+	const { doc, sync, files }: { doc: MapDocumentInteractive; sync: SessionSync; files: FileCommands } = $props();
+
+	// Browsers may clear their storage (e.g. Safari after 7 days without a visit), so a download is
+	// the lasting copy
+	const saved = $derived(
+		{
+			saved: 'Saved in this browser',
+			memory: 'Not saved: this browser keeps no maps',
+			failed: 'Not saved: the browser storage is full'
+		}[sync.status]
+	);
 
 	const selection = $derived(doc.selection);
 	const drawing = $derived(doc.drawing);
@@ -68,6 +81,14 @@
 
 <div class="statusbar">
 	<span class="hint">{hint}</span>
+	<span class="saved" class:unsaved={sync.status !== 'saved'}>
+		{saved} ·
+		<button
+			class="download"
+			title="Browsers can delete the maps they keep. A downloaded file keeps the map."
+			onclick={() => files.downloadFile()}>Download</button
+		>
+	</span>
 	<span class="position">{position}</span>
 </div>
 
@@ -91,6 +112,25 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.saved {
+		flex: none;
+		white-space: nowrap;
+
+		&.unsaved {
+			color: var(--color-error);
+		}
+	}
+
+	.download {
+		padding: 0;
+		border: none;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-decoration: underline;
+		cursor: pointer;
 	}
 
 	.position {

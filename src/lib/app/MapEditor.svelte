@@ -12,7 +12,9 @@
 	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
 	import { newMarkerState } from '$lib/element/marker.js';
 	import { loadConfig } from '$lib/background/index.js';
-	import { SessionSync } from './session_sync.js';
+	import { SessionSync } from '$lib/session_sync.svelte.js';
+	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
+	import { FileCommands } from '$lib/files/file_commands.js';
 
 	let {
 		onMapLoad
@@ -26,9 +28,11 @@
 	let mode: 'editor' | 'viewer' | undefined = $state();
 	// the editor keeps its maps in the browser storage, and phones show the last one
 	let sessions: Promise<SessionSync> | undefined = $state();
+	let sync: SessionSync | undefined = $state();
 	onMount(() => {
 		mode = matchMedia('(min-width: 600px) and (min-height: 400px)').matches ? 'editor' : 'viewer';
 		sessions = SessionSync.open(removeHash);
+		sessions.then((opened) => (sync = opened));
 	});
 
 	/**
@@ -64,6 +68,16 @@
 	const covered: Insets = $derived({ ...insets, left: coveredLeft });
 
 	let mapDocument: MapDocument | undefined = $state();
+
+	// the file commands of the menu and the status line, with the dialog that asks for a file name
+	let dialogFile: DialogFile | undefined = $state();
+	const files = $derived(
+		mapDocument?.isInteractive() && sync
+			? new FileCommands(mapDocument, sync, {
+					askDownloadFilename: async (name) => (await dialogFile?.askDownloadFilename(name)) ?? null
+				})
+			: undefined
+	);
 
 	function createDocument(map: MaplibreMapType): MapDocument {
 		// the color schemes and fonts of this editor instance
@@ -102,8 +116,8 @@
 	>
 		<!-- from the start, so the map does not move when the editor has started -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
-			{#if mapDocument?.isInteractive()}
-				<TopBar doc={mapDocument} />
+			{#if mapDocument?.isInteractive() && sync && files}
+				<TopBar doc={mapDocument} {sync} {files} />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
@@ -112,8 +126,8 @@
 			{/if}
 		</div>
 		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
-			{#if mapDocument?.isInteractive()}
-				<StatusBar doc={mapDocument} />
+			{#if mapDocument?.isInteractive() && sync && files}
+				<StatusBar doc={mapDocument} {sync} {files} />
 			{/if}
 		</div>
 		{#if mapDocument?.isInteractive()}
@@ -147,6 +161,8 @@
 				right={sidebarWidth}
 			/>
 		{/if}
+
+		<DialogFile bind:this={dialogFile} />
 
 		<style>
 			.page .container {
