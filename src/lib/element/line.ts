@@ -43,7 +43,7 @@ export class LineElement extends AbstractPathElement {
 
 	static fromState(doc: ElementOwner, state: StateElementLine) {
 		const element = new LineElement(doc, state.points);
-		if (state.style) element.layer.setState(state.style);
+		element.layer.setState(state.style);
 		return element;
 	}
 }

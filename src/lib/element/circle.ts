@@ -103,8 +103,8 @@ export class CircleElement extends AbstractElement {
 
 	static fromState(doc: ElementOwner, state: StateElementCircle) {
 		const element = new CircleElement(doc, state.point, state.radius);
-		if (state.style) element.fillLayer.setState(state.style);
-		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
+		element.fillLayer.setState(state.style);
+		element.strokeLayer.setState(state.strokeStyle);
 		return element;
 	}
 }

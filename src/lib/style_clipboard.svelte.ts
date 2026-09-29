@@ -1,5 +1,6 @@
 import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
+import type { StylePart } from './style/index.js';
 
 /** The parts of a style: markers have a symbol, lines a stroke, polygons and circles a fill and a stroke. */
 type Role = 'symbol' | 'fill' | 'stroke';
@@ -9,12 +10,7 @@ const DEFAULTS: Record<Role, StateStyle> = { symbol: SYMBOL_DEFAULTS, fill: FILL
 /** A copied style: the complete style of each role of the element. */
 export type CopiedStyle = Partial<Record<Role, StateStyle>>;
 
-interface StyleLayer {
-	getState(): StateStyle | undefined;
-	setState(state: StateStyle): void;
-}
-
-function layersOf(element: AbstractElement): Partial<Record<Role, StyleLayer>> {
+function layersOf(element: AbstractElement): Partial<Record<Role, StylePart>> {
 	return element.getStyleLayers();
 }
 
@@ -33,7 +29,7 @@ export class StyleClipboard {
 
 	public copy(element: AbstractElement) {
 		const style: CopiedStyle = {};
-		for (const [role, layer] of Object.entries(layersOf(element)) as [Role, StyleLayer][]) {
+		for (const [role, layer] of Object.entries(layersOf(element)) as [Role, StylePart][]) {
 			// with the defaults, so pasting also resets the properties that are not set
 			style[role] = { ...DEFAULTS[role], ...layer.getState() };
 		}
@@ -56,13 +52,13 @@ export class StyleClipboard {
 				const source = mainRole(style);
 				const target = mainRole(layers);
 				const color = source && style[source]?.color;
-				if (target && color) layers[target]!.setState({ color });
+				if (target && color) layers[target]!.patch({ color });
 				continue;
 			}
 
 			for (const role of common) {
 				// a line ignores `visible` of an outline, since it cannot be hidden
-				layers[role]!.setState({ ...style[role] });
+				layers[role]!.patch({ ...style[role] });
 			}
 		}
 	}

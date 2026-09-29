@@ -15,6 +15,7 @@ export const dashArrays = new Map<number, { name: string; array: number[] | unde
 
 export class LineStyle extends StylePart {
 	static readonly defaultStyle = LINE_DEFAULTS;
+	protected readonly defaults = LineStyle.defaultStyle;
 
 	#color: string = $state(LINE_DEFAULTS.color);
 	#dashed: number = $state(LINE_DEFAULTS.pattern);
@@ -81,7 +82,7 @@ export class LineStyle extends StylePart {
 		);
 	}
 
-	setState(state: StateStyle) {
+	patch(state: StateStyle) {
 		if (state.color != null) this.color = state.color;
 		if (state.pattern != null) this.dashed = state.pattern;
 		if (state.visible != null) this.visible = state.visible;

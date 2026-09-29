@@ -153,9 +153,20 @@ describe('SymbolStyle', () => {
 		expect(layer.labelAlign).toBe(2);
 	});
 
+	it('gives the fields that a stored style leaves out their defaults', () => {
+		layer.setState({ halo: 0, size: 2, label: 'Label', symbol: 'icons:anchor' });
+		layer.setState({ color: '#00ff00' });
+
+		expect(layer.color).toBe('#00ff00');
+		expect(layer.halo).toBe(1);
+		expect(layer.size).toBe(1);
+		expect(layer.label).toBe('');
+		expect(layer.symbol).toBe('base:icon-embassy');
+	});
+
 	it('should restore falsy values', () => {
-		layer.setState({ halo: 0, rotate: 90, label: 'Label', align: 2 });
-		layer.setState({ rotate: 0, label: '', align: 0 });
+		layer.patch({ halo: 0, rotate: 90, label: 'Label', align: 2 });
+		layer.patch({ rotate: 0, label: '', align: 0 });
 
 		expect(layer.halo).toBe(0);
 		expect(layer.rotate).toBe(0);

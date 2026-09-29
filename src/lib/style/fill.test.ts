@@ -55,10 +55,19 @@ describe('FillStyle', () => {
 	});
 
 	it('should restore falsy values', () => {
-		layer.setState({ opacity: 0, pattern: 1 });
-		layer.setState({ pattern: 0 });
+		layer.patch({ opacity: 0, pattern: 1 });
+		layer.patch({ pattern: 0 });
 
 		expect(layer.opacity).toBe(0);
+		expect(layer.pattern).toBe(0);
+	});
+
+	it('gives the fields that a stored style leaves out their defaults', () => {
+		layer.setState({ opacity: 0.5, pattern: 1 });
+		layer.setState({ color: '#00ff00' });
+
+		expect(layer.color).toBe('#00ff00');
+		expect(layer.opacity).toBe(1);
 		expect(layer.pattern).toBe(0);
 	});
 });

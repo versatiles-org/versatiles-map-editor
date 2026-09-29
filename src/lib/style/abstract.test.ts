@@ -17,7 +17,8 @@ class TestLayer extends StylePart {
 	getState() {
 		return undefined;
 	}
-	setState() {}
+	patch() {}
+	protected readonly defaults = {};
 }
 
 describe('StylePart', () => {

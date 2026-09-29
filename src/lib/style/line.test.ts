@@ -54,10 +54,20 @@ describe('LineStyle', () => {
 	});
 
 	it('should restore falsy values', () => {
-		layer.setState({ visible: false, pattern: 1 });
-		layer.setState({ pattern: 0 });
+		layer.patch({ visible: false, pattern: 1 });
+		layer.patch({ pattern: 0 });
 
 		expect(layer.visible).toBe(false);
 		expect(layer.dashed).toBe(0);
+	});
+
+	it('gives the fields that a stored style leaves out their defaults', () => {
+		layer.setState({ visible: false, pattern: 1, width: 5 });
+		layer.setState({ color: '#00ff00' });
+
+		expect(layer.color).toBe('#00ff00');
+		expect(layer.visible).toBe(true);
+		expect(layer.dashed).toBe(0);
+		expect(layer.width).toBe(2);
 	});
 });

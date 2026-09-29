@@ -22,6 +22,7 @@ export function parseFillPatternName(name: string): { pattern: number; color: st
 
 export class FillStyle extends StylePart {
 	static readonly defaultStyle = FILL_DEFAULTS;
+	protected readonly defaults = FillStyle.defaultStyle;
 
 	#color: string = $state(FILL_DEFAULTS.color);
 	#opacity: number = $state(FILL_DEFAULTS.opacity);
@@ -63,7 +64,7 @@ export class FillStyle extends StylePart {
 		);
 	}
 
-	setState(state: StateStyle) {
+	patch(state: StateStyle) {
 		if (state.color != null) this.color = state.color;
 		if (state.opacity != null) this.opacity = state.opacity;
 		if (state.pattern != null) this.pattern = state.pattern;

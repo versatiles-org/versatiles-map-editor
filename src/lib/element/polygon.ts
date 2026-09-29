@@ -47,8 +47,8 @@ export class PolygonElement extends AbstractPathElement {
 
 	static fromState(doc: ElementOwner, state: StateElementPolygon) {
 		const element = new PolygonElement(doc, state.points);
-		if (state.style) element.fillLayer.setState(state.style);
-		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
+		element.fillLayer.setState(state.style);
+		element.strokeLayer.setState(state.strokeStyle);
 		return element;
 	}
 }

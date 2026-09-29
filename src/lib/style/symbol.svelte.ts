@@ -98,6 +98,7 @@ export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) 
 
 export class SymbolStyle extends StylePart {
 	static readonly defaultStyle = SYMBOL_DEFAULTS;
+	protected readonly defaults = SymbolStyle.defaultStyle;
 
 	#color: string = $state(SYMBOL_DEFAULTS.color);
 	#halo: number = $state(SYMBOL_DEFAULTS.halo);
@@ -228,7 +229,7 @@ export class SymbolStyle extends StylePart {
 		);
 	}
 
-	setState(style: StateStyle) {
+	patch(style: StateStyle) {
 		if (style.color != null) this.color = style.color;
 		if (style.rotate != null) this.rotate = style.rotate;
 		if (style.size != null) this.size = style.size;

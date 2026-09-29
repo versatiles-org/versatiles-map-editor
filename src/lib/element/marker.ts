@@ -70,7 +70,7 @@ export class MarkerElement extends AbstractElement {
 
 	static fromState(doc: ElementOwner, state: StateElementMarker) {
 		const element = new MarkerElement(doc, state.point);
-		if (state.style) element.layer.setState(state.style);
+		element.layer.setState(state.style);
 		return element;
 	}
 }

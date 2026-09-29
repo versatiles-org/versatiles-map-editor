@@ -1,12 +1,5 @@
 import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import {
-	FILL_DEFAULTS,
-	LINE_DEFAULTS,
-	SYMBOL_DEFAULTS,
-	type StateElement,
-	type StatePopup,
-	type StateStyle
-} from '@versatiles/map-state';
+import type { StateElement, StatePopup, StateStyle } from '@versatiles/map-state';
 
 let nextId = 1;
 
@@ -95,13 +88,11 @@ export abstract class AbstractElement {
 		if (JSON.stringify(current) === JSON.stringify(state)) return true;
 
 		this.setGeometry(state);
-		// the style of the state, with the defaults for the properties it leaves out
 		const { symbol, fill, stroke } = this.getStyleLayers();
-		if (symbol) symbol.setState({ ...SYMBOL_DEFAULTS, ...state.style });
-		if (fill) fill.setState({ ...FILL_DEFAULTS, ...state.style });
+		symbol?.setState(state.style);
+		fill?.setState(state.style);
 		// the outline of an area has its own style, a line has only one
-		const strokeStyle = fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style;
-		if (stroke) stroke.setState({ ...LINE_DEFAULTS, ...strokeStyle });
+		stroke?.setState(fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style);
 		this.popup = state.popup?.text ?? '';
 		this.changed();
 		return true;
