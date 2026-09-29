@@ -73,7 +73,7 @@
 	{#if selection.legendSelected && legend}
 		<PanelLegend {doc} />
 	{:else if elements.length > 0}
-		<StyleEditor {elements} />
+		<StyleEditor {elements} {doc} />
 	{:else}
 		<InspectorSection title="Background map">
 			<PanelBackground {doc} />

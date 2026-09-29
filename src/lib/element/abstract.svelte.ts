@@ -1,5 +1,4 @@
-import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import {
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
@@ -8,7 +7,6 @@ import {
 	type StatePopup,
 	type StateStyle
 } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { ELEMENT_LAYERS, type Role } from '../rendering/index.js';
 
 let nextId = 1;
@@ -16,7 +14,8 @@ let nextId = 1;
 export abstract class AbstractElement {
 	protected isSelected = false;
 
-	public readonly doc: MapDocument | MapDocumentInteractive;
+	/** The document that holds the element, which it reports its changes to. */
+	protected readonly doc: ElementOwner;
 	/** The id of the element's features in the shared element sources. */
 	public readonly id = nextId++;
 	/** The length, area or radius, shown in the style editor. */
@@ -24,7 +23,7 @@ export abstract class AbstractElement {
 	/** Text of the popup that opens on click in the viewer. Empty for no popup. */
 	public popup = $state('');
 
-	constructor(doc: MapDocument | MapDocumentInteractive) {
+	constructor(doc: ElementOwner) {
 		this.doc = doc;
 	}
 

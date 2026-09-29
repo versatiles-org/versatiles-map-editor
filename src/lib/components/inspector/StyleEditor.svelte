@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { measurementText } from '$lib/components/format.js';
 	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { StyleLayers } from '$lib/element/types.js';
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
@@ -10,11 +11,11 @@
 	import { group } from './group.js';
 
 	/** The selected elements. With several elements, only the properties they share are shown. */
-	const { elements }: { elements: AbstractElement[] } = $props();
+	const { elements, doc }: { elements: AbstractElement[]; doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	const single = $derived(elements.length === 1 ? elements[0] : undefined);
-	const log = () => elements[0]?.doc.state?.log();
+	const log = () => doc.state.log();
 
 	/** The layers of one role, if all elements have it; otherwise none. */
 	function layersOfRole<R extends keyof StyleLayers>(role: R): NonNullable<StyleLayers[R]>[] {
@@ -33,12 +34,12 @@
 {#key elements}
 	{#if symbolLayers.length > 0}
 		<InspectorSection title="Symbol">
-			<StyleSymbol layers={symbolLayers} doc={elements[0].doc} />
+			<StyleSymbol layers={symbolLayers} {doc} />
 		</InspectorSection>
 	{/if}
 	{#if fillLayers.length > 0 && strokeVisible}
 		<InspectorSection title="Fill">
-			<StyleFill layers={fillLayers} doc={elements[0].doc} />
+			<StyleFill layers={fillLayers} {doc} />
 		</InspectorSection>
 		<InspectorSection title="Outline">
 			{#snippet heading()}
@@ -48,12 +49,12 @@
 				</label>
 			{/snippet}
 			{#if strokeVisible.value}
-				<StyleStroke layers={strokeLayers} doc={elements[0].doc} />
+				<StyleStroke layers={strokeLayers} {doc} />
 			{/if}
 		</InspectorSection>
 	{:else if strokeLayers.length > 0}
 		<InspectorSection title="Line">
-			<StyleStroke layers={strokeLayers} doc={elements[0].doc} />
+			<StyleStroke layers={strokeLayers} {doc} />
 		</InspectorSection>
 	{/if}
 	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}

@@ -1,5 +1,4 @@
-import type { MapDocument } from '../map_document.svelte.js';
-import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
+import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { type GeoPoint, circle, circleArea, distance, movePoint } from '../geometry.js';
 import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
@@ -11,7 +10,7 @@ export class CircleElement extends AbstractElement {
 	public point: GeoPoint;
 	public radius: number;
 
-	constructor(doc: MapDocument, point: GeoPoint, radius: number) {
+	constructor(doc: ElementOwner, point: GeoPoint, radius: number) {
 		super(doc);
 		this.point = point;
 		this.radius = radius;
@@ -102,7 +101,7 @@ export class CircleElement extends AbstractElement {
 		};
 	}
 
-	static fromState(doc: MapDocument, state: StateElementCircle) {
+	static fromState(doc: ElementOwner, state: StateElementCircle) {
 		const element = new CircleElement(doc, state.point, state.radius);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);

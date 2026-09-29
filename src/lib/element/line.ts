@@ -1,14 +1,13 @@
-import type { MapDocument } from '../map_document.svelte.js';
 import { type GeoPath, pathLength } from '../geometry.js';
 import { MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
-import type { Measurement, StyleLayers } from './types.js';
+import type { ElementOwner, Measurement, StyleLayers } from './types.js';
 
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;
 
-	constructor(doc: MapDocument, line: GeoPath) {
+	constructor(doc: ElementOwner, line: GeoPath) {
 		super(doc, true);
 		this.path = line;
 
@@ -42,7 +41,7 @@ export class LineElement extends AbstractPathElement {
 		};
 	}
 
-	static fromState(doc: MapDocument, state: StateElementLine) {
+	static fromState(doc: ElementOwner, state: StateElementLine) {
 		const element = new LineElement(doc, state.points);
 		if (state.style) element.layer.setState(state.style);
 		return element;

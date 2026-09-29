@@ -1,6 +1,5 @@
 import { AbstractElement } from './abstract.svelte.js';
-import type { MapDocument } from '../map_document.svelte.js';
-import type { SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
+import type { ElementOwner, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { MapLayerSymbol } from '../map_layer/index.js';
 import type { StateElement, StateElementMarker } from '@versatiles/map-state';
 import { type GeoPoint, movePoint } from '../geometry.js';
@@ -10,7 +9,7 @@ export class MarkerElement extends AbstractElement {
 
 	public point: GeoPoint;
 
-	constructor(doc: MapDocument, point: GeoPoint) {
+	constructor(doc: ElementOwner, point: GeoPoint) {
 		super(doc);
 		this.point = point;
 
@@ -69,7 +68,7 @@ export class MarkerElement extends AbstractElement {
 		};
 	}
 
-	static fromState(doc: MapDocument, state: StateElementMarker) {
+	static fromState(doc: ElementOwner, state: StateElementMarker) {
 		const element = new MarkerElement(doc, state.point);
 		if (state.style) element.layer.setState(state.style);
 		return element;

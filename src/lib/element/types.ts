@@ -1,4 +1,5 @@
 import type { GeoPoint } from '../geometry.js';
+import type { AbstractElement } from './abstract.svelte.js';
 import type { MapLayerFill, MapLayerLine, MapLayerSymbol } from '../map_layer/index.js';
 
 /**
@@ -27,4 +28,12 @@ export interface SelectionNodeUpdater {
 export interface Measurement {
 	kind: 'length' | 'radius' | 'area';
 	value: number;
+}
+
+/** What an element reports to the document that holds it, e.g. the map document. */
+export interface ElementOwner {
+	/** Draw the element again, after a change of its geometry or style. */
+	elementChanged(element: AbstractElement): void;
+	/** Remove the element, e.g. when it is deleted. */
+	removeElement(element: AbstractElement): void;
 }
