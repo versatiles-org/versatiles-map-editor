@@ -7,7 +7,6 @@ import {
 	type StatePopup,
 	type StateStyle
 } from '@versatiles/map-state';
-import { ELEMENT_LAYERS, type Role } from '../rendering/index.js';
 
 let nextId = 1;
 
@@ -36,11 +35,6 @@ export abstract class AbstractElement {
 
 	public get selected(): boolean {
 		return this.isSelected;
-	}
-
-	/** The ids of the map layers that draw the element (shared with the other elements). */
-	public getLayerIds(): string[] {
-		return (Object.keys(this.getStyleLayers()) as Role[]).map((role) => ELEMENT_LAYERS[role]);
 	}
 
 	/** The colors of the element, e.g. for the palette of used colors. A hidden outline has none. */

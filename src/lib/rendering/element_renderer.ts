@@ -19,6 +19,11 @@ export const ELEMENT_LAYERS: Record<Role, string> = {
 };
 const ROLES = Object.keys(ELEMENT_LAYERS) as Role[];
 
+/** The ids of the layers that draw the element: one per role of its style, shared with the other elements. */
+export function layerIdsOf(element: AbstractElement): string[] {
+	return (Object.keys(element.getStyleLayers()) as Role[]).map((role) => ELEMENT_LAYERS[role]);
+}
+
 /**
  * A value that the layer looks up by a feature property, since features cannot have array
  * properties (e.g. dash arrays): `lookup('dash', [[1, [2, 4]], …], [100])`.

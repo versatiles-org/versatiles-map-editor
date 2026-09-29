@@ -2,7 +2,7 @@ import type * as maplibregl from 'maplibre-gl';
 import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { GeoPoint } from '../geometry.js';
-import { ElementRenderer } from './element_renderer.js';
+import { ElementRenderer, layerIdsOf } from './element_renderer.js';
 import { MapStyleLoader } from './map_style_loader.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
@@ -16,7 +16,7 @@ export interface ElementIndex {
 
 export function indexElements(elements: AbstractElement[]): ElementIndex {
 	return {
-		layerIds: [...new Set(elements.flatMap((element) => element.getLayerIds()))],
+		layerIds: [...new Set(elements.flatMap(layerIdsOf))],
 		byId: new Map(elements.map((element) => [element.id, element]))
 	};
 }
