@@ -239,7 +239,7 @@
 			top={covered.top + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
 			bottom={layout.legendAboveAttribution ? attributionSize.top : covered.bottom}
 			bind:width={legendWidth}
-			selected={mapDocument.selection?.legendSelected ?? false}
+			selected={mapDocument.isInteractive() && mapDocument.selection.legendSelected}
 			onselect={onselectlegend}
 		/>
 	{/if}

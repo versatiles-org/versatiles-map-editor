@@ -21,8 +21,9 @@ describe('MapDocument', () => {
 	it('should initialize with default values', () => {
 		expect(mapDocument.elements).toBeDefined();
 		expect(mapDocument.view.map).toBe(map);
-		expect(mapDocument.state).toBeNull();
-		expect(mapDocument.selection).toBeNull();
+		// the viewer has no history, selection or palette
+		expect('state' in mapDocument).toBe(false);
+		expect('selection' in mapDocument).toBe(false);
 	});
 
 	describe('destroy', () => {
@@ -86,13 +87,10 @@ describe('MapDocument', () => {
 		};
 		const clearSpy = vi.spyOn(mapDocument, 'clear');
 		const setStateSpy = vi.spyOn(mapDocument, 'setState');
-		// @ts-expect-error: mocking state
-		mapDocument.state = { history: { reset: vi.fn() } };
 
 		await mapDocument.loadState(state);
 		expect(clearSpy).toHaveBeenCalled();
 		expect(setStateSpy).toHaveBeenCalledWith(state);
-		expect(mapDocument.state?.history.reset).toHaveBeenCalledWith(state);
 	});
 
 	it('should propagate errors while loading a state', async () => {

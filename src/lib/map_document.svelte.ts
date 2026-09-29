@@ -1,10 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
-import type { SelectionHandler } from './interaction/index.js';
-import type { StateManager } from './state/manager.js';
-import type { ColorPalette } from './color_palette.svelte.js';
-import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
+import type { StateBackground, StateLegend, MapState, StateElement, StateMetadata } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
 import { MapView, type ElementIndex } from './rendering/index.js';
 import { getSettings, sameBackground } from './background/index.js';
@@ -14,9 +11,6 @@ export class MapDocument {
 	#elements: AbstractElement[] = $state.raw([]);
 	/** The map on the screen, which shows the elements. */
 	public readonly view: MapView;
-	public readonly state: StateManager | null = null;
-	public readonly selection: SelectionHandler | null = null;
-	public readonly colors: ColorPalette | null = null;
 	/** Whether the read-only viewer shows an address search. */
 	public search = $state(false);
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
@@ -137,7 +131,6 @@ export class MapDocument {
 		if (!state) return;
 		this.clear();
 		await this.setState(state);
-		this.state?.history.reset(state);
 	}
 
 	/** Whether a state is being loaded: until then, the map misses (some of) its elements. */
@@ -174,10 +167,7 @@ export class MapDocument {
 		this.deselectAll();
 
 		if (state.map) this.view.fitViewport(state.map);
-		this.legend = state.meta?.legend;
-		this.search = state.meta?.search === true;
-		this.labelFont = state.meta?.labelFont;
-		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
+		this.applyMetadata(state.meta);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, this.#background)) {
 			await this.setBackground(state.meta?.background);
@@ -206,6 +196,13 @@ export class MapDocument {
 		const kept = new Set(next);
 		current.filter((element) => !kept.has(element)).forEach((element) => element.destroy());
 		this.elements = next;
+	}
+
+	/** Take the properties of the map from the state, e.g. its legend. */
+	protected applyMetadata(meta: StateMetadata | undefined) {
+		this.legend = meta?.legend;
+		this.search = meta?.search === true;
+		this.labelFont = meta?.labelFont;
 	}
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */

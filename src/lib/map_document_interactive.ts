@@ -35,6 +35,17 @@ export class MapDocumentInteractive extends MapDocument {
 		this.state = new StateManager(this);
 	}
 
+	/** Load a map, e.g. from a file, as a new start of the history. */
+	public async loadState(state: MapState) {
+		await super.loadState(state);
+		if (state) this.state.history.reset(state);
+	}
+
+	protected applyMetadata(meta: StateMetadata | undefined) {
+		super.applyMetadata(meta);
+		this.colors.scheme = meta?.colorScheme;
+	}
+
 	protected deselectAll() {
 		this.selection.selectElement();
 	}

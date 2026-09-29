@@ -1,4 +1,4 @@
-import { decodeState, type StateElement } from '@versatiles/map-state';
+import { decodeState, type MapState, type StateElement } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MapDocumentInteractive } from './map_document_interactive.js';
 import { MarkerElement } from './element/marker.js';
@@ -94,6 +94,18 @@ describe('MapDocument', () => {
 	});
 
 	describe('state', () => {
+		it('starts a new history with a loaded map, and takes its color scheme', async () => {
+			await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
+			mockMap.emit('style.load');
+			const reset = vi.spyOn(doc.state.history, 'reset');
+			const state: MapState = { meta: { colorScheme: 'pastel' }, elements: [{ type: 'marker', point: [1, 2] }] };
+
+			await doc.loadState(state);
+			expect(reset).toHaveBeenCalledWith(state);
+			expect(doc.colors.scheme).toBe('pastel');
+			expect(doc.elements).toHaveLength(1);
+		});
+
 		it('should create and restore empty map', async () => {
 			expect(doc.getState()).toStrictEqual({
 				elements: [],
