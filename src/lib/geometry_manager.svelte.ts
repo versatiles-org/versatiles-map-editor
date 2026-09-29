@@ -5,13 +5,9 @@ import type { SelectionHandler } from './interaction/index.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
-import { inlineSources } from '@versatiles/style';
 import { elementFromState } from './element/registry.js';
-import { ELEMENT_LAYERS, ElementRenderer } from './element_renderer.js';
-import { buildStyle, keepElements } from './editor_style.js';
-import { getSettings } from './background/index.js';
-import { addFillPatternImage } from './map_layer/index.js';
-import { loadSymbols, spriteSheets } from './symbols_catalog.js';
+import { ElementRenderer } from './element_renderer.js';
+import { MapStyleLoader } from './map_style_loader.svelte.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {
@@ -43,17 +39,9 @@ export class GeometryManager {
 	public search = $state(false);
 	/** The legend of the map, if it has one. Replaced as a whole on every change. */
 	public legend: StateLegend | undefined = $state.raw(undefined);
-	/** The background map. Undefined for the editor's default background. */
-	#background: StateBackground | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
-	#labelFont: string | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
-	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
+	/** The background map and the font of the labels, and loading their style. */
+	readonly #style: MapStyleLoader;
 	private destroyed = false;
-	private readonly abortController = new AbortController();
-	// The map has no style until inlineSources() finishes, so elements must wait for it
-	private styleLoaded = false;
-	private styleRequest = 0;
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
 	#loading = $state(false);
 	private loadingStates = 0;
@@ -63,15 +51,8 @@ export class GeometryManager {
 	constructor(map: maplibregl.Map) {
 		this.map = map;
 		this.canvas = this.map.getCanvasContainer();
-		this.map.on('style.load', () => {
-			this.styleLoaded = true;
-			// e.g. a label font that was set while the style loaded
-			this.applyLabelFont();
-		});
-		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
-		this.map.setMissingStyleImageResolver((id) => void addFillPatternImage(this.map, id));
 		this.renderer = new ElementRenderer(this.map);
-		void this.loadStyle(undefined);
+		this.#style = new MapStyleLoader(this.map, this.renderer);
 	}
 
 	/** All elements of the map, in drawing order. Replaced as a whole on every change. */
@@ -85,7 +66,7 @@ export class GeometryManager {
 
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	public get background(): StateBackground | undefined {
-		return this.#background;
+		return this.#style.background;
 	}
 
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
@@ -95,76 +76,26 @@ export class GeometryManager {
 
 	/** The font of the labels of all markers, or undefined for the font of the background map. */
 	public get labelFont(): string | undefined {
-		return this.#labelFont;
+		return this.#style.labelFont;
 	}
 	public set labelFont(font: string | undefined) {
-		if (font === this.#labelFont) return;
-		this.#labelFont = font;
-		// without a new style; the next style has it too (see `loadStyle`)
-		this.applyLabelFont();
+		this.#style.labelFont = font;
 	}
 
-	/** Set the font on the layer of the markers, once the style has it. */
-	private applyLabelFont() {
-		if (this.styleLoaded && this.map.getLayer(ELEMENT_LAYERS.symbol)) {
-			this.map.setLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font', ['literal', [this.font]]);
-		}
+	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
+	public get font(): string {
+		return this.#style.font;
 	}
 
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
-	public async setBackground(background?: StateBackground) {
-		if (sameBackground(background, this.#background)) return;
-		this.#background = background;
-		await this.loadStyle(background);
-	}
-
-	private async loadStyle(background: StateBackground | undefined) {
-		const request = ++this.styleRequest;
-		// The sprite sheets with all symbols, loaded once for all maps. The style needs them for
-		// its sprites and for the places of the labels around the symbols.
-		await loadSymbols();
-		if (this.destroyed || request !== this.styleRequest) return;
-		const style = buildStyle(background, this.#labelFont);
-		style.sprite = spriteSheets();
-
-		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
-		// The download is aborted and its result ignored once the manager is destroyed.
-		const signal = this.abortController.signal;
-		let inlined = style;
-		try {
-			inlined = await inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) });
-		} catch (error) {
-			if (this.destroyed) return; // includes the AbortError caused by destroy()
-			console.error('Failed to inline map style sources', error);
-		}
-		// a newer background replaces this one
-		if (this.destroyed || request !== this.styleRequest) return;
-
-		const previousStyle = this.map.style;
-		let onLoad!: () => void;
-		const loaded = new Promise<void>((resolve) => (onLoad = resolve));
-		this.map.once('style.load', onLoad);
-		this.styleLoaded = false;
-		// The elements keep their sources and layers
-		this.map.setStyle(inlined, {
-			transformStyle: (previous, next) => keepElements(previous, next)
-		});
-		// the element sources of the new style may be empty or outdated
-		this.renderer.redraw();
-		// MapLibre changes the current style if it can (keeping e.g. the images of the fill patterns).
-		// Only a new style object has to load, which fires "style.load".
-		if (previousStyle && this.map.style === previousStyle) {
-			this.map.off('style.load', onLoad);
-			this.styleLoaded = true;
-			return;
-		}
-		await loaded;
+	public setBackground(background?: StateBackground): Promise<void> {
+		return this.#style.setBackground(background);
 	}
 
 	/** Stop pending work and remove all elements. Call before removing the map. */
 	public destroy() {
 		this.destroyed = true;
-		this.abortController.abort();
+		this.#style.destroy();
 		this.clear();
 	}
 
@@ -294,13 +225,13 @@ export class GeometryManager {
 		this.labelFont = state.meta?.labelFont;
 		if (this.colors) this.colors.scheme = state.meta?.colorScheme;
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!sameBackground(state.meta?.background, this.#background)) {
+		if (!this.#style.hasBackground(state.meta?.background)) {
 			await this.setBackground(state.meta?.background);
 			if (outdated()) return;
 		}
 
-		if (!this.styleLoaded) {
-			await new Promise((r) => this.map.once('style.load', r));
+		if (!this.#style.ready) {
+			await this.#style.whenReady();
 			if (outdated()) return;
 		}
 
@@ -325,8 +256,4 @@ export class GeometryManager {
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */
 	protected deselectAll() {}
-}
-
-function sameBackground(a: StateBackground | undefined, b: StateBackground | undefined): boolean {
-	return JSON.stringify(a) === JSON.stringify(b);
 }
