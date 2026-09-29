@@ -1,9 +1,9 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { ExpressionSpecification, LayerSpecification, SourceSpecification } from 'maplibre-gl';
-import type { AbstractElement } from './element/abstract.svelte.js';
-import type { StyleLayers } from './element/types.js';
-import { dashArrays, LABEL_POSITIONS, labelPositionTable } from './map_layer/index.js';
-import { allSymbols } from './symbols_catalog.js';
+import type { AbstractElement } from '../element/abstract.svelte.js';
+import type { StyleLayers } from '../element/types.js';
+import { dashArrays, LABEL_POSITIONS, labelPositionTable } from '../map_layer/index.js';
+import { allSymbols } from '../symbols_catalog.js';
 
 /** The parts of a style that elements have, each drawn by one layer for all elements. */
 export type Role = keyof StyleLayers;

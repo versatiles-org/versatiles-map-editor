@@ -1,7 +1,7 @@
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import type { StyleSpecification } from '@versatiles/style';
-import { getMapStyle, getSettings } from './background/index.js';
+import { getMapStyle, getSettings } from '../background/index.js';
 import { ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
 
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */

@@ -3,9 +3,9 @@ import type { StateBackground } from '@versatiles/map-state';
 import { inlineSources } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
 import { buildStyle, keepElements } from './editor_style.js';
-import { getSettings } from './background/index.js';
-import { addFillPatternImage } from './map_layer/index.js';
-import { loadSymbols, spriteSheets } from './symbols_catalog.js';
+import { getSettings } from '../background/index.js';
+import { addFillPatternImage } from '../map_layer/index.js';
+import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
 
 /**
  * Loads the style of the map: the background map with the editor's layers, and the font of the

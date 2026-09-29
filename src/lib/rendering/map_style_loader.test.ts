@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { inlineSources } from '@versatiles/style';
-import { deferInlineSources } from './__mocks__/inline_sources.js';
+import { deferInlineSources } from '../__mocks__/inline_sources.js';
 import { MapStyleLoader } from './map_style_loader.svelte.js';
 import type { ElementRenderer } from './element_renderer.js';
-import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
 describe('MapStyleLoader', () => {
 	let map: MockMap;

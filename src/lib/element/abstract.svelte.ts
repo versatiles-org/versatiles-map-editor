@@ -10,7 +10,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
-import { ELEMENT_LAYERS, type Role } from '../element_renderer.js';
+import { ELEMENT_LAYERS, type Role } from '../rendering/index.js';
 
 let nextId = 1;
 

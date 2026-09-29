@@ -6,8 +6,7 @@ import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.svelte.js';
 import type { StateBackground, StateLegend, MapState, StateElement } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
-import { ElementRenderer } from './element_renderer.js';
-import { MapStyleLoader } from './map_style_loader.svelte.js';
+import { ElementRenderer, MapStyleLoader } from './rendering/index.js';
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {
