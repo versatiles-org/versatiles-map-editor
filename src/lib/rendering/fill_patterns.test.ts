@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { addFillPatternImage } from './fill_patterns.js';
-import { fillPatternName } from '../map_layer/index.js';
+import { fillPatternName } from '../style/index.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
 describe('fill pattern images', () => {

@@ -102,7 +102,7 @@ colors normalized to lowercase hex) or fall back to the defaults.
 
 Enum values use human-readable names (`fill-pattern`, `stroke-style`,
 `symbol-label-align`) whose index↔name tables live here. `symbol-pattern` is the name of the
-image, e.g. `icons:anchor`. The editor's `MapLayer` classes take
+image, e.g. `icons:anchor`. The editor's `StylePart` classes take
 their defaults and enum names from here and only add rendering data;
 `profile.test.ts` checks that every enum value can be rendered.
 

@@ -1,4 +1,4 @@
-import { MapLayer } from './abstract.svelte.js';
+import { StylePart } from './abstract.svelte.js';
 import { type StateStyle, FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
 /** The fill patterns by their index, with their names from the codec, e.g. for choosing one. */
@@ -20,7 +20,7 @@ export function parseFillPatternName(name: string): { pattern: number; color: st
 	return { pattern: Number(pattern), color };
 }
 
-export class MapLayerFill extends MapLayer {
+export class FillStyle extends StylePart {
 	static readonly defaultStyle = FILL_DEFAULTS;
 
 	#color: string = $state(FILL_DEFAULTS.color);
@@ -59,7 +59,7 @@ export class MapLayerFill extends MapLayer {
 	getState(): StateStyle | undefined {
 		return removeDefaultFields(
 			{ color: this.color, opacity: this.opacity, pattern: this.pattern },
-			MapLayerFill.defaultStyle
+			FillStyle.defaultStyle
 		);
 	}
 

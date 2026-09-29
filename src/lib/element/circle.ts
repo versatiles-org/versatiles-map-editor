@@ -1,12 +1,12 @@
 import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { type GeoPoint, circle, circleArea, distance, movePoint } from '../geometry.js';
-import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
+import { FillStyle, LineStyle } from '../style/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
 
 export class CircleElement extends AbstractElement {
-	public readonly fillLayer: MapLayerFill;
-	public readonly strokeLayer: MapLayerLine;
+	public readonly fillLayer: FillStyle;
+	public readonly strokeLayer: LineStyle;
 	public point: GeoPoint;
 	public radius: number;
 
@@ -15,9 +15,9 @@ export class CircleElement extends AbstractElement {
 		this.point = point;
 		this.radius = radius;
 
-		this.fillLayer = new MapLayerFill(() => this.changed());
+		this.fillLayer = new FillStyle(() => this.changed());
 
-		this.strokeLayer = new MapLayerLine(() => this.changed());
+		this.strokeLayer = new LineStyle(() => this.changed());
 
 		this.changed();
 	}

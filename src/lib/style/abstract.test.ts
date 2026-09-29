@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MapLayer } from './abstract.svelte.js';
+import { StylePart } from './abstract.svelte.js';
 
-class TestLayer extends MapLayer {
+class TestLayer extends StylePart {
 	#a = 1;
 	get a() {
 		return this.#a;
@@ -20,7 +20,7 @@ class TestLayer extends MapLayer {
 	setState() {}
 }
 
-describe('MapLayer', () => {
+describe('StylePart', () => {
 	it('reports the changes of the style', () => {
 		const onChange = vi.fn();
 		const layer = new TestLayer(onChange);

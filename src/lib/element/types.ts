@@ -1,15 +1,15 @@
 import type { GeoPoint } from '../geometry.js';
 import type { AbstractElement } from './abstract.svelte.js';
-import type { MapLayerFill, MapLayerLine, MapLayerSymbol } from '../map_layer/index.js';
+import type { FillStyle, LineStyle, SymbolStyle } from '../style/index.js';
 
 /**
- * The map layers of an element by their role in its style: markers have a symbol, lines a stroke,
+ * The parts of an element's style by their role: markers have a symbol, lines a stroke,
  * polygons and circles a fill and a stroke (their outline).
  */
 export interface StyleLayers {
-	symbol?: MapLayerSymbol;
-	fill?: MapLayerFill;
-	stroke?: MapLayerLine;
+	symbol?: SymbolStyle;
+	fill?: FillStyle;
+	stroke?: LineStyle;
 }
 
 export interface SelectionNode {

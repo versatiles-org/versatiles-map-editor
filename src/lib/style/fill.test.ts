@@ -1,17 +1,17 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { fillPatternName, MapLayerFill, parseFillPatternName } from './fill.svelte.js';
+import { fillPatternName, FillStyle, parseFillPatternName } from './fill.svelte.js';
 
-describe('MapLayerFill', () => {
+describe('FillStyle', () => {
 	let onChange: Mock<() => void>;
-	let layer: MapLayerFill;
+	let layer: FillStyle;
 
 	beforeEach(() => {
 		onChange = vi.fn();
-		layer = new MapLayerFill(onChange);
+		layer = new FillStyle(onChange);
 	});
 
 	it('should have the correct keys in default style', () => {
-		const keys = Object.keys(MapLayerFill.defaultStyle).sort();
+		const keys = Object.keys(FillStyle.defaultStyle).sort();
 		expect(keys).toStrictEqual(['color', 'opacity', 'pattern']);
 	});
 

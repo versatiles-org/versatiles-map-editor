@@ -10,8 +10,8 @@ import {
 import type { StateStyle } from './types.js';
 
 import { patternFills } from '$lib/rendering/fill_patterns.js';
-import { dashArrays } from '$lib/map_layer/line.svelte.js';
-import { labelPositions } from '$lib/map_layer/symbol.svelte.js';
+import { dashArrays } from '$lib/style/line.svelte.js';
+import { labelPositions } from '$lib/style/symbol.svelte.js';
 
 // The codec owns the style vocabulary and the editor derives its tables from it.
 // These guards ensure the editor has rendering data for every value the codec knows.

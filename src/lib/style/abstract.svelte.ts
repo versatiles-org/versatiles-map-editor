@@ -5,7 +5,7 @@ import type { StateStyle } from '@versatiles/map-state';
  * Its properties are reactive state, which the editors change; the element renderer draws it
  * from its feature properties.
  */
-export abstract class MapLayer {
+export abstract class StylePart {
 	private readonly onChange: () => void;
 
 	/** `onChange` is called after every change of the style. */

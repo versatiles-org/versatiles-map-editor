@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { Color } from '@versatiles/style';
-import { parseFillPatternName } from '../map_layer/index.js';
+import { parseFillPatternName } from '../style/index.js';
 
 /** A repeating pattern of opacities (0–5 per pixel), shifted by `xf` per column and `yf` per row. */
 interface Fill {

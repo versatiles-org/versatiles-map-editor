@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { fillPatterns, type MapLayerFill } from '$lib/map_layer/index.js';
+	import { fillPatterns, type FillStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** The fill layers of all selected elements, which are edited together. */
-	const { layers, doc }: { layers: MapLayerFill[]; doc: MapDocumentInteractive } = $props();
+	const { layers, doc }: { layers: FillStyle[]; doc: MapDocumentInteractive } = $props();
 	const uid = $props.id();
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));

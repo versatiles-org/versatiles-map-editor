@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { dashArrays, MapLayerLine } from '$lib/map_layer/index.js';
+	import { dashArrays, LineStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** The line layers of all selected elements, which are edited together. */
-	const { layers, doc }: { layers: MapLayerLine[]; doc: MapDocumentInteractive } = $props();
+	const { layers, doc }: { layers: LineStyle[]; doc: MapDocumentInteractive } = $props();
 	const uid = $props.id();
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));

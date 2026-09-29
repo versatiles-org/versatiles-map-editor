@@ -38,7 +38,7 @@ background. Next to them are the modules that several folders share.
   `inspector/` the sidebar, `dialogs/`, and `map/` what floats over the map, split into `viewer/`
   (also in the viewer) and `editor/` (only in the editor)
 
-- `element/`, `map_layer/`, `state/`: the elements, their styles, and the state with undo and redo
+- `element/`, `style/`, `state/`: the elements, their styles, and the state with undo and redo
 
 - `interaction/`: selecting, moving, reshaping and drawing with the mouse and fingers
 

@@ -1,18 +1,18 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { iconBox, LABEL_POSITIONS, labelPositionTable, MapLayerSymbol } from './symbol.svelte.js';
+import { iconBox, LABEL_POSITIONS, labelPositionTable, SymbolStyle } from './symbol.svelte.js';
 import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
 
-describe('MapLayerSymbol', () => {
+describe('SymbolStyle', () => {
 	let onChange: Mock<() => void>;
-	let layer: MapLayerSymbol;
+	let layer: SymbolStyle;
 
 	beforeEach(() => {
 		onChange = vi.fn();
-		layer = new MapLayerSymbol(onChange);
+		layer = new SymbolStyle(onChange);
 	});
 
 	it('should have the correct keys in default style', () => {
-		const keys = Object.keys(MapLayerSymbol.defaultStyle).sort();
+		const keys = Object.keys(SymbolStyle.defaultStyle).sort();
 		expect(keys).toStrictEqual([
 			'align',
 			'color',
@@ -64,7 +64,7 @@ describe('MapLayerSymbol', () => {
 		expect(layer.getProperties()).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
 		expect(layer.getState()).toStrictEqual({ labelColor: '#123456', haloColor: '#fedcba' });
 
-		const copy = new MapLayerSymbol(() => {});
+		const copy = new SymbolStyle(() => {});
 		copy.setState(layer.getState()!);
 		expect([copy.labelColor, copy.haloColor]).toStrictEqual(['#123456', '#fedcba']);
 	});

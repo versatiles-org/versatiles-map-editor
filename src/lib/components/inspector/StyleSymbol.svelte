@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { labelPositions, MapLayerSymbol } from '$lib/map_layer/index.js';
+	import { labelPositions, SymbolStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
-	const { layers, doc }: { layers: MapLayerSymbol[]; doc: MapDocumentInteractive } = $props();
+	const { layers, doc }: { layers: SymbolStyle[]; doc: MapDocumentInteractive } = $props();
 	const uid = $props.id();
 	const log = () => doc.state.log();
 	const symbol = $derived(group(layers, 'symbol'));

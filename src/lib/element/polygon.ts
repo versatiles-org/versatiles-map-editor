@@ -1,20 +1,20 @@
 import { type GeoPath, polygonArea } from '../geometry.js';
-import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
+import { FillStyle, LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { ElementOwner, Measurement, StyleLayers } from './types.js';
 
 export class PolygonElement extends AbstractPathElement {
-	public readonly fillLayer: MapLayerFill;
-	public readonly strokeLayer: MapLayerLine;
+	public readonly fillLayer: FillStyle;
+	public readonly strokeLayer: LineStyle;
 
 	constructor(doc: ElementOwner, polygon: GeoPath) {
 		super(doc, false);
 		this.path = polygon;
 
-		this.fillLayer = new MapLayerFill(() => this.changed());
+		this.fillLayer = new FillStyle(() => this.changed());
 
-		this.strokeLayer = new MapLayerLine(() => this.changed());
+		this.strokeLayer = new LineStyle(() => this.changed());
 
 		this.changed();
 	}

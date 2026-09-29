@@ -1,4 +1,4 @@
-import { MapLayer } from './abstract.svelte.js';
+import { StylePart } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
@@ -96,7 +96,7 @@ export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) 
 	anchor: anchors[index]
 }));
 
-export class MapLayerSymbol extends MapLayer {
+export class SymbolStyle extends StylePart {
 	static readonly defaultStyle = SYMBOL_DEFAULTS;
 
 	#color: string = $state(SYMBOL_DEFAULTS.color);
@@ -224,7 +224,7 @@ export class MapLayerSymbol extends MapLayer {
 				labelColor: this.labelColor,
 				haloColor: this.haloColor
 			},
-			MapLayerSymbol.defaultStyle
+			SymbolStyle.defaultStyle
 		);
 	}
 

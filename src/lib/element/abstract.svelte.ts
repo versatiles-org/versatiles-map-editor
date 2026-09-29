@@ -26,7 +26,7 @@ export abstract class AbstractElement {
 		this.doc = doc;
 	}
 
-	/** The map layers that draw the element, by their role in its style. */
+	/** The parts of the element's style, by their role. */
 	abstract getStyleLayers(): StyleLayers;
 
 	public select(value: boolean) {

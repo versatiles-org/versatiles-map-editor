@@ -1,4 +1,4 @@
-import { MapLayer } from './abstract.svelte.js';
+import { StylePart } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, LINE_DEFAULTS, STROKE_STYLE_NAMES, removeDefaultFields } from '@versatiles/map-state';
 
@@ -13,7 +13,7 @@ export const dashArrays = new Map<number, { name: string; array: number[] | unde
 	STROKE_STYLE_NAMES.map((name, index) => [index, { name, array: arrays[index] }])
 );
 
-export class MapLayerLine extends MapLayer {
+export class LineStyle extends StylePart {
 	static readonly defaultStyle = LINE_DEFAULTS;
 
 	#color: string = $state(LINE_DEFAULTS.color);
@@ -77,7 +77,7 @@ export class MapLayerLine extends MapLayer {
 	getState(): StateStyle | undefined {
 		return removeDefaultFields(
 			{ color: this.color, pattern: this.dashed, visible: this.visible, width: this.width },
-			MapLayerLine.defaultStyle
+			LineStyle.defaultStyle
 		);
 	}
 

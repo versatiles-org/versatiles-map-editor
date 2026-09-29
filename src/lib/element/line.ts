@@ -1,17 +1,17 @@
 import { type GeoPath, pathLength } from '../geometry.js';
-import { MapLayerLine } from '../map_layer/index.js';
+import { LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { ElementOwner, Measurement, StyleLayers } from './types.js';
 
 export class LineElement extends AbstractPathElement {
-	public readonly layer: MapLayerLine;
+	public readonly layer: LineStyle;
 
 	constructor(doc: ElementOwner, line: GeoPath) {
 		super(doc, true);
 		this.path = line;
 
-		this.layer = new MapLayerLine(() => this.changed(), { canHide: false });
+		this.layer = new LineStyle(() => this.changed(), { canHide: false });
 
 		this.changed();
 	}

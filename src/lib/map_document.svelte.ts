@@ -121,7 +121,7 @@ export class MapDocument {
 		this.elements = this.elements.filter((e) => !set.has(e));
 	}
 
-	/** Remove the elements and their map layers. */
+	/** Remove the elements for good, e.g. when they are deleted. */
 	public deleteElements(elements: AbstractElement[]) {
 		this.removeElements(elements);
 		elements.forEach((element) => element.destroy());

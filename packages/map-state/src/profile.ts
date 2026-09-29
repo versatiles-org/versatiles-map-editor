@@ -6,10 +6,10 @@ import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 // ---------------------------------------------------------------------------
 // Style vocabulary of the serialization format.
 //
-// The editor keeps the live values in MapLayer stores and projects them to two
+// The editor keeps the live values in StylePart stores and projects them to two
 // shapes: a numeric, default-stripped `StateStyle` (for State/base64) and a
 // human-readable GeoJSON property bag. This module owns the mapping between the
-// two so the codec is the single source of truth: the editor's MapLayer classes
+// two so the codec is the single source of truth: the editor's StylePart classes
 // take their default styles and enum names from here.
 // ---------------------------------------------------------------------------
 
