@@ -1,15 +1,15 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { StateElement } from '@versatiles/map-state';
-import { MockMapDocument } from '../__mocks__/map_document.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import { MockElementOwner } from './__mocks__/owner.js';
+import type { ElementOwner } from './types.js';
 import { elementFromState } from './registry.js';
 import { newElement } from '../__mocks__/elements.js';
 
 describe('element registry', () => {
-	let doc: MapDocument;
+	let doc: ElementOwner;
 
 	beforeEach(() => {
-		doc = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockElementOwner();
 	});
 
 	it('builds each type from its state, with its popup', () => {
@@ -47,10 +47,10 @@ describe('element registry', () => {
 });
 
 describe('style layers', () => {
-	let doc: MapDocument;
+	let doc: ElementOwner;
 
 	beforeEach(() => {
-		doc = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockElementOwner();
 	});
 
 	it('name the layers by their role', () => {

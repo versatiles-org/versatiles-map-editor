@@ -1,13 +1,12 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { AbstractPathElement } from './abstract_path.js';
-import { MockMapDocument } from '../__mocks__/map_document.js';
-import type { MapDocument } from '../map_document.svelte.js';
-import type { SelectionNode } from './types.js';
+import { MockElementOwner } from './__mocks__/owner.js';
+import type { ElementOwner, SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
 import { getMiddlePoint, lat2mercator } from '../geometry.js';
 
 class TestPathElement extends AbstractPathElement {
-	constructor(doc: MapDocument, isLine: boolean) {
+	constructor(doc: ElementOwner, isLine: boolean) {
 		super(doc, isLine);
 	}
 	isActive = true;
@@ -37,12 +36,12 @@ class TestPathElement extends AbstractPathElement {
 }
 
 describe('AbstractPathElement', () => {
-	let mockDoc: MockMapDocument;
-	let doc: MapDocument;
+	let mockDoc: MockElementOwner;
+	let doc: ElementOwner;
 
 	beforeEach(() => {
-		mockDoc = new MockMapDocument();
-		doc = mockDoc as unknown as MapDocument;
+		mockDoc = new MockElementOwner();
+		doc = mockDoc;
 	});
 
 	it('should initialize with empty path', () => {

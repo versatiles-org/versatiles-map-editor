@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { AbstractElement } from './abstract.svelte.js';
-import { MockMapDocument } from '../__mocks__/map_document.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import { MockElementOwner } from './__mocks__/owner.js';
+import type { ElementOwner } from './types.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 
 class TestElement extends AbstractElement {
-	constructor(doc: MapDocument) {
+	constructor(doc: ElementOwner) {
 		super(doc);
 	}
 
@@ -34,10 +34,10 @@ class TestElement extends AbstractElement {
 }
 
 describe('AbstractElement', () => {
-	let mockDoc: MapDocument;
+	let mockDoc: ElementOwner;
 
 	beforeEach(() => {
-		mockDoc = new MockMapDocument() as unknown as MapDocument;
+		mockDoc = new MockElementOwner();
 	});
 
 	it('gets a unique id for its features', () => {

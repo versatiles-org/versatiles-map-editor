@@ -1,33 +1,33 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { StyleClipboard } from './style_clipboard.svelte.js';
-import { MockMapDocument } from './__mocks__/map_document.js';
-import type { MapDocument } from './map_document.svelte.js';
+import { MockElementOwner } from './element/__mocks__/owner.js';
+import type { ElementOwner } from './element/types.js';
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 
 // elements of each type, where the geometry does not matter
-const newMarker = (doc: MapDocument) => new MarkerElement(doc, [0, 0]);
-const newLine = (doc: MapDocument) =>
+const newMarker = (doc: ElementOwner) => new MarkerElement(doc, [0, 0]);
+const newLine = (doc: ElementOwner) =>
 	new LineElement(doc, [
 		[0, 0],
 		[1, 1]
 	]);
-const newPolygon = (doc: MapDocument) =>
+const newPolygon = (doc: ElementOwner) =>
 	new PolygonElement(doc, [
 		[0, 0],
 		[1, 0],
 		[0, 1]
 	]);
-const newCircle = (doc: MapDocument) => new CircleElement(doc, [0, 0], 1000);
+const newCircle = (doc: ElementOwner) => new CircleElement(doc, [0, 0], 1000);
 
 describe('StyleClipboard', () => {
-	let doc: MapDocument;
+	let doc: ElementOwner;
 	let clipboard: StyleClipboard;
 
 	beforeEach(() => {
-		doc = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockElementOwner();
 		clipboard = new StyleClipboard();
 	});
 

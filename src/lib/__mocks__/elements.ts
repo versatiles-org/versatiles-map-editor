@@ -1,5 +1,5 @@
 import type { StateElement } from '@versatiles/map-state';
-import type { MapDocument } from '../map_document.svelte.js';
+import type { ElementOwner } from '../element/types.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { elementFromState, type ElementType } from '../element/registry.js';
 import type { CircleElement } from '../element/circle.js';
@@ -42,7 +42,7 @@ function elementState(type: ElementType): StateElement {
 }
 
 /** A new element of the type, not added to the map. */
-export function newElement<T extends ElementType>(doc: MapDocument, type: T): ElementOfType[T] {
+export function newElement<T extends ElementType>(doc: ElementOwner, type: T): ElementOfType[T] {
 	return elementFromState(doc, elementState(type)) as ElementOfType[T];
 }
 

@@ -1,16 +1,16 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { LineElement } from './line.js';
-import { MockMapDocument } from '../__mocks__/map_document.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import { MockElementOwner } from './__mocks__/owner.js';
+import type { ElementOwner } from './types.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('LineElement', () => {
-	let mockDoc: MapDocument;
+	let mockDoc: ElementOwner;
 	let element: LineElement;
 
 	beforeEach(() => {
-		mockDoc = new MockMapDocument() as unknown as MapDocument;
+		mockDoc = new MockElementOwner();
 		element = new LineElement(mockDoc, [
 			[0, 0],
 			[1, 1]

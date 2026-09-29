@@ -1,16 +1,16 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { CircleElement } from './circle.js';
-import { MockMapDocument } from '../__mocks__/map_document.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import { MockElementOwner } from './__mocks__/owner.js';
+import type { ElementOwner } from './types.js';
 import type { StateElementCircle } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('CircleElement', () => {
-	let doc: MapDocument;
+	let doc: ElementOwner;
 	let circleElement: CircleElement;
 
 	beforeEach(() => {
-		doc = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockElementOwner();
 		circleElement = new CircleElement(doc, [10, 20], 300000);
 		circleElement.fillLayer.color = '#00ff00';
 		circleElement.strokeLayer.color = '#0000ff';
