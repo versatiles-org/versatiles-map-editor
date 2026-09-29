@@ -13,12 +13,12 @@
 	 * The properties of what is selected: the style of the selected elements, the legend after a
 	 * click on it, or the properties of the map when nothing is selected.
 	 */
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
-	const selection = $derived(manager.selection);
+	const selection = $derived(doc.selection);
 	const elements = $derived(selection.selectedElements);
-	const legend = $derived(manager.legend);
+	const legend = $derived(doc.legend);
 
 	// the name as in the list of elements, e.g. "Marker 2"
 	const header = $derived.by((): { icon: IconName; title: string; subtitle: string } => {
@@ -30,24 +30,24 @@
 			return { icon: icon as IconName, title: `${elements.length} elements`, subtitle: countTypes(types) };
 		}
 		const element = elements[0];
-		const index = manager.elements.indexOf(element);
-		const name = elementNames(manager.elements.map((e) => e.getState().type))[index];
+		const index = doc.elements.indexOf(element);
+		const name = elementNames(doc.elements.map((e) => e.getState().type))[index];
 		return { icon: types[0] as IconName, title: name, subtitle: elementText(element) };
 	});
 
 	/** One font for the labels of all markers, or the one of the background map. */
 	function setLabelFont(font: string | undefined) {
-		manager.labelFont = font;
-		manager.state.log();
+		doc.labelFont = font;
+		doc.state.log();
 	}
 
 	function toggleSearch(search: boolean) {
-		manager.search = search;
-		manager.state.log();
+		doc.search = search;
+		doc.state.log();
 	}
 
 	function addLegend() {
-		addLegendEntry(manager);
+		addLegendEntry(doc);
 		selection.selectLegend();
 	}
 </script>
@@ -72,19 +72,19 @@
 	</div>
 
 	{#if selection.legendSelected && legend}
-		<PanelLegend {manager} />
+		<PanelLegend {doc} />
 	{:else if elements.length > 0}
 		<StyleEditor {elements} />
 	{:else}
 		<InspectorSection title="Background map">
-			<PanelBackground {manager} />
+			<PanelBackground {doc} />
 		</InspectorSection>
 		<InspectorSection title="Labels of markers">
 			<FontSelect
 				id="{uid}-labels"
-				value={manager.labelFont}
+				value={doc.labelFont}
 				inherit="Like the background map"
-				inherited={getSettings(manager.background).font}
+				inherited={getSettings(doc.background).font}
 				onchange={setLabelFont}
 			/>
 		</InspectorSection>
@@ -102,7 +102,7 @@
 		</InspectorSection>
 		<InspectorSection title="Shared map">
 			<label class="check">
-				<input type="checkbox" checked={manager.search} onchange={(e) => toggleSearch(e.currentTarget.checked)} />
+				<input type="checkbox" checked={doc.search} onchange={(e) => toggleSearch(e.currentTarget.checked)} />
 				Address search for visitors
 			</label>
 			<p class="label">Visitors can search for a place, e.g. their street. The map content does not change.</p>

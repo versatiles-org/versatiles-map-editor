@@ -6,12 +6,12 @@ import type { StateElementPolygon } from '@versatiles/map-state';
 import type { GeoPath } from '../geometry.js';
 
 describe('PolygonElement', () => {
-	let mockManager: MapDocument;
+	let mockDoc: MapDocument;
 	let element: PolygonElement;
 
 	beforeEach(() => {
-		mockManager = new MockMapDocument() as unknown as MapDocument;
-		element = new PolygonElement(mockManager, [
+		mockDoc = new MockMapDocument() as unknown as MapDocument;
+		element = new PolygonElement(mockDoc, [
 			[0, 0],
 			[1, 0],
 			[0, 1]
@@ -25,12 +25,12 @@ describe('PolygonElement', () => {
 			[20, 20],
 			[30, 30]
 		];
-		element = new PolygonElement(mockManager, customPolygon);
+		element = new PolygonElement(mockDoc, customPolygon);
 		expect(element.path).toEqual(customPolygon);
 	});
 
 	it('should provide the area as measurement', () => {
-		element = new PolygonElement(mockManager, [
+		element = new PolygonElement(mockDoc, [
 			[0, 0],
 			[1, 0],
 			[1, 1],
@@ -61,10 +61,10 @@ describe('PolygonElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(mockManager.renderer.update).mockClear();
+		vi.mocked(mockDoc.renderer.update).mockClear();
 		element.fillLayer.color = '#00ff00';
 		element.strokeLayer.width = 5;
-		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
+		expect(mockDoc.renderer.update).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {
@@ -86,7 +86,7 @@ describe('PolygonElement', () => {
 			style: { color: '#00ff00' },
 			strokeStyle: { width: 2 }
 		};
-		const restoredElement = PolygonElement.fromState(mockManager, state);
+		const restoredElement = PolygonElement.fromState(mockDoc, state);
 
 		expect(restoredElement.path).toEqual(state.points);
 		expect(restoredElement.fillLayer.color).toBe('#00ff00');

@@ -13,7 +13,7 @@
 	 * and the edit commands with their shortcuts. Import and export expand in place instead of
 	 * flying out, which also works on touch screens.
 	 */
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	let open = $state(false);
@@ -24,8 +24,8 @@
 	let dialogImportTable: DialogImportTable | undefined = $state();
 	let dialogShortcuts: DialogShortcuts | undefined = $state();
 
-	const history = $derived(manager.state.history);
-	const hasSelection = $derived(manager.selection.selectedElements.length > 0);
+	const history = $derived(doc.state.history);
+	const hasSelection = $derived(doc.selection.selectedElements.length > 0);
 
 	// the shortcuts as the platform writes them
 	const mac = /Mac|iPhone|iPad/.test(navigator.platform);
@@ -101,7 +101,7 @@
 
 	// the questions of the file commands, in the dialog, which exists once the menu is mounted
 	const files = $derived(
-		new FileCommands(manager, {
+		new FileCommands(doc, {
 			askCreateNew: async () => (await dialogFile?.askCreateNew()) ?? false,
 			askReplace: async () => (await dialogFile?.askReplace()) ?? false,
 			askDownloadFilename: async (name) => (await dialogFile?.askDownloadFilename(name)) ?? null
@@ -183,27 +183,27 @@
 			{@render item('KML (Google Earth)', () => files.exportKML())}
 		</div>
 		<hr />
-		{@render item('Undo', () => manager.state.undo(), {
+		{@render item('Undo', () => doc.state.undo(), {
 			disabled: !history.undoEnabled,
 			keys: ['⌘Z', 'Ctrl+Z', 'Meta+Z Control+Z']
 		})}
-		{@render item('Redo', () => manager.state.redo(), {
+		{@render item('Redo', () => doc.state.redo(), {
 			disabled: !history.redoEnabled,
 			keys: ['⇧⌘Z', 'Ctrl+Shift+Z', 'Meta+Shift+Z Control+Shift+Z']
 		})}
-		{@render item('Duplicate', () => commands.duplicateSelection(manager), {
+		{@render item('Duplicate', () => commands.duplicateSelection(doc), {
 			disabled: !hasSelection,
 			keys: ['⌘D', 'Ctrl+D', 'Meta+D Control+D']
 		})}
-		{@render item('Copy style', () => commands.copyStyle(manager), {
-			disabled: !commands.canCopyStyle(manager),
+		{@render item('Copy style', () => commands.copyStyle(doc), {
+			disabled: !commands.canCopyStyle(doc),
 			keys: ['⌥⌘C', 'Ctrl+Alt+C', 'Meta+Alt+C Control+Alt+C']
 		})}
-		{@render item('Paste style', () => commands.pasteStyle(manager), {
-			disabled: !commands.canPasteStyle(manager),
+		{@render item('Paste style', () => commands.pasteStyle(doc), {
+			disabled: !commands.canPasteStyle(doc),
 			keys: ['⌥⌘V', 'Ctrl+Alt+V', 'Meta+Alt+V Control+Alt+V']
 		})}
-		{@render item('Delete', () => commands.deleteSelection(manager), {
+		{@render item('Delete', () => commands.deleteSelection(doc), {
 			disabled: !hasSelection,
 			keys: ['⌫', 'Del', 'Delete']
 		})}
@@ -225,7 +225,7 @@
 </div>
 
 <DialogFile bind:this={dialogFile} />
-<DialogImportTable bind:this={dialogImportTable} {manager} />
+<DialogImportTable bind:this={dialogImportTable} {doc} />
 <DialogShortcuts bind:this={dialogShortcuts} />
 
 <style>

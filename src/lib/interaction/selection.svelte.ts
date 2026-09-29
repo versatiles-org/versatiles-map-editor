@@ -46,12 +46,12 @@ export class SelectionHandler {
 	}
 
 	private selectedNodeIndex: number | undefined;
-	private manager: MapDocumentInteractive;
+	private doc: MapDocumentInteractive;
 	private pointer: SelectionPointer;
 
-	constructor(manager: MapDocumentInteractive) {
-		this.manager = manager;
-		this.pointer = new SelectionPointer(manager, this);
+	constructor(doc: MapDocumentInteractive) {
+		this.doc = doc;
+		this.pointer = new SelectionPointer(doc, this);
 	}
 
 	/** Select only this element, or nothing. */
@@ -66,7 +66,7 @@ export class SelectionHandler {
 		// only the elements whose selection changes, so selecting many elements takes linear time
 		const was = new Set(current);
 		const is = new Set(selection);
-		this.manager.elements.forEach((e) => {
+		this.doc.elements.forEach((e) => {
 			if (was.has(e) !== is.has(e)) e.select(is.has(e));
 		});
 		this.#selectedElements = selection;
@@ -105,7 +105,7 @@ export class SelectionHandler {
 		if (element == null || index == null) return false;
 		if (!element.deleteNode(index)) return false;
 		this.selectNode();
-		this.manager.state.log();
+		this.doc.state.log();
 		return true;
 	}
 
@@ -121,7 +121,7 @@ export class SelectionHandler {
 				: undefined;
 
 		// looked up each time, since a new background map replaces the source object
-		this.manager.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({
+		this.doc.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({
 			type: 'FeatureCollection',
 			features: nodes.map((n) => ({
 				type: 'Feature',
@@ -134,7 +134,7 @@ export class SelectionHandler {
 		const elements = this.#selectedElements;
 		const marks =
 			elements.length > 1 ? elements.flatMap((e) => e.getSelectionNodes().filter((n) => !n.transparent)) : [];
-		this.manager.map.getSource<maplibregl.GeoJSONSource>('selection_marks')?.setData({
+		this.doc.map.getSource<maplibregl.GeoJSONSource>('selection_marks')?.setData({
 			type: 'FeatureCollection',
 			features: marks.map((n) => ({
 				type: 'Feature',

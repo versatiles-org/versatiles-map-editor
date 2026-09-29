@@ -5,9 +5,9 @@
 	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
-	let { manager, drawerOpen = $bindable() }: { manager: MapDocumentInteractive; drawerOpen: boolean } = $props();
+	let { doc, drawerOpen = $bindable() }: { doc: MapDocumentInteractive; drawerOpen: boolean } = $props();
 
-	const drawing = $derived(manager.drawing);
+	const drawing = $derived(doc.drawing);
 
 	const TOOLS: { id: Tool; name: string; key: string }[] = [
 		{ id: 'select', name: 'Select', key: 'V' },

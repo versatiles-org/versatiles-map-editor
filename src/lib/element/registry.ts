@@ -17,12 +17,12 @@ const ELEMENT_CLASSES = {
 export type ElementType = keyof typeof ELEMENT_CLASSES;
 
 /** Build a live editor element from its serialized state. */
-export function elementFromState(manager: MapDocument, state: StateElement): AbstractElement {
+export function elementFromState(doc: MapDocument, state: StateElement): AbstractElement {
 	const Class = ELEMENT_CLASSES[state.type];
 	if (!Class) throw new Error('Unknown element type');
 	// each class reads the state of its own type
-	const fromState = Class.fromState as (manager: MapDocument, state: StateElement) => AbstractElement;
-	const element = fromState(manager, state);
+	const fromState = Class.fromState as (doc: MapDocument, state: StateElement) => AbstractElement;
+	const element = fromState(doc, state);
 	if (state.popup) element.popup = state.popup.text;
 	return element;
 }

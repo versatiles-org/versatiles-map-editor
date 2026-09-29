@@ -13,87 +13,87 @@ import {
 import { addElement } from '../__mocks__/elements.js';
 
 describe('commands', () => {
-	let manager: MapDocumentInteractive;
+	let doc: MapDocumentInteractive;
 
 	beforeEach(() => {
-		manager = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+		doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
 	});
 
-	const types = () => manager.elements.map((e) => e.getState().type);
+	const types = () => doc.elements.map((e) => e.getState().type);
 
 	it('duplicate the selected elements in one undo step and select the copies', () => {
-		const marker = addElement(manager, 'marker');
-		const line = addElement(manager, 'line');
-		manager.state.log();
-		manager.selection.selectElements([marker, line]);
+		const marker = addElement(doc, 'marker');
+		const line = addElement(doc, 'line');
+		doc.state.log();
+		doc.selection.selectElements([marker, line]);
 
-		duplicateSelection(manager);
+		duplicateSelection(doc);
 		expect(types()).toStrictEqual(['marker', 'line', 'marker', 'line']);
-		expect(manager.selection.selectedElements).toStrictEqual(manager.elements.slice(2));
+		expect(doc.selection.selectedElements).toStrictEqual(doc.elements.slice(2));
 
-		manager.state.undo();
+		doc.state.undo();
 		expect(types()).toStrictEqual(['marker', 'line']);
 	});
 
 	it('delete the selected elements in one undo step', () => {
-		const marker = addElement(manager, 'marker');
-		addElement(manager, 'line');
-		manager.state.log();
-		manager.selection.selectElement(marker);
+		const marker = addElement(doc, 'marker');
+		addElement(doc, 'line');
+		doc.state.log();
+		doc.selection.selectElement(marker);
 
-		deleteSelection(manager);
+		deleteSelection(doc);
 		expect(types()).toStrictEqual(['line']);
 
-		manager.state.undo();
+		doc.state.undo();
 		expect(types()).toStrictEqual(['marker', 'line']);
 	});
 
 	it('do nothing without a selection', () => {
-		addElement(manager, 'marker');
-		manager.state.log();
-		manager.selection.selectElements([]);
+		addElement(doc, 'marker');
+		doc.state.log();
+		doc.selection.selectElements([]);
 
-		duplicateSelection(manager);
-		deleteSelection(manager);
-		pasteStyle(manager);
+		duplicateSelection(doc);
+		deleteSelection(doc);
+		pasteStyle(doc);
 		expect(types()).toStrictEqual(['marker']);
 		// no undo step was added: one undo removes the marker
-		manager.state.undo();
+		doc.state.undo();
 		expect(types()).toStrictEqual([]);
 	});
 
 	it('copy the style of one element and paste it onto the selection', () => {
-		const a = addElement(manager, 'marker');
-		const b = addElement(manager, 'marker');
-		manager.state.log();
+		const a = addElement(doc, 'marker');
+		const b = addElement(doc, 'marker');
+		doc.state.log();
 
-		manager.selection.selectElements([a, b]);
-		expect(canCopyStyle(manager)).toBe(false);
-		expect(canPasteStyle(manager)).toBe(false);
+		doc.selection.selectElements([a, b]);
+		expect(canCopyStyle(doc)).toBe(false);
+		expect(canPasteStyle(doc)).toBe(false);
 
 		a.getStyleLayers().symbol!.color = '#123456';
-		manager.selection.selectElement(a);
-		copyStyle(manager);
-		manager.selection.selectElement(b);
-		expect(canPasteStyle(manager)).toBe(true);
-		pasteStyle(manager);
+		doc.selection.selectElement(a);
+		copyStyle(doc);
+		doc.selection.selectElement(b);
+		expect(canPasteStyle(doc)).toBe(true);
+		pasteStyle(doc);
 		expect(b.getStyleLayers().symbol!.color).toBe('#123456');
 	});
 });
 
 describe('addLegendEntry', () => {
 	it('starts a legend, and adds entries with colors of the map that it does not show yet', () => {
-		const manager = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
-		const a = addElement(manager, 'marker');
+		const doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+		const a = addElement(doc, 'marker');
 		a.getStyleLayers().symbol!.color = '#111111';
-		const b = addElement(manager, 'marker');
+		const b = addElement(doc, 'marker');
 		b.getStyleLayers().symbol!.color = '#222222';
 
-		addLegendEntry(manager);
-		addLegendEntry(manager);
-		expect(manager.legend?.entries.map((entry) => entry.color).sort()).toStrictEqual(['#111111', '#222222']);
+		addLegendEntry(doc);
+		addLegendEntry(doc);
+		expect(doc.legend?.entries.map((entry) => entry.color).sort()).toStrictEqual(['#111111', '#222222']);
 
-		manager.state.undo();
-		expect(manager.legend?.entries).toHaveLength(1);
+		doc.state.undo();
+		expect(doc.legend?.entries).toHaveLength(1);
 	});
 });

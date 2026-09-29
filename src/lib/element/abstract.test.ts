@@ -5,8 +5,8 @@ import type { MapDocument } from '../map_document.svelte.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 
 class TestElement extends AbstractElement {
-	constructor(manager: MapDocument) {
-		super(manager);
+	constructor(doc: MapDocument) {
+		super(doc);
 	}
 
 	getStyleLayers() {
@@ -34,27 +34,27 @@ class TestElement extends AbstractElement {
 }
 
 describe('AbstractElement', () => {
-	let mockManager: MapDocument;
+	let mockDoc: MapDocument;
 
 	beforeEach(() => {
-		mockManager = new MockMapDocument() as unknown as MapDocument;
+		mockDoc = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('gets a unique id for its features, and no source of its own', () => {
-		const a = new TestElement(mockManager);
-		const b = new TestElement(mockManager);
+		const a = new TestElement(mockDoc);
+		const b = new TestElement(mockDoc);
 		expect(a.id).not.toBe(b.id);
-		expect(mockManager.map.addSource).not.toHaveBeenCalled();
+		expect(mockDoc.map.addSource).not.toHaveBeenCalled();
 	});
 
 	it('should call destroy and delete itself', () => {
-		const element = new TestElement(mockManager);
+		const element = new TestElement(mockDoc);
 		vi.spyOn(element, 'destroy');
-		vi.spyOn(mockManager, 'removeElement');
+		vi.spyOn(mockDoc, 'removeElement');
 
 		element.delete();
 
 		expect(element.destroy).toHaveBeenCalled();
-		expect(mockManager.removeElement).toHaveBeenCalledWith(element);
+		expect(mockDoc.removeElement).toHaveBeenCalledWith(element);
 	});
 });

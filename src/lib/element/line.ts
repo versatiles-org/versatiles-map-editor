@@ -9,8 +9,8 @@ import { formatLength } from '../format.js';
 export class LineElement extends AbstractPathElement {
 	public readonly layer: MapLayerLine;
 
-	constructor(manager: MapDocument, line: GeoPath) {
-		super(manager, true);
+	constructor(doc: MapDocument, line: GeoPath) {
+		super(doc, true);
 		this.path = line;
 
 		this.layer = new MapLayerLine(() => this.updateSource(), { canHide: false });
@@ -43,8 +43,8 @@ export class LineElement extends AbstractPathElement {
 		};
 	}
 
-	static fromState(manager: MapDocument, state: StateElementLine) {
-		const element = new LineElement(manager, state.points);
+	static fromState(doc: MapDocument, state: StateElementLine) {
+		const element = new LineElement(doc, state.points);
 		if (state.style) element.layer.setState(state.style);
 		return element;
 	}

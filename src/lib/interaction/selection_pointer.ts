@@ -21,26 +21,26 @@ const MOUSE_TOLERANCE = 3;
  * can be clicked or dragged. It changes the selection only through its methods.
  */
 export class SelectionPointer {
-	private readonly manager: MapDocumentInteractive;
+	private readonly doc: MapDocumentInteractive;
 	private readonly selection: SelectionHandler;
 	// The element under the mouse, for the cursor; the mouse position is handled once per frame
 	private hovered: AbstractElement | undefined;
 	private pointer: { x: number; y: number } | undefined;
 	private frame: number | undefined;
 
-	constructor(manager: MapDocumentInteractive, selection: SelectionHandler) {
-		this.manager = manager;
+	constructor(doc: MapDocumentInteractive, selection: SelectionHandler) {
+		this.doc = doc;
 		this.selection = selection;
-		const map = this.manager.map;
+		const map = this.doc.map;
 
 		map.on('mousedown', (e) => this.handleDown(e));
 		map.on('touchstart', (e) => this.handleDown(e));
 
 		map.on('mouseenter', 'selection_nodes', () => {
-			this.manager.cursor.togglePrecise('selection_nodes');
+			this.doc.cursor.togglePrecise('selection_nodes');
 		});
 		map.on('mouseleave', 'selection_nodes', () => {
-			this.manager.cursor.togglePrecise('selection_nodes', false);
+			this.doc.cursor.togglePrecise('selection_nodes', false);
 		});
 
 		// A pointer over an element, and a grab hand over a selected one, which can be dragged
@@ -48,7 +48,7 @@ export class SelectionPointer {
 			this.pointer = e.point;
 			this.frame ??= requestAnimationFrame(() => {
 				this.frame = undefined;
-				this.hover(this.pointer && this.manager.elementAt(this.pointer, MOUSE_TOLERANCE));
+				this.hover(this.pointer && this.doc.elementAt(this.pointer, MOUSE_TOLERANCE));
 			});
 		});
 		map.on('mouseout', () => {
@@ -58,11 +58,11 @@ export class SelectionPointer {
 
 		map.on('click', (e) => {
 			// e.g. a click that drew an element
-			if (isClaimed(e) || this.manager.drawing.active) return;
+			if (isClaimed(e) || this.doc.drawing.active) return;
 			// A click on a node selects the node (in handleNodeDown) and keeps the element selected
 			if (this.findNode(e)) return;
 			e.preventDefault();
-			const element = this.manager.elementAt(e.point, MOUSE_TOLERANCE);
+			const element = this.doc.elementAt(e.point, MOUSE_TOLERANCE);
 			// Shift+click adds an element to the selection or removes it, like in graphics software
 			if (e.originalEvent.shiftKey) {
 				if (element) this.selection.toggleElement(element);
@@ -75,7 +75,7 @@ export class SelectionPointer {
 	}
 
 	private handleDown(e: MapPointerEvent) {
-		if (isMultiTouch(e) || isClaimed(e) || this.manager.drawing.active) return;
+		if (isMultiTouch(e) || isClaimed(e) || this.doc.drawing.active) return;
 		if (this.handleNodeDown(e)) return;
 		this.handleElementDown(e);
 	}
@@ -85,7 +85,7 @@ export class SelectionPointer {
 		// Shift+click toggles the selection instead
 		if (e.originalEvent.shiftKey) return;
 		const selected = this.selection.selectedElements;
-		const element = this.manager.elementAt(e.point, isTouchEvent(e) ? TOUCH_TOLERANCE : MOUSE_TOLERANCE, selected);
+		const element = this.doc.elementAt(e.point, isTouchEvent(e) ? TOUCH_TOLERANCE : MOUSE_TOLERANCE, selected);
 		if (!element) return;
 
 		claimEvent(e);
@@ -95,12 +95,12 @@ export class SelectionPointer {
 		let targets: AbstractElement[] | undefined = e.originalEvent.altKey ? undefined : selected;
 		let moved = false;
 		trackDrag(
-			this.manager.map,
+			this.doc.map,
 			e,
 			(e) => {
 				e.preventDefault();
 				moved = true;
-				targets ??= this.manager.duplicateElements(selected);
+				targets ??= this.doc.duplicateElements(selected);
 				const x = e.lngLat.lng;
 				const y = lat2mercator(e.lngLat.lat);
 				targets.forEach((target) => target.moveBy(x - x0, y - y0));
@@ -111,14 +111,14 @@ export class SelectionPointer {
 			() => {
 				// A click (or tap) on a selected element selects only this element
 				if (!moved) this.selection.selectElement(element);
-				this.manager.state.log();
+				this.doc.state.log();
 			}
 		);
 	}
 
 	/** The selection node at the event position, with a larger tolerance for touch. */
 	private findNode(e: MapPointerEvent): Record<string, unknown> | undefined {
-		const map = this.manager.map;
+		const map = this.doc.map;
 		if (!isTouchEvent(e)) {
 			return map.queryRenderedFeatures(e.point, { layers: ['selection_nodes'] })[0]?.properties;
 		}
@@ -163,13 +163,13 @@ export class SelectionPointer {
 		let node = selectedNode;
 		this.selection.selectNode(selectedNode.vertex);
 		trackDrag(
-			this.manager.map,
+			this.doc.map,
 			e,
 			(e) => {
 				e.preventDefault();
 				if (copy) {
 					copy = false;
-					node = this.manager.duplicateElement(element).getSelectionNodeUpdater(properties) ?? node;
+					node = this.doc.duplicateElement(element).getSelectionNodeUpdater(properties) ?? node;
 				}
 				node.update(e.lngLat.lng, e.lngLat.lat);
 				this.selection.updateSelectionNodes();
@@ -177,7 +177,7 @@ export class SelectionPointer {
 			() => {
 				// A dragged midpoint became a new vertex, so the nodes change even without a move
 				this.selection.updateSelectionNodes();
-				this.manager.state.log();
+				this.doc.state.log();
 			}
 		);
 		return true;
@@ -190,7 +190,7 @@ export class SelectionPointer {
 
 	private hover(element: AbstractElement | undefined) {
 		this.hovered = element;
-		const cursor = this.manager.cursor;
+		const cursor = this.doc.cursor;
 		cursor.toggleHover('elements', element !== undefined);
 		cursor.toggleGrab('elements', element?.selected === true);
 	}

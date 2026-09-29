@@ -23,12 +23,12 @@ const DEFAULT_FILENAME = 'map.mapjson';
  * file is suggested for the next download.
  */
 export class FileCommands {
-	readonly #manager: MapDocumentInteractive;
+	readonly #doc: MapDocumentInteractive;
 	readonly #questions: FileQuestions;
 	#filename = DEFAULT_FILENAME;
 
-	constructor(manager: MapDocumentInteractive, questions: FileQuestions) {
-		this.#manager = manager;
+	constructor(doc: MapDocumentInteractive, questions: FileQuestions) {
+		this.#doc = doc;
 		this.#questions = questions;
 	}
 
@@ -40,8 +40,8 @@ export class FileCommands {
 	public async newFile(): Promise<void> {
 		if (!(await this.#questions.askCreateNew())) return;
 		// an empty map in the current view, without legend or background; undoable
-		await this.#manager.setState({ elements: [] });
-		this.#manager.state.log();
+		await this.#doc.setState({ elements: [] });
+		this.#doc.state.log();
 		this.#filename = DEFAULT_FILENAME;
 	}
 
@@ -53,8 +53,8 @@ export class FileCommands {
 			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
 			if (this.#hasContent() && !(await this.#questions.askReplace())) return;
 			// a change like any other, so it can be undone and is kept in the URL
-			await this.#manager.setState(state);
-			this.#manager.state.log();
+			await this.#doc.setState(state);
+			this.#doc.state.log();
 			this.#filename = file.name;
 		} catch (error) {
 			console.error(error);
@@ -67,13 +67,13 @@ export class FileCommands {
 		const filename = await this.#questions.askDownloadFilename(this.#filename);
 		if (!filename) return;
 		this.#filename = filename;
-		downloadJSON(this.#manager.getState(), filename);
+		downloadJSON(this.#doc.getState(), filename);
 	}
 
 	public importGeoJSON(): Promise<void> {
 		return this.#importFile(
 			'.geojson,.json,application/geo+json,application/json',
-			(text) => this.#manager.addGeoJSON(JSON.parse(text)),
+			(text) => this.#doc.addGeoJSON(JSON.parse(text)),
 			'GeoJSON'
 		);
 	}
@@ -81,23 +81,23 @@ export class FileCommands {
 	public importKML(): Promise<void> {
 		return this.#importFile(
 			'.kml,application/vnd.google-earth.kml+xml',
-			(text) => this.#manager.addState(stateFromKML(text)),
+			(text) => this.#doc.addState(stateFromKML(text)),
 			'KML'
 		);
 	}
 
 	public exportGeoJSON(): void {
-		downloadJSON(this.#manager.getGeoJSON(), 'map.geojson', 'application/geo+json');
+		downloadJSON(this.#doc.getGeoJSON(), 'map.geojson', 'application/geo+json');
 	}
 
 	public exportKML(): void {
-		const kml = stateToKML(this.#manager.getState());
+		const kml = stateToKML(this.#doc.getState());
 		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), 'map.kml');
 	}
 
 	/** Whether the map has anything to lose: elements or map properties like a legend. */
 	#hasContent(): boolean {
-		const state = this.#manager.getState();
+		const state = this.#doc.getState();
 		return state.elements.length > 0 || state.meta !== undefined;
 	}
 
@@ -107,7 +107,7 @@ export class FileCommands {
 			const file = await chooseTextFile(accept);
 			if (!file) return;
 			read(file.text);
-			this.#manager.state.log();
+			this.#doc.state.log();
 		} catch (error) {
 			console.error(error);
 			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');

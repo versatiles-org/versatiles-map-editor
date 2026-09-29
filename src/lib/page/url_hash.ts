@@ -10,7 +10,7 @@ import { notify } from '../notify.svelte.js';
  * A new hash, e.g. from the browser's history, loads its map.
  */
 export class UrlHash {
-	readonly #getManager: () => MapDocument | undefined;
+	readonly #getDoc: () => MapDocument | undefined;
 	readonly #replace: (hash: string) => void;
 	readonly #persist = throttle(() => this.#write(), 300);
 	#ready = false;
@@ -18,11 +18,11 @@ export class UrlHash {
 	#waitingForLoad = false;
 
 	/**
-	 * `getManager` is the manager of the map, which may change. `replace` writes the hash to the
+	 * `getDoc` returns the map document, which may change. `replace` writes the hash to the
 	 * URL, without firing "hashchange" (e.g. SvelteKit's replaceState).
 	 */
-	constructor(getManager: () => MapDocument | undefined, replace: (hash: string) => void) {
-		this.#getManager = getManager;
+	constructor(getDoc: () => MapDocument | undefined, replace: (hash: string) => void) {
+		this.#getDoc = getDoc;
 		this.#replace = replace;
 	}
 
@@ -37,12 +37,12 @@ export class UrlHash {
 
 	/** Write the state of the map to the URL, e.g. after a change. */
 	public request = () => {
-		const manager = this.#getManager();
+		const doc = this.#getDoc();
 		// While a map loads, it misses its elements: the URL is written once it has loaded
-		if (manager?.isLoading()) {
+		if (doc?.isLoading()) {
 			if (!this.#waitingForLoad) {
 				this.#waitingForLoad = true;
-				manager.whenLoaded().then(() => {
+				doc.whenLoaded().then(() => {
 					this.#waitingForLoad = false;
 					this.request();
 				});
@@ -55,8 +55,8 @@ export class UrlHash {
 
 	/** Load the map of a hash. Returns false if the hash could not be decoded. */
 	public read(hash: string): boolean {
-		const manager = this.#getManager();
-		if (!manager) return false;
+		const doc = this.#getDoc();
+		if (!doc) return false;
 		let state;
 		try {
 			state = decodeState(hash);
@@ -67,7 +67,7 @@ export class UrlHash {
 		}
 		// The viewport changes (and is persisted) at once, but the elements only after the style has
 		// loaded, so the URL must be written again. Otherwise a reload would lose the elements.
-		manager.loadState(state).then(this.request, (error) => {
+		doc.loadState(state).then(this.request, (error) => {
 			console.error('Failed to load map state', error);
 			notify('The map could not be loaded completely.');
 		});
@@ -90,10 +90,10 @@ export class UrlHash {
 
 	/** Only the editor writes its map to the URL; the viewer keeps the link it was opened with. */
 	#write() {
-		const manager = this.#getManager();
-		if (!manager?.isInteractive()) return;
+		const doc = this.#getDoc();
+		if (!doc?.isInteractive()) return;
 		try {
-			this.#replace(manager.state.getHash());
+			this.#replace(doc.state.getHash());
 		} catch (error) {
 			console.error('Failed to store the map state in the URL', error);
 		}

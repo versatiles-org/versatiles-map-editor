@@ -129,7 +129,7 @@ export class ElementRenderer {
 		this.map = map;
 	}
 
-	/** The elements to draw, in drawing order. The manager calls it on every change of the list. */
+	/** The elements to draw, in drawing order. The map document calls it on every change of the list. */
 	public setElements(elements: AbstractElement[]) {
 		this.elements = elements;
 		this.order = new Map(elements.map((element, i) => [element, i]));

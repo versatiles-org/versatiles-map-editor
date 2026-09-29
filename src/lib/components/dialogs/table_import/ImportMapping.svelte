@@ -14,7 +14,7 @@
 	 */
 	let {
 		table,
-		manager,
+		doc,
 		colors,
 		settings = $bindable(),
 		hasHeader = $bindable(),
@@ -22,7 +22,7 @@
 		onimport
 	}: {
 		table: Table;
-		manager: MapDocumentInteractive;
+		doc: MapDocumentInteractive;
 		colors: string[];
 		settings: ImportSettings;
 		hasHeader: boolean;
@@ -136,13 +136,13 @@
 	<fieldset>
 		<legend>Style</legend>
 		<InputRow id="{uid}-color" label="Color">
-			<ColorPicker id="{uid}-color" bind:value={settings.color} palette={manager.colors} />
+			<ColorPicker id="{uid}-color" bind:value={settings.color} palette={doc.colors} />
 		</InputRow>
 		<InputRow id="{uid}-symbol" label="Symbol">
 			<SymbolSelector
 				id="{uid}-symbol"
 				bind:symbol={() => settings.symbol, (v) => (settings.symbol = v ?? '')}
-				map={manager.map}
+				map={doc.map}
 			/>
 		</InputRow>
 		{@render columnSelect('category', 'Category', () => settings.category, setCategory, true)}
@@ -161,13 +161,13 @@
 			<div class="category">
 				<span id="{uid}-category-{i}-label">{c.value || '(empty)'} ({c.count})</span>
 				<div class="picker">
-					<ColorPicker id="{uid}-category-{i}" bind:value={c.color} palette={manager.colors} />
+					<ColorPicker id="{uid}-category-{i}" bind:value={c.color} palette={doc.colors} />
 				</div>
 				<span id="{uid}-category-{i}-symbol-label" hidden>Symbol of {c.value || '(empty)'}</span>
 				<SymbolSelector
 					id="{uid}-category-{i}-symbol"
 					bind:symbol={() => c.symbol, (v) => (c.symbol = v ?? '')}
-					map={manager.map}
+					map={doc.map}
 				/>
 			</div>
 		{/each}

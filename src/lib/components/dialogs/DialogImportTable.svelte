@@ -23,7 +23,7 @@
 	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
 	import { formatCount } from '$lib/format.js';
 
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	let dialog: Dialog | undefined;
@@ -36,7 +36,7 @@
 
 	let settings: ImportSettings = $state(defaultSettings(SYMBOL_DEFAULTS.color, NEW_MARKER_SYMBOL));
 	// the colors of the categories, from the map's color scheme
-	const colors = $derived(getColorScheme(manager.colors.scheme, config.current.colorSchemes).colors);
+	const colors = $derived(getColorScheme(doc.colors.scheme, config.current.colorSchemes).colors);
 
 	let progress = $state({ done: 0, total: 0 });
 	let controller: AbortController | undefined;
@@ -74,22 +74,22 @@
 		importError = '';
 		progress = { done: 0, total: table.rows.length };
 		controller = new AbortController();
-		const center = manager.map.getCenter();
+		const center = doc.map.getCenter();
 		try {
 			const result = await importTable(table, mappingOf(settings), {
 				signal: controller.signal,
 				language: navigator.language,
-				...biasOptions(settings.bias, [center.lng, center.lat], manager.map.getZoom()),
+				...biasOptions(settings.bias, [center.lng, center.lat], doc.map.getZoom()),
 				importUncertain: settings.importUncertain,
 				onProgress: (done, total) => (progress = { done, total })
 			});
 			showPoints(result.markers.map((m) => m.point));
-			manager.addElements(result.markers);
+			doc.addElements(result.markers);
 			if (settings.addLegend && settings.categories.length > 0 && result.markers.length > 0) {
 				// added to an existing legend
-				manager.legend = legendWithCategories(manager.legend, settings.categories);
+				doc.legend = legendWithCategories(doc.legend, settings.categories);
 			}
-			if (result.markers.length > 0) manager.state.log();
+			if (result.markers.length > 0) doc.state.log();
 			imported = result.markers.length;
 			failed = result.failed;
 			uncertain = result.uncertain;
@@ -112,7 +112,7 @@
 	/** Move the map to the imported markers. */
 	function showPoints(points: [number, number][]) {
 		const bounds = boundsOf(points);
-		if (bounds) manager.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
+		if (bounds) doc.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
 	}
 </script>
 
@@ -134,7 +134,7 @@
 		{:else if step === 'mapping' && table}
 			<ImportMapping
 				{table}
-				{manager}
+				{doc}
 				{colors}
 				bind:settings
 				bind:hasHeader

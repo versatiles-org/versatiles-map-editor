@@ -233,10 +233,10 @@
 			editor = loadedEditor;
 			// the color schemes and fonts of this editor instance
 			void loadConfig();
-			const manager = new loadedEditor.MapDocumentInteractive(map);
-			manager.state.events.on('change', urlHash.request);
+			const doc = new loadedEditor.MapDocumentInteractive(map);
+			doc.state.events.on('change', urlHash.request);
 			map.on('moveend', urlHash.request);
-			mapDocument = manager;
+			mapDocument = doc;
 		} else {
 			mapDocument = new MapDocument(map);
 			new PopupHandler(mapDocument);
@@ -299,25 +299,25 @@
 		<!-- from the start, so the map does not move when the code of the editor has loaded -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
 			{#if editor && mapDocument && mapDocument.isInteractive()}
-				<editor.TopBar manager={mapDocument} />
+				<editor.TopBar doc={mapDocument} />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
 			{#if editor && mapDocument && mapDocument.isInteractive()}
-				<editor.ToolRail manager={mapDocument} bind:drawerOpen />
+				<editor.ToolRail doc={mapDocument} bind:drawerOpen />
 			{/if}
 		</div>
 		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
 			{#if editor && mapDocument && mapDocument.isInteractive()}
-				<editor.StatusBar manager={mapDocument} />
+				<editor.StatusBar doc={mapDocument} />
 			{/if}
 		</div>
 	{/if}
 	{#if showSidebar && editor && mapDocument && mapDocument.isInteractive()}
 		<editor.NodeDeleteButton {mapDocument} />
-		<editor.DrawBar manager={mapDocument} left={coveredLeft} right={sidebarWidth} />
+		<editor.DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
 		<editor.SelectionBar
-			manager={mapDocument}
+			doc={mapDocument}
 			top={TOPBAR_HEIGHT}
 			left={coveredLeft}
 			right={sidebarWidth}
@@ -332,7 +332,7 @@
 			style:width="{DRAWER_WIDTH}px"
 			hidden={!drawerOpen}
 		>
-			<editor.ElementsDrawer manager={mapDocument} onclose={() => (drawerOpen = false)} />
+			<editor.ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
 		</div>
 		<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>

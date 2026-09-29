@@ -10,8 +10,8 @@ export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
 	public readonly strokeLayer: MapLayerLine;
 
-	constructor(manager: MapDocument, polygon: GeoPath) {
-		super(manager, false);
+	constructor(doc: MapDocument, polygon: GeoPath) {
+		super(doc, false);
 		this.path = polygon;
 
 		this.fillLayer = new MapLayerFill(() => this.updateSource());
@@ -47,8 +47,8 @@ export class PolygonElement extends AbstractPathElement {
 		};
 	}
 
-	static fromState(manager: MapDocument, state: StateElementPolygon) {
-		const element = new PolygonElement(manager, state.points);
+	static fromState(doc: MapDocument, state: StateElementPolygon) {
+		const element = new PolygonElement(doc, state.points);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
 		return element;

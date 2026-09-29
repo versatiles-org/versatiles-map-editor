@@ -61,7 +61,7 @@
 
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
-		<Inspector manager={mapDocument} />
+		<Inspector doc={mapDocument} />
 	</div>
 </div>
 

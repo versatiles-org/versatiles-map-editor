@@ -13,7 +13,7 @@
 
 	const uid = $props.id();
 	const single = $derived(elements.length === 1 ? elements[0] : undefined);
-	const log = () => elements[0]?.manager.state?.log();
+	const log = () => elements[0]?.doc.state?.log();
 
 	/** The layers of one role, if all elements have it; otherwise none. */
 	function layersOfRole<R extends keyof StyleLayers>(role: R): NonNullable<StyleLayers[R]>[] {
@@ -32,12 +32,12 @@
 {#key elements}
 	{#if symbolLayers.length > 0}
 		<InspectorSection title="Symbol">
-			<StyleSymbol layers={symbolLayers} manager={elements[0].manager} />
+			<StyleSymbol layers={symbolLayers} doc={elements[0].doc} />
 		</InspectorSection>
 	{/if}
 	{#if fillLayers.length > 0 && strokeVisible}
 		<InspectorSection title="Fill">
-			<StyleFill layers={fillLayers} manager={elements[0].manager} />
+			<StyleFill layers={fillLayers} doc={elements[0].doc} />
 		</InspectorSection>
 		<InspectorSection title="Outline">
 			{#snippet heading()}
@@ -47,12 +47,12 @@
 				</label>
 			{/snippet}
 			{#if strokeVisible.value}
-				<StyleStroke layers={strokeLayers} manager={elements[0].manager} />
+				<StyleStroke layers={strokeLayers} doc={elements[0].doc} />
 			{/if}
 		</InspectorSection>
 	{:else if strokeLayers.length > 0}
 		<InspectorSection title="Line">
-			<StyleStroke layers={strokeLayers} manager={elements[0].manager} />
+			<StyleStroke layers={strokeLayers} doc={elements[0].doc} />
 		</InspectorSection>
 	{/if}
 	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}

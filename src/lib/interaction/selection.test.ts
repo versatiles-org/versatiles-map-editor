@@ -16,7 +16,7 @@ describe('SelectionHandler', () => {
 	let mockMap: MockMap;
 	let mockCursor: Mocked<Cursor>;
 	let mockState: Mocked<StateManager>;
-	let mockManager: MapDocumentInteractive;
+	let mockDoc: MapDocumentInteractive;
 
 	beforeEach(() => {
 		mockMap = new MockMap();
@@ -28,7 +28,7 @@ describe('SelectionHandler', () => {
 		mockState = {
 			log: vi.fn()
 		} as unknown as Mocked<StateManager>;
-		mockManager = {
+		mockDoc = {
 			map: mockMap,
 			cursor: mockCursor,
 			state: mockState,
@@ -38,7 +38,7 @@ describe('SelectionHandler', () => {
 		} as unknown as MapDocumentInteractive;
 
 		vi.clearAllMocks();
-		handler = new SelectionHandler(mockManager);
+		handler = new SelectionHandler(mockDoc);
 	});
 
 	it('should initialize with undefined selectedElement', () => {
@@ -50,7 +50,7 @@ describe('SelectionHandler', () => {
 			select: vi.fn(),
 			getSelectionNodes: vi.fn().mockReturnValue([])
 		} as unknown as AbstractElement;
-		mockManager.elements = [element];
+		mockDoc.elements = [element];
 		handler.selectElement(element);
 
 		handler.selectLegend();
@@ -72,7 +72,7 @@ describe('SelectionHandler', () => {
 			select: selectMock,
 			getSelectionNodes: vi.fn().mockReturnValue([])
 		} as unknown as AbstractElement;
-		mockManager.elements = [element];
+		mockDoc.elements = [element];
 		handler.selectElement(element);
 		expect(handler.selectedElement).toBe(element);
 		expect(selectMock).toHaveBeenCalledWith(true);
@@ -89,7 +89,7 @@ describe('SelectionHandler', () => {
 			select: selectMock2,
 			getSelectionNodes: vi.fn().mockReturnValue([])
 		} as unknown as AbstractElement;
-		mockManager.elements = [element1, element2];
+		mockDoc.elements = [element1, element2];
 		handler.selectElement(element1);
 		handler.selectElement(element2);
 		expect(selectMock1).toHaveBeenCalledWith(false);
@@ -151,7 +151,7 @@ describe('SelectionHandler', () => {
 				deleteNode: vi.fn(() => true),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			mockManager.elements = [element];
+			mockDoc.elements = [element];
 			handler.selectElement(element);
 		});
 
@@ -206,7 +206,7 @@ describe('SelectionHandler', () => {
 					getSelectionNodes: vi.fn(() => [{ index: 0, coordinates: [0, 0] }])
 				}) as unknown as Mocked<AbstractElement>;
 			elements = [createElement(), createElement(), createElement()];
-			mockManager.elements = elements;
+			mockDoc.elements = elements;
 		});
 
 		it('selects, toggles and deselects elements', () => {

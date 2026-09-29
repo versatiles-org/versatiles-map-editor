@@ -6,12 +6,12 @@ import type { StateElementCircle } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('CircleElement', () => {
-	let manager: MapDocument;
+	let doc: MapDocument;
 	let circleElement: CircleElement;
 
 	beforeEach(() => {
-		manager = new MockMapDocument() as unknown as MapDocument;
-		circleElement = new CircleElement(manager, [10, 20], 300000);
+		doc = new MockMapDocument() as unknown as MapDocument;
+		circleElement = new CircleElement(doc, [10, 20], 300000);
 		circleElement.fillLayer.color = '#00ff00';
 		circleElement.strokeLayer.color = '#0000ff';
 	});
@@ -64,9 +64,9 @@ describe('CircleElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(manager.renderer.update).mockClear();
+		vi.mocked(doc.renderer.update).mockClear();
 		circleElement.strokeLayer.visible = false;
-		expect(manager.renderer.update).toHaveBeenCalledWith(circleElement);
+		expect(doc.renderer.update).toHaveBeenCalledWith(circleElement);
 	});
 
 	it('should return state representation', () => {
@@ -86,7 +86,7 @@ describe('CircleElement', () => {
 			style: {},
 			strokeStyle: {}
 		};
-		const element = CircleElement.fromState(manager, state);
+		const element = CircleElement.fromState(doc, state);
 		expect(element.point).toEqual([30, 40]);
 		expect(element.radius).toBe(10);
 	});

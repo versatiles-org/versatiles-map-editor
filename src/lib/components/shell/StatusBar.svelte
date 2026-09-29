@@ -5,10 +5,10 @@
 	 * The line at the bottom of the editor: what the current tool or selection does, so the
 	 * sidebar needs no help texts, and the zoom and the position of the mouse on the map.
 	 */
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
-	const selection = $derived(manager.selection);
-	const drawing = $derived(manager.drawing);
+	const selection = $derived(doc.selection);
+	const drawing = $derived(doc.drawing);
 
 	const hint = $derived.by(() => {
 		switch (drawing.tool) {
@@ -43,7 +43,7 @@
 	let pointer: { lng: number; lat: number } | undefined = $state();
 
 	$effect(() => {
-		const map = manager.map;
+		const map = doc.map;
 		const onZoom = () => (zoom = map.getZoom());
 		onZoom();
 		const onMove = (e: { lngLat: { lng: number; lat: number } }) => (pointer = e.lngLat);

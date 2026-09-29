@@ -42,11 +42,11 @@ function elementState(type: ElementType): StateElement {
 }
 
 /** A new element of the type, not added to the map. */
-export function newElement<T extends ElementType>(manager: MapDocument, type: T): ElementOfType[T] {
-	return elementFromState(manager, elementState(type)) as ElementOfType[T];
+export function newElement<T extends ElementType>(doc: MapDocument, type: T): ElementOfType[T] {
+	return elementFromState(doc, elementState(type)) as ElementOfType[T];
 }
 
 /** A new element of the type, added to the map and selected, like a drawn one. */
-export function addElement<T extends ElementType>(manager: MapDocumentInteractive, type: T): ElementOfType[T] {
-	return manager.addElement(elementState(type)) as ElementOfType[T];
+export function addElement<T extends ElementType>(doc: MapDocumentInteractive, type: T): ElementOfType[T] {
+	return doc.addElement(elementState(type)) as ElementOfType[T];
 }

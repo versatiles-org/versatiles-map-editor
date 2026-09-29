@@ -8,8 +8,8 @@ export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];
 	protected readonly isLine: boolean;
 
-	constructor(manager: MapDocument, isLine: boolean) {
-		super(manager);
+	constructor(doc: MapDocument, isLine: boolean) {
+		super(doc);
 		this.isLine = isLine;
 	}
 

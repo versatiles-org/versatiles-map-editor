@@ -6,9 +6,9 @@
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
-	const { layers, manager }: { layers: MapLayerSymbol[]; manager: MapDocument } = $props();
+	const { layers, doc }: { layers: MapLayerSymbol[]; doc: MapDocument } = $props();
 	const uid = $props.id();
-	const log = () => manager.state?.log();
+	const log = () => doc.state?.log();
 	const symbol = $derived(group(layers, 'symbol'));
 	const color = $derived(group(layers, 'color'));
 	const rotate = $derived(group(layers, 'rotate'));
@@ -51,12 +51,12 @@
 				log();
 			}
 		}
-		map={manager.map}
+		map={doc.map}
 	/>
 </InputRow>
 
 <InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
-	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={manager.colors} />
+	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
 <InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
@@ -72,7 +72,7 @@
 </InputRow>
 
 <InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>
-	<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={manager.colors} />
+	<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
 <InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
@@ -80,7 +80,7 @@
 </InputRow>
 
 <InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
-	<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={manager.colors} />
+	<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
 <InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>

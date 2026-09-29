@@ -7,7 +7,7 @@ import { notify } from '../notify.svelte.js';
 vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 describe('UrlHash', () => {
-	let manager: {
+	let doc: {
 		isInteractive: ReturnType<typeof vi.fn>;
 		isLoading: ReturnType<typeof vi.fn>;
 		whenLoaded: ReturnType<typeof vi.fn>;
@@ -23,7 +23,7 @@ describe('UrlHash', () => {
 		vi.clearAllMocks();
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		version = 0;
-		manager = {
+		doc = {
 			isInteractive: vi.fn(() => true),
 			isLoading: vi.fn(() => false),
 			whenLoaded: vi.fn(async () => {}),
@@ -32,7 +32,7 @@ describe('UrlHash', () => {
 			state: { getHash: vi.fn(() => `v${++version}`) }
 		};
 		replace = vi.fn<(hash: string) => void>();
-		urlHash = new UrlHash(() => manager as unknown as MapDocument, replace);
+		urlHash = new UrlHash(() => doc as unknown as MapDocument, replace);
 	});
 
 	afterEach(() => {
@@ -63,20 +63,20 @@ describe('UrlHash', () => {
 	it('writes once a loading map has loaded, since it misses its elements until then', async () => {
 		urlHash.start();
 		let loaded!: () => void;
-		manager.isLoading.mockReturnValue(true);
-		manager.whenLoaded.mockReturnValue(new Promise<void>((resolve) => (loaded = resolve)));
+		doc.isLoading.mockReturnValue(true);
+		doc.whenLoaded.mockReturnValue(new Promise<void>((resolve) => (loaded = resolve)));
 		urlHash.request();
 		urlHash.request();
 		expect(replace).not.toHaveBeenCalled();
-		expect(manager.whenLoaded).toHaveBeenCalledTimes(1);
+		expect(doc.whenLoaded).toHaveBeenCalledTimes(1);
 
-		manager.isLoading.mockReturnValue(false);
+		doc.isLoading.mockReturnValue(false);
 		loaded();
 		await vi.waitFor(() => expect(replace).toHaveBeenCalledTimes(1));
 	});
 
 	it('does not write the map of the viewer', () => {
-		manager.isInteractive.mockReturnValue(false);
+		doc.isInteractive.mockReturnValue(false);
 		urlHash.start();
 		urlHash.request();
 		expect(replace).not.toHaveBeenCalled();
@@ -96,18 +96,18 @@ describe('UrlHash', () => {
 		it('loads the map of a hash, and writes it again once its elements exist', async () => {
 			urlHash.start();
 			expect(urlHash.read(encodeState(state))).toBe(true);
-			expect(manager.loadState).toHaveBeenCalledWith(expect.objectContaining({ elements: state.elements }));
+			expect(doc.loadState).toHaveBeenCalledWith(expect.objectContaining({ elements: state.elements }));
 			await vi.waitFor(() => expect(replace).toHaveBeenCalledTimes(1));
 		});
 
 		it('tells the user about a hash that cannot be read', () => {
 			expect(urlHash.read('not a map')).toBe(false);
-			expect(manager.loadState).not.toHaveBeenCalled();
+			expect(doc.loadState).not.toHaveBeenCalled();
 			expect(notify).toHaveBeenCalledWith('The map in the link could not be read. The link may be incomplete.');
 		});
 
 		it('tells the user about a map that cannot be loaded', async () => {
-			manager.loadState.mockRejectedValue(new Error('no style'));
+			doc.loadState.mockRejectedValue(new Error('no style'));
 			urlHash.read(encodeState(state));
 			await vi.waitFor(() => expect(notify).toHaveBeenCalledWith('The map could not be loaded completely.'));
 		});
@@ -122,10 +122,10 @@ describe('UrlHash', () => {
 		urlHash.listen();
 		location.hash = encodeState({ elements: [] });
 		dispatchEvent(new HashChangeEvent('hashchange'));
-		expect(manager.loadState).toHaveBeenCalledTimes(1);
+		expect(doc.loadState).toHaveBeenCalledTimes(1);
 
 		urlHash.destroy();
 		dispatchEvent(new HashChangeEvent('hashchange'));
-		expect(manager.loadState).toHaveBeenCalledTimes(1);
+		expect(doc.loadState).toHaveBeenCalledTimes(1);
 	});
 });

@@ -6,12 +6,12 @@ import type { StateElementMarker } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('MarkerElement', () => {
-	let mockManager: MapDocument;
+	let mockDoc: MapDocument;
 	let element: MarkerElement;
 
 	beforeEach(() => {
-		mockManager = new MockMapDocument() as unknown as MapDocument;
-		element = new MarkerElement(mockManager, [0, 0]);
+		mockDoc = new MockMapDocument() as unknown as MapDocument;
+		element = new MarkerElement(mockDoc, [0, 0]);
 	});
 
 	it('should move the whole marker with its node', () => {
@@ -24,7 +24,7 @@ describe('MarkerElement', () => {
 
 	it('should initialize with a provided point', () => {
 		const customPoint: GeoPoint = [10, 20];
-		element = new MarkerElement(mockManager, customPoint);
+		element = new MarkerElement(mockDoc, customPoint);
 		expect(element['point']).toEqual(customPoint);
 	});
 
@@ -59,9 +59,9 @@ describe('MarkerElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(mockManager.renderer.update).mockClear();
+		vi.mocked(mockDoc.renderer.update).mockClear();
 		element.layer.color = '#00ff00';
-		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
+		expect(mockDoc.renderer.update).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {
@@ -85,7 +85,7 @@ describe('MarkerElement', () => {
 			point: [10, 20],
 			style: { color: '#00ff00' }
 		};
-		const restoredElement = MarkerElement.fromState(mockManager, state);
+		const restoredElement = MarkerElement.fromState(mockDoc, state);
 
 		expect(restoredElement['point']).toEqual(state.point);
 		expect(restoredElement.layer.getState()?.color).toBe('#00ff00');

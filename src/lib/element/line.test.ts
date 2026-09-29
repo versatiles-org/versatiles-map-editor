@@ -6,12 +6,12 @@ import type { StateElementLine } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('LineElement', () => {
-	let mockManager: MapDocument;
+	let mockDoc: MapDocument;
 	let element: LineElement;
 
 	beforeEach(() => {
-		mockManager = new MockMapDocument() as unknown as MapDocument;
-		element = new LineElement(mockManager, [
+		mockDoc = new MockMapDocument() as unknown as MapDocument;
+		element = new LineElement(mockDoc, [
 			[0, 0],
 			[1, 1]
 		]);
@@ -23,12 +23,12 @@ describe('LineElement', () => {
 			[10, 10],
 			[20, 20]
 		];
-		element = new LineElement(mockManager, customPath);
+		element = new LineElement(mockDoc, customPath);
 		expect(element.path).toEqual(customPath);
 	});
 
 	it('should provide the length as measurement', () => {
-		element = new LineElement(mockManager, [
+		element = new LineElement(mockDoc, [
 			[0, 0],
 			[1, 0]
 		]);
@@ -50,9 +50,9 @@ describe('LineElement', () => {
 	});
 
 	it('draws itself again after a change of its style', () => {
-		vi.mocked(mockManager.renderer.update).mockClear();
+		vi.mocked(mockDoc.renderer.update).mockClear();
 		element.layer.color = '#00ff00';
-		expect(mockManager.renderer.update).toHaveBeenCalledWith(element);
+		expect(mockDoc.renderer.update).toHaveBeenCalledWith(element);
 	});
 
 	it('should return correct state object', () => {
@@ -71,14 +71,14 @@ describe('LineElement', () => {
 			],
 			style: { color: '#00ff00' }
 		};
-		const restoredElement = LineElement.fromState(mockManager, state);
+		const restoredElement = LineElement.fromState(mockDoc, state);
 
 		expect(restoredElement.path).toEqual(state.points);
 		expect(restoredElement.layer.getState()?.color).toBe('#00ff00');
 	});
 
 	it('stays visible with "visible: false" from a link or a file, since a line cannot be hidden', () => {
-		const line = LineElement.fromState(mockManager, {
+		const line = LineElement.fromState(mockDoc, {
 			type: 'line',
 			points: [
 				[1, 2],

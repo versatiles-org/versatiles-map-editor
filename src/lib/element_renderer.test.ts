@@ -9,7 +9,7 @@ type Source = { setData: Mock; updateData: Mock };
 
 describe('ElementRenderer', () => {
 	let map: MockMap;
-	let manager: MapDocument;
+	let doc: MapDocument;
 	let sources: Record<string, Source>;
 
 	beforeEach(async () => {
@@ -19,8 +19,8 @@ describe('ElementRenderer', () => {
 		map.getSource.mockImplementation(
 			(id: string) => (sources[id] ??= { setData: vi.fn(), updateData: vi.fn() }) as never
 		);
-		manager = new MapDocument(map as unknown as MaplibreMap);
-		const loading = manager.setState({
+		doc = new MapDocument(map as unknown as MaplibreMap);
+		const loading = doc.setState({
 			elements: [
 				{
 					type: 'polygon',
@@ -36,14 +36,14 @@ describe('ElementRenderer', () => {
 		});
 		map.setStyle();
 		await loading;
-		manager.renderer.flush();
+		doc.renderer.flush();
 	});
 
 	const lastFeatures = (role: keyof typeof ELEMENT_LAYERS) =>
 		sources[ELEMENT_LAYERS[role]].setData.mock.lastCall![0].features as GeoJSON.Feature[];
 
 	it('draws all elements with one source per role, in the order of the elements', () => {
-		const [polygon, marker] = manager.elements;
+		const [polygon, marker] = doc.elements;
 		expect(lastFeatures('fill').map((f) => [f.id, f.properties?.order])).toStrictEqual([[polygon.id, 0]]);
 		// a hidden outline is not drawn
 		expect(lastFeatures('stroke')).toStrictEqual([]);
@@ -53,7 +53,7 @@ describe('ElementRenderer', () => {
 	});
 
 	it('writes changes of single elements once, only their features', async () => {
-		const [polygon, marker] = manager.elements as [PolygonElement, MarkerElement];
+		const [polygon, marker] = doc.elements as [PolygonElement, MarkerElement];
 		for (const source of Object.values(sources)) source.setData.mockClear();
 
 		marker.layer.label = 'B';
@@ -73,7 +73,7 @@ describe('ElementRenderer', () => {
 	});
 
 	it('draws everything again when the elements change', async () => {
-		manager.clear();
+		doc.clear();
 		await Promise.resolve();
 		expect(lastFeatures('fill')).toStrictEqual([]);
 		expect(lastFeatures('symbol')).toStrictEqual([]);

@@ -6,10 +6,10 @@ import { elementFromState } from './registry.js';
 import { newElement } from '../__mocks__/elements.js';
 
 describe('element registry', () => {
-	let manager: MapDocument;
+	let doc: MapDocument;
 
 	beforeEach(() => {
-		manager = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('builds each type from its state, with its popup', () => {
@@ -35,30 +35,28 @@ describe('element registry', () => {
 			{ type: 'circle', point: [1, 2], radius: 100, style: { color: '#456789' } }
 		];
 		for (const state of states) {
-			const element = elementFromState(manager, state);
+			const element = elementFromState(doc, state);
 			expect(element.getState()).toMatchObject(state);
 		}
-		expect(elementFromState(manager, states[0]).popup).toBe('A');
+		expect(elementFromState(doc, states[0]).popup).toBe('A');
 	});
 
 	it('rejects an unknown type', () => {
-		expect(() => elementFromState(manager, { type: 'unknown' } as unknown as StateElement)).toThrow(
-			'Unknown element type'
-		);
+		expect(() => elementFromState(doc, { type: 'unknown' } as unknown as StateElement)).toThrow('Unknown element type');
 	});
 });
 
 describe('style layers', () => {
-	let manager: MapDocument;
+	let doc: MapDocument;
 
 	beforeEach(() => {
-		manager = new MockMapDocument() as unknown as MapDocument;
+		doc = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('name the layers by their role', () => {
-		const marker = newElement(manager, 'marker');
-		const line = newElement(manager, 'line');
-		const circle = newElement(manager, 'circle');
+		const marker = newElement(doc, 'marker');
+		const line = newElement(doc, 'line');
+		const circle = newElement(doc, 'circle');
 		expect(marker.getStyleLayers()).toStrictEqual({ symbol: marker.layer });
 		expect(line.getStyleLayers()).toStrictEqual({ stroke: line.layer });
 		expect(circle.getStyleLayers()).toStrictEqual({ fill: circle.fillLayer, stroke: circle.strokeLayer });
@@ -66,14 +64,14 @@ describe('style layers', () => {
 	});
 
 	it('give the colors, without the color of a hidden outline', () => {
-		const line = newElement(manager, 'line');
+		const line = newElement(doc, 'line');
 		line.layer.color = '#00ff00';
 		// a line cannot be hidden, so it is always drawn
 		line.layer.visible = false;
 		expect(line.layer.visible).toBe(true);
 		expect(line.getColors()).toStrictEqual(['#00ff00']);
 
-		const circle = newElement(manager, 'circle');
+		const circle = newElement(doc, 'circle');
 		circle.fillLayer.color = '#ff0000';
 		circle.strokeLayer.color = '#0000ff';
 		circle.strokeLayer.visible = true;

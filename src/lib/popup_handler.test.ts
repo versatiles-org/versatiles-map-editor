@@ -8,13 +8,13 @@ const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve))
 
 describe('PopupHandler', () => {
 	let map: MockMap;
-	let manager: MapDocument;
+	let doc: MapDocument;
 
 	beforeEach(async () => {
 		map = new MockMap();
-		manager = new MapDocument(map as unknown as MaplibreMap);
-		new PopupHandler(manager);
-		const loading = manager.setState({
+		doc = new MapDocument(map as unknown as MaplibreMap);
+		new PopupHandler(doc);
+		const loading = doc.setState({
 			elements: [
 				{ type: 'marker', point: [1, 2], popup: { text: 'Hello' } },
 				{ type: 'marker', point: [3, 4] }
@@ -26,7 +26,7 @@ describe('PopupHandler', () => {
 	});
 
 	const hoverOver = (index: number | undefined) => {
-		const element = index === undefined ? undefined : manager.elements[index];
+		const element = index === undefined ? undefined : doc.elements[index];
 		map.queryRenderedFeatures.mockReturnValue(element ? [{ id: element.id } as unknown as MapGeoJSONFeature] : []);
 		map.emit('mousemove', { point: { x: 10, y: 20 } });
 	};
@@ -46,7 +46,7 @@ describe('PopupHandler', () => {
 	});
 
 	it('only takes elements with a popup, also after a popup changes', async () => {
-		const withoutPopup = manager.elements[1];
+		const withoutPopup = doc.elements[1];
 		hoverOver(1);
 		await nextFrame();
 		expect(map.getCanvasContainer().style.cursor).toBe('');

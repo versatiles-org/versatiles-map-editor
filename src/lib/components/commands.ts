@@ -5,46 +5,46 @@ import type { MapDocumentInteractive } from '../map_document_interactive.js';
  * shortcuts. Each change is one undo step.
  */
 
-export function duplicateSelection(manager: MapDocumentInteractive): void {
-	const elements = manager.selection.selectedElements;
+export function duplicateSelection(doc: MapDocumentInteractive): void {
+	const elements = doc.selection.selectedElements;
 	if (elements.length === 0) return;
-	manager.duplicateElements(elements, [20, 20]);
-	manager.state.log();
+	doc.duplicateElements(elements, [20, 20]);
+	doc.state.log();
 }
 
-export function deleteSelection(manager: MapDocumentInteractive): void {
-	const elements = manager.selection.selectedElements;
+export function deleteSelection(doc: MapDocumentInteractive): void {
+	const elements = doc.selection.selectedElements;
 	if (elements.length === 0) return;
-	manager.deleteElements(elements);
-	manager.state.log();
+	doc.deleteElements(elements);
+	doc.state.log();
 }
 
 /** Only the style of one element, since several elements can have different styles. */
-export function canCopyStyle(manager: MapDocumentInteractive): boolean {
-	return manager.selection.selectedElements.length === 1;
+export function canCopyStyle(doc: MapDocumentInteractive): boolean {
+	return doc.selection.selectedElements.length === 1;
 }
 
-export function copyStyle(manager: MapDocumentInteractive): void {
-	if (!canCopyStyle(manager)) return;
-	manager.styleClipboard.copy(manager.selection.selectedElements[0]);
+export function copyStyle(doc: MapDocumentInteractive): void {
+	if (!canCopyStyle(doc)) return;
+	doc.styleClipboard.copy(doc.selection.selectedElements[0]);
 }
 
-export function canPasteStyle(manager: MapDocumentInteractive): boolean {
-	return manager.selection.selectedElements.length > 0 && manager.styleClipboard.style !== undefined;
+export function canPasteStyle(doc: MapDocumentInteractive): boolean {
+	return doc.selection.selectedElements.length > 0 && doc.styleClipboard.style !== undefined;
 }
 
 /** Add an entry to the legend, or start a legend. It starts with a color of the map that the legend does not show yet. */
-export function addLegendEntry(manager: MapDocumentInteractive): void {
-	const entries = manager.legend?.entries ?? [];
+export function addLegendEntry(doc: MapDocumentInteractive): void {
+	const entries = doc.legend?.entries ?? [];
 	const used = new Set(entries.map((entry) => entry.color.toLowerCase()));
-	const color = manager.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
-	manager.legend = { ...manager.legend, entries: [...entries, { color, label: '' }] };
-	manager.state.log();
+	const color = doc.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
+	doc.legend = { ...doc.legend, entries: [...entries, { color, label: '' }] };
+	doc.state.log();
 }
 
-export function pasteStyle(manager: MapDocumentInteractive): void {
-	const style = manager.styleClipboard.style;
-	if (!canPasteStyle(manager) || !style) return;
-	manager.styleClipboard.paste(manager.selection.selectedElements, style);
-	manager.state.log();
+export function pasteStyle(doc: MapDocumentInteractive): void {
+	const style = doc.styleClipboard.style;
+	if (!canPasteStyle(doc) || !style) return;
+	doc.styleClipboard.paste(doc.selection.selectedElements, style);
+	doc.state.log();
 }

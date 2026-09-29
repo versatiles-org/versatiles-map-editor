@@ -13,7 +13,7 @@ describe('SelectionPointer', () => {
 	let mockMap: MockMap;
 	let mockCursor: Mocked<Cursor>;
 	let mockState: Mocked<StateManager>;
-	let mockManager: MapDocumentInteractive;
+	let mockDoc: MapDocumentInteractive;
 
 	beforeEach(() => {
 		mockMap = new MockMap();
@@ -25,7 +25,7 @@ describe('SelectionPointer', () => {
 		mockState = {
 			log: vi.fn()
 		} as unknown as Mocked<StateManager>;
-		mockManager = {
+		mockDoc = {
 			map: mockMap,
 			cursor: mockCursor,
 			state: mockState,
@@ -35,7 +35,7 @@ describe('SelectionPointer', () => {
 		} as unknown as MapDocumentInteractive;
 
 		vi.clearAllMocks();
-		handler = new SelectionHandler(mockManager);
+		handler = new SelectionHandler(mockDoc);
 	});
 
 	describe('handle mouse events', () => {
@@ -155,7 +155,7 @@ describe('SelectionPointer', () => {
 				duplicateElement = vi.fn(() => ({
 					getSelectionNodeUpdater: vi.fn().mockReturnValue({ update: copyUpdateMock })
 				}));
-				Object.assign(mockManager, { duplicateElement });
+				Object.assign(mockDoc, { duplicateElement });
 				mockMap.queryRenderedFeatures.mockReturnValue([
 					{ properties: { index: 0 } } as unknown as maplibregl.MapGeoJSONFeature
 				]);
@@ -283,7 +283,7 @@ describe('SelectionPointer', () => {
 				deleteNode: vi.fn(() => true),
 				isMoveNode: vi.fn(() => false)
 			} as unknown as Mocked<AbstractElement>;
-			mockManager.elements = [element];
+			mockDoc.elements = [element];
 			handler.selectElement(element);
 		});
 
@@ -325,8 +325,8 @@ describe('SelectionPointer', () => {
 					getSelectionNodes: vi.fn(() => [{ index: 0, coordinates: [0, 0] }])
 				}) as unknown as Mocked<AbstractElement>;
 			elements = [createElement(), createElement(), createElement()];
-			mockManager.elements = elements;
-			elementAt = mockManager.elementAt as Mock;
+			mockDoc.elements = elements;
+			elementAt = mockDoc.elementAt as Mock;
 			// no selection node is hit
 			mockMap.queryRenderedFeatures.mockReturnValue([]);
 		});
@@ -379,7 +379,7 @@ describe('SelectionPointer', () => {
 		it('moves copies of all selected elements with Alt-drag', () => {
 			const copies = [elements[2]];
 			const duplicateElements = vi.fn(() => copies);
-			Object.assign(mockManager, { duplicateElements });
+			Object.assign(mockDoc, { duplicateElements });
 			handler.selectElements([elements[0]]);
 			elementAt.mockReturnValue(elements[0]);
 

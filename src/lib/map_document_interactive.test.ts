@@ -11,15 +11,15 @@ import { addElement } from './__mocks__/elements.js';
 
 describe('MapDocument', () => {
 	let mockMap: MockMap;
-	let manager: MapDocumentInteractive;
+	let doc: MapDocumentInteractive;
 
 	beforeEach(() => {
 		mockMap = new MockMap();
-		manager = new MapDocumentInteractive(mockMap as unknown as MaplibreMap);
+		doc = new MapDocumentInteractive(mockMap as unknown as MaplibreMap);
 	});
 
 	it('should initialize correctly', async () => {
-		expect(manager).toBeDefined();
+		expect(doc).toBeDefined();
 		expect(mockMap.getCanvasContainer).toHaveBeenCalled();
 		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 	});
@@ -27,96 +27,96 @@ describe('MapDocument', () => {
 	it('gives all marker labels a font of their own, or the one of the background map', async () => {
 		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 		mockMap.emit('style.load');
-		expect(manager.font).toBe('noto_sans_regular');
-		expect(manager.getState().meta?.labelFont).toBeUndefined();
+		expect(doc.font).toBe('noto_sans_regular');
+		expect(doc.getState().meta?.labelFont).toBeUndefined();
 
 		// set on the layer of the markers, without a new style, and stored in the map
-		manager.labelFont = 'lato_bold';
-		expect(manager.font).toBe('lato_bold');
+		doc.labelFont = 'lato_bold';
+		expect(doc.font).toBe('lato_bold');
 		expect(mockMap.setLayoutProperty).toHaveBeenCalledWith('elements_symbol', 'text-font', ['literal', ['lato_bold']]);
-		expect(manager.getState().meta?.labelFont).toBe('lato_bold');
+		expect(doc.getState().meta?.labelFont).toBe('lato_bold');
 
 		// a new background keeps it
 		const styles = mockMap.setStyle.mock.calls.length;
-		void manager.setBackground({ builder: 'osm', options: { text: { font: 'open_sans_regular' } } });
+		void doc.setBackground({ builder: 'osm', options: { text: { font: 'open_sans_regular' } } });
 		await vi.waitFor(() => expect(mockMap.setStyle.mock.calls.length).toBeGreaterThan(styles));
 		const style = (mockMap.setStyle.mock.calls.at(-1) as unknown[])[0] as { layers: { id: string; layout?: object }[] };
 		expect(style.layers.find((l) => l.id === 'elements_symbol')?.layout).toMatchObject({
 			'text-font': ['literal', ['lato_bold']]
 		});
-		expect(manager.font).toBe('lato_bold');
+		expect(doc.font).toBe('lato_bold');
 
 		// without its own font, the labels follow the background map
-		manager.labelFont = undefined;
-		expect(manager.font).toBe('open_sans_regular');
+		doc.labelFont = undefined;
+		expect(doc.font).toBe('open_sans_regular');
 	});
 
 	it('should add a new marker', () => {
-		const element = addElement(manager, 'marker');
+		const element = addElement(doc, 'marker');
 		expect(element).toBeInstanceOf(MarkerElement);
-		expect(manager.elements).toBeDefined();
+		expect(doc.elements).toBeDefined();
 	});
 
 	it('should add a new line', () => {
-		const element = addElement(manager, 'line');
+		const element = addElement(doc, 'line');
 		expect(element).toBeInstanceOf(LineElement);
-		expect(manager.elements).toBeDefined();
+		expect(doc.elements).toBeDefined();
 	});
 
 	it('should add a new polygon', () => {
-		const element = addElement(manager, 'polygon');
+		const element = addElement(doc, 'polygon');
 		expect(element).toBeInstanceOf(PolygonElement);
-		expect(manager.elements).toBeDefined();
+		expect(doc.elements).toBeDefined();
 	});
 
 	it('should not accumulate map listeners on undo/redo', () => {
-		addElement(manager, 'polygon');
-		manager.state.log();
-		addElement(manager, 'marker');
-		manager.state.log();
+		addElement(doc, 'polygon');
+		doc.state.log();
+		addElement(doc, 'marker');
+		doc.state.log();
 		const count = mockMap.listenerCount();
 
 		for (let i = 0; i < 5; i++) {
-			manager.state.undo();
-			manager.state.redo();
+			doc.state.undo();
+			doc.state.redo();
 		}
 		expect(mockMap.listenerCount()).toBe(count);
 	});
 
 	it('should delete an element', () => {
-		const element = addElement(manager, 'marker');
-		const { selection } = manager;
+		const element = addElement(doc, 'marker');
+		const { selection } = doc;
 		if (!selection) throw new Error('Selection is not defined');
 		selection.selectElement(element);
-		manager.removeElement(element);
+		doc.removeElement(element);
 		expect(selection.selectedElements).toStrictEqual([]);
-		expect(manager.elements).toStrictEqual([]);
+		expect(doc.elements).toStrictEqual([]);
 	});
 
 	describe('state', () => {
 		it('should create and restore empty map', async () => {
-			expect(manager.getState()).toStrictEqual({
+			expect(doc.getState()).toStrictEqual({
 				elements: [],
 				map: { center: [1, 2], radius: 312696.8037113758 }
 			});
-			expect(manager.state.getHash()).toBe('IG2haCUQhQ');
+			expect(doc.state.getHash()).toBe('IG2haCUQhQ');
 
-			manager.map.setCenter({ lng: 12, lat: 34 });
-			manager.map.setZoom(5);
+			doc.map.setCenter({ lng: 12, lat: 34 });
+			doc.map.setZoom(5);
 
-			expect(manager.getState()).toStrictEqual({
+			expect(doc.getState()).toStrictEqual({
 				elements: [],
 				map: { center: [12, 34], radius: 215179.62743964553 }
 			});
 
-			const hash = manager.state.getHash();
+			const hash = doc.state.getHash();
 			expect(hash).toBe('IGxYdVMa_BQ');
 
-			await manager.setState(decodeState(hash));
-			expect(manager.elements.length).toBe(0);
-			const center = manager.map.getCenter();
+			await doc.setState(decodeState(hash));
+			expect(doc.elements.length).toBe(0);
+			const center = doc.map.getCenter();
 			expect(center).toStrictEqual({ lng: 12, lat: 34 });
-			expect(manager.map.getZoom()).toStrictEqual(5);
+			expect(doc.map.getZoom()).toStrictEqual(5);
 		});
 	});
 
@@ -128,17 +128,17 @@ describe('MapDocument', () => {
 				type: 'marker'
 			};
 
-			const marker = addElement(manager, 'marker');
+			const marker = addElement(doc, 'marker');
 			marker.point = element.point;
 			marker.layer.label = element.style.label;
 
-			expect(manager.getState().elements).toStrictEqual([element]);
+			expect(doc.getState().elements).toStrictEqual([element]);
 
-			const hash = manager.state.getHash();
+			const hash = doc.state.getHash();
 			expect(hash).toBe('IG2haCUQhQgukjiAgqjmQJI4COEA');
 
-			await manager.setState(decodeState(hash));
-			const elements = manager.elements;
+			await doc.setState(decodeState(hash));
+			const elements = doc.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
@@ -153,17 +153,17 @@ describe('MapDocument', () => {
 				type: 'line'
 			};
 
-			const line = addElement(manager, 'line');
+			const line = addElement(doc, 'line');
 			line.path = element.points;
 			line.layer.color = element.style.color;
 
-			expect(manager.getState().elements).toStrictEqual([element]);
+			expect(doc.getState().elements).toStrictEqual([element]);
 
-			const hash = manager.state.getHash();
+			const hash = doc.state.getHash();
 			expect(hash).toBe('IVXm97bQtBKIQohAAAaTWAaTWIEAA');
 
-			await manager.setState(decodeState(hash));
-			const elements = manager.elements;
+			await doc.setState(decodeState(hash));
+			const elements = doc.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
@@ -179,25 +179,25 @@ describe('MapDocument', () => {
 				type: 'polygon'
 			};
 
-			const polygon = addElement(manager, 'polygon');
+			const polygon = addElement(doc, 'polygon');
 			polygon.path = element.points;
 			polygon.fillLayer.color = element.style.color;
 			polygon.strokeLayer.color = element.strokeStyle.color;
 
-			expect(manager.getState().elements).toStrictEqual([element]);
+			expect(doc.getState().elements).toStrictEqual([element]);
 
-			const hash = manager.state.getHash();
+			const hash = doc.state.getHash();
 			expect(hash).toBe('IlXm94SNFZtoWglEIUYgAANJrANJrECAAgQEA');
 
-			await manager.setState(decodeState(hash));
-			const elements = manager.elements;
+			await doc.setState(decodeState(hash));
+			const elements = doc.elements;
 			expect(elements.length).toBe(1);
 			expect(elements[0].getState()).toStrictEqual(element);
 		});
 
 		it('should add an imported state: its elements and its map properties', () => {
-			addElement(manager, 'marker');
-			manager.addState({
+			addElement(doc, 'marker');
+			doc.addState({
 				meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] }, colorScheme: 'dark2', search: true },
 				elements: [
 					{
@@ -209,69 +209,69 @@ describe('MapDocument', () => {
 					}
 				]
 			});
-			expect(manager.elements.map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
-			expect(manager.legend?.entries.length).toBe(1);
-			expect(manager.colors.scheme).toBe('dark2');
-			expect(manager.search).toBe(true);
+			expect(doc.elements.map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
+			expect(doc.legend?.entries.length).toBe(1);
+			expect(doc.colors.scheme).toBe('dark2');
+			expect(doc.search).toBe(true);
 		});
 
 		it('should add several elements and select them all', () => {
-			const elements = manager.addElements([
+			const elements = doc.addElements([
 				{ type: 'marker', point: [1, 2] },
 				{ type: 'marker', point: [3, 4] }
 			]);
-			expect(manager.elements).toStrictEqual(elements);
-			expect(manager.selection.selectedElements).toStrictEqual(elements);
+			expect(doc.elements).toStrictEqual(elements);
+			expect(doc.selection.selectedElements).toStrictEqual(elements);
 		});
 
 		it('should add an element from its state and select it', () => {
 			const state: StateElement = { type: 'marker', point: [10, 20], popup: { text: 'Hi' } };
-			const element = manager.addElement(state);
-			expect(manager.elements).toStrictEqual([element]);
-			expect(manager.selection.selectedElement).toBe(element);
+			const element = doc.addElement(state);
+			expect(doc.elements).toStrictEqual([element]);
+			expect(doc.selection.selectedElement).toBe(element);
 			expect(element.getState()).toMatchObject(state);
 		});
 
 		it('should keep the color scheme in the state', async () => {
-			expect(manager.getState()).not.toHaveProperty('meta');
-			await manager.setState({ meta: { colorScheme: 'dark2' }, elements: [] });
-			expect(manager.colors.scheme).toBe('dark2');
-			expect(manager.getState().meta).toStrictEqual({ colorScheme: 'dark2' });
+			expect(doc.getState()).not.toHaveProperty('meta');
+			await doc.setState({ meta: { colorScheme: 'dark2' }, elements: [] });
+			expect(doc.colors.scheme).toBe('dark2');
+			expect(doc.getState().meta).toStrictEqual({ colorScheme: 'dark2' });
 		});
 
 		it('should disable box zoom, which would swallow Shift+clicks', () => {
-			expect(manager.map.boxZoom.disable).toHaveBeenCalled();
+			expect(doc.map.boxZoom.disable).toHaveBeenCalled();
 		});
 
 		describe('duplicate', () => {
 			it('should duplicate several elements and select all copies', () => {
-				const marker = addElement(manager, 'marker');
-				const line = addElement(manager, 'line');
-				const copies = manager.duplicateElements([marker, line]);
+				const marker = addElement(doc, 'marker');
+				const line = addElement(doc, 'line');
+				const copies = doc.duplicateElements([marker, line]);
 				expect(copies.map((c) => c.getState())).toStrictEqual([marker.getState(), line.getState()]);
-				expect(manager.selection.selectedElements).toStrictEqual(copies);
-				expect(manager.elements.length).toBe(4);
+				expect(doc.selection.selectedElements).toStrictEqual(copies);
+				expect(doc.elements.length).toBe(4);
 			});
 
 			it('should keep the other selected elements when one is removed', () => {
-				const marker = addElement(manager, 'marker');
-				const line = addElement(manager, 'line');
-				manager.selection.selectElements([marker, line]);
+				const marker = addElement(doc, 'marker');
+				const line = addElement(doc, 'line');
+				doc.selection.selectElements([marker, line]);
 				marker.delete();
-				expect(manager.selection.selectedElements).toStrictEqual([line]);
+				expect(doc.selection.selectedElements).toStrictEqual([line]);
 			});
 
 			it('should duplicate a marker with an offset and select the copy', () => {
-				const marker = addElement(manager, 'marker');
+				const marker = addElement(doc, 'marker');
 				marker.point = [10, 20];
 				marker.layer.label = 'Test';
 
-				const copy = manager.duplicateElement(marker, [5, 0]);
+				const copy = doc.duplicateElement(marker, [5, 0]);
 
 				expect(copy).toBeInstanceOf(MarkerElement);
 				expect(copy).not.toBe(marker);
-				expect(manager.elements).toStrictEqual([marker, copy]);
-				expect(manager.selection.selectedElement).toBe(copy);
+				expect(doc.elements).toStrictEqual([marker, copy]);
+				expect(doc.selection.selectedElement).toBe(copy);
 				expect(copy.getState()).toStrictEqual({
 					type: 'marker',
 					point: [15, expect.closeTo(20)],
@@ -281,14 +281,14 @@ describe('MapDocument', () => {
 			});
 
 			it('should duplicate a line without sharing its points', () => {
-				const line = addElement(manager, 'line');
+				const line = addElement(doc, 'line');
 				line.path = [
 					[1, 2],
 					[3, 4]
 				];
 				line.layer.color = '#abcdef';
 
-				const copy = manager.duplicateElement(line) as LineElement;
+				const copy = doc.duplicateElement(line) as LineElement;
 
 				expect(copy.getState()).toStrictEqual(line.getState());
 				copy.path[0][0] = 99;
@@ -296,13 +296,13 @@ describe('MapDocument', () => {
 			});
 
 			it('should duplicate polygons and circles with their outline style', () => {
-				const polygon = addElement(manager, 'polygon');
+				const polygon = addElement(doc, 'polygon');
 				polygon.strokeLayer.visible = false;
-				const circle = addElement(manager, 'circle');
+				const circle = addElement(doc, 'circle');
 				circle.strokeLayer.color = '#123456';
 
-				const polygonCopy = manager.duplicateElement(polygon, [0, 10]);
-				const circleCopy = manager.duplicateElement(circle, [0, 10]);
+				const polygonCopy = doc.duplicateElement(polygon, [0, 10]);
+				const circleCopy = doc.duplicateElement(circle, [0, 10]);
 
 				expect(polygonCopy).toBeInstanceOf(PolygonElement);
 				expect(polygonCopy.getState()).toMatchObject({ strokeStyle: { visible: false } });
@@ -316,14 +316,14 @@ describe('MapDocument', () => {
 		});
 
 		it('should restore falsy style values', async () => {
-			const polygon = addElement(manager, 'polygon');
+			const polygon = addElement(doc, 'polygon');
 			polygon.fillLayer.opacity = 0;
 			polygon.strokeLayer.visible = false;
-			const marker = addElement(manager, 'marker');
+			const marker = addElement(doc, 'marker');
 			marker.layer.halo = 0;
 
-			await manager.setState(decodeState(manager.state.getHash()));
-			const [restoredPolygon, restoredMarker] = manager.elements.map((e) => e.getState());
+			await doc.setState(decodeState(doc.state.getHash()));
+			const [restoredPolygon, restoredMarker] = doc.elements.map((e) => e.getState());
 			expect(restoredPolygon).toMatchObject({ style: { opacity: 0 }, strokeStyle: { visible: false } });
 			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });
 		});
@@ -332,9 +332,9 @@ describe('MapDocument', () => {
 	describe('GeoJSON', () => {
 		it('returns a FeatureCollection delegating to the codec', () => {
 			vi.spyOn(mockMap, 'getCenter').mockReturnValue(new LngLat(10, 20));
-			addElement(manager, 'marker');
+			addElement(doc, 'marker');
 
-			const geojson = manager.getGeoJSON();
+			const geojson = doc.getGeoJSON();
 			expect(geojson.type).toBe('FeatureCollection');
 			expect(geojson.features).toHaveLength(1);
 			expect(geojson.features[0].geometry.type).toBe('Point');
@@ -343,7 +343,7 @@ describe('MapDocument', () => {
 		});
 
 		it('applies the viewport from an imported document', () => {
-			manager.addGeoJSON({
+			doc.addGeoJSON({
 				type: 'FeatureCollection',
 				map: { center: [10, 20], radius: 1000 },
 				features: []
@@ -352,7 +352,7 @@ describe('MapDocument', () => {
 		});
 
 		it('imports Point, Circle, LineString and Polygon features', () => {
-			manager.addGeoJSON({
+			doc.addGeoJSON({
 				type: 'FeatureCollection',
 				features: [
 					{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } },
@@ -390,7 +390,7 @@ describe('MapDocument', () => {
 				]
 			});
 
-			const elements = manager.elements;
+			const elements = doc.elements;
 			expect(elements[0]).toBeInstanceOf(MarkerElement);
 			expect(elements[1]).toBeInstanceOf(CircleElement);
 			expect(elements[2]).toBeInstanceOf(LineElement);
@@ -398,22 +398,22 @@ describe('MapDocument', () => {
 		});
 
 		it('appends imported elements to the existing ones', () => {
-			addElement(manager, 'marker');
-			manager.addGeoJSON({
+			addElement(doc, 'marker');
+			doc.addGeoJSON({
 				type: 'FeatureCollection',
 				features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [10, 20] } }]
 			});
-			expect(manager.elements).toHaveLength(2);
+			expect(doc.elements).toHaveLength(2);
 		});
 
 		it('ignores features it cannot map without throwing', () => {
 			expect(() =>
-				manager.addGeoJSON({
+				doc.addGeoJSON({
 					type: 'FeatureCollection',
 					features: [{ type: 'Feature', properties: {}, geometry: { type: 'GeometryCollection', geometries: [] } }]
 				})
 			).not.toThrow();
-			expect(manager.elements).toHaveLength(0);
+			expect(doc.elements).toHaveLength(0);
 		});
 	});
 
@@ -423,26 +423,26 @@ describe('MapDocument', () => {
 
 		it('adds them in one change and selects them in one step', () => {
 			// every change of the element list is drawn
-			const setElements = vi.spyOn(manager.renderer, 'setElements');
-			const selectElements = vi.spyOn(manager.selection, 'selectElements');
+			const setElements = vi.spyOn(doc.renderer, 'setElements');
+			const selectElements = vi.spyOn(doc.selection, 'selectElements');
 
-			manager.addElements(markers(100));
+			doc.addElements(markers(100));
 			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([100]);
 			expect(selectElements.mock.calls.map(([list]) => list.length)).toStrictEqual([100]);
-			expect(manager.selection.selectedElements).toHaveLength(100);
+			expect(doc.selection.selectedElements).toHaveLength(100);
 		});
 
 		it('deletes them in one change, with their layers', () => {
-			const elements = manager.addElements(markers(3));
+			const elements = doc.addElements(markers(3));
 			const destroy = elements.map((element) => vi.spyOn(element, 'destroy'));
-			const setElements = vi.spyOn(manager.renderer, 'setElements');
-			const selectElements = vi.spyOn(manager.selection, 'selectElements');
+			const setElements = vi.spyOn(doc.renderer, 'setElements');
+			const selectElements = vi.spyOn(doc.selection, 'selectElements');
 
-			manager.deleteElements(elements.slice(0, 2));
+			doc.deleteElements(elements.slice(0, 2));
 			expect(setElements.mock.calls.map(([list]) => list.length)).toStrictEqual([1]);
 			expect(selectElements.mock.calls.map(([list]) => list.length)).toStrictEqual([1]);
 			expect(destroy.map((spy) => spy.mock.calls.length)).toStrictEqual([1, 1, 0]);
-			expect(manager.elements).toStrictEqual([elements[2]]);
+			expect(doc.elements).toStrictEqual([elements[2]]);
 		});
 	});
 
@@ -453,61 +453,61 @@ describe('MapDocument', () => {
 		});
 
 		it('change the elements in place', async () => {
-			const polygon = addElement(manager, 'polygon');
-			const marker = addElement(manager, 'marker');
-			manager.state.log();
+			const polygon = addElement(doc, 'polygon');
+			const marker = addElement(doc, 'marker');
+			doc.state.log();
 			polygon.fillLayer.color = '#123456';
 			polygon.fillLayer.opacity = 0.2;
 			polygon.strokeLayer.width = 7;
-			manager.state.log();
+			doc.state.log();
 			mockMap.addSource.mockClear();
 
-			await manager.state.undo();
-			expect(manager.elements).toStrictEqual([polygon, marker]);
+			await doc.state.undo();
+			expect(doc.elements).toStrictEqual([polygon, marker]);
 			expect(mockMap.addSource).not.toHaveBeenCalled();
 			// the defaults, which the state leaves out
 			expect(polygon.getState().style).toBeUndefined();
 			expect(polygon.getState().strokeStyle).toBeUndefined();
 
-			await manager.state.redo();
-			expect(manager.elements).toStrictEqual([polygon, marker]);
+			await doc.state.redo();
+			expect(doc.elements).toStrictEqual([polygon, marker]);
 			expect(polygon.getState().style).toStrictEqual({ color: '#123456', opacity: 0.2 });
 			expect(polygon.getState().strokeStyle).toStrictEqual({ width: 7 });
 		});
 
 		it('restore the geometry and the popup', async () => {
-			const line = addElement(manager, 'line');
+			const line = addElement(doc, 'line');
 			const path = structuredClone(line.path);
-			manager.state.log();
+			doc.state.log();
 			line.moveBy(1, 0);
 			line.popup = 'Hello';
-			manager.state.log();
+			doc.state.log();
 
-			await manager.state.undo();
+			await doc.state.undo();
 			expect(line.path).toStrictEqual(path);
 			expect(line.popup).toBe('');
 		});
 
 		it('build and remove only the elements that differ, in the right order', async () => {
-			const marker = addElement(manager, 'marker');
-			manager.state.log();
+			const marker = addElement(doc, 'marker');
+			doc.state.log();
 			marker.delete();
-			const line = addElement(manager, 'line');
-			addElement(manager, 'circle');
-			manager.state.log();
+			const line = addElement(doc, 'line');
+			addElement(doc, 'circle');
+			doc.state.log();
 			const destroyLine = vi.spyOn(line, 'destroy');
 
 			// [line, circle] becomes [marker]: the line is replaced, the circle removed
-			await manager.state.undo();
-			const [restored] = manager.elements;
-			expect(manager.elements).toHaveLength(1);
+			await doc.state.undo();
+			const [restored] = doc.elements;
+			expect(doc.elements).toHaveLength(1);
 			expect(restored).toBeInstanceOf(MarkerElement);
 			expect(destroyLine).toHaveBeenCalled();
 
 			// [marker] becomes [line, circle]: a new line and a new circle
 			mockMap.moveLayer.mockClear();
-			await manager.state.redo();
-			expect(manager.elements.map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
+			await doc.state.redo();
+			expect(doc.elements.map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
 			expect(mockMap.moveLayer).not.toHaveBeenCalled();
 		});
 	});

@@ -12,7 +12,7 @@ const TOLERANCE = 4;
  * There are no hover tooltips, since they would not work on touch devices.
  */
 export class PopupHandler {
-	private readonly manager: MapDocument;
+	private readonly doc: MapDocument;
 	private popup: Popup | undefined;
 	private hovered: AbstractElement | undefined;
 	// The elements with a popup, prepared once per change instead of on every mouse move
@@ -21,10 +21,10 @@ export class PopupHandler {
 	private pointer: { x: number; y: number } | undefined;
 	private frame: number | undefined;
 
-	constructor(manager: MapDocument) {
-		this.manager = manager;
-		this.#candidates = $derived(indexElements(manager.elements.filter((element) => element.popup.trim())));
-		const map = manager.map;
+	constructor(doc: MapDocument) {
+		this.doc = doc;
+		this.#candidates = $derived(indexElements(doc.elements.filter((element) => element.popup.trim())));
+		const map = doc.map;
 		map.on('click', (e) => this.open(e));
 		map.on('mousemove', (e) => this.scheduleHover(e.point));
 		map.on('mouseout', () => {
@@ -35,7 +35,7 @@ export class PopupHandler {
 
 	/** The topmost element with a popup at the point. */
 	private elementAt(point: { x: number; y: number }): AbstractElement | undefined {
-		return this.manager.elementAt(point, TOLERANCE, this.#candidates);
+		return this.doc.elementAt(point, TOLERANCE, this.#candidates);
 	}
 
 	private scheduleHover(point: { x: number; y: number }) {
@@ -55,13 +55,13 @@ export class PopupHandler {
 		const content = document.createElement('div');
 		content.className = 'element-popup';
 		content.append(renderPopupText(element.popup));
-		this.popup = new Popup({ maxWidth: '280px' }).setLngLat(e.lngLat).setDOMContent(content).addTo(this.manager.map);
+		this.popup = new Popup({ maxWidth: '280px' }).setLngLat(e.lngLat).setDOMContent(content).addTo(this.doc.map);
 	}
 
 	private hover(element: AbstractElement | undefined) {
 		if (element === this.hovered) return;
 		this.hovered = element;
-		const map = this.manager.map;
+		const map = this.doc.map;
 		map.getCanvasContainer().style.cursor = element ? 'pointer' : '';
 		map.getSource<GeoJSONSource>('highlight')?.setData({
 			type: 'FeatureCollection',

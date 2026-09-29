@@ -5,9 +5,9 @@
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** The line layers of all selected elements, which are edited together. */
-	const { layers, manager }: { layers: MapLayerLine[]; manager: MapDocument } = $props();
+	const { layers, doc }: { layers: MapLayerLine[]; doc: MapDocument } = $props();
 	const uid = $props.id();
-	const log = () => manager.state?.log();
+	const log = () => doc.state?.log();
 	const color = $derived(group(layers, 'color'));
 	const width = $derived(group(layers, 'width'));
 	const dashed = $derived(group(layers, 'dashed'));
@@ -21,7 +21,7 @@
 </script>
 
 <InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
-	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={manager.colors} />
+	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
 <InputRow id="{uid}-dashed" label="Style" mixed={dashed.mixed} group>

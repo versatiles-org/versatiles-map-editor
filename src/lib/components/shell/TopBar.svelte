@@ -6,19 +6,19 @@
 	import MainMenu from './MainMenu.svelte';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
-	const history = $derived(manager.state.history);
+	const history = $derived(doc.state.history);
 	let dialogShare: DialogShare | undefined = $state();
 </script>
 
 <header class="topbar">
-	<MainMenu {manager} />
+	<MainMenu {doc} />
 	<h1>VersaTiles Map Editor</h1>
 	<span class="separator"></span>
 	<button
 		class="icon-button"
-		onclick={() => manager.state.undo()}
+		onclick={() => doc.state.undo()}
 		disabled={!history.undoEnabled}
 		aria-label="Undo"
 		title="Undo (Cmd/Ctrl+Z)"
@@ -27,7 +27,7 @@
 	</button>
 	<button
 		class="icon-button"
-		onclick={() => manager.state.redo()}
+		onclick={() => doc.state.redo()}
 		disabled={!history.redoEnabled}
 		aria-label="Redo"
 		title="Redo (Shift+Cmd/Ctrl+Z)"
@@ -36,7 +36,7 @@
 	</button>
 	<span class="spacer"></span>
 	<button class="btn share" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</button>
-	<DialogShare bind:this={dialogShare} state={manager.state} />
+	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>
 
 <style>

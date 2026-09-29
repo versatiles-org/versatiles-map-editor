@@ -7,8 +7,8 @@ import type { StateElement } from '@versatiles/map-state';
 import { getMiddlePoint, lat2mercator } from '../geometry.js';
 
 class TestPathElement extends AbstractPathElement {
-	constructor(manager: MapDocument, isLine: boolean) {
-		super(manager, isLine);
+	constructor(doc: MapDocument, isLine: boolean) {
+		super(doc, isLine);
 	}
 	isActive = true;
 
@@ -37,22 +37,22 @@ class TestPathElement extends AbstractPathElement {
 }
 
 describe('AbstractPathElement', () => {
-	let mockManager: MockMapDocument;
-	let manager: MapDocument;
+	let mockDoc: MockMapDocument;
+	let doc: MapDocument;
 
 	beforeEach(() => {
-		mockManager = new MockMapDocument();
-		manager = mockManager as unknown as MapDocument;
+		mockDoc = new MockMapDocument();
+		doc = mockDoc as unknown as MapDocument;
 	});
 
 	it('should initialize with empty path', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		expect(element).toBeDefined();
 		expect(element['path']).toEqual([]);
 	});
 
 	it('should generate selection nodes correctly', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		element['path'] = [
 			[0, 0],
 			[10, 10]
@@ -70,7 +70,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should update selection node correctly', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		element['path'] = [
 			[0, 0],
 			[10, 10]
@@ -83,7 +83,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should report the dragged vertex, and insert a vertex for a dragged midpoint', () => {
-		const element = new TestPathElement(manager, false);
+		const element = new TestPathElement(doc, false);
 		element.path = [
 			[0, 0],
 			[10, 0],
@@ -96,7 +96,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should delete a vertex', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		element.path = [
 			[0, 0],
 			[10, 10],
@@ -111,7 +111,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should keep the minimum number of vertices', () => {
-		const line = new TestPathElement(manager, true);
+		const line = new TestPathElement(doc, true);
 		line.path = [
 			[0, 0],
 			[10, 10]
@@ -120,7 +120,7 @@ describe('AbstractPathElement', () => {
 		expect(line.deleteNode(0)).toBe(false);
 		expect(line.path.length).toBe(2);
 
-		const polygon = new TestPathElement(manager, false);
+		const polygon = new TestPathElement(doc, false);
 		polygon.path = [
 			[0, 0],
 			[10, 0],
@@ -132,7 +132,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should not delete midpoints or unknown nodes', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		element.path = [
 			[0, 0],
 			[10, 10],
@@ -144,7 +144,7 @@ describe('AbstractPathElement', () => {
 	});
 
 	it('should move all points, keeping the shape on the map', () => {
-		const element = new TestPathElement(manager, true);
+		const element = new TestPathElement(doc, true);
 		element.path = [
 			[0, 0],
 			[10, 10]

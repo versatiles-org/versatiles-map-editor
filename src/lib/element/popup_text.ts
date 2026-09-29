@@ -7,11 +7,11 @@
  * The text is never parsed as HTML, and only http(s) and mailto links are created,
  * so a shared map cannot inject markup or scripts into a website that embeds it.
  */
-export function renderPopupText(text: string, doc: Document = document): DocumentFragment {
-	const fragment = doc.createDocumentFragment();
+export function renderPopupText(text: string, dom: Document = document): DocumentFragment {
+	const fragment = dom.createDocumentFragment();
 	text.split(/\r?\n/).forEach((line, i) => {
-		if (i > 0) fragment.append(doc.createElement('br'));
-		fragment.append(...renderInline(line, doc, true));
+		if (i > 0) fragment.append(dom.createElement('br'));
+		fragment.append(...renderInline(line, dom, true));
 	});
 	return fragment;
 }
@@ -20,11 +20,11 @@ export function renderPopupText(text: string, doc: Document = document): Documen
  * The popup text as plain text, as the popup shows it without its formatting: "**bold**" is
  * "bold", and a link its label. E.g. for the name of an element in a list.
  */
-export function popupToPlainText(text: string, doc: Document = document): string {
+export function popupToPlainText(text: string, dom: Document = document): string {
 	return text
 		.split(/\r?\n/)
 		.map((line) =>
-			renderInline(line, doc, true)
+			renderInline(line, dom, true)
 				.map((node) => node.textContent)
 				.join('')
 		)
@@ -46,33 +46,33 @@ function trimUrl(url: string): string {
 	}
 }
 
-function renderInline(text: string, doc: Document, allowBold: boolean): Node[] {
+function renderInline(text: string, dom: Document, allowBold: boolean): Node[] {
 	const nodes: Node[] = [];
 	let last = 0;
 	for (const match of text.matchAll(INLINE)) {
 		const [whole, label, target, bareUrl, bold] = match;
 		if (bold !== undefined && !allowBold) continue;
 		const url = bareUrl && trimUrl(bareUrl);
-		if (match.index > last) nodes.push(doc.createTextNode(text.slice(last, match.index)));
+		if (match.index > last) nodes.push(dom.createTextNode(text.slice(last, match.index)));
 		// the punctuation after a bare URL remains text
 		last = match.index + (url ? url.length : whole.length);
 
 		if (bold !== undefined) {
-			const strong = doc.createElement('strong');
-			strong.append(...renderInline(bold, doc, false));
+			const strong = dom.createElement('strong');
+			strong.append(...renderInline(bold, dom, false));
 			nodes.push(strong);
 		} else if (url) {
-			nodes.push(createLink(url, url, doc) ?? doc.createTextNode(whole));
+			nodes.push(createLink(url, url, dom) ?? dom.createTextNode(whole));
 		} else {
-			nodes.push(createLink(label, target, doc) ?? doc.createTextNode(whole));
+			nodes.push(createLink(label, target, dom) ?? dom.createTextNode(whole));
 		}
 	}
-	if (last < text.length) nodes.push(doc.createTextNode(text.slice(last)));
+	if (last < text.length) nodes.push(dom.createTextNode(text.slice(last)));
 	return nodes;
 }
 
 /** A link, or undefined if the target is not a valid http(s) or mailto URL. */
-function createLink(label: string, target: string, doc: Document): HTMLAnchorElement | undefined {
+function createLink(label: string, target: string, dom: Document): HTMLAnchorElement | undefined {
 	let url: URL;
 	try {
 		url = new URL(target);
@@ -81,7 +81,7 @@ function createLink(label: string, target: string, doc: Document): HTMLAnchorEle
 	}
 	if (!['http:', 'https:', 'mailto:'].includes(url.protocol)) return undefined;
 
-	const a = doc.createElement('a');
+	const a = dom.createElement('a');
 	a.href = url.href;
 	a.target = '_blank';
 	a.rel = 'noopener noreferrer';

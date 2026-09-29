@@ -10,8 +10,8 @@ export class MarkerElement extends AbstractElement {
 
 	public point: GeoPoint;
 
-	constructor(manager: MapDocument, point: GeoPoint) {
-		super(manager);
+	constructor(doc: MapDocument, point: GeoPoint) {
+		super(doc);
 		this.point = point;
 
 		this.layer = new MapLayerSymbol(() => this.updateSource());
@@ -69,8 +69,8 @@ export class MarkerElement extends AbstractElement {
 		};
 	}
 
-	static fromState(manager: MapDocument, state: StateElementMarker) {
-		const element = new MarkerElement(manager, state.point);
+	static fromState(doc: MapDocument, state: StateElementMarker) {
+		const element = new MarkerElement(doc, state.point);
 		if (state.style) element.layer.setState(state.style);
 		return element;
 	}

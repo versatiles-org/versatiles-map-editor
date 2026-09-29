@@ -39,21 +39,21 @@ describe('MapDocument', () => {
 						reject = rej;
 					})
 			);
-			const manager = new MapDocument(map as unknown as MaplibreMap);
+			const doc = new MapDocument(map as unknown as MaplibreMap);
 			await vi.waitFor(() => expect(inlineSources).toHaveBeenCalled());
 			map.setStyle.mockClear();
-			return { manager, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
+			return { doc, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
 		}
 
 		it('creates elements only once the style is loaded', async () => {
-			const { manager, resolve } = await deferInlineSources();
-			const loading = manager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
+			const { doc, resolve } = await deferInlineSources();
+			const loading = doc.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
 			await new Promise((r) => setTimeout(r, 0));
-			expect(manager.elements).toHaveLength(0);
+			expect(doc.elements).toHaveLength(0);
 
 			resolve({ version: 8, sources: {}, layers: [] });
 			await loading;
-			expect(manager.elements).toHaveLength(1);
+			expect(doc.elements).toHaveLength(1);
 		});
 
 		it('removes all elements', () => {

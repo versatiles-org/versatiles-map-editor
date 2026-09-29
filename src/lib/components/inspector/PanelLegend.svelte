@@ -5,11 +5,11 @@
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
-	const legend: StateLegend = $derived(manager.legend ?? { entries: [] });
-	const log = () => manager.state.log();
+	const legend: StateLegend = $derived(doc.legend ?? { entries: [] });
+	const log = () => doc.state.log();
 
 	type Position = NonNullable<StateLegend['position']>;
 	// at their places in a 3×3 grid, without the center
@@ -37,7 +37,7 @@
 	/** A legend without entries is no legend. */
 	function update(change: Partial<StateLegend>) {
 		const next = { ...legend, ...change };
-		manager.legend = next.entries.length > 0 ? next : undefined;
+		doc.legend = next.entries.length > 0 ? next : undefined;
 	}
 
 	/** A property of the legend, as one undo step. */
@@ -102,14 +102,14 @@
 					id="{uid}-{i}-color"
 					bind:value={() => entry.color, (color) => updateEntry(i, { color })}
 					onchange={log}
-					palette={manager.colors}
+					palette={doc.colors}
 				/>
 			</InputRow>
 			<InputRow id="{uid}-{i}-symbol" label="Symbol">
 				<SymbolSelector
 					id="{uid}-{i}-symbol"
 					noneLabel="Color only"
-					map={manager.map}
+					map={doc.map}
 					bind:symbol={
 						() => entry.symbol ?? '',
 						(symbol) => {
@@ -125,7 +125,7 @@
 {/if}
 
 <div class="grid1">
-	<button class="btn" onclick={() => addLegendEntry(manager)}>Add legend entry</button>
+	<button class="btn" onclick={() => addLegendEntry(doc)}>Add legend entry</button>
 </div>
 
 <style>

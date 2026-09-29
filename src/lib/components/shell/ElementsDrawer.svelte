@@ -8,10 +8,10 @@
 	 * everything can be chosen with the keyboard or a screen reader, also elements that are hard
 	 * to hit on the map.
 	 */
-	const { manager, onclose }: { manager: MapDocumentInteractive; onclose: () => void } = $props();
+	const { doc, onclose }: { doc: MapDocumentInteractive; onclose: () => void } = $props();
 
-	const selection = $derived(manager.selection);
-	const count = $derived(manager.elements.length);
+	const selection = $derived(doc.selection);
+	const count = $derived(doc.elements.length);
 	const nothingSelected = $derived(selection.selectedElements.length === 0 && !selection.legendSelected);
 </script>
 
@@ -26,14 +26,14 @@
 		<button class="row" aria-pressed={nothingSelected} onclick={() => selection.selectElement()}>
 			<Icon name="map" size={16} />Map settings
 		</button>
-		{#if manager.legend}
+		{#if doc.legend}
 			<button class="row" aria-pressed={selection.legendSelected} onclick={() => selection.selectLegend()}>
 				<Icon name="legend" size={16} />Legend
 			</button>
 		{/if}
 		<hr />
 		{#if count > 0}
-			<ElementList {manager} />
+			<ElementList {doc} />
 		{:else}
 			<p class="label">No elements yet. Draw them with the tools on the left.</p>
 		{/if}

@@ -10,7 +10,7 @@ vi.mock('../geocoding.js', () => ({ geocode }));
 
 describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;
-	let manager: {
+	let doc: {
 		map: MockMap;
 		colors: { scheme: string | undefined; getColors: () => string[]; use: () => void };
 		legend: StateLegend | undefined;
@@ -19,7 +19,7 @@ describe('DialogImportTable', () => {
 	};
 
 	beforeEach(() => {
-		manager = {
+		doc = {
 			map: new MockMap(),
 			colors: { scheme: undefined, getColors: () => [], use: () => {} },
 			legend: undefined,
@@ -28,7 +28,7 @@ describe('DialogImportTable', () => {
 		};
 		component = mount(DialogImportTable, {
 			target: document.body,
-			props: { manager: manager as unknown as MapDocumentInteractive }
+			props: { doc: doc as unknown as MapDocumentInteractive }
 		});
 		(component as { open: () => void }).open();
 		flushSync();
@@ -109,11 +109,11 @@ describe('DialogImportTable', () => {
 	it('imports the rows as markers, with a style and a legend entry per category', async () => {
 		paste('name,lat,lon,kind\nA,52.5,13.4,cafe\nB,52.6,13.5,shop\nC,52.7,13.6,cafe');
 		button('Import 3 rows').click();
-		await vi.waitFor(() => expect(manager.addElements).toHaveBeenCalled());
+		await vi.waitFor(() => expect(doc.addElements).toHaveBeenCalled());
 		await tick();
 		flushSync();
 
-		const markers = manager.addElements.mock.lastCall![0] as StateElementMarker[];
+		const markers = doc.addElements.mock.lastCall![0] as StateElementMarker[];
 		expect(markers.map((m) => [m.point, m.style?.label])).toStrictEqual([
 			[[13.4, 52.5], 'A'],
 			[[13.5, 52.6], 'B'],
@@ -122,15 +122,15 @@ describe('DialogImportTable', () => {
 		// both cafes in one color, the shop in another
 		expect(markers[0].style?.color).toBe(markers[2].style?.color);
 		expect(markers[0].style?.color).not.toBe(markers[1].style?.color);
-		expect(manager.legend?.entries.map((e) => e.label)).toStrictEqual(['cafe', 'shop']);
-		expect(manager.map.fitBounds).toHaveBeenCalled();
-		expect(manager.state.log).toHaveBeenCalledTimes(1);
+		expect(doc.legend?.entries.map((e) => e.label)).toStrictEqual(['cafe', 'shop']);
+		expect(doc.map.fitBounds).toHaveBeenCalled();
+		expect(doc.state.log).toHaveBeenCalledTimes(1);
 		expect(document.body.textContent).toContain('Imported 3 markers.');
 	});
 
 	it('prefers places in the region of the map view, or as the user chooses', async () => {
 		geocode.mockReset().mockResolvedValue([{ label: 'Bonn', point: [7.1, 50.7] }]);
-		manager.map.setZoom(14);
+		doc.map.setZoom(14);
 		paste('name,address\nTown hall,Markt 1 Bonn');
 		const bias = select('Prefer places');
 		expect(bias.value).toBe('region');
@@ -164,7 +164,7 @@ describe('DialogImportTable', () => {
 		geocode.mockReset().mockResolvedValue([chaussee]);
 		paste('Name;Straße;Nr;Ort\nOffice;Hauptstraße;5;Berlin');
 		button('Import 1 row').click();
-		await vi.waitFor(() => expect(manager.addElements).toHaveBeenCalled());
+		await vi.waitFor(() => expect(doc.addElements).toHaveBeenCalled());
 		await tick();
 		flushSync();
 		const list = (name: string) => document.querySelector(`[aria-label="${name}"]`)?.textContent?.trim();
@@ -172,10 +172,10 @@ describe('DialogImportTable', () => {
 
 		unmount(component);
 		document.body.innerHTML = '';
-		manager.addElements.mockClear();
+		doc.addElements.mockClear();
 		component = mount(DialogImportTable, {
 			target: document.body,
-			props: { manager: manager as unknown as MapDocumentInteractive }
+			props: { doc: doc as unknown as MapDocumentInteractive }
 		});
 		(component as { open: () => void }).open();
 		flushSync();

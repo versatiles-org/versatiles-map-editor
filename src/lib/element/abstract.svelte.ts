@@ -19,7 +19,7 @@ export abstract class AbstractElement {
 	protected readonly map: maplibregl.Map;
 	protected isSelected = false;
 
-	public readonly manager: MapDocument | MapDocumentInteractive;
+	public readonly doc: MapDocument | MapDocumentInteractive;
 	/** The id of the element's features in the shared element sources. */
 	public readonly id = nextId++;
 	/** The length, area or radius, shown in the style editor. */
@@ -27,9 +27,9 @@ export abstract class AbstractElement {
 	/** Text of the popup that opens on click in the viewer. Empty for no popup. */
 	public popup = $state('');
 
-	constructor(manager: MapDocument | MapDocumentInteractive) {
-		this.manager = manager;
-		this.map = manager.map;
+	constructor(doc: MapDocument | MapDocumentInteractive) {
+		this.doc = doc;
+		this.map = doc.map;
 		this.canvas = this.map.getCanvasContainer();
 	}
 
@@ -65,7 +65,7 @@ export abstract class AbstractElement {
 
 	/** Draw the element again, after a change of its geometry or style. */
 	protected updateSource() {
-		this.manager.renderer.update(this);
+		this.doc.renderer.update(this);
 		this.measurements = this.getMeasurements();
 	}
 
@@ -123,7 +123,7 @@ export abstract class AbstractElement {
 	protected abstract setGeometry(state: StateElement): void;
 
 	public delete() {
-		this.manager.removeElement(this);
+		this.doc.removeElement(this);
 		this.destroy();
 	}
 

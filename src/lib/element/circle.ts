@@ -12,8 +12,8 @@ export class CircleElement extends AbstractElement {
 	public point: GeoPoint;
 	public radius: number;
 
-	constructor(manager: MapDocument, point: GeoPoint, radius: number) {
-		super(manager);
+	constructor(doc: MapDocument, point: GeoPoint, radius: number) {
+		super(doc);
 		this.point = point;
 		this.radius = radius;
 
@@ -103,8 +103,8 @@ export class CircleElement extends AbstractElement {
 		};
 	}
 
-	static fromState(manager: MapDocument, state: StateElementCircle) {
-		const element = new CircleElement(manager, state.point, state.radius);
+	static fromState(doc: MapDocument, state: StateElementCircle) {
+		const element = new CircleElement(doc, state.point, state.radius);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);
 		return element;

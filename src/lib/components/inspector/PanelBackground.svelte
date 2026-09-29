@@ -12,10 +12,10 @@
 	import { InputRow, FontSelect, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
-	const { manager }: { manager: MapDocumentInteractive } = $props();
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
-	const settings = $derived(getSettings(manager.background));
+	const settings = $derived(getSettings(doc.background));
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>
@@ -56,8 +56,8 @@
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
 		// and quick changes are separate undo steps.
-		void manager.setBackground(changeSettings(manager.background, { [key]: value }));
-		manager.state.log();
+		void doc.setBackground(changeSettings(doc.background, { [key]: value }));
+		doc.state.log();
 	}
 </script>
 
