@@ -2,12 +2,15 @@
 	"deps-graph": {
 		"barrel": ["packages/**", "src/lib/**"],
 		"collapse-dir": [
+			"src/lib/components/dialogs/*",
+			"src/lib/components/inspector/*",
 			"src/lib/components/map/editor/*",
 			"src/lib/components/map/viewer/*",
-			"src/lib/components/ui/*",
-			"src/lib/page/*"
+			"src/lib/components/shell/*",
+			"src/lib/components/ui/*"
 		],
 		"include": ["src", "packages/map-state/src"],
-		"merge-outgoing": ["src/lib/*", "src/lib/components/*"]
+		"merge-outgoing": ["src/lib/*", "src/lib/components/*"],
+		"exclude": ["src/vitest.setup.ts", "src/routes/iframe-test/*"]
 	}
 }
