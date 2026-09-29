@@ -14,7 +14,7 @@ export function createMockDoc() {
 	} as unknown as Mocked<Cursor>;
 	const state = { log: vi.fn() } as unknown as Mocked<StateManager>;
 	const doc = {
-		map,
+		view: { map },
 		cursor,
 		state,
 		elements: [],

@@ -29,7 +29,7 @@
 	function update() {
 		const elements = doc.selection.selectedElements;
 		if (elements.length === 0 || !bar) return (position = undefined);
-		const map = doc.map;
+		const map = doc.view.map;
 		let x0 = Infinity,
 			y0 = Infinity,
 			x1 = -Infinity,
@@ -63,7 +63,7 @@
 	});
 
 	$effect(() => {
-		const map = doc.map;
+		const map = doc.view.map;
 		const down = () => (pressed = true);
 		const up = () => {
 			pressed = false;

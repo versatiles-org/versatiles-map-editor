@@ -101,8 +101,8 @@ describe('MapDocument', () => {
 			});
 			expect(doc.state.getHash()).toBe('IG2haCUQhQ');
 
-			doc.map.setCenter({ lng: 12, lat: 34 });
-			doc.map.setZoom(5);
+			doc.view.map.setCenter({ lng: 12, lat: 34 });
+			doc.view.map.setZoom(5);
 
 			expect(doc.getState()).toStrictEqual({
 				elements: [],
@@ -114,9 +114,9 @@ describe('MapDocument', () => {
 
 			await doc.setState(decodeState(hash));
 			expect(doc.elements.length).toBe(0);
-			const center = doc.map.getCenter();
+			const center = doc.view.map.getCenter();
 			expect(center).toStrictEqual({ lng: 12, lat: 34 });
-			expect(doc.map.getZoom()).toStrictEqual(5);
+			expect(doc.view.map.getZoom()).toStrictEqual(5);
 		});
 	});
 
@@ -240,7 +240,7 @@ describe('MapDocument', () => {
 		});
 
 		it('should disable box zoom, which would swallow Shift+clicks', () => {
-			expect(doc.map.boxZoom.disable).toHaveBeenCalled();
+			expect(doc.view.map.boxZoom.disable).toHaveBeenCalled();
 		});
 
 		describe('duplicate', () => {
@@ -423,7 +423,7 @@ describe('MapDocument', () => {
 
 		it('adds them in one change and selects them in one step', () => {
 			// every change of the element list is drawn
-			const setElements = vi.spyOn(doc.renderer, 'setElements');
+			const setElements = vi.spyOn(doc.view.renderer, 'setElements');
 			const selectElements = vi.spyOn(doc.selection, 'selectElements');
 
 			doc.addElements(markers(100));
@@ -435,7 +435,7 @@ describe('MapDocument', () => {
 		it('deletes them in one change, with their layers', () => {
 			const elements = doc.addElements(markers(3));
 			const destroy = elements.map((element) => vi.spyOn(element, 'destroy'));
-			const setElements = vi.spyOn(doc.renderer, 'setElements');
+			const setElements = vi.spyOn(doc.view.renderer, 'setElements');
 			const selectElements = vi.spyOn(doc.selection, 'selectElements');
 
 			doc.deleteElements(elements.slice(0, 2));

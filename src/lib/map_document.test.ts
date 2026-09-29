@@ -20,7 +20,7 @@ describe('MapDocument', () => {
 
 	it('should initialize with default values', () => {
 		expect(mapDocument.elements).toBeDefined();
-		expect(mapDocument.map).toBe(map);
+		expect(mapDocument.view.map).toBe(map);
 		expect(mapDocument.state).toBeNull();
 		expect(mapDocument.selection).toBeNull();
 	});

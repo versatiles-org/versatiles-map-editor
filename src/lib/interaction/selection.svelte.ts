@@ -121,7 +121,7 @@ export class SelectionHandler {
 				: undefined;
 
 		// looked up each time, since a new background map replaces the source object
-		this.doc.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({
+		this.doc.view.map.getSource<maplibregl.GeoJSONSource>('selection_nodes')?.setData({
 			type: 'FeatureCollection',
 			features: nodes.map((n) => ({
 				type: 'Feature',
@@ -134,7 +134,7 @@ export class SelectionHandler {
 		const elements = this.#selectedElements;
 		const marks =
 			elements.length > 1 ? elements.flatMap((e) => e.getSelectionNodes().filter((n) => !n.transparent)) : [];
-		this.doc.map.getSource<maplibregl.GeoJSONSource>('selection_marks')?.setData({
+		this.doc.view.map.getSource<maplibregl.GeoJSONSource>('selection_marks')?.setData({
 			type: 'FeatureCollection',
 			features: marks.map((n) => ({
 				type: 'Feature',

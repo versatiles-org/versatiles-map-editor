@@ -13,7 +13,7 @@ vi.mock('../geocoding.js', () => ({ geocode }));
 describe('DialogImportTable', () => {
 	let component: ReturnType<typeof mount>;
 	let doc: {
-		map: MockMap;
+		view: { map: MockMap };
 		colors: { scheme: string | undefined; getColors: () => string[]; use: () => void };
 		legend: StateLegend | undefined;
 		addElements: ReturnType<typeof vi.fn>;
@@ -22,7 +22,7 @@ describe('DialogImportTable', () => {
 
 	beforeEach(() => {
 		doc = {
-			map: new MockMap(),
+			view: { map: new MockMap() },
 			colors: { scheme: undefined, getColors: () => [], use: () => {} },
 			legend: undefined,
 			addElements: vi.fn(),
@@ -31,7 +31,7 @@ describe('DialogImportTable', () => {
 		component = mount(DialogImportTable, {
 			target: document.body,
 			props: { doc: doc as unknown as MapDocumentInteractive },
-			context: symbolLibraryContext(new SymbolLibrary(doc.map as unknown as maplibregl.Map))
+			context: symbolLibraryContext(new SymbolLibrary(doc.view.map as unknown as maplibregl.Map))
 		});
 		(component as { open: () => void }).open();
 		flushSync();
@@ -126,14 +126,14 @@ describe('DialogImportTable', () => {
 		expect(markers[0].style?.color).toBe(markers[2].style?.color);
 		expect(markers[0].style?.color).not.toBe(markers[1].style?.color);
 		expect(doc.legend?.entries.map((e) => e.label)).toStrictEqual(['cafe', 'shop']);
-		expect(doc.map.fitBounds).toHaveBeenCalled();
+		expect(doc.view.map.fitBounds).toHaveBeenCalled();
 		expect(doc.state.log).toHaveBeenCalledTimes(1);
 		expect(document.body.textContent).toContain('Imported 3 markers.');
 	});
 
 	it('prefers places in the region of the map view, or as the user chooses', async () => {
 		geocode.mockReset().mockResolvedValue([{ label: 'Bonn', point: [7.1, 50.7] }]);
-		doc.map.setZoom(14);
+		doc.view.map.setZoom(14);
 		paste('name,address\nTown hall,Markt 1 Bonn');
 		const bias = select('Prefer places');
 		expect(bias.value).toBe('region');
@@ -179,7 +179,7 @@ describe('DialogImportTable', () => {
 		component = mount(DialogImportTable, {
 			target: document.body,
 			props: { doc: doc as unknown as MapDocumentInteractive },
-			context: symbolLibraryContext(new SymbolLibrary(doc.map as unknown as maplibregl.Map))
+			context: symbolLibraryContext(new SymbolLibrary(doc.view.map as unknown as maplibregl.Map))
 		});
 		(component as { open: () => void }).open();
 		flushSync();

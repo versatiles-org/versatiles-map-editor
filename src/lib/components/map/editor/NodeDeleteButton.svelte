@@ -8,13 +8,13 @@
 
 	function updatePosition() {
 		const node = selectedNode;
-		position = node ? mapDocument.map.project(node.coordinates) : undefined;
+		position = node ? mapDocument.view.map.project(node.coordinates) : undefined;
 	}
 
 	$effect(() => {
 		updatePosition();
-		mapDocument.map.on('move', updatePosition);
-		return () => mapDocument.map.off('move', updatePosition);
+		mapDocument.view.map.on('move', updatePosition);
+		return () => mapDocument.view.map.off('move', updatePosition);
 	});
 
 	function deleteNode() {

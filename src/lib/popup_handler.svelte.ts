@@ -25,7 +25,7 @@ export class PopupHandler {
 	constructor(doc: MapDocument) {
 		this.doc = doc;
 		this.#candidates = $derived(indexElements(doc.elements.filter((element) => element.popup.trim())));
-		const map = doc.map;
+		const map = doc.view.map;
 		map.on('click', (e) => this.open(e));
 		map.on('mousemove', (e) => this.scheduleHover(e.point));
 		map.on('mouseout', () => {
@@ -56,13 +56,13 @@ export class PopupHandler {
 		const content = document.createElement('div');
 		content.className = 'element-popup';
 		content.append(renderPopupText(element.popup));
-		this.popup = new Popup({ maxWidth: '280px' }).setLngLat(e.lngLat).setDOMContent(content).addTo(this.doc.map);
+		this.popup = new Popup({ maxWidth: '280px' }).setLngLat(e.lngLat).setDOMContent(content).addTo(this.doc.view.map);
 	}
 
 	private hover(element: AbstractElement | undefined) {
 		if (element === this.hovered) return;
 		this.hovered = element;
-		const map = this.doc.map;
+		const map = this.doc.view.map;
 		map.getCanvasContainer().style.cursor = element ? 'pointer' : '';
 		map.getSource<GeoJSONSource>('highlight')?.setData({
 			type: 'FeatureCollection',

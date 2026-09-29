@@ -2,13 +2,11 @@ import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { vi } from 'vitest';
-import { MockMap } from './map.js';
 import { MockCursor } from './cursor.js';
 import { StateManager } from '../state/manager.js';
 
 export class MockMapDocument {
 	public elements: AbstractElement[] = [];
-	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
 	public elementChanged = vi.fn();
 	public readonly font = 'noto_sans_regular';

@@ -74,12 +74,12 @@
 		importError = '';
 		progress = { done: 0, total: table.rows.length };
 		controller = new AbortController();
-		const center = doc.map.getCenter();
+		const center = doc.view.map.getCenter();
 		try {
 			const result = await importTable(table, mappingOf(settings), {
 				signal: controller.signal,
 				language: navigator.language,
-				...biasOptions(settings.bias, [center.lng, center.lat], doc.map.getZoom()),
+				...biasOptions(settings.bias, [center.lng, center.lat], doc.view.map.getZoom()),
 				importUncertain: settings.importUncertain,
 				onProgress: (done, total) => (progress = { done, total })
 			});
@@ -112,7 +112,7 @@
 	/** Move the map to the imported markers. */
 	function showPoints(points: [number, number][]) {
 		const bounds = boundsOf(points);
-		if (bounds) doc.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
+		if (bounds) doc.view.map.fitBounds(bounds, { padding: 50, maxZoom: 15 });
 	}
 </script>
 

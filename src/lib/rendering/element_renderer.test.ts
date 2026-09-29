@@ -36,7 +36,7 @@ describe('ElementRenderer', () => {
 		});
 		map.setStyle();
 		await loading;
-		doc.renderer.flush();
+		doc.view.renderer.flush();
 	});
 
 	const lastFeatures = (role: keyof typeof ELEMENT_LAYERS) =>

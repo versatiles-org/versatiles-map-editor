@@ -101,7 +101,7 @@
 	const attributionCorner = $derived(layout.attributionCorner);
 	$effect(() => {
 		const corner = attributionCorner;
-		const m = mapDocument?.map;
+		const m = mapDocument?.view.map;
 		if (!m) return;
 		return addAttribution(m, corner, (size) => (attributionSize = size));
 	});
@@ -292,7 +292,7 @@
 		>
 			{#if showSearch}
 				<div class="map-search" class:right={layout.searchRight} bind:offsetWidth={searchWidth}>
-					<SearchPlace map={mapDocument.map} onmark={showSidebar ? markPlace : undefined} />
+					<SearchPlace map={mapDocument.view.map} onmark={showSidebar ? markPlace : undefined} />
 				</div>
 			{/if}
 			{#if screenTooSmall}

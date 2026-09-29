@@ -40,11 +40,10 @@ describe('AbstractElement', () => {
 		mockDoc = new MockMapDocument() as unknown as MapDocument;
 	});
 
-	it('gets a unique id for its features, and no source of its own', () => {
+	it('gets a unique id for its features', () => {
 		const a = new TestElement(mockDoc);
 		const b = new TestElement(mockDoc);
 		expect(a.id).not.toBe(b.id);
-		expect(mockDoc.map.addSource).not.toHaveBeenCalled();
 	});
 
 	it('should call destroy and delete itself', () => {

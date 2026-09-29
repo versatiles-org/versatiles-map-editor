@@ -39,7 +39,7 @@ export class DrawingHandler {
 	/** Created before the selection, so its listeners run first and can claim the events. */
 	constructor(doc: MapDocumentInteractive) {
 		this.doc = doc;
-		const map = doc.map;
+		const map = doc.view.map;
 		map.on('mousedown', (e) => this.handleDown(e));
 		map.on('touchstart', (e) => this.handleDown(e));
 		map.on('click', (e) => this.handleClick(e));
@@ -80,7 +80,7 @@ export class DrawingHandler {
 		this.hover = undefined;
 		this.lastPress = undefined;
 		this.#tool = tool;
-		const map = this.doc.map;
+		const map = this.doc.view.map;
 		if (this.active) {
 			// the new element is selected when it is done, and a click draws instead of selecting
 			this.doc.selection.selectElement();
@@ -117,7 +117,7 @@ export class DrawingHandler {
 		this.swallowClick = false;
 		if (this.#tool !== 'circle' || isMultiTouch(e)) return;
 		claimEvent(e);
-		const map = this.doc.map;
+		const map = this.doc.view.map;
 		const center: GeoPoint = [e.lngLat.lng, e.lngLat.lat];
 		this.#points = [center];
 		this.#radius = 0;
@@ -171,7 +171,7 @@ export class DrawingHandler {
 
 		const points = this.#points;
 		if (this.#tool === 'polygon' && points.length >= 3) {
-			const first = this.doc.map.project(points[0]);
+			const first = this.doc.view.map.project(points[0]);
 			if (Math.hypot(first.x - pixel.x, first.y - pixel.y) < CLOSE_PX) {
 				this.finish();
 				return;
@@ -201,6 +201,6 @@ export class DrawingHandler {
 		}
 		points.forEach((coordinates) => features.push(feature({ type: 'Point', coordinates })));
 		// looked up each time, since a new background map replaces the source object
-		this.doc.map.getSource<maplibregl.GeoJSONSource>('drawing')?.setData({ type: 'FeatureCollection', features });
+		this.doc.view.map.getSource<maplibregl.GeoJSONSource>('drawing')?.setData({ type: 'FeatureCollection', features });
 	}
 }

@@ -31,7 +31,7 @@ export class SelectionPointer {
 	constructor(doc: MapDocumentInteractive, selection: SelectionHandler) {
 		this.doc = doc;
 		this.selection = selection;
-		const map = this.doc.map;
+		const map = this.doc.view.map;
 
 		map.on('mousedown', (e) => this.handleDown(e));
 		map.on('touchstart', (e) => this.handleDown(e));
@@ -95,7 +95,7 @@ export class SelectionPointer {
 		let targets: AbstractElement[] | undefined = e.originalEvent.altKey ? undefined : selected;
 		let moved = false;
 		trackDrag(
-			this.doc.map,
+			this.doc.view.map,
 			e,
 			(e) => {
 				e.preventDefault();
@@ -118,7 +118,7 @@ export class SelectionPointer {
 
 	/** The selection node at the event position, with a larger tolerance for touch. */
 	private findNode(e: MapPointerEvent): Record<string, unknown> | undefined {
-		const map = this.doc.map;
+		const map = this.doc.view.map;
 		if (!isTouchEvent(e)) {
 			return map.queryRenderedFeatures(e.point, { layers: ['selection_nodes'] })[0]?.properties;
 		}
@@ -163,7 +163,7 @@ export class SelectionPointer {
 		let node = selectedNode;
 		this.selection.selectNode(selectedNode.vertex);
 		trackDrag(
-			this.doc.map,
+			this.doc.view.map,
 			e,
 			(e) => {
 				e.preventDefault();

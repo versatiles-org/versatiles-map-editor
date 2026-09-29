@@ -31,26 +31,18 @@ export class MapDocument {
 		this.view = new MapView(map);
 	}
 
-	public get map(): maplibregl.Map {
-		return this.view.map;
-	}
-
-	public get renderer() {
-		return this.view.renderer;
-	}
-
 	/** All elements of the map, in drawing order. Replaced as a whole on every change. */
 	public get elements(): AbstractElement[] {
 		return this.#elements;
 	}
 	public set elements(elements: AbstractElement[]) {
 		this.#elements = elements;
-		this.renderer.setElements(elements);
+		this.view.renderer.setElements(elements);
 	}
 
 	/** Draw an element again, after a change of its geometry or style, which the element reports. */
 	public elementChanged(element: AbstractElement) {
-		this.renderer.update(element);
+		this.view.renderer.update(element);
 	}
 
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */

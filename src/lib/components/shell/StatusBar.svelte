@@ -43,7 +43,7 @@
 	let pointer: { lng: number; lat: number } | undefined = $state();
 
 	$effect(() => {
-		const map = doc.map;
+		const map = doc.view.map;
 		const onZoom = () => (zoom = map.getZoom());
 		onZoom();
 		const onMove = (e: { lngLat: { lng: number; lat: number } }) => (pointer = e.lngLat);
