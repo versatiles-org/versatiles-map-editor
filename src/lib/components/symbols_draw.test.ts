@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MockMap } from '../__mocks__/map.js';
-import { SymbolLibrary } from './symbols_draw.js';
+import { drawImage, SymbolLibrary } from './symbols_draw.js';
 
 describe('SymbolLibrary', () => {
 	let map: MockMap;
@@ -172,5 +172,88 @@ describe('SymbolLibrary', () => {
 			expect(ctx.putImageData).toHaveBeenCalledTimes(1);
 			expect(map.listenerCount('idle')).toBe(0);
 		});
+	});
+});
+
+describe('drawImage', () => {
+	/** An SDF image of `size`×`size` pixels with a square shape of `2 * half` pixels in the middle. */
+	function sdfSquare(size: number, half: number) {
+		const data = new Uint8ClampedArray(size * size * 4);
+		const middle = (size - 1) / 2;
+		for (let y = 0; y < size; y++) {
+			for (let x = 0; x < size; x++) {
+				// the distance to the edge, positive outside: 32 values of the SDF per pixel
+				const distance = Math.max(Math.abs(x - middle), Math.abs(y - middle)) - half;
+				data[(y * size + x) * 4 + 3] = 191.25 - distance * 32;
+			}
+		}
+		return { width: size, height: size, data };
+	}
+	const pixel = (data: Uint8ClampedArray, width: number, x: number, y: number) => [
+		...data.slice((y * width + x) * 4, (y * width + x) * 4 + 4)
+	];
+	const image = sdfSquare(10, 2);
+
+	it('paints the shape in its color, and nothing outside', () => {
+		const data = drawImage(image, true, { width: 10, height: 10 }, { color: '#ff0000' });
+		expect(pixel(data, 10, 5, 5)).toStrictEqual([255, 0, 0, 255]);
+		expect(pixel(data, 10, 0, 0)[3]).toBe(0);
+		// black without a color
+		expect(pixel(drawImage(image, true, { width: 10, height: 10 }, {}), 10, 5, 5)).toStrictEqual([0, 0, 0, 255]);
+	});
+
+	it('crops the image to the shape, so the shape fills the canvas', () => {
+		const whole = drawImage(image, true, { width: 20, height: 20 }, {});
+		const cropped = drawImage(image, true, { width: 20, height: 20 }, { crop: true });
+		// near the left edge: outside the shape in the whole image, inside the cropped shape
+		expect(pixel(whole, 20, 1, 10)[3]).toBe(0);
+		expect(pixel(cropped, 20, 1, 10)[3]).toBe(255);
+	});
+
+	it('keeps the aspect ratio, centered in a wide canvas', () => {
+		const data = drawImage(image, true, { width: 40, height: 20 }, { crop: true });
+		// the square shape fills the height, with empty space at the left and the right
+		expect(pixel(data, 40, 20, 10)[3]).toBe(255);
+		expect(pixel(data, 40, 2, 10)[3]).toBe(0);
+		const row = Array.from({ length: 40 }, (_, x) => pixel(data, 40, x, 10)[3]);
+		expect(row).toStrictEqual([...row].reverse());
+	});
+
+	it('draws a halo: the symbol in gray, with a white rim around it', () => {
+		const data = drawImage(image, true, { width: 30, height: 30 }, { halo: 3 });
+		// inside: dark
+		expect(pixel(data, 30, 15, 15)).toStrictEqual([0, 0, 0, 255]);
+		// 2 pixels outside the edge of the shape (at 7.5 and 19.5): white, and still covered by the halo
+		const rim = pixel(data, 30, 21, 15);
+		expect(rim.slice(0, 3)).toStrictEqual([255, 255, 255]);
+		expect(rim[3]).toBeGreaterThan(0);
+		// far outside: nothing
+		expect(pixel(data, 30, 29, 15)[3]).toBe(0);
+	});
+
+	it('draws no outline in a color that is invalid', () => {
+		const plain = drawImage(image, true, { width: 20, height: 20 }, { color: '#ff0000', crop: true });
+		const outlined = drawImage(
+			image,
+			true,
+			{ width: 20, height: 20 },
+			{ color: '#ff0000', outline: 'nope', crop: true }
+		);
+		expect(outlined).toStrictEqual(plain);
+	});
+
+	it('copies an image that is no SDF, pixel by pixel at the same size', () => {
+		const colors = {
+			width: 2,
+			height: 2,
+			data: new Uint8ClampedArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
+		};
+		expect(Array.from(drawImage(colors, false, { width: 2, height: 2 }, {}))).toStrictEqual(Array.from(colors.data));
+	});
+
+	it('draws nothing of an empty image, also when cropped', () => {
+		const empty = { width: 4, height: 4, data: new Uint8ClampedArray(4 * 4 * 4) };
+		const data = drawImage(empty, true, { width: 8, height: 8 }, { crop: true });
+		expect(data.every((value, i) => i % 4 !== 3 || value === 0)).toBe(true);
 	});
 });
