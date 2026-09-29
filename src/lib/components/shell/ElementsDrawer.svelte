@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { Icon } from '$lib/components/ui/index.js';
+	import { Icon, IconButton } from '$lib/components/ui/index.js';
 	import ElementList from './ElementList.svelte';
 
 	/**
@@ -18,9 +18,7 @@
 <aside id="elements-drawer" class="drawer" aria-labelledby="elements-drawer-title">
 	<div class="header">
 		<h2 id="elements-drawer-title">Elements <span class="count">{count}</span></h2>
-		<button class="icon-button" aria-label="Close the elements" title="Close the elements (E)" onclick={onclose}>
-			<Icon name="close" size={16} />
-		</button>
+		<IconButton icon="close" label="Close the elements" title="Close the elements (E)" small onclick={onclose} />
 	</div>
 	<div class="content">
 		<button class="row" aria-pressed={nothingSelected} onclick={() => selection.selectElement()}>
@@ -112,27 +110,6 @@
 		&:focus-visible {
 			outline: 2px solid var(--color-blue);
 			outline-offset: -2px;
-		}
-	}
-
-	.icon-button {
-		display: grid;
-		place-items: center;
-		width: 28px;
-		height: 28px;
-		padding: 0;
-		border: none;
-		border-radius: 7px;
-		background: transparent;
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:hover {
-			background: var(--color-hover);
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-			outline-offset: 1px;
 		}
 	}
 </style>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import * as commands from '$lib/components/commands.js';
-	import { Icon } from '$lib/components/ui/index.js';
+	import { IconButton } from '$lib/components/ui/index.js';
 	import { coordinatesOf } from '$lib/geometry.js';
 
 	/**
@@ -97,41 +97,34 @@
 	style:left="{position?.x ?? 0}px"
 	style:top="{position?.y ?? 0}px"
 >
-	<button
-		class="icon-button"
-		aria-label="Duplicate"
+	<IconButton
+		icon="duplicate"
+		label="Duplicate"
 		title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
 		onclick={() => commands.duplicateSelection(doc)}
-	>
-		<Icon name="duplicate" />
-	</button>
-	<button
-		class="icon-button"
-		aria-label="Copy style"
+	/>
+	<IconButton
+		icon="pipette"
+		label="Copy style"
 		title="Copy the style of the element (Cmd/Ctrl+Alt+C)"
 		disabled={!commands.canCopyStyle(doc)}
 		onclick={() => commands.copyStyle(doc)}
-	>
-		<Icon name="pipette" />
-	</button>
-	<button
-		class="icon-button"
-		aria-label="Paste style"
+	/>
+	<IconButton
+		icon="brush"
+		label="Paste style"
 		title="Paste the style onto the selected elements (Cmd/Ctrl+Alt+V)"
 		disabled={!commands.canPasteStyle(doc)}
 		onclick={() => commands.pasteStyle(doc)}
-	>
-		<Icon name="brush" />
-	</button>
+	/>
 	<span class="separator"></span>
-	<button
-		class="icon-button delete"
-		aria-label="Delete"
+	<IconButton
+		icon="trash"
+		label="Delete"
 		title="Delete (Delete/Backspace)"
+		danger
 		onclick={() => commands.deleteSelection(doc)}
-	>
-		<Icon name="trash" />
-	</button>
+	/>
 </div>
 
 <style>
@@ -160,34 +153,5 @@
 		height: 20px;
 		margin: 0 3px;
 		background: var(--color-border);
-	}
-
-	.icon-button {
-		display: grid;
-		place-items: center;
-		width: 34px;
-		height: 34px;
-		padding: 0;
-		border: none;
-		border-radius: 8px;
-		background: transparent;
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:hover:not(:disabled) {
-			background: var(--color-hover);
-		}
-		&:disabled {
-			color: var(--color-disabled-text);
-			opacity: 0.5;
-			cursor: default;
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-			outline-offset: 1px;
-		}
-		&.delete {
-			color: var(--color-error);
-		}
 	}
 </style>

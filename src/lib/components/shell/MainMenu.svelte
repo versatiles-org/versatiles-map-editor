@@ -5,7 +5,7 @@
 	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
 	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
-	import { Icon } from '$lib/components/ui/index.js';
+	import { Icon, IconButton } from '$lib/components/ui/index.js';
 	import { FileCommands } from '$lib/files/file_commands.js';
 
 	/**
@@ -144,18 +144,15 @@
 {/snippet}
 
 <div class="main-menu">
-	<button
-		bind:this={button}
-		class="menu-button"
-		aria-label="Menu"
-		title="Menu"
+	<IconButton
+		bind:element={button}
+		icon="menu"
+		label="Menu"
 		aria-haspopup="menu"
 		aria-expanded={open}
 		aria-controls="{uid}-menu"
 		onclick={toggle}
-	>
-		<Icon name="menu" />
-	</button>
+	/>
 
 	<!-- hidden, not removed, so the dialogs of the commands stay -->
 	<div
@@ -231,28 +228,6 @@
 <style>
 	.main-menu {
 		position: relative;
-	}
-
-	.menu-button {
-		display: grid;
-		place-items: center;
-		width: 34px;
-		height: 34px;
-		padding: 0;
-		border: none;
-		border-radius: 8px;
-		background: transparent;
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:hover,
-		&[aria-expanded='true'] {
-			background: var(--color-hover);
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-			outline-offset: 1px;
-		}
 	}
 
 	.menu {

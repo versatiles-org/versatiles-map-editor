@@ -2,7 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, type IconName, FontSelect } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, type IconName, FontSelect } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
@@ -60,14 +60,13 @@
 			{#if header.subtitle}<span class="subtitle">{header.subtitle}</span>{/if}
 		</span>
 		{#if selection.legendSelected && legend}
-			<button
-				class="icon-button"
-				aria-label="Back to the map"
+			<IconButton
+				icon="close"
+				label="Back to the map"
 				title="Back to the map (Escape)"
+				small
 				onclick={() => selection.selectLegend(false)}
-			>
-				<Icon name="close" size={16} />
-			</button>
+			/>
 		{/if}
 	</div>
 
@@ -148,28 +147,6 @@
 		font-size: 0.75rem;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.icon-button {
-		display: grid;
-		flex: none;
-		place-items: center;
-		width: 28px;
-		height: 28px;
-		padding: 0;
-		border: none;
-		border-radius: 7px;
-		background: transparent;
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:hover {
-			background: var(--color-hover);
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-			outline-offset: 1px;
-		}
 	}
 
 	p.label {
