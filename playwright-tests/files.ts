@@ -26,6 +26,42 @@ test('downloads the map as GeoJSON and as map file', { tag: '@cross-browser' }, 
 	expect(state.elements.map((e: { type: string }) => e.type)).toStrictEqual(['marker']);
 });
 
+test('the title of the map names the page, the files and the shared map', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await expect(page).toHaveTitle('VersaTiles Map Editor');
+	const title = page.getByRole('textbox', { name: 'Title' });
+	await expect(title).toHaveAttribute('placeholder', 'Untitled map');
+
+	// the page title changes while it is typed
+	await title.fill('Cafés in Berlin');
+	await expect(page).toHaveTitle('Cafés in Berlin – VersaTiles Map Editor');
+	await title.press('Enter');
+	await expect.poll(async () => (await storedState(page)).meta?.title).toBe('Cafés in Berlin');
+
+	// the names of the files
+	const exportGeoJSON = await menuItem(page, 'Export', 'GeoJSON');
+	const [geojson] = await Promise.all([page.waitForEvent('download'), exportGeoJSON.click()]);
+	expect(geojson.suggestedFilename()).toBe('Cafés in Berlin.geojson');
+	await (await menuItem(page, 'Download…')).click();
+	await expect(page.getByRole('dialog').getByRole('textbox')).toHaveValue('Cafés in Berlin.mapjson');
+	await page.keyboard.press('Escape');
+
+	// the shared map has it too
+	const hash = encodeState(await storedState(page));
+	await page.goto('/view#' + hash);
+	await waitForMapIsReady(page);
+	await expect(page).toHaveTitle('Cafés in Berlin – VersaTiles Map');
+
+	// undoable
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await expect(title).toHaveValue('Cafés in Berlin');
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect(title).toHaveValue('');
+	await expect(page).toHaveTitle('VersaTiles Map Editor');
+});
+
 test('file dialogs confirm and cancel', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);

@@ -14,6 +14,7 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   KML. Without them, the text is black and the halo white, as before.
 - `labelFont` in the metadata: one glyph font for the labels of all markers, instead of the font
   of the background map's labels.
+- `title` in the metadata: the title of the map (base64 key 9), also the name of the KML document.
 - `mapLabelsOnTop` in the metadata: draw the labels of the background map over the areas and lines
   of the elements, instead of under them.
 - `symbol` in the style of a marker, and in legend entries: the name of an image of the tile

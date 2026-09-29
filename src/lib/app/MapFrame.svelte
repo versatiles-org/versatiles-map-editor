@@ -101,6 +101,13 @@
 		const dy = previous.bottom - padding.bottom - (previous.top - padding.top);
 		map.panBy([dx / 2, dy / 2], { duration: 0 });
 	});
+	// the title of the map before the name of the page, e.g. "Cafés – VersaTiles Map Editor"
+	const pageTitle = typeof document === 'undefined' ? '' : document.title;
+	$effect(() => {
+		const title = mapDocument?.title.trim();
+		document.title = title ? `${title} – ${pageTitle}` : pageTitle;
+	});
+
 	// until the map has loaded for the first time, and while a map from a link or file loads
 	const loading = $derived(!triggeredMapReady || mapDocument?.loading === true);
 	// the height of the search and the hint at the top of the map

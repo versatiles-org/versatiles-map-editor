@@ -196,7 +196,8 @@ export class StateWriter {
 					metadata.colorScheme ||
 					metadata.search ||
 					metadata.labelFont ||
-					metadata.mapLabelsOnTop));
+					metadata.mapLabelsOnTop ||
+					metadata.title));
 		if (!stored) {
 			return this.writeBit(false);
 		}
@@ -236,6 +237,10 @@ export class StateWriter {
 		if (metadata.mapLabelsOnTop) {
 			// a flag: the key alone
 			this.writeInteger(7, 6);
+		}
+		if (metadata.title) {
+			this.writeInteger(9, 6);
+			this.writeString(metadata.title);
 		}
 		this.writeInteger(0, 6);
 	}

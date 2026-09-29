@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapState } from '@versatiles/map-state';
-import { FileCommands, type FileQuestions } from './file_commands.js';
+import { FileCommands, fileBaseName, type FileQuestions } from './file_commands.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
@@ -25,6 +25,7 @@ describe('FileCommands', () => {
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		state = { elements: [] };
 		doc = {
+			title: '',
 			getState: vi.fn(() => state),
 			setState: vi.fn(async (next: MapState) => void (state = next)),
 			getGeoJSON: vi.fn(() => ({ type: 'FeatureCollection', features: [] })),
@@ -127,5 +128,31 @@ describe('FileCommands', () => {
 		);
 		files.exportKML();
 		expect(downloadBlob).toHaveBeenCalledWith(expect.any(Blob), 'map.kml');
+	});
+
+	it('names the files after the title of the map, until a file is opened or downloaded', async () => {
+		doc.title = 'Cafés: Berlin/Hamburg';
+		expect(files.filename).toBe('Cafés Berlin Hamburg.mapjson');
+		files.exportGeoJSON();
+		expect(downloadJSON).toHaveBeenLastCalledWith(expect.anything(), 'Cafés Berlin Hamburg.geojson', expect.anything());
+
+		questions.askDownloadFilename.mockResolvedValueOnce('trip.mapjson');
+		await files.downloadFile();
+		files.exportKML();
+		expect(downloadBlob).toHaveBeenLastCalledWith(expect.any(Blob), 'trip.kml');
+	});
+});
+
+describe('fileBaseName', () => {
+	it('keeps the title, without the characters that file systems do not allow', () => {
+		expect(fileBaseName('Cafés in Berlin – 2026')).toBe('Cafés in Berlin – 2026');
+		expect(fileBaseName(' a/b\\c:d*e?f"g<h>i|j\n ')).toBe('a b c d e f g h i j');
+		expect(fileBaseName('..hidden')).toBe('hidden');
+		expect(fileBaseName('x'.repeat(300))).toHaveLength(100);
+	});
+
+	it('is "map" without a title', () => {
+		expect(fileBaseName('')).toBe('map');
+		expect(fileBaseName(' / ')).toBe('map');
 	});
 });

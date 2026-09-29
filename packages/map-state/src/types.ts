@@ -79,6 +79,8 @@ export interface StateMetadata {
 	 * they are under them. The labels of markers are always on top.
 	 */
 	mapLabelsOnTop?: boolean;
+	/** The title of the map, e.g. for the list of maps, the title of the page and file names. */
+	title?: string;
 }
 
 export const LEGEND_POSITIONS = [

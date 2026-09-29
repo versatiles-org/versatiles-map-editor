@@ -40,6 +40,8 @@ export class SessionSync {
 	#id: string | undefined;
 	/** The state of a new map before its first change: the first step of its session. */
 	#first: string | undefined;
+	/** The title of the map as its session has it, e.g. for the list of maps. */
+	#title: string | undefined;
 	#failed = false;
 
 	/** `removeHash` removes the map of a link from the URL, without loading the page again. */
@@ -133,6 +135,8 @@ export class SessionSync {
 		doc.state.events.on('log', (state) => this.#log(state));
 		doc.state.events.on('move', (undone) => {
 			if (this.#id) this.#store?.setUndone(this.#id, undone);
+			// e.g. undoing a change of the title
+			this.#storeTitle(this.#doc?.title);
 		});
 		doc.view.map.on('moveend', this.#onMove);
 		addEventListener('hashchange', this.#onHashChange);
@@ -160,15 +164,18 @@ export class SessionSync {
 					await doc.loadState({ ...state, map: camera });
 					doc.state.history.restore(stored.states, stored.position);
 					this.#setSession(stored.session.id);
+					this.#title = stored.session.title;
 					break;
 				}
 				case 'link':
 					// stored at once, while the map loads
-					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.map }));
+					this.#title = opening.state.meta?.title;
+					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.map, title: this.#title }));
 					await doc.loadState(opening.state);
 					break;
 				case 'new':
 					this.#setSession(undefined);
+					this.#title = undefined;
 					this.#first = encodeStep(doc.getState());
 					break;
 			}
@@ -187,9 +194,18 @@ export class SessionSync {
 		if (!this.#id) {
 			const id = store.create(this.#first ?? encoded, { camera: doc.view.getViewport() });
 			this.#setSession(id);
-			if (this.#first === undefined) return;
+			if (this.#first === undefined) return this.#storeTitle(state.meta?.title);
 		}
 		store.push(this.#id!, encoded);
+		this.#storeTitle(state.meta?.title);
+	}
+
+	/** Store the title of the map in its session, if it changed. */
+	#storeTitle(title: string | undefined) {
+		title = title?.trim() || undefined;
+		if (!this.#id || title === this.#title) return;
+		this.#title = title;
+		this.#store?.setTitle(this.#id, title);
 	}
 
 	/**

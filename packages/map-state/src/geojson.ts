@@ -113,6 +113,7 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	if (state.meta?.search) meta.search = true;
 	if (state.meta?.labelFont) meta.labelFont = state.meta.labelFont;
 	if (state.meta?.mapLabelsOnTop) meta.mapLabelsOnTop = true;
+	if (state.meta?.title) meta.title = state.meta.title;
 	if (Object.keys(meta).length > 0) doc.meta = meta;
 	return doc;
 }
@@ -274,6 +275,8 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		const labelFont = sanitizeString(doc.meta.labelFont);
 		if (labelFont) meta.labelFont = labelFont;
 		if (doc.meta.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;
+		const title = sanitizeString(doc.meta.title);
+		if (title) meta.title = title;
 		if (Object.keys(meta).length > 0) state.meta = meta;
 	}
 	return state;

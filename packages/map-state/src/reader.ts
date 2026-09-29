@@ -253,6 +253,9 @@ export class StateReader {
 					case 7:
 						metadata.mapLabelsOnTop = true;
 						break;
+					case 9:
+						metadata.title = this.readString();
+						break;
 					case 8:
 						// not a field of the metadata: the symbols of the styles and of the legend
 						this.readSymbols();

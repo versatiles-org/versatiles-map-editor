@@ -32,7 +32,7 @@ export function stateToKML(state: MapState): string {
 	if (doc.meta) documentData[META_DATA] = JSON.stringify(doc.meta);
 
 	const content = [
-		xml('name', 'Map'),
+		xml('name', state.meta?.title || 'Map'),
 		doc.map &&
 			xml('LookAt', [
 				xml('longitude', String(doc.map.center[0])),

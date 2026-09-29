@@ -116,6 +116,8 @@ export class MapDocumentInteractive extends MapDocument {
 		const colorScheme = this.colors.scheme;
 		if (colorScheme) meta.colorScheme = colorScheme;
 		if (this.search) meta.search = true;
+		const title = this.title.trim();
+		if (title) meta.title = title;
 		if (this.labelFont) meta.labelFont = this.labelFont;
 		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 		return {
@@ -140,6 +142,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (meta.legend) this.legend = meta.legend;
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.search) this.search = true;
+		if (meta.title) this.title = meta.title;
 		if (meta.labelFont) this.labelFont = meta.labelFont;
 		if (meta.mapLabelsOnTop) this.mapLabelsOnTop = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));

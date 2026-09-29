@@ -14,18 +14,35 @@ export interface FileQuestions {
 	askDownloadFilename(initialFilename: string): Promise<string | null>;
 }
 
-// like the other exports, map.geojson and map.kml
-const DEFAULT_FILENAME = 'map.mapjson';
+const EXTENSION = /\.mapjson$/i;
+
+/**
+ * A file name (without extension) from the title of a map: without the characters that file
+ * systems do not allow, else "map".
+ */
+export function fileBaseName(title: string): string {
+	const name = title
+		// eslint-disable-next-line no-control-regex -- control characters are not allowed either
+		.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim()
+		// no hidden file
+		.replace(/^\.+/, '')
+		.slice(0, 100)
+		.trim();
+	return name || 'map';
+}
 
 /**
  * The commands of the menu for files: a new map, opening and downloading it, and the import and
  * export of GeoJSON and KML. Each change is one undo step. The name of an opened or downloaded
- * file is suggested for the next download.
+ * file is suggested for the next download and names the exports; else the title of the map does.
  */
 export class FileCommands {
 	readonly #doc: MapDocumentInteractive;
 	readonly #questions: FileQuestions;
-	#filename = DEFAULT_FILENAME;
+	/** The name of the opened or downloaded file, if there is one. */
+	#filename: string | undefined;
 
 	constructor(doc: MapDocumentInteractive, questions: FileQuestions) {
 		this.#doc = doc;
@@ -34,7 +51,12 @@ export class FileCommands {
 
 	/** The name that the next download suggests. */
 	public get filename(): string {
-		return this.#filename;
+		return this.#filename ?? `${fileBaseName(this.#doc.title)}.mapjson`;
+	}
+
+	/** The name of the exported files, without extension. */
+	get #baseName(): string {
+		return this.#filename ? this.#filename.replace(EXTENSION, '') : fileBaseName(this.#doc.title);
 	}
 
 	public async newFile(): Promise<void> {
@@ -42,7 +64,7 @@ export class FileCommands {
 		// an empty map in the current view, without legend or background; undoable
 		await this.#doc.setState({ elements: [] });
 		this.#doc.state.log();
-		this.#filename = DEFAULT_FILENAME;
+		this.#filename = undefined;
 	}
 
 	public async openFile(): Promise<void> {
@@ -64,7 +86,7 @@ export class FileCommands {
 	}
 
 	public async downloadFile(): Promise<void> {
-		const filename = await this.#questions.askDownloadFilename(this.#filename);
+		const filename = await this.#questions.askDownloadFilename(this.filename);
 		if (!filename) return;
 		this.#filename = filename;
 		downloadJSON(this.#doc.getState(), filename);
@@ -87,12 +109,12 @@ export class FileCommands {
 	}
 
 	public exportGeoJSON(): void {
-		downloadJSON(this.#doc.getGeoJSON(), 'map.geojson', 'application/geo+json');
+		downloadJSON(this.#doc.getGeoJSON(), `${this.#baseName}.geojson`, 'application/geo+json');
 	}
 
 	public exportKML(): void {
 		const kml = stateToKML(this.#doc.getState());
-		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), 'map.kml');
+		downloadBlob(new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' }), `${this.#baseName}.kml`);
 	}
 
 	/** Whether the map has anything to lose: elements or map properties like a legend. */

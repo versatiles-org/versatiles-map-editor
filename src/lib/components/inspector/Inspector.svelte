@@ -2,7 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, IconButton, type IconName, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, type IconName, Button, ButtonGroup, Hint, InputRow } from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
@@ -76,6 +76,17 @@
 	{:else if elements.length > 0}
 		<StyleEditor {elements} {doc} />
 	{:else}
+		<!-- changes the title of the page while it is typed, and is an undo step when it is done -->
+		<InputRow id="{uid}-title" label="Title">
+			<input
+				id="{uid}-title"
+				type="text"
+				value={doc.title}
+				placeholder="Untitled map"
+				oninput={(e) => (doc.title = e.currentTarget.value)}
+				onchange={() => doc.state.log()}
+			/>
+		</InputRow>
 		<InspectorSection title="Background map">
 			<PanelBackground {doc} />
 		</InspectorSection>

@@ -13,6 +13,8 @@ export class MapDocument {
 	public readonly view: MapView;
 	/** Whether the read-only viewer shows an address search. */
 	public search = $state(false);
+	/** The title of the map, e.g. for the title of the page and file names. Empty without one. */
+	public title = $state('');
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	#background: StateBackground | undefined = $state.raw(undefined);
 	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
@@ -216,6 +218,7 @@ export class MapDocument {
 	protected applyMetadata(meta: StateMetadata | undefined) {
 		this.legend = meta?.legend;
 		this.search = meta?.search === true;
+		this.title = meta?.title ?? '';
 		this.labelFont = meta?.labelFont;
 		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;
 	}

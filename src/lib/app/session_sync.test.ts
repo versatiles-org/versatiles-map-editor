@@ -177,6 +177,31 @@ describe('SessionSync', () => {
 		);
 	});
 
+	it('stores the title of the map in its session, also after undo', async () => {
+		await sync.attach(doc, await sync.prepare(''));
+		doc.title = 'Cafés';
+		doc.state.log();
+		await store.flush();
+		const [session] = await store.list();
+		expect(session.title).toBe('Cafés');
+
+		doc.title = 'Bars';
+		doc.state.log();
+		await doc.state.undo();
+		await store.flush();
+		expect((await store.load(session.id))?.session.title).toBe('Cafés');
+		await doc.state.undo();
+		await store.flush();
+		expect((await store.load(session.id))?.session.title).toBeUndefined();
+	});
+
+	it('stores the title of the map of a link', async () => {
+		await sync.attach(doc, await sync.prepare(encodeState({ meta: { title: 'Linked' }, elements: [] })));
+		await store.flush();
+		expect((await store.list())[0].title).toBe('Linked');
+		expect(doc.title).toBe('Linked');
+	});
+
 	describe('tabs', () => {
 		let locks: FakeLockManager;
 		const others: SessionSync[] = [];
