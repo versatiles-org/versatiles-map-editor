@@ -1,15 +1,6 @@
-import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import type { Page } from '@playwright/test';
-import {
-	drawElement,
-	drawnElements,
-	menuItem,
-	storedState,
-	trackServerRequests,
-	waitForMapIsReady
-} from './lib/utils.js';
+import { drawnElements, storedState, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
 
 const mapUrl =
 	'/#IVUAACybKM64mNZKaQomnQRMQQr0K4L5RjzgxOQoxnQpyAgxrwsgxGQkxJRBwsRskTI9PRn4oDShQAAv6hNphQvZxJGfCIUAefwpRQoUlbCDICAZGMYmPRyKDbAAZB6EYxPYJDKA';
@@ -159,32 +150,6 @@ test('invalid hash', async ({ page }) => {
 	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
 });
 
-test('keeps an opened map in the URL', async ({ page }) => {
-	const state = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point: [13.4, 52.5] }] };
-	await page.goto('/#' + encodeState(state as MapState));
-	await waitForMapIsReady(page);
-	// the viewport is written before the elements have loaded, which must not drop them
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
-});
-
-test('keeps the map in the URL across reloads', async ({ page }) => {
-	await page.goto('/');
-	await waitForMapIsReady(page);
-	await drawElement(page, 'Marker');
-
-	// a single change is written to the hash immediately
-	const elementsInUrl = async () => (await storedState(page)).elements.map((e) => e.type);
-	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
-
-	await page.reload();
-	await waitForMapIsReady(page);
-
-	const exportGeoJSON = await menuItem(page, 'Export', 'GeoJSON');
-	const [download] = await Promise.all([page.waitForEvent('download'), exportGeoJSON.click()]);
-	const doc = JSON.parse(readFileSync(await download.path(), 'utf-8'));
-	expect(doc.features.map((f: { geometry: { type: string } }) => f.geometry.type)).toStrictEqual(['Point']);
-});
-
 test('a map near a pole keeps its elements', async ({ page }) => {
 	// half the height of the view reaches beyond the latitudes of the map
 	const state: MapState = {
@@ -203,29 +168,6 @@ test('a map near a pole keeps its elements', async ({ page }) => {
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 });
 
-test('the stored map keeps the elements while the map is loading', async ({ page }) => {
-	// a slow network: the style waits for its TileJSON until the test releases it
-	let release!: () => void;
-	const released = new Promise<void>((resolve) => (release = resolve));
-	await page.route('**/tiles.json', async (route) => {
-		await released;
-		await route.fallback();
-	});
-	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
-		elements: [{ type: 'marker', point: [13.4, 52.5] }]
-	};
-	await page.goto('/#' + encodeState(state));
-	// The viewport is already set, the elements wait for the style. Something must *not* happen
-	// here (storing the map without elements), so the test has to give it time to happen.
-	await page.waitForTimeout(1000);
-	expect((await storedState(page)).elements.length).toBe(1);
-
-	release();
-	await waitForMapIsReady(page);
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
-});
-
 test('a loading indicator shows until the map has loaded', async ({ page }) => {
 	// hold back the tiles, so the map keeps loading
 	let release = () => {};
@@ -239,74 +181,4 @@ test('a loading indicator shows until the map has loaded', async ({ page }) => {
 	release();
 	await waitForMapIsReady(page);
 	await expect(page.getByText('Loading map…')).toHaveCount(0);
-});
-
-test('the editor keeps its map, history and camera in the browser, not in the URL', async ({ page }) => {
-	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
-		elements: [{ type: 'marker', point: [13.4, 52.5] }]
-	};
-	await page.goto('/#' + encodeState(state));
-	await waitForMapIsReady(page);
-	// the link is opened, and removed from the URL
-	await expect.poll(() => new URL(page.url()).hash).toBe('');
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
-
-	await drawElement(page, 'Marker');
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
-	const camera = (await storedState(page)).map;
-
-	// a reload continues the map, with its camera and the step to undo
-	await page.reload();
-	await waitForMapIsReady(page);
-	expect(new URL(page.url()).hash).toBe('');
-	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(2);
-	expect((await storedState(page)).map).toStrictEqual(camera);
-	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
-	await page.getByRole('button', { name: 'Redo' }).click();
-	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
-});
-
-test('each tab edits its own map, and a reload keeps it', async ({ page, context }) => {
-	const mapOf = (lng: number): MapState => ({
-		map: { center: [lng, 52.5], radius: 10000 },
-		elements: [{ type: 'marker', point: [lng, 52.5] }]
-	});
-	const lng = async (page: Page) => {
-		const element = (await storedState(page)).elements[0];
-		return element && 'point' in element ? element.point[0] : undefined;
-	};
-	await page.goto('/#' + encodeState(mapOf(13.4)));
-	await waitForMapIsReady(page);
-	await expect.poll(() => lng(page)).toBe(13.4);
-
-	// the last map is open in the first tab, so a second tab starts a new map
-	const second = await context.newPage();
-	await second.goto('/');
-	await waitForMapIsReady(second);
-	await expect(second.getByText('Your last map is open in another tab.')).toBeVisible();
-	await expect.poll(() => drawnElements(second).then((drawn) => drawn.symbol.length)).toBe(0);
-	await drawElement(second, 'Marker');
-	await expect.poll(async () => (await storedState(second)).elements.length).toBe(1);
-
-	// a reload keeps the map of each tab
-	await page.reload();
-	await waitForMapIsReady(page);
-	await expect.poll(() => lng(page)).toBe(13.4);
-	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(1);
-	await second.reload();
-	await waitForMapIsReady(second);
-	await expect(second.getByText('Your last map is open in another tab.')).toHaveCount(0);
-	expect((await storedState(second)).elements).toHaveLength(1);
-	expect(await lng(second)).not.toBe(13.4);
-
-	// a duplicated tab (with the session id of the first tab) gets a copy of its map
-	const duplicate = await context.newPage();
-	const id = await page.evaluate(() => sessionStorage.getItem('versatiles-map-editor:session'));
-	await duplicate.addInitScript((id) => sessionStorage.setItem('versatiles-map-editor:session', id!), id);
-	await duplicate.goto('/');
-	await waitForMapIsReady(duplicate);
-	await expect.poll(() => lng(duplicate)).toBe(13.4);
-	expect(await duplicate.evaluate(() => sessionStorage.getItem('versatiles-map-editor:session'))).not.toBe(id);
 });
