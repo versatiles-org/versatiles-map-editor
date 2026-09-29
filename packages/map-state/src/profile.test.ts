@@ -4,10 +4,9 @@ import {
 	FILL_PATTERN_NAMES,
 	STROKE_STYLE_NAMES,
 	LABEL_ALIGN_NAMES,
-	legacyMarkerStyle,
-	removeDefaultFields
+	removeDefaultFields,
+	sanitizeSymbol
 } from './profile.js';
-import { LEGACY_SYMBOLS, legacySymbol, symbolFromName } from './symbols.js';
 import type { StateStyle } from './types.js';
 
 import { fillPatterns } from '$lib/map_layer/fill.svelte.js';
@@ -26,30 +25,13 @@ describe('profile drift guard', () => {
 	});
 });
 
-describe('symbols of older links and files', () => {
-	it('reads the old numbers and names as the names of their images', () => {
-		for (const [index, name, image] of LEGACY_SYMBOLS) {
-			expect(legacySymbol(index)).toBe(image);
-			expect(legacySymbol(name)).toBe(image);
-		}
-		expect(legacySymbol(38)).toBe('base:icon-embassy');
-		expect(legacySymbol('flag')).toBe('base:icon-embassy');
-		expect(legacySymbol(999)).toBeUndefined();
-		expect(legacySymbol('unknown')).toBeUndefined();
-	});
-
-	it('keeps the full name of an image', () => {
-		expect(symbolFromName('icons:anchor')).toBe('icons:anchor');
-		expect(symbolFromName('')).toBe('');
-		expect(symbolFromName('bench')).toBe('base:icon-bench');
-		expect(symbolFromName('unknown')).toBeUndefined();
-	});
-
-	it('moves the number of a marker symbol to its name', () => {
-		expect(legacyMarkerStyle({ pattern: 12, size: 2 })).toStrictEqual({ symbol: 'base:icon-bench', size: 2 });
-		expect(legacyMarkerStyle({ pattern: 999 })).toStrictEqual({});
-		expect(legacyMarkerStyle({ pattern: 12, symbol: 'icons:anchor' })).toStrictEqual({ symbol: 'icons:anchor' });
-		expect(legacyMarkerStyle({ size: 2 })).toStrictEqual({ size: 2 });
+describe('sanitizeSymbol', () => {
+	it('keeps the name of an image, or "" for no symbol', () => {
+		expect(sanitizeSymbol('icons:anchor')).toBe('icons:anchor');
+		expect(sanitizeSymbol('')).toBe('');
+		expect(sanitizeSymbol('bench')).toBeUndefined();
+		expect(sanitizeSymbol(12)).toBeUndefined();
+		expect(sanitizeSymbol(undefined)).toBeUndefined();
 	});
 });
 

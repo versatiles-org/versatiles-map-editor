@@ -288,6 +288,7 @@ describe('legend', () => {
 					entries: [
 						{ color: '#F00', label: 5, symbol: 2.4 },
 						{ color: '#00F', label: 'y', symbol: 'flag' },
+						{ color: '#0F0', label: 'z', symbol: 'icons:anchor' },
 						{ color: 'nope', label: 'x' },
 						'x'
 					]
@@ -299,9 +300,10 @@ describe('legend', () => {
 				layout: 'inline',
 				font: 'monospace',
 				entries: [
-					// an old number or name of a symbol is read as the name of its image
-					{ color: '#ff0000', label: '5', symbol: 'base:icon-airport' },
-					{ color: '#0000ff', label: 'y', symbol: 'base:icon-embassy' }
+					// a symbol is the name of its image, e.g. no number or short name
+					{ color: '#ff0000', label: '5' },
+					{ color: '#0000ff', label: 'y' },
+					{ color: '#00ff00', label: 'z', symbol: 'icons:anchor' }
 				]
 			}
 		});

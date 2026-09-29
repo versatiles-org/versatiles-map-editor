@@ -317,7 +317,7 @@ export class StateWriter {
 			this.writeInteger(1, 4);
 			this.writeColorValue(entry.color);
 			if (entry.symbol) {
-				// the image name; key 2 was the number of a symbol in older links
+				// the image name; key 2 is not used
 				this.writeInteger(4, 4);
 				this.writeString(entry.symbol);
 			}

@@ -13,8 +13,7 @@ import type {
 	StateStyle
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, MAX_CODEC_VERSION } from './constants.js';
-import { legacyMarkerStyle, sanitizeBackground } from './profile.js';
-import { legacySymbol } from './symbols.js';
+import { sanitizeBackground } from './profile.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
@@ -280,7 +279,7 @@ export class StateReader {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			// a copy: the style can be shared with other elements, e.g. as the base of their styles
-			if (this.readBit()) element.style = legacyMarkerStyle({ ...this.readStyle() });
+			if (this.readBit()) element.style = { ...this.readStyle() };
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
@@ -367,12 +366,6 @@ export class StateReader {
 				case 1:
 					entry.color = this.readColorValue();
 					break;
-				case 2: {
-					// the number of a symbol, in older links
-					const symbol = legacySymbol(this.readVarint());
-					if (symbol) entry.symbol = symbol;
-					break;
-				}
 				case 3:
 					entry.label = this.readString();
 					break;

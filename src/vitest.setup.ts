@@ -7,17 +7,22 @@ vi.mock('@versatiles/style', async (importOriginal) => ({
 	inlineSources: vi.fn(async (style) => style)
 }));
 
-// loadSymbols() downloads the sprite sheets of the tile server. In unit tests, the map has the
-// symbols of older maps at once. symbols_catalog.test.ts tests the download itself.
+// loadSymbols() downloads the sprite sheets of the tile server. In unit tests, the symbols of the
+// "base" sheet (a fixture) are loaded once, before the first test. symbols_catalog.test.ts tests the
+// download itself. To update the fixture:
+// curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
 vi.mock('./lib/symbols_catalog.js', async (importOriginal) => {
 	const original = await importOriginal<typeof import('./lib/symbols_catalog.js')>();
-	return {
-		...original,
-		loadSymbols: vi.fn(async () => ({
-			sheets: original.spriteSheets().map((s) => s.id),
-			symbols: original.allSymbols()
-		}))
-	};
+	const { default: base } = await import('./lib/__fixtures__/sprite-base.json', { with: { type: 'json' } });
+	const files: Record<string, unknown> = { 'index.json': ['base'], 'base.json': base };
+	const fetch = globalThis.fetch;
+	globalThis.fetch = async (url) => Response.json(files[String(url).replace(/^.*\//, '')]);
+	try {
+		await original.loadSymbols();
+	} finally {
+		globalThis.fetch = fetch;
+	}
+	return original;
 });
 
 // Svelte warns in development, e.g. about a binding that is not reactive. Its warnings are bugs, so

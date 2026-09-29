@@ -1,4 +1,3 @@
-import { LEGACY_SYMBOLS } from '@versatiles/map-state';
 import { TILE_SERVER } from './background/index.js';
 
 /** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
@@ -19,7 +18,7 @@ export interface SymbolInfo {
 	center: [number, number];
 }
 
-/** The image of 32×32 pixels, centered on the point, of the symbols of older maps. */
+/** An image of 32×32 pixels, centered on the point: the size of the symbols of the "base" sprite. */
 function centered(): Pick<SymbolInfo, 'anchor' | 'width' | 'height' | 'center'> {
 	return { anchor: 'center', width: 32, height: 32, center: [0.5, 0.5] };
 }
@@ -35,19 +34,8 @@ export const NEW_MARKER_SYMBOL = 'extras:pin-teardrop';
 
 const SPRITES_URL = `${TILE_SERVER}/assets/sprites/`;
 
-/**
- * The symbols of older maps, which were all in the "base" sheet. Used until the server's are
- * loaded. Some of their names have the same image: the first one is its title, the others aliases.
- */
-const LEGACY_CATALOG: SymbolCatalog = { sheets: ['base'], symbols: [] };
-for (const [, title, name] of LEGACY_SYMBOLS) {
-	if (!name) continue;
-	const known = LEGACY_CATALOG.symbols.find((symbol) => symbol.name === name);
-	if (known) known.aliases.push(title);
-	else LEGACY_CATALOG.symbols.push({ name, title, aliases: [], ...centered() });
-}
-
-let catalog = LEGACY_CATALOG;
+// empty until the symbols of the server are loaded
+let catalog: SymbolCatalog = { sheets: [], symbols: [] };
 let byName = indexByName(catalog);
 let loading: Promise<SymbolCatalog> | undefined;
 
@@ -57,8 +45,8 @@ function indexByName({ symbols }: SymbolCatalog): Map<string, SymbolInfo> {
 
 /**
  * Load the sprite sheets of the tile server once, with the titles and aliases of their symbols.
- * Patterns are no symbols: only images that can be recolored (SDF) are. Without the server, the
- * symbols of older maps are used.
+ * Patterns are no symbols: only images that can be recolored (SDF) are. Without the server, there
+ * are no symbols.
  */
 export function loadSymbols(): Promise<SymbolCatalog> {
 	loading ??= fetchCatalog().then(

@@ -1,9 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { LEGACY_SYMBOLS } from '@versatiles/map-state';
 import { filterSymbols } from './symbols_catalog.js';
-// Icon names of the "base" sprite that @versatiles/style loads. To update:
-// curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
-import spriteBase from './__fixtures__/sprite-base.json' with { type: 'json' };
 
 vi.unmock('./symbols_catalog.js');
 
@@ -14,36 +10,16 @@ async function symbolsModule() {
 }
 
 describe('getSymbol', () => {
-	it('knows the symbols of older maps before the symbols of the server are loaded', async () => {
-		const { getSymbol, spriteSheets } = await symbolsModule();
-		expect(getSymbol('base:icon-airfield')).toStrictEqual({
-			name: 'base:icon-airfield',
-			title: 'airplane',
-			aliases: [],
-			anchor: 'center',
-			width: 32,
-			height: 32,
-			center: [0.5, 0.5]
-		});
-		expect(spriteSheets()).toStrictEqual([{ id: 'base', url: 'https://tiles.versatiles.org/assets/sprites/base' }]);
+	it('has no symbols before the symbols of the server are loaded', async () => {
+		const { allSymbols, spriteSheets } = await symbolsModule();
+		expect(allSymbols()).toStrictEqual([]);
+		expect(spriteSheets()).toStrictEqual([]);
 	});
 
 	it('names an unknown image by its name, and "" is no symbol', async () => {
 		const { getSymbol } = await symbolsModule();
 		expect(getSymbol('icons:unknown')).toMatchObject({ name: 'icons:unknown', title: 'unknown' });
 		expect(getSymbol('')).toBeUndefined();
-	});
-});
-
-describe('the symbols of older maps', () => {
-	const icons = spriteBase as Record<string, { sdf: boolean }>;
-
-	it('should all exist in the base sprite and be recolorable', () => {
-		const invalid = LEGACY_SYMBOLS.filter(([, , image]) => image).filter(([, , image]) => {
-			const [sprite, icon] = image.split(':');
-			return sprite !== 'base' || !icons[icon]?.sdf;
-		});
-		expect(invalid).toStrictEqual([]);
 	});
 });
 
@@ -104,16 +80,14 @@ describe('loadSymbols', () => {
 		vi.unstubAllGlobals();
 	});
 
-	it('keeps the symbols of older maps without the server', async () => {
+	it('has no symbols without the server', async () => {
 		vi.stubGlobal('fetch', async () => new Response('', { status: 500 }));
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const { loadSymbols, allSymbols, spriteSheets } = await symbolsModule();
 
 		await loadSymbols();
-		// once per image, without "none"
-		expect(allSymbols().length).toBe(new Set(LEGACY_SYMBOLS.map(([, , image]) => image).filter(Boolean)).size);
-		expect(new Set(allSymbols().map((symbol) => symbol.name)).size).toBe(allSymbols().length);
-		expect(spriteSheets().map((sheet) => sheet.id)).toStrictEqual(['base']);
+		expect(allSymbols()).toStrictEqual([]);
+		expect(spriteSheets()).toStrictEqual([]);
 		vi.unstubAllGlobals();
 		vi.restoreAllMocks();
 	});

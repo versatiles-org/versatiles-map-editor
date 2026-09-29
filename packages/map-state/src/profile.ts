@@ -2,7 +2,6 @@ import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
 import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
-import { legacySymbol, symbolFromName } from './symbols.js';
 
 // ---------------------------------------------------------------------------
 // Style vocabulary of the serialization format.
@@ -30,7 +29,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	rotate: 0,
 	size: 1,
 	halo: 1,
-	// the flag, the default of older links and files
+	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
 	symbol: 'base:icon-embassy',
 	label: '',
 	align: 0,
@@ -82,6 +81,14 @@ export function sanitizeString(value: unknown): string | undefined {
 	if (typeof value === 'string') return value;
 	if (typeof value === 'number' || typeof value === 'boolean') return String(value);
 	return undefined;
+}
+
+/**
+ * A symbol, named by its image in the sprites of the tile server, e.g. "icons:anchor", or "" for
+ * no symbol. Undefined for anything else.
+ */
+export function sanitizeSymbol(value: unknown): string | undefined {
+	return typeof value === 'string' && (value === '' || value.includes(':')) ? value : undefined;
 }
 
 export function sanitizeBoolean(value: unknown): boolean | undefined {
@@ -157,19 +164,6 @@ export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 
 // ----- symbol (marker) -----
 
-function legacyNumber(value: unknown): string | undefined {
-	const index = sanitizeNumber(value, 0);
-	return index === undefined ? undefined : legacySymbol(Math.round(index));
-}
-
-/** The style of a marker of an older link or file, whose symbol is a number in `pattern`. */
-export function legacyMarkerStyle(style: StateStyle): StateStyle {
-	if (style.pattern === undefined) return style;
-	const { pattern, ...rest } = style;
-	const symbol = legacySymbol(pattern);
-	return symbol === undefined || rest.symbol !== undefined ? rest : { ...rest, symbol };
-}
-
 export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
 	const s = { ...SYMBOL_DEFAULTS, ...style };
 	return {
@@ -196,8 +190,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'align', indexOf(LABEL_ALIGN_NAMES, p['symbol-label-align']));
 		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));
 		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
-		// the image name, or the short name of older files
-		if (typeof p['symbol-pattern'] === 'string') set(s, 'symbol', symbolFromName(p['symbol-pattern']));
+		set(s, 'symbol', sanitizeSymbol(p['symbol-pattern']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);
 }
@@ -245,8 +238,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		const color = sanitizeColor(e.color);
 		if (!color) continue;
 		const result: StateLegendEntry = { color, label: sanitizeString(e.label) ?? '' };
-		// the image name, or the number of older files
-		const symbol = typeof e.symbol === 'string' ? symbolFromName(e.symbol) : legacyNumber(e.symbol);
+		const symbol = sanitizeSymbol(e.symbol);
 		if (symbol) result.symbol = symbol;
 		legend.entries.push(result);
 	}

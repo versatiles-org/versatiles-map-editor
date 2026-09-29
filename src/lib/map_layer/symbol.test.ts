@@ -153,12 +153,6 @@ describe('MapLayerSymbol', () => {
 		expect(layer.labelAlign).toBe(2);
 	});
 
-	it('reads the number of the symbol of an older file', () => {
-		layer.setState({ pattern: 12, size: 2 });
-		expect(layer.symbol).toBe('base:icon-bench');
-		expect(layer.getState()).toStrictEqual({ symbol: 'base:icon-bench', size: 2 });
-	});
-
 	it('should restore falsy values', () => {
 		layer.setState({ halo: 0, rotate: 90, label: 'Label', align: 2 });
 		layer.setState({ rotate: 0, label: '', align: 0 });

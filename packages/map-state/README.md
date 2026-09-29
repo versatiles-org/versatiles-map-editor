@@ -57,8 +57,7 @@ stateFromKML(kml: string): MapState
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
   the way the editor does.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
-  `sheet:name`, e.g. `icons:anchor`, or `""` for none. `LEGACY_SYMBOLS`, `legacySymbol`,
-  `symbolFromName` and `legacyMarkerStyle` convert the symbol numbers and names of older maps.
+  `sheet:name`, e.g. `icons:anchor`, or `""` for none.
 
 `MapState` is the canonical model: a viewport, map properties (`meta`) and a list of typed
 elements whose styles omit default values. The types are exported too (`StateElement`,
@@ -104,8 +103,7 @@ colors normalized to lowercase hex) or fall back to the defaults.
 
 Enum values use human-readable names (`fill-pattern`, `stroke-style`,
 `symbol-label-align`) whose index↔name tables live here. `symbol-pattern` is the name of the
-image, e.g. `icons:anchor`; the names of older files (e.g. `flag`) are read with the table of
-`symbols.ts`. The editor's `MapLayer` classes take
+image, e.g. `icons:anchor`. The editor's `MapLayer` classes take
 their defaults and enum names from here and only add rendering data;
 `profile.test.ts` checks that every enum value can be rendered.
 

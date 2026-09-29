@@ -1,12 +1,6 @@
 import { MapLayer } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
-import {
-	type StateStyle,
-	LABEL_ALIGN_NAMES,
-	SYMBOL_DEFAULTS,
-	legacyMarkerStyle,
-	removeDefaultFields
-} from '@versatiles/map-state';
+import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
@@ -235,17 +229,15 @@ export class MapLayerSymbol extends MapLayer {
 	}
 
 	setState(style: StateStyle) {
-		// e.g. a file of an older version, with the number of the symbol
-		const state = legacyMarkerStyle(style);
-		if (state.color != null) this.color = state.color;
-		if (state.rotate != null) this.rotate = state.rotate;
-		if (state.size != null) this.size = state.size;
-		if (state.halo != null) this.halo = state.halo;
-		if (state.symbol != null) this.symbol = state.symbol;
-		if (state.label != null) this.label = state.label;
-		if (state.align != null) this.labelAlign = lookupLabelAlign(state.align).index;
-		if (state.labelColor != null) this.labelColor = state.labelColor;
-		if (state.haloColor != null) this.haloColor = state.haloColor;
+		if (style.color != null) this.color = style.color;
+		if (style.rotate != null) this.rotate = style.rotate;
+		if (style.size != null) this.size = style.size;
+		if (style.halo != null) this.halo = style.halo;
+		if (style.symbol != null) this.symbol = style.symbol;
+		if (style.label != null) this.label = style.label;
+		if (style.align != null) this.labelAlign = lookupLabelAlign(style.align).index;
+		if (style.labelColor != null) this.labelColor = style.labelColor;
+		if (style.haloColor != null) this.haloColor = style.haloColor;
 	}
 }
 
