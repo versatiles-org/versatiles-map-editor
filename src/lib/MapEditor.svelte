@@ -1,23 +1,11 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
-	import { replaceState } from '$app/navigation';
-	import 'maplibre-gl/dist/maplibre-gl.css';
-	import '$lib/page/theme.css';
-	import * as maplibre from 'maplibre-gl';
+	import { onMount } from 'svelte';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
-	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
-	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
-	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
-	import { Notifications } from '$lib/components/ui/index.js';
-	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { MapDocument } from './map_document.svelte.js';
-	import type { MapDocumentInteractive } from './map_document_interactive.js';
-	import { PopupHandler } from './popup_handler.svelte.js';
+	import MapFrame, { type Insets } from './MapFrame.svelte';
+	import MapViewer from './MapViewer.svelte';
+	import type { MapDocument } from './map_document.svelte.js';
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
-	import { UrlHash } from '$lib/page/url_hash.js';
-	import { addAttribution, layoutOverlays, type AttributionSize } from '$lib/page/overlay_layout.js';
 
 	let {
 		onMapLoad
@@ -25,95 +13,37 @@
 		onMapLoad?: (map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) => void;
 	} = $props();
 
-	let container: HTMLDivElement;
-	let map: MaplibreMapType | undefined;
-	// draws the symbols of the map's sprites for the components, e.g. the legend
-	const symbolLibrary = new SymbolLibrary();
-	setSymbolLibrary(symbolLibrary);
-	let triggeredMapReady = $state(false);
-	let showSidebar = $state(false);
+	// The editor needs room for the sidebar and the map. Smaller screens (phones) and embeds get the
+	// read-only viewer. The size is checked once, since switching modes would lose the editor state.
+	let mode: 'editor' | 'viewer' | undefined = $state();
+	let screenTooSmall = $state(false);
+	onMount(() => {
+		const embedded = window.self !== window.top;
+		screenTooSmall = !embedded && !matchMedia('(min-width: 600px) and (min-height: 400px)').matches;
+		mode = embedded || screenTooSmall ? 'viewer' : 'editor';
+	});
+
 	// the sidebar can be collapsed, to see more of the map
 	let sidebarOpen = $state(true);
 	const SIDEBAR_WIDTH = 250;
 	// the width of the map that the sidebar covers
-	const sidebarWidth = $derived(showSidebar && sidebarOpen ? SIDEBAR_WIDTH : 0);
-	// the height of the map that the top bar of the editor covers
+	const sidebarWidth = $derived(sidebarOpen ? SIDEBAR_WIDTH : 0);
+	// the height of the map that the top bar covers
 	const TOPBAR_HEIGHT = 44;
-	const topbarHeight = $derived(showSidebar ? TOPBAR_HEIGHT : 0);
 	// the width of the map that the tools at the left cover
 	const RAIL_WIDTH = 48;
-	const railWidth = $derived(showSidebar ? RAIL_WIDTH : 0);
 	// the list of elements, in a drawer right of the tools, over the map
 	let drawerOpen = $state(false);
 	const DRAWER_WIDTH = 250;
 	// the width at the left that the tools and the drawer cover, e.g. for the legend
-	const coveredLeft = $derived(railWidth + (showSidebar && drawerOpen ? DRAWER_WIDTH : 0));
+	const coveredLeft = $derived(RAIL_WIDTH + (drawerOpen ? DRAWER_WIDTH : 0));
 	// the height of the map that the status line at the bottom covers
 	const STATUS_HEIGHT = 26;
-	const statusHeight = $derived(showSidebar ? STATUS_HEIGHT : 0);
-	const MAP_PADDING = 10;
 
-	// The map centers its content in the part that the bars leave free. When the sidebar is
-	// shown or hidden, the map is moved back, so its content stays where it is on the screen.
-	$effect(() => {
-		const right = MAP_PADDING + sidebarWidth;
-		if (!map) return;
-		const previous = map.getPadding().right ?? right;
-		if (previous === right) return;
-		map.setPadding({
-			top: MAP_PADDING + topbarHeight,
-			right,
-			bottom: MAP_PADDING + statusHeight,
-			left: MAP_PADDING + railWidth
-		});
-		map.panBy([(previous - right) / 2, 0], { duration: 0 });
-	});
-	let screenTooSmall = $state(false);
-	let mapDocument: MapDocument | MapDocumentInteractive | undefined = $state();
-	// always in the editor, where a found place can be marked; in the viewer if the map offers it
-	const showSearch = $derived(showSidebar ? mapDocument?.isInteractive() === true : mapDocument?.search === true);
-	// until the map has loaded for the first time, and while a map from a link or file loads
-	const loading = $derived(!triggeredMapReady || mapDocument?.loading === true);
-	// the height of the search and the hint at the top of the viewer
-	let topOverlaysHeight = $state(0);
+	const insets: Insets = $derived({ top: TOPBAR_HEIGHT, right: sidebarWidth, bottom: STATUS_HEIGHT, left: RAIL_WIDTH });
+	const covered: Insets = $derived({ ...insets, left: coveredLeft });
 
-	// The legend keeps its corner: the search and the attribution go to the other side
-	const legendPosition = $derived(
-		mapDocument?.legend?.entries.length ? (mapDocument.legend.position ?? 'bottom-left') : undefined
-	);
-	let pageWidth = $state(0);
-	let searchWidth = $state(0);
-	let legendWidth = $state(0);
-	let attributionSize: AttributionSize = $state({ width: 0, top: 0 });
-	const layout = $derived(
-		layoutOverlays(legendPosition, {
-			freeWidth: pageWidth - coveredLeft - sidebarWidth - 3 * MAP_PADDING,
-			legendWidth,
-			searchWidth,
-			attributionWidth: attributionSize.width,
-			topOverlaysHeight,
-			hint: screenTooSmall
-		})
-	);
-
-	// the attribution in the bottom corner without the legend; a value of its own, since the
-	// layout changes with the size of the attribution, which must not add it again
-	const attributionCorner = $derived(layout.attributionCorner);
-	$effect(() => {
-		const corner = attributionCorner;
-		const m = mapDocument?.view.map;
-		if (!m) return;
-		return addAttribution(m, corner, (size) => (attributionSize = size));
-	});
-
-	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
-	onMount(() => {
-		init();
-		// SvelteKit's replaceState fails until its router has finished starting, which happens
-		// after all components are mounted
-		tick().then(() => urlHash.start());
-		return destroy;
-	});
+	let mapDocument: MapDocument | undefined = $state();
 
 	/**
 	 * The code of the editor, loaded only for the editor: embeds and phones show the read-only
@@ -144,6 +74,16 @@
 	}
 	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
 
+	async function prepare() {
+		editor = await loadEditor();
+	}
+
+	function createDocument(map: MaplibreMapType): MapDocument {
+		// the color schemes and fonts of this editor instance
+		void loadConfig();
+		return new editor!.MapDocumentInteractive(map);
+	}
+
 	/** Add a marker at a place that the search found. */
 	function markPlace(point: [number, number]) {
 		if (!mapDocument?.isInteractive()) return;
@@ -155,199 +95,71 @@
 	function selectLegend() {
 		if (mapDocument?.isInteractive()) mapDocument.selection.selectLegend();
 	}
-
-	/** Show the country of the user (from the time zone), when there is no map in the URL. */
-	async function showCountry(map: MaplibreMapType) {
-		// only needed without a map, so it is loaded only then
-		const { getCountryBoundingBox } = await import('$lib/page/location.js');
-		const bbox = getCountryBoundingBox();
-		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
-	}
-
-	let destroyed = false;
-	function destroy(): void {
-		destroyed = true;
-		urlHash.destroy();
-		// before map.remove(), so the elements can still remove their layers
-		mapDocument?.destroy();
-		mapDocument = undefined;
-		map?.remove();
-		map = undefined;
-		symbolLibrary.map = undefined;
-	}
-
-	// the map in the URL; replaceState does not fire "hashchange"
-	const urlHash = new UrlHash(
-		() => mapDocument,
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
-		(hash) => replaceState('#' + hash, {})
-	);
-
-	function init(): void {
-		if (map) return;
-
-		maplibre.setWorkerUrl(maplibreWorkerUrl);
-
-		// The editor starts without a style; map_document sets the actual map style.
-		map = new maplibre.Map({
-			container,
-			renderWorldCopies: false,
-			dragRotate: false,
-			attributionControl: false,
-			fadeDuration: 0
-		});
-		symbolLibrary.map = map;
-
-		void onMapInit(map);
-
-		map.on('idle', checkMapReady);
-
-		function checkMapReady() {
-			if (triggeredMapReady) return;
-			if (!map!.loaded()) return;
-			triggeredMapReady = true;
-			if (onMapLoad) onMapLoad(map!, maplibre);
-		}
-	}
-
-	async function onMapInit(map: MaplibreMapType) {
-		// The editor needs room for the sidebar and the map. Smaller screens (phones) get the
-		// read-only viewer. The size is checked once, since switching modes would lose the editor state.
-		const embedded = window.self !== window.top;
-		screenTooSmall = !embedded && !matchMedia('(min-width: 600px) and (min-height: 400px)').matches;
-		showSidebar = !embedded && !screenTooSmall;
-
-		// before the first view is set
-		map.setPadding({
-			top: MAP_PADDING + (showSidebar ? TOPBAR_HEIGHT : 0),
-			right: MAP_PADDING + (showSidebar ? SIDEBAR_WIDTH : 0),
-			bottom: MAP_PADDING + (showSidebar ? STATUS_HEIGHT : 0),
-			left: MAP_PADDING + (showSidebar ? RAIL_WIDTH : 0)
-		});
-
-		let hash = location.hash.slice(1);
-		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
-
-		// The map has no style yet, so it shows nothing until the code has loaded
-		const [loadedEditor] = await Promise.all([
-			showSidebar ? loadEditor() : undefined,
-			hash ? undefined : showCountry(map)
-		]);
-		if (destroyed) return;
-
-		if (loadedEditor) {
-			editor = loadedEditor;
-			// the color schemes and fonts of this editor instance
-			void loadConfig();
-			const doc = new loadedEditor.MapDocumentInteractive(map);
-			doc.state.events.on('change', urlHash.request);
-			map.on('moveend', urlHash.request);
-			mapDocument = doc;
-		} else {
-			mapDocument = new MapDocument(map);
-			new PopupHandler(mapDocument);
-		}
-
-		if (hash && !urlHash.read(hash)) void showCountry(map);
-
-		urlHash.listen();
-	}
 </script>
 
-<div
-	class="page map-editor-theme"
-	class:editor={showSidebar}
-	bind:clientWidth={pageWidth}
-	style:--covered-left="{coveredLeft}px"
-	style:--covered-right="{sidebarWidth}px"
-	style:--covered-bottom="{statusHeight}px"
->
-	<div class="container">
-		<div class="map" bind:this={container}></div>
-	</div>
-	{#if loading}
-		<LoadingIndicator right={sidebarWidth} />
-	{/if}
-	<Notifications right={sidebarWidth} />
-	{#if mapDocument?.legend}
-		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
-		<Legend
-			legend={mapDocument.legend}
-			left={coveredLeft}
-			right={sidebarWidth}
-			top={topbarHeight + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
-			bottom={layout.legendAboveAttribution ? attributionSize.top : statusHeight}
-			bind:width={legendWidth}
-			selected={mapDocument.selection?.legendSelected ?? false}
-			onselect={showSidebar ? selectLegend : undefined}
-		/>
-	{/if}
-	{#if mapDocument && (showSearch || screenTooSmall)}
-		<div
-			class="top-overlays"
-			style:top="{topbarHeight + 10}px"
-			style:left="{coveredLeft + 10}px"
-			style:right="{sidebarWidth + 10}px"
-			bind:offsetHeight={topOverlaysHeight}
-		>
-			{#if showSearch}
-				<div class="map-search" class:right={layout.searchRight} bind:offsetWidth={searchWidth}>
-					<SearchPlace map={mapDocument.view.map} onmark={showSidebar ? markPlace : undefined} />
-				</div>
-			{/if}
-			{#if screenTooSmall}
-				<div class="hint">Open this page on a larger screen to edit the map.</div>
-			{/if}
-		</div>
-	{/if}
-	{#if showSidebar}
+{#if mode === 'viewer'}
+	<MapViewer hint={screenTooSmall ? 'Open this page on a larger screen to edit the map.' : undefined} {onMapLoad} />
+{:else if mode === 'editor'}
+	<!-- a found place can be marked -->
+	<MapFrame
+		{prepare}
+		{createDocument}
+		bind:mapDocument
+		{insets}
+		{covered}
+		search
+		onmark={markPlace}
+		onselectlegend={selectLegend}
+		editor
+		{onMapLoad}
+	>
 		<!-- from the start, so the map does not move when the code of the editor has loaded -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
-			{#if editor && mapDocument && mapDocument.isInteractive()}
+			{#if editor && mapDocument?.isInteractive()}
 				<editor.TopBar doc={mapDocument} />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
-			{#if editor && mapDocument && mapDocument.isInteractive()}
+			{#if editor && mapDocument?.isInteractive()}
 				<editor.ToolRail doc={mapDocument} bind:drawerOpen />
 			{/if}
 		</div>
 		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
-			{#if editor && mapDocument && mapDocument.isInteractive()}
+			{#if editor && mapDocument?.isInteractive()}
 				<editor.StatusBar doc={mapDocument} />
 			{/if}
 		</div>
-	{/if}
-	{#if showSidebar && editor && mapDocument && mapDocument.isInteractive()}
-		<editor.NodeDeleteButton {mapDocument} />
-		<editor.DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
-		<editor.SelectionBar
-			doc={mapDocument}
-			top={TOPBAR_HEIGHT}
-			left={coveredLeft}
-			right={sidebarWidth}
-			bottom={STATUS_HEIGHT}
-		/>
-		<!-- hidden, not removed, so the list keeps e.g. its scroll position -->
-		<div
-			class="drawer-slot"
-			style:top="{TOPBAR_HEIGHT}px"
-			style:bottom="{STATUS_HEIGHT}px"
-			style:left="{RAIL_WIDTH}px"
-			style:width="{DRAWER_WIDTH}px"
-			hidden={!drawerOpen}
-		>
-			<editor.ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
-		</div>
-		<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
-		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
-			<editor.Sidebar {mapDocument} />
-		</div>
-		<editor.SidebarToggle
-			bind:open={sidebarOpen}
-			top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
-			right={sidebarWidth}
-		/>
+		{#if editor && mapDocument?.isInteractive()}
+			<editor.NodeDeleteButton {mapDocument} />
+			<editor.DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
+			<editor.SelectionBar
+				doc={mapDocument}
+				top={TOPBAR_HEIGHT}
+				left={coveredLeft}
+				right={sidebarWidth}
+				bottom={STATUS_HEIGHT}
+			/>
+			<!-- hidden, not removed, so the list keeps e.g. its scroll position -->
+			<div
+				class="drawer-slot"
+				style:top="{TOPBAR_HEIGHT}px"
+				style:bottom="{STATUS_HEIGHT}px"
+				style:left="{RAIL_WIDTH}px"
+				style:width="{DRAWER_WIDTH}px"
+				hidden={!drawerOpen}
+			>
+				<editor.ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
+			</div>
+			<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
+			<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
+				<editor.Sidebar {mapDocument} />
+			</div>
+			<editor.SidebarToggle
+				bind:open={sidebarOpen}
+				top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
+				right={sidebarWidth}
+			/>
+		{/if}
 
 		<style>
 			.page .container {
@@ -357,18 +169,10 @@
 				left: 0;
 			}
 		</style>
-	{/if}
-</div>
+	</MapFrame>
+{/if}
 
 <style>
-	.page,
-	.container {
-		width: 100%;
-		height: 100%;
-		position: relative;
-		min-height: 6em;
-	}
-
 	/* over the map, like the sidebar, so the map keeps its size */
 	.topbar-slot {
 		position: absolute;
@@ -405,85 +209,5 @@
 		z-index: var(--z-panels);
 		right: 0;
 		width: 250px;
-	}
-
-	.map {
-		position: absolute;
-		left: 0;
-		top: 0;
-		width: 100%;
-		height: 100%;
-
-		:global(canvas) {
-			outline: none !important;
-		}
-
-		:global(.maplibregl-ctrl-attrib) {
-			background-color: color-mix(in srgb, var(--color-bg) 50%, transparent) !important;
-			color: var(--color-text) !important;
-			opacity: 0.5;
-			font-size: 0.85em;
-			line-height: normal !important;
-		}
-		:global(.maplibregl-ctrl-attrib a) {
-			color: var(--color-text) !important;
-		}
-
-		/* the attribution, clear of the tools, the drawer, the sidebar and the status line */
-		.page.editor & :global(.maplibregl-ctrl-bottom-left) {
-			left: var(--covered-left);
-			bottom: var(--covered-bottom);
-		}
-		.page.editor & :global(.maplibregl-ctrl-bottom-right) {
-			right: var(--covered-right);
-			bottom: var(--covered-bottom);
-		}
-	}
-
-	/* The search, and the hint of the viewer, at the top, since the attribution at the bottom can
-	   expand to the full width. Stacked, so they do not overlap. */
-	.top-overlays {
-		position: absolute;
-		z-index: var(--z-search);
-		display: flex;
-		flex-direction: column;
-		gap: var(--gap);
-		/* the map can be dragged between them */
-		pointer-events: none;
-		& > * {
-			pointer-events: auto;
-		}
-	}
-
-	.hint {
-		align-self: center;
-		max-width: calc(100% - 2 * var(--gap));
-		padding: 0.4em 1em;
-		border-radius: var(--border-radius);
-		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
-		backdrop-filter: blur(10px);
-		color: var(--color-text);
-		font-size: 0.8em;
-		text-align: center;
-	}
-
-	.map-search {
-		width: min(260px, 100%);
-		/* at the right, if the legend is at the top left */
-		&.right {
-			align-self: flex-end;
-		}
-		font-size: 13px;
-		:global(input) {
-			padding: 6px 8px;
-			border: 1px solid rgb(0 0 0 / 30%);
-			border-radius: 4px;
-			box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
-		}
-	}
-
-	:global(.maplibregl-ctrl-attrib) {
-		display: flex;
-		align-items: center;
 	}
 </style>

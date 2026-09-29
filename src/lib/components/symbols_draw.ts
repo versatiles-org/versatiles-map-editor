@@ -56,11 +56,11 @@ const contextKey = Symbol('symbol library');
 
 /**
  * The symbol library of the editor, for the components that draw symbols, e.g. the legend and
- * the symbol selector. MapEditor sets it.
+ * the symbol selector. MapFrame sets it.
  */
 export function getSymbolLibrary(): SymbolLibrary {
 	const library = getContext<SymbolLibrary | undefined>(contextKey);
-	if (!library) throw new Error('no symbol library: MapEditor sets it, or the context of mount()');
+	if (!library) throw new Error('no symbol library: MapFrame sets it, or the context of mount()');
 	return library;
 }
 
