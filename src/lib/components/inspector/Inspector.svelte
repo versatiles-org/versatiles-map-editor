@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
-	import Editor from './Editor.svelte';
+	import StyleEditor from './StyleEditor.svelte';
 	import { Icon, type IconName, FontSelect } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
@@ -74,7 +74,7 @@
 	{#if selection.legendSelected && legend}
 		<PanelLegend {manager} />
 	{:else if elements.length > 0}
-		<Editor {elements} />
+		<StyleEditor {elements} />
 	{:else}
 		<InspectorSection title="Background map">
 			<PanelBackground {manager} />

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
 	import type { StyleLayers } from '$lib/element/types.js';
-	import EditorFill from './EditorFill.svelte';
-	import EditorStroke from './EditorStroke.svelte';
-	import EditorSymbol from './EditorSymbol.svelte';
+	import StyleFill from './StyleFill.svelte';
+	import StyleStroke from './StyleStroke.svelte';
+	import StyleSymbol from './StyleSymbol.svelte';
 	import { InputRow } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
@@ -32,12 +32,12 @@
 {#key elements}
 	{#if symbolLayers.length > 0}
 		<InspectorSection title="Symbol">
-			<EditorSymbol layers={symbolLayers} manager={elements[0].manager} />
+			<StyleSymbol layers={symbolLayers} manager={elements[0].manager} />
 		</InspectorSection>
 	{/if}
 	{#if fillLayers.length > 0 && strokeVisible}
 		<InspectorSection title="Fill">
-			<EditorFill layers={fillLayers} manager={elements[0].manager} />
+			<StyleFill layers={fillLayers} manager={elements[0].manager} />
 		</InspectorSection>
 		<InspectorSection title="Outline">
 			{#snippet heading()}
@@ -47,12 +47,12 @@
 				</label>
 			{/snippet}
 			{#if strokeVisible.value}
-				<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
+				<StyleStroke layers={strokeLayers} manager={elements[0].manager} />
 			{/if}
 		</InspectorSection>
 	{:else if strokeLayers.length > 0}
 		<InspectorSection title="Line">
-			<EditorStroke layers={strokeLayers} manager={elements[0].manager} />
+			<StyleStroke layers={strokeLayers} manager={elements[0].manager} />
 		</InspectorSection>
 	{/if}
 	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
