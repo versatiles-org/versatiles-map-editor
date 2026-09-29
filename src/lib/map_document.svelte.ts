@@ -19,6 +19,8 @@ export class MapDocument {
 	#labelFont: string | undefined = $state.raw(undefined);
 	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
 	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
+	/** Whether the labels of the background map are drawn over the areas and lines of the elements. */
+	#mapLabelsOnTop = $state(false);
 	/** The legend of the map, if it has one. Replaced as a whole on every change. */
 	public legend: StateLegend | undefined = $state.raw(undefined);
 	private destroyed = false;
@@ -64,6 +66,18 @@ export class MapDocument {
 		if (font === this.#labelFont) return;
 		this.#labelFont = font;
 		this.view.style.setFont(this.font);
+	}
+
+	/**
+	 * Whether the labels of the background map are drawn over the areas and lines of the elements,
+	 * instead of under them. The labels of markers are always on top.
+	 */
+	public get mapLabelsOnTop(): boolean {
+		return this.#mapLabelsOnTop;
+	}
+	public set mapLabelsOnTop(onTop: boolean) {
+		this.#mapLabelsOnTop = onTop;
+		this.view.style.setMapLabelsOnTop(onTop);
 	}
 
 	/** Show another background map. The background is set at once; resolves when its style is loaded. */
@@ -203,6 +217,7 @@ export class MapDocument {
 		this.legend = meta?.legend;
 		this.search = meta?.search === true;
 		this.labelFont = meta?.labelFont;
+		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;
 	}
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */

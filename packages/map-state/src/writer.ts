@@ -184,7 +184,12 @@ export class StateWriter {
 		// only the fields that are stored count, e.g. not `search: false`
 		const stored =
 			metadata &&
-			(metadata.background || metadata.legend || metadata.colorScheme || metadata.search || metadata.labelFont);
+			(metadata.background ||
+				metadata.legend ||
+				metadata.colorScheme ||
+				metadata.search ||
+				metadata.labelFont ||
+				metadata.mapLabelsOnTop);
 		if (!metadata || !stored) {
 			return this.writeBit(false);
 		}
@@ -214,6 +219,10 @@ export class StateWriter {
 		if (metadata.labelFont) {
 			this.writeInteger(6, 6);
 			this.writeString(metadata.labelFont);
+		}
+		if (metadata.mapLabelsOnTop) {
+			// a flag: the key alone
+			this.writeInteger(7, 6);
 		}
 		this.writeInteger(0, 6);
 	}

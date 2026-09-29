@@ -100,4 +100,40 @@ describe('MapStyleLoader', () => {
 			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:1:#ff0000', expect.anything());
 		});
 	});
+
+	describe('labels of the background map on top', () => {
+		const under = ['highlight_line', 'highlight_point', 'elements_fill', 'elements_stroke'];
+
+		beforeEach(async () => {
+			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
+			const types: Record<string, string> = { water: 'fill', place_labels: 'symbol', elements_symbol: 'symbol' };
+			map.getLayersOrder.mockReturnValue(['water', 'place_labels', ...under, 'elements_symbol']);
+			map.getLayer.mockImplementation((id: string) => ({ type: types[id] ?? 'line' }));
+			map.moveLayer.mockClear();
+		});
+
+		it('moves the areas and lines under the first label, and back under the markers', () => {
+			loader.setMapLabelsOnTop(true);
+			expect(map.moveLayer.mock.calls).toStrictEqual(under.map((id) => [id, 'place_labels']));
+
+			map.moveLayer.mockClear();
+			map.getLayersOrder.mockReturnValue(['water', ...under, 'place_labels', 'elements_symbol']);
+			loader.setMapLabelsOnTop(false);
+			expect(map.moveLayer.mock.calls).toStrictEqual(under.map((id) => [id, 'elements_symbol']));
+		});
+		it('leaves them under the markers if the background map has no labels', () => {
+			map.getLayersOrder.mockReturnValue(['water', ...under, 'elements_symbol']);
+			loader.setMapLabelsOnTop(true);
+			expect(map.moveLayer).not.toHaveBeenCalled();
+		});
+		it('builds the next style in this order', async () => {
+			loader.setMapLabelsOnTop(true);
+			map.setStyle.mockClear();
+			await loader.setBackground({ builder: 'osm', options: { theme: 'gray' } }, 'noto_sans_regular');
+			const style = (map.setStyle.mock.lastCall as unknown[])[0] as { layers: { id: string; type: string }[] };
+			const ids = style.layers.map((layer) => layer.id);
+			const firstLabel = style.layers.findIndex((layer) => layer.type === 'symbol');
+			expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
+		});
+	});
 });

@@ -117,6 +117,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (colorScheme) meta.colorScheme = colorScheme;
 		if (this.search) meta.search = true;
 		if (this.labelFont) meta.labelFont = this.labelFont;
+		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 		return {
 			map: this.view.getViewport(),
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
@@ -140,6 +141,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.search) this.search = true;
 		if (meta.labelFont) this.labelFont = meta.labelFont;
+		if (meta.mapLabelsOnTop) this.mapLabelsOnTop = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

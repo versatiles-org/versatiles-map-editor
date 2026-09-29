@@ -336,6 +336,45 @@ test('one font for the labels of all markers, which need not be the one of the b
 	await expect.poll(() => stateInUrl(page).meta?.labelFont).toBeUndefined();
 });
 
+test('the labels of the background map over areas and lines, those of markers always on top', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	// the position of the layers of the elements, relative to the first label of the background map
+	const order = () =>
+		page.evaluate(() => {
+			const map = (window as unknown as MapWindow).map;
+			const ids = map.getLayersOrder();
+			const label = ids.findIndex((id) => map.getLayer(id)?.type === 'symbol');
+			const offset = (id: string) => Math.sign(ids.indexOf(id) - label);
+			return { fill: offset('elements_fill'), stroke: offset('elements_stroke'), symbol: offset('elements_symbol') };
+		});
+	const checkbox = page.getByRole('checkbox', { name: 'Over areas and lines' });
+
+	// under the areas and lines, at first
+	await expect(checkbox).not.toBeChecked();
+	expect(await order()).toStrictEqual({ fill: 1, stroke: 1, symbol: 1 });
+
+	// over them, but still under the markers
+	await checkbox.check();
+	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
+	await expect.poll(() => stateInUrl(page).meta?.mapLabelsOnTop).toBe(true);
+
+	// kept in the map, and by a new background map
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect(checkbox).toBeChecked();
+	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
+	await page.getByRole('radio', { name: 'Satellite' }).check();
+	await expect.poll(() => stateInUrl(page).meta?.background?.builder).toBe('satellite');
+	await waitForMapIsIdle(page);
+	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
+
+	// under them again
+	await checkbox.uncheck();
+	await expect.poll(order).toStrictEqual({ fill: 1, stroke: 1, symbol: 1 });
+	await expect.poll(() => stateInUrl(page).meta?.mapLabelsOnTop).toBeUndefined();
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

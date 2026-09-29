@@ -51,6 +51,21 @@ describe('MapDocument', () => {
 		expect(doc.font).toBe('open_sans_regular');
 	});
 
+	it('draws the labels of the background map over areas and lines, if set, and stores it', async () => {
+		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
+		mockMap.emit('style.load');
+		expect(doc.mapLabelsOnTop).toBe(false);
+		expect(doc.getState().meta?.mapLabelsOnTop).toBeUndefined();
+
+		doc.mapLabelsOnTop = true;
+		expect(mockMap.moveLayer).toHaveBeenCalledWith('elements_fill', expect.any(String));
+		expect(doc.getState().meta?.mapLabelsOnTop).toBe(true);
+
+		// e.g. undo
+		await doc.setState({ elements: [] });
+		expect(doc.mapLabelsOnTop).toBe(false);
+	});
+
 	it('should add a new marker', () => {
 		const element = addElement(doc, 'marker');
 		expect(element).toBeInstanceOf(MarkerElement);

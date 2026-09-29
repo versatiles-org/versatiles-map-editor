@@ -247,6 +247,9 @@ export class StateReader {
 					case 6:
 						metadata.labelFont = this.readString();
 						break;
+					case 7:
+						metadata.mapLabelsOnTop = true;
+						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}

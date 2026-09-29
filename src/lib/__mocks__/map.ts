@@ -45,7 +45,8 @@ export class MockMap {
 	queryRenderedFeatures = vi.fn(() => [{ properties: {} }]) as Mock<MaplibreMap['queryRenderedFeatures']>;
 	setPaintProperty = vi.fn();
 	setLayoutProperty = vi.fn();
-	getLayer = vi.fn(() => ({}) as unknown);
+	getLayer = vi.fn((id: string): unknown => ({ id }));
+	getLayersOrder = vi.fn((): string[] => []);
 	removeLayer = vi.fn();
 	moveLayer = vi.fn();
 	hasImage = vi.fn();

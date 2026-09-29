@@ -21,10 +21,26 @@ function emptySource(): SourceSpecification {
 }
 
 /**
- * The background map with the editor's own layers over it, from the bottom up: the highlight, the
- * elements, the selection, and the element being drawn.
+ * The layers that are drawn under the labels of the background map if they are on top: the areas
+ * and lines of the elements, and the highlight under them. The markers are always on top.
  */
-export function buildStyle(background: StateBackground | undefined, labelFont?: string): StyleSpecification {
+export const LAYERS_UNDER_MAP_LABELS = [
+	'highlight_line',
+	'highlight_point',
+	ELEMENT_LAYERS.fill,
+	ELEMENT_LAYERS.stroke
+];
+
+/**
+ * The background map with the editor's own layers over it, from the bottom up: the highlight, the
+ * elements, the selection, and the element being drawn. With `mapLabelsOnTop`, the labels of the
+ * background map are drawn over the highlight and the areas and lines of the elements.
+ */
+export function buildStyle(
+	background: StateBackground | undefined,
+	labelFont?: string,
+	mapLabelsOnTop = false
+): StyleSpecification {
 	const style = getMapStyle(background);
 	style.transition = { duration: 0, delay: 0 };
 	// larger nodes are easier to see and hit with a finger
@@ -35,8 +51,18 @@ export function buildStyle(background: StateBackground | undefined, labelFont?: 
 		selectionLayers(coarse),
 		drawingLayers(coarse)
 	];
-	for (const { sources, layers } of parts) {
-		Object.assign(style.sources, sources);
+	const layers: LayerSpecification[] = [];
+	for (const part of parts) {
+		Object.assign(style.sources, part.sources);
+		layers.push(...part.layers);
+	}
+	if (mapLabelsOnTop) {
+		// under the first label of the background map, if it has labels
+		const under = layers.filter((layer) => LAYERS_UNDER_MAP_LABELS.includes(layer.id));
+		const labels = style.layers.findIndex((layer) => layer.type === 'symbol');
+		style.layers.splice(labels < 0 ? style.layers.length : labels, 0, ...under);
+		style.layers.push(...layers.filter((layer) => !under.includes(layer)));
+	} else {
 		style.layers.push(...layers);
 	}
 	return style;

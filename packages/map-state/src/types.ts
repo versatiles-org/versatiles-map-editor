@@ -74,6 +74,11 @@ export interface StateMetadata {
 	 * font of the labels of the background map.
 	 */
 	labelFont?: string;
+	/**
+	 * Draw the labels of the background map over the areas and lines of the elements. Without it,
+	 * they are under them. The labels of markers are always on top.
+	 */
+	mapLabelsOnTop?: boolean;
 }
 
 export const LEGEND_POSITIONS = [

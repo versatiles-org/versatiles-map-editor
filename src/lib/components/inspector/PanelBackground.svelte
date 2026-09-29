@@ -60,6 +60,12 @@
 		void doc.setBackground(changeSettings(doc.background, { [key]: value }));
 		doc.state.log();
 	}
+
+	/** The labels of the background map over the areas and lines of the elements, or under them. */
+	function setMapLabelsOnTop(onTop: boolean) {
+		doc.mapLabelsOnTop = onTop;
+		doc.state.log();
+	}
 </script>
 
 <InputRow id="{uid}-base" label="Base map" group>
@@ -185,6 +191,15 @@
 			bind:value={haloWidth}
 			onchange={() => change('haloWidth', haloWidth)}
 			unit="px"
+		/>
+	</InputRow>
+	<!-- the labels of markers are always on top -->
+	<InputRow id="{uid}-labels-on-top" label="Over areas and lines">
+		<input
+			id="{uid}-labels-on-top"
+			type="checkbox"
+			checked={doc.mapLabelsOnTop}
+			onchange={(e) => setMapLabelsOnTop(e.currentTarget.checked)}
 		/>
 	</InputRow>
 {/if}
