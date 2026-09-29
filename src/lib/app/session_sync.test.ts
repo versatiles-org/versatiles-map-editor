@@ -6,6 +6,7 @@ import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { SessionStore } from '../session_store.js';
 import { SessionSync } from './session_sync.js';
 import { notify } from '../notify.svelte.js';
+import { FakeLockManager } from '../__mocks__/locks.js';
 
 vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
@@ -25,6 +26,7 @@ describe('SessionSync', () => {
 	beforeEach(async () => {
 		vi.clearAllMocks();
 		vi.spyOn(console, 'error').mockImplementation(() => {});
+		sessionStorage.clear();
 		name = `test-${crypto.randomUUID()}`;
 		store = (await SessionStore.open(name))!;
 		removeHash = vi.fn<() => void>();
@@ -173,5 +175,123 @@ describe('SessionSync', () => {
 		expect(notify).toHaveBeenCalledExactlyOnceWith(
 			'The map could not be saved in this browser. Download it to keep it.'
 		);
+	});
+
+	describe('tabs', () => {
+		let locks: FakeLockManager;
+		const others: SessionSync[] = [];
+
+		beforeEach(() => {
+			locks = new FakeLockManager();
+			Object.defineProperty(navigator, 'locks', { value: locks, configurable: true });
+		});
+
+		afterEach(() => {
+			others.forEach((other) => other.destroy());
+			others.length = 0;
+			delete (navigator as { locks?: unknown }).locks;
+		});
+
+		/** Another tab: its own connection to the storage, and its own session id (`tabSession`). */
+		async function openTab(tabSession?: string): Promise<SessionSync> {
+			if (tabSession) sessionStorage.setItem('versatiles-map-editor:session', tabSession);
+			else sessionStorage.clear();
+			const other = new SessionSync((await SessionStore.open(name))!, vi.fn());
+			others.push(other);
+			return other;
+		}
+
+		/** Sessions with one marker each, the last one changed most recently. */
+		async function createSessions(...lngs: number[]): Promise<string[]> {
+			const now = vi.spyOn(Date, 'now');
+			const ids = lngs.map((lng, i) => {
+				now.mockReturnValue(1000 * (i + 1));
+				return store.create(step([marker(lng)]), { camera });
+			});
+			now.mockRestore();
+			// written, before another tab reads them
+			await store.flush();
+			return ids;
+		}
+
+		const lockedSessions = async () => (await locks.query()).held!.map(({ name }) => name!.split(':').at(-1)).sort();
+
+		it('keeps the map of the tab after a reload, even if another one was changed later', async () => {
+			const [a, b] = await createSessions(1, 2);
+			sessionStorage.setItem('versatiles-map-editor:session', a);
+			const opening = await sync.prepare('');
+			expect(opening).toMatchObject({ kind: 'session', stored: { session: { id: a } } });
+			expect(await lockedSessions()).toStrictEqual([a]);
+			expect(b).toBeDefined();
+		});
+
+		it('keeps the id of the session of the tab, also of a new one', async () => {
+			await sync.attach(doc, await sync.prepare(''));
+			doc.addElement(marker(1));
+			doc.state.log();
+			const [session] = await store.list();
+			expect(sessionStorage.getItem('versatiles-map-editor:session')).toBe(session.id);
+			await vi.waitFor(async () => expect(await lockedSessions()).toStrictEqual([session.id]));
+		});
+
+		it('gives a duplicated tab a copy of the map, since the original tab has it open', async () => {
+			const [a] = await createSessions(1);
+			store.push(a, step([marker(1), marker(2)]));
+			await store.flush();
+			const first = await openTab(a);
+			expect(await first.prepare('')).toMatchObject({ stored: { session: { id: a } } });
+
+			// the duplicate has the same session id
+			const opening = await (await openTab(a)).prepare('');
+			expect(opening.kind).toBe('session');
+			const copy = opening.kind === 'session' ? opening.stored : undefined;
+			expect(copy?.session.id).not.toBe(a);
+			expect(copy?.states.map((state) => decodeState(state).elements.length)).toStrictEqual([1, 2]);
+			expect(copy?.session.camera).toStrictEqual(camera);
+			expect((await store.list()).length).toBe(2);
+			expect(await lockedSessions()).toStrictEqual([a, copy!.session.id].sort());
+		});
+
+		it('opens the most recently changed map that no other tab has open', async () => {
+			const [a, b] = await createSessions(1, 2);
+			await (await openTab()).prepare('');
+			expect(await lockedSessions()).toStrictEqual([b]);
+			const opening = await (await openTab()).prepare('');
+			expect(opening).toMatchObject({ stored: { session: { id: a } } });
+		});
+
+		it('starts a new map if all maps are open in other tabs, with a note', async () => {
+			await createSessions(1);
+			await (await openTab()).prepare('');
+			vi.mocked(notify).mockClear();
+			expect(await (await openTab()).prepare('')).toStrictEqual({ kind: 'new' });
+			expect(notify).toHaveBeenCalledWith('Your last map is open in another tab.', 'info');
+		});
+
+		it('opens the map of a link as a new session if another tab has its session open', async () => {
+			const [a] = await createSessions(13.4);
+			await (await openTab()).prepare('');
+			const opening = await sync.prepare(encodeState({ map: camera, elements: [marker(13.4)] }));
+			expect(opening.kind).toBe('link');
+			expect(a).toBeDefined();
+		});
+
+		it('releases the lock of a map when the tab opens another one', async () => {
+			const [a] = await createSessions(1);
+			await sync.attach(doc, await sync.prepare(''));
+			expect(await lockedSessions()).toStrictEqual([a]);
+
+			location.hash = encodeState({ map: camera, elements: [marker(2)] });
+			dispatchEvent(new HashChangeEvent('hashchange'));
+			await vi.waitFor(async () => expect(await lockedSessions()).not.toContain(a));
+			const locked = await lockedSessions();
+			expect(locked).toHaveLength(1);
+			expect(sessionStorage.getItem('versatiles-map-editor:session')).toBe(locked[0]);
+			location.hash = '';
+
+			// and all when it is closed
+			sync.destroy();
+			await vi.waitFor(async () => expect(await lockedSessions()).toStrictEqual([]));
+		});
 	});
 });

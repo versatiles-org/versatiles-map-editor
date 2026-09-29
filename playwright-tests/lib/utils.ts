@@ -202,9 +202,9 @@ export async function waitForMapIsIdle(page: Page): Promise<void> {
 }
 
 /**
- * The map that the editor keeps in the browser storage: the current state of the most recently
- * changed session, with its camera. Writes are asynchronous, so the state can be outdated for a
- * moment. Returns an empty state if there is none (yet).
+ * The map that the editor keeps in the browser storage: the current state of the tab's session
+ * (else the most recently changed one), with its camera. Writes are asynchronous, so the state can
+ * be outdated for a moment. Returns an empty state if there is none (yet).
  */
 export async function storedState(page: Page): Promise<MapState> {
 	const stored = await page.evaluate(async () => {
@@ -227,7 +227,8 @@ export async function storedState(page: Page): Promise<MapState> {
 				});
 			type Session = { id: string; changed: number; position: number; camera?: MapState['map'] };
 			const sessions = await read<Session[]>('sessions', undefined, true);
-			const session = sessions.sort((a, b) => b.changed - a.changed)[0];
+			const own = sessionStorage.getItem('versatiles-map-editor:session');
+			const session = sessions.find(({ id }) => id === own) ?? sessions.sort((a, b) => b.changed - a.changed)[0];
 			if (!session) return undefined;
 			const step = await read<{ state: string } | undefined>('steps', [session.id, session.position]);
 			return step && { state: step.state, camera: session.camera };

@@ -176,4 +176,35 @@ describe('SessionStore', () => {
 		await other.close();
 		vi.unstubAllGlobals();
 	});
+
+	it('copies a session with its history and camera', async () => {
+		const camera = { center: [13.4, 52.5] as [number, number], radius: 1000 };
+		const id = store.create('A', { camera, title: 'Map' });
+		store.push(id, 'B');
+		store.setUndone(id, 1);
+		const copy = await store.copy(id);
+		expect(copy).not.toBe(id);
+		expect(await store.load(copy!)).toMatchObject({
+			states: ['A', 'B'],
+			position: 0,
+			session: { camera, title: 'Map' }
+		});
+		// independent of the original
+		store.push(copy!, 'C');
+		expect((await store.load(id))?.states).toStrictEqual(['A', 'B']);
+		expect(await store.copy('unknown')).toBeUndefined();
+	});
+
+	it('tells this tab and the other tabs about changed sessions', async () => {
+		const other = (await SessionStore.open(name))!;
+		const here = vi.fn();
+		const there = vi.fn();
+		store.onChange(here);
+		other.onChange(there);
+		const id = store.create('A');
+		await store.flush();
+		expect(here).toHaveBeenCalledWith(id);
+		await vi.waitFor(() => expect(there).toHaveBeenCalledWith(id));
+		await other.close();
+	});
 });

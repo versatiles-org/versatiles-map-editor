@@ -10,6 +10,8 @@ const DB_NAME = 'versatiles-map-editor';
 const DB_VERSION = 1;
 const SESSIONS = 'sessions';
 const STEPS = 'steps';
+/** The channel that tells the other tabs about changed sessions. */
+const CHANNEL = 'versatiles-map-editor:sessions';
 
 /** The most steps of the history of a session, as the history in memory keeps. */
 export const MAX_STEPS = 100;
@@ -73,6 +75,8 @@ export class SessionStore {
 	// the latest camera of each session that is not written yet
 	readonly #cameras = new Map<string, MapState['map']>();
 	#errorListeners: ((error: unknown) => void)[] = [];
+	#changeListeners: ((id: string) => void)[] = [];
+	readonly #channel = typeof BroadcastChannel === 'undefined' ? undefined : new BroadcastChannel(CHANNEL);
 	/**
 	 * Whether the browser keeps the storage unless the user clears it (see `navigator.storage.persist`),
 	 * once the browser has answered.
@@ -81,6 +85,8 @@ export class SessionStore {
 
 	private constructor(db: IDBDatabase) {
 		this.#db = db;
+		// a change in another tab
+		if (this.#channel) this.#channel.onmessage = ({ data }) => this.#changed(String(data), false);
 	}
 
 	/**
@@ -116,9 +122,23 @@ export class SessionStore {
 		this.#errorListeners.push(listener);
 	}
 
+	/**
+	 * Call `listener` with the id of a session after a change of it, in this tab or in another one,
+	 * e.g. to update a list of the maps.
+	 */
+	public onChange(listener: (id: string) => void) {
+		this.#changeListeners.push(listener);
+	}
+
+	#changed(id: string, here: boolean) {
+		if (here) this.#channel?.postMessage(id);
+		this.#changeListeners.forEach((listener) => listener(id));
+	}
+
 	/** Close the storage, after the pending writes. */
 	public async close() {
 		await this.flush();
+		this.#channel?.close();
 		this.#db.close();
 	}
 
@@ -159,7 +179,7 @@ export class SessionStore {
 		const session: SessionRecord = { id, changed: Date.now(), first: 0, position: 0, sizes: [state.length] };
 		if (camera) session.camera = camera;
 		if (title) session.title = title;
-		this.#write([SESSIONS, STEPS], (tx) => {
+		this.#write(id, [SESSIONS, STEPS], (tx) => {
 			tx.objectStore(SESSIONS).put(session);
 			tx.objectStore(STEPS).put({ session: id, step: 0, state } satisfies StepRecord);
 		});
@@ -207,7 +227,7 @@ export class SessionStore {
 		const pending = this.#cameras.has(id);
 		this.#cameras.set(id, camera);
 		if (pending) return;
-		this.#write([SESSIONS], async (tx) => {
+		this.#write(id, [SESSIONS], async (tx) => {
 			const latest = this.#cameras.get(id);
 			this.#cameras.delete(id);
 			const sessions = tx.objectStore(SESSIONS);
@@ -227,9 +247,27 @@ export class SessionStore {
 		});
 	}
 
+	/**
+	 * A copy of a session with its history and camera, as a new session, e.g. for a duplicated tab.
+	 * Resolves to its id, or undefined if there is no such session.
+	 */
+	public async copy(id: string): Promise<string | undefined> {
+		const stored = await this.load(id);
+		if (!stored) return undefined;
+		const copy = crypto.randomUUID();
+		const { session } = stored;
+		this.#write(copy, [SESSIONS, STEPS], (tx) => {
+			tx.objectStore(SESSIONS).put({ ...session, id: copy, changed: Date.now() } satisfies SessionRecord);
+			stored.states.forEach((state, i) => {
+				tx.objectStore(STEPS).put({ session: copy, step: session.first + i, state } satisfies StepRecord);
+			});
+		});
+		return copy;
+	}
+
 	/** Remove a session with all its steps. */
 	public delete(id: string) {
-		this.#write([SESSIONS, STEPS], (tx) => {
+		this.#write(id, [SESSIONS, STEPS], (tx) => {
 			tx.objectStore(SESSIONS).delete(id);
 			tx.objectStore(STEPS).delete(stepRange(id, -Infinity, Infinity));
 		});
@@ -237,7 +275,7 @@ export class SessionStore {
 
 	/** Change the record of a session in one transaction; nothing happens if it was deleted. */
 	#update(id: string, change: (session: SessionRecord, tx: IDBTransaction) => void) {
-		this.#write([SESSIONS, STEPS], async (tx) => {
+		this.#write(id, [SESSIONS, STEPS], async (tx) => {
 			const sessions = tx.objectStore(SESSIONS);
 			const session = await request(sessions.get(id) as IDBRequest<SessionRecord | undefined>);
 			if (!session) return;
@@ -247,7 +285,7 @@ export class SessionStore {
 	}
 
 	/** Queue a write. A failed write is reported to the error listeners; the next ones are still tried. */
-	#write(stores: string[], write: (tx: IDBTransaction) => void | Promise<void>) {
+	#write(id: string, stores: string[], write: (tx: IDBTransaction) => void | Promise<void>) {
 		this.#queue = this.#queue.then(async () => {
 			let tx: IDBTransaction | undefined;
 			try {
@@ -257,6 +295,7 @@ export class SessionStore {
 				written.catch(() => {});
 				await write(tx);
 				await written;
+				this.#changed(id, true);
 			} catch (error) {
 				// nothing of a failed write is kept
 				try {

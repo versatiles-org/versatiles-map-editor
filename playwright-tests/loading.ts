@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
+import type { Page } from '@playwright/test';
 import {
 	drawElement,
 	drawnElements,
@@ -265,4 +266,47 @@ test('the editor keeps its map, history and camera in the browser, not in the UR
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 	await page.getByRole('button', { name: 'Redo' }).click();
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
+});
+
+test('each tab edits its own map, and a reload keeps it', async ({ page, context }) => {
+	const mapOf = (lng: number): MapState => ({
+		map: { center: [lng, 52.5], radius: 10000 },
+		elements: [{ type: 'marker', point: [lng, 52.5] }]
+	});
+	const lng = async (page: Page) => {
+		const element = (await storedState(page)).elements[0];
+		return element && 'point' in element ? element.point[0] : undefined;
+	};
+	await page.goto('/#' + encodeState(mapOf(13.4)));
+	await waitForMapIsReady(page);
+	await expect.poll(() => lng(page)).toBe(13.4);
+
+	// the last map is open in the first tab, so a second tab starts a new map
+	const second = await context.newPage();
+	await second.goto('/');
+	await waitForMapIsReady(second);
+	await expect(second.getByText('Your last map is open in another tab.')).toBeVisible();
+	await expect.poll(() => drawnElements(second).then((drawn) => drawn.symbol.length)).toBe(0);
+	await drawElement(second, 'Marker');
+	await expect.poll(async () => (await storedState(second)).elements.length).toBe(1);
+
+	// a reload keeps the map of each tab
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect.poll(() => lng(page)).toBe(13.4);
+	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(1);
+	await second.reload();
+	await waitForMapIsReady(second);
+	await expect(second.getByText('Your last map is open in another tab.')).toHaveCount(0);
+	expect((await storedState(second)).elements).toHaveLength(1);
+	expect(await lng(second)).not.toBe(13.4);
+
+	// a duplicated tab (with the session id of the first tab) gets a copy of its map
+	const duplicate = await context.newPage();
+	const id = await page.evaluate(() => sessionStorage.getItem('versatiles-map-editor:session'));
+	await duplicate.addInitScript((id) => sessionStorage.setItem('versatiles-map-editor:session', id!), id);
+	await duplicate.goto('/');
+	await waitForMapIsReady(duplicate);
+	await expect.poll(() => lng(duplicate)).toBe(13.4);
+	expect(await duplicate.evaluate(() => sessionStorage.getItem('versatiles-map-editor:session'))).not.toBe(id);
 });
