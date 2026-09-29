@@ -130,6 +130,9 @@ this version is read; a later version can be told apart by it. To keep hashes sh
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
+- the names of the symbols of all styles and of the legend are stored once in the metadata,
+  sorted, each with the length of the beginning it shares with the previous name (e.g.
+  `base:icon-`) and the rest, and referenced by index;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`);
 - element coordinates are whole steps from the map center, with a global resolution in decimal

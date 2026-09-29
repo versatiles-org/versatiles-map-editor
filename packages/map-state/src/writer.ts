@@ -20,6 +20,8 @@ export class StateWriter {
 	bits: boolean[] = [];
 	// the colors of the state, most frequent first, by their color key (see `writePalette`)
 	private palette = new Map<string, number>();
+	// the index of each symbol name in the list of the metadata (see `writeSymbols`)
+	private symbols = new Map<string, number>();
 	// the styles written so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -105,7 +107,7 @@ export class StateWriter {
 		const digits = digitsForResolution(this.resolution);
 		this.writeVarint(digits);
 		this.grid = new LocalGrid(center ?? [0, 0], digits);
-		this.writeMetadata(root.meta);
+		this.writeMetadata(root.meta, collectSymbols(root));
 
 		root.elements.forEach((element) => {
 			switch (element.type) {
@@ -180,21 +182,32 @@ export class StateWriter {
 		}
 	}
 
-	writeMetadata(metadata?: StateMetadata) {
+	/**
+	 * `symbols`: the names of all symbols of the map, which styles and the legend reference by index.
+	 * Without it, those of the legend.
+	 */
+	writeMetadata(metadata?: StateMetadata, symbols = collectSymbols({ meta: metadata, elements: [] })) {
 		// only the fields that are stored count, e.g. not `search: false`
 		const stored =
-			metadata &&
-			(metadata.background ||
-				metadata.legend ||
-				metadata.colorScheme ||
-				metadata.search ||
-				metadata.labelFont ||
-				metadata.mapLabelsOnTop);
-		if (!metadata || !stored) {
+			symbols.length > 0 ||
+			(metadata &&
+				(metadata.background ||
+					metadata.legend ||
+					metadata.colorScheme ||
+					metadata.search ||
+					metadata.labelFont ||
+					metadata.mapLabelsOnTop));
+		if (!stored) {
 			return this.writeBit(false);
 		}
 
 		this.writeBit(true);
+		// first, since the legend references them
+		if (symbols.length > 0) {
+			this.writeInteger(8, 6);
+			this.writeSymbols(symbols);
+		}
+		if (!metadata) return this.writeInteger(0, 6);
 		//if (metadata.heading) {
 		//	this.writeInteger(1, 6);
 		//	this.writeString(metadata.heading);
@@ -308,9 +321,9 @@ export class StateWriter {
 			this.writeInteger(1, 4);
 			this.writeColorValue(entry.color);
 			if (entry.symbol) {
-				// the image name; key 2 is not used
+				// the image name, by its index in the list of symbols; key 2 is not used
 				this.writeInteger(4, 4);
-				this.writeString(entry.symbol);
+				this.writeSymbolValue(entry.symbol);
 			}
 			if (entry.label) {
 				this.writeInteger(3, 4);
@@ -386,7 +399,7 @@ export class StateWriter {
 			case 'label':
 				return this.writeString(style.label!);
 			case 'symbol':
-				return this.writeString(style.symbol!);
+				return this.writeSymbolValue(style.symbol!);
 			case 'visible':
 				// the key alone means "false"
 				return;
@@ -397,7 +410,33 @@ export class StateWriter {
 	private fork(): StateWriter {
 		const writer = new StateWriter({ resolution: this.resolution });
 		writer.palette = this.palette;
+		writer.symbols = this.symbols;
 		return writer;
+	}
+
+	/**
+	 * The names of the symbols, each once and sorted, and afterwards only their index. The names
+	 * share long beginnings (e.g. "base:icon-"), so each stores only the length of the beginning it
+	 * shares with the previous name, and the rest.
+	 */
+	writeSymbols(names: string[]) {
+		const sorted = [...new Set(names)].sort();
+		let previous = '';
+		this.writeArray(sorted, (name) => {
+			let shared = 0;
+			while (shared < previous.length && shared < name.length && previous[shared] === name[shared]) shared++;
+			this.writeVarint(shared);
+			this.writeString(name.slice(shared));
+			previous = name;
+		});
+		this.symbols = new Map(sorted.map((name, index) => [name, index]));
+	}
+
+	/** A symbol, as its index in the list of symbols. */
+	writeSymbolValue(name: string) {
+		const index = this.symbols.get(name);
+		if (index === undefined) throw new Error(`Symbol not in the list: ${name}`);
+		this.writeVarint(index);
 	}
 
 	/** The colors, each once, and afterwards only their index. */
@@ -433,6 +472,18 @@ export class StateWriter {
 		charCodes.forEach((c) => this.writeVarint(c < 128 ? CHAR_CODE2VALUE[c] : c));
 		return value;
 	}
+}
+
+/** The names of the symbols of all styles and of the legend, each once. */
+export function collectSymbols(root: MapState): string[] {
+	const symbols = new Set<string>();
+	for (const element of root.elements) {
+		if (element.style?.symbol != null) symbols.add(element.style.symbol);
+	}
+	for (const entry of root.meta?.legend?.entries ?? []) {
+		if (entry.symbol) symbols.add(entry.symbol);
+	}
+	return [...symbols];
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

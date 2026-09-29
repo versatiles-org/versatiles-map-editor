@@ -28,6 +28,11 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `base:icon-embassy` instead of `flag`. Older links and files are still read: their numbers and
   names become the names of the images.
 
+- **Breaking:** the base64 string stores the names of the symbols once, in a list in the
+  metadata (key 8), and styles and legend entries reference them by index. The names share their
+  beginnings in the list, so maps with many symbols get much shorter links. Links with the names
+  in the styles cannot be read any more.
+
 ### Removed
 
 - `symbolEntries`, `symbolName` and `symbolIndexByName`: symbols are names now. `LEGACY_SYMBOLS`

@@ -23,6 +23,8 @@ export class StateReader {
 	public offset: number = 0;
 	// the colors, which are referenced by index (see `readPalette`)
 	private palette: string[] = [];
+	// the names of the symbols, which are referenced by index (see `readSymbols`)
+	private symbols: string[] = [];
 	// the styles read so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -155,6 +157,7 @@ export class StateReader {
 			const version = this.readInteger(3);
 			if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
 			this.readPalette();
+			this.symbols = [];
 			this.styleHistory = new StyleHistory();
 
 			// Read the map element
@@ -249,6 +252,10 @@ export class StateReader {
 						break;
 					case 7:
 						metadata.mapLabelsOnTop = true;
+						break;
+					case 8:
+						// not a field of the metadata: the symbols of the styles and of the legend
+						this.readSymbols();
 						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
@@ -354,7 +361,7 @@ export class StateReader {
 					entry.label = this.readString();
 					break;
 				case 4:
-					entry.symbol = this.readString();
+					entry.symbol = this.readSymbolValue();
 					break;
 				default:
 					throw new Error(`Invalid legend entry key: ${key}`);
@@ -440,7 +447,7 @@ export class StateReader {
 					style.haloColor = this.readColorValue();
 					break;
 				case 13:
-					style.symbol = this.readString();
+					style.symbol = this.readSymbolValue();
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readInteger(4);
@@ -458,6 +465,25 @@ export class StateReader {
 	/** The colors, each once, which are referenced by index afterwards. */
 	readPalette() {
 		this.palette = this.readArray(() => this.readColor());
+	}
+
+	/** The names of the symbols, each as the length of the beginning it shares with the previous one and the rest. */
+	readSymbols() {
+		let previous = '';
+		this.symbols = this.readArray(() => {
+			const shared = this.readVarint();
+			if (shared > previous.length) throw new Error(`Invalid symbol name: ${shared} shared characters`);
+			previous = previous.slice(0, shared) + this.readString();
+			return previous;
+		});
+	}
+
+	/** A symbol, as its index in the list of symbols. */
+	readSymbolValue(): string {
+		const index = this.readVarint();
+		const name = this.symbols[index];
+		if (name === undefined) throw new Error(`Invalid symbol index: ${index}`);
+		return name;
 	}
 
 	/** A color, as its index in the palette. */
