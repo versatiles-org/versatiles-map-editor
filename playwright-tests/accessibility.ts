@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { encodeState } from '../packages/map-state/src/index.js';
-import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, storedState, waitForMapIsReady } from './lib/utils.js';
 
 test('dialogs are named, can be closed and are usable by keyboard', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
@@ -116,7 +116,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	// Delete removes the selected elements
 	await page.keyboard.press('Delete');
 	await expect(options).toHaveText(['Marker 1: Berlin']);
-	await expect.poll(() => stateInUrl(page).elements.map((e) => e.type)).toStrictEqual(['marker']);
+	await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(['marker']);
 
 	// Enter selects the element, like a click on the map
 	await page.keyboard.press('Home');

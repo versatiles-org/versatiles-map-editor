@@ -202,35 +202,61 @@ export async function waitForMapIsIdle(page: Page): Promise<void> {
 }
 
 /**
- * The map state in the URL. Rapid changes are throttled, so the hash can be missing or
- * outdated for a moment. Returns an empty state if there is no valid hash (yet).
+ * The map that the editor keeps in the browser storage: the current state of the most recently
+ * changed session, with its camera. Writes are asynchronous, so the state can be outdated for a
+ * moment. Returns an empty state if there is none (yet).
  */
-export function stateInUrl(page: Page): MapState {
-	try {
-		return decodeState(new URL(page.url()).hash.slice(1));
-	} catch {
-		return { elements: [] };
-	}
+export async function storedState(page: Page): Promise<MapState> {
+	const stored = await page.evaluate(async () => {
+		const name = 'versatiles-map-editor';
+		// opening a database that does not exist would create it, without the editor's tables
+		if (!(await indexedDB.databases()).some((db) => db.name === name)) return undefined;
+		const db = await new Promise<IDBDatabase>((resolve, reject) => {
+			const request = indexedDB.open(name);
+			request.onsuccess = () => resolve(request.result);
+			request.onerror = () => reject(request.error);
+		});
+		try {
+			if (!db.objectStoreNames.contains('sessions')) return undefined;
+			const read = <T>(store: string, query: IDBValidKey | IDBKeyRange | undefined, all = false) =>
+				new Promise<T>((resolve, reject) => {
+					const objects = db.transaction(store, 'readonly').objectStore(store);
+					const request = all ? objects.getAll(query) : objects.get(query!);
+					request.onsuccess = () => resolve(request.result as T);
+					request.onerror = () => reject(request.error);
+				});
+			type Session = { id: string; changed: number; position: number; camera?: MapState['map'] };
+			const sessions = await read<Session[]>('sessions', undefined, true);
+			const session = sessions.sort((a, b) => b.changed - a.changed)[0];
+			if (!session) return undefined;
+			const step = await read<{ state: string } | undefined>('steps', [session.id, session.position]);
+			return step && { state: step.state, camera: session.camera };
+		} finally {
+			db.close();
+		}
+	});
+	if (!stored) return { elements: [] };
+	const state = decodeState(stored.state);
+	return stored.camera ? { ...state, map: stored.camera } : state;
 }
 
 /**
- * The map state in the URL once it has stopped changing, e.g. after a drag: the editor writes
- * the URL at most every 300 ms, so right after a change it can still hold an intermediate state.
+ * The stored map once it has stopped changing, e.g. after a drag, which writes a step at its end.
  */
-export async function settledStateInUrl(page: Page, quietTime = 500, timeout = 10_000): Promise<MapState> {
+export async function settledStoredState(page: Page, quietTime = 500, timeout = 10_000): Promise<MapState> {
 	const start = Date.now();
-	let hash = new URL(page.url()).hash;
+	let state = JSON.stringify(await storedState(page));
 	let since = Date.now();
 	while (Date.now() - since < quietTime) {
-		if (Date.now() - start > timeout) throw new Error('The URL did not stop changing');
+		if (Date.now() - start > timeout) throw new Error('The stored map did not stop changing');
 		await page.waitForTimeout(50);
-		const current = new URL(page.url()).hash;
-		if (current !== hash) {
-			hash = current;
+		const current = JSON.stringify(await storedState(page));
+		if (current !== state) {
+			state = current;
 			since = Date.now();
 		}
 	}
-	return stateInUrl(page);
+	return storedState(page);
 }
 
 export async function trackServerRequests(page: Page): Promise<() => string[]> {

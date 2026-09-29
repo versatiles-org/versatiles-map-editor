@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { replaceState } from '$app/navigation';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	import MapFrame, { type Insets } from './MapFrame.svelte';
 	import MapViewer from './MapViewer.svelte';
@@ -11,6 +12,7 @@
 	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
 	import { newMarkerState } from '$lib/element/marker.js';
 	import { loadConfig } from '$lib/background/index.js';
+	import { SessionSync } from './session_sync.js';
 
 	let {
 		onMapLoad
@@ -22,9 +24,24 @@
 	// viewer, like shared and embedded maps (the page /view). The size is checked once, since
 	// switching modes would lose the editor state.
 	let mode: 'editor' | 'viewer' | undefined = $state();
+	// the editor keeps its maps in the browser storage, and phones show the last one
+	let sessions: Promise<SessionSync> | undefined = $state();
 	onMount(() => {
 		mode = matchMedia('(min-width: 600px) and (min-height: 400px)').matches ? 'editor' : 'viewer';
+		sessions = SessionSync.open(removeHash);
 	});
+
+	/**
+	 * Remove the map of a link from the URL, once it is opened. SvelteKit's replaceState fails until
+	 * its router has started, which happens after all components are mounted.
+	 */
+	function removeHash() {
+		void tick().then(() => {
+			const url = location.pathname + location.search;
+			// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL is removed
+			if (location.hash) replaceState(url, {});
+		});
+	}
 
 	// the sidebar can be collapsed, to see more of the map
 	let sidebarOpen = $state(true);
@@ -68,7 +85,7 @@
 </script>
 
 {#if mode === 'viewer'}
-	<MapViewer hint="Open this page on a larger screen to edit the map." {onMapLoad} />
+	<MapViewer hint="Open this page on a larger screen to edit the map." {sessions} {onMapLoad} />
 {:else if mode === 'editor'}
 	<!-- a found place can be marked -->
 	<MapFrame
@@ -80,6 +97,7 @@
 		onmark={markPlace}
 		onselectlegend={selectLegend}
 		editor
+		{sessions}
 		{onMapLoad}
 	>
 		<!-- from the start, so the map does not move when the editor has started -->

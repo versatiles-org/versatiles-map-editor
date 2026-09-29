@@ -73,7 +73,10 @@ export class SessionStore {
 	// the latest camera of each session that is not written yet
 	readonly #cameras = new Map<string, MapState['map']>();
 	#errorListeners: ((error: unknown) => void)[] = [];
-	/** Whether the browser keeps the storage unless the user clears it (see `navigator.storage.persist`). */
+	/**
+	 * Whether the browser keeps the storage unless the user clears it (see `navigator.storage.persist`),
+	 * once the browser has answered.
+	 */
 	public persisted = false;
 
 	private constructor(db: IDBDatabase) {
@@ -99,11 +102,12 @@ export class SessionStore {
 			return undefined;
 		}
 		const store = new SessionStore(db);
-		try {
-			store.persisted = (await navigator.storage?.persist?.()) ?? false;
-		} catch {
+		// Not awaited: Firefox asks the user, and the answer can take long or never come
+		navigator.storage?.persist?.().then(
+			(persisted) => (store.persisted = persisted),
 			// e.g. not allowed: the storage is kept as long as the browser wants
-		}
+			() => {}
+		);
 		return store;
 	}
 
@@ -187,11 +191,14 @@ export class SessionStore {
 		});
 	}
 
-	/** Make another step the current one, e.g. after undo or redo. Keeps the time of the last change. */
-	public setPosition(id: string, position: number) {
+	/**
+	 * Make another step the current one, e.g. after undo or redo: `undone` steps before the most
+	 * recent one. Keeps the time of the last change.
+	 */
+	public setUndone(id: string, undone: number) {
 		this.#update(id, (session) => {
 			const last = session.first + session.sizes.length - 1;
-			session.position = Math.min(last, Math.max(session.first, session.first + position));
+			session.position = Math.min(last, Math.max(session.first, last - undone));
 		});
 	}
 

@@ -4,7 +4,7 @@ import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	drawElement,
 	project,
-	stateInUrl,
+	storedState,
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow,
@@ -62,7 +62,7 @@ test('adding an element creates an undo step', async ({ page }) => {
 test('undo and redo with the keyboard, but not in text fields', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	const types = () => stateInUrl(page).elements.map((e) => e.type);
+	const types = async () => (await storedState(page)).elements.map((e) => e.type);
 
 	await drawElement(page, 'Marker');
 	await drawElement(page, 'Line');
@@ -99,7 +99,9 @@ test('the symbol picker', async ({ page }) => {
 		await dialog.getByRole('button', { name: 'Anchor', exact: true }).click();
 		await expect(dialog).toBeHidden();
 		await expect(page.getByRole('button', { name: 'Symbol Anchor' })).toBeVisible();
-		await expect.poll(() => stateInUrl(page).elements[0].style).toMatchObject({ symbol: 'icons:anchor' });
+		await expect
+			.poll(async () => (await storedState(page)).elements[0].style)
+			.toMatchObject({ symbol: 'icons:anchor' });
 	});
 
 	await test.step('the picker filters the symbols while typing', async () => {
@@ -169,7 +171,7 @@ test('duplicating an element', { tag: '@cross-browser' }, async ({ page }) => {
 	);
 	await waitForMapIsReady(page);
 
-	const pointsInUrl = () => stateInUrl(page).elements.map((e) => ('point' in e ? e.point : undefined));
+	const pointsInUrl = async () => (await storedState(page)).elements.map((e) => ('point' in e ? e.point : undefined));
 	const [x, y] = await project(page, center);
 
 	// select the marker by clicking its flag icon, which is drawn above and right of its point
@@ -179,8 +181,8 @@ test('duplicating an element', { tag: '@cross-browser' }, async ({ page }) => {
 	// button and keyboard shortcut place the copy with an offset
 	await page.getByRole('button', { name: 'Duplicate' }).click();
 	await page.keyboard.press('ControlOrMeta+d');
-	await expect.poll(async () => (await pointsInUrl()).length).toBe(3);
-	const [original, copy1, copy2] = pointsInUrl();
+	await expect.poll(async () => (await await pointsInUrl()).length).toBe(3);
+	const [original, copy1, copy2] = await pointsInUrl();
 	expect(original).toStrictEqual(center);
 	expect(copy1![0]).toBeGreaterThan(center[0]);
 	expect(copy1![1]).toBeLessThan(center[1]);
@@ -199,8 +201,8 @@ test('duplicating an element', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.mouse.move(x - 50, y - 50, { steps: 5 });
 	await page.mouse.up();
 	await page.keyboard.up('Alt');
-	await expect.poll(async () => (await pointsInUrl()).length).toBe(4);
-	const points = pointsInUrl();
+	await expect.poll(async () => (await await pointsInUrl()).length).toBe(4);
+	const points = await pointsInUrl();
 	expect(points[0]).toStrictEqual(center);
 	expect(points[3]![0]).toBeLessThan(center[0]);
 	expect(points[3]![1]).toBeGreaterThan(center[1]);
@@ -216,7 +218,7 @@ test('deleting nodes and elements with the keyboard', { tag: '@cross-browser' },
 		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'line', points }] })
 	);
 	await waitForMapIsReady(page);
-	const linePoints = () => stateInUrl(page).elements.map((e) => ('points' in e ? e.points.length : 0));
+	const linePoints = async () => (await storedState(page)).elements.map((e) => ('points' in e ? e.points.length : 0));
 
 	// select the line, then its middle node
 	const [x, y] = await project(page, [13.375, 52.51]);
@@ -238,16 +240,17 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 	await waitForMapIsReady(page);
 	await drawElement(page, 'Polygon');
 	// the codec returns colors in upper case
-	const fill = () => (stateInUrl(page).elements[0] as { style?: { color?: string } })?.style?.color?.toLowerCase();
-	const stroke = () =>
-		(stateInUrl(page).elements[0] as { strokeStyle?: { color?: string } })?.strokeStyle?.color?.toLowerCase();
+	const fill = async () =>
+		((await storedState(page)).elements[0] as { style?: { color?: string } })?.style?.color?.toLowerCase();
+	const stroke = async () =>
+		((await storedState(page)).elements[0] as { strokeStyle?: { color?: string } })?.strokeStyle?.color?.toLowerCase();
 	const [fillColor, strokeColor] = await page.getByLabel('Color').all();
 
 	// a hex value sets the fill color
 	await fillColor.click();
 	await page.getByLabel('Hex').fill('#00ff00');
 	await page.getByLabel('Hex').press('Enter');
-	await expect.poll(() => fill()).toBe('#00ff00');
+	await expect.poll(async () => await fill()).toBe('#00ff00');
 	await expect(fillColor).toHaveText('#00ff00');
 
 	// Escape closes the picker
@@ -261,7 +264,7 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 		.poll(() => palette.evaluateAll((buttons) => buttons.map((b) => b.getAttribute('aria-label'))))
 		.toStrictEqual(['#00ff00', '#ff0000']);
 	await palette.first().click();
-	await expect.poll(() => stroke()).toBe('#00ff00');
+	await expect.poll(async () => await stroke()).toBe('#00ff00');
 
 	// dragging in the saturation/brightness field creates a single undo step
 	await fillColor.click();
@@ -275,11 +278,13 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 	// the center is half saturation and half brightness of the hue green, #408040. Firefox rounds
 	// the mouse position to whole pixels, which can change the channels by 1.
 	const channels = (hex = '') => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-	await expect.poll(() => channels(fill()).every((c, i) => Math.abs(c - [0x40, 0x80, 0x40][i]) <= 2)).toBe(true);
+	await expect
+		.poll(async () => channels(await fill()).every((c, i) => Math.abs(c - [0x40, 0x80, 0x40][i]) <= 2))
+		.toBe(true);
 	expect(Math.abs(Number(await page.getByLabel('Green').inputValue()) - 128)).toBeLessThanOrEqual(2);
 	await page.screenshot({ path: 'test-results/color-picker.png' });
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(() => fill()).toBe('#00ff00');
+	await expect.poll(async () => await fill()).toBe('#00ff00');
 });
 
 test('editing a popup', async ({ page }) => {
@@ -298,7 +303,7 @@ test('editing a popup', async ({ page }) => {
 	await popup.press('Backspace');
 	await popup.blur();
 	await expect
-		.poll(() => stateInUrl(page).elements[0]?.popup)
+		.poll(async () => (await storedState(page)).elements[0]?.popup)
 		.toStrictEqual({ text: 'Hello **world**\nhttps://versatiles.or' });
 });
 
@@ -320,9 +325,9 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
-	const elements = () => stateInUrl(page).elements;
-	const fillColors = () =>
-		elements().map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
+	const elements = async () => (await storedState(page)).elements;
+	const fillColors = async () =>
+		(await elements()).map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
 	// the heading of the inspector: the name of the selected element, or the number of elements
 	const styleTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
 
@@ -346,24 +351,24 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	await page.keyboard.press('Escape');
 
 	// dragging one of them moves both polygons south, but not the marker
-	const firstLatitudes = () => elements().map((e) => ('points' in e ? e.points[0][1] : e.point[1]));
-	const before = firstLatitudes();
+	const firstLatitudes = async () => (await elements()).map((e) => ('points' in e ? e.points[0][1] : e.point[1]));
+	const before = await firstLatitudes();
 	await page.mouse.move(...a);
 	await page.mouse.down();
 	await page.mouse.move(a[0], a[1] + 40, { steps: 5 });
 	await page.mouse.up();
-	await expect.poll(() => firstLatitudes()[0]).toBeLessThan(before[0]);
-	const after = firstLatitudes();
+	await expect.poll(async () => (await firstLatitudes())[0]).toBeLessThan(before[0]);
+	const after = await firstLatitudes();
 	expect(after[1] - before[1]).toBeCloseTo(after[0] - before[0], 4);
 	expect(after[2]).toBe(before[2]);
 	await expect(styleTitle).toHaveText('2 elements');
 
 	// duplicate and delete act on all selected elements
 	await page.keyboard.press('ControlOrMeta+d');
-	await expect.poll(() => elements().length).toBe(5);
+	await expect.poll(async () => (await elements()).length).toBe(5);
 	await expect(styleTitle).toHaveText('2 elements');
 	await page.keyboard.press('Delete');
-	await expect.poll(() => elements().length).toBe(3);
+	await expect.poll(async () => (await elements()).length).toBe(3);
 
 	// a marker and polygons have no style properties in common
 	const moved = await project(page, [13.34, 52.465]);
@@ -410,8 +415,8 @@ test('copying and pasting a style', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
 	// the style parts of all elements, with colors in lower case like in the state
-	const styles = () =>
-		stateInUrl(page).elements.map((e) => {
+	const styles = async () =>
+		(await storedState(page)).elements.map((e) => {
 			const lower = (style?: { color?: string }) => style && { ...style, color: style.color?.toLowerCase() };
 			return 'strokeStyle' in e
 				? { style: lower(e.style), strokeStyle: lower(e.strokeStyle) }
@@ -447,13 +452,7 @@ test('copying and pasting a style', async ({ page }) => {
 
 	// a single undo step reverts both
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect
-		.poll(() =>
-			styles()
-				.slice(1)
-				.map((s) => JSON.stringify(s))
-		)
-		.toStrictEqual(['{}', '{}']);
+	await expect.poll(async () => (await styles()).slice(1).map((s) => JSON.stringify(s))).toStrictEqual(['{}', '{}']);
 });
 
 test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@cross-browser' }, async ({ page }) => {
@@ -466,7 +465,7 @@ test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@c
 	// select the marker by clicking its flag icon, which is drawn above and right of its point
 	const selectMarker = () => page.mouse.click(x + 6, y - 8);
 	await selectMarker();
-	const markers = () => stateInUrl(page).elements.length;
+	const markers = async () => (await storedState(page)).elements.length;
 
 	// in the saturation/brightness field of the color picker
 	await page.getByRole('button', { name: /^Color/ }).click();
@@ -481,7 +480,7 @@ test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@c
 	await page.keyboard.press('Delete');
 	await page.keyboard.press('Escape');
 	await expect(page.getByRole('dialog')).toBeHidden();
-	expect(markers()).toBe(1);
+	expect(await markers()).toBe(1);
 
 	// on the map, Delete deletes the selected marker
 	await selectMarker();
@@ -512,7 +511,7 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 
 test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 	const view = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [] } as MapState;
-	const types = (page: Page) => stateInUrl(page).elements.map((e) => e.type);
+	const types = async (page: Page) => (await storedState(page)).elements.map((e) => e.type);
 	const tool = (page: Page, name: string) => page.getByRole('toolbar', { name: 'Tools' }).getByRole('button', { name });
 
 	test.beforeEach(async ({ page }) => {
@@ -532,8 +531,8 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 		await expect(page.getByRole('group', { name: 'Drawing' })).toContainText('2 nodes');
 		await page.mouse.dblclick(x + 80, y);
 
-		await expect.poll(() => types(page)).toStrictEqual(['line']);
-		expect((stateInUrl(page).elements[0] as { points: Point[] }).points).toHaveLength(3);
+		await expect.poll(async () => await types(page)).toStrictEqual(['line']);
+		expect(((await storedState(page)).elements[0] as { points: Point[] }).points).toHaveLength(3);
 		// back to selecting, with the new line selected
 		await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true');
 		await expect(page.getByRole('button', { name: 'Duplicate' })).toBeEnabled();
@@ -551,8 +550,8 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 			[-60, 40]
 		])
 			await page.mouse.click(x + dx, y + dy);
-		await expect.poll(() => types(page)).toStrictEqual(['polygon']);
-		expect((stateInUrl(page).elements[0] as { points: Point[] }).points).toHaveLength(3);
+		await expect.poll(async () => await types(page)).toStrictEqual(['polygon']);
+		expect(((await storedState(page)).elements[0] as { points: Point[] }).points).toHaveLength(3);
 	});
 
 	test('tools have keyboard shortcuts, and Escape cancels', async ({ page }) => {
@@ -560,7 +559,7 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 		await page.keyboard.press('m');
 		await expect(tool(page, 'Marker')).toHaveAttribute('aria-pressed', 'true');
 		await page.mouse.click(x, y);
-		await expect.poll(() => types(page)).toStrictEqual(['marker']);
+		await expect.poll(async () => await types(page)).toStrictEqual(['marker']);
 
 		// an unfinished line is dropped
 		await page.keyboard.press('l');
@@ -575,8 +574,8 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 		await page.mouse.down();
 		await page.mouse.move(x + 160, y + 100, { steps: 5 });
 		await page.mouse.up();
-		await expect.poll(() => types(page)).toStrictEqual(['marker', 'circle']);
-		const radius = (stateInUrl(page).elements[1] as { radius: number }).radius;
+		await expect.poll(async () => await types(page)).toStrictEqual(['marker', 'circle']);
+		const radius = ((await storedState(page)).elements[1] as { radius: number }).radius;
 		expect(radius).toBeGreaterThan(200);
 	});
 });
@@ -606,7 +605,7 @@ test('the inspector and the actions follow the selection', async ({ page }) => {
 
 	// the actions act on the selection
 	await bar.getByRole('button', { name: 'Delete' }).click();
-	await expect.poll(() => stateInUrl(page).elements).toStrictEqual([]);
+	await expect.poll(async () => (await storedState(page)).elements).toStrictEqual([]);
 	await expect(bar).toBeHidden();
 	await expect(title).toHaveText('Map');
 });
@@ -631,16 +630,17 @@ test(
 		};
 		await page.goto('/#' + encodeState(state));
 		await waitForMapIsReady(page);
-		const polygon = () => stateInUrl(page).elements[0] as { style?: { pattern?: number; opacity?: number } };
+		const polygon = async () =>
+			(await storedState(page)).elements[0] as { style?: { pattern?: number; opacity?: number } };
 
 		// the fill pattern as pictures, chosen by click and by arrow keys
 		await page.mouse.click(...(await project(page, [13.4, 52.49])));
 		const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
 		await expect(patterns.getByRole('radio')).toHaveCount(3);
 		await patterns.getByRole('radio', { name: 'diagonal', exact: true }).check();
-		await expect.poll(() => polygon().style?.pattern).toBe(1);
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe(1);
 		await page.keyboard.press('ArrowRight');
-		await expect.poll(() => polygon().style?.pattern).toBe(2);
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe(2);
 
 		// a slider shows its value
 		const opacity = page.getByRole('slider', { name: 'Opacity' });
@@ -651,12 +651,12 @@ test(
 		const field = page.getByRole('spinbutton', { name: 'Opacity' });
 		await field.fill('25');
 		await field.press('Enter');
-		await expect.poll(() => polygon().style?.opacity).toBe(0.25);
+		await expect.poll(async () => (await polygon()).style?.opacity).toBe(0.25);
 		// the slider shows the step next to it, the field the exact value
 		await expect(field).toHaveValue('25');
 		await field.fill('150');
 		await field.press('Enter');
-		await expect.poll(() => polygon().style?.opacity).toBeUndefined();
+		await expect.poll(async () => (await polygon()).style?.opacity).toBeUndefined();
 		await expect(field).toHaveValue('100');
 
 		// the label of a marker, at its place around the symbol
@@ -665,13 +665,17 @@ test(
 		const positions = page.getByRole('radiogroup', { name: 'Label position' });
 		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
 		await positions.getByRole('radio', { name: 'Above' }).check();
-		await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { align?: number } }).style?.align).toBe(3);
+		await expect
+			.poll(async () => ((await storedState(page)).elements[1] as { style?: { align?: number } }).style?.align)
+			.toBe(3);
 
 		// a typed value between the steps of the slider, e.g. 17° instead of 15° or 30°
 		const rotation = page.getByRole('spinbutton', { name: 'Rotation' });
 		await rotation.fill('17');
 		await rotation.press('Enter');
-		await expect.poll(() => (stateInUrl(page).elements[1] as { style?: { rotate?: number } }).style?.rotate).toBe(17);
+		await expect
+			.poll(async () => ((await storedState(page)).elements[1] as { style?: { rotate?: number } }).style?.rotate)
+			.toBe(17);
 	}
 );
 
@@ -768,7 +772,7 @@ test('the text color and the halo color of a label', async ({ page }) => {
 	await setColor('Text color', '#123456');
 	await setColor('Halo color', '#fedcba');
 	await expect
-		.poll(() => stateInUrl(page).elements[0].style)
+		.poll(async () => (await storedState(page)).elements[0].style)
 		.toMatchObject({ labelColor: '#123456', haloColor: '#fedcba' });
 
 	// the map draws the label with them

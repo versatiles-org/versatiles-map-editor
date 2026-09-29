@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { drawElement, menuItem, stateInUrl, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, storedState, waitForMapIsReady } from './lib/utils.js';
 
 test('downloads the map as GeoJSON and as map file', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
@@ -65,7 +65,7 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	const types = () => stateInUrl(page).elements.map((e) => e.type);
+	const types = async () => (await storedState(page)).elements.map((e) => e.type);
 	const dialog = page.getByRole('dialog');
 	const file: MapState = {
 		elements: [
@@ -112,11 +112,11 @@ test('opening a map file and a new map can be undone and are kept in the URL', a
 	await expect.poll(types).toStrictEqual(['marker']);
 	await (await menuItem(page, 'New map')).click();
 	await dialog.getByRole('button', { name: /^Create new map/ }).click();
-	await expect.poll(() => stateInUrl(page)).toMatchObject({ elements: [] });
-	expect(stateInUrl(page).meta).toBeUndefined();
+	await expect.poll(async () => await storedState(page)).toMatchObject({ elements: [] });
+	expect((await storedState(page)).meta).toBeUndefined();
 	await page.getByRole('button', { name: /^Undo/ }).click();
 	await expect.poll(types).toStrictEqual(['marker']);
-	await expect.poll(() => stateInUrl(page).meta?.legend?.entries.length).toBe(1);
+	await expect.poll(async () => (await storedState(page)).meta?.legend?.entries.length).toBe(1);
 });
 
 test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) => {
@@ -148,9 +148,10 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 	const kml = readFileSync(await download.path(), 'utf-8');
 	expect(kml).toContain('<Placemark><name>Café</name><description>Open</description>');
 
-	// importing it into an empty map restores the map
-	await page.goto('/');
+	// importing it into an empty map restores the map (the editor itself would continue the last map)
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
+	await expect.poll(async () => (await storedState(page)).elements).toStrictEqual([]);
 	const importKML = await menuItem(page, 'Import', 'KML (Google Earth)…');
 	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), importKML.click()]);
 	await chooser.setFiles({
@@ -160,8 +161,8 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 	});
 
 	const lower = (value: unknown) => JSON.parse(JSON.stringify(value).toLowerCase());
-	await expect.poll(() => lower(stateInUrl(page).elements)).toStrictEqual(lower(state.elements));
-	await expect.poll(() => lower(stateInUrl(page).meta)).toStrictEqual(lower(state.meta));
+	await expect.poll(async () => lower((await storedState(page)).elements)).toStrictEqual(lower(state.elements));
+	await expect.poll(async () => lower((await storedState(page)).meta)).toStrictEqual(lower(state.meta));
 });
 
 test.describe('importing a table', () => {
@@ -171,7 +172,7 @@ test.describe('importing a table', () => {
 		await (await menuItem(page, 'Import', 'Table (CSV/TSV)…')).click();
 		return page.getByRole('dialog');
 	}
-	const markers = (page: Page) => stateInUrl(page).elements as StateElementMarker[];
+	const markers = async (page: Page) => (await storedState(page)).elements as StateElementMarker[];
 
 	test('pasted from a spreadsheet, with coordinates', { tag: '@cross-browser' }, async ({ page }) => {
 		const dialog = await openImport(page);
@@ -196,7 +197,7 @@ test.describe('importing a table', () => {
 		await dialog.getByRole('button', { name: /^Done/ }).click();
 
 		await expect
-			.poll(() => markers(page).map((m) => [m.point, m.style?.label, m.popup?.text]))
+			.poll(async () => (await markers(page)).map((m) => [m.point, m.style?.label, m.popup?.text]))
 			.toStrictEqual([
 				[[13.4, 52.5], 'Café', 'Open **daily**'],
 				[[13.41, 52.51], 'Shop', undefined]
@@ -204,7 +205,7 @@ test.describe('importing a table', () => {
 		// the imported markers are selected, and one undo step removes them
 		await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 		await page.getByRole('button', { name: 'Undo' }).click();
-		await expect.poll(() => markers(page).length).toBe(0);
+		await expect.poll(async () => (await markers(page)).length).toBe(0);
 	});
 
 	test('from a file, with addresses', { tag: '@cross-browser' }, async ({ page }) => {
@@ -236,7 +237,7 @@ test.describe('importing a table', () => {
 			'Row 3: Nirgendwo 5 — address not found'
 		);
 		await expect
-			.poll(() => markers(page).map((m) => [m.point, m.style?.label]))
+			.poll(async () => (await markers(page)).map((m) => [m.point, m.style?.label]))
 			.toStrictEqual([[[13.4, 52.5], 'Bäckerei']]);
 	});
 
@@ -262,10 +263,11 @@ test.describe('importing a table', () => {
 		await dialog.getByRole('button', { name: 'Import 4 rows' }).click();
 		await expect(dialog.getByText('Imported 4 markers.')).toBeVisible();
 
-		const colors = () => (stateInUrl(page).elements as StateElementMarker[]).map((m) => m.style?.color?.toLowerCase());
+		const colors = async () =>
+			((await storedState(page)).elements as StateElementMarker[]).map((m) => m.style?.color?.toLowerCase());
 		await expect.poll(colors).toStrictEqual(['#4477aa', '#000000', '#4477aa', '#228833']);
 		await expect
-			.poll(() => stateInUrl(page).meta?.legend?.entries.map((e) => [e.label, e.color.toLowerCase()]))
+			.poll(async () => (await storedState(page)).meta?.legend?.entries.map((e) => [e.label, e.color.toLowerCase()]))
 			.toStrictEqual([
 				['Cafe', '#4477aa'],
 				['Shop', '#000000'],
@@ -308,7 +310,7 @@ test('Escape cancels a running table import', async ({ page }) => {
 	release();
 	// Something must *not* happen here (markers added later), so the test gives it time
 	await page.waitForTimeout(1000);
-	expect(stateInUrl(page).elements).toStrictEqual([]);
+	expect((await storedState(page)).elements).toStrictEqual([]);
 });
 
 test('a file that cannot be imported shows a message instead of a browser dialog', async ({ page }) => {

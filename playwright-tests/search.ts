@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { decodeState, encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { boxesOverlap, mapCenter, stateInUrl, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { boxesOverlap, mapCenter, storedState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 test('searching a place', { tag: '@cross-browser' }, async ({ page }) => {
 	const requests: URLSearchParams[] = [];
@@ -50,7 +50,7 @@ test('searching a place', { tag: '@cross-browser' }, async ({ page }) => {
 	await expect.poll(() => mapCenter(page)).toStrictEqual([expect.closeTo(13.3777, 3), expect.closeTo(52.5163, 3)]);
 	await page.getByRole('button', { name: 'Add marker here' }).click();
 	await expect
-		.poll(() => stateInUrl(page).elements)
+		.poll(async () => (await storedState(page)).elements)
 		.toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163], style: { symbol: 'extras:pin-teardrop' } }]);
 	await expect(page.getByRole('button', { name: 'Add marker here' })).toBeHidden();
 
@@ -106,7 +106,7 @@ test.describe('address search in the viewer', () => {
 		await expect(option).not.toBeChecked();
 		await option.check();
 
-		await expect.poll(() => stateInUrl(page).meta?.search).toBe(true);
+		await expect.poll(async () => (await storedState(page)).meta?.search).toBe(true);
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
 		expect(decodeState(new URL(link).hash.slice(1)).meta?.search).toBe(true);
 		// the preview is the embedded viewer, with the search

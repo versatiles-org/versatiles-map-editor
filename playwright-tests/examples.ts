@@ -4,7 +4,7 @@ import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	coveredPoints,
 	menuItem,
-	stateInUrl,
+	storedState,
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow
@@ -34,8 +34,8 @@ for (const name of EXAMPLES) {
 			const [chooser] = await Promise.all([page.waitForEvent('filechooser'), open.click()]);
 			await chooser.setFiles(file);
 
-			await expect.poll(() => stateInUrl(page).elements.map((e) => e.type)).toStrictEqual(types);
-			await expect.poll(() => stateInUrl(page).meta?.background).toStrictEqual(state.meta?.background);
+			await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(types);
+			await expect.poll(async () => (await storedState(page)).meta?.background).toStrictEqual(state.meta?.background);
 			const overlay = page.getByRole('list', { name: 'Legend' });
 			await expect(overlay.getByRole('listitem')).toHaveText(legend);
 			await waitForMapIsIdle(page);

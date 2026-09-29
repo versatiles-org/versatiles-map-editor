@@ -5,7 +5,7 @@ import {
 	drawElement,
 	drawnElements,
 	project,
-	stateInUrl,
+	storedState,
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow
@@ -52,7 +52,7 @@ test('styling the background map', async ({ page }) => {
 		const drawn = await drawnElements(page);
 		return { ...content, drawn: [drawn.fill.length, drawn.stroke.length, drawn.symbol.length] };
 	};
-	const background = () => stateInUrl(page).meta?.background;
+	const background = async () => (await storedState(page)).meta?.background;
 	const [x, y] = await project(page, [13.36, 52.48]);
 	await page.mouse.click(x, y);
 	const before = await mapContent();
@@ -94,7 +94,7 @@ test('styling the background map', async ({ page }) => {
 	await page.reload();
 	await waitForMapIsReady(page);
 	await expect(page.getByText('Open this page on a larger screen')).toBeVisible();
-	expect(background()).toStrictEqual(undone);
+	expect(await background()).toStrictEqual(undone);
 	const labelsInGerman = () =>
 		page.evaluate(() => JSON.stringify((window as unknown as MapWindow).map.getStyle()?.layers).includes('name_de'));
 	await expect.poll(labelsInGerman).toBe(true);
@@ -107,7 +107,7 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	const background = () => stateInUrl(page).meta?.background;
+	const background = async () => (await storedState(page)).meta?.background;
 	const sources = () =>
 		page.evaluate(() => Object.keys((window as unknown as MapWindow).map.getStyle()?.sources ?? {}));
 
@@ -121,7 +121,7 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 	// the labels without the streets
 	await streets.uncheck();
 	await expect
-		.poll(() => background()?.options.osmOverlay)
+		.poll(async () => (await background())?.options.osmOverlay)
 		.toMatchObject({ layers: { roads: false, transit: false, markings: false } });
 	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(false);
 	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(true);
@@ -177,7 +177,7 @@ test('the size and the halo of the labels of both maps', async ({ page }) => {
 	await expect.poll(async () => (await cityLabel()).halo).toBe(3);
 	expect((await cityLabel()).size).not.toStrictEqual(before.size);
 	await expect
-		.poll(() => stateInUrl(page).meta?.background?.options.text)
+		.poll(async () => (await storedState(page)).meta?.background?.options.text)
 		.toMatchObject({ scale: 1.5, places: { haloWidth: 3 } });
 
 	// the satellite map keeps them
@@ -194,7 +194,7 @@ test('the size and the halo of the labels of both maps', async ({ page }) => {
 test('changing the colors of the vector map and of the satellite imagery', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
-	const background = () => stateInUrl(page).meta?.background;
+	const background = async () => (await storedState(page)).meta?.background;
 	const paint = (layer: string, property: string) =>
 		page.evaluate(
 			([layer, property]) => (window as unknown as MapWindow).map.getPaintProperty(layer, property as 'fill-color'),
@@ -213,7 +213,7 @@ test('changing the colors of the vector map and of the satellite imagery', async
 
 	// the satellite imagery keeps the change, as a property of its raster layer
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await expect.poll(() => background()?.options.raster).toStrictEqual({ saturation: -1 });
+	await expect.poll(async () => (await background())?.options.raster).toStrictEqual({ saturation: -1 });
 	await expect.poll(() => paint('satellite', 'raster-saturation')).toBe(-1);
 	// darker: white becomes gray
 	await page.getByRole('slider', { name: 'White becomes' }).fill('0.8');
@@ -223,18 +223,20 @@ test('changing the colors of the vector map and of the satellite imagery', async
 	await page.getByRole('spinbutton', { name: 'Black becomes' }).press('Enter');
 	await expect(page.getByRole('spinbutton', { name: 'White becomes' })).toHaveValue('90');
 	await expect
-		.poll(() => background()?.options.raster)
+		.poll(async () => (await background())?.options.raster)
 		.toStrictEqual({
 			saturation: -1,
 			brightnessMin: 0.9,
 			brightnessMax: 0.9
 		});
 	// the streets and labels over the imagery get the same colors
-	expect(background()?.options.osmOverlay).toMatchObject({ recolor: { saturate: -1, brightness: 0.4, contrast: 0 } });
+	expect((await background())?.options.osmOverlay).toMatchObject({
+		recolor: { saturate: -1, brightness: 0.4, contrast: 0 }
+	});
 
 	// all back
 	await page.getByRole('button', { name: 'Reset colors' }).click();
-	await expect.poll(() => background()?.options.raster).toBeUndefined();
+	await expect.poll(async () => (await background())?.options.raster).toBeUndefined();
 	await expect(page.getByRole('button', { name: 'Reset colors' })).toBeDisabled();
 });
 
@@ -316,12 +318,12 @@ test('one font for the labels of all markers, which need not be the one of the b
 	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Lato');
 	await labels.getByRole('combobox', { name: 'Style' }).selectOption('Bold');
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
-	await expect.poll(() => stateInUrl(page).meta?.labelFont).toBe('lato_bold');
+	await expect.poll(async () => (await storedState(page)).meta?.labelFont).toBe('lato_bold');
 
 	// which the font of the background map does not change
 	await background.getByRole('combobox', { name: 'Font' }).selectOption('Open Sans');
 	await expect
-		.poll(() => stateInUrl(page).meta?.background?.options)
+		.poll(async () => (await storedState(page)).meta?.background?.options)
 		.toMatchObject({ text: { font: 'open_sans_regular' } });
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
 
@@ -333,7 +335,7 @@ test('one font for the labels of all markers, which need not be the one of the b
 	// like the background map again
 	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Like the background map');
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['open_sans_regular']]);
-	await expect.poll(() => stateInUrl(page).meta?.labelFont).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).meta?.labelFont).toBeUndefined();
 });
 
 test('the labels of the background map over areas and lines, those of markers always on top', async ({ page }) => {
@@ -357,7 +359,7 @@ test('the labels of the background map over areas and lines, those of markers al
 	// over them, but still under the markers
 	await checkbox.check();
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
-	await expect.poll(() => stateInUrl(page).meta?.mapLabelsOnTop).toBe(true);
+	await expect.poll(async () => (await storedState(page)).meta?.mapLabelsOnTop).toBe(true);
 
 	// kept in the map, and by a new background map
 	await page.reload();
@@ -365,14 +367,14 @@ test('the labels of the background map over areas and lines, those of markers al
 	await expect(checkbox).toBeChecked();
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await expect.poll(() => stateInUrl(page).meta?.background?.builder).toBe('satellite');
+	await expect.poll(async () => (await storedState(page)).meta?.background?.builder).toBe('satellite');
 	await waitForMapIsIdle(page);
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
 
 	// under them again
 	await checkbox.uncheck();
 	await expect.poll(order).toStrictEqual({ fill: 1, stroke: 1, symbol: 1 });
-	await expect.poll(() => stateInUrl(page).meta?.mapLabelsOnTop).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).meta?.mapLabelsOnTop).toBeUndefined();
 });
 
 test('editing the legend', async ({ page }) => {
@@ -396,8 +398,8 @@ test('editing the legend', async ({ page }) => {
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	const legendInUrl = () => {
-		const legend = stateInUrl(page).meta?.legend;
+	const legendInUrl = async () => {
+		const legend = (await storedState(page)).meta?.legend;
 		return legend && { ...legend, entries: legend.entries.map((e) => ({ ...e, color: e.color.toLowerCase() })) };
 	};
 	const overlay = page.getByRole('list', { name: 'Legend' });
@@ -470,7 +472,7 @@ test('choosing a color scheme', async ({ page }) => {
 			.getByRole('group', { name })
 			.getByRole('button')
 			.evaluateAll((buttons) => buttons.map((b) => b.getAttribute('aria-label')));
-	const polygon = () => stateInUrl(page).elements[0] as { style?: { color?: string } };
+	const polygon = async () => (await storedState(page)).elements[0] as { style?: { color?: string } };
 
 	// the default scheme is offered, and not stored
 	await fillColor.click();
@@ -480,12 +482,12 @@ test('choosing a color scheme', async ({ page }) => {
 
 	// another scheme, and one of its colors
 	await scheme.selectOption('Okabe-Ito (colorblind-safe)');
-	await expect.poll(() => stateInUrl(page).meta?.colorScheme).toBe('okabe-ito');
+	await expect.poll(async () => (await storedState(page)).meta?.colorScheme).toBe('okabe-ito');
 	await page
 		.getByRole('group', { name: 'Okabe-Ito (colorblind-safe)' })
 		.getByRole('button', { name: '#0072b2' })
 		.click();
-	await expect.poll(() => polygon().style?.color?.toLowerCase()).toBe('#0072b2');
+	await expect.poll(async () => (await polygon()).style?.color?.toLowerCase()).toBe('#0072b2');
 	await page.keyboard.press('Escape');
 
 	// the scheme belongs to the map, so every color picker offers it
@@ -496,7 +498,7 @@ test('choosing a color scheme', async ({ page }) => {
 	// undo reverts the color, then the scheme
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(() => stateInUrl(page).meta?.colorScheme).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).meta?.colorScheme).toBeUndefined();
 });
 
 test('color schemes and fonts of an organisation', async ({ page }) => {
@@ -539,7 +541,9 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect(face).toHaveValue('lato_regular');
 	await face.selectOption('Bold');
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
-	await expect.poll(() => stateInUrl(page).meta?.background?.options).toMatchObject({ text: { font: 'lato_bold' } });
+	await expect
+		.poll(async () => (await storedState(page)).meta?.background?.options)
+		.toMatchObject({ text: { font: 'lato_bold' } });
 
 	// and another family keeps the bold face
 	await family.selectOption('Open Sans');
@@ -550,5 +554,5 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await page.getByRole('button', { name: 'Add a legend' }).click();
 	await page.getByRole('radiogroup', { name: 'Font' }).getByRole('radio', { name: 'Serif' }).check();
 	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
-	await expect.poll(() => stateInUrl(page).meta?.legend?.font).toBe('serif');
+	await expect.poll(async () => (await storedState(page)).meta?.legend?.font).toBe('serif');
 });

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { StateHistory } from './history.svelte.js';
-import type { MapState } from '@versatiles/map-state';
+import { encodeState, type MapState } from '@versatiles/map-state';
 
 describe('StateHistory', () => {
 	let history: StateHistory;
@@ -33,14 +33,14 @@ describe('StateHistory', () => {
 	});
 
 	it('should initialize with the given state', () => {
-		expect(JSON.parse(history['history'][0])).toEqual({ ...state1, map: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state1, map: undefined });
 		expect(history.undoEnabled).toBe(false);
 		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should reset the history with a new state', () => {
 		history.reset(state2);
-		expect(JSON.parse(history['history'][0])).toEqual({ ...state2, map: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state2, map: undefined });
 		expect(history['history'].length).toBe(1);
 		expect(history.undoEnabled).toBe(false);
 		expect(history.redoEnabled).toBe(false);
@@ -48,7 +48,7 @@ describe('StateHistory', () => {
 
 	it('should push a new state to the history', () => {
 		history.push(state2);
-		expect(JSON.parse(history['history'][0])).toEqual({ ...state2, map: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state2, map: undefined });
 		expect(history['history'].length).toBe(2);
 		expect(history.undoEnabled).toBe(true);
 		expect(history.redoEnabled).toBe(false);
@@ -103,5 +103,23 @@ describe('StateHistory', () => {
 			history.push({ elements: [{ type: 'marker', point: [i, i] }] });
 		}
 		expect(history['history'].length).toBe(100);
+	});
+
+	it('continues a stored history, and decodes its states when they are needed', () => {
+		const stored = [state1, state2, state1].map((state) => encodeState({ ...state, map: undefined }));
+		// the second state is the current one: one step was undone
+		history.restore(stored, 1);
+		expect(history.undone).toBe(1);
+		expect(history.undoEnabled).toBe(true);
+		expect(history.redoEnabled).toBe(true);
+		expect(history['history'].every((entry) => entry.json === undefined)).toBe(true);
+
+		expect(history.undo()).toMatchObject({ elements: state1.elements });
+		expect(history.redo()).toMatchObject({ elements: [{ type: 'line' }] });
+		// the current state again is no change, another one drops the step that redo would restore
+		expect(history.push(history['get']())).toBe(false);
+		expect(history.push(state1)).toBe(true);
+		expect(history['history'].length).toBe(3);
+		expect(history.redoEnabled).toBe(false);
 	});
 });

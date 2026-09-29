@@ -34,17 +34,17 @@ describe('SessionStore', () => {
 		expect(await store.load(id)).toMatchObject({ states: ['A', 'B', 'C'], position: 2 });
 
 		// undo twice, redo once
-		store.setPosition(id, 0);
-		store.setPosition(id, 1);
+		store.setUndone(id, 2);
+		store.setUndone(id, 1);
 		expect(await store.load(id)).toMatchObject({ states: ['A', 'B', 'C'], position: 1 });
 
 		store.push(id, 'D');
 		expect(await store.load(id)).toMatchObject({ states: ['A', 'B', 'D'], position: 2 });
 
 		// a position outside the history is the nearest step
-		store.setPosition(id, 10);
+		store.setUndone(id, -3);
 		expect((await store.load(id))?.position).toBe(2);
-		store.setPosition(id, -3);
+		store.setUndone(id, 10);
 		expect((await store.load(id))?.position).toBe(0);
 	});
 
@@ -84,7 +84,7 @@ describe('SessionStore', () => {
 
 		// undo is no change of the map's time
 		now.mockReturnValue(4000);
-		store.setPosition(b, 0);
+		store.setUndone(b, 0);
 		expect((await store.list()).map((session) => session.changed)).toStrictEqual([3000, 2000]);
 		now.mockRestore();
 	});
@@ -159,12 +159,20 @@ describe('SessionStore', () => {
 		consoleWarn.mockRestore();
 	});
 
+	it('opens without waiting for the answer of the user, e.g. in Firefox', async () => {
+		vi.stubGlobal('navigator', { ...navigator, storage: { persist: () => new Promise(() => {}) } });
+		const other = (await SessionStore.open(`${name}-pending`))!;
+		expect(other.persisted).toBe(false);
+		await other.close();
+		vi.unstubAllGlobals();
+	});
+
 	it('asks the browser to keep the storage', async () => {
 		const persist = vi.fn(async () => true);
 		vi.stubGlobal('navigator', { ...navigator, storage: { persist } });
 		const other = (await SessionStore.open(`${name}-persist`))!;
 		expect(persist).toHaveBeenCalled();
-		expect(other.persisted).toBe(true);
+		await vi.waitFor(() => expect(other.persisted).toBe(true));
 		await other.close();
 		vi.unstubAllGlobals();
 	});

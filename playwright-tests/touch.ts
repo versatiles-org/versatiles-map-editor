@@ -4,8 +4,8 @@ import type { CDPSession, Page } from '@playwright/test';
 import {
 	mapCenter,
 	project,
-	settledStateInUrl,
-	stateInUrl,
+	settledStoredState,
+	storedState,
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow,
@@ -59,8 +59,8 @@ const points: Point[] = [
 ];
 const line: MapState = { map: { center, radius: 10000 }, elements: [{ type: 'line', points }] };
 
-const linePoints = (page: Page) => {
-	const element = stateInUrl(page).elements[0];
+const linePoints = async (page: Page) => {
+	const element = (await storedState(page)).elements[0];
 	return element && 'points' in element ? element.points : [];
 };
 
@@ -81,19 +81,19 @@ test('dragging elements and nodes with a finger', async ({ page }) => {
 	// dragging the selected line moves it instead of the map
 	const start = await project(page, onLine);
 	await touch.drag(start, [start[0], start[1] + 50]);
-	await expect.poll(() => linePoints(page)[0][1]).toBeLessThan(52.5);
-	expect(linePoints(page)[1][1]).toBeCloseTo(linePoints(page)[0][1], 5);
+	await expect.poll(async () => (await linePoints(page))[0][1]).toBeLessThan(52.5);
+	expect((await linePoints(page))[1][1]).toBeCloseTo((await linePoints(page))[0][1], 5);
 	expect(await mapCenter(page)).toStrictEqual(viewCenter);
 
 	// a node can be hit with a finger next to it, and dragging it reshapes the line
 	await waitForMapIsIdle(page);
 	// the final position of the line, not an intermediate one of the drag
-	const settled = (await settledStateInUrl(page)).elements[0] as { points: Point[] };
+	const settled = (await settledStoredState(page)).elements[0] as { points: Point[] };
 	const [first, second] = settled.points;
 	const node = await project(page, second);
 	await touch.drag([node[0] + 8, node[1] + 8], [node[0] + 8, node[1] - 42]);
-	await expect.poll(() => linePoints(page)[1][1]).toBeGreaterThan(second[1]);
-	expect(linePoints(page)[0]).toStrictEqual(first);
+	await expect.poll(async () => (await linePoints(page))[1][1]).toBeGreaterThan(second[1]);
+	expect((await linePoints(page))[0]).toStrictEqual(first);
 	expect(await mapCenter(page)).toStrictEqual(viewCenter);
 
 	// dragging next to the line pans the map
@@ -111,10 +111,10 @@ test('deleting a node with a finger', async ({ page }) => {
 
 	// tapping the midpoint adds a node, which can be deleted
 	await page.touchscreen.tap(...(await project(page, center)));
-	await expect.poll(() => linePoints(page).length).toBe(3);
+	await expect.poll(async () => (await linePoints(page)).length).toBe(3);
 	await expect(deleteNode).toBeEnabled();
 	await deleteNode.tap();
-	await expect.poll(() => linePoints(page).length).toBe(2);
+	await expect.poll(async () => (await linePoints(page)).length).toBe(2);
 	await expect(deleteNode).toBeHidden();
 	// the line is still selected
 	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeEnabled();
@@ -138,7 +138,7 @@ test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 		]
 	);
 	await expect.poll(getZoom).toBeGreaterThan(zoom + 1);
-	expect(linePoints(page)).toStrictEqual(points);
+	expect(await linePoints(page)).toStrictEqual(points);
 });
 
 test('drawing a line with taps and the Finish button', async ({ page }) => {
@@ -151,6 +151,6 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 	await page.waitForTimeout(500);
 	await page.touchscreen.tap(x + 80, y);
 	await page.getByRole('button', { name: 'Finish' }).tap();
-	await expect.poll(() => linePoints(page).length).toBe(2);
+	await expect.poll(async () => (await linePoints(page)).length).toBe(2);
 	await expect(page.getByRole('button', { name: 'Select' })).toHaveAttribute('aria-pressed', 'true');
 });

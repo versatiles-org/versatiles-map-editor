@@ -1,11 +1,24 @@
-import type { MapState } from '@versatiles/map-state';
+import { decodeState, type MapState } from '@versatiles/map-state';
 
 const MAXLENGTH = 100;
 
+/**
+ * A step of the history: the state as JSON, or as the codec's encoded string if it was restored
+ * from the browser storage, which is decoded once it is needed.
+ */
+interface Entry {
+	json?: string;
+	encoded?: string;
+}
+
+function jsonOf(entry: Entry): string {
+	entry.json ??= JSON.stringify(decodeState(entry.encoded!));
+	return entry.json;
+}
+
 export class StateHistory {
-	// History of state hashes
-	// The first element is the most recent state
-	private history: string[] = [];
+	// The steps of the history, the most recent first
+	private history: Entry[] = [];
 
 	// The index of the current state in the history
 	// 0 means the most recent state
@@ -26,19 +39,36 @@ export class StateHistory {
 		this.push(state);
 	}
 
+	/**
+	 * Continue a stored history: its encoded states, the oldest first, and the index of the current
+	 * one. The states are decoded when undo or redo needs them.
+	 */
+	public restore(encoded: string[], position: number) {
+		if (encoded.length === 0) return;
+		this.history = encoded.map((state) => ({ encoded: state })).reverse();
+		this.index = Math.min(this.history.length - 1, Math.max(0, this.history.length - 1 - position));
+		this.updateButtons();
+	}
+
+	/** The number of undone steps, which redo would restore. */
+	public get undone(): number {
+		return this.index;
+	}
+
 	/** Add a state to the history. Returns false if it equals the current state. */
 	public push(state: MapState): boolean {
 		// The viewport is not part of the history, so panning the map is not undoable
-		const entry = JSON.stringify({ ...state, map: undefined });
+		const json = JSON.stringify({ ...state, map: undefined });
 
 		// Nothing changed (e.g. a click without drag), so there is nothing to undo
-		if (entry === this.history[this.index]) return false;
+		const current = this.history[this.index];
+		if (current && json === jsonOf(current)) return false;
 
 		if (this.index > 0) {
 			this.history.splice(0, this.index);
 			this.index = 0;
 		}
-		this.history.unshift(entry);
+		this.history.unshift({ json });
 
 		// Remove old history
 		if (this.history.length > MAXLENGTH) {
@@ -49,7 +79,7 @@ export class StateHistory {
 	}
 
 	private get(): MapState {
-		return JSON.parse(this.history[this.index]);
+		return JSON.parse(jsonOf(this.history[this.index]));
 	}
 
 	public undo(): MapState {

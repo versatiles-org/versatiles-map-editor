@@ -9,8 +9,7 @@
 </script>
 
 <script lang="ts">
-	import { onMount, tick, type Snippet } from 'svelte';
-	import { replaceState } from '$app/navigation';
+	import { onMount, type Snippet } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import './theme.css';
 	import * as maplibre from 'maplibre-gl';
@@ -23,11 +22,13 @@
 	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import type { MapDocument } from '$lib/map_document.svelte.js';
 	import { UrlHash } from './url_hash.js';
+	import type { SessionSync } from './session_sync.js';
 	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
 
 	/**
-	 * The map with what the viewer and the editor share: the map in the URL, the legend, the search,
-	 * the attribution and a loading indicator. The editor adds its bars as `children`.
+	 * The map with what the viewer and the editor share: the map of the link or of the browser
+	 * storage, the legend, the search, the attribution and a loading indicator. The editor adds its
+	 * bars as `children`.
 	 */
 	let {
 		createDocument,
@@ -39,6 +40,7 @@
 		onselectlegend,
 		hint,
 		editor = false,
+		sessions,
 		onMapLoad,
 		children
 	}: {
@@ -59,6 +61,12 @@
 		hint?: string;
 		/** Whether this is the editor, which follows the dark mode of the system. */
 		editor?: boolean;
+		/**
+		 * The browser storage of the editor's maps: the editor opens and keeps its map there, the
+		 * viewer on the editor page (phones) shows the last one without a link. Without it (the
+		 * viewer page), the map of the link is shown.
+		 */
+		sessions?: Promise<SessionSync>;
 		onMapLoad?: (map: MaplibreMapType, maplibre: typeof import('maplibre-gl')) => void;
 		children?: Snippet;
 	} = $props();
@@ -130,13 +138,10 @@
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
 	onMount(() => {
 		init();
-		// SvelteKit's replaceState fails until its router has finished starting, which happens
-		// after all components are mounted
-		tick().then(() => urlHash.start());
 		return destroy;
 	});
 
-	/** Show the country of the user (from the time zone), when there is no map in the URL. */
+	/** Show the country of the user (from the time zone), when there is no map to show. */
 	async function showCountry(map: MaplibreMapType) {
 		// only needed without a map, so it is loaded only then
 		const { getCountryBoundingBox } = await import('./location.js');
@@ -148,6 +153,7 @@
 	function destroy(): void {
 		destroyed = true;
 		urlHash.destroy();
+		sync?.destroy();
 		// before map.remove(), so the elements can still remove their layers
 		mapDocument?.destroy();
 		mapDocument = undefined;
@@ -156,12 +162,10 @@
 		symbolLibrary.map = undefined;
 	}
 
-	// the map in the URL; replaceState does not fire "hashchange"
-	const urlHash = new UrlHash(
-		() => mapDocument,
-		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
-		(hash) => replaceState('#' + hash, {})
-	);
+	// the map in the URL, in the viewer
+	const urlHash = new UrlHash(() => mapDocument);
+	// the maps in the browser storage, in the editor
+	let sync: SessionSync | undefined;
 
 	function init(): void {
 		if (map) return;
@@ -197,20 +201,32 @@
 		let hash = location.hash.slice(1);
 		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
 
+		// the editor: the map of the link, else of the browser storage
+		const current = await sessions;
+		if (destroyed) {
+			current?.destroy();
+			return;
+		}
+		sync = current;
+		const opening = editor ? await sync?.prepare(hash) : undefined;
+		// the viewer on the editor page shows the editor's last map, read-only
+		const last = !editor && !hash ? await sync?.last() : undefined;
+		if (destroyed) return;
+
 		// The map has no style yet, so it shows nothing until the country is shown
-		if (!hash) await showCountry(map);
+		if (opening ? !opening.camera : !hash && !last?.map) await showCountry(map);
 		if (destroyed) return;
 
 		const doc = createDocument(map);
-		// the edited map is kept in the URL
-		if (doc.isInteractive()) {
-			doc.state.events.on('change', urlHash.request);
-			map.on('moveend', urlHash.request);
-		}
 		mapDocument = doc;
 
-		if (hash && !urlHash.read(hash)) void showCountry(map);
-
+		if (sync && opening && doc.isInteractive()) {
+			await sync.attach(doc, opening);
+			return;
+		}
+		if (last) {
+			doc.loadState(last).catch((error) => console.error('Failed to load map state', error));
+		} else if (hash && !urlHash.read(hash)) void showCountry(map);
 		urlHash.listen();
 	}
 </script>

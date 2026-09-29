@@ -5,7 +5,7 @@ import {
 	drawElement,
 	drawnElements,
 	menuItem,
-	stateInUrl,
+	storedState,
 	trackServerRequests,
 	waitForMapIsReady
 } from './lib/utils.js';
@@ -163,7 +163,7 @@ test('keeps an opened map in the URL', async ({ page }) => {
 	await page.goto('/#' + encodeState(state as MapState));
 	await waitForMapIsReady(page);
 	// the viewport is written before the elements have loaded, which must not drop them
-	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 });
 
 test('keeps the map in the URL across reloads', async ({ page }) => {
@@ -172,7 +172,7 @@ test('keeps the map in the URL across reloads', async ({ page }) => {
 	await drawElement(page, 'Marker');
 
 	// a single change is written to the hash immediately
-	const elementsInUrl = () => stateInUrl(page).elements.map((e) => e.type);
+	const elementsInUrl = async () => (await storedState(page)).elements.map((e) => e.type);
 	await expect.poll(elementsInUrl).toStrictEqual(['marker']);
 
 	await page.reload();
@@ -199,10 +199,10 @@ test('a map near a pole keeps its elements', async ({ page }) => {
 	await page.mouse.down();
 	await page.mouse.move(450, 350, { steps: 5 });
 	await page.mouse.up();
-	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 });
 
-test('the URL keeps the elements while the map is loading', async ({ page }) => {
+test('the stored map keeps the elements while the map is loading', async ({ page }) => {
 	// a slow network: the style waits for its TileJSON until the test releases it
 	let release!: () => void;
 	const released = new Promise<void>((resolve) => (release = resolve));
@@ -216,13 +216,13 @@ test('the URL keeps the elements while the map is loading', async ({ page }) => 
 	};
 	await page.goto('/#' + encodeState(state));
 	// The viewport is already set, the elements wait for the style. Something must *not* happen
-	// here (writing a URL without elements), so the test has to give it time to happen.
+	// here (storing the map without elements), so the test has to give it time to happen.
 	await page.waitForTimeout(1000);
-	expect(stateInUrl(page).elements.length).toBe(1);
+	expect((await storedState(page)).elements.length).toBe(1);
 
 	release();
 	await waitForMapIsReady(page);
-	await expect.poll(() => stateInUrl(page).elements.length).toBe(1);
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 });
 
 test('a loading indicator shows until the map has loaded', async ({ page }) => {
@@ -238,4 +238,31 @@ test('a loading indicator shows until the map has loaded', async ({ page }) => {
 	release();
 	await waitForMapIsReady(page);
 	await expect(page.getByText('Loading map…')).toHaveCount(0);
+});
+
+test('the editor keeps its map, history and camera in the browser, not in the URL', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [{ type: 'marker', point: [13.4, 52.5] }]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	// the link is opened, and removed from the URL
+	await expect.poll(() => new URL(page.url()).hash).toBe('');
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
+
+	await drawElement(page, 'Marker');
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
+	const camera = (await storedState(page)).map;
+
+	// a reload continues the map, with its camera and the step to undo
+	await page.reload();
+	await waitForMapIsReady(page);
+	expect(new URL(page.url()).hash).toBe('');
+	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(2);
+	expect((await storedState(page)).map).toStrictEqual(camera);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
+	await page.getByRole('button', { name: 'Redo' }).click();
+	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
 });

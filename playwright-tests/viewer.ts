@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { boxesOverlap, project, stateInUrl, waitForMapIsIdle, waitForMapIsReady } from './lib/utils.js';
+import { boxesOverlap, project, storedState, waitForMapIsIdle, waitForMapIsReady } from './lib/utils.js';
 
 test.describe('small screens', () => {
 	// wide enough for the hint to fit on one line, next to the attribution
@@ -113,7 +113,7 @@ test('precision of a shared map', async ({ page }) => {
 	expect((await shared()).length).toBeLessThan(automatic.length);
 
 	// the map in the editor keeps its precision
-	expect((stateInUrl(page).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
+	expect(((await storedState(page)).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
 });
 
 test.describe('overlays of the viewer on a phone', () => {

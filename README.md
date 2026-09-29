@@ -13,7 +13,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Legend** with a position, a layout and a font. New entries start with a color of the map that the legend does not show yet.
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
-- **Save** the map as a file and open it again. The address bar always holds the whole map, so a reload keeps the work.
+- **Save** the map as a file and open it again. The editor keeps the map, its undo history and the view in the browser, so a reload keeps the work.
 - **Share** a link or embed the map in a website, with a selectable precision and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
 - **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
 
@@ -32,7 +32,7 @@ The code is in `src/lib`. `map_document*.ts` hold the map with its elements, leg
 background. Next to them are the modules that several folders share.
 
 - `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
-  viewer (`/view`), both around the map in `MapFrame.svelte`, with the URL, the layout and the theme
+  viewer (`/view`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`session_sync.ts`), the layout and the theme
 
 - `components/`: the Svelte components: `ui/` generic controls, `pickers/` for a color, a font or
   a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`, and
@@ -119,7 +119,7 @@ The read-only viewer at `/view` reads the map from the URL hash, so it can be em
 <iframe src="https://your-host/view#<state-hash>" style="width: 600px; height: 600px;"></iframe>
 ```
 
-The state can alternatively be provided via the iframe's `data` attribute. The editor (`/`) takes the same hash, e.g. to edit a shared map further.
+The state can alternatively be provided via the iframe's `data` attribute. The editor (`/`) takes the same hash, e.g. to edit a shared map further: it opens the map as a new one in the browser storage and removes the hash from the URL.
 
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
