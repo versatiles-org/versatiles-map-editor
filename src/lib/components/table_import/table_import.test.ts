@@ -13,7 +13,7 @@ import {
 	tableCategories
 } from './table_import.js';
 import { parseTable } from './table.js';
-import type { geocode } from '../../geocoding.js';
+import type { geocode } from '../geocoding.js';
 
 describe('importTable', () => {
 	it('creates markers from coordinates, with label, popup and style', async () => {

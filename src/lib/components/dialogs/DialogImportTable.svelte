@@ -17,7 +17,7 @@
 		type ImportSettings,
 		type Table,
 		type UncertainRow
-	} from '$lib/components/dialogs/table_import/index.js';
+	} from '$lib/components/table_import/index.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
 	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
