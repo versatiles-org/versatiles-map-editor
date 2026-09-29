@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock; setStyle: Mock }[] }));
 
@@ -45,13 +45,6 @@ const { default: MapEditor } = await import('./MapEditor.svelte');
 const { MapDocumentInteractive } = await import('./map_document_interactive.js');
 
 describe('MapEditor', () => {
-	// The code of the editor, which MapEditor loads after the map is created. Its first import
-	// compiles all its components, which can take seconds with a cold cache and other test files
-	// running in parallel, so it is loaded once before the tests.
-	beforeAll(async () => {
-		await Promise.all([import('./components/shell/index.js'), import('./components/map/editor/index.js')]);
-	}, 60_000);
-
 	afterEach(() => {
 		maps.length = 0;
 		document.body.innerHTML = '';
@@ -64,7 +57,7 @@ describe('MapEditor', () => {
 		unmount(component);
 	});
 
-	// The editor code is loaded after the map is created
+	// The editor starts once the map shows the country of the user (without a map in the URL)
 	const editorLoaded = () => vi.waitFor(() => expect(document.querySelector('.sidebar')).not.toBeNull());
 
 	it('removes the map and the hashchange listener on unmount', async () => {
@@ -99,14 +92,14 @@ describe('MapEditor', () => {
 		destroy.mockRestore();
 	});
 
-	it('does not start the editor when it is unmounted while its code loads', async () => {
+	it('does not start the editor when it is unmounted while the map starts', async () => {
 		const addListener = vi.spyOn(window, 'addEventListener');
 		const component = mount(MapEditor, { target: document.body });
 		flushSync();
 		unmount(component);
 		flushSync();
-		// give the editor code time to load
-		await import('./components/shell/index.js');
+		// give the map time to show the country
+		await import('./page/location.js');
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		expect(document.querySelector('.sidebar')).toBeNull();

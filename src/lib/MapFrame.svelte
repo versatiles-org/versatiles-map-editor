@@ -30,7 +30,6 @@
 	 * the attribution and a loading indicator. The editor adds its bars as `children`.
 	 */
 	let {
-		prepare,
 		createDocument,
 		mapDocument = $bindable(),
 		insets = { top: 0, right: 0, bottom: 0, left: 0 },
@@ -43,9 +42,7 @@
 		onMapLoad,
 		children
 	}: {
-		/** Loads what `createDocument` needs, e.g. the code of the editor, while the map starts. */
-		prepare?: () => Promise<void>;
-		/** The document of the map, created once `prepare` has finished. */
+		/** Creates the document of the map, once the map has its first view. */
 		createDocument: (map: MaplibreMapType) => MapDocument;
 		mapDocument?: MapDocument;
 		/** The bars that the map centers its content between. */
@@ -200,8 +197,8 @@
 		let hash = location.hash.slice(1);
 		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
 
-		// The map has no style yet, so it shows nothing until the code has loaded
-		await Promise.all([prepare?.(), hash ? undefined : showCountry(map)]);
+		// The map has no style yet, so it shows nothing until the country is shown
+		if (!hash) await showCountry(map);
 		if (destroyed) return;
 
 		const doc = createDocument(map);

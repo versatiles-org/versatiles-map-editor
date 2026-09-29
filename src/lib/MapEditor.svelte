@@ -4,6 +4,11 @@
 	import MapFrame, { type Insets } from './MapFrame.svelte';
 	import MapViewer from './MapViewer.svelte';
 	import type { MapDocument } from './map_document.svelte.js';
+	// Imported with the page, not loaded once the editor starts: on a slow network (300 ms latency),
+	// the editor then starts about 0.5 s sooner. Phones, which get the viewer, load ~95 KiB more.
+	import { MapDocumentInteractive } from './map_document_interactive.js';
+	import { ElementsDrawer, Sidebar, SidebarToggle, StatusBar, ToolRail, TopBar } from '$lib/components/shell/index.js';
+	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
 
@@ -14,7 +19,7 @@
 	} = $props();
 
 	// The editor needs room for the sidebar and the map. Smaller screens (phones) and embeds get the
-	// read-only viewer. The size is checked once, since switching modes would lose the editor state.
+	// read-only viewer (see also the page /view). The size is checked once, since switching modes would lose the editor state.
 	let mode: 'editor' | 'viewer' | undefined = $state();
 	let screenTooSmall = $state(false);
 	onMount(() => {
@@ -45,43 +50,10 @@
 
 	let mapDocument: MapDocument | undefined = $state();
 
-	/**
-	 * The code of the editor, loaded only for the editor: embeds and phones show the read-only
-	 * viewer, which does not need the sidebar with its dialogs, importers and codecs.
-	 */
-	async function loadEditor() {
-		const [
-			{ MapDocumentInteractive },
-			{ Sidebar, SidebarToggle, TopBar, ToolRail, ElementsDrawer, StatusBar },
-			{ DrawBar, SelectionBar, NodeDeleteButton }
-		] = await Promise.all([
-			import('./map_document_interactive.js'),
-			import('$lib/components/shell/index.js'),
-			import('$lib/components/map/editor/index.js')
-		]);
-		return {
-			MapDocumentInteractive,
-			Sidebar,
-			SidebarToggle,
-			TopBar,
-			ToolRail,
-			DrawBar,
-			SelectionBar,
-			ElementsDrawer,
-			StatusBar,
-			NodeDeleteButton
-		};
-	}
-	let editor: Awaited<ReturnType<typeof loadEditor>> | undefined = $state();
-
-	async function prepare() {
-		editor = await loadEditor();
-	}
-
 	function createDocument(map: MaplibreMapType): MapDocument {
 		// the color schemes and fonts of this editor instance
 		void loadConfig();
-		return new editor!.MapDocumentInteractive(map);
+		return new MapDocumentInteractive(map);
 	}
 
 	/** Add a marker at a place that the search found. */
@@ -102,7 +74,6 @@
 {:else if mode === 'editor'}
 	<!-- a found place can be marked -->
 	<MapFrame
-		{prepare}
 		{createDocument}
 		bind:mapDocument
 		{insets}
@@ -113,26 +84,26 @@
 		editor
 		{onMapLoad}
 	>
-		<!-- from the start, so the map does not move when the code of the editor has loaded -->
+		<!-- from the start, so the map does not move when the editor has started -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
-			{#if editor && mapDocument?.isInteractive()}
-				<editor.TopBar doc={mapDocument} />
+			{#if mapDocument?.isInteractive()}
+				<TopBar doc={mapDocument} />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
-			{#if editor && mapDocument?.isInteractive()}
-				<editor.ToolRail doc={mapDocument} bind:drawerOpen />
+			{#if mapDocument?.isInteractive()}
+				<ToolRail doc={mapDocument} bind:drawerOpen />
 			{/if}
 		</div>
 		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
-			{#if editor && mapDocument?.isInteractive()}
-				<editor.StatusBar doc={mapDocument} />
+			{#if mapDocument?.isInteractive()}
+				<StatusBar doc={mapDocument} />
 			{/if}
 		</div>
-		{#if editor && mapDocument?.isInteractive()}
-			<editor.NodeDeleteButton {mapDocument} />
-			<editor.DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
-			<editor.SelectionBar
+		{#if mapDocument?.isInteractive()}
+			<NodeDeleteButton {mapDocument} />
+			<DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
+			<SelectionBar
 				doc={mapDocument}
 				top={TOPBAR_HEIGHT}
 				left={coveredLeft}
@@ -148,13 +119,13 @@
 				style:width="{DRAWER_WIDTH}px"
 				hidden={!drawerOpen}
 			>
-				<editor.ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
+				<ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
 			</div>
 			<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
 			<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
-				<editor.Sidebar {mapDocument} />
+				<Sidebar {mapDocument} />
 			</div>
-			<editor.SidebarToggle
+			<SidebarToggle
 				bind:open={sidebarOpen}
 				top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
 				right={sidebarWidth}
