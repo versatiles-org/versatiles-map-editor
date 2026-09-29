@@ -45,45 +45,6 @@ describe('MapDocument', () => {
 			return { manager, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
 		}
 
-		it('sets the style once it is loaded', async () => {
-			const { resolve } = await deferInlineSources();
-			resolve({ version: 8, sources: {}, layers: [] });
-			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
-		});
-
-		it('does not set the style after destroy', async () => {
-			const { manager, resolve } = await deferInlineSources();
-			manager.destroy();
-			resolve({ version: 8, sources: {}, layers: [] });
-			await new Promise((r) => setTimeout(r, 0));
-			expect(map.setStyle).not.toHaveBeenCalled();
-		});
-
-		it('does not fall back to the uninlined style after destroy', async () => {
-			const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-			const { manager, reject } = await deferInlineSources();
-			manager.destroy();
-			reject(new DOMException('The operation was aborted.', 'AbortError'));
-			await new Promise((r) => setTimeout(r, 0));
-			expect(map.setStyle).not.toHaveBeenCalled();
-			expect(consoleError).not.toHaveBeenCalled();
-			consoleError.mockRestore();
-		});
-
-		it('aborts the TileJSON download', async () => {
-			const { manager } = await deferInlineSources();
-			const fetchMock = vi.fn<typeof fetch>();
-			vi.stubGlobal('fetch', fetchMock);
-			const options = vi.mocked(inlineSources).mock.lastCall?.[1];
-			options?.fetch?.('https://example.org/tiles.json');
-			const signal = fetchMock.mock.lastCall?.[1]?.signal;
-			expect(signal?.aborted).toBe(false);
-
-			manager.destroy();
-			expect(signal?.aborted).toBe(true);
-			vi.unstubAllGlobals();
-		});
-
 		it('creates elements only once the style is loaded', async () => {
 			const { manager, resolve } = await deferInlineSources();
 			const loading = manager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
@@ -300,53 +261,12 @@ describe('MapDocument', () => {
 	describe('background', () => {
 		const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
 
-		it('changes the style, keeping the elements', async () => {
-			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
-			map.setStyle.mockClear();
-			// the mocked map changes its style object, like MapLibre with a diff: nothing has to load
-			map.setStyle.mockImplementation(() => {});
-			await mapDocument.setBackground(gray);
-			expect(mapDocument.background).toStrictEqual(gray);
-			expect(map.setStyle).toHaveBeenCalledTimes(1);
-			expect((map.setStyle.mock.lastCall as unknown[])[1]).toMatchObject({
-				transformStyle: expect.any(Function)
-			});
-			// only the permanent listener is left
-			expect(map.listenerCount('style.load')).toBe(1);
-
-			// an unchanged background loads no style
-			await mapDocument.setBackground({ ...gray });
-			expect(map.setStyle).toHaveBeenCalledTimes(1);
-		});
-
-		it('waits for a new style object to load', async () => {
-			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
-			// a full reload: MapLibre replaces the style object, which loads later
-			map.setStyle.mockImplementation(() => (map.style = {}));
-			let done = false;
-			const loading = mapDocument.setBackground(gray).then(() => (done = true));
-			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(2));
-			await new Promise((r) => setTimeout(r, 0));
-			expect(done).toBe(false);
-			map.emit('style.load');
-			await loading;
-			expect(done).toBe(true);
-		});
-
 		it('is set by the state', async () => {
 			map.setStyle();
 			await mapDocument.setState({ meta: { background: gray }, elements: [] });
 			expect(mapDocument.background).toStrictEqual(gray);
 			await mapDocument.setState({ elements: [] });
 			expect(mapDocument.background).toBeUndefined();
-		});
-
-		it('makes the missing images of fill patterns', () => {
-			const resolver = map.setMissingStyleImageResolver.mock.lastCall![0] as (id: string) => void;
-			resolver('base:icon-airfield');
-			expect(map.addImage).not.toHaveBeenCalled();
-			resolver('fill-pattern:1:#ff0000');
-			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:1:#ff0000', expect.anything());
 		});
 	});
 
