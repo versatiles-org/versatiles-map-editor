@@ -1,5 +1,5 @@
 import { stateFromKML, stateToKML } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { notify } from '../notify.svelte.js';
@@ -23,11 +23,11 @@ const DEFAULT_FILENAME = 'map.mapjson';
  * file is suggested for the next download.
  */
 export class FileCommands {
-	readonly #manager: GeometryManagerInteractive;
+	readonly #manager: MapDocumentInteractive;
 	readonly #questions: FileQuestions;
 	#filename = DEFAULT_FILENAME;
 
-	constructor(manager: GeometryManagerInteractive, questions: FileQuestions) {
+	constructor(manager: MapDocumentInteractive, questions: FileQuestions) {
 		this.#manager = manager;
 		this.#questions = questions;
 	}

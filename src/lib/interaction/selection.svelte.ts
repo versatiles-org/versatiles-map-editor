@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { SelectionNode } from '../element/types.js';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { GeoPoint } from '../geometry.js';
 import { SelectionPointer } from './selection_pointer.js';
 
@@ -46,10 +46,10 @@ export class SelectionHandler {
 	}
 
 	private selectedNodeIndex: number | undefined;
-	private manager: GeometryManagerInteractive;
+	private manager: MapDocumentInteractive;
 	private pointer: SelectionPointer;
 
-	constructor(manager: GeometryManagerInteractive) {
+	constructor(manager: MapDocumentInteractive) {
 		this.manager = manager;
 		this.pointer = new SelectionPointer(manager, this);
 	}

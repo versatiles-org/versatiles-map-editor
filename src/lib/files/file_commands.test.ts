@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapState } from '@versatiles/map-state';
 import { FileCommands, type FileQuestions } from './file_commands.js';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { notify } from '../notify.svelte.js';
@@ -15,7 +15,7 @@ vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 describe('FileCommands', () => {
 	let state: MapState;
-	let manager: GeometryManagerInteractive;
+	let manager: MapDocumentInteractive;
 	let questions: { [K in keyof FileQuestions]: ReturnType<typeof vi.fn> };
 	let files: FileCommands;
 	const choose = (name: string, text: string) => vi.mocked(chooseTextFile).mockResolvedValue({ name, text });
@@ -31,7 +31,7 @@ describe('FileCommands', () => {
 			addGeoJSON: vi.fn(),
 			addState: vi.fn(),
 			state: { log: vi.fn() }
-		} as unknown as GeometryManagerInteractive;
+		} as unknown as MapDocumentInteractive;
 		questions = {
 			askCreateNew: vi.fn(async () => true),
 			askReplace: vi.fn(async () => true),

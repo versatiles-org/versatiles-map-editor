@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { GeometryManager } from '$lib/geometry_manager.svelte.js';
+	import type { MapDocument } from '$lib/map_document.svelte.js';
 	import { labelPositions, MapLayerSymbol } from '$lib/map_layer/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 
 	/** The symbol layers of all selected markers, which are edited together. */
-	const { layers, manager }: { layers: MapLayerSymbol[]; manager: GeometryManager } = $props();
+	const { layers, manager }: { layers: MapLayerSymbol[]; manager: MapDocument } = $props();
 	const uid = $props.id();
 	const log = () => manager.state?.log();
 	const symbol = $derived(group(layers, 'symbol'));

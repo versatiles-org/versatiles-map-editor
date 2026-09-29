@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import * as commands from '$lib/components/commands.js';
 	import { Icon } from '$lib/components/ui/index.js';
 	import { coordinatesOf } from '$lib/geometry.js';
@@ -16,7 +16,7 @@
 		left = 0,
 		right = 0,
 		bottom = 0
-	}: { manager: GeometryManagerInteractive; top?: number; left?: number; right?: number; bottom?: number } = $props();
+	}: { manager: MapDocumentInteractive; top?: number; left?: number; right?: number; bottom?: number } = $props();
 
 	const GAP = 10;
 	const selected = $derived(manager.selection.selectedElements);

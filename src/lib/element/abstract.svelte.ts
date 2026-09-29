@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import {
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
@@ -9,7 +9,7 @@ import {
 	type StatePopup,
 	type StateStyle
 } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { ELEMENT_LAYERS, type Role } from '../element_renderer.js';
 
 let nextId = 1;
@@ -19,7 +19,7 @@ export abstract class AbstractElement {
 	protected readonly map: maplibregl.Map;
 	protected isSelected = false;
 
-	public readonly manager: GeometryManager | GeometryManagerInteractive;
+	public readonly manager: MapDocument | MapDocumentInteractive;
 	/** The id of the element's features in the shared element sources. */
 	public readonly id = nextId++;
 	/** The length, area or radius, shown in the style editor. */
@@ -27,7 +27,7 @@ export abstract class AbstractElement {
 	/** Text of the popup that opens on click in the viewer. Empty for no popup. */
 	public popup = $state('');
 
-	constructor(manager: GeometryManager | GeometryManagerInteractive) {
+	constructor(manager: MapDocument | MapDocumentInteractive) {
 		this.manager = manager;
 		this.map = manager.map;
 		this.canvas = this.map.getCanvasContainer();

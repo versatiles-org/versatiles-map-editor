@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { Icon } from '$lib/components/ui/index.js';
 	import ElementList from './ElementList.svelte';
 
@@ -8,7 +8,7 @@
 	 * everything can be chosen with the keyboard or a screen reader, also elements that are hard
 	 * to hit on the map.
 	 */
-	const { manager, onclose }: { manager: GeometryManagerInteractive; onclose: () => void } = $props();
+	const { manager, onclose }: { manager: MapDocumentInteractive; onclose: () => void } = $props();
 
 	const selection = $derived(manager.selection);
 	const count = $derived(manager.elements.length);

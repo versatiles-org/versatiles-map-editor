@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { Tool } from '$lib/interaction/index.js';
 	import { Icon } from '$lib/components/ui/index.js';
 	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
-	let { manager, drawerOpen = $bindable() }: { manager: GeometryManagerInteractive; drawerOpen: boolean } = $props();
+	let { manager, drawerOpen = $bindable() }: { manager: MapDocumentInteractive; drawerOpen: boolean } = $props();
 
 	const drawing = $derived(manager.drawing);
 

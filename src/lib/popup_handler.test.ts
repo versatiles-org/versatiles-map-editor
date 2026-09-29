@@ -1,18 +1,18 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { MapGeoJSONFeature } from 'maplibre-gl';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
-import { GeometryManager } from './geometry_manager.svelte.js';
+import { MapDocument } from './map_document.svelte.js';
 import { PopupHandler } from './popup_handler.svelte.js';
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
 
 describe('PopupHandler', () => {
 	let map: MockMap;
-	let manager: GeometryManager;
+	let manager: MapDocument;
 
 	beforeEach(async () => {
 		map = new MockMap();
-		manager = new GeometryManager(map as unknown as MaplibreMap);
+		manager = new MapDocument(map as unknown as MaplibreMap);
 		new PopupHandler(manager);
 		const loading = manager.setState({
 			elements: [

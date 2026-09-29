@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
-import { GeometryManager } from './geometry_manager.svelte.js';
+import { MapDocument } from './map_document.svelte.js';
 import { elementFromState } from './element/registry.js';
 import { Cursor, DrawingHandler, SelectionHandler } from './interaction/index.js';
 import { StateManager } from './state/manager.js';
@@ -16,7 +16,7 @@ import {
 } from '@versatiles/map-state';
 import type { GeoPoint } from './geometry.js';
 
-export class GeometryManagerInteractive extends GeometryManager {
+export class MapDocumentInteractive extends MapDocument {
 	public readonly selection: SelectionHandler;
 	public readonly drawing: DrawingHandler;
 	public readonly cursor: Cursor;
@@ -49,7 +49,7 @@ export class GeometryManagerInteractive extends GeometryManager {
 		this.state.events.clear();
 	}
 
-	public isInteractive(): this is GeometryManagerInteractive {
+	public isInteractive(): this is MapDocumentInteractive {
 		return true;
 	}
 

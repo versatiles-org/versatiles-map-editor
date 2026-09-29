@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateElement } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { ElementType } from '../element/registry.js';
 import { type GeoPoint, circle, distance } from '../geometry.js';
 import { claimEvent, isMultiTouch, trackDrag, type MapPointerEvent } from './drag.js';
@@ -34,10 +34,10 @@ export class DrawingHandler {
 	private lastPress: { time: number; x: number; y: number } | undefined;
 	// the click after drawing a circle with the mouse, which must not select or deselect
 	private swallowClick = false;
-	private readonly manager: GeometryManagerInteractive;
+	private readonly manager: MapDocumentInteractive;
 
 	/** Created before the selection, so its listeners run first and can claim the events. */
-	constructor(manager: GeometryManagerInteractive) {
+	constructor(manager: MapDocumentInteractive) {
 		this.manager = manager;
 		const map = manager.map;
 		map.on('mousedown', (e) => this.handleDown(e));

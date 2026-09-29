@@ -1,5 +1,5 @@
 import type { AbstractElement } from '../element/abstract.svelte.js';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { SelectionHandler } from './selection.svelte.js';
 import { type GeoPoint, lat2mercator } from '../geometry.js';
 import {
@@ -21,14 +21,14 @@ const MOUSE_TOLERANCE = 3;
  * can be clicked or dragged. It changes the selection only through its methods.
  */
 export class SelectionPointer {
-	private readonly manager: GeometryManagerInteractive;
+	private readonly manager: MapDocumentInteractive;
 	private readonly selection: SelectionHandler;
 	// The element under the mouse, for the cursor; the mouse position is handled once per frame
 	private hovered: AbstractElement | undefined;
 	private pointer: { x: number; y: number } | undefined;
 	private frame: number | undefined;
 
-	constructor(manager: GeometryManagerInteractive, selection: SelectionHandler) {
+	constructor(manager: MapDocumentInteractive, selection: SelectionHandler) {
 		this.manager = manager;
 		this.selection = selection;
 		const map = this.manager.map;

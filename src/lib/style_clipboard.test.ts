@@ -1,33 +1,33 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { StyleClipboard } from './style_clipboard.svelte.js';
-import { MockGeometryManager } from './__mocks__/geometry_manager.js';
-import type { GeometryManager } from './geometry_manager.svelte.js';
+import { MockMapDocument } from './__mocks__/map_document.js';
+import type { MapDocument } from './map_document.svelte.js';
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
 import { CircleElement } from './element/circle.js';
 
 // elements of each type, where the geometry does not matter
-const newMarker = (manager: GeometryManager) => new MarkerElement(manager, [0, 0]);
-const newLine = (manager: GeometryManager) =>
+const newMarker = (manager: MapDocument) => new MarkerElement(manager, [0, 0]);
+const newLine = (manager: MapDocument) =>
 	new LineElement(manager, [
 		[0, 0],
 		[1, 1]
 	]);
-const newPolygon = (manager: GeometryManager) =>
+const newPolygon = (manager: MapDocument) =>
 	new PolygonElement(manager, [
 		[0, 0],
 		[1, 0],
 		[0, 1]
 	]);
-const newCircle = (manager: GeometryManager) => new CircleElement(manager, [0, 0], 1000);
+const newCircle = (manager: MapDocument) => new CircleElement(manager, [0, 0], 1000);
 
 describe('StyleClipboard', () => {
-	let manager: GeometryManager;
+	let manager: MapDocument;
 	let clipboard: StyleClipboard;
 
 	beforeEach(() => {
-		manager = new MockGeometryManager() as unknown as GeometryManager;
+		manager = new MockMapDocument() as unknown as MapDocument;
 		clipboard = new StyleClipboard();
 	});
 

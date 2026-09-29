@@ -1,24 +1,24 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 
-	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
+	const { mapDocument }: { mapDocument: MapDocumentInteractive } = $props();
 
-	const selectedNode = $derived(geometryManager.selection.selectedNode);
+	const selectedNode = $derived(mapDocument.selection.selectedNode);
 	let position: { x: number; y: number } | undefined = $state();
 
 	function updatePosition() {
 		const node = selectedNode;
-		position = node ? geometryManager.map.project(node.coordinates) : undefined;
+		position = node ? mapDocument.map.project(node.coordinates) : undefined;
 	}
 
 	$effect(() => {
 		updatePosition();
-		geometryManager.map.on('move', updatePosition);
-		return () => geometryManager.map.off('move', updatePosition);
+		mapDocument.map.on('move', updatePosition);
+		return () => mapDocument.map.off('move', updatePosition);
 	});
 
 	function deleteNode() {
-		geometryManager.selection.deleteSelectedNode();
+		mapDocument.selection.deleteSelectedNode();
 	}
 </script>
 

@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { AbstractElement } from './abstract.svelte.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import { MockMapDocument } from '../__mocks__/map_document.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import type { StateElementMarker } from '@versatiles/map-state';
 
 class TestElement extends AbstractElement {
-	constructor(manager: GeometryManager) {
+	constructor(manager: MapDocument) {
 		super(manager);
 	}
 
@@ -34,10 +34,10 @@ class TestElement extends AbstractElement {
 }
 
 describe('AbstractElement', () => {
-	let mockManager: GeometryManager;
+	let mockManager: MapDocument;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager() as unknown as GeometryManager;
+		mockManager = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('gets a unique id for its features, and no source of its own', () => {

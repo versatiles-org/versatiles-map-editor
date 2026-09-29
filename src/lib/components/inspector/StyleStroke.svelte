@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { GeometryManager } from '$lib/geometry_manager.svelte.js';
+	import type { MapDocument } from '$lib/map_document.svelte.js';
 	import { dashArrays, MapLayerLine } from '$lib/map_layer/index.js';
 	import { group } from './group.js';
 	import { InputRow, ColorPicker, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** The line layers of all selected elements, which are edited together. */
-	const { layers, manager }: { layers: MapLayerLine[]; manager: GeometryManager } = $props();
+	const { layers, manager }: { layers: MapLayerLine[]; manager: MapDocument } = $props();
 	const uid = $props.id();
 	const log = () => manager.state?.log();
 	const color = $derived(group(layers, 'color'));

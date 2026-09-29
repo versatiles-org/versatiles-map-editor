@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
-import { GeometryManager } from './geometry_manager.svelte.js';
+import { MapDocument } from './map_document.svelte.js';
 import { ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
 import type { PolygonElement } from './element/polygon.js';
 import type { MarkerElement } from './element/marker.js';
@@ -9,7 +9,7 @@ type Source = { setData: Mock; updateData: Mock };
 
 describe('ElementRenderer', () => {
 	let map: MockMap;
-	let manager: GeometryManager;
+	let manager: MapDocument;
 	let sources: Record<string, Source>;
 
 	beforeEach(async () => {
@@ -19,7 +19,7 @@ describe('ElementRenderer', () => {
 		map.getSource.mockImplementation(
 			(id: string) => (sources[id] ??= { setData: vi.fn(), updateData: vi.fn() }) as never
 		);
-		manager = new GeometryManager(map as unknown as MaplibreMap);
+		manager = new MapDocument(map as unknown as MaplibreMap);
 		const loading = manager.setState({
 			elements: [
 				{

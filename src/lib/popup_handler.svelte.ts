@@ -1,6 +1,6 @@
 import { Popup, type GeoJSONSource, type MapMouseEvent } from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
-import { indexElements, type ElementIndex, type GeometryManager } from './geometry_manager.svelte.js';
+import { indexElements, type ElementIndex, type MapDocument } from './map_document.svelte.js';
 import { renderPopupText } from './element/popup_text.js';
 
 // Tolerance in pixels around the pointer, so thin lines are easier to hit, especially with a finger
@@ -12,7 +12,7 @@ const TOLERANCE = 4;
  * There are no hover tooltips, since they would not work on touch devices.
  */
 export class PopupHandler {
-	private readonly manager: GeometryManager;
+	private readonly manager: MapDocument;
 	private popup: Popup | undefined;
 	private hovered: AbstractElement | undefined;
 	// The elements with a popup, prepared once per change instead of on every mouse move
@@ -21,7 +21,7 @@ export class PopupHandler {
 	private pointer: { x: number; y: number } | undefined;
 	private frame: number | undefined;
 
-	constructor(manager: GeometryManager) {
+	constructor(manager: MapDocument) {
 		this.manager = manager;
 		this.#candidates = $derived(indexElements(manager.elements.filter((element) => element.popup.trim())));
 		const map = manager.map;

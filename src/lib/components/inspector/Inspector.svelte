@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
 	import { Icon, type IconName, FontSelect } from '$lib/components/ui/index.js';
@@ -13,7 +13,7 @@
 	 * The properties of what is selected: the style of the selected elements, the legend after a
 	 * click on it, or the properties of the map when nothing is selected.
 	 */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	const selection = $derived(manager.selection);

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import {
 		changeSettings,
 		DEFAULT_COLORS,
@@ -12,7 +12,7 @@
 	import { InputRow, FontSelect, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	const settings = $derived(getSettings(manager.background));

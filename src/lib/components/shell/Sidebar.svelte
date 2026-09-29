@@ -3,12 +3,12 @@
 	import Inspector from '$lib/components/inspector/Inspector.svelte';
 	import * as commands from '$lib/components/commands.js';
 	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 
-	const { geometryManager }: { geometryManager: GeometryManagerInteractive } = $props();
+	const { mapDocument }: { mapDocument: MapDocumentInteractive } = $props();
 
-	const stateManager = $derived(geometryManager.state);
-	const selection = $derived(geometryManager.selection);
+	const stateManager = $derived(mapDocument.state);
+	const selection = $derived(mapDocument.selection);
 	const selectedElements = $derived(selection.selectedElements);
 
 	function onKeydown(e: KeyboardEvent) {
@@ -27,20 +27,20 @@
 		if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'd') {
 			if (selectedElements.length === 0) return;
 			e.preventDefault();
-			commands.duplicateSelection(geometryManager);
+			commands.duplicateSelection(mapDocument);
 		}
 
 		// Cmd/Ctrl+Alt+C/V, like in Keynote and PowerPoint. By e.code, since Alt changes e.key (e.g. to "ç" on macOS).
 		if ((e.metaKey || e.ctrlKey) && e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.code === 'KeyV')) {
 			if (selectedElements.length === 0) return;
 			e.preventDefault();
-			if (e.code === 'KeyC') commands.copyStyle(geometryManager);
-			else commands.pasteStyle(geometryManager);
+			if (e.code === 'KeyC') commands.copyStyle(mapDocument);
+			else commands.pasteStyle(mapDocument);
 		}
 
 		// Escape deselects the elements or the legend, e.g. to see the properties of the map. Not in
 		// the sidebar, where it e.g. closes the color picker.
-		if (e.key === 'Escape' && !geometryManager.drawing.active && !target?.closest('.sidebar')) {
+		if (e.key === 'Escape' && !mapDocument.drawing.active && !target?.closest('.sidebar')) {
 			if (selection.selectedNode) selection.selectNode();
 			else selection.selectElement();
 			return;
@@ -52,7 +52,7 @@
 			// Delete the selected node, or the elements if no node is selected. A node the shape
 			// needs is kept, so the element is not deleted by accident.
 			if (selection.selectedNode) selection.deleteSelectedNode();
-			else commands.deleteSelection(geometryManager);
+			else commands.deleteSelection(mapDocument);
 		}
 	}
 </script>
@@ -61,7 +61,7 @@
 
 <div class="sidebar">
 	<div style="margin-bottom: 36px;">
-		<Inspector manager={geometryManager} />
+		<Inspector manager={mapDocument} />
 	</div>
 </div>
 

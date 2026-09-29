@@ -1,6 +1,6 @@
 import { decodeState, type StateElement } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+import { MapDocumentInteractive } from './map_document_interactive.js';
 import { MarkerElement } from './element/marker.js';
 import { LineElement } from './element/line.js';
 import { PolygonElement } from './element/polygon.js';
@@ -9,13 +9,13 @@ import { LngLat, MockMap, type MaplibreMap } from './__mocks__/map.js';
 import type { GeoPath, GeoPoint } from './geometry.js';
 import { addElement } from './__mocks__/elements.js';
 
-describe('GeometryManager', () => {
+describe('MapDocument', () => {
 	let mockMap: MockMap;
-	let manager: GeometryManagerInteractive;
+	let manager: MapDocumentInteractive;
 
 	beforeEach(() => {
 		mockMap = new MockMap();
-		manager = new GeometryManagerInteractive(mockMap as unknown as MaplibreMap);
+		manager = new MapDocumentInteractive(mockMap as unknown as MaplibreMap);
 	});
 
 	it('should initialize correctly', async () => {

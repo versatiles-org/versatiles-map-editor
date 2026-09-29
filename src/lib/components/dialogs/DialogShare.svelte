@@ -32,7 +32,7 @@
 
 	/** Fine enough for the current viewport: a thousandth of its radius, below a pixel of a typical embed. */
 	function updateAutoDigits() {
-		const radius = stateManager.geometryManager.getState().map?.radius;
+		const radius = stateManager.mapDocument.getState().map?.radius;
 		autoDigits = radius ? digitsForResolution(radius / 1000) : 5;
 	}
 
@@ -154,9 +154,9 @@
 				<label class="checkbox">
 					<input
 						type="checkbox"
-						checked={stateManager.geometryManager.search}
+						checked={stateManager.mapDocument.search}
 						onchange={(e) => {
-							stateManager.geometryManager.search = e.currentTarget.checked;
+							stateManager.mapDocument.search = e.currentTarget.checked;
 							stateManager.log();
 							update(0);
 						}}

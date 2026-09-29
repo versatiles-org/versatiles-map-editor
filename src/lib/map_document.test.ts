@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { GeometryManager } from './geometry_manager.svelte.js';
+import { MapDocument } from './map_document.svelte.js';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
 import type { MapState } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
@@ -8,21 +8,21 @@ import { inlineSources } from '@versatiles/style';
 import type { StyleSpecification } from 'maplibre-gl';
 import type * as maplibregl from 'maplibre-gl';
 
-describe('GeometryManager', () => {
+describe('MapDocument', () => {
 	let map: MockMap;
-	let geometryManager: GeometryManager;
+	let mapDocument: MapDocument;
 
 	beforeEach(() => {
 		map = new MockMap();
-		geometryManager = new GeometryManager(map as unknown as MaplibreMap);
+		mapDocument = new MapDocument(map as unknown as MaplibreMap);
 	});
 
 	it('should initialize with default values', () => {
-		expect(geometryManager.elements).toBeDefined();
-		expect(geometryManager.map).toBe(map);
-		expect(geometryManager.canvas).toBe(map.getCanvasContainer());
-		expect(geometryManager.state).toBeNull();
-		expect(geometryManager.selection).toBeNull();
+		expect(mapDocument.elements).toBeDefined();
+		expect(mapDocument.map).toBe(map);
+		expect(mapDocument.canvas).toBe(map.getCanvasContainer());
+		expect(mapDocument.state).toBeNull();
+		expect(mapDocument.selection).toBeNull();
 	});
 
 	describe('destroy', () => {
@@ -39,7 +39,7 @@ describe('GeometryManager', () => {
 						reject = rej;
 					})
 			);
-			const manager = new GeometryManager(map as unknown as MaplibreMap);
+			const manager = new MapDocument(map as unknown as MaplibreMap);
 			await vi.waitFor(() => expect(inlineSources).toHaveBeenCalled());
 			map.setStyle.mockClear();
 			return { manager, resolve: (s: StyleSpecification) => resolve(s), reject: (e: unknown) => reject(e) };
@@ -97,35 +97,35 @@ describe('GeometryManager', () => {
 
 		it('removes all elements', () => {
 			const element = { destroy: vi.fn() } as unknown as AbstractElement;
-			geometryManager['appendElement'](element);
-			geometryManager.destroy();
+			mapDocument['appendElement'](element);
+			mapDocument.destroy();
 			expect(element.destroy).toHaveBeenCalled();
-			expect(geometryManager.elements).toStrictEqual([]);
+			expect(mapDocument.elements).toStrictEqual([]);
 		});
 	});
 
 	it('should clear all elements', () => {
 		const element = { destroy: vi.fn() } as unknown as AbstractElement;
-		geometryManager.elements.push(element);
-		geometryManager.clear();
+		mapDocument.elements.push(element);
+		mapDocument.clear();
 		expect(element.destroy).toHaveBeenCalled();
-		expect(geometryManager.elements).toBeDefined();
+		expect(mapDocument.elements).toBeDefined();
 	});
 
 	it('should append an element', async () => {
 		// a real element: the renderer draws it later, in a microtask
-		const element = new MarkerElement(geometryManager, [0, 0]);
-		geometryManager['appendElement'](element);
-		expect(geometryManager.elements).toContain(element);
+		const element = new MarkerElement(mapDocument, [0, 0]);
+		mapDocument['appendElement'](element);
+		expect(mapDocument.elements).toContain(element);
 		// drawn within the test, so an error would fail this test
 		await Promise.resolve();
 	});
 
 	it('should remove an element', () => {
 		const element = { id: 'test-element' } as unknown as AbstractElement;
-		geometryManager.elements.push(element);
-		geometryManager.removeElement(element);
-		expect(geometryManager.elements).not.toContain(element);
+		mapDocument.elements.push(element);
+		mapDocument.removeElement(element);
+		expect(mapDocument.elements).not.toContain(element);
 	});
 
 	it('should load a state', async () => {
@@ -133,20 +133,20 @@ describe('GeometryManager', () => {
 			map: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
-		const clearSpy = vi.spyOn(geometryManager, 'clear');
-		const setStateSpy = vi.spyOn(geometryManager, 'setState');
+		const clearSpy = vi.spyOn(mapDocument, 'clear');
+		const setStateSpy = vi.spyOn(mapDocument, 'setState');
 		// @ts-expect-error: mocking state
-		geometryManager.state = { history: { reset: vi.fn() } };
+		mapDocument.state = { history: { reset: vi.fn() } };
 
-		await geometryManager.loadState(state);
+		await mapDocument.loadState(state);
 		expect(clearSpy).toHaveBeenCalled();
 		expect(setStateSpy).toHaveBeenCalledWith(state);
-		expect(geometryManager.state?.history.reset).toHaveBeenCalledWith(state);
+		expect(mapDocument.state?.history.reset).toHaveBeenCalledWith(state);
 	});
 
 	it('should propagate errors while loading a state', async () => {
 		const state = { elements: [{ type: 'unknown' }] } as unknown as MapState;
-		await expect(geometryManager.loadState(state)).rejects.toThrow('Unknown element type');
+		await expect(mapDocument.loadState(state)).rejects.toThrow('Unknown element type');
 	});
 
 	it('should set a state and fit map bounds', async () => {
@@ -154,13 +154,13 @@ describe('GeometryManager', () => {
 			map: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
-		await geometryManager.setState(state);
+		await mapDocument.setState(state);
 		expect(map.fitBounds).toHaveBeenCalled();
 	});
 
 	it('should restore popups', async () => {
 		map.setStyle();
-		await geometryManager.setState({
+		await mapDocument.setState({
 			elements: [
 				{
 					type: 'line',
@@ -172,33 +172,33 @@ describe('GeometryManager', () => {
 				}
 			]
 		});
-		const [element] = geometryManager.elements;
+		const [element] = mapDocument.elements;
 		expect(element.popup).toBe('Hello');
 		expect(element.getState().popup).toStrictEqual({ text: 'Hello' });
 	});
 
 	describe('loading', () => {
 		it('reports a state as loading until its elements exist', async () => {
-			expect(geometryManager.isLoading()).toBe(false);
-			expect(geometryManager.loading).toBe(false);
+			expect(mapDocument.isLoading()).toBe(false);
+			expect(mapDocument.loading).toBe(false);
 			// the style is not loaded yet, so the elements have to wait
-			const loading = geometryManager.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
-			expect(geometryManager.isLoading()).toBe(true);
-			expect(geometryManager.loading).toBe(true);
+			const loading = mapDocument.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
+			expect(mapDocument.isLoading()).toBe(true);
+			expect(mapDocument.loading).toBe(true);
 			let loaded = false;
-			geometryManager.whenLoaded().then(() => (loaded = true));
+			mapDocument.whenLoaded().then(() => (loaded = true));
 
 			map.setStyle();
 			await loading;
 			await Promise.resolve();
 			expect(loaded).toBe(true);
-			expect(geometryManager.isLoading()).toBe(false);
-			expect(geometryManager.loading).toBe(false);
-			expect(geometryManager.elements).toHaveLength(1);
+			expect(mapDocument.isLoading()).toBe(false);
+			expect(mapDocument.loading).toBe(false);
+			expect(mapDocument.elements).toHaveLength(1);
 		});
 
 		it('resolves at once when nothing is loading', async () => {
-			await expect(geometryManager.whenLoaded()).resolves.toBeUndefined();
+			await expect(mapDocument.whenLoaded()).resolves.toBeUndefined();
 		});
 
 		it('lets a newer state replace an older one that is still waiting', async () => {
@@ -209,12 +209,12 @@ describe('GeometryManager', () => {
 			vi.mocked(inlineSources).mockImplementationOnce(() => new Promise((r) => (resolve = r)));
 			const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
 
-			const older = geometryManager.setState({
+			const older = mapDocument.setState({
 				meta: { background: gray },
 				elements: [{ type: 'marker', point: [1, 2] }]
 			});
 			// the same background: the newer state does not wait
-			const newer = geometryManager.setState({
+			const newer = mapDocument.setState({
 				meta: { background: gray },
 				elements: [
 					{
@@ -230,16 +230,14 @@ describe('GeometryManager', () => {
 			resolve({ version: 8, sources: {}, layers: [] });
 			await older;
 
-			const elements = geometryManager.elements;
+			const elements = mapDocument.elements;
 			expect(elements.map((e) => e.getState().type)).toStrictEqual(['line']);
-			expect(geometryManager.isLoading()).toBe(false);
+			expect(mapDocument.isLoading()).toBe(false);
 		});
 
 		it('is not loading any more after an error', async () => {
-			await expect(
-				geometryManager.setState({ elements: [{ type: 'unknown' }] } as unknown as MapState)
-			).rejects.toThrow();
-			expect(geometryManager.isLoading()).toBe(false);
+			await expect(mapDocument.setState({ elements: [{ type: 'unknown' }] } as unknown as MapState)).rejects.toThrow();
+			expect(mapDocument.isLoading()).toBe(false);
 		});
 	});
 
@@ -248,14 +246,14 @@ describe('GeometryManager', () => {
 
 		it('stays within the latitudes of the map near a pole', () => {
 			// e.g. a view at zoom 2, centered at 70°N: half its height is about 27.5°
-			geometryManager.fitViewport({ center: [0, 70], radius: 3_061_000 });
+			mapDocument.fitViewport({ center: [0, 70], radius: 3_061_000 });
 			const [[, south], [, north]] = shownBounds();
 			expect(north).toBeCloseTo(85.051129);
 			expect(south).toBeCloseTo(42.5, 0);
 		});
 
 		it('is at most once around the world wide', () => {
-			geometryManager.fitViewport({ center: [10, 89.99], radius: 1000 });
+			mapDocument.fitViewport({ center: [10, 89.99], radius: 1000 });
 			const [[west], [east]] = shownBounds();
 			expect(east - west).toBeLessThanOrEqual(360);
 		});
@@ -265,27 +263,27 @@ describe('GeometryManager', () => {
 			map.fitBounds.mockImplementationOnce(() => {
 				throw new Error('Invalid LngLat');
 			});
-			expect(() => geometryManager.fitViewport({ center: [0, 0], radius: 1000 })).not.toThrow();
+			expect(() => mapDocument.fitViewport({ center: [0, 0], radius: 1000 })).not.toThrow();
 			expect(error).toHaveBeenCalled();
 		});
 	});
 
 	it('should find the topmost element at a pixel', async () => {
 		map.setStyle();
-		await geometryManager.setState({
+		await mapDocument.setState({
 			elements: [
 				{ type: 'marker', point: [0, 0] },
 				{ type: 'marker', point: [1, 1] }
 			]
 		});
-		const [a, b] = geometryManager.elements;
+		const [a, b] = mapDocument.elements;
 		map.queryRenderedFeatures.mockReturnValue([
 			{ source: 'basemap', id: 'x' },
 			{ source: 'elements_symbol', id: b.id },
 			{ source: 'elements_symbol', id: a.id }
 		] as unknown as maplibregl.MapGeoJSONFeature[]);
 
-		expect(geometryManager.elementAt({ x: 10, y: 20 }, 2)).toBe(b);
+		expect(mapDocument.elementAt({ x: 10, y: 20 }, 2)).toBe(b);
 		expect(map.queryRenderedFeatures).toHaveBeenLastCalledWith(
 			[
 				[8, 18],
@@ -295,8 +293,8 @@ describe('GeometryManager', () => {
 			{ layers: ['elements_symbol'] }
 		);
 		// only among the candidates
-		expect(geometryManager.elementAt({ x: 10, y: 20 }, 0, [a])).toBe(a);
-		expect(geometryManager.elementAt({ x: 10, y: 20 }, 0, [])).toBeUndefined();
+		expect(mapDocument.elementAt({ x: 10, y: 20 }, 0, [a])).toBe(a);
+		expect(mapDocument.elementAt({ x: 10, y: 20 }, 0, [])).toBeUndefined();
 	});
 
 	describe('background', () => {
@@ -307,8 +305,8 @@ describe('GeometryManager', () => {
 			map.setStyle.mockClear();
 			// the mocked map changes its style object, like MapLibre with a diff: nothing has to load
 			map.setStyle.mockImplementation(() => {});
-			await geometryManager.setBackground(gray);
-			expect(geometryManager.background).toStrictEqual(gray);
+			await mapDocument.setBackground(gray);
+			expect(mapDocument.background).toStrictEqual(gray);
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
 			expect((map.setStyle.mock.lastCall as unknown[])[1]).toMatchObject({
 				transformStyle: expect.any(Function)
@@ -317,7 +315,7 @@ describe('GeometryManager', () => {
 			expect(map.listenerCount('style.load')).toBe(1);
 
 			// an unchanged background loads no style
-			await geometryManager.setBackground({ ...gray });
+			await mapDocument.setBackground({ ...gray });
 			expect(map.setStyle).toHaveBeenCalledTimes(1);
 		});
 
@@ -326,7 +324,7 @@ describe('GeometryManager', () => {
 			// a full reload: MapLibre replaces the style object, which loads later
 			map.setStyle.mockImplementation(() => (map.style = {}));
 			let done = false;
-			const loading = geometryManager.setBackground(gray).then(() => (done = true));
+			const loading = mapDocument.setBackground(gray).then(() => (done = true));
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(2));
 			await new Promise((r) => setTimeout(r, 0));
 			expect(done).toBe(false);
@@ -337,10 +335,10 @@ describe('GeometryManager', () => {
 
 		it('is set by the state', async () => {
 			map.setStyle();
-			await geometryManager.setState({ meta: { background: gray }, elements: [] });
-			expect(geometryManager.background).toStrictEqual(gray);
-			await geometryManager.setState({ elements: [] });
-			expect(geometryManager.background).toBeUndefined();
+			await mapDocument.setState({ meta: { background: gray }, elements: [] });
+			expect(mapDocument.background).toStrictEqual(gray);
+			await mapDocument.setState({ elements: [] });
+			expect(mapDocument.background).toBeUndefined();
 		});
 
 		it('makes the missing images of fill patterns', () => {
@@ -353,6 +351,6 @@ describe('GeometryManager', () => {
 	});
 
 	it('should identify as non-interactive', () => {
-		expect(geometryManager.isInteractive()).toBe(false);
+		expect(mapDocument.isInteractive()).toBe(false);
 	});
 });

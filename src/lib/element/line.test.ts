@@ -1,16 +1,16 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { LineElement } from './line.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import { MockMapDocument } from '../__mocks__/map_document.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import type { StateElementLine } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('LineElement', () => {
-	let mockManager: GeometryManager;
+	let mockManager: MapDocument;
 	let element: LineElement;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager() as unknown as GeometryManager;
+		mockManager = new MockMapDocument() as unknown as MapDocument;
 		element = new LineElement(mockManager, [
 			[0, 0],
 			[1, 1]

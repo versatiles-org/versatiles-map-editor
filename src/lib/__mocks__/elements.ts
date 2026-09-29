@@ -1,6 +1,6 @@
 import type { StateElement } from '@versatiles/map-state';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocument } from '../map_document.svelte.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { elementFromState, type ElementType } from '../element/registry.js';
 import type { CircleElement } from '../element/circle.js';
 import type { LineElement } from '../element/line.js';
@@ -42,11 +42,11 @@ function elementState(type: ElementType): StateElement {
 }
 
 /** A new element of the type, not added to the map. */
-export function newElement<T extends ElementType>(manager: GeometryManager, type: T): ElementOfType[T] {
+export function newElement<T extends ElementType>(manager: MapDocument, type: T): ElementOfType[T] {
 	return elementFromState(manager, elementState(type)) as ElementOfType[T];
 }
 
 /** A new element of the type, added to the map and selected, like a drawn one. */
-export function addElement<T extends ElementType>(manager: GeometryManagerInteractive, type: T): ElementOfType[T] {
+export function addElement<T extends ElementType>(manager: MapDocumentInteractive, type: T): ElementOfType[T] {
 	return manager.addElement(elementState(type)) as ElementOfType[T];
 }

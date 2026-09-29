@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { encodeState } from '@versatiles/map-state';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import { UrlHash } from './url_hash.js';
 import { notify } from '../notify.svelte.js';
 
@@ -32,7 +32,7 @@ describe('UrlHash', () => {
 			state: { getHash: vi.fn(() => `v${++version}`) }
 		};
 		replace = vi.fn<(hash: string) => void>();
-		urlHash = new UrlHash(() => manager as unknown as GeometryManager, replace);
+		urlHash = new UrlHash(() => manager as unknown as MapDocument, replace);
 	});
 
 	afterEach(() => {

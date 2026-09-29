@@ -1,12 +1,12 @@
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapState } from '@versatiles/map-state';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { vi } from 'vitest';
 import { MockMap } from './map.js';
 import { MockCursor } from './cursor.js';
 import { StateManager } from '../state/manager.js';
 
-export class MockGeometryManager {
+export class MockMapDocument {
 	public elements: AbstractElement[] = [];
 	public readonly map = new MockMap();
 	public readonly cursor = new MockCursor();
@@ -15,7 +15,7 @@ export class MockGeometryManager {
 	public readonly state;
 
 	constructor() {
-		this.state = new StateManager(this as unknown as GeometryManagerInteractive);
+		this.state = new StateManager(this as unknown as MapDocumentInteractive);
 	}
 
 	public getState = vi.fn((): MapState => ({ map: { center: [0, 0], radius: 1000 }, elements: [] }));

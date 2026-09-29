@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import { MapDocumentInteractive } from '../map_document_interactive.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import {
 	addLegendEntry,
@@ -13,10 +13,10 @@ import {
 import { addElement } from '../__mocks__/elements.js';
 
 describe('commands', () => {
-	let manager: GeometryManagerInteractive;
+	let manager: MapDocumentInteractive;
 
 	beforeEach(() => {
-		manager = new GeometryManagerInteractive(new MockMap() as unknown as MaplibreMap);
+		manager = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
 	});
 
 	const types = () => manager.elements.map((e) => e.getState().type);
@@ -83,7 +83,7 @@ describe('commands', () => {
 
 describe('addLegendEntry', () => {
 	it('starts a legend, and adds entries with colors of the map that it does not show yet', () => {
-		const manager = new GeometryManagerInteractive(new MockMap() as unknown as MaplibreMap);
+		const manager = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
 		const a = addElement(manager, 'marker');
 		a.getStyleLayers().symbol!.color = '#111111';
 		const b = addElement(manager, 'marker');

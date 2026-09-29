@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
-import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from './map_document_interactive.js';
 import type { SelectionHandler } from './interaction/index.js';
 import type { StateManager } from './state/manager.js';
 import type { ColorPalette } from './color_palette.svelte.js';
@@ -25,7 +25,7 @@ export function indexElements(elements: AbstractElement[]): ElementIndex {
 /** The northernmost latitude of the Web Mercator projection. */
 const MAX_LATITUDE = 85.051129;
 
-export class GeometryManager {
+export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity
 	#elements: AbstractElement[] = $state.raw([]);
 	public readonly map: maplibregl.Map;
@@ -99,7 +99,7 @@ export class GeometryManager {
 		this.clear();
 	}
 
-	public isInteractive(): this is GeometryManagerInteractive {
+	public isInteractive(): this is MapDocumentInteractive {
 		return false;
 	}
 

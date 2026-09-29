@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { typeName } from '$lib/element/element_names.js';
 
 	/**
@@ -7,11 +7,7 @@
 	 * finish or cancel, since touch screens have no Enter and no Escape key.
 	 * `left` and `right` keep it centered in the part of the map between the bars.
 	 */
-	const {
-		manager,
-		left = 0,
-		right = 0
-	}: { manager: GeometryManagerInteractive; left?: number; right?: number } = $props();
+	const { manager, left = 0, right = 0 }: { manager: MapDocumentInteractive; left?: number; right?: number } = $props();
 
 	const drawing = $derived(manager.drawing);
 	const path = $derived(drawing.tool === 'line' || drawing.tool === 'polygon');

@@ -1,16 +1,16 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { PolygonElement } from './polygon.js';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import { MockMapDocument } from '../__mocks__/map_document.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { GeoPath } from '../geometry.js';
 
 describe('PolygonElement', () => {
-	let mockManager: GeometryManager;
+	let mockManager: MapDocument;
 	let element: PolygonElement;
 
 	beforeEach(() => {
-		mockManager = new MockGeometryManager() as unknown as GeometryManager;
+		mockManager = new MockMapDocument() as unknown as MapDocument;
 		element = new PolygonElement(mockManager, [
 			[0, 0],
 			[1, 0],

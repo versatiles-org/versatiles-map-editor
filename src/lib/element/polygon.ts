@@ -1,4 +1,4 @@
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import { type GeoPath, polygonArea } from '../geometry.js';
 import { MapLayerFill, MapLayerLine } from '../map_layer/index.js';
 import { AbstractPathElement } from './abstract_path.js';
@@ -10,7 +10,7 @@ export class PolygonElement extends AbstractPathElement {
 	public readonly fillLayer: MapLayerFill;
 	public readonly strokeLayer: MapLayerLine;
 
-	constructor(manager: GeometryManager, polygon: GeoPath) {
+	constructor(manager: MapDocument, polygon: GeoPath) {
 		super(manager, false);
 		this.path = polygon;
 
@@ -47,7 +47,7 @@ export class PolygonElement extends AbstractPathElement {
 		};
 	}
 
-	static fromState(manager: GeometryManager, state: StateElementPolygon) {
+	static fromState(manager: MapDocument, state: StateElementPolygon) {
 		const element = new PolygonElement(manager, state.points);
 		if (state.style) element.fillLayer.setState(state.style);
 		if (state.strokeStyle) element.strokeLayer.setState(state.strokeStyle);

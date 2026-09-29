@@ -10,8 +10,8 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
-	import { GeometryManager } from './geometry_manager.svelte.js';
-	import type { GeometryManagerInteractive } from './geometry_manager_interactive.js';
+	import { MapDocument } from './map_document.svelte.js';
+	import type { MapDocumentInteractive } from './map_document_interactive.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
@@ -65,19 +65,17 @@
 		map.panBy([(previous - right) / 2, 0], { duration: 0 });
 	});
 	let screenTooSmall = $state(false);
-	let geometryManager: GeometryManager | GeometryManagerInteractive | undefined = $state();
+	let mapDocument: MapDocument | MapDocumentInteractive | undefined = $state();
 	// always in the editor, where a found place can be marked; in the viewer if the map offers it
-	const showSearch = $derived(
-		showSidebar ? geometryManager?.isInteractive() === true : geometryManager?.search === true
-	);
+	const showSearch = $derived(showSidebar ? mapDocument?.isInteractive() === true : mapDocument?.search === true);
 	// until the map has loaded for the first time, and while a map from a link or file loads
-	const loading = $derived(!triggeredMapReady || geometryManager?.loading === true);
+	const loading = $derived(!triggeredMapReady || mapDocument?.loading === true);
 	// the height of the search and the hint at the top of the viewer
 	let topOverlaysHeight = $state(0);
 
 	// The legend keeps its corner: the search and the attribution go to the other side
 	const legendPosition = $derived(
-		geometryManager?.legend?.entries.length ? (geometryManager.legend.position ?? 'bottom-left') : undefined
+		mapDocument?.legend?.entries.length ? (mapDocument.legend.position ?? 'bottom-left') : undefined
 	);
 	let pageWidth = $state(0);
 	let searchWidth = $state(0);
@@ -99,7 +97,7 @@
 	const attributionCorner = $derived(layout.attributionCorner);
 	$effect(() => {
 		const corner = attributionCorner;
-		const m = geometryManager?.map;
+		const m = mapDocument?.map;
 		if (!m) return;
 		return addAttribution(m, corner, (size) => (attributionSize = size));
 	});
@@ -119,16 +117,16 @@
 	 */
 	async function loadEditor() {
 		const [
-			{ GeometryManagerInteractive },
+			{ MapDocumentInteractive },
 			{ Sidebar, SidebarToggle, TopBar, ToolRail, ElementsDrawer, StatusBar },
 			{ DrawBar, SelectionBar, NodeDeleteButton }
 		] = await Promise.all([
-			import('./geometry_manager_interactive.js'),
+			import('./map_document_interactive.js'),
 			import('$lib/components/shell/index.js'),
 			import('$lib/components/map/editor/index.js')
 		]);
 		return {
-			GeometryManagerInteractive,
+			MapDocumentInteractive,
 			Sidebar,
 			SidebarToggle,
 			TopBar,
@@ -144,14 +142,14 @@
 
 	/** Add a marker at a place that the search found. */
 	function markPlace(point: [number, number]) {
-		if (!geometryManager?.isInteractive()) return;
-		geometryManager.addElement({ type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } });
-		geometryManager.state.log();
+		if (!mapDocument?.isInteractive()) return;
+		mapDocument.addElement({ type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } });
+		mapDocument.state.log();
 	}
 
 	/** A click on the legend selects it in the editor, to edit it. */
 	function selectLegend() {
-		if (geometryManager?.isInteractive()) geometryManager.selection.selectLegend();
+		if (mapDocument?.isInteractive()) mapDocument.selection.selectLegend();
 	}
 
 	/** Show the country of the user (from the time zone), when there is no map in the URL. */
@@ -167,15 +165,15 @@
 		destroyed = true;
 		urlHash.destroy();
 		// before map.remove(), so the elements can still remove their layers
-		geometryManager?.destroy();
-		geometryManager = undefined;
+		mapDocument?.destroy();
+		mapDocument = undefined;
 		map?.remove();
 		map = undefined;
 	}
 
 	// the map in the URL; replaceState does not fire "hashchange"
 	const urlHash = new UrlHash(
-		() => geometryManager,
+		() => mapDocument,
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL changes
 		(hash) => replaceState('#' + hash, {})
 	);
@@ -185,7 +183,7 @@
 
 		maplibre.setWorkerUrl(maplibreWorkerUrl);
 
-		// The editor starts without a style; geometry_manager sets the actual map style.
+		// The editor starts without a style; map_document sets the actual map style.
 		map = new maplibre.Map({
 			container,
 			renderWorldCopies: false,
@@ -235,13 +233,13 @@
 			editor = loadedEditor;
 			// the color schemes and fonts of this editor instance
 			void loadConfig();
-			const manager = new loadedEditor.GeometryManagerInteractive(map);
+			const manager = new loadedEditor.MapDocumentInteractive(map);
 			manager.state.events.on('change', urlHash.request);
 			map.on('moveend', urlHash.request);
-			geometryManager = manager;
+			mapDocument = manager;
 		} else {
-			geometryManager = new GeometryManager(map);
-			new PopupHandler(geometryManager);
+			mapDocument = new MapDocument(map);
+			new PopupHandler(mapDocument);
 		}
 
 		if (hash && !urlHash.read(hash)) void showCountry(map);
@@ -265,21 +263,21 @@
 		<LoadingIndicator right={sidebarWidth} />
 	{/if}
 	<Notifications right={sidebarWidth} />
-	{#if geometryManager?.legend}
+	{#if mapDocument?.legend}
 		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
 		<Legend
-			legend={geometryManager.legend}
-			map={geometryManager.map}
+			legend={mapDocument.legend}
+			map={mapDocument.map}
 			left={coveredLeft}
 			right={sidebarWidth}
 			top={topbarHeight + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
 			bottom={layout.legendAboveAttribution ? attributionSize.top : statusHeight}
 			bind:width={legendWidth}
-			selected={geometryManager.selection?.legendSelected ?? false}
+			selected={mapDocument.selection?.legendSelected ?? false}
 			onselect={showSidebar ? selectLegend : undefined}
 		/>
 	{/if}
-	{#if geometryManager && (showSearch || screenTooSmall)}
+	{#if mapDocument && (showSearch || screenTooSmall)}
 		<div
 			class="top-overlays"
 			style:top="{topbarHeight + 10}px"
@@ -289,7 +287,7 @@
 		>
 			{#if showSearch}
 				<div class="map-search" class:right={layout.searchRight} bind:offsetWidth={searchWidth}>
-					<SearchPlace map={geometryManager.map} onmark={showSidebar ? markPlace : undefined} />
+					<SearchPlace map={mapDocument.map} onmark={showSidebar ? markPlace : undefined} />
 				</div>
 			{/if}
 			{#if screenTooSmall}
@@ -300,26 +298,26 @@
 	{#if showSidebar}
 		<!-- from the start, so the map does not move when the code of the editor has loaded -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
-			{#if editor && geometryManager && geometryManager.isInteractive()}
-				<editor.TopBar manager={geometryManager} />
+			{#if editor && mapDocument && mapDocument.isInteractive()}
+				<editor.TopBar manager={mapDocument} />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
-			{#if editor && geometryManager && geometryManager.isInteractive()}
-				<editor.ToolRail manager={geometryManager} bind:drawerOpen />
+			{#if editor && mapDocument && mapDocument.isInteractive()}
+				<editor.ToolRail manager={mapDocument} bind:drawerOpen />
 			{/if}
 		</div>
 		<div class="statusbar-slot" style:height="{STATUS_HEIGHT}px">
-			{#if editor && geometryManager && geometryManager.isInteractive()}
-				<editor.StatusBar manager={geometryManager} />
+			{#if editor && mapDocument && mapDocument.isInteractive()}
+				<editor.StatusBar manager={mapDocument} />
 			{/if}
 		</div>
 	{/if}
-	{#if showSidebar && editor && geometryManager && geometryManager.isInteractive()}
-		<editor.NodeDeleteButton {geometryManager} />
-		<editor.DrawBar manager={geometryManager} left={coveredLeft} right={sidebarWidth} />
+	{#if showSidebar && editor && mapDocument && mapDocument.isInteractive()}
+		<editor.NodeDeleteButton {mapDocument} />
+		<editor.DrawBar manager={mapDocument} left={coveredLeft} right={sidebarWidth} />
 		<editor.SelectionBar
-			manager={geometryManager}
+			manager={mapDocument}
 			top={TOPBAR_HEIGHT}
 			left={coveredLeft}
 			right={sidebarWidth}
@@ -334,11 +332,11 @@
 			style:width="{DRAWER_WIDTH}px"
 			hidden={!drawerOpen}
 		>
-			<editor.ElementsDrawer manager={geometryManager} onclose={() => (drawerOpen = false)} />
+			<editor.ElementsDrawer manager={mapDocument} onclose={() => (drawerOpen = false)} />
 		</div>
 		<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
 		<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
-			<editor.Sidebar {geometryManager} />
+			<editor.Sidebar {mapDocument} />
 		</div>
 		<editor.SidebarToggle
 			bind:open={sidebarOpen}

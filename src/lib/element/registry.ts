@@ -1,5 +1,5 @@
 import type { StateElement } from '@versatiles/map-state';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import type { AbstractElement } from './abstract.svelte.js';
 import { CircleElement } from './circle.js';
 import { LineElement } from './line.js';
@@ -17,11 +17,11 @@ const ELEMENT_CLASSES = {
 export type ElementType = keyof typeof ELEMENT_CLASSES;
 
 /** Build a live editor element from its serialized state. */
-export function elementFromState(manager: GeometryManager, state: StateElement): AbstractElement {
+export function elementFromState(manager: MapDocument, state: StateElement): AbstractElement {
 	const Class = ELEMENT_CLASSES[state.type];
 	if (!Class) throw new Error('Unknown element type');
 	// each class reads the state of its own type
-	const fromState = Class.fromState as (manager: GeometryManager, state: StateElement) => AbstractElement;
+	const fromState = Class.fromState as (manager: MapDocument, state: StateElement) => AbstractElement;
 	const element = fromState(manager, state);
 	if (state.popup) element.popup = state.popup.text;
 	return element;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import { Icon, type IconName } from '$lib/components/ui/index.js';
 	import { elementNames } from '$lib/element/element_names.js';
@@ -9,7 +9,7 @@
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen
 	 * reader. It shows the selection of the map, and choosing in the list selects on the map.
 	 */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	const selected = $derived(manager.selection.selectedElements);

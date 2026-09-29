@@ -1,5 +1,5 @@
 import { AbstractElement } from './abstract.svelte.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import type { SelectionNode, SelectionNodeUpdater } from './types.js';
 import { getMiddlePoint, movePoint, type GeoPath, type GeoPoint } from '../geometry.js';
 import type { StateElement, StateElementLine, StateElementPolygon } from '@versatiles/map-state';
@@ -8,7 +8,7 @@ export abstract class AbstractPathElement extends AbstractElement {
 	public path: GeoPath = [];
 	protected readonly isLine: boolean;
 
-	constructor(manager: GeometryManager, isLine: boolean) {
+	constructor(manager: MapDocument, isLine: boolean) {
 		super(manager);
 		this.isLine = isLine;
 	}

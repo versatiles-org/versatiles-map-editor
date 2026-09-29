@@ -42,7 +42,7 @@ vi.mock('./background/config.svelte.js', async (importOriginal) => ({
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
-const { GeometryManagerInteractive } = await import('./geometry_manager_interactive.js');
+const { MapDocumentInteractive } = await import('./map_document_interactive.js');
 
 describe('MapEditor', () => {
 	// The code of the editor, which MapEditor loads after the map is created. Its first import
@@ -85,8 +85,8 @@ describe('MapEditor', () => {
 		removeListener.mockRestore();
 	});
 
-	it('destroys the geometry manager before removing the map', async () => {
-		const destroy = vi.spyOn(GeometryManagerInteractive.prototype, 'destroy');
+	it('destroys the map document before removing the map', async () => {
+		const destroy = vi.spyOn(MapDocumentInteractive.prototype, 'destroy');
 		const component = mount(MapEditor, { target: document.body });
 		flushSync();
 		await editorLoaded();

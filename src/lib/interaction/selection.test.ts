@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock, type Mocked } from 'vi
 import { SelectionHandler } from './selection.svelte.js';
 import { MockMap } from '../__mocks__/map.js';
 import type * as maplibregl from 'maplibre-gl';
-import type { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { Cursor } from './cursor.js';
 import type { StateManager } from '../state/manager.js';
 import type { AbstractElement } from '../element/abstract.svelte.js';
@@ -16,7 +16,7 @@ describe('SelectionHandler', () => {
 	let mockMap: MockMap;
 	let mockCursor: Mocked<Cursor>;
 	let mockState: Mocked<StateManager>;
-	let mockManager: GeometryManagerInteractive;
+	let mockManager: MapDocumentInteractive;
 
 	beforeEach(() => {
 		mockMap = new MockMap();
@@ -35,7 +35,7 @@ describe('SelectionHandler', () => {
 			elements: [],
 			elementAt: vi.fn(() => undefined),
 			drawing: { active: false }
-		} as unknown as GeometryManagerInteractive;
+		} as unknown as MapDocumentInteractive;
 
 		vi.clearAllMocks();
 		handler = new SelectionHandler(mockManager);

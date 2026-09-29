@@ -1,15 +1,15 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { StateElement } from '@versatiles/map-state';
-import { MockGeometryManager } from '../__mocks__/geometry_manager.js';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import { MockMapDocument } from '../__mocks__/map_document.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import { elementFromState } from './registry.js';
 import { newElement } from '../__mocks__/elements.js';
 
 describe('element registry', () => {
-	let manager: GeometryManager;
+	let manager: MapDocument;
 
 	beforeEach(() => {
-		manager = new MockGeometryManager() as unknown as GeometryManager;
+		manager = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('builds each type from its state, with its popup', () => {
@@ -49,10 +49,10 @@ describe('element registry', () => {
 });
 
 describe('style layers', () => {
-	let manager: GeometryManager;
+	let manager: MapDocument;
 
 	beforeEach(() => {
-		manager = new MockGeometryManager() as unknown as GeometryManager;
+		manager = new MockMapDocument() as unknown as MapDocument;
 	});
 
 	it('name the layers by their role', () => {

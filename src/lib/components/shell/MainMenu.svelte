@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import * as commands from '$lib/components/commands.js';
 	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
@@ -13,7 +13,7 @@
 	 * and the edit commands with their shortcuts. Import and export expand in place instead of
 	 * flying out, which also works on touch screens.
 	 */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	let open = $state(false);

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { ColorPicker, InputRow } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { formatCount } from '$lib/format.js';
 	import { ADDRESS_PARTS, type AddressPart, type Table } from './table.js';
 	import { MAX_CATEGORIES, type LocationBias } from './table_import.js';
@@ -22,7 +22,7 @@
 		onimport
 	}: {
 		table: Table;
-		manager: GeometryManagerInteractive;
+		manager: MapDocumentInteractive;
 		colors: string[];
 		settings: ImportSettings;
 		hasHeader: boolean;

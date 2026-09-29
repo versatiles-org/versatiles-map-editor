@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 
 	/**
 	 * The line at the bottom of the editor: what the current tool or selection does, so the
 	 * sidebar needs no help texts, and the zoom and the position of the mouse on the map.
 	 */
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const selection = $derived(manager.selection);
 	const drawing = $derived(manager.drawing);

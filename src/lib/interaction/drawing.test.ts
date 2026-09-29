@@ -1,16 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { GeometryManagerInteractive } from '../geometry_manager_interactive.js';
+import { MapDocumentInteractive } from '../map_document_interactive.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { addElement } from '../__mocks__/elements.js';
 
 describe('DrawingHandler', () => {
 	let map: MockMap;
-	let manager: GeometryManagerInteractive;
+	let manager: MapDocumentInteractive;
 
 	beforeEach(() => {
 		vi.useFakeTimers();
 		map = new MockMap();
-		manager = new GeometryManagerInteractive(map as unknown as MaplibreMap);
+		manager = new MapDocumentInteractive(map as unknown as MaplibreMap);
 		// no element is hit, so a click of the selection would deselect
 		map.queryRenderedFeatures.mockReturnValue([]);
 	});

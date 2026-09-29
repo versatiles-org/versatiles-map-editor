@@ -1,5 +1,5 @@
 import { decodeState } from '@versatiles/map-state';
-import type { GeometryManager } from '../geometry_manager.svelte.js';
+import type { MapDocument } from '../map_document.svelte.js';
 import { throttle } from './throttle.js';
 import { notify } from '../notify.svelte.js';
 
@@ -10,7 +10,7 @@ import { notify } from '../notify.svelte.js';
  * A new hash, e.g. from the browser's history, loads its map.
  */
 export class UrlHash {
-	readonly #getManager: () => GeometryManager | undefined;
+	readonly #getManager: () => MapDocument | undefined;
 	readonly #replace: (hash: string) => void;
 	readonly #persist = throttle(() => this.#write(), 300);
 	#ready = false;
@@ -21,7 +21,7 @@ export class UrlHash {
 	 * `getManager` is the manager of the map, which may change. `replace` writes the hash to the
 	 * URL, without firing "hashchange" (e.g. SvelteKit's replaceState).
 	 */
-	constructor(getManager: () => GeometryManager | undefined, replace: (hash: string) => void) {
+	constructor(getManager: () => MapDocument | undefined, replace: (hash: string) => void) {
 		this.#getManager = getManager;
 		this.#replace = replace;
 	}

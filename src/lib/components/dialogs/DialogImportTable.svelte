@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog } from '$lib/components/ui/index.js';
-	import type { GeometryManagerInteractive } from '$lib/geometry_manager_interactive.js';
+	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import {
 		applyCategory,
 		biasOptions,
@@ -23,7 +23,7 @@
 	import { NEW_MARKER_SYMBOL } from '$lib/symbols_catalog.js';
 	import { formatCount } from '$lib/format.js';
 
-	const { manager }: { manager: GeometryManagerInteractive } = $props();
+	const { manager }: { manager: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 	let dialog: Dialog | undefined;
