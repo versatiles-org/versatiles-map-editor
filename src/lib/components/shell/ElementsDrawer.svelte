@@ -84,6 +84,9 @@
 
 	hr {
 		margin: 6px 0;
+		border: none;
+		border-top: 1px solid var(--color-text);
+		opacity: 0.1;
 	}
 
 	.row {

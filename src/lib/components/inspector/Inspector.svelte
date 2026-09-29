@@ -2,7 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, IconButton, type IconName, FontSelect, Button, Hint } from '$lib/components/ui/index.js';
+	import { Icon, IconButton, type IconName, FontSelect, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
@@ -93,10 +93,10 @@
 					{legend.entries.length}
 					{legend.entries.length === 1 ? 'entry' : 'entries'}. Click the legend on the map to edit it.
 				</Hint>
-				<div class="grid1"><Button onclick={() => selection.selectLegend()}>Edit legend</Button></div>
+				<ButtonGroup><Button onclick={() => selection.selectLegend()}>Edit legend</Button></ButtonGroup>
 			{:else}
 				<Hint>A legend explains the colors and symbols of the map.</Hint>
-				<div class="grid1"><Button onclick={addLegend}>Add a legend</Button></div>
+				<ButtonGroup><Button onclick={addLegend}>Add a legend</Button></ButtonGroup>
 			{/if}
 		</InspectorSection>
 		<InspectorSection title="Shared map">

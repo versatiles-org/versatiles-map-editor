@@ -3,6 +3,7 @@
  * directly, others import from here.
  */
 export { default as Button } from './Button.svelte';
+export { default as ButtonGroup } from './ButtonGroup.svelte';
 export { default as ChoiceGroup } from './ChoiceGroup.svelte';
 export { default as ColorPicker } from './ColorPicker.svelte';
 export { default as Dialog } from './Dialog.svelte';

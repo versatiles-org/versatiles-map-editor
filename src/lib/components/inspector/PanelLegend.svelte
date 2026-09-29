@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
-	import { InputRow, ColorPicker, ChoiceGroup, Button } from '$lib/components/ui/index.js';
+	import { InputRow, ColorPicker, ChoiceGroup, Button, ButtonGroup } from '$lib/components/ui/index.js';
 	import SymbolSelector from '$lib/components/SymbolSelector.svelte';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
@@ -124,9 +124,9 @@
 	{/each}
 {/if}
 
-<div class="grid1">
+<ButtonGroup>
 	<Button onclick={() => addLegendEntry(doc)}>Add legend entry</Button>
-</div>
+</ButtonGroup>
 
 <style>
 	.entry {

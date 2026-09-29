@@ -9,7 +9,7 @@
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/background/index.js';
-	import { InputRow, FontSelect, ChoiceGroup, Slider, Button } from '$lib/components/ui/index.js';
+	import { InputRow, FontSelect, ChoiceGroup, Slider, Button, ButtonGroup } from '$lib/components/ui/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
@@ -131,9 +131,9 @@
 		unit="%"
 	/>
 </InputRow>
-<div class="grid1">
+<ButtonGroup>
 	<Button disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</Button>
-</div>
+</ButtonGroup>
 
 <!-- the font and language of the labels, unless the satellite map has none -->
 {#if settings.base === 'vector' || settings.labels !== 'none'}

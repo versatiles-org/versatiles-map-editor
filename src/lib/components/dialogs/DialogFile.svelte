@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Dialog, Button } from '$lib/components/ui/index.js';
+	import { Dialog, Button, ButtonGroup } from '$lib/components/ui/index.js';
 	import { EventHandler } from '$lib/event_handler.js';
 
 	type Mode = 'download' | 'new' | 'replace' | null;
@@ -93,10 +93,10 @@
 			File name
 			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
-		<div class="grid2">
+		<ButtonGroup columns={2} spaced={false}>
 			<Button onclick={cancel}>Cancel</Button>
 			<Button onclick={confirm}>Download</Button>
-		</div>
+		</ButtonGroup>
 	{/if}
 	{#if mode == 'new' || mode == 'replace'}
 		<!-- the buttons name the action, so it is clear without the question, e.g. for screen readers -->
@@ -106,17 +106,14 @@
 				: 'Open this map? It replaces the current map.'}
 			You can undo this.
 		</p>
-		<div class="grid2">
+		<ButtonGroup columns={2} spaced={false}>
 			<Button onclick={confirm}>{mode == 'new' ? 'Create new map' : 'Replace map'}</Button>
 			<Button onclick={cancel} data-focus>Cancel</Button>
-		</div>
+		</ButtonGroup>
 	{/if}
 </Dialog>
 
 <style>
-	.grid2 {
-		margin: 0;
-	}
 	label,
 	p {
 		display: block;

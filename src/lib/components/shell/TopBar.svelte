@@ -1,5 +1,4 @@
 <script lang="ts">
-	import '$lib/components/style/index.scss';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import DialogShare from '$lib/components/dialogs/DialogShare.svelte';
 	import { Icon, IconButton, Button } from '$lib/components/ui/index.js';
