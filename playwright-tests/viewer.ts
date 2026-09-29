@@ -21,6 +21,22 @@ test.describe('small screens', () => {
 	});
 });
 
+test.describe('view page', () => {
+	test('shows the map read-only, also on a large screen', async ({ page }) => {
+		const hash = encodeState({
+			map: { center: [13.4, 52.5], radius: 10000 },
+			elements: [{ type: 'marker', point: [13.4, 52.5] }]
+		});
+		await page.goto('/view#' + hash);
+		await waitForMapIsReady(page);
+		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
+		await expect(page.getByText('Open this page on a larger screen to edit the map.')).toHaveCount(0);
+		// the viewer does not write its map to the URL
+		await waitForMapIsIdle(page);
+		expect(new URL(page.url()).hash).toBe('#' + hash);
+	});
+});
+
 test.describe('viewer', () => {
 	// small screens show the read-only viewer, like embedded maps
 	test.use({ viewport: { width: 500, height: 500 } });
