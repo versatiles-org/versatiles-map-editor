@@ -175,10 +175,10 @@ describe('changeSettings', () => {
 		}
 	});
 
-	it('reads colors of older maps as black and white', () => {
-		const older = { builder: 'osm' as const, options: { recolor: { brightness: 0.1, contrast: 1.5 } } };
+	it('reads any brightness and contrast as black and white', () => {
+		const strong = { builder: 'osm' as const, options: { recolor: { brightness: 0.1, contrast: 1.5 } } };
 		// too much contrast: black and white are kept within black and white
-		expect(getSettings(older).colors).toStrictEqual({ saturation: 0, black: 0, white: 1 });
+		expect(getSettings(strong).colors).toStrictEqual({ saturation: 0, black: 0, white: 1 });
 		const faded = { builder: 'osm' as const, options: { recolor: { brightness: 0.25, contrast: 0.5 } } };
 		expect(getSettings(faded).colors).toStrictEqual({ saturation: 0, black: 0.5, white: 1 });
 	});
@@ -190,12 +190,6 @@ describe('changeSettings', () => {
 		expect(getSettings(faded).colors).toStrictEqual({ saturation: -0.5, black: 0.2, white: 1 });
 		const darker = changeSettings(sat, { colors: { ...DEFAULT_COLORS, white: 0.7 } });
 		expect(darker?.options.raster).toStrictEqual({ brightnessMax: 0.7 });
-		// the contrast of older maps is removed, since it would move black and white again
-		const older = { builder: 'satellite' as const, options: { osmOverlay: false, raster: { contrast: 0.4 } } };
-		expect(changeSettings(older, { colors: { ...DEFAULT_COLORS, black: 0.1 } })?.options).toStrictEqual({
-			osmOverlay: false,
-			raster: { brightnessMin: 0.1 }
-		});
 	});
 
 	it('gives the streets and labels over the imagery the colors of the imagery', () => {

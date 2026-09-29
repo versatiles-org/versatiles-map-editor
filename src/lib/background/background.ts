@@ -170,8 +170,7 @@ function setColors(builder: StateBackground['builder'], options: Options, colors
 		return;
 	}
 	const { saturation, black, white } = colors;
-	// the contrast of the imagery would move black and white again
-	const { contrast: _, ...raster } = isObject(options.raster) ? options.raster : {};
+	const raster = isObject(options.raster) ? options.raster : {};
 	options.raster = { ...raster, saturation, brightnessMin: black, brightnessMax: white };
 	// the streets and labels over the imagery get the same colors (`true` or none: the default overlay)
 	if (options.osmOverlay !== false) {

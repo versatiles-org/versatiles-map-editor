@@ -8,9 +8,6 @@ export interface MapState {
 	elements: StateElement[];
 }
 
-/** @deprecated Use `MapState`. */
-export type StateRoot = MapState;
-
 export type StateElement = StateElementMarker | StateElementLine | StateElementPolygon | StateElementCircle;
 
 export interface StateElementMarker {
