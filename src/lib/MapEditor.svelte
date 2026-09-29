@@ -2,7 +2,7 @@
 	import { onMount, tick } from 'svelte';
 	import { replaceState } from '$app/navigation';
 	import 'maplibre-gl/dist/maplibre-gl.css';
-	import './theme.css';
+	import '$lib/page/theme.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
@@ -15,8 +15,8 @@
 	import { PopupHandler } from './popup_handler.svelte.js';
 	import { NEW_MARKER_SYMBOL } from './symbols_catalog.js';
 	import { loadConfig } from '$lib/background/index.js';
-	import { UrlHash } from './url_hash.js';
-	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
+	import { UrlHash } from '$lib/page/url_hash.js';
+	import { addAttribution, layoutOverlays, type AttributionSize } from '$lib/page/overlay_layout.js';
 
 	let {
 		onMapLoad
@@ -157,7 +157,7 @@
 	/** Show the country of the user (from the time zone), when there is no map in the URL. */
 	async function showCountry(map: MaplibreMapType) {
 		// only needed without a map, so it is loaded only then
-		const { getCountryBoundingBox } = await import('./location.js');
+		const { getCountryBoundingBox } = await import('$lib/page/location.js');
 		const bbox = getCountryBoundingBox();
 		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
 	}

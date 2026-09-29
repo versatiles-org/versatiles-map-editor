@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { encodeState } from '@versatiles/map-state';
-import type { GeometryManager } from './geometry_manager.svelte.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import { UrlHash } from './url_hash.js';
-import { notify } from './notify.svelte.js';
+import { notify } from '../notify.svelte.js';
 
-vi.mock('./notify.svelte.js', () => ({ notify: vi.fn() }));
+vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 describe('UrlHash', () => {
 	let manager: {

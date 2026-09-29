@@ -1,7 +1,7 @@
 import { decodeState } from '@versatiles/map-state';
-import type { GeometryManager } from './geometry_manager.svelte.js';
+import type { GeometryManager } from '../geometry_manager.svelte.js';
 import { throttle } from './throttle.js';
-import { notify } from './notify.svelte.js';
+import { notify } from '../notify.svelte.js';
 
 /**
  * Keeps the URL hash in sync with the edited map, so a reload keeps the work and the address bar
