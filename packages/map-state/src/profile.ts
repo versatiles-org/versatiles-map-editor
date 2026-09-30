@@ -235,8 +235,17 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 
 // ----- legend -----
 
-/** The values of a legend that are not stored: at the bottom left, entries below each other, a sans-serif font. */
-export const LEGEND_DEFAULTS = { position: 'bottom-left', layout: 'vertical', font: 'sans-serif' } as const;
+/**
+ * The values of a legend that are not stored: at the bottom left, entries below each other, a
+ * sans-serif font, neither bold nor italic.
+ */
+export const LEGEND_DEFAULTS = {
+	position: 'bottom-left',
+	layout: 'vertical',
+	font: 'sans-serif',
+	bold: false,
+	italic: false
+} as const;
 
 /**
  * The legend without the fields that have their default value, as the base64 string stores it, so
@@ -253,7 +262,7 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 /** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const { position, layout, font, entries } = value as Record<string, unknown>;
+	const { position, layout, font, bold, italic, entries } = value as Record<string, unknown>;
 	if (!Array.isArray(entries)) return undefined;
 
 	const legend: StateLegend = { entries: [] };
@@ -266,6 +275,8 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (LEGEND_FONTS.includes(font as StateLegend['font'] & string)) {
 		legend.font = font as StateLegend['font'];
 	}
+	if (bold === true) legend.bold = true;
+	if (italic === true) legend.italic = true;
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;

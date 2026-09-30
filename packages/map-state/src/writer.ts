@@ -348,6 +348,9 @@ export class StateWriter {
 			this.writeInteger(4, 4);
 			this.writeVarint(LEGEND_FONTS.indexOf(legend.font));
 		}
+		// only the key: they are false without it
+		if (legend.bold) this.writeInteger(5, 4);
+		if (legend.italic) this.writeInteger(6, 4);
 		this.writeInteger(3, 4);
 		this.writeArray(legend.entries, (entry) => {
 			this.writeInteger(1, 4);

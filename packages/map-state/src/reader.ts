@@ -365,6 +365,12 @@ export class StateReader {
 						legend.font = LEGEND_FONTS[this.readVarint()];
 						if (!legend.font) throw new Error('Invalid legend font');
 						break;
+					case 5:
+						legend.bold = true;
+						break;
+					case 6:
+						legend.italic = true;
+						break;
 					default:
 						throw new Error(`Invalid legend key: ${key}`);
 				}

@@ -85,6 +85,23 @@
 		/>
 	</InputRow>
 
+	<InputRow id="{uid}-bold" label="Bold">
+		<input
+			id="{uid}-bold"
+			type="checkbox"
+			checked={legend.bold === true}
+			onchange={(e) => change({ bold: e.currentTarget.checked })}
+		/>
+	</InputRow>
+	<InputRow id="{uid}-italic" label="Italic">
+		<input
+			id="{uid}-italic"
+			type="checkbox"
+			checked={legend.italic === true}
+			onchange={(e) => change({ italic: e.currentTarget.checked })}
+		/>
+	</InputRow>
+
 	{#each legend.entries as entry, i (i)}
 		<fieldset class="entry">
 			<legend>Entry {i + 1}</legend>

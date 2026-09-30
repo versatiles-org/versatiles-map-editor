@@ -115,6 +115,10 @@ export interface StateLegend {
 	layout?: (typeof LEGEND_LAYOUTS)[number];
 	/** Default: "sans-serif". */
 	font?: (typeof LEGEND_FONTS)[number];
+	/** The texts of all entries in bold. Default: false. */
+	bold?: boolean;
+	/** The texts of all entries in italic. Default: false. */
+	italic?: boolean;
 	entries: StateLegendEntry[];
 }
 

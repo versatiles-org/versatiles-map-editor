@@ -572,4 +572,16 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await page.getByRole('radiogroup', { name: 'Font' }).getByRole('radio', { name: 'Serif' }).check();
 	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCSS('font-family', 'serif');
 	await expect.poll(async () => (await storedState(page)).meta?.legend?.font).toBe('serif');
+
+	// and bold or italic texts
+	const legend = page.getByRole('list', { name: 'Legend' });
+	await page.getByRole('checkbox', { name: 'Bold' }).check();
+	await expect(legend).toHaveCSS('font-weight', '700');
+	await expect.poll(async () => (await storedState(page)).meta?.legend?.bold).toBe(true);
+	await page.getByRole('checkbox', { name: 'Italic' }).check();
+	await expect(legend).toHaveCSS('font-style', 'italic');
+	await page.getByRole('checkbox', { name: 'Bold' }).uncheck();
+	await expect(legend).toHaveCSS('font-weight', '400');
+	await expect.poll(async () => (await storedState(page)).meta?.legend).toMatchObject({ font: 'serif', italic: true });
+	expect((await storedState(page)).meta?.legend?.bold).toBeUndefined();
 });

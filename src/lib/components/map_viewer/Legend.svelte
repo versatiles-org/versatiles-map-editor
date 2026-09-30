@@ -86,6 +86,8 @@
 		style:--top="{top}px"
 		style:--bottom="{bottom}px"
 		style:font-family={legend.font ?? 'sans-serif'}
+		style:font-weight={legend.bold ? 'bold' : undefined}
+		style:font-style={legend.italic ? 'italic' : undefined}
 		bind:offsetWidth={width}
 		bind:offsetHeight={height}
 		bind:this={element}
