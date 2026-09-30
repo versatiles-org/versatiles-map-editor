@@ -5,6 +5,8 @@
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
 	import MainMenu from './MainMenu.svelte';
+	// the logo of versatiles.org
+	import logo from './versatiles-logo.svg';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */
 	const { doc, sync, files }: { doc: MapDocumentInteractive; sync: SessionSync; files: FileCommands } = $props();
@@ -15,7 +17,7 @@
 
 <header class="topbar">
 	<MainMenu {doc} {sync} {files} />
-	<h1>VersaTiles Map Editor</h1>
+	<h1><img src={logo} alt="" width="19" height="22" /><span>VersaTiles Map Editor</span></h1>
 	<span class="separator"></span>
 	<IconButton
 		icon="undo"
@@ -52,12 +54,25 @@
 	}
 
 	h1 {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-width: 0;
 		margin: 0 0 0 4px;
 		font-size: var(--font-size-md);
 		font-weight: 600;
 		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+
+		img {
+			flex: none;
+			height: 22px;
+			width: auto;
+		}
+
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
 	}
 
 	.separator {
