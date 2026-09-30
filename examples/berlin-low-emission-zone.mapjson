@@ -22,7 +22,7 @@
 				{ "color": "#009e73", "label": "Large parks" }
 			]
 		},
-		"title": "berlin-low-emission-zone",
+		"title": "Berlin low-emission zone",
 		"mapLabelsOnTop": true
 	},
 	"elements": [

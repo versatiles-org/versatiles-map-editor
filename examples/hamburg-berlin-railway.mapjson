@@ -3,6 +3,7 @@
 		"center": [11.7, 53.07],
 		"radius": 105000
 	},
+	"frame": [9.653, 52.422, 14.05, 53.656],
 	"meta": {
 		"background": {
 			"builder": "osm",
@@ -25,7 +26,9 @@
 					"label": "Detour of long-distance trains"
 				}
 			]
-		}
+		},
+		"title": "Hamburg–Berlin railway renovation",
+		"labelFont": "noto_sans_bold"
 	},
 	"elements": [
 		{
@@ -97,40 +100,40 @@
 			"type": "marker",
 			"point": [11.4964, 53.3301],
 			"style": {
-				"color": "#555555",
-				"size": 0.9,
-				"symbol": "base:transport-tram",
-				"label": "Ludwigslust"
+				"color": "#d55e00",
+				"symbol": "base:icon-rail",
+				"label": "Ludwigslust",
+				"labelColor": "#d55e00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [11.7514, 52.9981],
 			"style": {
-				"color": "#555555",
-				"size": 0.9,
-				"symbol": "base:transport-tram",
-				"label": "Wittenberge"
+				"color": "#d55e00",
+				"symbol": "base:icon-rail",
+				"label": "Wittenberge",
+				"labelColor": "#d55e00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [10.562, 52.9674],
 			"style": {
-				"color": "#555555",
-				"size": 0.9,
-				"symbol": "base:transport-tram",
-				"label": "Uelzen"
+				"color": "#0072b2",
+				"symbol": "base:icon-rail",
+				"label": "Uelzen",
+				"labelColor": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [11.8554, 52.5946],
 			"style": {
-				"color": "#555555",
-				"size": 0.9,
-				"symbol": "base:transport-tram",
-				"label": "Stendal"
+				"color": "#0072b2",
+				"symbol": "base:icon-rail",
+				"label": "Stendal",
+				"labelColor": "#0072b2"
 			}
 		}
 	]

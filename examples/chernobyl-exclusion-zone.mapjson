@@ -1,5 +1,6 @@
 {
 	"map": { "center": [30.175189454575417, 51.39166926981753], "radius": 47169.86443603064 },
+	"frame": [29.558, 51.066, 31.0, 51.712],
 	"meta": {
 		"background": {
 			"builder": "satellite",
@@ -15,7 +16,7 @@
 				{ "color": "#e69f00", "label": "30 km exclusion zone" }
 			]
 		},
-		"title": "chernobyl-exclusion-zone",
+		"title": "Chernobyl exclusion zone",
 		"labelFont": "noto_sans_bold"
 	},
 	"elements": [
