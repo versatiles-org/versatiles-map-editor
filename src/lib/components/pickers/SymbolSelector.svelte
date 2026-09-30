@@ -46,8 +46,8 @@
 	const drawIconHalo: Action<HTMLCanvasElement, string> = (canvas, name) =>
 		symbolLibrary.drawSymbol(canvas, name, {
 			color: textColor(canvas),
-			outline: themeColor(canvas, '--color-bg', '#fff'),
-			outlineWidth: 2
+			halo: themeColor(canvas, '--color-bg', '#fff'),
+			haloWidth: 2
 		});
 
 	const info = $derived(symbol ? getSymbol(symbol) : undefined);

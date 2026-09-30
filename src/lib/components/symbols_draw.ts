@@ -6,12 +6,15 @@ import { parseColor } from '@versatiles/map-state';
 export interface DrawOptions {
 	/** The color of an SDF symbol, black by default. */
 	color?: string;
-	/**
-	 * An outline around an SDF symbol in this color, `outlineWidth` canvas pixels wide, e.g. a halo
-	 * in the color of the background behind it.
-	 */
+	/** An outline around an SDF symbol in this color, `outlineWidth` canvas pixels wide. */
 	outline?: string;
 	outlineWidth?: number;
+	/**
+	 * A halo around the symbol and its outline in this color, `haloWidth` canvas pixels wide: the
+	 * color of the background behind it, which separates the symbol from what is around it.
+	 */
+	halo?: string;
+	haloWidth?: number;
 	/** Scale the shape to fill the canvas, instead of the whole image with its empty border. */
 	crop?: boolean;
 }
@@ -29,7 +32,7 @@ export class SymbolLibrary {
 	}
 
 	/**
-	 * Draw the symbol into the canvas: black, or in `color`, and with an `outline`.
+	 * Draw the symbol into the canvas: black, or in `color`, and with an `outline` and a `halo`.
 	 * If the sprite is not loaded yet, it is drawn once it is, while the canvas is on the page.
 	 */
 	drawSymbol(canvas: HTMLCanvasElement, name: string, options: DrawOptions = {}): void {
@@ -91,10 +94,10 @@ export function drawImage(
 	{ width, height }: { width: number; height: number },
 	options: DrawOptions
 ): Uint8ClampedArray<ArrayBuffer> {
-	const outlineWidth = options.outline && parseColor(options.outline) ? (options.outlineWidth ?? 1) : 0;
+	const rims = sdfRims(options).reduce((sum, rim) => sum + rim.width, 0);
 	const shape = options.crop ? shapeBox(image, sdf) : undefined;
-	// the outline and the antialiasing, in canvas pixels, around the scaled shape
-	const { scale, x0, y0 } = placement(image, shape, width, height, outlineWidth + 0.5);
+	// the outline, the halo and the antialiasing, in canvas pixels, around the scaled shape
+	const { scale, x0, y0 } = placement(image, shape, width, height, rims + 0.5);
 	const paint = sdfPainter(options);
 
 	const data = new Uint8ClampedArray(width * height * 4);
@@ -140,30 +143,47 @@ function placement(
 	};
 }
 
-/** How an SDF image is painted: in its color, with an outline or without. */
+type RGB = { r: number; g: number; b: number };
+
+/** The outline and the halo around an SDF symbol, from the inside out; without an invalid color. */
+function sdfRims(options: DrawOptions): { rgb: RGB; width: number }[] {
+	const rims: { rgb: RGB; width: number }[] = [];
+	const outline = options.outline ? parseColor(options.outline) : undefined;
+	if (outline) rims.push({ rgb: outline, width: options.outlineWidth ?? 1 });
+	const halo = options.halo ? parseColor(options.halo) : undefined;
+	if (halo) rims.push({ rgb: halo, width: options.haloWidth ?? 1 });
+	return rims;
+}
+
+/**
+ * How an SDF image is painted: in its color, then its outline and its halo around it. Each part
+ * covers a pixel as far as it reaches into it, antialiased over one pixel around its edge.
+ */
 function sdfPainter(options: DrawOptions): Painter {
 	const rgb = (options.color && parseColor(options.color)) || { r: 0, g: 0, b: 0 };
-	const outline = options.outline ? parseColor(options.outline) : undefined;
-	const outlineWidth = outline ? (options.outlineWidth ?? 1) : 0;
-	// covered pixels, antialiased over one pixel around the edge
-	const fill = (distance: number) => clamp(distance + 0.5);
-
-	if (outline) {
-		// the symbol over its outline
-		return (data, i, distance) => {
-			const alpha = clamp(distance + outlineWidth + 0.5);
-			const mix = alpha > 0 ? fill(distance) / alpha : 0;
-			data[i] = rgb.r * mix + outline.r * (1 - mix);
-			data[i + 1] = rgb.g * mix + outline.g * (1 - mix);
-			data[i + 2] = rgb.b * mix + outline.b * (1 - mix);
-			data[i + 3] = 255 * alpha;
-		};
-	}
+	const parts = [{ rgb, width: 0 }, ...sdfRims(options)];
 	return (data, i, distance) => {
-		data[i] = rgb.r;
-		data[i + 1] = rgb.g;
-		data[i + 2] = rgb.b;
-		data[i + 3] = 255 * fill(distance);
+		let r = 0;
+		let g = 0;
+		let b = 0;
+		// the coverage of the parts up to the current one, from the inside out
+		let covered = 0;
+		let reach = 0;
+		for (const part of parts) {
+			reach += part.width;
+			const coverage = clamp(distance + reach + 0.5);
+			const share = coverage - covered;
+			r += part.rgb.r * share;
+			g += part.rgb.g * share;
+			b += part.rgb.b * share;
+			covered = coverage;
+		}
+		if (covered > 0) {
+			data[i] = r / covered;
+			data[i + 1] = g / covered;
+			data[i + 2] = b / covered;
+		}
+		data[i + 3] = 255 * covered;
 	};
 }
 

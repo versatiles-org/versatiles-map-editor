@@ -234,6 +234,21 @@ describe('drawImage', () => {
 		}
 	});
 
+	it('draws the symbol, then its outline, then its halo, from the inside out', () => {
+		const data = drawImage(
+			image,
+			true,
+			{ width: 30, height: 30 },
+			{ color: '#ff0000', outline: '#0000ff', outlineWidth: 2, halo: '#ffffff', haloWidth: 3 }
+		);
+		// the edge of the shape is at about 20.5: the symbol, the outline to 22.5, the halo to 25.5
+		expect(pixel(data, 30, 15, 15)).toStrictEqual([255, 0, 0, 255]);
+		expect(pixel(data, 30, 21, 15)).toStrictEqual([0, 0, 255, 255]);
+		expect(pixel(data, 30, 24, 15)).toStrictEqual([255, 255, 255, 255]);
+		// beyond the halo: nothing
+		expect(pixel(data, 30, 27, 15)[3]).toBe(0);
+	});
+
 	it('draws no outline in a color that is invalid', () => {
 		const plain = drawImage(image, true, { width: 20, height: 20 }, { color: '#ff0000', crop: true });
 		const outlined = drawImage(

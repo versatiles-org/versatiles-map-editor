@@ -78,14 +78,3 @@ export function channelTrack(channel: Channel, color: RGBA, hsv: HSV): string {
 	}
 	return `linear-gradient(to right, ${stops.join(', ')})`;
 }
-
-/** The contrast ratio of two colors (WCAG), from 1 (the same) to 21 (black and white). */
-export function contrast(a: RGB, b: RGB): number {
-	const luminance = ({ r, g, b }: RGB) =>
-		[r, g, b]
-			.map((channel) => channel / 255)
-			.map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-			.reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
-	const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
-	return (light + 0.05) / (dark + 0.05);
-}

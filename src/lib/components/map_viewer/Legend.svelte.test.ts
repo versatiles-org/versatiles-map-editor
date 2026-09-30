@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 import Legend from './Legend.svelte';
 import { SymbolLibrary, symbolLibraryContext } from '../symbols_draw.js';
@@ -12,11 +12,10 @@ describe('Legend', () => {
 		document.body.innerHTML = '';
 	});
 
-	it('shows the text of each entry in its color, opaque, and light colors darker', () => {
+	it('shows the text of each entry in exactly the color of its symbol or swatch', () => {
 		const entries = [
 			{ color: '#0072b2', label: 'Blue' },
 			{ color: '#d55e0080', label: 'Translucent orange' },
-			// yellow and white, which the white legend would swallow: the shade of their outline
 			{ color: '#e69f00', label: 'Yellow' },
 			{ color: '#ffffff', label: 'White' }
 		];
@@ -28,6 +27,26 @@ describe('Legend', () => {
 		});
 		flushSync();
 		const colors = [...document.querySelectorAll<HTMLElement>('.text')].map((text) => text.style.color);
-		expect(colors).toStrictEqual(['#0072b2', '#d55e00', '#735000', '#808080']);
+		expect(colors).toStrictEqual(entries.map((entry) => entry.color));
+	});
+
+	it('draws the symbols in their color only, also light symbols', () => {
+		const entries = [
+			{ color: '#0072b2', symbol: 'icons:anchor', label: 'Blue' },
+			{ color: '#ffffff', symbol: 'icons:anchor', label: 'White' }
+		];
+		const library = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map);
+		const drawSymbol = vi.spyOn(library, 'drawSymbol').mockImplementation(() => {});
+		component = mount(Legend, {
+			target: document.body,
+			props: { legend: { entries } },
+			context: symbolLibraryContext(library)
+		});
+		flushSync();
+		const options = drawSymbol.mock.calls.map((call) => call[2]);
+		expect(options).toStrictEqual([
+			{ color: '#0072b2', crop: true },
+			{ color: '#ffffff', crop: true }
+		]);
 	});
 });

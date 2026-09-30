@@ -2,8 +2,7 @@
 	import type { Action } from 'svelte/action';
 	import type { StateLegend } from '@versatiles/map-state';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { formatHex, parseColor } from '@versatiles/map-state';
-	import { contrast } from '$lib/components/color.js';
+	import { parseColor } from '@versatiles/map-state';
 
 	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
 	function opacityOf(color: string): number {
@@ -60,31 +59,12 @@
 	const resolution = 2 * (window.devicePixelRatio || 1);
 	const symbolLibrary = getSymbolLibrary();
 
-	/** A darker shade of the color, for the outline, so e.g. white symbols show on the white legend. */
-	function darker(color: string): string {
-		const rgb = parseColor(color) ?? { r: 0, g: 0, b: 0 };
-		return formatHex({ r: rgb.r / 2, g: rgb.g / 2, b: rgb.b / 2, alpha: 1 });
-	}
-
-	/**
-	 * The color of an entry's text: the color of its symbol or swatch, opaque. A light color, which
-	 * the white legend would swallow (less than 3:1, e.g. yellow or white), takes the darker shade
-	 * of the symbol's outline.
-	 */
-	function textColor(color: string): string {
-		const rgb = parseColor(color) ?? { r: 0, g: 0, b: 0 };
-		const white = { r: 255, g: 255, b: 255 };
-		return contrast(rgb, white) >= 3 ? formatHex({ ...rgb, alpha: 1 }) : darker(color);
-	}
-
 	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {
 		const draw = (p: { symbol: string; color: string }) => {
 			canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
-			// the shape fills the canvas, with an outline 1px wide
+			// the shape fills the canvas
 			symbolLibrary.drawSymbol(canvas, p.symbol, {
 				color: p.color,
-				outline: darker(p.color),
-				outlineWidth: resolution,
 				crop: true
 			});
 		};
@@ -127,7 +107,8 @@
 				{:else}
 					<span class="swatch" style:background-color={entry.color}></span>
 				{/if}
-				<span class="text" style:color={textColor(entry.color)}>{entry.label}</span>
+				<!-- the text in the same color as its symbol or swatch -->
+				<span class="text" style:color={entry.color}>{entry.label}</span>
 			</div>
 		{/each}
 	</div>
