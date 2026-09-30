@@ -86,6 +86,9 @@
 	/* titles of dialogs */
 	--font-size-xl: 17px;
 
+	/* behind colors, so an opacity shows: black and white squares of 4 px, e.g. a background layer
+	   under the color (linear-gradient(color, color), var(--checkerboard)) */
+	--checkerboard: repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) 0 0 / 8px 8px;
 	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
 	--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	--checkmark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");

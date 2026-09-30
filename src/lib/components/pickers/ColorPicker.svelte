@@ -47,6 +47,8 @@
 	const schemes = $derived(config.current.colorSchemes);
 	const colorScheme = $derived(getColorScheme(palette?.scheme, schemes));
 	const hex = $derived(toHex(rgb));
+	// the whole value, with its opacity
+	const shown = $derived(toHexKeepingAlpha(rgb, value));
 
 	// HSV is kept separately from the value, so the hue and saturation survive while the
 	// color is gray or black. It is updated when the value changes from outside.
@@ -177,7 +179,7 @@
 			<button
 				class="swatch"
 				class:active={color === value.toLowerCase()}
-				style:background-color={color}
+				style:--swatch-color={color}
 				aria-label={color}
 				title={color}
 				onclick={() => pick(color)}
@@ -195,8 +197,8 @@
 	aria-controls="{id}-panel"
 	onclick={toggle}
 >
-	<span class="swatch" style:background-color={hex}></span>
-	{hex}
+	<span class="swatch" style:--swatch-color={shown}></span>
+	{shown}
 </button>
 
 {#if open}
@@ -221,7 +223,7 @@
 			onpointercancel={onTitleUp}
 			onlostpointercapture={onTitleUp}
 		>
-			<span class="swatch" style:background-color={hex}></span>
+			<span class="swatch" style:--swatch-color={shown}></span>
 			<span class="name">Color</span>
 			<IconButton icon="close" label="Close" title="Close (Escape)" size="sm" onclick={close} />
 		</div>
@@ -295,7 +297,9 @@
 		font-size: var(--font-size-sm);
 	}
 
+	/* the color over a checkerboard, which shows through where the color has an opacity */
 	.swatch {
+		background: linear-gradient(var(--swatch-color), var(--swatch-color)), var(--checkerboard);
 		display: inline-block;
 		width: 16px;
 		height: 16px;

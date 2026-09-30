@@ -67,6 +67,12 @@ describe('ColorPicker', () => {
 		expect(picker.find<HTMLInputElement>('#color-r').value).toBe('255');
 	});
 
+	it('shows a color with its opacity, over a checkerboard', () => {
+		picker = render('#ff000080');
+		expect(picker.find('#color').textContent?.trim()).toBe('#ff000080');
+		expect(picker.find<HTMLElement>('#color .swatch').style.getPropertyValue('--swatch-color')).toBe('#ff000080');
+	});
+
 	it('takes a typed hex color, keeping the transparency of the value', () => {
 		picker = render('#00ff0080');
 		picker.open();
