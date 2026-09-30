@@ -69,8 +69,11 @@ test(
 		// copying the link is announced, not only shown as a check mark
 		if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 		await page.getByRole('button', { name: /^Share/ }).click();
-		await page.getByRole('button', { name: /^Copy link/ }).click();
+		const copy = page.getByRole('button', { name: /^Copy link/ });
+		await copy.click();
 		await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
+		// and the check mark is shown
+		await expect.poll(() => copy.evaluate((button) => getComputedStyle(button, '::after').opacity)).toBe('1');
 	}
 );
 

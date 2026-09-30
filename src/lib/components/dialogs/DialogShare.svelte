@@ -278,10 +278,10 @@
 			pointer-events: none;
 			transition: opacity 0.1s ease-in-out;
 		}
+	}
 
-		&:global(.success)::after {
-			opacity: 1;
-		}
+	.panel :global(.copy.success)::after {
+		opacity: 1;
 	}
 
 	/* the preview at the left, the settings in a panel at the right */
