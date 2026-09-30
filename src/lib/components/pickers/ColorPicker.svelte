@@ -3,13 +3,22 @@
 
 	// Where the user dragged a color picker to: all of them open there, until the page is reloaded
 	let dragged: Position | undefined;
+	// The channels that the user chose last, also for the other color pickers, until the page is reloaded
+	let mode: 'rgb' | 'hsv' = 'rgb';
 </script>
 
 <script lang="ts">
 	import { besideElement, keepInViewport } from './popup_position.js';
-	import ColorField from './ColorField.svelte';
-	import { IconButton } from '$lib/components/ui/index.js';
-	import { hsvKeeping, hsvToRgb, rgbToHsv, type HSV, type RGB } from '$lib/components/color.js';
+	import { ChoiceGroup, IconButton, Slider } from '$lib/components/ui/index.js';
+	import {
+		channelTrack,
+		hsvKeeping,
+		hsvToRgb,
+		rgbToHsv,
+		type Channel,
+		type HSV,
+		type RGB
+	} from '$lib/components/color.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 	import type { ColorPalette } from '$lib/color_palette.svelte.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
@@ -28,6 +37,9 @@
 	} = $props();
 
 	let open = $state(false);
+	// the value when the popup was opened, which a click on it restores
+	let oldValue = $state('');
+	let channels: 'rgb' | 'hsv' = $state(mode);
 	let paletteColors: string[] = $state([]);
 	let button: HTMLButtonElement | undefined = $state();
 	let panel: HTMLDivElement | undefined = $state();
@@ -44,7 +56,6 @@
 	const rgb: RGB = $derived({ r: color.r, g: color.g, b: color.b });
 	const schemes = $derived(config.current.colorSchemes);
 	const colorScheme = $derived(getColorScheme(palette?.scheme, schemes));
-	const hex = $derived(formatHex({ ...rgb, alpha: 1 }));
 	// the whole value, with its opacity
 	const shown = $derived(formatHex(color));
 
@@ -78,6 +89,12 @@
 		write(color);
 	}
 
+	/** Change the opacity, keeping the color. */
+	function setAlpha(alpha: number) {
+		ownValue = formatHex({ ...rgb, alpha });
+		value = ownValue;
+	}
+
 	function commit() {
 		palette?.use(value);
 		onchange?.();
@@ -85,7 +102,9 @@
 
 	function toggle() {
 		open = !open;
-		if (open) paletteColors = palette?.getColors() ?? [];
+		if (!open) return;
+		paletteColors = palette?.getColors() ?? [];
+		oldValue = shown;
 	}
 
 	// On click instead of pointerdown: closing changes the layout of the sidebar, which would
@@ -142,38 +161,114 @@
 		if (open && e.key === 'Escape') close();
 	}
 
+	/** A typed color, with its opacity: also hex digits without "#", or a CSS color. */
 	function onHexChange(e: Event & { currentTarget: HTMLInputElement }) {
-		// also hex digits without "#"
 		const text = e.currentTarget.value.trim();
 		const typed = parseColor(/^[0-9a-f]+$/i.test(text) ? '#' + text : text);
-		if (typed) {
-			setRgb(typed);
-			commit();
-		}
-		e.currentTarget.value = hex;
+		if (typed) pick(formatHex(typed));
+		e.currentTarget.value = shown;
 	}
 
-	function onChannelChange(channel: keyof RGB, e: Event & { currentTarget: HTMLInputElement }) {
-		const n = Math.round(Number(e.currentTarget.value));
-		if (Number.isFinite(n)) {
-			setRgb({ ...rgb, [channel]: Math.max(0, Math.min(255, n)) });
-			commit();
-		}
-		e.currentTarget.value = String(rgb[channel]);
-	}
-
+	/** Take a color as it is, e.g. the old one or a used one, with its opacity. */
 	function pick(color: string) {
 		const parsed = parseColor(color);
 		if (!parsed) return;
 		setHsvFromRgb(parsed);
-		ownValue = value = color;
+		ownValue = value = formatHex(parsed);
 		commit();
 	}
+
+	/** Take a color of the scheme, which is opaque, keeping the opacity of the value. */
+	function pickScheme(scheme: string) {
+		const parsed = parseColor(scheme);
+		if (parsed) pick(formatHex({ ...parsed, alpha: color.alpha }));
+	}
+
+	function chooseChannels(next: 'rgb' | 'hsv') {
+		channels = mode = next;
+	}
+
+	const CHANNEL_CHOICES: { value: 'rgb' | 'hsv'; label: string }[] = [
+		{ value: 'rgb', label: 'RGB' },
+		{ value: 'hsv', label: 'HSV' }
+	];
+
+	/** The sliders of the chosen channels, and the opacity. */
+	const sliders = $derived.by(() => {
+		type Row = {
+			key: Channel;
+			short: string;
+			name: string;
+			max: number;
+			step: number;
+			scale?: number;
+			unit?: string;
+			get: () => number;
+			set: (n: number) => void;
+		};
+		const rows: Row[] =
+			channels === 'rgb'
+				? (['r', 'g', 'b'] as const).map((key, i) => ({
+						key,
+						short: key.toUpperCase(),
+						name: ['Red', 'Green', 'Blue'][i],
+						max: 255,
+						step: 1,
+						get: () => rgb[key],
+						set: (n: number) => setRgb({ ...rgb, [key]: n })
+					}))
+				: [
+						{
+							key: 'h',
+							short: 'H',
+							name: 'Hue',
+							max: 360,
+							step: 1,
+							unit: '°',
+							get: () => hsv.h,
+							set: (h) => setHsv({ ...hsv, h })
+						},
+						{
+							key: 's',
+							short: 'S',
+							name: 'Saturation',
+							max: 1,
+							step: 0.01,
+							scale: 100,
+							unit: '%',
+							get: () => hsv.s,
+							set: (s) => setHsv({ ...hsv, s })
+						},
+						{
+							key: 'v',
+							short: 'V',
+							name: 'Brightness',
+							max: 1,
+							step: 0.01,
+							scale: 100,
+							unit: '%',
+							get: () => hsv.v,
+							set: (v) => setHsv({ ...hsv, v })
+						}
+					];
+		rows.push({
+			key: 'alpha',
+			short: 'A',
+			name: 'Opacity',
+			max: 1,
+			step: 0.01,
+			scale: 100,
+			unit: '%',
+			get: () => color.alpha,
+			set: setAlpha
+		});
+		return rows;
+	});
 </script>
 
 <svelte:window onclick={onWindowClick} onkeydown={onWindowKeyDown} onresize={() => open && place()} />
 
-{#snippet swatches(colors: string[], label: string)}
+{#snippet swatches(colors: string[], label: string, onpick: (color: string) => void)}
 	<div class="palette" role="group" aria-label={label}>
 		{#each colors as color (color)}
 			<button
@@ -182,7 +277,7 @@
 				style:--swatch-color={color}
 				aria-label={color}
 				title={color}
-				onclick={() => pick(color)}
+				onclick={() => onpick(color)}
 			></button>
 		{/each}
 	</div>
@@ -223,45 +318,48 @@
 			onpointercancel={onTitleUp}
 			onlostpointercapture={onTitleUp}
 		>
-			<span class="swatch" style:--swatch-color={shown}></span>
 			<span class="name">Color</span>
 			<IconButton icon="close" label="Close" title="Close (Escape)" size="sm" onclick={close} />
 		</div>
-		<ColorField {hsv} oninput={setHsv} oncommit={commit} />
+		<!-- the old color, which a click restores, and the new one -->
+		<div class="compare">
+			<button
+				class="swatch old"
+				style:--swatch-color={oldValue}
+				aria-label="Old color {oldValue}, restore it"
+				title="Restore the old color"
+				onclick={() => pick(oldValue)}
+			></button>
+			<span class="swatch new" style:--swatch-color={shown} role="img" aria-label="New color {shown}"></span>
+		</div>
 
-		<div class="values">
+		<span class="sr-only" id="{id}-channels">Color channels</span>
+		<ChoiceGroup labelledby="{id}-channels" value={channels} onchange={chooseChannels} options={CHANNEL_CHOICES} />
+
+		<div class="sliders">
+			{#each sliders as row (row.key)}
+				<label id="{id}-{row.key}-label" for="{id}-{row.key}" title={row.name}>
+					<span aria-hidden="true">{row.short}</span><span class="sr-only">{row.name}</span>
+				</label>
+				<Slider
+					id="{id}-{row.key}"
+					min={0}
+					max={row.max}
+					step={row.step}
+					scale={row.scale}
+					unit={row.unit}
+					bind:value={row.get, row.set}
+					onchange={commit}
+					track={channelTrack(row.key, color, hsv)}
+					checkered={row.key === 'alpha'}
+					wide
+				/>
+			{/each}
+		</div>
+
+		<div class="hex">
 			<label for="{id}-hex">Hex</label>
-			<label for="{id}-r">R</label>
-			<label for="{id}-g">G</label>
-			<label for="{id}-b">B</label>
-			<input id="{id}-hex" type="text" value={hex} maxlength="9" spellcheck="false" onchange={onHexChange} />
-			<input
-				id="{id}-r"
-				type="number"
-				min="0"
-				max="255"
-				aria-label="Red"
-				value={rgb.r}
-				onchange={(e) => onChannelChange('r', e)}
-			/>
-			<input
-				id="{id}-g"
-				type="number"
-				min="0"
-				max="255"
-				aria-label="Green"
-				value={rgb.g}
-				onchange={(e) => onChannelChange('g', e)}
-			/>
-			<input
-				id="{id}-b"
-				type="number"
-				min="0"
-				max="255"
-				aria-label="Blue"
-				value={rgb.b}
-				onchange={(e) => onChannelChange('b', e)}
-			/>
+			<input id="{id}-hex" type="text" value={shown} maxlength="30" spellcheck="false" onchange={onHexChange} />
 		</div>
 
 		{#if palette}
@@ -280,12 +378,12 @@
 					<option value={id}>{name}</option>
 				{/each}
 			</select>
-			{@render swatches(colorScheme.colors, colorScheme.name)}
+			{@render swatches(colorScheme.colors, colorScheme.name, pickScheme)}
 		{/if}
 
 		{#if paletteColors.length > 0}
 			<div class="group-label">Used colors</div>
-			{@render swatches(paletteColors, 'Used colors')}
+			{@render swatches(paletteColors, 'Used colors', pick)}
 		{/if}
 	</div>
 {/if}
@@ -314,7 +412,7 @@
 		position: fixed;
 		inset: auto;
 		box-sizing: border-box;
-		width: 240px;
+		width: 264px;
 		max-height: calc(100vh - 16px);
 		overflow-y: auto;
 		margin: 0;
@@ -349,28 +447,72 @@
 		}
 	}
 
-	.values {
+	/* the old and the new color, side by side */
+	.compare {
 		display: grid;
-		grid-template-columns: 2fr 1fr 1fr 1fr;
-		gap: 2px var(--space-1);
-		font-size: var(--font-size-sm);
+		grid-template-columns: 1fr 1fr;
+		gap: 2px;
+		height: var(--size-md);
+
+		.swatch {
+			width: 100%;
+			height: 100%;
+		}
+		.old {
+			border-radius: var(--radius-md) 0 0 var(--radius-md);
+		}
+		.new {
+			border-radius: 0 var(--radius-md) var(--radius-md) 0;
+		}
+
+		.old {
+			padding: 0;
+			border: none;
+			cursor: pointer;
+		}
+	}
+
+	/* a slider per channel, with its letter */
+	.sliders {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: var(--space-2) var(--space-2);
+
+		label {
+			color: var(--color-text-muted);
+			font-size: var(--font-size-sm);
+			font-weight: 600;
+		}
+	}
+
+	.hex {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+
+		label {
+			color: var(--color-text-muted);
+			font-size: var(--font-size-sm);
+		}
 
 		input {
-			width: 100%;
-			box-sizing: border-box;
+			flex: 1;
 			min-width: 0;
-			font-family: monospace;
+			font-family: ui-monospace, Menlo, Consolas, monospace;
 		}
+	}
 
-		/* the fields are too narrow for spin buttons */
-		input[type='number'] {
-			appearance: textfield;
-		}
-		input[type='number']::-webkit-inner-spin-button,
-		input[type='number']::-webkit-outer-spin-button {
-			appearance: none;
-			margin: 0;
-		}
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.scheme {

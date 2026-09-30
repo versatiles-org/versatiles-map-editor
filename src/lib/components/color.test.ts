@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatHex } from '@versatiles/map-state';
-import { channelTrack, hsvKeeping, hsvToRgb, moveInField, rgbToHsv } from './color.js';
+import { channelTrack, hsvKeeping, hsvToRgb, rgbToHsv } from './color.js';
 
 describe('HSV', () => {
 	it('converts primary and gray colors', () => {
@@ -29,16 +29,6 @@ describe('hsvKeeping', () => {
 		expect(hsvKeeping({ r: 0, g: 0, b: 0 }, previous)).toStrictEqual({ h: 120, s: 0.5, v: 0 });
 		expect(hsvKeeping({ r: 128, g: 128, b: 128 }, previous)).toMatchObject({ h: 120, s: 0 });
 		expect(hsvKeeping({ r: 255, g: 0, b: 0 }, previous)).toStrictEqual({ h: 0, s: 1, v: 1 });
-	});
-});
-
-describe('moveInField', () => {
-	it('moves saturation and brightness with the arrow keys, within 0…1', () => {
-		const hsv = { h: 10, s: 0.5, v: 0.995 };
-		expect(moveInField(hsv, 'ArrowRight', false)).toStrictEqual({ h: 10, s: 0.51, v: 0.995 });
-		expect(moveInField(hsv, 'ArrowLeft', true)).toStrictEqual({ h: 10, s: 0.4, v: 0.995 });
-		expect(moveInField(hsv, 'ArrowUp', true)).toStrictEqual({ h: 10, s: 0.5, v: 1 });
-		expect(moveInField(hsv, 'Enter', false)).toBeUndefined();
 	});
 });
 

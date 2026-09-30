@@ -38,15 +38,6 @@ export function hsvKeeping(color: RGB, previous: HSV): HSV {
 	return next;
 }
 
-/** Saturation and brightness moved by the arrow key, in steps of 1% (10% with Shift). */
-export function moveInField(hsv: HSV, key: string, large: boolean): HSV | undefined {
-	const step = large ? 0.1 : 0.01;
-	const delta = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowDown: [0, -step], ArrowUp: [0, step] }[key];
-	if (!delta) return undefined;
-	const clamp = (x: number) => Math.max(0, Math.min(1, x));
-	return { h: hsv.h, s: clamp(hsv.s + delta[0]), v: clamp(hsv.v + delta[1]) };
-}
-
 export function hsvToRgb({ h, s, v }: HSV): RGB {
 	const f = (n: number) => {
 		const k = (n + h / 60) % 6;

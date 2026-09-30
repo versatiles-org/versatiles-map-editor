@@ -28,6 +28,17 @@ function render(initial: string) {
 		target.dispatchEvent(new KeyboardEvent('keydown', { key, shiftKey, bubbles: true }));
 		flushSync();
 	};
+	/** Drag a slider to a value: an input on each move, a change at the end. */
+	const slide = (selector: string, ...values: number[]) => {
+		const input = find<HTMLInputElement>(selector);
+		for (const value of values) {
+			input.value = String(value);
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			flushSync();
+		}
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+		flushSync();
+	};
 	const change = (selector: string, text: string) => {
 		const input = find<HTMLInputElement>(selector);
 		input.value = text;
@@ -39,6 +50,7 @@ function render(initial: string) {
 		onchange,
 		open,
 		key,
+		slide,
 		change,
 		find,
 		get value() {
@@ -73,36 +85,70 @@ describe('ColorPicker', () => {
 		expect(picker.find<HTMLElement>('#color .swatch').style.getPropertyValue('--swatch-color')).toBe('#ff000080');
 	});
 
-	it('takes a typed hex color, keeping the transparency of the value', () => {
+	it('takes a typed color with its opacity', () => {
 		picker = render('#00ff0080');
 		picker.open();
+		expect(picker.find<HTMLInputElement>('#color-hex').value).toBe('#00ff0080');
 		picker.change('#color-hex', '#0000FF');
-		expect(picker.value).toBe('#0000ff80');
+		expect(picker.value).toBe('#0000ff');
 		expect(picker.onchange).toHaveBeenCalledTimes(1);
 
 		// also without "#", and as a CSS color
-		picker.change('#color-hex', 'ff0000');
+		picker.change('#color-hex', 'ff000080');
 		expect(picker.value).toBe('#ff000080');
-		picker.change('#color-hex', 'rgb(0, 128, 0)');
-		expect(picker.value).toBe('#00800080');
-		picker.change('#color-hex', '#0000FF');
+		picker.change('#color-hex', 'rgb(0 128 0 / 25%)');
+		expect(picker.value).toBe('#00800040');
 
 		// an invalid color changes nothing and shows the value again
 		picker.change('#color-hex', 'blue');
-		expect(picker.value).toBe('#0000ff80');
-		expect(picker.find<HTMLInputElement>('#color-hex').value).toBe('#0000ff');
+		expect(picker.value).toBe('#00800040');
+		expect(picker.find<HTMLInputElement>('#color-hex').value).toBe('#00800040');
 	});
 
-	it('changes brightness and saturation with the arrow keys, keeping the hue at black', () => {
+	it('changes the channels with sliders, one change at the end of a drag', () => {
+		picker = render('#ff000080');
+		picker.open();
+		picker.slide('#color-g', 50, 100, 128);
+		expect(picker.value).toBe('#ff800080');
+		expect(picker.onchange).toHaveBeenCalledTimes(1);
+		// the opacity, keeping the color
+		picker.slide('#color-alpha', 1);
+		expect(picker.value).toBe('#ff8000');
+		expect(picker.onchange).toHaveBeenCalledTimes(2);
+	});
+
+	it('offers HSV instead of RGB, keeping the hue at black, also for the next picker', () => {
 		picker = render('#ff0000');
 		picker.open();
-		const field = picker.find('[role="slider"]');
-		for (let i = 0; i < 10; i++) picker.key(field, 'ArrowDown', true);
+		// the second choice, HSV
+		picker.find<HTMLInputElement>('label:nth-child(2) input[type="radio"]').click();
+		flushSync();
+		expect(picker.find('#color-r')).toBeNull();
+		picker.slide('#color-v', 0);
 		expect(picker.value).toBe('#000000');
-		for (let i = 0; i < 10; i++) picker.key(field, 'ArrowUp', true);
+		picker.slide('#color-v', 1);
 		// still red, not the hue of black
 		expect(picker.value).toBe('#ff0000');
-		expect(picker.onchange).toHaveBeenCalledTimes(20);
+
+		unmount(picker.component);
+		document.body.innerHTML = '';
+		picker = render('#00ff00');
+		picker.open();
+		expect(picker.find('#color-h')).not.toBeNull();
+		// back to RGB for the other tests
+		picker.find<HTMLInputElement>('label:nth-child(1) input[type="radio"]').click();
+		flushSync();
+	});
+
+	it('restores the old color with a click on it', () => {
+		picker = render('#ff0000');
+		picker.open();
+		picker.slide('#color-alpha', 0.5);
+		expect(picker.value).toBe('#ff000080');
+		picker.find<HTMLButtonElement>('.compare .old').click();
+		flushSync();
+		expect(picker.value).toBe('#ff0000');
+		expect(picker.onchange).toHaveBeenCalledTimes(2);
 	});
 
 	it('follows a change of the value from outside', () => {

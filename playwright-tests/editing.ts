@@ -266,22 +266,33 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 	await palette.first().click();
 	await expect.poll(async () => await stroke()).toBe('#00ff00');
 
-	// dragging in the saturation/brightness field creates a single undo step
+	// a color of the scheme keeps the opacity; the old color is restored with a click
 	await fillColor.click();
-	const field = page.getByRole('slider', { name: 'Saturation and brightness' });
-	const box = (await field.boundingBox())!;
-	// not at the very edge, where the scroll bar of the sidebar can be
-	await page.mouse.move(box.x + box.width * 0.9, box.y + box.height * 0.1);
+	await page.getByLabel('Hex').fill('#00ff0080');
+	await page.getByLabel('Hex').press('Enter');
+	await expect.poll(async () => await fill()).toBe('#00ff0080');
+	const scheme = page.getByRole('group', { name: 'Bright (colorblind-safe)' }).getByRole('button').first();
+	const schemeColor = await scheme.getAttribute('aria-label');
+	await scheme.click();
+	await expect.poll(async () => await fill()).toBe(schemeColor + '80');
+	await page.getByRole('button', { name: /^Old color/ }).click();
+	await expect.poll(async () => await fill()).toBe('#00ff00');
+	await page.keyboard.press('Escape');
+
+	// dragging a slider creates a single undo step
+	await fillColor.click();
+	const green = page.getByRole('slider', { name: 'Green' });
+	const box = (await green.boundingBox())!;
+	await page.mouse.move(box.x + box.width - 4, box.y + box.height / 2);
 	await page.mouse.down();
 	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 5 });
 	await page.mouse.up();
-	// the center is half saturation and half brightness of the hue green, #408040. Firefox rounds
-	// the mouse position to whole pixels, which can change the channels by 1.
+	// green about half; the rounding of the mouse position can change it by a few steps
 	const channels = (hex = '') => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-	await expect
-		.poll(async () => channels(await fill()).every((c, i) => Math.abs(c - [0x40, 0x80, 0x40][i]) <= 2))
-		.toBe(true);
-	expect(Math.abs(Number(await page.getByLabel('Green').inputValue()) - 128)).toBeLessThanOrEqual(2);
+	await expect.poll(async () => Math.abs(channels(await fill())[1] - 128)).toBeLessThanOrEqual(6);
+	expect(
+		Math.abs(Number(await page.getByRole('spinbutton', { name: 'Green' }).inputValue()) - 128)
+	).toBeLessThanOrEqual(6);
 	await page.screenshot({ path: 'test-results/color-picker.png' });
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(async () => await fill()).toBe('#00ff00');
@@ -467,9 +478,9 @@ test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@c
 	await selectMarker();
 	const markers = async () => (await storedState(page)).elements.length;
 
-	// in the saturation/brightness field of the color picker
+	// in a slider of the color picker
 	await page.getByRole('button', { name: /^Color/ }).click();
-	await page.getByRole('slider', { name: 'Saturation and brightness' }).focus();
+	await page.getByRole('slider', { name: 'Red' }).focus();
 	await page.keyboard.press('Backspace');
 	await page.keyboard.press('Delete');
 	await page.keyboard.press('Escape');

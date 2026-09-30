@@ -77,7 +77,7 @@ test('overlays of the editor are above what they open over', async ({ page }) =>
 			.click();
 		await expect(page.getByLabel('Hex')).toBeVisible();
 		await expectOnTop(
-			page.getByRole('slider', { name: 'Saturation and brightness' }),
+			page.getByRole('slider', { name: 'Red' }),
 			page.getByLabel('Hex'),
 			page.getByRole('group', { name: 'Used colors' }).getByRole('button')
 		);
