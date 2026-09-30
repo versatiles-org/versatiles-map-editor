@@ -27,7 +27,7 @@
 	--accent-hue: 308;
 	--accent-chroma: 0.2;
 	/* per mode: the lightness of the accent, the step to its hover, and the opacity of its tint */
-	--accent-lightness: 60%;
+	--accent-lightness: 59%;
 	--accent-hover-step: -8%;
 	--accent-tint-opacity: 13%;
 
