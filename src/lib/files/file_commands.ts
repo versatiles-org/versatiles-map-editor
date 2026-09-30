@@ -1,4 +1,4 @@
-import { stateFromKML, stateToKML, type MapState } from '@versatiles/map-state';
+import { stateFromKML, stateToKML, upgradeState, type MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
@@ -74,7 +74,8 @@ export class FileCommands {
 		try {
 			const file = await chooseTextFile('.mapjson');
 			if (!file) return;
-			const state: MapState = JSON.parse(file.text);
+			// e.g. a file of an older version, whose fills have an opacity of their own
+			const state: MapState = upgradeState(JSON.parse(file.text));
 			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
 			// named after the file, without a title of its own
 			const title = state.meta?.title || file.name.replace(EXTENSION, '');

@@ -35,7 +35,7 @@ const state: MapState = {
 				[13.4, 52.4],
 				[13.4, 52.5]
 			],
-			style: { color: '#123456', opacity: 0.5, pattern: 2 },
+			style: { color: '#12345680', pattern: 2 },
 			strokeStyle: { color: '#654321', visible: false },
 			popup: { text: 'A polygon' }
 		},
@@ -136,7 +136,7 @@ describe('stateFromKML', () => {
 					[2, 1],
 					[2, 2]
 				],
-				style: { color: '#00ff00', opacity: 0.25 },
+				style: { color: '#00ff0040' },
 				strokeStyle: { visible: false }
 			},
 			{ type: 'marker', point: [5, 5] }

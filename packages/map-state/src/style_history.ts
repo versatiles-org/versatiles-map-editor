@@ -3,11 +3,11 @@ import type { StateStyle } from './types.js';
 
 /**
  * The fields of a style with their key in the base64 format, and the value as it is encoded:
- * values that encode identically are equal, e.g. an opacity of 0.504 and 0.5.
+ * values that encode identically are equal, e.g. a halo of 1.04 and 1. Key 2 was the opacity of
+ * fills, which older strings have; it is the alpha of the color now (see `OLD_OPACITY_KEY`).
  */
 export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (value: never) => unknown }[] = [
 	{ key: 1, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 2, name: 'opacity', encoded: (v: number) => Math.round(v * 100) },
 	{ key: 3, name: 'pattern', encoded: (v: number) => v },
 	{ key: 4, name: 'rotate', encoded: (v: number) => v },
 	{ key: 5, name: 'size', encoded: (v: number) => Math.round(v * 10) },
@@ -21,6 +21,9 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) },
 	{ key: 13, name: 'symbol', encoded: (v: string) => v }
 ];
+
+/** The key of the opacity of fills in older strings, which the reader turns into the alpha of the color. */
+export const OLD_OPACITY_KEY = 2;
 
 /** In a style patch: the next 4 bits are the key of a field to remove. */
 export const STYLE_REMOVE_KEY = 15;

@@ -101,6 +101,12 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   `meta.title`: the title of the map; `meta.labelFont`: one glyph font for the labels of all
   markers; `meta.mapLabelsOnTop`: the labels of the background map over the areas and lines)
 
+The opacity of every color is its alpha (`#rrggbbaa`), also of a fill. GeoJSON has the fill's
+apart, as simplestyle does: `fill-color` without alpha and `fill-opacity`; on import, `fill-opacity`
+is multiplied into the alpha of `fill-color`. Older base64 strings, where a fill had an opacity of
+its own, are read the same way; `upgradeState` does it for a `MapState` of an older version, e.g.
+of a saved file.
+
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;
 features without geometry, with invalid coordinates, lines with fewer than 2

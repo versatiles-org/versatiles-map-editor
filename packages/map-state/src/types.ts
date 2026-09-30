@@ -55,7 +55,6 @@ export interface StateElementCircle {
 
 export interface StateStyle {
 	halo?: number;
-	opacity?: number;
 	pattern?: number;
 	rotate?: number;
 	size?: number;

@@ -2,7 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { fillPatterns, type FillStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup } from '$lib/components/ui/index.js';
 	import { ColorPicker } from '$lib/components/pickers/index.js';
 
 	/** The fill layers of all selected elements, which are edited together. */
@@ -11,7 +11,6 @@
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
 	const pattern = $derived(group(layers, 'pattern'));
-	const opacity = $derived(group(layers, 'opacity'));
 	const patterns = [...fillPatterns].map(([index, { name }]) => ({ value: index, label: name }));
 	// the width of the stripes in the preview, per pattern; none is filled
 	const stripes = [0, 2.5, 1];
@@ -59,17 +58,4 @@
 			</svg>
 		{/snippet}
 	</ChoiceGroup>
-</InputRow>
-
-<InputRow label="Opacity" id="{uid}-opacity" mixed={opacity.mixed}>
-	<Slider
-		id="{uid}-opacity"
-		min={0}
-		max={1}
-		step={0.02}
-		bind:value={opacity.value}
-		onchange={log}
-		scale={100}
-		unit="%"
-	/>
 </InputRow>

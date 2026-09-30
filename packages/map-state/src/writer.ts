@@ -412,8 +412,6 @@ export class StateWriter {
 		switch (name) {
 			case 'halo':
 				return this.writeVarint(Math.round(style.halo! * 10));
-			case 'opacity':
-				return this.writeVarint(Math.round(style.opacity! * 100));
 			case 'pattern':
 				return this.writeVarint(style.pattern!);
 			case 'rotate':

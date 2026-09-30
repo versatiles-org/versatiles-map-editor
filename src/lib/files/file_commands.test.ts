@@ -64,6 +64,16 @@ describe('FileCommands', () => {
 			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'Holidays', search: true } });
 		});
 
+		it('opens a file of an older version, whose fills have an opacity of their own', async () => {
+			const polygon = { type: 'polygon', points: [], style: { color: '#0000ff', opacity: 0.5 } };
+			choose('trip.mapjson', JSON.stringify({ elements: [polygon] }));
+			await files.openFile();
+			expect(maps.openMap).toHaveBeenCalledWith({
+				elements: [{ type: 'polygon', points: [], style: { color: '#0000ff80' } }],
+				meta: { title: 'trip' }
+			});
+		});
+
 		it('tells the user about a file that is no map, or cannot be read', async () => {
 			choose('trip.mapjson', '{"no": "elements"}');
 			await files.openFile();

@@ -44,7 +44,7 @@ describe('StyleClipboard', () => {
 		source.fillLayer.color = '#00ff00';
 		source.strokeLayer.width = 4;
 		const target = newPolygon(doc);
-		target.fillLayer.opacity = 0.5;
+		target.fillLayer.pattern = 1;
 		target.strokeLayer.visible = false;
 
 		copyAndPaste(source, target);

@@ -138,7 +138,7 @@ describe('StateWriter', () => {
 				{
 					type: 'marker',
 					point: [3, 4],
-					style: { halo: 1.5, opacity: 0.8, color: '#ff0000' }
+					style: { halo: 1.5, size: 0.8, color: '#ff0000' }
 				},
 				{
 					type: 'line',
@@ -146,7 +146,7 @@ describe('StateWriter', () => {
 						[5, 6],
 						[7, 8]
 					],
-					style: { halo: 1.5, opacity: 0.8, color: '#00ff00' }
+					style: { halo: 1.5, size: 0.8, color: '#00ff00' }
 				},
 				{
 					type: 'polygon',
@@ -155,20 +155,20 @@ describe('StateWriter', () => {
 						[11, 12],
 						[13, 14]
 					],
-					style: { halo: 1.5, opacity: 0.8, color: '#0000ff' },
-					strokeStyle: { halo: 1.5, opacity: 0.8, color: '#ffff00' }
+					style: { halo: 1.5, size: 0.8, color: '#0000ff' },
+					strokeStyle: { halo: 1.5, size: 0.8, color: '#ffff00' }
 				},
 				{
 					type: 'circle',
 					point: [15, 16],
 					radius: 17,
-					style: { opacity: 0.1 },
-					strokeStyle: { opacity: 0.2 }
+					style: { pattern: 1 },
+					strokeStyle: { width: 0.2 }
 				}
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JH-AAAA_wAAAH-__8AWQhv9KBf7WFImQsBBpNYBpNYgC8UIkAAQgKLeAKLeANJrANJrEKAgMYGHWEIGHWEIGk1gGk1gGk1gGk1iFAgQoGBAWXaxAWXaxIoBKBAKgA'
+			'JH-AAAA_wAAAH-__8AWQhv9KBf7WFImQsBBpNYBpNYgC8qEAAQgKLeAKLeANJrANJrEKAgMYGHWEIGHWEIGk1gGk1gGk1gGk1iFAgQoGBAWXaxAWXaxIoBhBAYQA'
 		);
 	});
 
@@ -190,7 +190,6 @@ describe('StateWriter', () => {
 		writer.writePalette(['#ff0000']);
 		writer.writeStyle({
 			halo: 1.5,
-			opacity: 0.8,
 			pattern: 3,
 			rotate: -45,
 			size: 2.5,
@@ -200,7 +199,7 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('C_wAAAC8UIhjJmIuTXORAEkCBHCUA');
+		expect(writer.asBase64()).toBe('C_wAAAC8YyZiLk1zkQBJAgRwlA');
 	});
 
 	it('should write a RGB color correctly', () => {

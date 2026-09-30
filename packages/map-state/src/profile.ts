@@ -15,7 +15,7 @@ import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
-export const FILL_DEFAULTS: Defaults<'color' | 'opacity' | 'pattern'> = { color: '#ff0000', opacity: 1, pattern: 0 };
+export const FILL_DEFAULTS: Defaults<'color' | 'pattern'> = { color: '#ff0000', pattern: 0 };
 export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> = {
 	color: '#ff0000',
 	pattern: 0,
@@ -120,11 +120,16 @@ export function removeDefaultFields(value: StateStyle, def: StateStyle): StateSt
 
 // ----- fill (polygon fill, circle fill) -----
 
+/**
+ * The opacity of a fill is the alpha of its color. GeoJSON has them apart, as simplestyle does,
+ * so other tools read them: the color without alpha, and `fill-opacity`.
+ */
 export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
 	const s = { ...FILL_DEFAULTS, ...style };
+	const { r, g, b, alpha } = parseColor(s.color) ?? { r: 0, g: 0, b: 0, alpha: 1 };
 	return {
-		'fill-color': s.color,
-		'fill-opacity': s.opacity,
+		'fill-color': formatHex({ r, g, b, alpha: 1 }),
+		'fill-opacity': Math.round(alpha * 1000) / 1000,
 		'fill-pattern': nameOf(FILL_PATTERN_NAMES, s.pattern)
 	};
 }
@@ -133,7 +138,12 @@ export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 	const s: StateStyle = { ...FILL_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['fill-color']));
-		set(s, 'opacity', sanitizeNumber(p['fill-opacity'], 0, 1));
+		// the opacity becomes the alpha of the color, also of a color with an alpha of its own
+		const opacity = sanitizeNumber(p['fill-opacity'], 0, 1);
+		if (opacity !== undefined && opacity < 1) {
+			const color = parseColor(s.color ?? FILL_DEFAULTS.color)!;
+			s.color = formatHex({ ...color, alpha: color.alpha * opacity });
+		}
 		set(s, 'pattern', indexOf(FILL_PATTERN_NAMES, p['fill-pattern']));
 	}
 	return removeDefaultFields(s, FILL_DEFAULTS);

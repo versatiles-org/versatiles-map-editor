@@ -37,7 +37,7 @@ describe('style references', () => {
 						[1, 0],
 						[1, 1]
 					],
-					style: { color: '#00ff00', opacity: 0.5, pattern: 1 },
+					style: { color: '#00ff00', pattern: 1 },
 					strokeStyle: { color: '#000000', width: 3, visible: false }
 				},
 				{

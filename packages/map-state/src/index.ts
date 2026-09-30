@@ -11,6 +11,7 @@ export { formatHex, parseColor, type RGBA } from './color.js';
 export { digitsForResolution, resolutionOfDigits } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
 export { sanitizeFrame } from './profile.js';
+export { upgradeState } from './legacy.js';
 export { stateFromKML, stateToKML } from './kml.js';
 
 // The style vocabulary: defaults and names of the style values, e.g. for rendering the elements

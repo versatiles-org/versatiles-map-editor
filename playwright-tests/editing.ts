@@ -33,8 +33,8 @@ test('dragging a slider creates a single undo step', { tag: '@cross-browser' }, 
 
 	await addPolygon();
 	// a slider drag fires many input events, but only one change event on release
-	await page.getByRole('slider', { name: 'Opacity' }).evaluate((input: HTMLInputElement) => {
-		for (const value of ['0.9', '0.8', '0.7', '0.6', '0.5']) {
+	await page.getByRole('slider', { name: 'Width' }).evaluate((input: HTMLInputElement) => {
+		for (const value of ['1', '1.5', '2.5', '3', '3.5']) {
 			input.value = value;
 			input.dispatchEvent(new Event('input', { bubbles: true }));
 		}
@@ -642,7 +642,7 @@ test(
 		await page.goto('/#' + encodeState(state));
 		await waitForMapIsReady(page);
 		const polygon = async () =>
-			(await storedState(page)).elements[0] as { style?: { pattern?: number; opacity?: number } };
+			(await storedState(page)).elements[0] as { style?: { pattern?: number }; strokeStyle?: { width?: number } };
 
 		// the fill pattern as pictures, chosen by click and by arrow keys
 		await page.mouse.click(...(await project(page, [13.4, 52.49])));
@@ -654,21 +654,21 @@ test(
 		await expect.poll(async () => (await polygon()).style?.pattern).toBe(2);
 
 		// a slider shows its value
-		const opacity = page.getByRole('slider', { name: 'Opacity' });
-		await opacity.fill('0.4');
-		await expect(page.getByRole('spinbutton', { name: 'Opacity' })).toHaveValue('40');
+		const width = page.getByRole('slider', { name: 'Width' });
+		await width.fill('4');
+		await expect(page.getByRole('spinbutton', { name: 'Width' })).toHaveValue('4');
 
-		// or typed exactly, in percent, and kept within the range of the slider
-		const field = page.getByRole('spinbutton', { name: 'Opacity' });
-		await field.fill('25');
+		// or typed exactly, and kept within the range of the slider
+		const field = page.getByRole('spinbutton', { name: 'Width' });
+		await field.fill('2.3');
 		await field.press('Enter');
-		await expect.poll(async () => (await polygon()).style?.opacity).toBe(0.25);
+		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(2.3);
 		// the slider shows the step next to it, the field the exact value
-		await expect(field).toHaveValue('25');
+		await expect(field).toHaveValue('2.3');
 		await field.fill('150');
 		await field.press('Enter');
-		await expect.poll(async () => (await polygon()).style?.opacity).toBeUndefined();
-		await expect(field).toHaveValue('100');
+		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(5);
+		await expect(field).toHaveValue('5');
 
 		// the label of a marker, at its place around the symbol
 		const [x, y] = await project(page, [13.3, 52.5]);

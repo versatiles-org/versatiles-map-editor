@@ -344,14 +344,15 @@ describe('MapDocument', () => {
 
 		it('should restore falsy style values', async () => {
 			const polygon = addElement(doc, 'polygon');
-			polygon.fillLayer.opacity = 0;
+			polygon.fillLayer.color = '#ff000000';
 			polygon.strokeLayer.visible = false;
 			const marker = addElement(doc, 'marker');
 			marker.layer.halo = 0;
 
 			await doc.setState(decodeState(doc.state.getHash()));
 			const [restoredPolygon, restoredMarker] = doc.elements.map((e) => e.getState());
-			expect(restoredPolygon).toMatchObject({ style: { opacity: 0 }, strokeStyle: { visible: false } });
+			// an invisible fill
+			expect(restoredPolygon).toMatchObject({ style: { color: '#ff000000' }, strokeStyle: { visible: false } });
 			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });
 		});
 	});
@@ -483,8 +484,7 @@ describe('MapDocument', () => {
 			const polygon = addElement(doc, 'polygon');
 			const marker = addElement(doc, 'marker');
 			doc.state.log();
-			polygon.fillLayer.color = '#123456';
-			polygon.fillLayer.opacity = 0.2;
+			polygon.fillLayer.color = '#12345633';
 			polygon.strokeLayer.width = 7;
 			doc.state.log();
 			mockMap.addSource.mockClear();
@@ -498,7 +498,7 @@ describe('MapDocument', () => {
 
 			await doc.state.redo();
 			expect(doc.elements).toStrictEqual([polygon, marker]);
-			expect(polygon.getState().style).toStrictEqual({ color: '#123456', opacity: 0.2 });
+			expect(polygon.getState().style).toStrictEqual({ color: '#12345633' });
 			expect(polygon.getState().strokeStyle).toStrictEqual({ width: 7 });
 		});
 

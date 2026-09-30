@@ -1,5 +1,12 @@
 import { StylePart } from './abstract.svelte.js';
-import { type StateStyle, FILL_DEFAULTS, FILL_PATTERN_NAMES, removeDefaultFields } from '@versatiles/map-state';
+import {
+	type StateStyle,
+	FILL_DEFAULTS,
+	FILL_PATTERN_NAMES,
+	formatHex,
+	parseColor,
+	removeDefaultFields
+} from '@versatiles/map-state';
 
 /** The fill patterns by their index, with their names from the codec, e.g. for choosing one. */
 export const fillPatterns = new Map<number, { name: string }>(
@@ -25,7 +32,6 @@ export class FillStyle extends StylePart {
 	protected readonly defaults = FillStyle.defaultStyle;
 
 	#color: string = $state(FILL_DEFAULTS.color);
-	#opacity: number = $state(FILL_DEFAULTS.opacity);
 	#pattern: number = $state(FILL_DEFAULTS.pattern);
 
 	get color(): string {
@@ -34,14 +40,6 @@ export class FillStyle extends StylePart {
 	set color(value: string) {
 		if (value === this.#color) return;
 		this.#color = value;
-		this.changed();
-	}
-	get opacity(): number {
-		return this.#opacity;
-	}
-	set opacity(value: number) {
-		if (value === this.#opacity) return;
-		this.#opacity = value;
 		this.changed();
 	}
 	get pattern(): number {
@@ -53,20 +51,21 @@ export class FillStyle extends StylePart {
 		this.changed();
 	}
 
+	/**
+	 * The image of the pattern in the color without its opacity, which is a property of its own, so
+	 * the colors of all opacities share one image.
+	 */
 	getProperties() {
-		return { pattern: fillPatternName(this.pattern, this.color), opacity: this.opacity };
+		const { r, g, b, alpha } = parseColor(this.color) ?? { r: 0, g: 0, b: 0, alpha: 1 };
+		return { pattern: fillPatternName(this.pattern, formatHex({ r, g, b, alpha: 1 })), opacity: alpha };
 	}
 
 	getState(): StateStyle | undefined {
-		return removeDefaultFields(
-			{ color: this.color, opacity: this.opacity, pattern: this.pattern },
-			FillStyle.defaultStyle
-		);
+		return removeDefaultFields({ color: this.color, pattern: this.pattern }, FillStyle.defaultStyle);
 	}
 
 	patch(state: StateStyle) {
 		if (state.color != null) this.color = state.color;
-		if (state.opacity != null) this.opacity = state.opacity;
 		if (state.pattern != null) this.pattern = state.pattern;
 	}
 }

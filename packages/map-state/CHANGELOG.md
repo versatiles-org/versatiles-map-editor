@@ -39,6 +39,10 @@ The first release.
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).
+- The opacity of every color is its alpha, also of a fill: styles have no `opacity`. GeoJSON has
+  a fill's as `fill-color` without alpha and `fill-opacity`, as simplestyle does. Older base64
+  strings, whose fills had an opacity of their own, are read with it as the alpha of the color;
+  `upgradeState` does the same for a `MapState` of an older version, e.g. of a saved file.
 - Features that cannot be mapped are skipped on import, e.g. circles without a positive radius, and
   deeply nested KML is read without a stack overflow.
 - Metadata is stored only if one of its fields has a value, so the same map always gives the same

@@ -100,7 +100,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 0],
 					[1, 1]
 				],
-				style: { color: '#112233', opacity: 0.5 },
+				style: { color: '#11223380' },
 				strokeStyle: { color: '#445566', width: 3, visible: false },
 				popup: { text: 'A polygon' }
 			},

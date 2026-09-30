@@ -323,7 +323,7 @@ describe('StateReader', () => {
 					{
 						type: 'marker',
 						point: [3, 4],
-						style: { halo: 1.2, opacity: 3.4, color: '#ff0000' }
+						style: { halo: 1.2, size: 3.4, color: '#ff0000' }
 					},
 					{
 						type: 'line',
@@ -335,8 +335,8 @@ describe('StateReader', () => {
 					{
 						type: 'polygon',
 						points: path,
-						style: { halo: 1.5, opacity: 0.8, color: '#0000ff64' },
-						strokeStyle: { halo: 1.5, opacity: 0.8, color: '#ffff00' }
+						style: { halo: 1.5, width: 0.8, color: '#0000ff64' },
+						strokeStyle: { halo: 1.5, width: 0.8, color: '#ffff00' }
 					},
 					{
 						type: 'circle',
@@ -350,12 +350,26 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JX-AAAAAP-yf_-ABERERERESyEN_pQL_awpEyFgINJrANJrEAWCpUgACEBRbwBRbwBpNYBpNYG1KbCuJrurSk2hnA3KMedOJKEGNyF-QB-JuFkmIaF2FSIOFqNcSZXpKRHFAF4oRICCFAgIDDrCEDDrCFmGxAgYIEEA'
+				'JX-AAAAAP-yf_-ABERERERESyEN_pQL_awpEyFgINJrANJrEAWFFCgACEBRbwBRbwBpNYBpNYG1KbCuJrurSk2hnA3KMedOJKEGNyF-QB-JuFkmIaF2FSIOFqNcSZXpKRHFAF5kICCFAgIDDrCEDDrCFmGxAgYIEEA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
 			expect(reader.ended()).toBe(true);
 		});
+	});
+
+	it('reads the opacity of fills in older strings as the alpha of their color', () => {
+		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
+		// the outline of a polygon, the outline referring to the style of the fill
+		const state = StateReader.fromBase64(
+			'JX-AAAAAP-yf_-ABERERERESyEN_pQL_awpEyFgINJrANJrEAWCpUgACEBRbwBRbwBpNYBpNYG1KbCuJrurSk2hnA3KMedOJKEGNyF-QB-JuFkmIaF2FSIOFqNcSZXpKRHFAF4oRICCFAgIDDrCEDDrCFmGxAgYIEEA'
+		).readRoot();
+		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
+		// at most opaque
+		expect(marker.style).toStrictEqual({ halo: 1.2, color: '#ff0000' });
+		// 0x64 × 0.8 = 0x50
+		expect(polygon.style).toStrictEqual({ halo: 1.5, color: '#0000ff50' });
+		expect(polygon.strokeStyle).toStrictEqual({ halo: 1.5, color: '#ffff00cc' });
 	});
 
 	describe('readStyle', () => {
@@ -370,7 +384,6 @@ describe('StateReader', () => {
 		it('should read a style correctly', () => {
 			const style: StateStyle = {
 				halo: 1.5,
-				opacity: 0.8,
 				pattern: 3,
 				rotate: -45,
 				size: 2.5,
@@ -384,7 +397,7 @@ describe('StateReader', () => {
 			// the palette of the colors, which the style refers to
 			writer.writePalette(['#c400ff42']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CxAD_oQAvFCIYyZiLk1zkQBJAgRwlA');
+			expect(writer.asBase64()).toBe('CxAD_oQAvGMmYi5Nc5EASQIEcJQA');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();

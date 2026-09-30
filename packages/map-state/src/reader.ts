@@ -15,8 +15,9 @@ import type {
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { sanitizeBackground } from './profile.js';
+import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
-import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
+import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
@@ -415,7 +416,11 @@ export class StateReader {
 		}
 	}
 
-	/** A style: a reference to an earlier style (0: none) and the differences to it. */
+	/**
+	 * A style: a reference to an earlier style (0: none) and the differences to it. The opacity of
+	 * a fill in an older string becomes the alpha of its color; the style history keeps the style
+	 * as it was written, since later styles of the string refer to it.
+	 */
 	readStyle(): StateStyle {
 		try {
 			const ref = this.readVarint();
@@ -423,14 +428,14 @@ export class StateReader {
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch({ ...base });
 			this.styleHistory.remember(style);
-			return style;
+			return withoutOldOpacity(style);
 		} catch (cause) {
 			throw new Error(`Error reading style`, { cause });
 		}
 	}
 
-	/** Apply the changed and removed fields to `style`. */
-	readStylePatch(style: StateStyle): StateStyle {
+	/** Apply the changed and removed fields to `style`, also the opacity of older strings. */
+	readStylePatch(style: OldStyle): OldStyle {
 		while (true) {
 			const key = this.readInteger(4);
 			switch (key) {
@@ -439,7 +444,7 @@ export class StateReader {
 				case 1:
 					style.halo = this.readVarint() / 10;
 					break;
-				case 2:
+				case OLD_OPACITY_KEY:
 					style.opacity = this.readVarint() / 100;
 					break;
 				case 3:
@@ -477,6 +482,10 @@ export class StateReader {
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readInteger(4);
+					if (removed === OLD_OPACITY_KEY) {
+						delete style.opacity;
+						break;
+					}
 					const field = STYLE_FIELDS.find((f) => f.key === removed);
 					if (!field) throw new Error(`Invalid state key: ${removed}`);
 					delete style[field.name];

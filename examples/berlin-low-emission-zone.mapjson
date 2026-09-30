@@ -57,7 +57,7 @@
 				[13.2851, 52.5185],
 				[13.2836, 52.5076]
 			],
-			"style": { "color": "#0072b2", "opacity": 0.3, "pattern": 2 },
+			"style": { "color": "#0072b24d", "pattern": 2 },
 			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
 				"text": "**Low-emission zone (Umweltzone)**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
@@ -83,7 +83,7 @@
 				[13.38598704636675, 52.47112879328836],
 				[13.386213025547676, 52.47608419259447]
 			],
-			"style": { "color": "#009e73", "opacity": 0.3 },
+			"style": { "color": "#009e734d" },
 			"strokeStyle": { "color": "#009e73" },
 			"popup": {
 				"text": "**Tempelhofer Feld**\nThe former airport, closed in 2008, is a public park since 2010. A referendum in 2014 kept it free of buildings."
@@ -109,7 +109,7 @@
 				[13.342841762685964, 52.50921803121102],
 				[13.337832043722727, 52.51149040314229]
 			],
-			"style": { "color": "#009e73", "opacity": 0.3 },
+			"style": { "color": "#009e734d" },
 			"strokeStyle": { "color": "#009e73" },
 			"popup": { "text": "**Großer Tiergarten**\nThe largest park in the center of Berlin." }
 		}
