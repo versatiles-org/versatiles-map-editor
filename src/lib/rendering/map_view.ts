@@ -33,6 +33,14 @@ const ELEMENTS_PADDING = 30;
 /** The closest zoom for elements all at one place, e.g. a single marker (like the table import). */
 const MAX_ZOOM = 15;
 
+/** A rectangle on the map, in pixels from its top left corner. */
+export interface Box {
+	left: number;
+	top: number;
+	right: number;
+	bottom: number;
+}
+
 /**
  * The map on the screen: it draws the elements over the background map, and knows where things
  * are shown, e.g. which element is at a pixel.
@@ -47,6 +55,8 @@ export class MapView {
 	#kept: { frame: Bounds | undefined; elements: StateElement[] } | undefined;
 	/** Whether the view itself moves the map, which does not end keeping the area. */
 	#fitting = false;
+	/** The part of the map that e.g. the legend covers, which a fitted area keeps clear of. */
+	#covered: Box | undefined;
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -130,35 +140,89 @@ export class MapView {
 
 	/**
 	 * Show the frame completely, else all elements, else the whole world, e.g. when a shared map
-	 * opens. The padding of the map (e.g. its bars) is kept free. With `keep`, e.g. in the viewer,
-	 * the area is shown again whenever the size of the map changes, until the map is moved.
+	 * opens. The padding of the map (e.g. its bars) is kept free, and the covered part (e.g. the
+	 * legend) if the area would reach under it. With `keep`, e.g. in the viewer, the area is shown
+	 * again whenever the size of the map or its covered part changes, until the map is moved.
 	 */
 	public fitArea(frame: Bounds | undefined, elements: StateElement[], { keep = false } = {}) {
 		this.#fit(frame, elements);
 		this.#kept = keep ? { frame, elements } : undefined;
 	}
 
+	/** The part of the map that e.g. the legend covers, undefined without one. A kept area is shown again. */
+	public setCovered(box: Box | undefined) {
+		if (JSON.stringify(box) === JSON.stringify(this.#covered)) return;
+		this.#covered = box;
+		if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements);
+	}
+
 	#fit(frame: Bounds | undefined, elements: StateElement[]) {
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
 		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
+		const target: [[number, number], [number, number]] = [
+			[bounds[0], lat(bounds[1])],
+			[bounds[2], lat(bounds[3])]
+		];
+		const padding = frame ? FRAME_PADDING : ELEMENTS_PADDING;
+		// not `maxZoom: undefined`, which would replace MapLibre's default and make the zoom NaN
+		const limit = frame ? {} : { maxZoom: MAX_ZOOM };
 		this.#fitting = true;
 		try {
-			this.map.fitBounds(
-				[
-					[bounds[0], lat(bounds[1])],
-					[bounds[2], lat(bounds[3])]
-				],
-				// not `maxZoom: undefined`, which would replace MapLibre's default and make the zoom NaN
-				frame
-					? { animate: false, padding: FRAME_PADDING }
-					: { animate: false, padding: ELEMENTS_PADDING, maxZoom: MAX_ZOOM }
-			);
+			this.map.fitBounds(target, { animate: false, padding, ...limit });
+			const clear = this.#clearOfCovered(target, padding, limit);
+			if (clear) this.map.fitBounds(target, { animate: false, padding: clear, ...limit });
 		} catch (error) {
 			// the elements must be shown anyway
 			console.error('Failed to show the area of the map', error);
 		} finally {
 			this.#fitting = false;
 		}
+	}
+
+	/**
+	 * If the shown area reaches under the covered part, a padding that keeps it clear: beside it,
+	 * or above or below it, whichever shows the area larger. Undefined if nothing is covered.
+	 */
+	#clearOfCovered(
+		target: [[number, number], [number, number]],
+		padding: number,
+		limit: { maxZoom?: number }
+	): Required<maplibregl.PaddingOptions> | undefined {
+		const box = this.#covered;
+		if (!box) return undefined;
+		const southWest = this.map.project(target[0]);
+		const northEast = this.map.project(target[1]);
+		const shown: Box = {
+			left: southWest.x - padding,
+			top: northEast.y - padding,
+			right: northEast.x + padding,
+			bottom: southWest.y + padding
+		};
+		if (!overlaps(shown, box)) return undefined;
+
+		const { clientWidth: width, clientHeight: height } = this.map.getContainer();
+		const { top = 0, right = 0, bottom = 0, left = 0 } = this.map.getPadding();
+		const base = { top: padding, right: padding, bottom: padding, left: padding };
+		// the fit padding is added to the padding of the map, e.g. its bars
+		const candidates: Required<maplibregl.PaddingOptions>[] = [];
+		if (box.right <= width / 2) candidates.push({ ...base, left: padding + Math.max(0, box.right - left) });
+		else if (box.left >= width / 2)
+			candidates.push({ ...base, right: padding + Math.max(0, width - box.left - right) });
+		if (box.bottom <= height / 2) candidates.push({ ...base, top: padding + Math.max(0, box.bottom - top) });
+		else if (box.top >= height / 2)
+			candidates.push({ ...base, bottom: padding + Math.max(0, height - box.top - bottom) });
+
+		let best: Required<maplibregl.PaddingOptions> | undefined;
+		let bestZoom = -Infinity;
+		for (const candidate of candidates) {
+			// undefined if the area does not fit, e.g. on a small map
+			const zoom = this.map.cameraForBounds(target, { padding: candidate, ...limit })?.zoom;
+			if (zoom !== undefined && zoom > bestZoom) {
+				best = candidate;
+				bestZoom = zoom;
+			}
+		}
+		return best;
 	}
 
 	/** The part of the map that is shown, without the padding of the map, e.g. its bars. */
@@ -201,6 +265,11 @@ export class MapView {
 		const { lng, lat } = this.map.unproject([x + offset[0], y + offset[1]]);
 		return [lng, lat];
 	}
+}
+
+/** Whether two rectangles overlap. */
+function overlaps(a: Box, b: Box): boolean {
+	return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
 }
 
 /** The ring around bounds, closed. */

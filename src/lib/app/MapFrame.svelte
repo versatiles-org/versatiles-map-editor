@@ -22,6 +22,7 @@
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import type { MapDocument } from '$lib/map_document.svelte.js';
+	import type { Box } from '$lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
@@ -121,6 +122,11 @@
 	let pageWidth = $state(0);
 	let searchWidth = $state(0);
 	let legendWidth = $state(0);
+	let legendBox: Box | undefined = $state();
+	// a shared map keeps its area clear of the legend
+	$effect(() => {
+		mapDocument?.view.setCovered(legendPosition ? legendBox : undefined);
+	});
 	let attributionSize: AttributionSize = $state({ width: 0, top: 0 });
 	const layout = $derived(
 		layoutOverlays(legendPosition, {
@@ -264,6 +270,7 @@
 			top={covered.top + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
 			bottom={layout.legendAboveAttribution ? attributionSize.top : covered.bottom}
 			bind:width={legendWidth}
+			onmove={(box) => (legendBox = box)}
 			selected={mapDocument.isInteractive() && mapDocument.selection.legendSelected}
 			onselect={onselectlegend}
 		/>

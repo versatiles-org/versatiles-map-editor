@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { LngLat, MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import { LngLat, MockMap, Point, type MaplibreMap } from '../__mocks__/map.js';
 import { MapView, visibleAreaFeatures } from './map_view.js';
 
 describe('MapView', () => {
@@ -85,6 +85,55 @@ describe('MapView', () => {
 			map.emit('resize');
 			map.emit('resize');
 			expect(map.fitBounds).toHaveBeenCalledTimes(3);
+		});
+
+		describe('with a covered part, e.g. the legend', () => {
+			// the mock map is 800 × 600 pixels; 1 pixel per degree, y to the south
+			beforeEach(() => {
+				map.project.mockImplementation((lngLat) => {
+					const { lng, lat } = LngLat.convert(lngLat);
+					return new Point(400 + lng, 300 - lat);
+				});
+			});
+			const lastPadding = () => (map.fitBounds.mock.lastCall![1] as { padding: unknown }).padding;
+
+			it('keeps the area clear of it, beside or below it, whichever shows the area larger', () => {
+				// a legend at the left, above the middle, 200 × 90 pixels
+				view.setCovered({ left: 10, top: 200, right: 210, bottom: 290 });
+				// beside it zooms less than below it
+				map.cameraForBounds.mockImplementation((_, options) => ({
+					zoom: (options?.padding as { left: number }).left > 10 ? 8 : 9
+				}));
+				view.fitArea([-300, -80, 300, 80], []);
+				expect(map.fitBounds).toHaveBeenCalledTimes(2);
+				expect(lastPadding()).toStrictEqual({ top: 300, right: 10, bottom: 10, left: 10 });
+
+				// beside it, if that shows the area larger
+				map.cameraForBounds.mockImplementation((_, options) => ({
+					zoom: (options?.padding as { left: number }).left > 10 ? 9 : 8
+				}));
+				view.fitArea([-300, -80, 300, 80], []);
+				expect(lastPadding()).toStrictEqual({ top: 10, right: 10, bottom: 10, left: 220 });
+			});
+
+			it('fits as usual if the area does not reach under it', () => {
+				view.setCovered({ left: 10, top: 10, right: 210, bottom: 110 });
+				view.fitArea([0, -50, 50, 50], []);
+				expect(map.fitBounds).toHaveBeenCalledTimes(1);
+				expect(lastPadding()).toBe(10);
+			});
+
+			it('shows a kept area again when it changes', () => {
+				view.fitArea([-300, -80, 300, 80], [], { keep: true });
+				expect(map.fitBounds).toHaveBeenCalledTimes(1);
+				view.setCovered({ left: 590, top: 310, right: 790, bottom: 400 });
+				expect(map.fitBounds).toHaveBeenCalledTimes(3);
+				// the same again: nothing to do
+				view.setCovered({ left: 590, top: 310, right: 790, bottom: 400 });
+				expect(map.fitBounds).toHaveBeenCalledTimes(3);
+				view.setCovered(undefined);
+				expect(map.fitBounds).toHaveBeenCalledTimes(4);
+			});
 		});
 
 		it('shows the whole world without frame and elements', () => {

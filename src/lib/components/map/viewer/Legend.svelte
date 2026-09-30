@@ -3,11 +3,13 @@
 	import type { StateLegend } from '@versatiles/map-state';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { parseHex, toHex } from '$lib/components/color.js';
+	import type { Box } from '$lib/rendering/index.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
 	/** In the editor, a click selects it (`onselect`). */
 	/** `width` is its width, e.g. to move it below the search if both do not fit side by side. */
+	/** `onmove` tells where it is on the map, so a fitted area keeps clear of it. */
 	let {
 		legend,
 		left = 0,
@@ -16,7 +18,8 @@
 		bottom = 0,
 		selected = false,
 		onselect,
-		width = $bindable(0)
+		width = $bindable(0),
+		onmove
 	}: {
 		legend: StateLegend;
 		left?: number;
@@ -26,7 +29,25 @@
 		selected?: boolean;
 		onselect?: () => void;
 		width?: number;
+		onmove?: (box: Box) => void;
 	} = $props();
+
+	let element: HTMLDivElement | undefined = $state();
+	let height = $state(0);
+	// after each change of its size or place; relative to the page, which is as large as the map
+	$effect(() => {
+		void [width, height, left, right, top, bottom, legend.position, legend.layout];
+		const page = element?.offsetParent;
+		if (!element || !page) return;
+		const rect = element.getBoundingClientRect();
+		const origin = page.getBoundingClientRect();
+		onmove?.({
+			left: rect.left - origin.left,
+			top: rect.top - origin.top,
+			right: rect.right - origin.left,
+			bottom: rect.bottom - origin.top
+		});
+	});
 
 	const symbolSize = 18;
 	// twice the pixels of the screen, which the browser scales down to smooth edges
@@ -69,6 +90,8 @@
 		style:--bottom="{bottom}px"
 		style:font-family={legend.font ?? 'sans-serif'}
 		bind:offsetWidth={width}
+		bind:offsetHeight={height}
+		bind:this={element}
 		role="list"
 		aria-label="Legend"
 	>

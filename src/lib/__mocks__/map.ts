@@ -73,6 +73,14 @@ export class MockMap {
 		return bounds;
 	});
 	fitBounds = vi.fn();
+	cameraForBounds = vi.fn(
+		(
+			_bounds: maplibre.LngLatBoundsLike,
+			_options?: maplibre.CameraForBoundsOptions
+		): { zoom?: number } | undefined => ({
+			zoom: 10
+		})
+	);
 	setStyle = vi.fn(() => this.emit('style.load'));
 }
 

@@ -53,6 +53,27 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(frame);
 });
 
+test('a shared map keeps its frame clear of the legend', async ({ page }) => {
+	// a window of the shape of the frame, so the frame would fill it, also under the legend
+	await page.setViewportSize({ width: 600, height: 500 });
+	const entries = ['Cafés', 'Bakeries', 'Parks', 'Museums'].map((label) => ({ color: '#ff0000', label }));
+	await page.goto('/view#' + encodeState({ frame, elements, meta: { legend: { entries } } }));
+	await waitForMapIsReady(page);
+	const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
+	await expect
+		.poll(async () => {
+			const shown = await frameOnPage(page, frame);
+			const clear =
+				shown.right <= legend.x ||
+				shown.left >= legend.x + legend.width ||
+				shown.bottom <= legend.y ||
+				shown.top >= legend.y + legend.height;
+			// and still completely on the map
+			return clear && shown.left >= 0 && shown.top >= 0 && shown.right <= 600 && shown.bottom <= 500;
+		})
+		.toBe(true);
+});
+
 test('without a frame, a shared map shows its elements, a single marker not closer than zoom 15', async ({ page }) => {
 	await page.goto('/view#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
