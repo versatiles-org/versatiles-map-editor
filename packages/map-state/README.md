@@ -60,7 +60,8 @@ stateFromKML(kml: string): MapState
   `centerOf(bounds)` their center.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
-  the way the editor does.
+  the way the editor does. `LEGEND_DEFAULTS` are the position, layout and font of a legend that
+  names none, and `removeLegendDefaults` leaves them out, as the base64 string does.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.
 

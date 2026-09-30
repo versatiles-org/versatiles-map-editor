@@ -35,7 +35,8 @@ The first release.
   KML document) and `mapLabelsOnTop` (the labels of the background map over the areas and lines of
   the elements).
 - The style vocabulary of the editor: defaults, names of patterns, stroke styles and label
-  alignments.
+  alignments. `LEGEND_DEFAULTS` and `removeLegendDefaults` for the position, layout and font of a
+  legend, which the base64 string leaves out, and a legend read from GeoJSON or KML too.
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).

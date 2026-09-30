@@ -22,7 +22,9 @@ export {
 	FILL_PATTERN_NAMES,
 	STROKE_STYLE_NAMES,
 	LABEL_ALIGN_NAMES,
-	removeDefaultFields
+	removeDefaultFields,
+	LEGEND_DEFAULTS,
+	removeLegendDefaults
 } from './profile.js';
 
 /**

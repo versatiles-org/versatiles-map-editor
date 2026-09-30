@@ -3,6 +3,7 @@ import type { AbstractElement } from './element/abstract.svelte.js';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
 import {
 	boundsOf,
+	removeLegendDefaults,
 	type Bounds,
 	type StateBackground,
 	type StateLegend,
@@ -36,8 +37,18 @@ export class MapDocument {
 	 * the elements. Part of the history, so a change can be undone.
 	 */
 	public frame: Bounds | undefined = $state.raw(undefined);
-	/** The legend of the map, if it has one. Replaced as a whole on every change. */
-	public legend: StateLegend | undefined = $state.raw(undefined);
+	/**
+	 * The legend of the map, if it has one. Replaced as a whole on every change. Without the fields
+	 * that have their default value, as links store it, so a legend is the same in a link, a file
+	 * and the editor.
+	 */
+	get legend(): StateLegend | undefined {
+		return this.#legend;
+	}
+	set legend(value: StateLegend | undefined) {
+		this.#legend = value && removeLegendDefaults(value);
+	}
+	#legend: StateLegend | undefined = $state.raw(undefined);
 	private destroyed = false;
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
 	#loading = $state(false);

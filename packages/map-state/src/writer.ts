@@ -1,7 +1,7 @@
 import { parseColor } from './color.js';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { boundsOf, centerOf } from './bounds.js';
-import { sanitizeFrame } from './profile.js';
+import { LEGEND_DEFAULTS, sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
@@ -336,15 +336,15 @@ export class StateWriter {
 
 	// key/value pairs like a style, so fields can be added later
 	writeLegend(legend: StateLegend) {
-		if (legend.position && legend.position !== 'bottom-left') {
+		if (legend.position && legend.position !== LEGEND_DEFAULTS.position) {
 			this.writeInteger(1, 4);
 			this.writeVarint(LEGEND_POSITIONS.indexOf(legend.position));
 		}
-		if (legend.layout && legend.layout !== 'vertical') {
+		if (legend.layout && legend.layout !== LEGEND_DEFAULTS.layout) {
 			this.writeInteger(2, 4);
 			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));
 		}
-		if (legend.font && legend.font !== 'sans-serif') {
+		if (legend.font && legend.font !== LEGEND_DEFAULTS.font) {
 			this.writeInteger(4, 4);
 			this.writeVarint(LEGEND_FONTS.indexOf(legend.font));
 		}

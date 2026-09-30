@@ -240,6 +240,20 @@ describe('MapDocument', () => {
 		});
 	});
 
+	it('keeps the legend without its default values, as links store it', async () => {
+		const entries = [{ color: '#ff0000', label: 'A' }];
+		await mapDocument.loadState({
+			elements: [],
+			meta: { legend: { position: 'bottom-left', layout: 'vertical', font: 'sans-serif', entries } }
+		});
+		expect(mapDocument.legend).toStrictEqual({ entries });
+		// also when it is changed, e.g. in the panel of the legend
+		mapDocument.legend = { position: 'top-right', font: 'sans-serif', entries };
+		expect(mapDocument.legend).toStrictEqual({ position: 'top-right', entries });
+		mapDocument.legend = undefined;
+		expect(mapDocument.legend).toBeUndefined();
+	});
+
 	it('should identify as non-interactive', () => {
 		expect(mapDocument.isInteractive()).toBe(false);
 	});

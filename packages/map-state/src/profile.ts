@@ -235,6 +235,21 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 
 // ----- legend -----
 
+/** The values of a legend that are not stored: at the bottom left, entries below each other, a sans-serif font. */
+export const LEGEND_DEFAULTS = { position: 'bottom-left', layout: 'vertical', font: 'sans-serif' } as const;
+
+/**
+ * The legend without the fields that have their default value, as the base64 string stores it, so
+ * a legend is the same whether it comes from a link, a file or the editor.
+ */
+export function removeLegendDefaults(legend: StateLegend): StateLegend {
+	const result = { ...legend };
+	for (const key of Object.keys(LEGEND_DEFAULTS) as (keyof typeof LEGEND_DEFAULTS)[]) {
+		if (result[key] === LEGEND_DEFAULTS[key]) delete result[key];
+	}
+	return result;
+}
+
 /** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
@@ -261,5 +276,5 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		if (symbol) result.symbol = symbol;
 		legend.entries.push(result);
 	}
-	return legend;
+	return removeLegendDefaults(legend);
 }
