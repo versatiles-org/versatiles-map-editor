@@ -1,7 +1,15 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
-import type { StateBackground, StateLegend, MapState, StateElement, StateMetadata } from '@versatiles/map-state';
+import {
+	boundsOf,
+	type Bounds,
+	type StateBackground,
+	type StateLegend,
+	type MapState,
+	type StateElement,
+	type StateMetadata
+} from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
 import { MapView, type ElementIndex } from './rendering/index.js';
 import { getSettings, sameBackground } from './background/index.js';
@@ -23,6 +31,11 @@ export class MapDocument {
 	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
 	/** Whether the labels of the background map are drawn over the areas and lines of the elements. */
 	#mapLabelsOnTop = $state(false);
+	/**
+	 * The visible area: what a shared or embedded map shows completely. Undefined for the bounds of
+	 * the elements. Part of the history, so a change can be undone.
+	 */
+	public frame: Bounds | undefined = $state.raw(undefined);
 	/** The legend of the map, if it has one. Replaced as a whole on every change. */
 	public legend: StateLegend | undefined = $state.raw(undefined);
 	private destroyed = false;
@@ -143,10 +156,21 @@ export class MapDocument {
 		elements.forEach((element) => element.destroy());
 	}
 
+	/** The bounds of all elements, or undefined without elements. */
+	public getBounds(): Bounds | undefined {
+		return boundsOf(this.elements.map((element) => element.getState()));
+	}
+
+	/**
+	 * Open a map. The editor looks where its camera was (`map`); without one, and always in the
+	 * viewer, the map shows its frame, else its elements.
+	 */
 	public async loadState(state: MapState) {
 		if (!state) return;
 		this.clear();
-		await this.setState(state);
+		const camera = this.isInteractive() ? state.map : undefined;
+		if (!camera) this.view.fitArea(state.frame, state.elements);
+		await this.setState({ ...state, map: camera });
 	}
 
 	/** Whether a state is being loaded: until then, the map misses (some of) its elements. */
@@ -183,6 +207,7 @@ export class MapDocument {
 		this.deselectAll();
 
 		if (state.map) this.view.fitViewport(state.map);
+		this.frame = state.frame;
 		this.applyMetadata(state.meta);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, this.#background)) {

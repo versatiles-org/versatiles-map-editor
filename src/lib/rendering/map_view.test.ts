@@ -37,4 +37,33 @@ describe('MapView', () => {
 			expect(error).toHaveBeenCalled();
 		});
 	});
+
+	describe('fitArea', () => {
+		it('shows the frame with a small padding, the elements with a larger one and a maximum zoom', () => {
+			view.fitArea([1, 2, 3, 4], []);
+			expect(map.fitBounds).toHaveBeenLastCalledWith(
+				[
+					[1, 2],
+					[3, 4]
+				],
+				{ animate: false, padding: 10 }
+			);
+			view.fitArea(undefined, [{ type: 'marker', point: [5, 6] }]);
+			expect(map.fitBounds).toHaveBeenLastCalledWith(
+				[
+					[5, 6],
+					[5, 6]
+				],
+				{ animate: false, padding: 30, maxZoom: 15 }
+			);
+		});
+
+		it('shows the whole world without frame and elements', () => {
+			view.fitArea(undefined, []);
+			const [[west, south], [east, north]] = map.fitBounds.mock.lastCall?.[0] as [number, number][];
+			expect([west, east]).toStrictEqual([-180, 180]);
+			expect(south).toBeCloseTo(-85.05);
+			expect(north).toBeCloseTo(85.05);
+		});
+	});
 });

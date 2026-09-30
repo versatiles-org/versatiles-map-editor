@@ -12,7 +12,8 @@ import {
 	type GeoJSONDocument,
 	type StateElement,
 	type StateMetadata,
-	type MapState
+	type MapState,
+	type Bounds
 } from '@versatiles/map-state';
 import type { GeoPoint } from './geometry.js';
 
@@ -122,6 +123,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 		return {
 			map: this.view.getViewport(),
+			...(this.frame ? { frame: this.frame } : {}),
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
 			elements: this.elements.map((element) => element.getState())
 		};
@@ -137,6 +139,8 @@ export class MapDocumentInteractive extends MapDocument {
 	 */
 	public addState(state: MapState) {
 		if (state.map) this.view.fitViewport(state.map);
+		// both frames: one that covers both; else the one there is
+		if (state.frame) this.frame = this.frame ? unionOf(this.frame, state.frame) : state.frame;
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
 		if (meta.legend) this.legend = meta.legend;
@@ -147,4 +151,9 @@ export class MapDocumentInteractive extends MapDocument {
 		if (meta.mapLabelsOnTop) this.mapLabelsOnTop = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
+}
+
+/** The bounds that cover both. */
+function unionOf(a: Bounds, b: Bounds): Bounds {
+	return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
 }

@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { MapState } from '@versatiles/map-state';
+import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { GeoPoint } from '../geometry.js';
 import { ElementRenderer, layerIdsOf } from './element_renderer.js';
@@ -25,6 +25,13 @@ export function indexElements(elements: AbstractElement[]): ElementIndex {
 const MAX_LATITUDE = 85.051129;
 /** The circumference of the earth in meters, as the viewport measures it. */
 const EARTH_CIRCUMFERENCE = 40074000;
+
+/** The padding around a frame that the author set, in pixels. */
+const FRAME_PADDING = 10;
+/** The padding around the elements, which is larger, since the symbols of markers are larger than their points. */
+const ELEMENTS_PADDING = 30;
+/** The closest zoom for elements all at one place, e.g. a single marker (like the table import). */
+const MAX_ZOOM = 15;
 
 /**
  * The map on the screen: it draws the elements over the background map, and knows where things
@@ -99,6 +106,30 @@ export class MapView {
 		} catch (error) {
 			// the elements must be shown anyway
 			console.error('Failed to show the viewport of the map', error);
+		}
+	}
+
+	/**
+	 * Show the frame completely, else all elements, else the whole world, e.g. when a shared map
+	 * opens. The padding of the map (e.g. its bars) is kept free.
+	 */
+	public fitArea(frame: Bounds | undefined, elements: StateElement[]) {
+		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
+		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
+		try {
+			this.map.fitBounds(
+				[
+					[bounds[0], lat(bounds[1])],
+					[bounds[2], lat(bounds[3])]
+				],
+				// not `maxZoom: undefined`, which would replace MapLibre's default and make the zoom NaN
+				frame
+					? { animate: false, padding: FRAME_PADDING }
+					: { animate: false, padding: ELEMENTS_PADDING, maxZoom: MAX_ZOOM }
+			);
+		} catch (error) {
+			// the elements must be shown anyway
+			console.error('Failed to show the area of the map', error);
 		}
 	}
 

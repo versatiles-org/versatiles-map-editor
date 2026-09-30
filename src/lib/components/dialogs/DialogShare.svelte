@@ -40,7 +40,7 @@
 
 	function getLinkCode() {
 		const digits = precision === 'auto' ? autoDigits : precision;
-		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfDigits(digits) })}`;
+		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfDigits(digits), camera: false })}`;
 	}
 
 	function getEmbedCode() {

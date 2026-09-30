@@ -90,7 +90,8 @@ describe('MapDocument', () => {
 
 		await mapDocument.loadState(state);
 		expect(clearSpy).toHaveBeenCalled();
-		expect(setStateSpy).toHaveBeenCalledWith(state);
+		// the viewer shows the frame, else the elements, not the camera of the author
+		expect(setStateSpy).toHaveBeenCalledWith({ ...state, map: undefined });
 	});
 
 	it('should propagate errors while loading a state', async () => {

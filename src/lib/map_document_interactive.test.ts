@@ -538,4 +538,66 @@ describe('MapDocument', () => {
 			expect(mockMap.moveLayer).not.toHaveBeenCalled();
 		});
 	});
+
+	describe('frame', () => {
+		const frame: [number, number, number, number] = [13.3, 52.45, 13.5, 52.55];
+		const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+
+		it('is part of the state and of the history, so a change can be undone', async () => {
+			expect(doc.getState().frame).toBeUndefined();
+			doc.frame = frame;
+			doc.state.log();
+			expect(doc.getState().frame).toStrictEqual(frame);
+			await doc.state.undo();
+			expect(doc.frame).toBeUndefined();
+			await doc.state.redo();
+			expect(doc.frame).toStrictEqual(frame);
+		});
+
+		it('is shown when a map without a camera opens, e.g. of a share link; else the elements', async () => {
+			mockMap.fitBounds.mockClear();
+			await doc.loadState({ frame, elements });
+			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual([
+				[13.3, 52.45],
+				[13.5, 52.55]
+			]);
+			await doc.loadState({ elements });
+			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual([
+				[13.4, 52.5],
+				[13.4, 52.5]
+			]);
+		});
+
+		it('is not shown when the editor has a camera, e.g. of its session', async () => {
+			await doc.loadState({ frame, elements, map: { center: [10, 50], radius: 1000 } });
+			const [[west, south], [east, north]] = mockMap.fitBounds.mock.lastCall?.[0] as [number, number][];
+			expect((west + east) / 2).toBeCloseTo(10);
+			expect((south + north) / 2).toBeCloseTo(50);
+		});
+
+		it('covers both frames when a file with a frame is imported', () => {
+			doc.frame = frame;
+			doc.addState({ frame: [13.4, 52.5, 13.6, 52.6], elements: [] });
+			expect(doc.frame).toStrictEqual([13.3, 52.45, 13.6, 52.6]);
+			doc.frame = undefined;
+			doc.addState({ frame, elements: [] });
+			expect(doc.frame).toStrictEqual(frame);
+			doc.addState({ elements: [] });
+			expect(doc.frame).toStrictEqual(frame);
+		});
+
+		it('is in share links, where the camera is left out', () => {
+			doc.frame = frame;
+			const shared = decodeState(doc.state.getHash({ camera: false }));
+			expect(shared.frame).toStrictEqual(frame);
+			expect(shared.map).toBeUndefined();
+			expect(decodeState(doc.state.getHash()).map).toBeDefined();
+		});
+
+		it('is next to the bounds of the elements', () => {
+			expect(doc.getBounds()).toBeUndefined();
+			addElement(doc, 'marker');
+			expect(doc.getBounds()).toHaveLength(4);
+		});
+	});
 });

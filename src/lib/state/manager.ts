@@ -17,9 +17,15 @@ export class StateManager {
 		this.history = new StateHistory(mapDocument.getState());
 	}
 
-	/** `resolution`: the precision of the coordinates in meters, e.g. coarser for sharing. */
-	public getHash(options: { resolution?: number } = {}): string {
-		return encodeState(this.mapDocument.getState(), options);
+	/**
+	 * The map as a link. `resolution`: the precision of the coordinates in meters, e.g. coarser for
+	 * sharing. `camera: false` leaves out where the editor looks, e.g. for sharing: a shared map
+	 * shows its frame, else its elements.
+	 */
+	public getHash({ resolution, camera = true }: { resolution?: number; camera?: boolean } = {}): string {
+		const state = this.mapDocument.getState();
+		if (!camera) delete state.map;
+		return encodeState(state, { resolution });
 	}
 
 	public log() {

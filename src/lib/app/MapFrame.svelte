@@ -221,8 +221,9 @@
 		const last = !editor && !hash ? await sync?.last() : undefined;
 		if (destroyed) return;
 
-		// The map has no style yet, so it shows nothing until the country is shown
-		if (opening ? !opening.camera : !hash && !last?.map) await showCountry(map);
+		// The map has no style yet, so it shows nothing until the country is shown. A map to open
+		// shows its camera, its frame or its elements.
+		if (opening ? opening.kind === 'new' : !hash && !last) await showCountry(map);
 		if (destroyed) return;
 
 		const doc = createDocument(map);
