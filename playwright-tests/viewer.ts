@@ -179,7 +179,7 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 		const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 
 		for (const control of [
-			dialog.getByRole('button', { name: 'Copy Embed Code' }),
+			dialog.getByRole('button', { name: 'Copy embed code' }),
 			dialog.getByRole('combobox', { name: 'Precision' }),
 			dialog.getByRole('checkbox', { name: 'Address search in the map' }),
 			dialog.getByRole('button', { name: 'Reload' })
@@ -187,11 +187,6 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 			await control.scrollIntoViewIfNeeded();
 			await expect(control).toBeInViewport();
 		}
-
-		// the caption of the aspect ratios does not cover the "Reload" button
-		const caption = (await dialog.getByText('Aspect ratio of the preview').boundingBox())!;
-		const reload = (await dialog.getByRole('button', { name: 'Reload' }).boundingBox())!;
-		expect(boxesOverlap(caption, reload)).toBe(false);
 	});
 });
 

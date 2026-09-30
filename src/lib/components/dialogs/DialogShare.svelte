@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/state/manager.js';
-	import { Dialog, Button, ChoiceGroup } from '$lib/components/ui/index.js';
+	import { Dialog, Button, ChoiceGroup, Hint } from '$lib/components/ui/index.js';
 	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
 
@@ -157,17 +157,26 @@
 </script>
 
 <Dialog bind:this={dialog} size="fullscreen" title="Share or embed the map">
-	<div class="grid">
-		<div class="head">
-			<p>Share your map with others by copying the link or embed code below.</p>
+	<div class="layout">
+		<div class="preview">
+			<div class="toolbar">
+				<h3>Preview</h3>
+				<span class="sr-only" id="{uid}-ratio">Aspect ratio of the preview</span>
+				<div class="ratios">
+					<ChoiceGroup labelledby="{uid}-ratio" value={previewAspectRatio} onchange={selectPreview} options={RATIOS} />
+				</div>
+				<Button variant="ghost" onclick={() => update(0)}>Reload</Button>
+			</div>
+			<div class="stage">
+				<iframe title="preview" bind:this={iframe} class={'aspect-' + previewAspectRatio}></iframe>
+			</div>
 		</div>
-		<div class="left">
-			<iframe title="preview" bind:this={iframe} class={'aspect-' + previewAspectRatio}></iframe>
-		</div>
-		<div class="right">
-			{#if notice}
-				<div class="notice">
-					<p>
+
+		<div class="panel">
+			<section aria-labelledby="{uid}-area">
+				<h3 id="{uid}-area">Visible area</h3>
+				{#if notice}
+					<p class="notice">
 						{#if notice.kind === 'outside'}
 							{notice.count}
 							{notice.count === 1 ? 'element is' : 'elements are'} outside the visible area.
@@ -175,53 +184,60 @@
 							The map is empty and has no visible area, so it shows the whole world.
 						{/if}
 					</p>
-					<div class="buttons">
-						<Button onclick={editVisibleArea}>Edit visible area</Button>
-						{#if notice.kind === 'outside'}<Button variant="ghost" onclick={fitToElements}>Fit to elements</Button>{/if}
-					</div>
+				{:else}
+					<Hint>
+						{stateManager.mapDocument.frame
+							? 'The map shows the visible area that you set, on every screen.'
+							: 'The map shows all elements, on every screen.'}
+					</Hint>
+				{/if}
+				<div class="buttons">
+					<Button onclick={editVisibleArea}>Edit visible area…</Button>
+					{#if notice?.kind === 'outside'}<Button variant="ghost" onclick={fitToElements}>Fit to elements</Button>{/if}
 				</div>
-			{:else}
-				<p class="visible-area">
-					<Button onclick={editVisibleArea}>Edit visible area</Button>
-				</p>
-			{/if}
-			<p>
-				<label for="text-link">
-					Link
-					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
-				</label>
-				<Button variant="primary" class="copy" bind:element={btnLink} onclick={copyLink}>Copy Link</Button>
-				<span class="sr-only" role="status">{copied}</span>
-				{#if copyError}<span class="copy-error" role="alert">{copyError}</span>{/if}
-			</p>
-			<p>
-				<label for="text-iframe">
-					Embed Code
-					<textarea id="text-iframe" rows="5" readonly onclick={(e) => e.currentTarget.select()}>{embedCode}</textarea>
-				</label>
+			</section>
 
-				<Button class="copy" bind:element={btnEmbed} onclick={copyEmbedCode}>Copy Embed Code</Button>
-			</p>
-			<p>
-				<label for="share-precision">Precision</label>
-				<select
-					id="share-precision"
-					value={String(precision)}
-					onchange={(e) => {
-						const value = e.currentTarget.value;
-						precision = value === 'auto' ? 'auto' : Number(value);
-						update(0);
-					}}
-				>
-					<option value="auto">Automatic (about {formatLength(resolutionOfDigits(autoDigits))})</option>
-					{#each [5, 4, 3, 2] as digits (digits)}
-						<option value={String(digits)}>About {formatLength(resolutionOfDigits(digits))}</option>
-					{/each}
-				</select>
-				<span class="hint">Coarser positions make shorter links.</span>
-			</p>
-			<p>
-				<label class="checkbox">
+			<section>
+				<h3><label for="text-link">Link</label></h3>
+				<Hint>Anyone with the link can view the map, but not change it.</Hint>
+				<div class="row">
+					<input id="text-link" type="text" readonly value={linkCode} onfocus={(e) => e.currentTarget.select()} />
+					<Button variant="primary" class="copy" bind:element={btnLink} onclick={copyLink}>Copy link</Button>
+				</div>
+			</section>
+
+			<section>
+				<h3><label for="text-iframe">Embed code</label></h3>
+				<Hint>Paste it into the HTML of a website.</Hint>
+				<textarea id="text-iframe" rows="4" readonly onfocus={(e) => e.currentTarget.select()}>{embedCode}</textarea>
+				<div class="buttons">
+					<Button class="copy" bind:element={btnEmbed} onclick={copyEmbedCode}>Copy embed code</Button>
+				</div>
+			</section>
+			<span class="sr-only" role="status">{copied}</span>
+			{#if copyError}<p class="copy-error" role="alert">{copyError}</p>{/if}
+
+			<section aria-labelledby="{uid}-options">
+				<h3 id="{uid}-options">Options</h3>
+				<div class="field">
+					<label for="share-precision">Precision</label>
+					<select
+						id="share-precision"
+						value={String(precision)}
+						onchange={(e) => {
+							const value = e.currentTarget.value;
+							precision = value === 'auto' ? 'auto' : Number(value);
+							update(0);
+						}}
+					>
+						<option value="auto">Automatic (about {formatLength(resolutionOfDigits(autoDigits))})</option>
+						{#each [5, 4, 3, 2] as digits (digits)}
+							<option value={String(digits)}>About {formatLength(resolutionOfDigits(digits))}</option>
+						{/each}
+					</select>
+				</div>
+				<Hint>Coarser positions make shorter links.</Hint>
+				<label class="check">
 					<input
 						type="checkbox"
 						checked={stateManager.mapDocument.search}
@@ -233,28 +249,17 @@
 					/>
 					Address search in the map
 				</label>
-				<span class="hint">Visitors can find a place, e.g. their street. The map content does not change.</span>
-			</p>
-		</div>
-		<div class="bottom">
-			<Button onclick={() => update(0)}>Reload</Button>
-			<div class="aspect-ratio">
-				<span class="caption" id="{uid}-ratio">Aspect ratio of the preview</span>
-				<ChoiceGroup
-					labelledby="{uid}-ratio"
-					size="md"
-					value={previewAspectRatio}
-					onchange={selectPreview}
-					options={RATIOS}
-				/>
-			</div>
+				<Hint>Visitors can find a place, e.g. their street. The map content does not change.</Hint>
+			</section>
 		</div>
 	</div>
 </Dialog>
 
 <style lang="scss">
 	/* a check mark at the corner of a copy button (of the component Button), shown for a moment after copying */
-	.grid :global(.copy) {
+	.panel :global(.copy) {
+		position: relative;
+
 		&::after {
 			content: '✓';
 			position: absolute;
@@ -279,143 +284,203 @@
 		}
 	}
 
-	.grid {
+	/* the preview at the left, the settings in a panel at the right */
+	.layout {
 		display: grid;
-		grid-template-columns: 1fr auto;
-		grid-template-rows: auto 1fr auto;
-		gap: 10px;
+		grid-template-columns: minmax(0, 1fr) 320px;
+		gap: var(--space-5);
 		width: 100%;
 		flex: 1;
 		min-height: 0;
-		/* scrolls if the controls do not fit, e.g. on a small screen */
-		overflow: auto;
+	}
 
-		.head {
-			grid-column: 1 / -1;
-			grid-row: 1 / 1;
-			text-align: center;
-			font-size: var(--font-size-lg);
-			margin-bottom: var(--space-5);
+	h3 {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
+		font-weight: 600;
+	}
+
+	.preview {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+		min-height: 0;
+	}
+
+	.toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+
+		h3 {
+			flex: 1;
 		}
 
-		.left {
-			grid-column: 1 / 2;
-			grid-row: 2 / 2;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			container-name: preview;
-			container-type: size;
-
-			iframe {
-				aspect-ratio: 16 / 9;
-				width: 100%;
-				height: auto;
-				border: 1px solid var(--color-border);
-				box-sizing: border-box;
-
-				@container preview (min-aspect-ratio: 16 / 9) {
-					width: auto;
-					height: 100%;
-				}
-			}
-
-			iframe.aspect-tall {
-				aspect-ratio: 9 / 16;
-				@container preview (min-aspect-ratio: 9 / 16) {
-					width: auto;
-					height: 100%;
-				}
-			}
-
-			iframe.aspect-square {
-				aspect-ratio: 1 / 1;
-				@container preview (min-aspect-ratio: 1 / 1) {
-					width: auto;
-					height: 100%;
-				}
-			}
-		}
-
-		.right {
-			grid-column: 2 / -1;
-			grid-row: 2 / -1;
-			text-align: left;
-
-			textarea {
-				width: 200px;
-				margin: 0 0 0.3rem;
-				display: block;
-				resize: none;
-			}
-
-			.checkbox {
-				display: block;
-			}
-
-			.hint {
-				display: block;
-				width: 200px;
-				font-size: var(--font-size-sm);
-				color: var(--color-text-muted);
-			}
-
-			textarea[readonly] {
-				font-size: var(--font-size-sm);
-				-webkit-user-select: all;
-				user-select: all;
-				color: var(--color-text-muted);
-			}
-		}
-
-		.bottom {
-			grid-column: 1 / 1;
-			grid-row: 3 / 3;
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: center;
-			align-items: flex-end;
-			/* room for the caption above the aspect ratios, also when they wrap below "Reload" */
-			gap: 1.8em var(--space-2);
-			padding-top: 1.5rem;
+		.ratios {
+			width: 300px;
+			max-width: 100%;
 		}
 	}
 
-	/* On a small screen, the controls come first, and the preview gets a fixed height below them */
+	/* the preview in the middle of a gray area, in the chosen aspect ratio */
+	.stage {
+		flex: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 0;
+		padding: var(--space-3);
+		border-radius: var(--radius-lg);
+		background: var(--color-hover);
+		container-name: preview;
+		container-type: size;
+
+		iframe {
+			aspect-ratio: 16 / 9;
+			width: 100%;
+			height: auto;
+			box-sizing: border-box;
+			border: 1px solid var(--color-border);
+			border-radius: var(--radius-md);
+			background: var(--color-bg);
+			box-shadow: var(--shadow-sm);
+
+			@container preview (min-aspect-ratio: 16 / 9) {
+				width: auto;
+				height: 100%;
+			}
+		}
+
+		iframe.aspect-tall {
+			aspect-ratio: 9 / 16;
+			@container preview (min-aspect-ratio: 9 / 16) {
+				width: auto;
+				height: 100%;
+			}
+		}
+
+		iframe.aspect-square {
+			aspect-ratio: 1 / 1;
+			@container preview (min-aspect-ratio: 1 / 1) {
+				width: auto;
+				height: 100%;
+			}
+		}
+	}
+
+	/* the sections of the settings, as in the inspector */
+	.panel {
+		min-height: 0;
+		/* room for the check mark at the corner of the copy buttons */
+		padding-right: var(--space-3);
+		overflow-y: auto;
+
+		section {
+			display: flex;
+			flex-direction: column;
+			gap: var(--space-2);
+			padding: var(--space-3) 0;
+			border-bottom: 1px solid var(--color-border);
+
+			&:first-child {
+				padding-top: 0;
+			}
+
+			&:last-child {
+				border-bottom: none;
+			}
+		}
+	}
+
+	.row {
+		display: flex;
+		gap: var(--space-2);
+
+		input {
+			flex: 1;
+			min-width: 0;
+		}
+	}
+
+	.buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	input[readonly],
+	textarea[readonly] {
+		color: var(--color-text-muted);
+		font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+		font-size: var(--font-size-sm);
+	}
+
+	textarea {
+		width: 100%;
+		box-sizing: border-box;
+		resize: none;
+	}
+
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+
+		select {
+			width: 100%;
+		}
+	}
+
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+
+	/* a warning about what visitors may miss; the buttons below say what can be done about it */
+	.notice {
+		margin: 0;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--color-border);
+		border-left: 3px solid var(--color-warning);
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-sm);
+	}
+
+	.copy-error {
+		margin: var(--space-2) 0 0;
+		color: var(--color-error);
+		font-size: var(--font-size-sm);
+	}
+
+	/* On a small screen, the settings come first, and the preview gets a fixed height below them */
 	@media (width <= 700px), (height <= 560px) {
-		.grid {
-			grid-template-columns: 1fr;
-			grid-template-rows: auto;
+		.layout {
+			grid-template-columns: minmax(0, 1fr);
+			/* the rows as high as their content, which the layout scrolls */
+			grid-auto-rows: max-content;
+			align-content: start;
+			/* scrolls as a whole */
+			overflow-y: auto;
+		}
 
-			.head {
-				margin-bottom: 0;
-			}
+		.panel {
+			overflow: visible;
+		}
 
-			.right {
-				grid-column: 1;
-				grid-row: 2;
+		.preview {
+			order: 1;
+		}
 
-				textarea,
-				.hint,
-				.copy-error {
-					width: 100%;
-					box-sizing: border-box;
-				}
-			}
-
-			.left {
-				grid-column: 1;
-				grid-row: 3;
-				height: 240px;
-				flex-shrink: 0;
-			}
-
-			.bottom {
-				grid-column: 1;
-				grid-row: 4;
-			}
+		.stage {
+			flex: none;
+			height: 240px;
 		}
 	}
+
 	.sr-only {
 		position: absolute;
 		width: 1px;
@@ -426,49 +491,5 @@
 		clip-path: inset(50%);
 		white-space: nowrap;
 		border: 0;
-	}
-	.copy-error {
-		display: block;
-		width: 200px;
-		margin-top: 0.3em;
-		color: var(--color-error);
-		font-size: var(--font-size-sm);
-	}
-
-	/* a warning about what visitors may miss, with what can be done about it */
-	.notice {
-		width: 200px;
-		margin: 0 0 1em;
-		padding: var(--space-2) var(--space-3);
-		border: 1px solid var(--color-border);
-		border-left: 3px solid var(--color-warning);
-		border-radius: var(--radius-md);
-		font-size: var(--font-size-sm);
-
-		p {
-			margin: 0 0 var(--space-2);
-		}
-
-		.buttons {
-			display: flex;
-			flex-wrap: wrap;
-			gap: var(--space-2);
-		}
-	}
-
-	/* the aspect ratio of the preview, with its caption above */
-	.aspect-ratio {
-		position: relative;
-
-		.caption {
-			position: absolute;
-			top: -1.6em;
-			right: 0;
-			left: 0;
-			color: var(--color-text-muted);
-			font-size: var(--font-size-sm);
-			text-align: center;
-			white-space: nowrap;
-		}
 	}
 </style>

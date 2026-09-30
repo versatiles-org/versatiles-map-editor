@@ -19,7 +19,7 @@ test('dialogs are named, can be closed and are usable by keyboard', { tag: '@cro
 
 	// Escape closes it, also after the preview has loaded, which must not take the focus
 	await page.getByRole('button', { name: /^Share/ }).click();
-	await expect(share.getByRole('button', { name: /^Copy Link/ })).toBeFocused();
+	await expect(share.getByRole('button', { name: /^Copy link/ })).toBeFocused();
 	await page.waitForTimeout(1000);
 	await page.keyboard.press('Escape');
 	await expect(share).toBeHidden();
@@ -69,7 +69,7 @@ test(
 		// copying the link is announced, not only shown as a check mark
 		if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 		await page.getByRole('button', { name: /^Share/ }).click();
-		await page.getByRole('button', { name: /^Copy Link/ }).click();
+		await page.getByRole('button', { name: /^Copy link/ }).click();
 		await expect(page.getByRole('dialog').getByRole('status')).toHaveText('Link copied');
 	}
 );
