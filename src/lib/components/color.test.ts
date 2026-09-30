@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatHex } from '@versatiles/map-state';
-import { channelTrack, hsvKeeping, hsvToRgb, rgbToHsv } from './color.js';
+import { channelTrack, contrast, hsvKeeping, hsvToRgb, rgbToHsv } from './color.js';
 
 describe('HSV', () => {
 	it('converts primary and gray colors', () => {
@@ -49,5 +49,14 @@ describe('channelTrack', () => {
 		expect(track.match(/rgb\(/g)).toHaveLength(7);
 		expect(track).toMatch(/^linear-gradient\(to right, rgb\(255 0 0\), rgb\(255 255 0\),/);
 		expect(track).toMatch(/rgb\(255 0 0\)\)$/);
+	});
+});
+
+describe('contrast', () => {
+	it('is the contrast ratio of WCAG, in either order', () => {
+		const white = { r: 255, g: 255, b: 255 };
+		expect(contrast(white, { r: 0, g: 0, b: 0 })).toBeCloseTo(21);
+		expect(contrast(white, white)).toBe(1);
+		expect(contrast({ r: 0, g: 114, b: 178 }, white)).toBeCloseTo(5.19, 2);
 	});
 });
