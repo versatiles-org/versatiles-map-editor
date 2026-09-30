@@ -177,3 +177,83 @@ test('the share dialog tells that an empty map without a visible area shows the 
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	await expect(dialog).toContainText('The map is empty and has no visible area, so it shows the whole world.');
 });
+
+test('the preview of the share dialog shows the frame completely in all three aspect ratios', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	/** Where the frame is in the preview, and the size of the preview, once its map is ready. */
+	const inPreview = async () => {
+		const preview = page.frames().find((f) => f.url().includes('/view#'));
+		if (!preview) return undefined;
+		// undefined while the preview loads again, e.g. for another aspect ratio
+		return preview
+			.evaluate(([west, south, east, north]) => {
+				const map = (window as unknown as { map?: { project(p: [number, number]): { x: number; y: number } } }).map;
+				if (!map || !(window as unknown as { mapReady?: boolean }).mapReady) return undefined;
+				const topLeft = map.project([west, north]);
+				const bottomRight = map.project([east, south]);
+				return {
+					...{ left: topLeft.x, top: topLeft.y, right: bottomRight.x, bottom: bottomRight.y },
+					width: innerWidth,
+					height: innerHeight
+				};
+			}, frame)
+			.catch(() => undefined);
+	};
+	for (const ratio of ['Horizontal', 'Square', 'Vertical']) {
+		await dialog.getByRole('radio', { name: ratio }).check({ force: true });
+		// the frame is inside the preview, and fills its width or its height
+		await expect
+			.poll(
+				async () => {
+					const shown = await inPreview();
+					if (!shown) return false;
+					const inside =
+						shown.left >= 0 && shown.top >= 0 && shown.right <= shown.width && shown.bottom <= shown.height;
+					const fills = shown.right - shown.left > shown.width - 50 || shown.bottom - shown.top > shown.height - 50;
+					return inside && fills;
+				},
+				{ message: ratio, timeout: 10_000 }
+			)
+			.toBe(true);
+	}
+});
+
+test('dragging a handle changes the frame, one undo step per drag', async ({ page }) => {
+	// a view with the whole frame, left of the sidebar
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Visible area…')).click();
+
+	// the north-east corner, 80 pixels to the east and 60 to the north
+	const [x, y] = await project(page, [frame[2], frame[3]]);
+	await page.mouse.move(x, y);
+	await page.mouse.down();
+	await page.mouse.move(x + 80, y - 60, { steps: 5 });
+	await page.mouse.up();
+	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
+	const dragged = (await storedState(page)).frame!;
+	// only the dragged sides
+	expect(dragged[0]).toBeCloseTo(frame[0], 4);
+	expect(dragged[1]).toBeCloseTo(frame[1], 4);
+	expect(dragged[3]).toBeGreaterThan(frame[3]);
+
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(frame);
+});
+
+test('importing a file with a frame gives a frame that covers both', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await waitForMapIsReady(page);
+	const file = { type: 'FeatureCollection', features: [], frame: [13.45, 52.5, 13.6, 52.6] };
+	const importGeoJSON = await menuItem(page, 'Import', 'GeoJSON…');
+	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), importGeoJSON.click()]);
+	await chooser.setFiles({
+		name: 'area.geojson',
+		mimeType: 'application/geo+json',
+		buffer: Buffer.from(JSON.stringify(file))
+	});
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual([13.3, 52.45, 13.6, 52.6]);
+});
