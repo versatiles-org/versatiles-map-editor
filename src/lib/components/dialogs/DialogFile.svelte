@@ -75,8 +75,8 @@
 			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<ButtonGroup columns={2} spaced={false}>
-			<Button onclick={cancel}>Cancel</Button>
-			<Button onclick={confirm}>Download</Button>
+			<Button variant="ghost" size="md" onclick={cancel}>Cancel</Button>
+			<Button variant="primary" size="md" onclick={confirm}>Download</Button>
 		</ButtonGroup>
 	{/if}
 </Dialog>

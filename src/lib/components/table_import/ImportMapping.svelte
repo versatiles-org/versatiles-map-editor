@@ -171,8 +171,8 @@
 {/if}
 
 <div class="buttons">
-	<Button onclick={onback}>Back</Button>
-	<Button disabled={table.rows.length === 0 || !hasPosition(settings)} onclick={onimport}>
+	<Button variant="ghost" size="md" onclick={onback}>Back</Button>
+	<Button variant="primary" size="md" disabled={table.rows.length === 0 || !hasPosition(settings)} onclick={onimport}>
 		Import {formatCount(table.rows.length, 'row')}
 	</Button>
 </div>

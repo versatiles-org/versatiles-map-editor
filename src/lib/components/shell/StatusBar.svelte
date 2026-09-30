@@ -2,6 +2,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
+	import { Button } from '$lib/components/ui/index.js';
 
 	/**
 	 * The line at the bottom of the editor: what the current tool or selection does, so the
@@ -83,10 +84,10 @@
 	<span class="hint">{hint}</span>
 	<span class="saved" class:unsaved={sync.status !== 'saved'}>
 		{saved} ·
-		<button
-			class="download"
+		<Button
+			variant="link"
 			title="Browsers can delete the maps they keep. A downloaded file keeps the map."
-			onclick={() => files.downloadFile()}>Download</button
+			onclick={() => files.downloadFile()}>Download</Button
 		>
 	</span>
 	<span class="position">{position}</span>
@@ -121,16 +122,6 @@
 		&.unsaved {
 			color: var(--color-error);
 		}
-	}
-
-	.download {
-		padding: 0;
-		border: none;
-		background: none;
-		color: inherit;
-		font: inherit;
-		text-decoration: underline;
-		cursor: pointer;
 	}
 
 	.position {

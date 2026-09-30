@@ -121,7 +121,7 @@
 					Link
 					<textarea id="text-link" rows="3" readonly onclick={(e) => e.currentTarget.select()}>{linkCode}</textarea>
 				</label>
-				<Button class="copy" bind:element={btnLink} onclick={copyLink}>Copy Link</Button>
+				<Button variant="primary" class="copy" bind:element={btnLink} onclick={copyLink}>Copy Link</Button>
 				<span class="sr-only" role="status">{copied}</span>
 				{#if copyError}<span class="copy-error" role="alert">{copyError}</span>{/if}
 			</p>

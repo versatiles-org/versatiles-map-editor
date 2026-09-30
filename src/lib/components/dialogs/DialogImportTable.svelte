@@ -120,7 +120,7 @@
 	<div class="import">
 		{#if step === 'input'}
 			<p>A CSV or TSV file, or a table copied from a spreadsheet, with one place per row.</p>
-			<Button class="file" onclick={() => fileInput?.click()}>Choose a file…</Button>
+			<Button class="file" size="md" onclick={() => fileInput?.click()}>Choose a file…</Button>
 			<input
 				bind:this={fileInput}
 				type="file"
@@ -130,7 +130,9 @@
 			/>
 			<label for="{uid}-paste">Or paste the table here:</label>
 			<textarea id="{uid}-paste" rows="8" bind:value={text}></textarea>
-			<Button disabled={!text.trim()} onclick={() => startMapping(undefined)}>Continue</Button>
+			<Button variant="primary" size="md" disabled={!text.trim()} onclick={() => startMapping(undefined)}
+				>Continue</Button
+			>
 		{:else if step === 'mapping' && table}
 			<ImportMapping
 				{table}
@@ -144,7 +146,7 @@
 		{:else if step === 'importing'}
 			<p>Searching the addresses: {progress.done} of {progress.total}</p>
 			<progress max={progress.total} value={progress.done}></progress>
-			<Button onclick={() => controller?.abort()}>Cancel</Button>
+			<Button size="md" onclick={() => controller?.abort()}>Cancel</Button>
 		{:else if step === 'done'}
 			{#if importError}
 				<p class="error" role="alert">The import failed: {importError}</p>
@@ -167,7 +169,7 @@
 					{/each}
 				</ul>
 			{/if}
-			<Button onclick={() => dialog?.close()}>Done</Button>
+			<Button variant="primary" size="md" onclick={() => dialog?.close()}>Done</Button>
 		{/if}
 	</div>
 </Dialog>

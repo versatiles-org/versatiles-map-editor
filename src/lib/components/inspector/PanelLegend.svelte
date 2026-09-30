@@ -118,7 +118,7 @@
 					}
 				/>
 			</InputRow>
-			<Button wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
+			<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
 		</fieldset>
 	{/each}
 {/if}

@@ -32,7 +32,7 @@
 		onclick={() => doc.state.redo()}
 	/>
 	<span class="spacer"></span>
-	<Button class="share" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</Button>
+	<Button variant="primary" size="md" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</Button>
 	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>
 
@@ -68,15 +68,5 @@
 
 	.spacer {
 		flex: 1;
-	}
-
-	/* the button of the component Button */
-	.topbar :global(.share) {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		flex: none;
-		border-radius: 8px;
-		padding-block: 0.5em;
 	}
 </style>

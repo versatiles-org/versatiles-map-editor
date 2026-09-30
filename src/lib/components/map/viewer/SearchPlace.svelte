@@ -197,7 +197,7 @@
 		</ul>
 	{/if}
 	{#if selected && onmark}
-		<Button class="add-marker" wide onclick={addMarker}>Add marker here</Button>
+		<Button variant="primary" class="add-marker" wide onclick={addMarker}>Add marker here</Button>
 	{/if}
 </div>
 

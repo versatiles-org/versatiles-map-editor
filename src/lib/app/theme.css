@@ -53,12 +53,16 @@
 	/* the system font */
 	--font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 
-	/* the height of the controls of the sidebar */
+	/* the heights of controls: in the sidebar, in bars and dialogs */
 	--size-sm: 28px;
+	--size-md: 32px;
 	/* corners: of small parts, of controls */
 	--radius-sm: 4px;
 	--radius-md: 6px;
 	--space-2: 8px;
+	--space-3: 12px;
+	/* the size of controls and their text */
+	--font-size-md: 13px;
 
 	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
 	--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -66,7 +70,6 @@
 
 	/* The names before the design system, until all components use the new ones */
 	--color-blue: var(--color-accent);
-	--color-blue-dark: var(--color-accent-hover);
 	--color-on-blue: var(--color-on-accent);
 	--color-blue-text: var(--color-accent-text);
 	--color-green: var(--color-success);

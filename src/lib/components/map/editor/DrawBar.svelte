@@ -24,11 +24,11 @@
 	<div class="drawbar" style:--left="{left}px" style:--right="{right}px" role="group" aria-label="Drawing">
 		<span class="hint" role="status">{title}</span>
 		{#if path}
-			<button class="button" disabled={count === 0} onclick={() => drawing.removeLastPoint()}>Remove last node</button>
+			<Button disabled={count === 0} onclick={() => drawing.removeLastPoint()}>Remove last node</Button>
 		{/if}
-		<button class="button" onclick={() => drawing.setTool('select')}>Cancel</button>
+		<Button variant="ghost" onclick={() => drawing.setTool('select')}>Cancel</Button>
 		{#if path}
-			<Button class="finish" disabled={!drawing.canFinish} onclick={() => drawing.finish()}>Finish</Button>
+			<Button variant="primary" disabled={!drawing.canFinish} onclick={() => drawing.finish()}>Finish</Button>
 		{/if}
 	</div>
 {/if}
@@ -59,35 +59,5 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-	}
-
-	.button {
-		flex: none;
-		padding: 5px 10px;
-		border: 1px solid var(--color-border);
-		border-radius: 7px;
-		background: var(--color-bg);
-		color: var(--color-text);
-		font: inherit;
-		cursor: pointer;
-
-		&:hover:not(:disabled) {
-			background: var(--color-hover);
-		}
-		&:disabled {
-			color: var(--color-disabled-text);
-			cursor: default;
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-accent-line);
-			outline-offset: 1px;
-		}
-	}
-
-	/* the button of the component Button */
-	.drawbar :global(.finish) {
-		flex: none;
-		border-radius: 7px;
-		padding-block: 6px;
 	}
 </style>
