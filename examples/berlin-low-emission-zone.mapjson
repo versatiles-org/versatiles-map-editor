@@ -1,30 +1,29 @@
 {
-	"map": {
-		"center": [13.373682001653322, 52.50750074584056],
-		"radius": 8865.209136381285
-	},
+	"map": { "center": [13.382425926920718, 52.50835026778887], "radius": 7020.084294154768 },
+	"frame": [13.274011990326414, 52.462486745361986, 13.483884102094066, 52.553436806102354],
 	"meta": {
 		"background": {
 			"builder": "osm",
 			"options": {
 				"theme": "gray",
 				"text": {
-					"spacing": 2
+					"spacing": 2,
+					"boundaries": { "haloWidth": 1.5 },
+					"places": { "haloWidth": 1.5 },
+					"streets": { "names": { "haloWidth": 1.5 } },
+					"water": { "haloWidth": 1.5 },
+					"pois": { "transit": { "haloWidth": 1.5 } }
 				}
 			}
 		},
 		"legend": {
 			"entries": [
-				{
-					"color": "#0072b2",
-					"label": "Low-emission zone, inside the S-Bahn ring"
-				},
-				{
-					"color": "#009e73",
-					"label": "Large parks"
-				}
+				{ "color": "#0072b2", "label": "Low-emission zone, inside the S-Bahn ring" },
+				{ "color": "#009e73", "label": "Large parks" }
 			]
-		}
+		},
+		"title": "berlin-low-emission-zone",
+		"mapLabelsOnTop": true
 	},
 	"elements": [
 		{
@@ -58,15 +57,8 @@
 				[13.2851, 52.5185],
 				[13.2836, 52.5076]
 			],
-			"style": {
-				"color": "#0072b2",
-				"opacity": 0.3,
-				"pattern": 2
-			},
-			"strokeStyle": {
-				"color": "#0072b2",
-				"width": 2.5
-			},
+			"style": { "color": "#0072b2", "opacity": 0.3, "pattern": 2 },
+			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
 				"text": "**Low-emission zone (Umweltzone)**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
 			}
@@ -91,13 +83,8 @@
 				[13.38598704636675, 52.47112879328836],
 				[13.386213025547676, 52.47608419259447]
 			],
-			"style": {
-				"color": "#009e73",
-				"opacity": 0.3
-			},
-			"strokeStyle": {
-				"color": "#009e73"
-			},
+			"style": { "color": "#009e73", "opacity": 0.3 },
+			"strokeStyle": { "color": "#009e73" },
 			"popup": {
 				"text": "**Tempelhofer Feld**\nThe former airport, closed in 2008, is a public park since 2010. A referendum in 2014 kept it free of buildings."
 			}
@@ -122,16 +109,9 @@
 				[13.342841762685964, 52.50921803121102],
 				[13.337832043722727, 52.51149040314229]
 			],
-			"style": {
-				"color": "#009e73",
-				"opacity": 0.3
-			},
-			"strokeStyle": {
-				"color": "#009e73"
-			},
-			"popup": {
-				"text": "**Großer Tiergarten**\nThe largest park in the center of Berlin."
-			}
+			"style": { "color": "#009e73", "opacity": 0.3 },
+			"strokeStyle": { "color": "#009e73" },
+			"popup": { "text": "**Großer Tiergarten**\nThe largest park in the center of Berlin." }
 		}
 	]
 }
