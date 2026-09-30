@@ -3,6 +3,7 @@ import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import type { CDPSession, Page } from '@playwright/test';
 import {
 	mapCenter,
+	menuItem,
 	project,
 	settledStoredState,
 	storedState,
@@ -153,4 +154,30 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 	await page.getByRole('button', { name: 'Finish' }).tap();
 	await expect.poll(async () => (await linePoints(page)).length).toBe(2);
 	await expect(page.getByRole('button', { name: 'Select' })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('dragging a handle of the visible area with a finger, a bit off the handle', async ({ page }) => {
+	const frame: [number, number, number, number] = [13.35, 52.47, 13.45, 52.53];
+	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, frame, elements: [] }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Visible area…')).click();
+	const touch = await Touchscreen.create(page);
+
+	// 10 pixels off the north-east corner: too far for the mouse, near enough for a finger
+	const [x, y] = await project(page, [frame[2], frame[3]]);
+	const viewCenter = await mapCenter(page);
+	await touch.drag([x + 7, y - 7], [x + 87, y - 67]);
+	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
+	const dragged = (await storedState(page)).frame!;
+	expect(dragged[0]).toBeCloseTo(frame[0], 4);
+	expect(dragged[1]).toBeCloseTo(frame[1], 4);
+	expect(dragged[3]).toBeGreaterThan(frame[3]);
+	// the map stayed where it was
+	expect(await mapCenter(page)).toStrictEqual(viewCenter);
+
+	// elsewhere, the finger moves the map, not the frame
+	await touch.drag([x - 200, y + 150], [x - 100, y + 150]);
+	await waitForMapIsIdle(page);
+	expect((await mapCenter(page))[0]).toBeLessThan(viewCenter[0]);
+	expect((await settledStoredState(page)).frame).toStrictEqual(dragged);
 });
