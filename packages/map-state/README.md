@@ -52,6 +52,10 @@ stateFromKML(kml: string): MapState
   `digitsForResolution` and `resolutionOfDigits` convert between meters and decimal places.
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
 - `CODEC_VERSION` is the format version that `encodeState` writes.
+- `frame` in the state is the visible area of a shared map, `[west, south, east, north]` (the type
+  `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
+  `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
+  `centerOf(bounds)` their center.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
   the way the editor does.
@@ -85,12 +89,15 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
+- visible area → `frame: [west, south, east, north]`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
   minimized options, stored as JSON in base64, so any current or future option fits;
   `meta.legend`: position, layout, generic font and entries of a legend defined by the author;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
-  `meta.search`: show an address search in the read-only viewer)
+  `meta.search`: show an address search in the read-only viewer;
+  `meta.title`: the title of the map; `meta.labelFont`: one glyph font for the labels of all
+  markers; `meta.mapLabelsOnTop`: the labels of the background map over the areas and lines)
 
 On import, `stateFromGeoJSON` also accepts a single `Feature` or a bare geometry.
 `Multi*` geometries and `GeometryCollection`s are split into single elements;
