@@ -55,8 +55,8 @@
 			aria-pressed={drawing.tool === id}
 			aria-keyshortcuts={key}
 			onclick={() => {
-				// a tool ends editing the visible area
-				doc.visibleArea.close();
+				// a tool ends editing the visible area, without returning e.g. to the share dialog
+				doc.visibleArea.close({ returning: false });
 				drawing.setTool(id);
 			}}
 		/>

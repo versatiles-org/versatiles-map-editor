@@ -88,7 +88,13 @@ test.describe('viewer', () => {
 test('precision of a shared map', async ({ page }) => {
 	const point: [number, number] = [13.412341, 52.512341];
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'marker', point }] })
+		'/#' +
+			encodeState({
+				map: { center: [13.4, 52.5], radius: 10000 },
+				// about 11 × 11 km
+				frame: [13.33, 52.45, 13.49, 52.55],
+				elements: [{ type: 'marker', point }]
+			})
 	);
 	await waitForMapIsReady(page, { count: 1 });
 	await page.getByRole('button', { name: /^Share/ }).click();
@@ -101,7 +107,7 @@ test('precision of a shared map', async ({ page }) => {
 		return { point: element.point, length: link.length };
 	};
 
-	// automatic: a thousandth of the 10 km viewport radius, about 11 m
+	// automatic: a thousandth of the size of the visible area, about 11 m
 	await expect(precision.getByRole('option').first()).toHaveText('Automatic (about 11 m)');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4123, 52.5123]);
 	const automatic = await shared();

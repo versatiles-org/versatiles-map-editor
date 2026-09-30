@@ -82,6 +82,17 @@ describe('VisibleAreaMode', () => {
 		expect(doc.frame).toStrictEqual([-40, -30, 40, 30]);
 	});
 
+	it('returns e.g. to the share dialog when it is done, but not when a tool is chosen', () => {
+		const onDone = vi.fn();
+		doc.visibleArea.open({ onDone });
+		doc.visibleArea.close();
+		expect(onDone).toHaveBeenCalledTimes(1);
+
+		doc.visibleArea.open({ onDone });
+		doc.visibleArea.close({ returning: false });
+		expect(onDone).toHaveBeenCalledTimes(1);
+	});
+
 	describe('handles', () => {
 		// a projection like on the screen: x grows to the east, y to the south, 1 pixel per degree
 		const frame: [number, number, number, number] = [-50, -50, 50, 50];

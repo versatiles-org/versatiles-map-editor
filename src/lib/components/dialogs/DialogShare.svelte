@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/state/manager.js';
 	import { Dialog, Button, ChoiceGroup } from '$lib/components/ui/index.js';
-	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
+	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
 
 	const { state: stateManager }: { state: StateManager } = $props();
@@ -28,14 +28,58 @@
 		update(1);
 	}
 
-	// The precision of the shared map: automatic (from the viewport) or decimal places of degrees
+	// The precision of the shared map: automatic (from what it shows) or decimal places of degrees
 	let precision: 'auto' | number = $state('auto');
 	let autoDigits = $state(5);
 
-	/** Fine enough for the current viewport: a thousandth of its radius, below a pixel of a typical embed. */
+	/** The half of the larger side of an area, in meters. */
+	function radiusOf([west, south, east, north]: Bounds): number {
+		const meters = 111320;
+		const width = (east - west) * meters * Math.cos((((south + north) / 2) * Math.PI) / 180);
+		return Math.max(width, (north - south) * meters) / 2;
+	}
+
+	/**
+	 * Fine enough for what the shared map shows, its frame or else its elements: a thousandth of
+	 * their size, below a pixel of a typical embed.
+	 */
 	function updateAutoDigits() {
-		const radius = stateManager.mapDocument.getState().map?.radius;
+		const doc = stateManager.mapDocument;
+		const area = doc.frame ?? doc.getBounds();
+		const radius = area && radiusOf(area);
 		autoDigits = radius ? digitsForResolution(radius / 1000) : 5;
+	}
+
+	// What visitors may miss: elements outside the frame, or an empty map without one
+	let notice: { kind: 'outside'; count: number } | { kind: 'empty' } | undefined = $state();
+
+	function updateNotice() {
+		const doc = stateManager.mapDocument;
+		const states = doc.elements.map((element) => element.getState());
+		const frame = doc.frame;
+		if (!frame) {
+			notice = states.length === 0 ? { kind: 'empty' } : undefined;
+			return;
+		}
+		// also elements that are only partly outside
+		const count = states.filter((state) => {
+			const [west, south, east, north] = boundsOf([state])!;
+			return west < frame[0] || south < frame[1] || east > frame[2] || north > frame[3];
+		}).length;
+		notice = count > 0 ? { kind: 'outside', count } : undefined;
+	}
+
+	/** Edit the visible area on the map, and come back here when it is done. */
+	function editVisibleArea() {
+		close();
+		stateManager.mapDocument.visibleArea.open({ onDone: () => open() });
+	}
+
+	/** Remove the frame, so the shared map shows all elements; one undo step. */
+	function fitToElements() {
+		stateManager.mapDocument.frame = undefined;
+		stateManager.log();
+		update(0);
 	}
 
 	function getLinkCode() {
@@ -50,6 +94,7 @@
 	function update(delay: number = 500) {
 		if (!dialog?.isOpen()) return;
 		updateAutoDigits();
+		updateNotice();
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
 		if (timeout != null) {
@@ -120,6 +165,26 @@
 			<iframe title="preview" bind:this={iframe} class={'aspect-' + previewAspectRatio}></iframe>
 		</div>
 		<div class="right">
+			{#if notice}
+				<div class="notice">
+					<p>
+						{#if notice.kind === 'outside'}
+							{notice.count}
+							{notice.count === 1 ? 'element is' : 'elements are'} outside the visible area.
+						{:else}
+							The map is empty and has no visible area, so it shows the whole world.
+						{/if}
+					</p>
+					<div class="buttons">
+						<Button onclick={editVisibleArea}>Edit visible area</Button>
+						{#if notice.kind === 'outside'}<Button variant="ghost" onclick={fitToElements}>Fit to elements</Button>{/if}
+					</div>
+				</div>
+			{:else}
+				<p class="visible-area">
+					<Button onclick={editVisibleArea}>Edit visible area</Button>
+				</p>
+			{/if}
 			<p>
 				<label for="text-link">
 					Link
@@ -368,6 +433,27 @@
 		margin-top: 0.3em;
 		color: var(--color-error);
 		font-size: var(--font-size-sm);
+	}
+
+	/* a warning about what visitors may miss, with what can be done about it */
+	.notice {
+		width: 200px;
+		margin: 0 0 1em;
+		padding: var(--space-2) var(--space-3);
+		border: 1px solid var(--color-border);
+		border-left: 3px solid var(--color-warning);
+		border-radius: var(--radius-md);
+		font-size: var(--font-size-sm);
+
+		p {
+			margin: 0 0 var(--space-2);
+		}
+
+		.buttons {
+			display: flex;
+			flex-wrap: wrap;
+			gap: var(--space-2);
+		}
 	}
 
 	/* the aspect ratio of the preview, with its caption above */

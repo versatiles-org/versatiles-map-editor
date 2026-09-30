@@ -136,3 +136,44 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await page.getByRole('button', { name: 'Marker', exact: true }).click();
 	await expect(bar).toBeHidden();
 });
+
+test('the share dialog warns about elements outside the visible area, and edits it', async ({ page }) => {
+	const outside: MapState['elements'] = [
+		{ type: 'marker', point: [13.4, 52.5] },
+		// partly outside
+		{
+			type: 'line',
+			points: [
+				[13.4, 52.5],
+				[13.6, 52.5]
+			]
+		}
+	];
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements: outside }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog).toContainText('1 element is outside the visible area.');
+	// the precision follows the size of the frame (about 14 × 11 km), not the camera
+	await expect(dialog.getByRole('combobox', { name: 'Precision' })).toContainText('Automatic (about 11 m)');
+
+	// editing the visible area, and back with Done
+	await dialog.getByRole('button', { name: 'Edit visible area' }).click();
+	await expect(dialog).toBeHidden();
+	const bar = page.getByRole('group', { name: 'Visible area' });
+	await bar.getByRole('button', { name: 'Done' }).click();
+	await expect(dialog).toBeVisible();
+
+	// all elements instead: no warning any more
+	await dialog.getByRole('button', { name: 'Fit to elements' }).click();
+	await expect(dialog).not.toContainText('outside the visible area');
+	await expect.poll(async () => (await storedState(page)).frame).toBeUndefined();
+});
+
+test('the share dialog tells that an empty map without a visible area shows the whole world', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog).toContainText('The map is empty and has no visible area, so it shows the whole world.');
+});

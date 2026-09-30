@@ -38,6 +38,8 @@ export class VisibleAreaMode {
 	public active = $state(false);
 	readonly #doc: MapDocumentInteractive;
 	#onChange: number | undefined;
+	/** Called when the mode ends with Done or Escape, e.g. to return to the share dialog. */
+	#onDone: (() => void) | undefined;
 
 	constructor(doc: MapDocumentInteractive) {
 		this.#doc = doc;
@@ -60,8 +62,9 @@ export class VisibleAreaMode {
 		return this.#doc.frame ?? this.#doc.getBounds();
 	}
 
-	/** Start editing the visible area. */
-	public open() {
+	/** Start editing the visible area. `onDone` is called when it ends with Done or Escape. */
+	public open({ onDone }: { onDone?: () => void } = {}) {
+		this.#onDone = onDone;
 		if (this.active) return;
 		const doc = this.#doc;
 		doc.drawing.setTool('select');
@@ -72,14 +75,20 @@ export class VisibleAreaMode {
 		this.render();
 	}
 
-	/** Stop editing the visible area. */
-	public close() {
+	/**
+	 * Stop editing the visible area. `returning: false` does not call `onDone` of `open`, e.g. when
+	 * a drawing tool is chosen instead.
+	 */
+	public close({ returning = true }: { returning?: boolean } = {}) {
 		if (!this.active) return;
 		this.active = false;
+		const onDone = this.#onDone;
+		this.#onDone = undefined;
 		if (this.#onChange !== undefined) this.#doc.state.events.off('change', this.#onChange);
 		this.#onChange = undefined;
 		this.#doc.cursor.setResize(undefined);
 		this.#doc.view.hideVisibleArea();
+		if (returning) onDone?.();
 	}
 
 	/** The frame becomes the part of the map that is shown now; one undo step. */
