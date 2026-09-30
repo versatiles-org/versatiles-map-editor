@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { dismiss, notifications } from '$lib/notify.svelte.js';
+	import IconButton from './IconButton.svelte';
 
 	/** `right` keeps the messages clear of the sidebar. */
 	const { right = 0 }: { right?: number } = $props();
@@ -9,7 +10,7 @@
 	{#each notifications.list as { id, message, kind } (id)}
 		<div class="notification {kind}" role={kind === 'error' ? 'alert' : 'status'}>
 			<span>{message}</span>
-			<button onclick={() => dismiss(id)} aria-label="Dismiss" title="Dismiss">&#x2715;</button>
+			<IconButton icon="close" label="Dismiss" size="sm" onclick={() => dismiss(id)} />
 		</div>
 	{/each}
 </div>
@@ -52,14 +53,5 @@
 
 	.info {
 		border-left: 4px solid var(--color-blue);
-	}
-
-	button {
-		flex-shrink: 0;
-		border: none;
-		background: none;
-		cursor: pointer;
-		font-size: 16px;
-		padding: 2px 4px;
 	}
 </style>

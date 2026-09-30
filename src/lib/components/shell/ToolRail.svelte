@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { Tool } from '$lib/interaction/index.js';
-	import { Icon } from '$lib/components/ui/index.js';
+	import { IconButton } from '$lib/components/ui/index.js';
 	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
@@ -45,29 +45,29 @@
 
 <div class="rail" role="toolbar" aria-label="Tools" aria-orientation="vertical">
 	{#each TOOLS as { id, name, key } (id)}
-		<button
-			class="tool"
-			aria-label={name}
+		<IconButton
+			icon={id}
+			label={name}
+			title="{name} ({key})"
+			size="lg"
 			aria-pressed={drawing.tool === id}
 			aria-keyshortcuts={key}
-			title="{name} ({key})"
 			onclick={() => drawing.setTool(id)}
-		>
-			<Icon name={id} size={20} />
-		</button>
+		/>
 	{/each}
 	<hr />
-	<button
-		class="tool"
-		aria-label="Elements"
+	<!-- solid while the drawer is open, like a chosen tool -->
+	<IconButton
+		icon="layers"
+		label="Elements"
+		title="Elements (E)"
+		size="lg"
+		selected={drawerOpen}
 		aria-expanded={drawerOpen}
 		aria-controls="elements-drawer"
 		aria-keyshortcuts="E"
-		title="Elements (E)"
 		onclick={() => (drawerOpen = !drawerOpen)}
-	>
-		<Icon name="layers" size={20} />
-	</button>
+	/>
 </div>
 
 <style>
@@ -75,7 +75,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 3px;
+		gap: var(--space-1);
 		box-sizing: border-box;
 		height: 100%;
 		padding: 7px 0;
@@ -89,31 +89,5 @@
 		border: none;
 		border-top: 1px solid var(--color-border);
 		opacity: 1;
-	}
-
-	.tool {
-		display: grid;
-		place-items: center;
-		width: 36px;
-		height: 36px;
-		padding: 0;
-		border: none;
-		border-radius: 8px;
-		background: transparent;
-		color: var(--color-text);
-		cursor: pointer;
-
-		&:hover {
-			background: var(--color-hover);
-		}
-		&[aria-pressed='true'],
-		&[aria-expanded='true'] {
-			background: var(--color-blue);
-			color: var(--color-on-blue);
-		}
-		&:focus-visible {
-			outline: 2px solid var(--color-accent-line);
-			outline-offset: 2px;
-		}
 	}
 </style>

@@ -65,7 +65,7 @@
 				icon="close"
 				label="Back to the map"
 				title="Back to the map (Escape)"
-				small
+				size="sm"
 				onclick={() => selection.selectLegend(false)}
 			/>
 		{/if}

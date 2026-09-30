@@ -47,18 +47,24 @@
 	--color-warning: #a40;
 	--color-success: #006636;
 
+	/* small parts on the map, e.g. a button next to a node */
+	--shadow-sm: 0 1px 3px rgb(15 15 20 / 20%);
 	/* what opens over everything, e.g. menus, popups and dialogs */
 	--shadow-lg: 0 1px 2px rgb(15 15 20 / 14%), 0 6px 22px rgb(15 15 20 / 16%);
 
 	/* the system font */
 	--font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 
-	/* the heights of controls: in the sidebar, in bars and dialogs */
+	/* the heights of controls: small parts, in the sidebar, in bars and dialogs, the tools */
+	--size-xs: 24px;
 	--size-sm: 28px;
 	--size-md: 32px;
+	--size-lg: 36px;
 	/* corners: of small parts, of controls */
 	--radius-sm: 4px;
 	--radius-md: 6px;
+	/* spacing on a 4 px grid */
+	--space-1: 4px;
 	--space-2: 8px;
 	--space-3: 12px;
 	/* the size of controls and their text */
@@ -122,6 +128,7 @@
 		/* the amber and the green of versatiles.org */
 		--color-warning: #c9850a;
 		--color-success: #3da660;
+		--shadow-sm: 0 1px 3px rgb(0 0 0 / 50%);
 		--shadow-lg: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
 		--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	}

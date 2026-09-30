@@ -18,7 +18,7 @@
 <aside id="elements-drawer" class="drawer" aria-labelledby="elements-drawer-title">
 	<div class="header">
 		<h2 id="elements-drawer-title">Elements <span class="count">{count}</span></h2>
-		<IconButton icon="close" label="Close the elements" title="Close the elements (E)" small onclick={onclose} />
+		<IconButton icon="close" label="Close the elements" title="Close the elements (E)" size="sm" onclick={onclose} />
 	</div>
 	<div class="content">
 		<button class="row" aria-pressed={nothingSelected} onclick={() => selection.selectElement()}>

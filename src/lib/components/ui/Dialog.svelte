@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { EventHandler } from '$lib/event_handler.js';
+	import IconButton from './IconButton.svelte';
 
 	const {
 		children,
@@ -54,7 +55,7 @@
 	{#if title}<h2 id="{uid}-title">{title}</h2>{/if}
 	{@render children?.()}
 	<!-- after the content, so the first focus goes to the first control of the dialog -->
-	<button class="close" onclick={close} aria-label="Close" title="Close (Escape)">&#x2715;</button>
+	<IconButton class="close" icon="close" label="Close" title="Close (Escape)" size="sm" onclick={close} />
 </dialog>
 
 <style>
@@ -103,25 +104,10 @@
 		font-size: 1.2em;
 	}
 
-	.close {
+	/* the close button of the component IconButton, at the top right */
+	dialog > :global(.close) {
 		position: absolute;
-		top: 5px;
-		right: 5px;
-		font-size: 20px;
-		cursor: pointer;
-		background: none;
-		border: none;
-		width: 25px;
-		height: 25px;
-		text-align: center;
-		padding: 0;
-
-		/* a larger hit area for fingers, without a larger button; up to the edge of the dialog, not
-		   beyond it, where it would let the dialog scroll sideways */
-		&::after {
-			content: '';
-			position: absolute;
-			inset: -5px;
-		}
+		top: var(--space-2);
+		right: var(--space-2);
 	}
 </style>

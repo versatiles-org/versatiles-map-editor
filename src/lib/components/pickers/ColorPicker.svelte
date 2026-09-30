@@ -8,6 +8,7 @@
 <script lang="ts">
 	import { besideElement, keepInViewport } from './popup_position.js';
 	import ColorField from './ColorField.svelte';
+	import { IconButton } from '$lib/components/ui/index.js';
 	import {
 		hsvKeeping,
 		hsvToRgb,
@@ -222,7 +223,7 @@
 		>
 			<span class="swatch" style:background-color={hex}></span>
 			<span class="name">Color</span>
-			<button class="close" aria-label="Close" title="Close (Escape)" onclick={close}>&#x2715;</button>
+			<IconButton icon="close" label="Close" title="Close (Escape)" size="sm" onclick={close} />
 		</div>
 		<ColorField {hsv} oninput={setHsv} oncommit={commit} />
 
@@ -344,22 +345,6 @@
 		.name {
 			flex: 1;
 			font-weight: 600;
-		}
-	}
-
-	.close {
-		width: 24px;
-		height: 24px;
-		padding: 0;
-		border: none;
-		border-radius: 6px;
-		background: transparent;
-		color: var(--color-text);
-		font-size: 14px;
-		cursor: pointer;
-
-		&:hover {
-			background: var(--color-hover);
 		}
 	}
 
