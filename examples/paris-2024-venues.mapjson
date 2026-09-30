@@ -8,7 +8,7 @@
 				{ "color": "#0072b2", "label": "Stadiums and arenas", "symbol": "base:icon-stadium" },
 				{ "color": "#d55e00", "label": "Temporary venues at landmarks", "symbol": "base:icon-monument" },
 				{ "color": "#009e73", "label": "Venues in nature", "symbol": "base:icon-outdoor" },
-				{ "color": "#cc9900", "label": "Olympic Village", "symbol": "base:icon-embassy" }
+				{ "color": "#cc9900", "label": "Olympic Village", "symbol": "base:icon-stadium" }
 			],
 			"position": "top-right"
 		},
