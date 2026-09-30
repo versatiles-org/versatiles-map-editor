@@ -122,7 +122,8 @@ describe('MapView', () => {
 			const setData = vi.fn();
 			map.getSource.mockReturnValue({ setData } as never);
 			view.showVisibleArea([1, 2, 3, 4], undefined);
-			expect(setData.mock.lastCall?.[0].features).toHaveLength(2);
+			// the veil, the border and 8 handles
+			expect(setData.mock.lastCall?.[0].features).toHaveLength(10);
 			view.hideVisibleArea();
 			expect(setData.mock.lastCall?.[0].features).toStrictEqual([]);
 		});

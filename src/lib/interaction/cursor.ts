@@ -1,6 +1,7 @@
 export class Cursor {
 	private readonly element: HTMLElement;
 
+	#resize: string | undefined; // Priority: highest, e.g. "nwse-resize" over a handle of the visible area
 	#precise = new Set<string>(); // Priority: high
 	#grab = new Set<string>(); // Priority: medium
 	#hover = new Set<string>(); // Priority: low
@@ -11,10 +12,17 @@ export class Cursor {
 	}
 
 	private update() {
+		if (this.#resize) return (this.element.style.cursor = this.#resize);
 		if (this.#precise.size > 0) return (this.element.style.cursor = 'crosshair');
 		if (this.#grab.size > 0) return (this.element.style.cursor = 'grab');
 		if (this.#hover.size > 0) return (this.element.style.cursor = 'pointer');
 		this.element.style.cursor = 'default';
+	}
+
+	/** A resize cursor, e.g. "ns-resize", or undefined for none. */
+	public setResize(cursor: string | undefined) {
+		this.#resize = cursor;
+		this.update();
 	}
 
 	public toggleHover(id: string, add: boolean = true) {

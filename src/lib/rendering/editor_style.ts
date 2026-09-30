@@ -49,7 +49,7 @@ export function buildStyle(
 		highlightLayers(),
 		elementStyle(labelFont ?? getSettings(background).font),
 		selectionLayers(coarse),
-		visibleAreaLayers(),
+		visibleAreaLayers(coarse),
 		drawingLayers(coarse)
 	];
 	const layers: LayerSpecification[] = [];
@@ -137,7 +137,7 @@ const EDITOR_COLOR = '#9d35ff';
  * The visible area while it is edited: a veil outside the frame, its border, and without a frame
  * the bounds of the elements, dashed. Over the elements, since the veil covers what visitors do not see.
  */
-function visibleAreaLayers(): StylePart {
+function visibleAreaLayers(coarse: boolean): StylePart {
 	return {
 		sources: { visible_area: emptySource() },
 		layers: [
@@ -161,6 +161,19 @@ function visibleAreaLayers(): StylePart {
 				type: 'line',
 				filter: ['==', ['get', 'kind'], 'bounds'],
 				paint: { 'line-color': EDITOR_COLOR, 'line-width': 1.5, 'line-dasharray': [3, 2] }
+			},
+			{
+				// the handles at the corners and edges, like the nodes of the element being drawn
+				id: 'visible_area_handles',
+				source: 'visible_area',
+				type: 'circle',
+				filter: ['==', ['get', 'kind'], 'handle'],
+				paint: {
+					'circle-color': '#ffffff',
+					'circle-radius': coarse ? 7 : 5,
+					'circle-stroke-color': EDITOR_COLOR,
+					'circle-stroke-width': 2
+				}
 			}
 		]
 	};

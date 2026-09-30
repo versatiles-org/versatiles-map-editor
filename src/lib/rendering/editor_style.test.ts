@@ -19,6 +19,7 @@ describe('buildStyle', () => {
 			'visible_area_veil',
 			'visible_area_border',
 			'visible_area_bounds',
+			'visible_area_handles',
 			'drawing_fill',
 			'drawing_line',
 			'drawing_nodes'
@@ -43,13 +44,14 @@ describe('buildStyle', () => {
 		const under = ['highlight_line', 'highlight_point', ELEMENT_LAYERS.fill, ELEMENT_LAYERS.stroke];
 		expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
 		// the markers, the selection, the visible area and the drawing stay on top
-		expect(ids.slice(-9)).toStrictEqual([
+		expect(ids.slice(-10)).toStrictEqual([
 			ELEMENT_LAYERS.symbol,
 			'selection_marks',
 			'selection_nodes',
 			'visible_area_veil',
 			'visible_area_border',
 			'visible_area_bounds',
+			'visible_area_handles',
 			'drawing_fill',
 			'drawing_line',
 			'drawing_nodes'

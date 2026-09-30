@@ -166,7 +166,9 @@ export class MapView {
 	 * a frame the bounds of the elements, dashed.
 	 */
 	public showVisibleArea(frame: Bounds | undefined, bounds: Bounds | undefined) {
-		this.#visibleAreaSource()?.setData({ type: 'FeatureCollection', features: visibleAreaFeatures(frame, bounds) });
+		const area = frame ?? bounds;
+		const features = [...visibleAreaFeatures(frame, bounds), ...(area ? handleFeatures(area) : [])];
+		this.#visibleAreaSource()?.setData({ type: 'FeatureCollection', features });
 	}
 
 	/** Hide the visible area, e.g. when its mode is left. */
@@ -218,4 +220,31 @@ export function visibleAreaFeatures(frame: Bounds | undefined, bounds: Bounds | 
 		];
 	}
 	return [];
+}
+
+/** The handles of the visible area: at the corners, which move two sides, and in the middle of the edges. */
+export const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as const;
+export type Handle = (typeof HANDLES)[number];
+
+const mercatorY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+const latitudeOf = (y: number) => (360 / Math.PI) * Math.atan(Math.exp(y)) - 90;
+
+/** Where a handle is: the middle of an edge is its middle on the map (in Web Mercator). */
+export function handlePosition([west, south, east, north]: Bounds, handle: Handle): [number, number] {
+	const lng = handle.includes('w') ? west : handle.includes('e') ? east : (west + east) / 2;
+	const lat = handle.includes('n')
+		? north
+		: handle.includes('s')
+			? south
+			: latitudeOf((mercatorY(south) + mercatorY(north)) / 2);
+	return [lng, lat];
+}
+
+/** The handles of an area, as features for the layer of the handles. */
+export function handleFeatures(area: Bounds): GeoJSON.Feature[] {
+	return HANDLES.map((handle) => ({
+		type: 'Feature',
+		properties: { kind: 'handle', handle },
+		geometry: { type: 'Point', coordinates: handlePosition(area, handle) }
+	}));
 }

@@ -1,15 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapDocumentInteractive } from '../map_document_interactive.js';
-import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import { LngLat, MockMap, Point, type MaplibreMap } from '../__mocks__/map.js';
+import { handlePosition, type Handle } from '../rendering/index.js';
 import { addElement } from '../__mocks__/elements.js';
 
 describe('VisibleAreaMode', () => {
 	let map: MockMap;
 	let doc: MapDocumentInteractive;
 	let setData: ReturnType<typeof vi.fn>;
-	/** The kinds of the features that the map shows of the visible area. */
+	/** The kinds of the features that the map shows of the visible area, without the handles. */
 	const shown = () =>
-		(setData.mock.lastCall?.[0].features as { properties: { kind: string } }[]).map((f) => f.properties.kind);
+		(setData.mock.lastCall?.[0].features as { properties: { kind: string } }[])
+			.map((f) => f.properties.kind)
+			.filter((kind) => kind !== 'handle');
 
 	beforeEach(() => {
 		map = new MockMap();
@@ -61,5 +64,85 @@ describe('VisibleAreaMode', () => {
 		const show = vi.spyOn(doc.view, 'showVisibleArea');
 		await doc.state.redo();
 		expect(show).not.toHaveBeenCalled();
+	});
+
+	describe('handles', () => {
+		// a projection like on the screen: x grows to the east, y to the south, 1 pixel per degree
+		const frame: [number, number, number, number] = [-50, -50, 50, 50];
+		const pointer = (x: number, y: number, type = 'mousedown') => ({
+			type,
+			originalEvent: new MouseEvent(type),
+			point: { x, y },
+			lngLat: { lng: x, lat: -y },
+			preventDefault: vi.fn()
+		});
+		const pixel = (lng: number, lat: number): [number, number] => [lng, -lat];
+		/** The pixel of a handle of the current area. */
+		const handle = (name: Handle): [number, number] => pixel(...handlePosition(doc.frame ?? doc.getBounds()!, name));
+		/** Drag with the mouse from one pixel to another. */
+		function drag([x0, y0]: [number, number], [x1, y1]: [number, number]) {
+			map.emit('mousedown', pointer(x0, y0));
+			map.emit('mousemove', pointer(x1, y1, 'mousemove'));
+			map.emit('mouseup', pointer(x1, y1, 'mouseup'));
+		}
+
+		beforeEach(() => {
+			map.project.mockImplementation((lngLat) => {
+				const { lng, lat } = LngLat.convert(lngLat);
+				return new Point(lng, -lat);
+			});
+			map.unproject.mockImplementation((point) => {
+				const { x, y } = Point.convert(point);
+				return new LngLat(x, -y);
+			});
+			doc.frame = frame;
+			doc.state.log();
+			doc.visibleArea.open();
+		});
+
+		it('move two sides at a corner and one at an edge, each drag one undo step', async () => {
+			drag(handle('ne'), pixel(70, 60));
+			expect(doc.frame).toStrictEqual([-50, -50, 70, 60]);
+			const before = doc.frame!;
+			drag(handle('w'), pixel(-80, 0));
+			expect(doc.frame).toStrictEqual([-80, -50, 70, 60]);
+
+			await doc.state.undo();
+			expect(doc.frame).toStrictEqual(before);
+			await doc.state.undo();
+			expect(doc.frame).toStrictEqual(frame);
+		});
+
+		it('keep a minimum size of 20 pixels', () => {
+			// the east edge far over the west edge
+			drag(handle('e'), pixel(-100, 0));
+			expect(doc.frame).toStrictEqual([-50, -50, -30, 50]);
+		});
+
+		it('keep the frame within the latitudes of the map', () => {
+			drag(handle('n'), pixel(0, 89));
+			expect(doc.frame![3]).toBeCloseTo(85.05);
+		});
+
+		it('turn the bounds of the elements into a frame', () => {
+			doc.frame = undefined;
+			doc.addElement({
+				type: 'line',
+				points: [
+					[-10, -10],
+					[10, 10]
+				]
+			});
+			doc.visibleArea.render();
+			drag(handle('se'), pixel(20, -30));
+			expect(doc.frame).toStrictEqual([-10, -30, 20, 10]);
+		});
+
+		it('leave the map to be moved elsewhere', () => {
+			const e = pointer(0, 0);
+			map.emit('mousedown', e);
+			expect(e.preventDefault).not.toHaveBeenCalled();
+			expect(doc.frame).toStrictEqual(frame);
+		});
 	});
 });
