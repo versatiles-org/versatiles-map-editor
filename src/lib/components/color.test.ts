@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatHex } from '@versatiles/map-state';
-import { hsvKeeping, hsvToRgb, moveInField, rgbToHsv } from './color.js';
+import { channelTrack, hsvKeeping, hsvToRgb, moveInField, rgbToHsv } from './color.js';
 
 describe('HSV', () => {
 	it('converts primary and gray colors', () => {
@@ -39,5 +39,25 @@ describe('moveInField', () => {
 		expect(moveInField(hsv, 'ArrowLeft', true)).toStrictEqual({ h: 10, s: 0.4, v: 0.995 });
 		expect(moveInField(hsv, 'ArrowUp', true)).toStrictEqual({ h: 10, s: 0.5, v: 1 });
 		expect(moveInField(hsv, 'Enter', false)).toBeUndefined();
+	});
+});
+
+describe('channelTrack', () => {
+	const color = { r: 255, g: 128, b: 0, alpha: 0.5 };
+	const hsv = rgbToHsv(color);
+
+	it('goes through the values of a channel, the others as they are', () => {
+		expect(channelTrack('g', color, hsv)).toBe('linear-gradient(to right, rgb(255 0 0), rgb(255 255 0))');
+		// from transparent to opaque
+		expect(channelTrack('alpha', color, hsv)).toBe('linear-gradient(to right, rgb(255 128 0 / 0), rgb(255 128 0))');
+		// from black to the brightest color of this hue and saturation
+		expect(channelTrack('v', color, hsv)).toBe('linear-gradient(to right, rgb(0 0 0), rgb(255 128 0))');
+	});
+
+	it('goes through all hues, at the saturation and value of the color', () => {
+		const track = channelTrack('h', color, hsv);
+		expect(track.match(/rgb\(/g)).toHaveLength(7);
+		expect(track).toMatch(/^linear-gradient\(to right, rgb\(255 0 0\), rgb\(255 255 0\),/);
+		expect(track).toMatch(/rgb\(255 0 0\)\)$/);
 	});
 });

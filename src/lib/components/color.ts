@@ -1,3 +1,5 @@
+import type { RGBA } from '@versatiles/map-state';
+
 export interface RGB {
 	r: number; // 0…255
 	g: number;
@@ -51,4 +53,37 @@ export function hsvToRgb({ h, s, v }: HSV): RGB {
 		return (v - v * s * Math.max(0, Math.min(k, 4 - k, 1))) * 255;
 	};
 	return { r: f(5), g: f(3), b: f(1) };
+}
+
+/** A channel of a color: red, green and blue, hue, saturation and value, or its opacity. */
+export type Channel = 'r' | 'g' | 'b' | 'h' | 's' | 'v' | 'alpha';
+
+/**
+ * The track of a channel's slider: a gradient through the colors that the channel reaches, with
+ * the other channels as they are, e.g. red from 0 to 255 at the current green and blue. The
+ * opacity goes from transparent to the opaque color, to be drawn over a checkerboard.
+ */
+export function channelTrack(channel: Channel, color: RGBA, hsv: HSV): string {
+	const css = ({ r, g, b }: RGB, alpha = 1) =>
+		`rgb(${Math.round(r)} ${Math.round(g)} ${Math.round(b)}${alpha < 1 ? ` / ${alpha}` : ''})`;
+	let stops: string[];
+	switch (channel) {
+		case 'r':
+		case 'g':
+		case 'b':
+			stops = [0, 255].map((n) => css({ ...color, [channel]: n }));
+			break;
+		case 'alpha':
+			stops = [css(color, 0), css(color)];
+			break;
+		case 'h':
+			// through all hues, at the current saturation and value
+			stops = [0, 60, 120, 180, 240, 300, 360].map((h) => css(hsvToRgb({ ...hsv, h })));
+			break;
+		case 's':
+		case 'v':
+			stops = [0, 1].map((n) => css(hsvToRgb({ ...hsv, [channel]: n })));
+			break;
+	}
+	return `linear-gradient(to right, ${stops.join(', ')})`;
 }

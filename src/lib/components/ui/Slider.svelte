@@ -4,6 +4,10 @@
 	 * an exact value, e.g. a rotation of 17° between the steps of the slider. The field shows the
 	 * value times `scale` (e.g. 100 for percent), followed by its `unit`. A typed value is set on
 	 * Enter or when the field is left, and kept within `min` and `max`.
+	 *
+	 * `track` is a background for the track instead of the filled part in the accent, e.g. a
+	 * gradient through the colors of a channel; `checkered` draws it over a checkerboard, e.g. for
+	 * an opacity. `wide` fills the width of the container, instead of the part of an input row.
 	 */
 	let {
 		id,
@@ -13,7 +17,10 @@
 		value = $bindable(),
 		onchange,
 		unit = '',
-		scale = 1
+		scale = 1,
+		track,
+		checkered = false,
+		wide = false
 	}: {
 		id: string;
 		min: number;
@@ -23,6 +30,9 @@
 		onchange?: () => void;
 		unit?: string;
 		scale?: number;
+		track?: string;
+		checkered?: boolean;
+		wide?: boolean;
 	} = $props();
 
 	// as many decimals as the steps of the slider have, e.g. 1 for steps of 0.1
@@ -45,8 +55,20 @@
 	}
 </script>
 
-<span class="slider">
-	<input {id} type="range" {min} {max} {step} bind:value {onchange} style:--fill={fill} />
+<span class="slider" class:wide>
+	<input
+		{id}
+		type="range"
+		{min}
+		{max}
+		{step}
+		bind:value
+		{onchange}
+		class:track={track !== undefined}
+		class:checkered
+		style:--fill={fill}
+		style:--track={track}
+	/>
 	<input
 		class="field"
 		type="number"
@@ -121,6 +143,39 @@
 		}
 		&:hover::-moz-range-thumb {
 			border-color: var(--color-accent-line);
+		}
+	}
+
+	.wide {
+		width: 100%;
+	}
+
+	/* a track of its own, e.g. the colors of a channel: higher, so the colors are seen, with the
+	   knob in its middle */
+	input.track {
+		height: 16px;
+
+		&::-webkit-slider-runnable-track {
+			height: 12px;
+			background: var(--track);
+			box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
+		}
+		&.checkered::-webkit-slider-runnable-track {
+			background: var(--track), var(--checkerboard);
+		}
+		&::-webkit-slider-thumb {
+			margin-top: -1px;
+		}
+		&::-moz-range-track {
+			height: 12px;
+			background: var(--track);
+			box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
+		}
+		&.checkered::-moz-range-track {
+			background: var(--track), var(--checkerboard);
+		}
+		&::-moz-range-progress {
+			background: transparent;
 		}
 	}
 
