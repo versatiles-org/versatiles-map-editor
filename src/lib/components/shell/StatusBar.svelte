@@ -25,6 +25,9 @@
 	const drawing = $derived(doc.drawing);
 
 	const hint = $derived.by(() => {
+		if (doc.visibleArea.active) {
+			return 'Drag the handles to set the area that shared maps show completely. Escape or Done ends.';
+		}
 		switch (drawing.tool) {
 			case 'marker':
 				return 'Click the map to place the marker. Escape cancels.';

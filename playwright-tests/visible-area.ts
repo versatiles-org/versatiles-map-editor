@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
-import { project, storedState, waitForMapIsReady } from './lib/utils.js';
+import { menuItem, project, storedState, waitForMapIsReady } from './lib/utils.js';
 
 // The visible area (frame) of a map: what a shared or embedded map shows completely.
 
@@ -96,4 +96,43 @@ test('the viewer shows the frame again when its size changes, until the visitor 
 	await page.setViewportSize({ width: 400, height: 600 });
 	const after = await settledPosition(page, [13.4, 52.5]);
 	expect(after[0]).toBeCloseTo(moved[0], -1);
+});
+
+test('the visible area is edited in a mode of its own, from the menu or the Map panel', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, elements }));
+	await waitForMapIsReady(page);
+	const bar = page.getByRole('group', { name: 'Visible area' });
+	const shared = page.getByRole('region', { name: 'Shared map' });
+	await expect(shared).toContainText('Shared maps show all elements.');
+
+	// from the Map panel; without a frame, the bar shows the elements (a single marker has no size)
+	await shared.getByRole('button', { name: 'Edit visible area…' }).click();
+	await expect(bar).toContainText('The elements: 0 m × 0 m');
+	await expect(page.locator('.statusbar')).toContainText('Drag the handles');
+
+	// the current view becomes the frame
+	await bar.getByRole('button', { name: 'Use current view' }).click();
+	await expect(bar).toContainText(/^Visible area: [\d.,]+ km × [\d.,]+ km/);
+	await expect.poll(async () => (await storedState(page)).frame).toBeDefined();
+	await expect(shared).toContainText('Shared maps show the visible area that you set');
+
+	// back to the elements, and undo
+	await bar.getByRole('button', { name: 'Fit to elements' }).click();
+	await expect.poll(async () => (await storedState(page)).frame).toBeUndefined();
+	await expect(bar.getByRole('button', { name: 'Fit to elements' })).toBeDisabled();
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).frame).toBeDefined();
+
+	// Escape ends it, and so does Done, after opening it from the menu
+	await page.keyboard.press('Escape');
+	await expect(bar).toBeHidden();
+	await (await menuItem(page, 'Visible area…')).click();
+	await expect(bar).toBeVisible();
+	await bar.getByRole('button', { name: 'Done' }).click();
+	await expect(bar).toBeHidden();
+
+	// a tool ends it too
+	await (await menuItem(page, 'Visible area…')).click();
+	await page.getByRole('button', { name: 'Marker', exact: true }).click();
+	await expect(bar).toBeHidden();
 });

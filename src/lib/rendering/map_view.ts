@@ -161,6 +161,20 @@ export class MapView {
 		}
 	}
 
+	/** The part of the map that is shown, without the padding of the map, e.g. its bars. */
+	public viewBounds(): Bounds {
+		const { clientWidth: width, clientHeight: height } = this.map.getContainer();
+		const { top = 0, right = 0, bottom = 0, left = 0 } = this.map.getPadding();
+		const topLeft = this.map.unproject([left, top]);
+		const bottomRight = this.map.unproject([width - right, height - bottom]);
+		return [
+			Math.max(-180, topLeft.lng),
+			Math.max(-MAX_LATITUDE, bottomRight.lat),
+			Math.min(180, bottomRight.lng),
+			Math.min(MAX_LATITUDE, topLeft.lat)
+		];
+	}
+
 	/**
 	 * Show the visible area while it is edited: a veil outside the frame and its border, or without
 	 * a frame the bounds of the elements, dashed.

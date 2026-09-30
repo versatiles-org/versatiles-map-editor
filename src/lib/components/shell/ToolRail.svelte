@@ -54,7 +54,11 @@
 			size="lg"
 			aria-pressed={drawing.tool === id}
 			aria-keyshortcuts={key}
-			onclick={() => drawing.setTool(id)}
+			onclick={() => {
+				// a tool ends editing the visible area
+				doc.visibleArea.close();
+				drawing.setTool(id);
+			}}
 		/>
 	{/each}
 	<hr />

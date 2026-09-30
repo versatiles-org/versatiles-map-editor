@@ -236,6 +236,7 @@
 			{@render item('GeoJSON', () => files.exportGeoJSON())}
 			{@render item('KML (Google Earth)', () => files.exportKML())}
 		</div>
+		{@render item('Visible area…', () => doc.visibleArea.open())}
 		<hr />
 		{@render item('Undo', () => doc.state.undo(), {
 			disabled: !history.undoEnabled,

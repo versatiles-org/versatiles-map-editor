@@ -66,6 +66,22 @@ describe('VisibleAreaMode', () => {
 		expect(show).not.toHaveBeenCalled();
 	});
 
+	it('takes the current view as the frame, and goes back to the elements, each one undo step', async () => {
+		// a projection like on the screen, 10 pixels per degree around 0°, 0°
+		map.unproject.mockImplementation((point) => {
+			const { x, y } = Point.convert(point);
+			return new LngLat((x - 400) / 10, (300 - y) / 10);
+		});
+		doc.visibleArea.open();
+		doc.visibleArea.useCurrentView();
+		// the mock map is 800 × 600 pixels, without padding
+		expect(doc.frame).toStrictEqual([-40, -30, 40, 30]);
+		doc.visibleArea.fitToElements();
+		expect(doc.frame).toBeUndefined();
+		await doc.state.undo();
+		expect(doc.frame).toStrictEqual([-40, -30, 40, 30]);
+	});
+
 	describe('handles', () => {
 		// a projection like on the screen: x grows to the east, y to the south, 1 pixel per degree
 		const frame: [number, number, number, number] = [-50, -50, 50, 50];

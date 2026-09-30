@@ -82,6 +82,21 @@ export class VisibleAreaMode {
 		this.#doc.view.hideVisibleArea();
 	}
 
+	/** The frame becomes the part of the map that is shown now; one undo step. */
+	public useCurrentView() {
+		this.#doc.frame = this.#doc.view.viewBounds();
+		this.#doc.state.log();
+		this.render();
+	}
+
+	/** Remove the frame, so shared maps show the elements; one undo step. */
+	public fitToElements() {
+		if (!this.#doc.frame) return;
+		this.#doc.frame = undefined;
+		this.#doc.state.log();
+		this.render();
+	}
+
 	/** Draw the frame, or without one the bounds of the elements, e.g. after a change. */
 	public render() {
 		if (!this.active) return;

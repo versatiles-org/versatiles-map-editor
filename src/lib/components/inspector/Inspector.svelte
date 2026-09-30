@@ -117,6 +117,12 @@
 				Address search for visitors
 			</label>
 			<Hint>Visitors can search for a place, e.g. their street. The map content does not change.</Hint>
+			<Hint>
+				{doc.frame
+					? 'Shared maps show the visible area that you set, on every screen.'
+					: 'Shared maps show all elements. You can set the area that they show.'}
+			</Hint>
+			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit visible area…</Button></ButtonGroup>
 		</InspectorSection>
 	{/if}
 </div>

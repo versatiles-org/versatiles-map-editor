@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import { LngLat, MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { MapView, visibleAreaFeatures } from './map_view.js';
 
 describe('MapView', () => {
@@ -126,6 +126,19 @@ describe('MapView', () => {
 			expect(setData.mock.lastCall?.[0].features).toHaveLength(10);
 			view.hideVisibleArea();
 			expect(setData.mock.lastCall?.[0].features).toStrictEqual([]);
+		});
+	});
+
+	describe('viewBounds', () => {
+		it('is the part of the map within its padding', () => {
+			map.getPadding.mockReturnValue({ top: 10, right: 20, bottom: 30, left: 40 });
+			// 10 pixels per degree, like on the screen: y grows to the south
+			map.unproject.mockImplementation((point) => {
+				const [x, y] = point as [number, number];
+				return new LngLat(x / 10, -y / 10);
+			});
+			// the mock map is 800 × 600 pixels
+			expect(view.viewBounds()).toStrictEqual([4, -57, 78, -1]);
 		});
 	});
 });

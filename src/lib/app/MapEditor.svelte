@@ -9,7 +9,7 @@
 	// the editor then starts about 0.5 s sooner. Phones, which get the viewer, load ~95 KiB more.
 	import { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { ElementsDrawer, Sidebar, SidebarToggle, StatusBar, ToolRail, TopBar } from '$lib/components/shell/index.js';
-	import { DrawBar, NodeDeleteButton, SelectionBar } from '$lib/components/map/editor/index.js';
+	import { DrawBar, NodeDeleteButton, SelectionBar, VisibleAreaBar } from '$lib/components/map/editor/index.js';
 	import { newMarkerState } from '$lib/element/marker.js';
 	import { loadConfig } from '$lib/background/index.js';
 	import { SessionSync } from '$lib/session_sync.svelte.js';
@@ -133,6 +133,7 @@
 		{#if mapDocument?.isInteractive()}
 			<NodeDeleteButton {mapDocument} />
 			<DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
+			<VisibleAreaBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
 			<SelectionBar
 				doc={mapDocument}
 				top={TOPBAR_HEIGHT}
