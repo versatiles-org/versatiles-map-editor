@@ -273,6 +273,8 @@ test('black and white become exactly what is set, on both maps', { tag: '@cross-
 	};
 	// e.g. 50 % of 255, give or take the rounding and smoothing of the edges
 	const near = (value: number) => [value - 2, value + 2];
+	// the darkest pixels of the vector map: of small labels, which never cover a pixel completely
+	const [darkest] = await channelRange(page);
 
 	// the vector map, faded with white: its darkest lines and labels become mid-gray
 	await setLevel('Black becomes', '50');
@@ -289,6 +291,21 @@ test('black and white become exactly what is set, on both maps', { tag: '@cross-
 	await setLevel('Black becomes', '0');
 	await setLevel('White becomes', '40');
 	await expect.poll(async () => (await channelRange(page))[1]).toBeLessThanOrEqual(near(102)[1]);
+
+	// beyond black and white: more contrast, which the imagery gets from its raster contrast
+	await setLevel('White becomes', '200');
+	await setLevel('Black becomes', '-100');
+	await expect(page.getByRole('spinbutton', { name: 'Black becomes' })).toHaveValue('-100');
+	await expect(page.getByRole('spinbutton', { name: 'White becomes' })).toHaveValue('200');
+	await expect.poll(async () => (await channelRange(page))[0]).toBeLessThanOrEqual(near(0)[1]);
+	expect((await channelRange(page))[1]).toBeGreaterThanOrEqual(near(255)[0]);
+
+	// the same on the vector map: its labels become black, but their edges stay mixed with their halo
+	await page.getByRole('radio', { name: 'OpenStreetMap' }).check();
+	await waitForMapIsIdle(page);
+	await expect(page.getByRole('spinbutton', { name: 'Black becomes' })).toHaveValue('-100');
+	await expect.poll(async () => (await channelRange(page))[0]).toBeLessThan(darkest / 2);
+	expect((await channelRange(page))[1]).toBe(255);
 });
 
 test('one font for the labels of all markers, which need not be the one of the background map', async ({ page }) => {

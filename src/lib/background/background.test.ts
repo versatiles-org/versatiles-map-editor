@@ -162,7 +162,11 @@ describe('changeSettings', () => {
 			[0.5, 1],
 			[0, 0.3],
 			[0.35, 0.35],
-			[0.1, 0.75]
+			[0.1, 0.75],
+			[-1, 2],
+			[-0.5, 0.5],
+			[1, 2],
+			[-1, 0]
 		]) {
 			const recolor = changeSettings(undefined, { colors: { ...DEFAULT_COLORS, black, white } })!.options.recolor as {
 				brightness?: number;
@@ -177,8 +181,10 @@ describe('changeSettings', () => {
 
 	it('reads any brightness and contrast as black and white', () => {
 		const strong = { builder: 'osm' as const, options: { recolor: { brightness: 0.1, contrast: 1.5 } } };
-		// too much contrast: black and white are kept within black and white
-		expect(getSettings(strong).colors).toStrictEqual({ saturation: 0, black: 0, white: 1 });
+		expect(getSettings(strong).colors).toStrictEqual({ saturation: 0, black: -0.15, white: 1.35 });
+		// too much contrast: black and white are kept within their ranges
+		const extreme = { builder: 'osm' as const, options: { recolor: { brightness: 0, contrast: 5 } } };
+		expect(getSettings(extreme).colors).toStrictEqual({ saturation: 0, black: -1, white: 2 });
 		const faded = { builder: 'osm' as const, options: { recolor: { brightness: 0.25, contrast: 0.5 } } };
 		expect(getSettings(faded).colors).toStrictEqual({ saturation: 0, black: 0.5, white: 1 });
 	});
@@ -190,6 +196,60 @@ describe('changeSettings', () => {
 		expect(getSettings(faded).colors).toStrictEqual({ saturation: -0.5, black: 0.2, white: 1 });
 		const darker = changeSettings(sat, { colors: { ...DEFAULT_COLORS, white: 0.7 } });
 		expect(darker?.options.raster).toStrictEqual({ brightnessMax: 0.7 });
+	});
+
+	/** The lightness of a channel from 0 to 1, as MapLibre's raster shader computes it, clipped at the end. */
+	function rasterChannel(raster: Record<string, number>, c: number): number {
+		const contrast = raster.contrast ?? 0;
+		const factor = contrast > 0 ? 1 / (1 - contrast) : 1 + contrast;
+		const min = raster.brightnessMin ?? 0;
+		const max = raster.brightnessMax ?? 1;
+		return Math.min(1, Math.max(0, min + (max - min) * ((c - 0.5) * factor + 0.5)));
+	}
+
+	it('maps black and white of the imagery exactly where they are set, also beyond black and white', () => {
+		const sat = changeSettings(undefined, { base: 'satellite' });
+		for (const [black, white] of [
+			[0.2, 0.9],
+			[-1, 2],
+			[-0.5, 1],
+			[0, 1.5],
+			[-0.3, 0.5],
+			[0.3, 1.7],
+			[-1, 1],
+			[0.4, 0.4]
+		]) {
+			const changed = changeSettings(sat, { colors: { ...DEFAULT_COLORS, black, white } });
+			const raster = (changed?.options.raster ?? {}) as Record<string, number>;
+			for (const key of ['brightnessMin', 'brightnessMax', 'contrast']) {
+				const value = raster[key];
+				if (value === undefined) continue;
+				expect(value, key).toBeGreaterThanOrEqual(key === 'contrast' ? -1 : 0);
+				expect(value, key).toBeLessThan(key === 'contrast' ? 1 : 1.0001);
+			}
+			// clipped, as the map shows it; within 1 %, since a contrast near 1 is rounded
+			for (const c of [0, 0.1, 0.25, 0.5, 0.75, 0.9, 1]) {
+				const expected = Math.min(1, Math.max(0, black + (white - black) * c));
+				expect(Math.abs(rasterChannel(raster, c) - expected), `${black}…${white} at ${c}`).toBeLessThan(0.01);
+			}
+			const read = getSettings(changed).colors;
+			expect(read.black).toBeCloseTo(black, 1);
+			expect(read.white).toBeCloseTo(white, 1);
+		}
+	});
+
+	it('keeps mid-gray of the imagery from 0 to 1, since the raster properties cannot map it beyond', () => {
+		const sat = changeSettings(undefined, { base: 'satellite' });
+		// black −1 and white 0.5 would make mid-gray −0.25: both move up until it is 0
+		const dark = changeSettings(sat, { colors: { ...DEFAULT_COLORS, black: -1, white: 0.5 } });
+		const colors = getSettings(dark).colors;
+		expect(colors.black + colors.white).toBeCloseTo(0, 1);
+		expect(colors.white - colors.black).toBeCloseTo(1.5, 1);
+		// and black 0.5 and white 1.8 down until it is 1
+		const light = changeSettings(sat, { colors: { ...DEFAULT_COLORS, black: 0.5, white: 1.8 } });
+		const lightColors = getSettings(light).colors;
+		expect(lightColors.black + lightColors.white).toBeCloseTo(2, 1);
+		expect(lightColors.white - lightColors.black).toBeCloseTo(1.3, 1);
 	});
 
 	it('gives the streets and labels over the imagery the colors of the imagery', () => {

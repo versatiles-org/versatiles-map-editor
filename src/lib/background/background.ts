@@ -35,9 +35,11 @@ export interface MapColors {
 	/** From -1 (gray) to 1, 0 keeps the colors. */
 	saturation: number;
 	/**
-	 * The lightness that black becomes, and the one that white becomes, from 0 (black) to 1
-	 * (white). All other colors are between them, e.g. black 0.5 fades the map with white, and
-	 * white 0.5 with black. Black is never lighter than white.
+	 * The lightness that black becomes, and the one that white becomes, where 0 is black and 1
+	 * white. All other colors are between them, e.g. black 0.5 fades the map with white, and
+	 * white 0.5 with black. Beyond 0 and 1 they add contrast: black −0.5 makes the dark colors black,
+	 * white 1.5 the light colors white. Black goes from −1 to 1, white from 0 to 2, and black is
+	 * never lighter than white.
 	 */
 	black: number;
 	white: number;
@@ -140,13 +142,14 @@ function childOf(options: Options, path: string[], create = false): Options {
 
 /** Rounded, e.g. to keep 0.3 from becoming 0.30000000000000004 in a link. */
 const round = (value: number) => Math.round(value * 10000) / 10000 + 0;
-const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 /**
  * The colors of a map. The vector map scales the colors around mid-gray (`contrast`, a factor), then
  * adds a lightness (`brightness`), without clipping in between: black becomes
- * `brightness + (1 − contrast) / 2`, white that plus `contrast`. The imagery maps black and white
- * with `brightnessMin` and `brightnessMax`.
+ * `brightness + (1 − contrast) / 2`, white that plus `contrast`. The imagery works the same way
+ * with a contrast factor (from `contrast`), then `brightnessMin` and `brightnessMax`, see
+ * rasterLevels.
  */
 function getColors({ builder, options }: StateBackground): MapColors {
 	if (builder === 'osm') {
@@ -156,11 +159,45 @@ function getColors({ builder, options }: StateBackground): MapColors {
 		return levels(number(recolor.saturate, 0), black, black + contrast);
 	}
 	const raster = isObject(options.raster) ? options.raster : {};
-	return levels(number(raster.saturation, 0), number(raster.brightnessMin, 0), number(raster.brightnessMax, 1));
+	const min = number(raster.brightnessMin, 0);
+	const span = number(raster.brightnessMax, 1) - min;
+	const factor = contrastFactor(number(raster.contrast, 0));
+	const black = min + (span * (1 - factor)) / 2;
+	return levels(number(raster.saturation, 0), black, black + span * factor);
 }
 
 function levels(saturation: number, black: number, white: number): MapColors {
-	return { saturation, black: round(clamp01(black)), white: round(clamp01(Math.max(black, white))) };
+	const b = clamp(black, -1, 1);
+	return { saturation, black: round(b), white: round(clamp(Math.max(b, white), 0, 2)) };
+}
+
+/** The factor of MapLibre's `raster-contrast`, from -1 (all gray) to 1 (infinite). */
+function contrastFactor(contrast: number): number {
+	return contrast > 0 ? 1 / (1 - contrast) : 1 + contrast;
+}
+
+/** The smallest distance of `brightnessMin` and `brightnessMax`, which keeps the contrast finite. */
+const MIN_RASTER_SPAN = 0.02;
+
+/**
+ * The raster properties that map black and white of the imagery. MapLibre scales the colors
+ * around mid-gray by the contrast factor, then maps 0 to `brightnessMin` and 1 to
+ * `brightnessMax`, without clipping in between. Both must be from 0 to 1, so black below 0 and
+ * white above 1 take a contrast. Mid-gray always becomes a lightness from 0 to 1: beyond that,
+ * e.g. black −1 and white 0.5, black and white move together until it is 0 or 1.
+ */
+function rasterLevels(black: number, white: number) {
+	const center = clamp((black + white) / 2, 0, 1);
+	const range = white - black;
+	const room = Math.min(center, 1 - center);
+	if (range / 2 <= room) {
+		return { brightnessMin: round(center - range / 2), brightnessMax: round(center + range / 2), contrast: 0 };
+	}
+	// min and max as far apart as they can be around the center, and the contrast for the rest
+	const half = Math.max(room, MIN_RASTER_SPAN / 2);
+	const min = round(clamp(center - half, 0, 1));
+	const max = round(clamp(center + half, 0, 1));
+	return { brightnessMin: min, brightnessMax: max, contrast: round(1 - (max - min) / range) };
 }
 
 /** The options of `@versatiles/style` for the colors; other options of the builder are kept. */
@@ -171,7 +208,7 @@ function setColors(builder: StateBackground['builder'], options: Options, colors
 	}
 	const { saturation, black, white } = colors;
 	const raster = isObject(options.raster) ? options.raster : {};
-	options.raster = { ...raster, saturation, brightnessMin: black, brightnessMax: white };
+	options.raster = { ...raster, saturation, ...rasterLevels(black, white) };
 	// the streets and labels over the imagery get the same colors (`true` or none: the default overlay)
 	if (options.osmOverlay !== false) {
 		const overlay = isObject(options.osmOverlay) ? options.osmOverlay : {};

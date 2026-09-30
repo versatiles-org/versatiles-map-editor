@@ -117,7 +117,7 @@
 <InputRow id="{uid}-black" label="Black becomes">
 	<Slider
 		id="{uid}-black"
-		min={0}
+		min={-1}
 		max={1}
 		step={0.05}
 		bind:value={black}
@@ -130,7 +130,7 @@
 	<Slider
 		id="{uid}-white"
 		min={0}
-		max={1}
+		max={2}
 		step={0.05}
 		bind:value={white}
 		onchange={() => changeLevels('white')}
