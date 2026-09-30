@@ -59,6 +59,14 @@ describe('buildStyle', () => {
 		expect(new Set(ids).size).toBe(ids.length);
 		expect(ids.length).toBe(buildStyle(undefined, 'noto_sans_regular').layers.length);
 	});
+
+	it("draws the editor's own marks in the color of the theme", () => {
+		const style = buildStyle(undefined, 'noto_sans_regular', false, 'rgba(1, 2, 3, 1)');
+		const paint = (id: string) => style.layers.find((layer) => layer.id === id)?.paint as Record<string, unknown>;
+		expect(paint('drawing_line')['line-color']).toBe('rgba(1, 2, 3, 1)');
+		expect(paint('visible_area_border')['line-color']).toBe('rgba(1, 2, 3, 1)');
+		expect(paint('visible_area_handles')['circle-stroke-color']).toBe('rgba(1, 2, 3, 1)');
+	});
 });
 
 describe('keepElements', () => {

@@ -2,7 +2,8 @@ import type * as maplibregl from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import { inlineSources } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
-import { buildStyle, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
+import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
+import { themeColor } from './theme_color.js';
 import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
 
@@ -109,7 +110,8 @@ export class MapStyleLoader {
 		// its sprites and for the places of the labels around the symbols.
 		await loadSymbols();
 		if (this.#destroyed || request !== this.#request) return;
-		const style = buildStyle(background, this.#font, this.#mapLabelsOnTop);
+		const editorColor = themeColor(this.#map.getContainer(), '--color-accent-line', EDITOR_COLOR);
+		const style = buildStyle(background, this.#font, this.#mapLabelsOnTop, editorColor);
 		style.sprite = spriteSheets();
 
 		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.

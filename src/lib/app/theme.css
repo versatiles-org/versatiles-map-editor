@@ -4,7 +4,10 @@
  * stylesheet, since the variables are used by all components.
  *
  * The colors come from the VersaTiles logo and versatiles.org: the purples #9d35ff, #810098 and
- * #6b0075, the greens #93a813 and #005034, and the dark grays of the website.
+ * #6b0075, the greens #93a813 and #005034, and the dark grays of the website. The accent is one
+ * hue and chroma in OKLCH, whose lightness is seen as it is, whatever the hue: every purple of
+ * the editor is derived from them, and the modes only change its lightness.
+ * theme.test.ts checks the contrast of the accent in both modes.
  *
  * Components take their font sizes, corners and colors from these variables, which stylelint
  * checks (stylelint.config.js). The scales of the design (a variable exists once something uses
@@ -20,15 +23,26 @@
  *   colors, an accent tint for rows of a list
  */
 .map-editor-theme {
-	/* the main action and the chosen option, e.g. of a switch or a tool; white text 4.8:1 */
-	--color-accent: #9d35ff;
+	/* the accent: its hue and chroma (OKLCH), from which all purples of the editor are derived */
+	--accent-hue: 308;
+	--accent-chroma: 0.2;
+	/* per mode: the lightness of the accent, the step to its hover, and the opacity of its tint */
+	--accent-lightness: 60%;
+	--accent-hover-step: -8%;
+	--accent-tint-opacity: 13%;
+
+	/* the main action and the chosen option, e.g. of a switch or a tool; white text 5.1:1 */
+	--color-accent: oklch(var(--accent-lightness) var(--accent-chroma) var(--accent-hue));
 	/* darker than the accent in the light mode, brighter in the dark mode */
-	--color-accent-hover: #810098;
+	--color-accent-hover: oklch(
+		calc(var(--accent-lightness) + var(--accent-hover-step)) var(--accent-chroma) var(--accent-hue)
+	);
 	--color-on-accent: #fff;
-	/* thin lines: the focus ring (as on versatiles.org) and the ring of chosen pictures */
-	--color-accent-line: #9d35ff;
+	/* thin lines, in both modes: the focus ring (as on versatiles.org) and the ring of chosen
+	   pictures, and the editor's own marks on the map, e.g. the element being drawn */
+	--color-accent-line: oklch(60% var(--accent-chroma) var(--accent-hue));
 	/* chosen pictures, and selected rows of lists */
-	--color-accent-tint: color-mix(in srgb, #9d35ff 13%, transparent);
+	--color-accent-tint: oklch(60% var(--accent-chroma) var(--accent-hue) / var(--accent-tint-opacity));
 
 	/* bars, menus, popups, dialogs */
 	--color-bg: #fff;
@@ -118,9 +132,11 @@
 @media (prefers-color-scheme: dark) {
 	.map-editor-theme.editor {
 		color-scheme: dark;
-		/* the dark purple of the logo; the bright one is too strong on the dark background */
-		--color-accent: #6b0075;
-		--color-accent-tint: color-mix(in srgb, #9d35ff 24%, transparent);
+		/* a darker accent, since a bright one is too strong on the dark background; white text 8.2:1 */
+		--accent-lightness: 45%;
+		/* brighter than the accent */
+		--accent-hover-step: 7%;
+		--accent-tint-opacity: 24%;
 		/* the background of versatiles.org */
 		--color-bg: #1b1b1f;
 		/* the cards of versatiles.org */

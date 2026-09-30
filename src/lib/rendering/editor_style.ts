@@ -35,11 +35,13 @@ export const LAYERS_UNDER_MAP_LABELS = [
  * The background map with the editor's own layers over it, from the bottom up: the highlight, the
  * elements, the selection, and the element being drawn. With `mapLabelsOnTop`, the labels of the
  * background map are drawn over the highlight and the areas and lines of the elements.
+ * `editorColor` is the color of the editor's own marks, `--color-accent-line` of the theme.
  */
 export function buildStyle(
 	background: StateBackground | undefined,
 	labelFont?: string,
-	mapLabelsOnTop = false
+	mapLabelsOnTop = false,
+	editorColor = EDITOR_COLOR
 ): StyleSpecification {
 	const style = getMapStyle(background);
 	style.transition = { duration: 0, delay: 0 };
@@ -49,8 +51,8 @@ export function buildStyle(
 		highlightLayers(),
 		elementStyle(labelFont ?? getSettings(background).font),
 		selectionLayers(coarse),
-		visibleAreaLayers(coarse),
-		drawingLayers(coarse)
+		visibleAreaLayers(coarse, editorColor),
+		drawingLayers(coarse, editorColor)
 	];
 	const layers: LayerSpecification[] = [];
 	for (const part of parts) {
@@ -130,14 +132,17 @@ function selectionLayers(coarse: boolean): StylePart {
 	};
 }
 
-/** The color of the editor's own marks on the map: `--color-accent-line` of the theme. */
-const EDITOR_COLOR = '#9d35ff';
+/**
+ * The color of the editor's own marks on the map, if the theme cannot be read: about
+ * `--color-accent-line` of the theme, oklch(60% 0.19 308).
+ */
+export const EDITOR_COLOR = '#a059d3';
 
 /**
  * The visible area while it is edited: a veil outside the frame, its border, and without a frame
  * the bounds of the elements, dashed. Over the elements, since the veil covers what visitors do not see.
  */
-function visibleAreaLayers(coarse: boolean): StylePart {
+function visibleAreaLayers(coarse: boolean, color: string): StylePart {
 	return {
 		sources: { visible_area: emptySource() },
 		layers: [
@@ -153,14 +158,14 @@ function visibleAreaLayers(coarse: boolean): StylePart {
 				source: 'visible_area',
 				type: 'line',
 				filter: ['==', ['get', 'kind'], 'border'],
-				paint: { 'line-color': EDITOR_COLOR, 'line-width': 2 }
+				paint: { 'line-color': color, 'line-width': 2 }
 			},
 			{
 				id: 'visible_area_bounds',
 				source: 'visible_area',
 				type: 'line',
 				filter: ['==', ['get', 'kind'], 'bounds'],
-				paint: { 'line-color': EDITOR_COLOR, 'line-width': 1.5, 'line-dasharray': [3, 2] }
+				paint: { 'line-color': color, 'line-width': 1.5, 'line-dasharray': [3, 2] }
 			},
 			{
 				// the handles at the corners and edges, like the nodes of the element being drawn
@@ -171,7 +176,7 @@ function visibleAreaLayers(coarse: boolean): StylePart {
 				paint: {
 					'circle-color': '#ffffff',
 					'circle-radius': coarse ? 7 : 5,
-					'circle-stroke-color': EDITOR_COLOR,
+					'circle-stroke-color': color,
 					'circle-stroke-width': 2
 				}
 			}
@@ -180,7 +185,7 @@ function visibleAreaLayers(coarse: boolean): StylePart {
 }
 
 /** The element being drawn, in the color of the editor's controls. */
-function drawingLayers(coarse: boolean): StylePart {
+function drawingLayers(coarse: boolean, color: string): StylePart {
 	return {
 		sources: { drawing: emptySource() },
 		layers: [
@@ -189,7 +194,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				source: 'drawing',
 				type: 'fill',
 				filter: ['==', ['geometry-type'], 'Polygon'],
-				paint: { 'fill-color': EDITOR_COLOR, 'fill-opacity': 0.15 }
+				paint: { 'fill-color': color, 'fill-opacity': 0.15 }
 			},
 			{
 				id: 'drawing_line',
@@ -197,7 +202,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				type: 'line',
 				filter: ['!=', ['geometry-type'], 'Point'],
 				layout: { 'line-cap': 'round', 'line-join': 'round' },
-				paint: { 'line-color': EDITOR_COLOR, 'line-width': 2, 'line-dasharray': [2, 2] }
+				paint: { 'line-color': color, 'line-width': 2, 'line-dasharray': [2, 2] }
 			},
 			{
 				id: 'drawing_nodes',
@@ -207,7 +212,7 @@ function drawingLayers(coarse: boolean): StylePart {
 				paint: {
 					'circle-color': '#ffffff',
 					'circle-radius': coarse ? 6 : 4,
-					'circle-stroke-color': EDITOR_COLOR,
+					'circle-stroke-color': color,
 					'circle-stroke-width': 2
 				}
 			}
