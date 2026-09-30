@@ -117,7 +117,7 @@
 				{#each symbols as item (item.name)}
 					<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
 						><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
-						></canvas><br />{item.title}</button
+						></canvas><br /><span class="title">{item.title}</span></button
 					>
 				{/each}
 			{/key}
@@ -169,6 +169,11 @@
 
 			&:hover {
 				background-color: color-mix(in srgb, var(--color-text) 10%, transparent);
+			}
+
+			/* weaker than the symbols, which are what the list is about */
+			.title {
+				opacity: 0.5;
 			}
 
 			canvas {
