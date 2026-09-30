@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, tick, unmount } from 'svelte';
 import type { Map as MaplibreMap } from 'maplibre-gl';
-import type { GeocodingResult } from '../../geocoding.js';
+import type { GeocodingResult } from '../geocoding.js';
 
 const { geocode } = vi.hoisted(() => ({ geocode: vi.fn() }));
-vi.mock('../../geocoding.js', () => ({ geocode }));
+vi.mock('../geocoding.js', () => ({ geocode }));
 
 const { default: SearchPlace } = await import('./SearchPlace.svelte');
 

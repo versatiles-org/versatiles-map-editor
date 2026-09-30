@@ -4,8 +4,8 @@
 		"collapse-dir": [
 			"src/lib/components/dialogs/*",
 			"src/lib/components/inspector/*",
-			"src/lib/components/map/editor/*",
-			"src/lib/components/map/viewer/*",
+			"src/lib/components/map_editor/*",
+			"src/lib/components/map_viewer/*",
 			"src/lib/components/shell/*",
 			"src/lib/components/ui/*"
 		],

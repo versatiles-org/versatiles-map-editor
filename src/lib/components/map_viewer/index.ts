@@ -1,6 +1,6 @@
 /*
  * What the viewer shows over the map, and the editor too: the legend, the search and the indicator
- * of loading. The editor's bars are in ../editor, so that the viewer does not load them. The
+ * of loading. The editor's bars are in ../map_editor, so that the viewer does not load them. The
  * components of this folder import each other directly, others import from here.
  */
 export { default as Legend } from './Legend.svelte';

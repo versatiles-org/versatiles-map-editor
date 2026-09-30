@@ -18,7 +18,7 @@
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map/viewer/index.js';
+	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map_viewer/index.js';
 	import { Notifications } from '$lib/components/ui/index.js';
 	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import type { MapDocument } from '$lib/map_document.svelte.js';

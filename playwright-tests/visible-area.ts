@@ -307,10 +307,18 @@ test('importing a file with a frame gives a frame that covers both', async ({ pa
 test("the editor's marks on the map have the accent of the theme", { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	const color = await page.evaluate(() =>
-		String((window as unknown as MapWindow).map.getPaintProperty('visible_area_border', 'line-color'))
-	);
-	// --color-accent-line, oklch(60% 0.19 308), as the browser resolves it
-	const channels = /^rgba\((\d+), (\d+), (\d+), 1\)$/.exec(color)!.slice(1).map(Number);
-	expect(channels.map((channel, i) => Math.abs(channel - [160, 89, 211][i]) <= 3)).toStrictEqual([true, true, true]);
+	const [onMap, ofTheme] = await page.evaluate(() => {
+		const map = (window as unknown as MapWindow).map;
+		// --color-accent-line as the browser draws it, whatever the numbers of the theme are
+		const context = document.createElement('canvas').getContext('2d')!;
+		context.fillStyle = getComputedStyle(map.getContainer()).getPropertyValue('--color-accent-line');
+		context.fillRect(0, 0, 1, 1);
+		const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+		return [String(map.getPaintProperty('visible_area_border', 'line-color')), `rgba(${r}, ${g}, ${b}, 1)`];
+	});
+	expect(onMap).toBe(ofTheme);
+	// a purple, not the black of a color that could not be read
+	const [r, g, b] = /^rgba\((\d+), (\d+), (\d+), 1\)$/.exec(onMap)!.slice(1).map(Number);
+	expect(b).toBeGreaterThan(g + 50);
+	expect(r).toBeGreaterThan(g + 30);
 });
