@@ -28,6 +28,8 @@
 	// as many decimals as the steps of the slider have, e.g. 1 for steps of 0.1
 	const decimals = $derived(Math.max(0, -Math.floor(Math.log10(step * scale) + 1e-9)));
 	const shown = $derived(String(Number((value * scale).toFixed(decimals))));
+	// the filled part of the track, up to the knob
+	const fill = $derived(`${((Math.min(max, Math.max(min, value)) - min) / (max - min || 1)) * 100}%`);
 
 	function onFieldChange(e: Event & { currentTarget: HTMLInputElement }) {
 		const typed = Number(e.currentTarget.value.replace(',', '.').replace('−', '-'));
@@ -44,7 +46,7 @@
 </script>
 
 <span class="slider">
-	<input {id} type="range" {min} {max} {step} bind:value {onchange} />
+	<input {id} type="range" {min} {max} {step} bind:value {onchange} style:--fill={fill} />
 	<input
 		class="field"
 		type="number"
@@ -67,18 +69,64 @@
 		width: 60%;
 	}
 
+	/* the filled part in the accent, like the buttons, the rest in the color of the edges of
+	   fields, and a white knob, which is seen on both backgrounds */
 	input[type='range'] {
 		flex: 1;
 		min-width: 0;
+		height: 16px;
 		margin: 0;
+		appearance: none;
+		background: transparent;
+		cursor: pointer;
+
+		&::-webkit-slider-runnable-track {
+			height: 4px;
+			border-radius: 2px;
+			background: linear-gradient(to right, var(--color-accent) var(--fill), var(--color-border-field) var(--fill));
+		}
+		&::-moz-range-track {
+			height: 4px;
+			border-radius: 2px;
+			background: var(--color-border-field);
+		}
+		&::-moz-range-progress {
+			height: 4px;
+			border-radius: 2px;
+			background: var(--color-accent);
+		}
+		&::-webkit-slider-thumb {
+			width: 14px;
+			height: 14px;
+			margin-top: -5px;
+			border: 1px solid var(--color-border-field);
+			border-radius: 50%;
+			background: #fff;
+			box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+			appearance: none;
+		}
+		&::-moz-range-thumb {
+			box-sizing: border-box;
+			width: 14px;
+			height: 14px;
+			border: 1px solid var(--color-border-field);
+			border-radius: 50%;
+			background: #fff;
+			box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+		}
+		&:hover::-webkit-slider-thumb {
+			border-color: var(--color-accent-line);
+		}
+		&:hover::-moz-range-thumb {
+			border-color: var(--color-accent-line);
+		}
 	}
 
+	/* a field like the others, only narrow */
 	.field {
 		flex: none;
-		box-sizing: border-box;
-		width: 3.4em;
-		padding: 1px 3px;
-		font-size: 0.75rem;
+		width: 3.6em;
+		padding: 0 6px;
 		font-variant-numeric: tabular-nums;
 		text-align: right;
 

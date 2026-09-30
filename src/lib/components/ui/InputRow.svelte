@@ -42,15 +42,13 @@
 		& > .label {
 			flex-grow: 0;
 		}
+		/* checkboxes keep their size */
 		& > :global(button),
-		& > :global(input),
+		& > :global(input:not([type='checkbox'])),
 		& > :global(select) {
 			box-sizing: border-box;
 			width: 60%;
 			flex-grow: 0;
-		}
-		& > :global(input[type='checkbox']) {
-			width: auto;
 		}
 	}
 	/* readable: a darker gray instead of transparency, and at least 12px */

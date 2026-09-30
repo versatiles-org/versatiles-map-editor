@@ -30,11 +30,15 @@
 
 	/* bars, menus, popups, dialogs */
 	--color-bg: #fff;
+	/* inside fields */
+	--color-field: #fff;
 	--color-text: #000;
 	/* at least 4.5:1 on the (translucent) white of the sidebar */
 	--color-text-muted: #555;
 	/* edges of surfaces, dividers */
 	--color-border: rgb(27 27 31 / 13%);
+	/* edges of fields */
+	--color-border-field: rgb(27 27 31 / 30%);
 	/* every hover, and the track of switches */
 	--color-hover: rgb(27 27 31 / 7%);
 	--color-disabled-bg: #e6e6e9;
@@ -48,6 +52,17 @@
 
 	/* the system font */
 	--font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+
+	/* the height of the controls of the sidebar */
+	--size-sm: 28px;
+	/* corners: of small parts, of controls */
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--space-2: 8px;
+
+	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
+	--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+	--checkmark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
 
 	/* The names before the design system, until all components use the new ones */
 	--color-blue: var(--color-accent);
@@ -90,10 +105,13 @@
 		--color-accent-text: #c28bff;
 		/* the background of versatiles.org */
 		--color-bg: #1b1b1f;
+		/* the cards of versatiles.org */
+		--color-field: #26262b;
 		--color-text: #fff;
 		/* at least 4.5:1 on the (translucent) dark sidebar, also above a light map */
 		--color-text-muted: #aaa;
 		--color-border: rgb(255 255 255 / 13%);
+		--color-border-field: rgb(255 255 255 / 26%);
 		--color-hover: rgb(255 255 255 / 8%);
 		--color-disabled-bg: #2e2e34;
 		--color-disabled-text: #9a9aa0;
@@ -102,6 +120,7 @@
 		--color-warning: #c9850a;
 		--color-success: #3da660;
 		--shadow-lg: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
+		--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	}
 }
 

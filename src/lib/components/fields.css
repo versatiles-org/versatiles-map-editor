@@ -1,0 +1,115 @@
+/*
+ * The fields of the editor and the viewer: text, numbers, lists, text areas and checkboxes, and
+ * the focus ring of every control. A global stylesheet, since fields are in many components.
+ * Everything is in :where(), without specificity, so a component can still change a field, e.g.
+ * its width.
+ */
+
+/* one focus ring for every control */
+:where(.map-editor-theme) :where(:focus-visible) {
+	outline: 2px solid var(--color-accent-line);
+	outline-offset: 2px;
+}
+
+/* text, numbers and lists: 28 px high, like all controls of the sidebar */
+:where(.map-editor-theme)
+	:where(
+		input:not([type]),
+		input[type='text'],
+		input[type='search'],
+		input[type='number'],
+		input[type='url'],
+		input[type='email'],
+		select,
+		textarea
+	) {
+	box-sizing: border-box;
+	min-width: 0;
+	height: var(--size-sm);
+	margin: 0;
+	padding: 0 var(--space-2);
+	border: 1px solid var(--color-border-field);
+	border-radius: var(--radius-md);
+	background-color: var(--color-field);
+	color: var(--color-text);
+	font: inherit;
+}
+
+:where(.map-editor-theme)
+	:where(
+		input:not([type]),
+		input[type='text'],
+		input[type='search'],
+		input[type='number'],
+		input[type='url'],
+		input[type='email'],
+		select,
+		textarea
+	):where(:hover:not(:disabled, :focus)) {
+	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+
+:where(.map-editor-theme) :where(input, select, textarea):where(:disabled) {
+	background-color: var(--color-disabled-bg);
+	color: var(--color-disabled-text);
+}
+
+:where(.map-editor-theme) :where(input, textarea)::placeholder {
+	color: var(--color-text-muted);
+	opacity: 1;
+}
+
+:where(.map-editor-theme) :where(textarea) {
+	height: auto;
+	padding: 6px var(--space-2);
+	resize: vertical;
+}
+
+/* a list, with an arrow of our own instead of the browser's */
+:where(.map-editor-theme) :where(select) {
+	appearance: none;
+	padding-right: 26px;
+	background-image: var(--chevron-down);
+	background-repeat: no-repeat;
+	background-position: right var(--space-2) center;
+	background-size: 12px;
+	cursor: pointer;
+}
+
+/* a checkbox: a small field, filled like a primary button when checked */
+:where(.map-editor-theme) :where(input[type='checkbox']) {
+	appearance: none;
+	flex: none;
+	box-sizing: border-box;
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	border: 1px solid var(--color-border-field);
+	border-radius: var(--radius-sm);
+	background-color: var(--color-field);
+	cursor: pointer;
+}
+
+:where(.map-editor-theme) :where(input[type='checkbox']):where(:hover:not(:disabled)) {
+	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}
+
+:where(.map-editor-theme) :where(input[type='checkbox']):where(:checked) {
+	border-color: var(--color-accent);
+	background: var(--color-accent) var(--checkmark) center / 12px no-repeat;
+}
+
+:where(.map-editor-theme) :where(input[type='checkbox']):where(:checked:hover:not(:disabled)) {
+	border-color: var(--color-accent-hover);
+	background-color: var(--color-accent-hover);
+}
+
+:where(.map-editor-theme) :where(input[type='checkbox']):where(:disabled) {
+	background-color: var(--color-disabled-bg);
+	cursor: default;
+}
+
+/* radio buttons of the browser, in the accent color (most choices are ChoiceGroups) */
+:where(.map-editor-theme) :where(input[type='radio']) {
+	accent-color: var(--color-accent);
+}

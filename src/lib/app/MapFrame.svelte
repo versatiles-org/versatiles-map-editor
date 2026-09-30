@@ -12,6 +12,7 @@
 	import { onMount, type Snippet } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import './theme.css';
+	import '$lib/components/fields.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
