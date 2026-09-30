@@ -8,3 +8,4 @@ export * from './drag.js';
 export * from './drawing.svelte.js';
 export * from './selection.svelte.js';
 export * from './selection_pointer.js';
+export * from './visible_area.svelte.js';

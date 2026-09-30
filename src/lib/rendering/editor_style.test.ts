@@ -16,6 +16,9 @@ describe('buildStyle', () => {
 			ELEMENT_LAYERS.symbol,
 			'selection_marks',
 			'selection_nodes',
+			'visible_area_veil',
+			'visible_area_border',
+			'visible_area_bounds',
 			'drawing_fill',
 			'drawing_line',
 			'drawing_nodes'
@@ -39,11 +42,14 @@ describe('buildStyle', () => {
 		expect(style.layers[firstLabel].id).not.toBe(ELEMENT_LAYERS.symbol);
 		const under = ['highlight_line', 'highlight_point', ELEMENT_LAYERS.fill, ELEMENT_LAYERS.stroke];
 		expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
-		// the markers, the selection and the drawing stay on top
-		expect(ids.slice(-6)).toStrictEqual([
+		// the markers, the selection, the visible area and the drawing stay on top
+		expect(ids.slice(-9)).toStrictEqual([
 			ELEMENT_LAYERS.symbol,
 			'selection_marks',
 			'selection_nodes',
+			'visible_area_veil',
+			'visible_area_border',
+			'visible_area_bounds',
 			'drawing_fill',
 			'drawing_line',
 			'drawing_nodes'
@@ -75,5 +81,10 @@ describe('keepElements', () => {
 		// the layers of the new style, e.g. with the font of the new background map
 		expect(result.layers).toBe(next.layers);
 		expect(keepElements(undefined, next)).toBe(next);
+	});
+
+	it('keeps the visible area, e.g. while it is edited and the background map changes', () => {
+		const style = buildStyle(undefined, 'noto_sans_regular');
+		expect(style.sources.visible_area).toBeDefined();
 	});
 });

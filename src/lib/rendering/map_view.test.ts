@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
-import { MapView } from './map_view.js';
+import { MapView, visibleAreaFeatures } from './map_view.js';
 
 describe('MapView', () => {
 	let map: MockMap;
@@ -93,6 +93,38 @@ describe('MapView', () => {
 			expect([west, east]).toStrictEqual([-180, 180]);
 			expect(south).toBeCloseTo(-85.05);
 			expect(north).toBeCloseTo(85.05);
+		});
+	});
+
+	describe('visible area', () => {
+		it('is a veil around the frame, and its border', () => {
+			const [veil, border] = visibleAreaFeatures([1, 2, 3, 4], undefined);
+			expect(veil.properties).toStrictEqual({ kind: 'veil' });
+			const [world, hole] = (veil.geometry as GeoJSON.Polygon).coordinates;
+			expect(world[0]).toStrictEqual([-180, -85.051129]);
+			// the hole goes the other way round
+			expect(hole).toStrictEqual([
+				[1, 2],
+				[1, 4],
+				[3, 4],
+				[3, 2],
+				[1, 2]
+			]);
+			expect(border.properties).toStrictEqual({ kind: 'border' });
+		});
+
+		it('is the dashed bounds of the elements without a frame, and nothing without both', () => {
+			expect(visibleAreaFeatures(undefined, [1, 2, 3, 4]).map((f) => f.properties?.kind)).toStrictEqual(['bounds']);
+			expect(visibleAreaFeatures(undefined, undefined)).toStrictEqual([]);
+		});
+
+		it('is written to its source, and removed', () => {
+			const setData = vi.fn();
+			map.getSource.mockReturnValue({ setData } as never);
+			view.showVisibleArea([1, 2, 3, 4], undefined);
+			expect(setData.mock.lastCall?.[0].features).toHaveLength(2);
+			view.hideVisibleArea();
+			expect(setData.mock.lastCall?.[0].features).toStrictEqual([]);
 		});
 	});
 });

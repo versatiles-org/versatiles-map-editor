@@ -49,6 +49,7 @@ export function buildStyle(
 		highlightLayers(),
 		elementStyle(labelFont ?? getSettings(background).font),
 		selectionLayers(coarse),
+		visibleAreaLayers(),
 		drawingLayers(coarse)
 	];
 	const layers: LayerSpecification[] = [];
@@ -132,6 +133,39 @@ function selectionLayers(coarse: boolean): StylePart {
 /** The color of the editor's own marks on the map: `--color-accent-line` of the theme. */
 const EDITOR_COLOR = '#9d35ff';
 
+/**
+ * The visible area while it is edited: a veil outside the frame, its border, and without a frame
+ * the bounds of the elements, dashed. Over the elements, since the veil covers what visitors do not see.
+ */
+function visibleAreaLayers(): StylePart {
+	return {
+		sources: { visible_area: emptySource() },
+		layers: [
+			{
+				id: 'visible_area_veil',
+				source: 'visible_area',
+				type: 'fill',
+				filter: ['==', ['get', 'kind'], 'veil'],
+				paint: { 'fill-color': '#000000', 'fill-opacity': 0.35 }
+			},
+			{
+				id: 'visible_area_border',
+				source: 'visible_area',
+				type: 'line',
+				filter: ['==', ['get', 'kind'], 'border'],
+				paint: { 'line-color': EDITOR_COLOR, 'line-width': 2 }
+			},
+			{
+				id: 'visible_area_bounds',
+				source: 'visible_area',
+				type: 'line',
+				filter: ['==', ['get', 'kind'], 'bounds'],
+				paint: { 'line-color': EDITOR_COLOR, 'line-width': 1.5, 'line-dasharray': [3, 2] }
+			}
+		]
+	};
+}
+
 /** The element being drawn, in the color of the editor's controls. */
 function drawingLayers(coarse: boolean): StylePart {
 	return {
@@ -176,7 +210,14 @@ function drawingLayers(coarse: boolean): StylePart {
 export function keepElements(previous: StyleSpecification | undefined, next: StyleSpecification): StyleSpecification {
 	if (!previous) return next;
 	const sources = { ...next.sources };
-	for (const id of [...Object.values(ELEMENT_LAYERS), 'highlight', 'selection_marks', 'selection_nodes', 'drawing']) {
+	for (const id of [
+		...Object.values(ELEMENT_LAYERS),
+		'highlight',
+		'selection_marks',
+		'selection_nodes',
+		'drawing',
+		'visible_area'
+	]) {
 		if (previous.sources[id]) sources[id] = previous.sources[id];
 	}
 	return { ...next, sources };

@@ -19,6 +19,8 @@
 
 	function onKeydown(e: KeyboardEvent) {
 		if (isOwnKeyTarget(e) || e.metaKey || e.ctrlKey || e.altKey) return;
+		// no tools while the visible area is edited
+		if (doc.visibleArea.active) return;
 		if (drawing.active) {
 			if (e.key === 'Escape') drawing.setTool('select');
 			else if (e.key === 'Enter') drawing.finish();

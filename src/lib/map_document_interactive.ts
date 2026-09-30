@@ -2,7 +2,7 @@ import type * as maplibregl from 'maplibre-gl';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { MapDocument } from './map_document.svelte.js';
 import { elementFromState } from './element/registry.js';
-import { Cursor, DrawingHandler, SelectionHandler } from './interaction/index.js';
+import { Cursor, DrawingHandler, SelectionHandler, VisibleAreaMode } from './interaction/index.js';
 import { StateManager } from './state/manager.js';
 import { ColorPalette } from './color_palette.svelte.js';
 import { StyleClipboard } from './style_clipboard.svelte.js';
@@ -22,6 +22,8 @@ export class MapDocumentInteractive extends MapDocument {
 	public readonly drawing: DrawingHandler;
 	public readonly cursor: Cursor;
 	public readonly state: StateManager;
+	/** Editing the visible area (the frame), in which drawing and selecting are off. */
+	public readonly visibleArea: VisibleAreaMode;
 	public readonly styleClipboard = new StyleClipboard();
 	public readonly colors = new ColorPalette(() => this.elements.flatMap((e) => e.getColors()));
 
@@ -30,6 +32,8 @@ export class MapDocumentInteractive extends MapDocument {
 		this.cursor = new Cursor(map.getCanvasContainer());
 		// Shift+click selects several elements. Box zoom (Shift+drag) would swallow these clicks.
 		map.boxZoom.disable();
+		// first, so it can take the clicks while the visible area is edited
+		this.visibleArea = new VisibleAreaMode(this);
 		// before the selection, so a click with a drawing tool draws instead of selecting
 		this.drawing = new DrawingHandler(this);
 		this.selection = new SelectionHandler(this);

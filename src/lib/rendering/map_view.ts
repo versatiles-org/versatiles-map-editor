@@ -161,6 +161,23 @@ export class MapView {
 		}
 	}
 
+	/**
+	 * Show the visible area while it is edited: a veil outside the frame and its border, or without
+	 * a frame the bounds of the elements, dashed.
+	 */
+	public showVisibleArea(frame: Bounds | undefined, bounds: Bounds | undefined) {
+		this.#visibleAreaSource()?.setData({ type: 'FeatureCollection', features: visibleAreaFeatures(frame, bounds) });
+	}
+
+	/** Hide the visible area, e.g. when its mode is left. */
+	public hideVisibleArea() {
+		this.#visibleAreaSource()?.setData({ type: 'FeatureCollection', features: [] });
+	}
+
+	#visibleAreaSource() {
+		return this.map.style ? this.map.getSource<maplibregl.GeoJSONSource>('visible_area') : undefined;
+	}
+
 	/** The point that is shown `offset` pixels away from the point. */
 	public offsetPoint(point: GeoPoint, offset: [number, number]): GeoPoint {
 		if (offset[0] === 0 && offset[1] === 0) return point;
@@ -168,4 +185,37 @@ export class MapView {
 		const { lng, lat } = this.map.unproject([x + offset[0], y + offset[1]]);
 		return [lng, lat];
 	}
+}
+
+/** The ring around bounds, closed. */
+function ringOf([west, south, east, north]: Bounds): [number, number][] {
+	return [
+		[west, south],
+		[east, south],
+		[east, north],
+		[west, north],
+		[west, south]
+	];
+}
+
+/** The features of the visible area, which the layers of `editor_style` draw by their `kind`. */
+export function visibleAreaFeatures(frame: Bounds | undefined, bounds: Bounds | undefined): GeoJSON.Feature[] {
+	if (frame) {
+		// the world with the frame as a hole, in the other direction
+		const world = ringOf([-180, -MAX_LATITUDE, 180, MAX_LATITUDE]);
+		return [
+			{
+				type: 'Feature',
+				properties: { kind: 'veil' },
+				geometry: { type: 'Polygon', coordinates: [world, ringOf(frame).reverse()] }
+			},
+			{ type: 'Feature', properties: { kind: 'border' }, geometry: { type: 'LineString', coordinates: ringOf(frame) } }
+		];
+	}
+	if (bounds) {
+		return [
+			{ type: 'Feature', properties: { kind: 'bounds' }, geometry: { type: 'LineString', coordinates: ringOf(bounds) } }
+		];
+	}
+	return [];
 }
