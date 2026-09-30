@@ -3,6 +3,7 @@ import type { StateLegend } from '@versatiles/map-state';
 
 export type LegendPosition = NonNullable<StateLegend['position']>;
 export type AttributionCorner = 'bottom-left' | 'bottom-right';
+export type NavigationCorner = 'top-right' | 'bottom-right';
 
 /** The measured sizes of the overlays, in pixels. */
 export interface OverlaySizes {
@@ -22,6 +23,8 @@ export interface OverlayLayout {
 	/** Whether the search is at the right, instead of the left. */
 	searchRight: boolean;
 	attributionCorner: AttributionCorner;
+	/** Where the buttons for zooming go: top right, unless the legend or the search is there. */
+	navigationCorner: NavigationCorner;
 	/** Whether the legend goes below the search and the hint, since it would cover them. */
 	legendBelowOverlays: boolean;
 	/** Whether the legend goes above the attribution, e.g. while that is expanded. */
@@ -46,8 +49,23 @@ export function layoutOverlays(position: LegendPosition | undefined, sizes: Over
 	return {
 		searchRight: position === 'top-left',
 		attributionCorner: position === 'bottom-left' ? 'bottom-right' : 'bottom-left',
+		// a legend at the top or at the right (or the search, beside a legend at the top left) takes
+		// the top right corner; the attribution is at the bottom left then
+		navigationCorner: top || position === 'right' ? 'bottom-right' : 'top-right',
 		legendBelowOverlays: sizes.topOverlaysHeight > 0 && top && (sizes.hint || collide(sizes.searchWidth)),
 		legendAboveAttribution: bottom && collide(sizes.attributionWidth)
+	};
+}
+
+/**
+ * Add the buttons for zooming in and out in a corner. Without a compass, since the map is not
+ * rotated. Returns a function that removes them again.
+ */
+export function addNavigation(map: maplibre.Map, corner: NavigationCorner): () => void {
+	const navigation = new maplibre.NavigationControl({ showCompass: false });
+	map.addControl(navigation, corner);
+	return () => {
+		if (map.hasControl(navigation)) map.removeControl(navigation);
 	};
 }
 

@@ -108,6 +108,7 @@
 		{insets}
 		{covered}
 		search
+		navigation
 		onmark={markPlace}
 		onselectlegend={selectLegend}
 		editor

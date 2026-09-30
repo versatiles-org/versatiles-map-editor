@@ -25,7 +25,7 @@
 	import type { Box } from '$lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
-	import { addAttribution, layoutOverlays, type AttributionSize } from './overlay_layout.js';
+	import { addAttribution, addNavigation, layoutOverlays, type AttributionSize } from './overlay_layout.js';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -38,6 +38,7 @@
 		insets = { top: 0, right: 0, bottom: 0, left: 0 },
 		covered = insets,
 		search = false,
+		navigation = false,
 		onmark,
 		onselectlegend,
 		hint,
@@ -55,6 +56,8 @@
 		covered?: Insets;
 		/** Whether to show an address search. */
 		search?: boolean;
+		/** Whether to show the buttons for zooming in and out. */
+		navigation?: boolean;
 		/** Called to mark a place that the search found. */
 		onmark?: (point: [number, number]) => void;
 		/** Called when the legend is clicked, e.g. to edit it. */
@@ -147,6 +150,15 @@
 		const m = mapDocument?.view.map;
 		if (!m) return;
 		return addAttribution(m, corner, (size) => (attributionSize = size));
+	});
+
+	// the buttons for zooming, in the right corner that the legend and the search leave free
+	const navigationCorner = $derived(navigation ? layout.navigationCorner : undefined);
+	$effect(() => {
+		const corner = navigationCorner;
+		const m = mapDocument?.view.map;
+		if (!m || !corner) return;
+		return addNavigation(m, corner);
 	});
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
@@ -250,6 +262,7 @@
 	class="page map-editor-theme"
 	class:editor
 	bind:clientWidth={pageWidth}
+	style:--covered-top="{covered.top}px"
 	style:--covered-left="{covered.left}px"
 	style:--covered-right="{covered.right}px"
 	style:--covered-bottom="{covered.bottom}px"
@@ -327,7 +340,12 @@
 			color: var(--color-text) !important;
 		}
 
-		/* the attribution, clear of the bars, e.g. the tools, the drawer, the sidebar and the status line */
+		/* the attribution and the buttons for zooming, clear of the bars, e.g. the tools, the drawer,
+		   the sidebar and the status line */
+		:global(.maplibregl-ctrl-top-right) {
+			top: var(--covered-top);
+			right: var(--covered-right);
+		}
 		:global(.maplibregl-ctrl-bottom-left) {
 			left: var(--covered-left);
 			bottom: var(--covered-bottom);

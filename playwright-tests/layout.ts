@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Locator, Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { coveredPoints, menuItem, project, waitForMapIsReady } from './lib/utils.js';
+import { coveredPoints, menuItem, project, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 // Nothing of the editor may cover a control that is shown, e.g. a bar at the edge a menu or a
 // drop-down. Each situation opens as many overlays at once as possible.
@@ -155,8 +155,35 @@ test('the legend keeps its corner, and the search and the attribution go to the 
 			const middle = map.x + map.width / 2;
 			if (horizontal === 'left') expect(box.x).toBeGreaterThan(middle);
 			else expect(box.x + box.width).toBeLessThan(middle);
+
+			// the buttons for zooming at the right, left of the sidebar: at the top, unless the legend
+			// or the search is there
+			const zoom = (await page
+				.locator('.maplibregl-ctrl-group')
+				.filter({ has: zoomIn(page) })
+				.boundingBox())!;
+			expect(zoom.x + zoom.width).toBeCloseTo(map.x + map.width - 250 - 10, -1);
+			if (vertical === 'top') expect(zoom.y + zoom.height).toBeCloseTo(map.y + map.height - 26 - 10, -1);
+			else expect(zoom.y).toBeCloseTo(map.y + 44 + 10, -1);
 		});
 	}
+});
+
+const zoomIn = (page: Page) => page.getByRole('button', { name: 'Zoom in' });
+
+test('the editor has buttons for zooming, the viewer not yet', async ({ page }) => {
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+	const before = await zoom();
+	await zoomIn(page).click();
+	await expect.poll(zoom).toBeCloseTo(before + 1, 1);
+	await page.getByRole('button', { name: 'Zoom out' }).click();
+	await expect.poll(zoom).toBeCloseTo(before, 1);
+
+	await page.goto('/view#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await expect(zoomIn(page)).toHaveCount(0);
 });
 
 test.describe('in the viewer', () => {

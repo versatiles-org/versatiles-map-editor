@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type * as maplibregl from 'maplibre-gl';
-import { addAttribution, layoutOverlays, type OverlaySizes } from './overlay_layout.js';
+import { addAttribution, addNavigation, layoutOverlays, type OverlaySizes } from './overlay_layout.js';
 
 describe('layoutOverlays', () => {
 	// a wide map: the legend (200px) fits next to the search (260px) and the expanded attribution (400px)
@@ -19,9 +19,23 @@ describe('layoutOverlays', () => {
 		expect(layoutOverlays(undefined, narrow)).toStrictEqual({
 			searchRight: false,
 			attributionCorner: 'bottom-left',
+			navigationCorner: 'top-right',
 			legendBelowOverlays: false,
 			legendAboveAttribution: false
 		});
+	});
+
+	it('puts the buttons for zooming at the top right, or at the bottom right if the legend or the search is there', () => {
+		for (const position of ['bottom-left', 'bottom', 'bottom-right', 'left'] as const) {
+			expect(layoutOverlays(position, wide)).toMatchObject({ navigationCorner: 'top-right' });
+		}
+		for (const position of ['top-left', 'top', 'top-right', 'right'] as const) {
+			// the attribution is at the other bottom corner then
+			expect(layoutOverlays(position, wide)).toMatchObject({
+				navigationCorner: 'bottom-right',
+				attributionCorner: 'bottom-left'
+			});
+		}
 	});
 
 	it('moves the search and the attribution to the side away from the legend', () => {
@@ -65,6 +79,22 @@ describe('layoutOverlays', () => {
 				legendAboveAttribution: false
 			});
 		}
+	});
+});
+
+describe('addNavigation', () => {
+	it('adds the buttons for zooming to the corner, and removes them again', () => {
+		let controls: unknown[] = [];
+		const map = {
+			addControl: vi.fn((control: unknown) => controls.push(control)),
+			hasControl: vi.fn((control: unknown) => controls.includes(control)),
+			removeControl: vi.fn((control: unknown) => (controls = controls.filter((c) => c !== control)))
+		};
+		const remove = addNavigation(map as unknown as maplibregl.Map, 'bottom-right');
+		expect(map.addControl).toHaveBeenCalledWith(expect.anything(), 'bottom-right');
+		expect(controls).toHaveLength(1);
+		remove();
+		expect(controls).toStrictEqual([]);
 	});
 });
 
