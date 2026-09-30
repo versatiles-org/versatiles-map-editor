@@ -1,30 +1,16 @@
 {
-	"map": {
-		"center": [11.7, 53.07],
-		"radius": 105000
-	},
+	"map": { "center": [10.861904352344993, 53.16245269688628], "radius": 174620.48846535414 },
 	"frame": [9.653, 52.422, 14.05, 53.656],
 	"meta": {
 		"background": {
 			"builder": "osm",
-			"options": {
-				"theme": "muted",
-				"text": {
-					"language": "local"
-				}
-			}
+			"options": { "theme": "gray", "recolor": { "brightness": 0.175, "contrast": 0.65 } }
 		},
 		"legend": {
 			"position": "bottom-right",
 			"entries": [
-				{
-					"color": "#d55e00",
-					"label": "Closed for renovation, Aug 2025 – Apr 2026"
-				},
-				{
-					"color": "#0072b2",
-					"label": "Detour of long-distance trains"
-				}
+				{ "color": "#d55e00", "label": "Closed for renovation, Aug 2025 – Apr 2026" },
+				{ "color": "#0072b2", "label": "Detour of long-distance trains" }
 			]
 		},
 		"title": "Hamburg–Berlin railway renovation",
@@ -46,11 +32,7 @@
 				[13.1974, 52.5344],
 				[13.3695, 52.5251]
 			],
-			"style": {
-				"color": "#d55e00",
-				"pattern": 1,
-				"width": 4
-			},
+			"style": { "color": "#d55e00", "pattern": 2, "width": 3 },
 			"popup": {
 				"text": "**Hamburg–Berlin railway**\nClosed for a general renovation by Deutsche Bahn from August 2025 to April 2026."
 			}
@@ -68,33 +50,18 @@
 				[13.1974, 52.5344],
 				[13.3695, 52.5251]
 			],
-			"style": {
-				"color": "#0072b2",
-				"width": 3
-			},
-			"popup": {
-				"text": "**Detour**\nLong-distance trains ran via Uelzen and Stendal, which takes longer."
-			}
+			"style": { "color": "#0072b2", "width": 3 },
+			"popup": { "text": "**Detour**\nLong-distance trains ran via Uelzen and Stendal, which takes longer." }
 		},
 		{
 			"type": "marker",
 			"point": [10.0069, 53.5528],
-			"style": {
-				"color": "#000000",
-				"size": 1.3,
-				"symbol": "base:icon-rail",
-				"label": "Hamburg Hbf"
-			}
+			"style": { "color": "#000000", "size": 1.3, "symbol": "base:icon-rail", "label": "Hamburg Hbf", "align": 3 }
 		},
 		{
 			"type": "marker",
 			"point": [13.3695, 52.5251],
-			"style": {
-				"color": "#000000",
-				"size": 1.3,
-				"symbol": "base:icon-rail",
-				"label": "Berlin Hbf"
-			}
+			"style": { "color": "#000000", "size": 1.3, "symbol": "base:icon-rail", "label": "Berlin Hbf", "align": 3 }
 		},
 		{
 			"type": "marker",
@@ -103,6 +70,7 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
 				"label": "Ludwigslust",
+				"align": 1,
 				"labelColor": "#d55e00"
 			}
 		},
@@ -113,6 +81,7 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
 				"label": "Wittenberge",
+				"align": 1,
 				"labelColor": "#d55e00"
 			}
 		},
@@ -123,6 +92,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Uelzen",
+				"align": 4,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -133,6 +103,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Stendal",
+				"align": 4,
 				"labelColor": "#0072b2"
 			}
 		}

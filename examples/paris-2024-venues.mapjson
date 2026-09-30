@@ -1,43 +1,17 @@
 {
-	"map": {
-		"center": [2.3, 48.865],
-		"radius": 22000
-	},
+	"map": { "center": [2.263307092985201, 48.85855659995556], "radius": 30854.270334055476 },
 	"frame": [1.8, 48.732, 2.83, 48.995],
 	"meta": {
-		"background": {
-			"builder": "osm",
-			"options": {
-				"theme": "gray",
-				"text": {
-					"language": "local"
-				}
-			}
-		},
+		"background": { "builder": "osm", "options": { "theme": "gray", "text": { "language": "local" } } },
 		"legend": {
 			"position": "top-right",
 			"entries": [
-				{
-					"color": "#0072b2",
-					"symbol": "base:icon-stadium",
-					"label": "Stadiums and arenas"
-				},
-				{
-					"color": "#d55e00",
-					"symbol": "base:icon-monument",
-					"label": "Temporary venues at landmarks"
-				},
-				{
-					"color": "#009e73",
-					"symbol": "base:icon-outdoor",
-					"label": "Venues in nature"
-				},
-				{
-					"color": "#e69f00",
-					"symbol": "base:icon-embassy",
-					"label": "Olympic Village"
-				}
-			]
+				{ "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Stadiums and arenas" },
+				{ "color": "#d55e00", "symbol": "base:icon-monument", "label": "Temporary venues at landmarks" },
+				{ "color": "#009e73", "symbol": "base:icon-outdoor", "label": "Venues in nature" },
+				{ "color": "#e69f00", "symbol": "base:icon-embassy", "label": "Olympic Village" }
+			],
+			"font": "sans-serif"
 		},
 		"title": "Paris 2024 Olympic venues",
 		"labelFont": "noto_sans_bold"
@@ -48,14 +22,12 @@
 			"point": [2.331, 48.9115],
 			"style": {
 				"color": "#e69f00",
-				"size": 1.4,
+				"size": 2,
+				"symbol": "base:icon-stadium",
 				"label": "Olympic Village",
-				"align": 2,
 				"labelColor": "#e69f00"
 			},
-			"popup": {
-				"text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis"
-			}
+			"popup": { "text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis" }
 		},
 		{
 			"type": "marker",
@@ -67,9 +39,7 @@
 				"align": 3,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Stade de France**\nAthletics, rugby sevens"
-			}
+			"popup": { "text": "**Stade de France**\nAthletics, rugby sevens" }
 		},
 		{
 			"type": "marker",
@@ -81,9 +51,7 @@
 				"align": 1,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Aquatics Centre**\nArtistic swimming, diving, water polo"
-			}
+			"popup": { "text": "**Aquatics Centre**\nArtistic swimming, diving, water polo" }
 		},
 		{
 			"type": "marker",
@@ -94,22 +62,13 @@
 				"label": "La Défense Arena",
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**La Défense Arena**\nSwimming, water polo"
-			}
+			"popup": { "text": "**La Défense Arena**\nSwimming, water polo" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3786, 48.8387],
-			"style": {
-				"color": "#0072b2",
-				"symbol": "base:icon-stadium",
-				"label": "Bercy Arena",
-				"labelColor": "#0072b2"
-			},
-			"popup": {
-				"text": "**Bercy Arena**\nArtistic gymnastics, trampoline, basketball"
-			}
+			"style": { "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Bercy Arena", "labelColor": "#0072b2" },
+			"popup": { "text": "**Bercy Arena**\nArtistic gymnastics, trampoline, basketball" }
 		},
 		{
 			"type": "marker",
@@ -121,9 +80,7 @@
 				"align": 1,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Porte de La Chapelle Arena**\nBadminton, rhythmic gymnastics"
-			}
+			"popup": { "text": "**Porte de La Chapelle Arena**\nBadminton, rhythmic gymnastics" }
 		},
 		{
 			"type": "marker",
@@ -135,9 +92,7 @@
 				"align": 4,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**South Paris Arena**\nVolleyball, handball, table tennis, weightlifting"
-			}
+			"popup": { "text": "**South Paris Arena**\nVolleyball, handball, table tennis, weightlifting" }
 		},
 		{
 			"type": "marker",
@@ -148,9 +103,7 @@
 				"label": "North Paris Arena",
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**North Paris Arena**\nBoxing, modern pentathlon"
-			}
+			"popup": { "text": "**North Paris Arena**\nBoxing, modern pentathlon" }
 		},
 		{
 			"type": "marker",
@@ -162,9 +115,7 @@
 				"align": 2,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Parc des Princes**\nFootball"
-			}
+			"popup": { "text": "**Parc des Princes**\nFootball" }
 		},
 		{
 			"type": "marker",
@@ -176,9 +127,7 @@
 				"align": 3,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Roland-Garros**\nTennis, boxing"
-			}
+			"popup": { "text": "**Roland-Garros**\nTennis, boxing" }
 		},
 		{
 			"type": "marker",
@@ -190,9 +139,7 @@
 				"align": 2,
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Yves-du-Manoir Stadium**\nHockey"
-			}
+			"popup": { "text": "**Yves-du-Manoir Stadium**\nHockey" }
 		},
 		{
 			"type": "marker",
@@ -203,99 +150,55 @@
 				"label": "Le Bourget Climbing Venue",
 				"labelColor": "#0072b2"
 			},
-			"popup": {
-				"text": "**Le Bourget Climbing Venue**\nSport climbing"
-			}
+			"popup": { "text": "**Le Bourget Climbing Venue**\nSport climbing" }
 		},
 		{
 			"type": "marker",
 			"point": [2.0374, 48.7883],
-			"style": {
-				"color": "#0072b2",
-				"symbol": "base:icon-stadium",
-				"label": "Velodrome",
-				"labelColor": "#0072b2"
-			},
-			"popup": {
-				"text": "**Velodrome**\nTrack cycling, BMX racing, in Saint-Quentin-en-Yvelines"
-			}
+			"style": { "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Velodrome", "labelColor": "#0072b2" },
+			"popup": { "text": "**Velodrome**\nTrack cycling, BMX racing, in Saint-Quentin-en-Yvelines" }
 		},
 		{
 			"type": "marker",
 			"point": [2.2976, 48.8552],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Eiffel Tower Stadium**\nBeach volleyball"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Eiffel Tower Stadium**\nBeach volleyball" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3033, 48.8527],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Champ-de-Mars Arena**\nJudo, wrestling"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Champ-de-Mars Arena**\nJudo, wrestling" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3126, 48.8661],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Grand Palais**\nFencing, taekwondo"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Grand Palais**\nFencing, taekwondo" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3137, 48.8639],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Pont Alexandre III**\nTriathlon, marathon swimming"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Pont Alexandre III**\nTriathlon, marathon swimming" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3125, 48.856],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Invalides**\nArchery"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Invalides**\nArchery" }
 		},
 		{
 			"type": "marker",
 			"point": [2.3212, 48.8656],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**La Concorde**\nBMX freestyle, breaking, skateboarding, 3x3 basketball"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**La Concorde**\nBMX freestyle, breaking, skateboarding, 3x3 basketball" }
 		},
 		{
 			"type": "marker",
 			"point": [2.2885, 48.8616],
-			"style": {
-				"color": "#d55e00",
-				"symbol": "base:icon-monument"
-			},
-			"popup": {
-				"text": "**Trocadéro**\nRoad cycling, race walking"
-			}
+			"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+			"popup": { "text": "**Trocadéro**\nRoad cycling, race walking" }
 		},
 		{
 			"type": "marker",
@@ -307,9 +210,7 @@
 				"align": 2,
 				"labelColor": "#d55e00"
 			},
-			"popup": {
-				"text": "**Château de Versailles**\nEquestrian, modern pentathlon"
-			}
+			"popup": { "text": "**Château de Versailles**\nEquestrian, modern pentathlon" }
 		},
 		{
 			"type": "marker",
@@ -320,9 +221,7 @@
 				"label": "Vaires-sur-Marne Nautical Stadium",
 				"labelColor": "#009e73"
 			},
-			"popup": {
-				"text": "**Vaires-sur-Marne Nautical Stadium**\nRowing, canoe"
-			}
+			"popup": { "text": "**Vaires-sur-Marne Nautical Stadium**\nRowing, canoe" }
 		},
 		{
 			"type": "marker",
@@ -333,22 +232,13 @@
 				"label": "Élancourt Hill",
 				"labelColor": "#009e73"
 			},
-			"popup": {
-				"text": "**Élancourt Hill**\nMountain bike"
-			}
+			"popup": { "text": "**Élancourt Hill**\nMountain bike" }
 		},
 		{
 			"type": "marker",
 			"point": [2.0745, 48.7543],
-			"style": {
-				"color": "#009e73",
-				"symbol": "base:icon-golf",
-				"label": "Le Golf National",
-				"labelColor": "#009e73"
-			},
-			"popup": {
-				"text": "**Le Golf National**\nGolf"
-			}
+			"style": { "color": "#009e73", "symbol": "base:icon-golf", "label": "Le Golf National", "labelColor": "#009e73" },
+			"popup": { "text": "**Le Golf National**\nGolf" }
 		}
 	]
 }
