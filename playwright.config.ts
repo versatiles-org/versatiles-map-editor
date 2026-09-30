@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import os from 'node:os';
 
 // macOS has a GPU, so render WebGL with Metal. Elsewhere (Linux CI, Docker) fall back to
 // SwiftShader, which renders on the CPU and is several times slower and less stable.
@@ -12,17 +13,25 @@ const chromiumArgs =
 // files, scrolling and rendering. CI, and ALL_TESTS=1 (npm run test-playwright-all), run all of them.
 const allTests = !!process.env.CI || !!process.env.ALL_TESTS;
 
+// Whether the machine is busy before the tests start: its load in the last minute exceeds its cores
+const busy = os.loadavg()[0] > os.availableParallelism();
+
 export default defineConfig({
 	webServer: {
 		// Types are checked by "npm run check", so a plain vite build is enough here
 		command: 'npx vite build && npx vite preview',
 		port: 4173,
-		reuseExistingServer: !process.env.CI
+		reuseExistingServer: !process.env.CI,
+		// The build takes a few seconds, but it took over a minute on a machine busy with other work
+		// (load average 200); the default of 60 s then fails the whole run before any test
+		timeout: 300_000
 	},
 	// Parallel browsers compete for rendering, so each test gets slower with more workers. Locally
 	// on macOS (GPU rendering), 4 workers still finish a third faster than 2; 6 are not faster.
-	// CI runners have fewer cores, and Linux renders on the CPU, so they keep 2.
-	workers: process.platform === 'darwin' && !process.env.CI ? 4 : 2,
+	// CI runners have fewer cores, and Linux renders on the CPU, so they keep 2. A machine that is
+	// already busy (more waiting work than cores, e.g. other test runs) also gets 2: with 4, the
+	// starved browsers ran into the test timeout at random steps.
+	workers: process.platform === 'darwin' && !process.env.CI && !busy ? 4 : 2,
 	timeout: 60_000,
 	// In CI: a forgotten test.only fails the run, a failed test gets one more try, and the results
 	// are also written as an HTML report
