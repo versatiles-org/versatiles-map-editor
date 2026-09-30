@@ -45,16 +45,32 @@ describe('SymbolStyle', () => {
 			icon: 'base:icon-airfield',
 			anchor: 'center',
 			color: 'rgb(0,255,0)',
+			opacity: 1,
 			rotate: 0,
 			size: 2,
 			halo: 1,
 			// as it is: the layer reads it as a property, so "{…}" is not replaced
 			label: 'Price {EUR}',
 			labelColor: 'rgb(0,0,0)',
+			labelOpacity: 1,
 			haloColor: 'rgb(255,255,255)',
 			position: 'auto'
 		});
 		expect(onChange).toHaveBeenCalledTimes(4);
+	});
+
+	it('gives the opacity of the symbol and text colors on its own, so they fade with their halo', () => {
+		layer.color = '#00ff0080';
+		layer.labelColor = '#0000ff40';
+		layer.haloColor = '#ffffff80';
+		expect(layer.getProperties()).toMatchObject({
+			color: 'rgb(0,255,0)',
+			opacity: 128 / 255,
+			labelColor: 'rgb(0,0,255)',
+			labelOpacity: 64 / 255
+		});
+		// the halo keeps its own opacity in its color
+		expect(layer.getProperties().haloColor).toMatch(/^rgba\(255,\s*255,\s*255,\s*0\.5/);
 	});
 
 	it('has a text color and a halo color, stored only if changed', () => {

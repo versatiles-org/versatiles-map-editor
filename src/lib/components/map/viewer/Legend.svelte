@@ -3,6 +3,11 @@
 	import type { StateLegend } from '@versatiles/map-state';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { formatHex, parseColor } from '@versatiles/map-state';
+
+	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
+	function opacityOf(color: string): number {
+		return parseColor(color)?.alpha ?? 1;
+	}
 	import type { Box } from '$lib/rendering/index.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
@@ -104,6 +109,7 @@
 						height={symbolSize * resolution}
 						style:width="{symbolSize}px"
 						style:height="{symbolSize}px"
+						style:opacity={opacityOf(entry.color)}
 						use:drawSymbol={{ symbol: entry.symbol, color: entry.color }}
 					></canvas>
 				{:else}

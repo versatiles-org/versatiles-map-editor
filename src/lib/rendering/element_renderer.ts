@@ -103,8 +103,10 @@ export function elementStyle(font: string): {
 					'icon-halo-blur': 0,
 					'icon-halo-color': ['get', 'haloColor'],
 					'icon-halo-width': ['get', 'halo'],
-					'icon-opacity': 1,
+					// the opacity of the colors, which also fades the halo
+					'icon-opacity': ['get', 'opacity'],
 					'text-color': ['get', 'labelColor'],
+					'text-opacity': ['get', 'labelOpacity'],
 					'text-halo-blur': 0,
 					'text-halo-color': ['get', 'haloColor'],
 					'text-halo-width': ['get', 'halo']

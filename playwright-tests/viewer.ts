@@ -1,6 +1,13 @@
 import { expect, test } from './lib/test.js';
 import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { boxesOverlap, project, storedState, waitForMapIsIdle, waitForMapIsReady } from './lib/utils.js';
+import {
+	boxesOverlap,
+	project,
+	storedState,
+	waitForMapIsIdle,
+	waitForMapIsReady,
+	type MapWindow
+} from './lib/utils.js';
 
 test.describe('small screens', () => {
 	// wide enough for the hint to fit on one line, next to the attribution
@@ -214,4 +221,44 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 	await expect(title).toHaveText('Map');
 	const back = await project(page, [13.4, 52.5]);
 	expect(back[0]).toBeCloseTo(berlin[0], 0);
+});
+
+test('a marker with an opacity fades together with its halo', async ({ page }) => {
+	const map = { center: [13.4, 52.5] as [number, number], radius: 3000 };
+	const marker = (color: string) =>
+		encodeState({ map, elements: [{ type: 'marker', point: map.center, style: { color, size: 4, halo: 2 } }] });
+
+	/** The pixels around the marker, with the opacity of its symbols set to `opacity` if given. */
+	async function pixels(state: string, opacity?: number): Promise<number[]> {
+		await page.goto('/view#' + state);
+		await waitForMapIsReady(page);
+		if (opacity !== undefined) {
+			await page.evaluate(
+				(o) => (window as unknown as MapWindow).map.setPaintProperty('elements_symbol', 'icon-opacity', o),
+				opacity
+			);
+		}
+		await waitForMapIsIdle(page);
+		const [x, y] = await project(page, map.center);
+		const png = await page.screenshot({ clip: { x: x - 50, y: y - 50, width: 100, height: 100 } });
+		return page.evaluate(async (base64) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = document.createElement('canvas');
+			canvas.width = image.width;
+			canvas.height = image.height;
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			return [...context.getImageData(0, 0, image.width, image.height).data];
+		}, png.toString('base64'));
+	}
+	const difference = (a: number[], b: number[]) => Math.max(...a.map((value, i) => Math.abs(value - b[i])));
+
+	const translucent = await pixels(marker('#d55e0080'));
+	// not the same as the opaque marker
+	expect(difference(translucent, await pixels(marker('#d55e00')))).toBeGreaterThan(50);
+	// but the same as the opaque marker with a lower opacity, which also fades the halo. Last,
+	// since the next map of a link keeps the opacity of the layer.
+	expect(difference(translucent, await pixels(marker('#d55e00'), 128 / 255))).toBeLessThanOrEqual(2);
 });

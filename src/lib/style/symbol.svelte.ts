@@ -2,6 +2,7 @@ import { StylePart } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
+import { splitOpacity } from './opacity.js';
 
 type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
 
@@ -197,16 +198,24 @@ export class SymbolStyle extends StylePart {
 		return this.symbolInfo == null ? 'auto-center' : 'auto' + suffix;
 	}
 
+	/**
+	 * The opacity of the symbol color and of the text color are properties of their own, so the
+	 * symbol and the text fade together with their halo.
+	 */
 	getProperties() {
 		const info = this.symbolInfo;
+		const symbol = splitOpacity(this.color);
+		const text = splitOpacity(this.labelColor);
 		return {
 			...(info == null ? {} : { icon: info.name, anchor: info.anchor }),
-			color: Color.parse(this.color).asString(),
+			color: symbol.color,
+			opacity: symbol.opacity,
 			rotate: this.rotate,
 			size: this.size,
 			halo: this.halo,
 			label: this.label,
-			labelColor: Color.parse(this.labelColor).asString(),
+			labelColor: text.color,
+			labelOpacity: text.opacity,
 			haloColor: Color.parse(this.haloColor).asString(),
 			position: this.getPosition()
 		};
