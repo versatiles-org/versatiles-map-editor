@@ -4,10 +4,12 @@
 	import { Button } from '$lib/components/ui/index.js';
 	import { formatLength } from '$lib/components/format.js';
 	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
+	import { NUDGE } from '$lib/interaction/visible_area.svelte.js';
 
 	/**
 	 * A bar at the bottom of the map while the visible area is edited: its size, and buttons to
 	 * take the current view, to go back to the elements, and to end the mode (also Escape).
+	 * Shift and an arrow key move that side of the area outwards, with Alt too inwards.
 	 * `left` and `right` keep it centered in the part of the map between the bars.
 	 */
 	const { doc, left = 0, right = 0 }: { doc: MapDocumentInteractive; left?: number; right?: number } = $props();
@@ -34,9 +36,30 @@
 		e.preventDefault();
 		mode.close();
 	}
+
+	const SIDES: Record<string, 'n' | 'e' | 's' | 'w'> = {
+		ArrowUp: 'n',
+		ArrowRight: 'e',
+		ArrowDown: 's',
+		ArrowLeft: 'w'
+	};
+
+	/** Shift and an arrow key; before the map, which would rotate or tilt with them. */
+	function onNudge(e: KeyboardEvent) {
+		const side = SIDES[e.key];
+		if (!mode.active || !side || !e.shiftKey || e.metaKey || e.ctrlKey || isOwnKeyTarget(e)) return;
+		e.preventDefault();
+		e.stopPropagation();
+		mode.nudge(side, e.altKey ? -NUDGE : NUDGE);
+	}
+
+	/** Holding the key moves the side on; releasing it makes one undo step. */
+	function onKeyup(e: KeyboardEvent) {
+		if (SIDES[e.key] || e.key === 'Shift') mode.commit();
+	}
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydowncapture={onNudge} onkeydown={onKeydown} onkeyup={onKeyup} />
 
 {#if mode.active}
 	<div class="bar" style:--left="{left}px" style:--right="{right}px" role="group" aria-label="Visible area">

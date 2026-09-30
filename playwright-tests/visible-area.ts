@@ -244,6 +244,31 @@ test('dragging a handle changes the frame, one undo step per drag', async ({ pag
 	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(frame);
 });
 
+test('the keyboard moves the sides of the frame, one undo step per key', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Visible area…')).click();
+	const size = page.getByRole('group', { name: 'Visible area' }).getByRole('status');
+	const before = await size.textContent();
+
+	// focus on the map, which would rotate with Shift and an arrow key
+	await page.locator('.maplibregl-canvas').focus();
+	await page.keyboard.press('Shift+ArrowRight');
+	await page.keyboard.press('Shift+ArrowRight');
+	await expect(size).not.toHaveText(before!);
+	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
+	const moved = (await storedState(page)).frame!;
+	expect(moved[0]).toBeCloseTo(frame[0], 4);
+	expect(await page.evaluate(() => (window as unknown as { map: { getBearing(): number } }).map.getBearing())).toBe(0);
+
+	// inwards again
+	await page.keyboard.press('Alt+Shift+ArrowRight');
+	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeLessThan(moved[2]);
+
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(moved);
+});
+
 test('importing a file with a frame gives a frame that covers both', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
 	await waitForMapIsReady(page);

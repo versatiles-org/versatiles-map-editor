@@ -197,6 +197,23 @@ describe('VisibleAreaMode', () => {
 			expect(area()).toStrictEqual([-30, -10, 50, 70]);
 		});
 
+		it('move a side with the keyboard, the moves one undo step', async () => {
+			doc.visibleArea.nudge('e', 10);
+			doc.visibleArea.nudge('e', 10);
+			doc.visibleArea.nudge('n', -5);
+			expect(doc.frame).toStrictEqual([-50, -50, 70, 45]);
+			doc.visibleArea.commit();
+			await doc.state.undo();
+			expect(doc.frame).toStrictEqual(frame);
+
+			// the minimum size, and a pending step is made when the mode ends
+			doc.visibleArea.nudge('w', -200);
+			expect(doc.frame).toStrictEqual([30, -50, 50, 50]);
+			doc.visibleArea.close();
+			await doc.state.undo();
+			expect(doc.frame).toStrictEqual(frame);
+		});
+
 		it('leave the map to be moved elsewhere', () => {
 			const e = pointer(0, 0);
 			map.emit('mousedown', e);

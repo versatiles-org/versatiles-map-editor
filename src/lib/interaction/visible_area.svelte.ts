@@ -13,6 +13,9 @@ const MIN_BOUNDS = 40;
 /** The northernmost latitude of the Web Mercator projection. */
 const MAX_LATITUDE = 85.051129;
 
+/** How far a side moves with each press of a key, in pixels. */
+export const NUDGE = 10;
+
 /** The cursor over a handle: in the direction that it moves. */
 const CURSORS: Record<Handle, string> = {
 	nw: 'nwse-resize',
@@ -42,6 +45,8 @@ export class VisibleAreaMode {
 	#onChange: number | undefined;
 	/** Called when the mode ends with Done or Escape, e.g. to return to the share dialog. */
 	#onDone: (() => void) | undefined;
+	/** Whether the keyboard moved a side since the last undo step. */
+	#nudged = false;
 
 	constructor(doc: MapDocumentInteractive) {
 		this.#doc = doc;
@@ -111,6 +116,7 @@ export class VisibleAreaMode {
 	 */
 	public close({ returning = true }: { returning?: boolean } = {}) {
 		if (!this.active) return;
+		this.commit();
 		this.active = false;
 		const onDone = this.#onDone;
 		this.#onDone = undefined;
@@ -134,6 +140,27 @@ export class VisibleAreaMode {
 		this.#doc.frame = undefined;
 		this.#doc.state.log();
 		this.render();
+	}
+
+	/**
+	 * Move a side of the area by `pixels`, outwards if positive, e.g. with the keyboard; the bounds
+	 * of the elements become a frame. `commit` makes the moves one undo step.
+	 */
+	public nudge(side: 'n' | 'e' | 's' | 'w', pixels: number) {
+		const area = this.#area;
+		if (!this.active || !area) return;
+		const { x, y } = this.#doc.view.map.project(handlePosition(area, side));
+		const [dx, dy] = { n: [0, -pixels], e: [pixels, 0], s: [0, pixels], w: [-pixels, 0] }[side];
+		this.#doc.frame = this.#resized(area, side, { x: x + dx, y: y + dy });
+		this.#nudged = true;
+		this.render();
+	}
+
+	/** One undo step for the moves of `nudge` since the last one, e.g. when the key is released. */
+	public commit() {
+		if (!this.#nudged) return;
+		this.#nudged = false;
+		this.#doc.state.log();
 	}
 
 	/** Draw the frame, or without one the bounds of the elements, e.g. after a change. */

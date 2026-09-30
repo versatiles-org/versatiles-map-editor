@@ -50,6 +50,14 @@
 			]
 		},
 		{
+			title: 'Visible area',
+			keys: [
+				['Move a side outwards', `${shift}← → ↑ ↓`],
+				['Move a side inwards', `${alt}${shift}← → ↑ ↓`],
+				['Done', 'Escape']
+			]
+		},
+		{
 			title: 'List of elements',
 			keys: [
 				['Choose an element', '↑ ↓'],
