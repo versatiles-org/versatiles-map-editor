@@ -113,3 +113,27 @@
 :where(.map-editor-theme) :where(input[type='radio']) {
 	accent-color: var(--color-accent);
 }
+
+/* a button that opens a popup to choose a value, e.g. a color: it looks like a list */
+:where(.map-editor-theme) :where(button.picker) {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	box-sizing: border-box;
+	min-width: 0;
+	height: var(--size-sm);
+	padding: 0 26px 0 var(--space-2);
+	overflow: hidden;
+	border: 1px solid var(--color-border-field);
+	border-radius: var(--radius-md);
+	background: var(--color-field) var(--chevron-down) no-repeat right var(--space-2) center / 12px;
+	color: var(--color-text);
+	font: inherit;
+	text-align: left;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+:where(.map-editor-theme) :where(button.picker):where(:hover:not(:disabled)) {
+	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+}

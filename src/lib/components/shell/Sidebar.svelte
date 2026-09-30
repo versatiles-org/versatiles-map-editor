@@ -66,8 +66,10 @@
 
 <style>
 	.sidebar {
-		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		/* like the drawer: the map shines through, and a line at its edge */
+		background: var(--color-glass);
 		backdrop-filter: blur(10px);
+		border-left: 1px solid var(--color-border);
 		box-sizing: border-box;
 		color: var(--color-text);
 		font-size: 0.875em;

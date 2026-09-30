@@ -189,7 +189,7 @@
 <button
 	{id}
 	bind:this={button}
-	class="color-button"
+	class="color-button picker"
 	aria-labelledby="{id}-label {id}"
 	aria-expanded={open}
 	aria-controls="{id}-panel"
@@ -289,21 +289,18 @@
 {/if}
 
 <style>
+	/* a field that opens the popup (the class "picker" of fields.css), with the color and its code */
 	.color-button {
-		display: flex;
-		align-items: center;
-		gap: 0.5em;
-		font-family: monospace;
-		padding: 1px;
-		cursor: pointer;
+		font-family: ui-monospace, Menlo, Consolas, monospace;
+		font-size: var(--font-size-sm);
 	}
 
 	.swatch {
 		display: inline-block;
-		width: 20px;
-		height: 20px;
-		border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
-		border-radius: 3px;
+		width: 16px;
+		height: 16px;
+		border-radius: var(--radius-sm);
+		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
 		box-sizing: border-box;
 		flex-shrink: 0;
 	}
@@ -324,9 +321,9 @@
 		background: var(--color-bg);
 		color: var(--color-text);
 		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		box-shadow: var(--shadow);
-		font-size: 0.875rem;
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
+		font-size: var(--font-size-md);
 	}
 
 	/* the handle to move the popup */

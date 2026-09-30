@@ -45,7 +45,9 @@
 		height: 100%;
 		padding: 0 8px;
 		background: var(--color-bg);
-		border-bottom: 1px solid var(--color-border);
+		/* the line of versatiles.org */
+		border-bottom: 1px solid transparent;
+		border-image: var(--brand-gradient) 1;
 		color: var(--color-text);
 	}
 

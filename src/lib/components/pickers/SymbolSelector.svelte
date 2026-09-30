@@ -54,12 +54,7 @@
 	}
 </script>
 
-<button
-	{id}
-	aria-labelledby={id ? `${id}-label ${id}` : undefined}
-	onclick={() => dialog?.open()}
-	style="text-align: left; white-space: nowrap; overflow: hidden; padding: 1px"
->
+<button {id} aria-labelledby={id ? `${id}-label ${id}` : undefined} class="picker" onclick={() => dialog?.open()}>
 	{#key symbol}
 		{#if info}<canvas
 				width={buttonIconSize * retina}

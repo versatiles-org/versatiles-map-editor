@@ -44,10 +44,10 @@
 		flex-direction: column;
 		box-sizing: border-box;
 		height: 100%;
-		background: color-mix(in srgb, var(--color-bg) 85%, transparent);
+		/* like the sidebar: the map shines through, and a line at its edge */
+		background: var(--color-glass);
 		backdrop-filter: blur(10px);
 		border-right: 1px solid var(--color-border);
-		box-shadow: 4px 0 14px rgb(0 0 0 / 8%);
 		color: var(--color-text);
 		font-size: 0.875em;
 		/* e.g. Shift+click to select several elements must not select text */

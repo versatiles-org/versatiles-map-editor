@@ -34,24 +34,25 @@
 		pointer-events: auto;
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--space-2);
 		max-width: 100%;
 		box-sizing: border-box;
-		padding: 8px 8px 8px 12px;
-		border-radius: 6px;
+		padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
 		background: var(--color-bg);
-		box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
+		box-shadow: var(--shadow-sm);
 		color: var(--color-text);
-		font:
-			14px/1.3 system-ui,
-			sans-serif;
+		font-size: var(--font-size-md);
+		line-height: 1.35;
 	}
 
+	/* a stripe at the left: red for errors, the accent for other messages */
 	.error {
-		border-left: 4px solid var(--color-error);
+		border-left: 3px solid var(--color-error);
 	}
 
 	.info {
-		border-left: 4px solid var(--color-blue);
+		border-left: 3px solid var(--color-accent-line);
 	}
 </style>

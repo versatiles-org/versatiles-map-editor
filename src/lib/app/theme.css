@@ -30,6 +30,10 @@
 
 	/* bars, menus, popups, dialogs */
 	--color-bg: #fff;
+	/* panels over the map, e.g. the sidebar, which let the map shine through */
+	--color-glass: color-mix(in srgb, var(--color-bg) 85%, transparent);
+	/* the line under the top bar, as under the navigation of versatiles.org */
+	--brand-gradient: linear-gradient(60deg, #6b0075, #9d35ff 40%, #93a813 65%, #005034);
 	/* inside fields */
 	--color-field: #fff;
 	--color-text: #000;
@@ -60,9 +64,10 @@
 	--size-sm: 28px;
 	--size-md: 32px;
 	--size-lg: 36px;
-	/* corners: of small parts, of controls */
+	/* corners: of small parts, of controls, of surfaces (menus, popups, bars, dialogs) */
 	--radius-sm: 4px;
 	--radius-md: 6px;
+	--radius-lg: 10px;
 	/* spacing on a 4 px grid */
 	--space-1: 4px;
 	--space-2: 8px;
@@ -72,6 +77,8 @@
 	--font-size-xs: 11px;
 	--font-size-sm: 12px;
 	--font-size-md: 13px;
+	/* titles of dialogs */
+	--font-size-xl: 17px;
 
 	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
 	--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
@@ -81,10 +88,8 @@
 	--color-blue: var(--color-accent);
 	--color-on-blue: var(--color-on-accent);
 	--color-green: var(--color-success);
-	--shadow: var(--shadow-lg);
 	--btn-gap: 5px;
 	--gap: 10px;
-	--border-radius: 1em;
 
 	/* The stacking order of everything over the map, from the bottom up. Each overlay takes its
 	   level from here, so a new one cannot end up behind or in front of the wrong ones. */

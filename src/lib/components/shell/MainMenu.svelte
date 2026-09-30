@@ -290,7 +290,8 @@
 		position: absolute;
 		top: calc(100% + 6px);
 		left: 0;
-		z-index: 20;
+		/* over the rest of the top bar, whose level is over everything */
+		z-index: 1;
 		width: 260px;
 		max-height: calc(100vh - 60px);
 		overflow-y: auto;
@@ -298,8 +299,8 @@
 		padding: 5px;
 		background: var(--color-bg);
 		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		box-shadow: var(--shadow);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
 		font-size: var(--font-size-md);
 		outline: none;
 

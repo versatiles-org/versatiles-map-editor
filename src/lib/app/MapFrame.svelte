@@ -348,12 +348,13 @@
 	.hint {
 		align-self: center;
 		max-width: calc(100% - 2 * var(--gap));
-		padding: 0.4em 1em;
-		border-radius: var(--border-radius);
-		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		padding: 6px var(--space-3);
+		border-radius: var(--radius-lg);
+		background: var(--color-glass);
 		backdrop-filter: blur(10px);
+		box-shadow: var(--shadow-sm);
 		color: var(--color-text);
-		font-size: 0.8em;
+		font-size: var(--font-size-sm);
 		text-align: center;
 	}
 
@@ -363,12 +364,12 @@
 		&.right {
 			align-self: flex-end;
 		}
-		font-size: 13px;
+		font-size: var(--font-size-md);
+		/* a field (fields.css) on the map: in the size of bars, and with a shadow */
 		:global(input) {
-			padding: 6px 8px;
-			border: 1px solid rgb(0 0 0 / 30%);
-			border-radius: 4px;
-			box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+			height: var(--size-md);
+			border-color: var(--color-border);
+			box-shadow: var(--shadow-sm);
 		}
 	}
 

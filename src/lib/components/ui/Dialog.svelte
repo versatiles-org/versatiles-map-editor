@@ -67,15 +67,14 @@
 		width: 80vw;
 		height: 80vh;
 
-		background-color: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		/* opened with showModal(), so it is in the top layer, over everything */
+		background-color: var(--color-bg);
 		color: var(--color-text);
-		backdrop-filter: blur(10px);
-		box-shadow: 5px 5px 10px rgb(0 0 0 / 20%);
-		z-index: 10000;
-		border: 0.5px solid color-mix(in srgb, var(--color-text) 30%, transparent);
-		border-radius: 10px;
+		box-shadow: var(--shadow-lg);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
 		box-sizing: border-box;
-		padding: 20px;
+		padding: var(--space-5);
 
 		&.fullscreen {
 			width: calc(100vw - 20px);
@@ -100,8 +99,9 @@
 
 	h2 {
 		flex-shrink: 0;
-		margin: 0 30px var(--gap, 10px) 0;
-		font-size: 1.2em;
+		margin: 0 var(--size-md) var(--space-3) 0;
+		font-size: var(--font-size-xl);
+		font-weight: 600;
 	}
 
 	/* the close button of the component IconButton, at the top right */

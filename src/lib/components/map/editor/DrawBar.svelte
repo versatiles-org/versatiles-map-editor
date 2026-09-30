@@ -45,13 +45,13 @@
 		gap: 6px;
 		box-sizing: border-box;
 		max-width: calc(100% - var(--left) - var(--right) - 20px);
-		padding: 4px 4px 4px 12px;
+		padding: var(--space-1) var(--space-1) var(--space-1) var(--space-3);
 		background: var(--color-bg);
 		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		box-shadow: var(--shadow);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
 		color: var(--color-text);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 	}
 
 	.hint {

@@ -32,10 +32,10 @@
 		height: 48px;
 		padding: 0;
 		border: none;
-		border-radius: 6px 0 0 6px;
-		background: color-mix(in srgb, var(--color-bg) 80%, transparent);
+		border-radius: var(--radius-md) 0 0 var(--radius-md);
+		background: var(--color-glass);
 		backdrop-filter: blur(10px);
-		box-shadow: -1px 0 4px rgb(0 0 0 / 20%);
+		box-shadow: var(--shadow-sm);
 		color: var(--color-text);
 		cursor: pointer;
 

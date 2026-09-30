@@ -134,11 +134,11 @@
 		display: flex;
 		align-items: center;
 		gap: 2px;
-		padding: 3px;
+		padding: var(--space-1);
 		background: var(--color-bg);
 		border: 1px solid var(--color-border);
-		border-radius: 10px;
-		box-shadow: var(--shadow);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
 
 		&[hidden] {
 			display: none;
