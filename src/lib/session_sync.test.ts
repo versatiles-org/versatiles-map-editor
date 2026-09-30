@@ -261,7 +261,11 @@ describe('SessionSync', () => {
 			expect(doc.state.history.undoEnabled).toBe(false);
 			doc.addElement(marker(2));
 			doc.state.log();
-			expect((await stored()).map((s) => s.elements)).toStrictEqual([[0, 1], [1]]);
+			// changed in the same millisecond, so in any order
+			const elements = (await stored()).map((s) => s.elements);
+			expect(elements).toHaveLength(2);
+			expect(elements).toContainEqual([0, 1]);
+			expect(elements).toContainEqual([1]);
 		});
 
 		it('opens a map of a file as a new map', async () => {
@@ -425,6 +429,25 @@ describe('SessionSync', () => {
 			// and all when it is closed
 			sync.destroy();
 			await vi.waitFor(async () => expect(await lockedSessions()).toStrictEqual([]));
+		});
+
+		it('keeps the 10 most recently changed maps, and those that tabs have open', async () => {
+			const ids = await createSessions(...Array.from({ length: 12 }, (_, i) => i));
+			// another tab has the oldest map open
+			await (await openTab(ids[0])).prepare('');
+			sessionStorage.clear();
+			// opening the most recent map deletes the second-oldest
+			await sync.attach(doc, await sync.prepare(''));
+			await vi.waitFor(async () => expect((await store.list()).length).toBe(11));
+			expect((await store.list()).map(({ id }) => id)).not.toContain(ids[1]);
+
+			// a new map takes the place of the third-oldest
+			await sync.newMap();
+			doc.addElement(marker(20));
+			doc.state.log();
+			await vi.waitFor(async () => expect((await store.list()).map(({ id }) => id)).not.toContain(ids[2]));
+			expect((await store.list()).length).toBe(11);
+			expect((await store.list()).map(({ id }) => id)).toContain(ids[0]);
 		});
 
 		it('marks the maps that other tabs have open, which cannot be opened or deleted here', async () => {

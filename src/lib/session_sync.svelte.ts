@@ -5,7 +5,7 @@ import { notify } from './notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
 import { countTypes } from './components/element_names.js';
 
-/** How many of the most recent sessions are compared with the map of a link. */
+/** How many of the most recent sessions are kept, listed, and compared with the map of a link. */
 const RECENT = 10;
 /** The key of the id of the tab's session in `sessionStorage`, which a reload keeps. */
 const TAB_SESSION = 'versatiles-map-editor:session';
@@ -50,6 +50,7 @@ function encodeStep(state: MapState): string {
  *
  * Each tab edits one session, and holds its lock, so other tabs do not open it too. A reload
  * keeps the tab's session (its id is in `sessionStorage`); a duplicated tab gets a copy of it.
+ * The storage keeps the `RECENT` most recently changed maps, and those that tabs have open.
  */
 export class SessionSync {
 	readonly #store: SessionStore | undefined;
@@ -310,6 +311,23 @@ export class SessionSync {
 			sessionStorage.setItem(TAB_SESSION, id);
 		} catch {
 			// e.g. blocked: a reload opens the most recent map that no other tab has open
+		}
+		void this.#prune();
+	}
+
+	/** Delete the maps after the `RECENT` most recently changed ones, unless a tab has them open. */
+	async #prune() {
+		const store = this.#store;
+		if (!store) return;
+		try {
+			const elsewhere = await this.#locks.openElsewhere();
+			const sessions = await store.list();
+			for (const { id } of sessions.slice(RECENT)) {
+				if (id !== this.#id && !elsewhere.has(id)) store.delete(id);
+			}
+		} catch (error) {
+			// e.g. the storage was closed meanwhile: the maps are deleted the next time
+			console.warn('Failed to delete old maps', error);
 		}
 	}
 
