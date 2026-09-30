@@ -8,6 +8,8 @@ export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { CODEC_VERSION } from './constants.js';
 export { digitsForResolution, resolutionOfDigits } from './grid.js';
+export { boundsOf, centerOf } from './bounds.js';
+export { sanitizeFrame } from './profile.js';
 export { stateFromKML, stateToKML } from './kml.js';
 
 // The style vocabulary: defaults and names of the style values, e.g. for rendering the elements

@@ -126,7 +126,10 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 ## Format version
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
-this version is read; a later version can be told apart by it. To keep hashes short:
+this version is read; a later version can be told apart by it. Then come the palette, the camera
+(`map`, optional: where the author's editor looks), the resolution, the origin of the coordinates,
+the frame (optional: the visible area of a shared map), the metadata and the elements. To keep
+hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
@@ -135,9 +138,11 @@ this version is read; a later version can be told apart by it. To keep hashes sh
   `base:icon-`) and the rest, and referenced by index;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`);
-- element coordinates are whole steps from the map center, with a global resolution in decimal
-  places of degrees (#3, `grid.ts`). `encodeState(state, { resolution })` takes it in meters: the
-  default is 1 m; coarser values make shorter hashes, e.g. for sharing.
+- the coordinates of the frame and the elements are whole steps from an origin near them (the
+  center of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a
+  global resolution in decimal places of degrees (#3, `grid.ts`). `encodeState(state, {
+resolution })` takes it in meters: the default is 1 m; coarser values make shorter hashes, e.g.
+  for sharing.
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.

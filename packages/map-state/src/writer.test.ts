@@ -168,7 +168,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JH-AAAA_wAAAH-__8AWQhv9KBf7WFCDSawDSaxAF4oRIAAhAUW8AUW8AaTWAaTWIUBAYwMOsIQMOsIQNJrANJrANJrANJrEKBAhQMCAsu1iAsu1iRQCUCAVAA'
+			'JH-AAAA_wAAAH-__8AWQhv9KBf7WFImQsBBpNYBpNYgC8UIkAAQgKLeAKLeANJrANJrEKAgMYGHWEIGHWEIGk1gGk1gGk1gGk1iFAgQoGBAWXaxAWXaxIoBKBAKgA'
 		);
 	});
 
@@ -181,7 +181,7 @@ describe('StateWriter', () => {
 			},
 			elements: []
 		});
-		expect(writer.asBitString()).toBe('0010000001011001000000000000000000010100');
+		expect(writer.asBitString()).toBe('00100000010110010000000000000000000101000000000000000');
 	});
 
 	it('should write a style correctly', () => {

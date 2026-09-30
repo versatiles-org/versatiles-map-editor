@@ -6,7 +6,8 @@ import type {
 	StateElementLine,
 	StateElementMarker,
 	StateElementPolygon,
-	StateMetadata
+	StateMetadata,
+	Bounds
 } from './types.js';
 import {
 	fillPropsFromStyle,
@@ -15,6 +16,7 @@ import {
 	sanitizeBackground,
 	sanitizeLegend,
 	sanitizeNumber,
+	sanitizeFrame,
 	sanitizeString,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
@@ -23,11 +25,12 @@ import {
 } from './profile.js';
 
 /**
- * A GeoJSON FeatureCollection extended with the editor's `map` viewport, which
- * mirrors the State viewport (`center` + `radius` in meters).
+ * A GeoJSON FeatureCollection extended with the editor's `map` camera (`center` + `radius` in
+ * meters) and the `frame`, the visible area of the map (`[west, south, east, north]`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	map?: { center: [number, number]; radius: number };
+	frame?: Bounds;
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
 };
@@ -106,6 +109,8 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
 	if (state.map) doc.map = { center: state.map.center, radius: state.map.radius };
+	const frame = sanitizeFrame(state.frame);
+	if (frame) doc.frame = frame;
 	const meta: StateMetadata = {};
 	if (state.meta?.background) meta.background = state.meta.background;
 	if (state.meta?.legend) meta.legend = state.meta.legend;
@@ -262,6 +267,10 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		const center = toPoint(doc.map.center);
 		const radius = sanitizeNumber(doc.map.radius, 0);
 		if (center && radius !== undefined) state.map = { center, radius };
+	}
+	if (doc.type === 'FeatureCollection' && 'frame' in doc) {
+		const frame = sanitizeFrame(doc.frame);
+		if (frame) state.frame = frame;
 	}
 	if (doc.type === 'FeatureCollection' && 'meta' in doc && doc.meta) {
 		const meta: StateMetadata = {};

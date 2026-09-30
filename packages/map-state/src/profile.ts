@@ -1,6 +1,6 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
-import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle } from './types.js';
+import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle, Bounds } from './types.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -206,6 +206,15 @@ export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undef
 // ----- background map -----
 
 /** A valid background, or undefined. The options are not checked, since they belong to `@versatiles/style`. */
+/** A valid frame: four numbers, west < east and south < north, within the latitudes of the map. */
+export function sanitizeFrame(value: unknown): Bounds | undefined {
+	if (!Array.isArray(value) || value.length !== 4) return undefined;
+	const [west, south, east, north] = value;
+	if (![west, south, east, north].every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined;
+	if (!(west < east && south < north && south >= -90 && north <= 90 && west >= -180 && east <= 180)) return undefined;
+	return [west, south, east, north];
+}
+
 export function sanitizeBackground(value: unknown): StateBackground | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const { builder, options } = value as Record<string, unknown>;

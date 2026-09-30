@@ -9,6 +9,13 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `frame` in the map state: the visible area (`[west, south, east, north]`, the type `Bounds`),
+  which a shared or embedded map shows completely, whatever the size of its window. It is kept in
+  the base64 string, in GeoJSON (a member `frame` of the FeatureCollection) and in KML (whose
+  `LookAt` then looks at the frame). `sanitizeFrame` checks one.
+- `boundsOf(elements)`, the bounds of the elements (circles with their radius), and
+  `centerOf(bounds)`.
+
 - The text color and the halo color of a marker's label: `labelColor` and `haloColor` in the style,
   `symbol-label-color` and `symbol-halo-color` in GeoJSON, and the label color as `LabelStyle` in
   KML. Without them, the text is black and the halo white, as before.
@@ -22,6 +29,11 @@ and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `symbolFromName` and `legacyMarkerStyle` convert the symbols of older maps.
 
 ### Changed
+
+- **Breaking:** the base64 string has the frame, and the coordinates of the frame and the elements
+  are steps from an origin of their own: the center of the frame, else of the camera (`map`), else
+  of the elements, so a link without a camera stays short; the camera keeps a center of its own.
+  Older links cannot be read.
 
 - Base64 strings with these colors cannot be read by version 1.0.0, which rejects their style keys.
 - **Breaking:** markers store their symbol as `symbol` (base64 style key 13, legend key 4) instead

@@ -1,10 +1,13 @@
 import { parseColor } from './color.js';
-import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION } from './constants.js';
+import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import { boundsOf, centerOf } from './bounds.js';
+import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
+	Bounds,
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
@@ -103,10 +106,21 @@ export class StateWriter {
 		this.writePalette(collectColors(root));
 		this.styleHistory = new StyleHistory();
 
-		const center = this.writeMap(root.map);
+		// the camera, with its own center
+		this.writeMap(root.map);
 		const digits = digitsForResolution(this.resolution);
 		this.writeVarint(digits);
-		this.grid = new LocalGrid(center ?? [0, 0], digits);
+
+		// The coordinates of the frame and the elements are steps from an origin near them, so the
+		// numbers stay small: the center of the frame, else of the camera, else of the elements
+		const frame = sanitizeFrame(root.frame);
+		const near = (frame && centerOf(frame)) ?? root.map?.center ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
+		const origin: [number, number] = [Math.round(near[0] * ORIGIN_SCALE), Math.round(near[1] * ORIGIN_SCALE)];
+		this.writeVarint(origin[0], true);
+		this.writeVarint(origin[1], true);
+		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], digits);
+
+		this.writeFrame(frame);
 		this.writeMetadata(root.meta, collectSymbols(root));
 
 		root.elements.forEach((element) => {
@@ -129,6 +143,19 @@ export class StateWriter {
 					break;
 			}
 		});
+	}
+
+	/** The frame: its south-west corner on the grid, and its width and height in steps of the grid. */
+	writeFrame(frame: Bounds | undefined) {
+		if (!frame) return this.writeBit(false);
+		this.writeBit(true);
+		const [x0, y0] = this.elementGrid.toGrid([frame[0], frame[1]]);
+		const [x1, y1] = this.elementGrid.toGrid([frame[2], frame[3]]);
+		this.writeVarint(x0, true);
+		this.writeVarint(y0, true);
+		// at least one step, so a frame never becomes empty
+		this.writeVarint(Math.max(1, x1 - x0));
+		this.writeVarint(Math.max(1, y1 - y0));
 	}
 
 	/** Returns the center as the reader decodes it, or undefined without a map. */

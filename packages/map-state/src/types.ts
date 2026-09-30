@@ -1,9 +1,21 @@
 /** A map: its viewport, its properties and its elements. */
+/** A geographic area: west, south, east and north, in degrees. */
+export type Bounds = [west: number, south: number, east: number, north: number];
+
 export interface MapState {
+	/**
+	 * The camera: where the author's editor looks, e.g. after a reload. Links for sharing and
+	 * embedding leave it out; they show the `frame`, else the elements.
+	 */
 	map?: {
 		center: [number, number];
 		radius: number;
 	};
+	/**
+	 * The visible area: what a shared or embedded map shows completely, whatever the size and
+	 * the shape of the window. Without it, the bounds of the elements are shown.
+	 */
+	frame?: Bounds;
 	meta?: StateMetadata;
 	elements: StateElement[];
 }

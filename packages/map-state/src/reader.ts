@@ -1,5 +1,6 @@
 import { formatHex } from './color.js';
 import type {
+	Bounds,
 	StateBackground,
 	StateElementCircle,
 	StateElementLine,
@@ -12,7 +13,7 @@ import type {
 	MapState,
 	StateStyle
 } from './types.js';
-import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION } from './constants.js';
+import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { sanitizeBackground } from './profile.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
@@ -160,13 +161,18 @@ export class StateReader {
 			this.symbols = [];
 			this.styleHistory = new StyleHistory();
 
-			// Read the map element
+			// the camera
 			root.map = this.readMap();
 			if (!root.map) delete root.map;
 
 			const digits = this.readVarint();
 			if (digits > MAX_DIGITS) throw new Error(`Invalid resolution: ${digits}`);
-			this.grid = new LocalGrid(root.map?.center ?? [0, 0], digits);
+			// the origin of the coordinates of the frame and the elements
+			const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
+			this.grid = new LocalGrid(origin, digits);
+
+			const frame = this.readFrame();
+			if (frame) root.frame = frame;
 
 			// Read the metadata
 			root.meta = this.readMetadata();
@@ -202,6 +208,23 @@ export class StateReader {
 			}
 		} catch (cause) {
 			throw new Error(`Error reading root`, { cause });
+		}
+	}
+
+	/** See `StateWriter.writeFrame`. */
+	readFrame(): Bounds | undefined {
+		try {
+			if (!this.readBit()) return undefined;
+			const x0 = this.readVarint(true);
+			const y0 = this.readVarint(true);
+			const width = this.readVarint();
+			const height = this.readVarint();
+			if (width < 1 || height < 1) throw new Error('Invalid size of the frame');
+			const [west, south] = this.elementGrid.fromGrid([x0, y0]);
+			const [east, north] = this.elementGrid.fromGrid([x0 + width, y0 + height]);
+			return [west, south, east, north];
+		} catch (cause) {
+			throw new Error(`Error reading frame`, { cause });
 		}
 	}
 

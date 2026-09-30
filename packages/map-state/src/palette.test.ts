@@ -57,8 +57,11 @@ describe('color palette', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray(['#ff0000'], (c) => writer.writeColor(c));
-		writer.writeBit(false); // no map
+		writer.writeBit(false); // no camera
 		writer.writeVarint(5); // resolution: decimal places
+		writer.writeVarint(0, true); // the origin
+		writer.writeVarint(0, true);
+		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
 		writer.writePoint([0, 0]);

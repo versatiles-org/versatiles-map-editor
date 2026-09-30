@@ -1,6 +1,6 @@
 import type * as GeoJSON from 'geojson';
 import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
-import type { MapState } from './types.js';
+import type { MapState, Bounds } from './types.js';
 import { child, children, descendants, parseXml, text, xml, type XmlElement } from './xml.js';
 
 /**
@@ -12,6 +12,7 @@ import { child, children, descendants, parseXml, text, xml, type XmlElement } fr
  */
 
 const MAP_DATA = 'versatiles:map';
+const FRAME_DATA = 'versatiles:frame';
 const META_DATA = 'versatiles:meta';
 const CENTER_DATA = 'center';
 // Properties that only our export writes: they mark a Placemark whose ExtendedData is complete
@@ -24,20 +25,32 @@ type Point = [number, number];
 // Export
 // ---------------------------------------------------------------------------
 
+/** The center of a frame, and the radius (in meters) that shows all of it. */
+function viewOfFrame([west, south, east, north]: Bounds): { center: [number, number]; radius: number } {
+	const center: [number, number] = [(west + east) / 2, (south + north) / 2];
+	const meters = 111320;
+	const width = (east - west) * meters * Math.cos((center[1] * Math.PI) / 180);
+	const height = (north - south) * meters;
+	return { center, radius: Math.max(width, height) / 2 };
+}
+
 /** The map state as a KML document. */
 export function stateToKML(state: MapState): string {
 	const doc = stateToGeoJSON(state);
 	const documentData: Record<string, string> = {};
 	if (doc.map) documentData[MAP_DATA] = JSON.stringify(doc.map);
+	if (doc.frame) documentData[FRAME_DATA] = JSON.stringify(doc.frame);
 	if (doc.meta) documentData[META_DATA] = JSON.stringify(doc.meta);
 
+	// where Google Earth looks: at the frame, else at the camera
+	const view = doc.frame ? viewOfFrame(doc.frame) : doc.map;
 	const content = [
 		xml('name', state.meta?.title || 'Map'),
-		doc.map &&
+		view &&
 			xml('LookAt', [
-				xml('longitude', String(doc.map.center[0])),
-				xml('latitude', String(doc.map.center[1])),
-				xml('range', String(Math.round(doc.map.radius * 2.5)))
+				xml('longitude', String(view.center[0])),
+				xml('latitude', String(view.center[1])),
+				xml('range', String(Math.round(view.radius * 2.5)))
 			]),
 		extendedData(documentData),
 		...doc.features.map(featureToPlacemark)
@@ -177,6 +190,8 @@ export function stateFromKML(kml: string): MapState {
 	const documentData = readExtendedData(child(document, 'ExtendedData'));
 	const map = parseJson(documentData[MAP_DATA]);
 	if (map) doc.map = map as GeoJSONDocument['map'];
+	const frame = parseJson(documentData[FRAME_DATA]);
+	if (frame) doc.frame = frame as GeoJSONDocument['frame'];
 	const meta = parseJson(documentData[META_DATA]);
 	if (meta) doc.meta = meta as GeoJSONDocument['meta'];
 

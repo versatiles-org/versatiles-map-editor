@@ -27,3 +27,6 @@ CHAR_VALUE2CODE.forEach((c, v) => (CHAR_CODE2VALUE[c] = v));
  * the original format, is not supported any more.)
  */
 export const CODEC_VERSION = 1;
+
+/** The origin of the coordinates is rounded to 1/100 degree, which is short and near enough. */
+export const ORIGIN_SCALE = 100;
