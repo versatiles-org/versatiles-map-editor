@@ -169,7 +169,8 @@ export class MapDocument {
 		if (!state) return;
 		this.clear();
 		const camera = this.isInteractive() ? state.map : undefined;
-		if (!camera) this.view.fitArea(state.frame, state.elements);
+		// the viewer keeps showing it when its size changes, e.g. a growing embed
+		if (!camera) this.view.fitArea(state.frame, state.elements, { keep: !this.isInteractive() });
 		await this.setState({ ...state, map: camera });
 	}
 

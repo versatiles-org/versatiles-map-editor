@@ -58,6 +58,35 @@ describe('MapView', () => {
 			);
 		});
 
+		it('shows the area again when the size changes, until the map is moved', async () => {
+			view.fitArea([1, 2, 3, 4], [], { keep: true });
+			expect(map.fitBounds).toHaveBeenCalledTimes(1);
+			// a resize of MapLibre fires "movestart" before "resize"
+			map.emit('movestart');
+			map.emit('resize');
+			await Promise.resolve();
+			expect(map.fitBounds).toHaveBeenCalledTimes(2);
+			// e.g. dragged by the visitor: a move without a resize
+			map.emit('movestart');
+			await Promise.resolve();
+			map.emit('resize');
+			expect(map.fitBounds).toHaveBeenCalledTimes(2);
+		});
+
+		it('does not show it again without keep, e.g. in the editor', () => {
+			view.fitArea([1, 2, 3, 4], []);
+			map.emit('resize');
+			expect(map.fitBounds).toHaveBeenCalledTimes(1);
+		});
+
+		it('keeps the area when the view itself moves the map', () => {
+			map.fitBounds.mockImplementation(() => map.emit('movestart'));
+			view.fitArea([1, 2, 3, 4], [], { keep: true });
+			map.emit('resize');
+			map.emit('resize');
+			expect(map.fitBounds).toHaveBeenCalledTimes(3);
+		});
+
 		it('shows the whole world without frame and elements', () => {
 			view.fitArea(undefined, []);
 			const [[west, south], [east, north]] = map.fitBounds.mock.lastCall?.[0] as [number, number][];

@@ -43,11 +43,30 @@ export class MapView {
 	public readonly renderer: ElementRenderer;
 	/** The background map and the font of the labels, and loading their style. */
 	public readonly style: MapStyleLoader;
+	/** The area that is shown again when the size of the map changes, until the map is moved. */
+	#kept: { frame: Bounds | undefined; elements: StateElement[] } | undefined;
+	/** Whether the view itself moves the map, which does not end keeping the area. */
+	#fitting = false;
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
 		this.renderer = new ElementRenderer(map);
 		this.style = new MapStyleLoader(map, this.renderer);
+		// A resize of the map fires "movestart" before "resize", both at once. So a move ends keeping
+		// the area only if no resize follows it, e.g. a move by the visitor or by the address search.
+		let resized = false;
+		map.on('movestart', () => {
+			if (this.#fitting) return;
+			queueMicrotask(() => {
+				if (!resized) this.#kept = undefined;
+			});
+		});
+		// e.g. a growing embed, or a rotated phone
+		map.on('resize', () => {
+			resized = true;
+			queueMicrotask(() => (resized = false));
+			if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements);
+		});
 	}
 
 	/** Stop pending work, e.g. loading a style. */
@@ -111,11 +130,18 @@ export class MapView {
 
 	/**
 	 * Show the frame completely, else all elements, else the whole world, e.g. when a shared map
-	 * opens. The padding of the map (e.g. its bars) is kept free.
+	 * opens. The padding of the map (e.g. its bars) is kept free. With `keep`, e.g. in the viewer,
+	 * the area is shown again whenever the size of the map changes, until the map is moved.
 	 */
-	public fitArea(frame: Bounds | undefined, elements: StateElement[]) {
+	public fitArea(frame: Bounds | undefined, elements: StateElement[], { keep = false } = {}) {
+		this.#fit(frame, elements);
+		this.#kept = keep ? { frame, elements } : undefined;
+	}
+
+	#fit(frame: Bounds | undefined, elements: StateElement[]) {
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
 		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
+		this.#fitting = true;
 		try {
 			this.map.fitBounds(
 				[
@@ -130,6 +156,8 @@ export class MapView {
 		} catch (error) {
 			// the elements must be shown anyway
 			console.error('Failed to show the area of the map', error);
+		} finally {
+			this.#fitting = false;
 		}
 	}
 

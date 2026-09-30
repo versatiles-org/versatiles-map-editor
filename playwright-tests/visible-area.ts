@@ -15,6 +15,18 @@ async function frameOnPage(page: Page, [west, south, east, north]: Bounds) {
 	return { left, top, right, bottom };
 }
 
+/** The pixel of a point once the map has come to rest, e.g. after the inertia of a drag. */
+async function settledPosition(page: Page, point: [number, number]): Promise<[number, number]> {
+	let last = await project(page, point);
+	for (let i = 0; i < 50; i++) {
+		await page.waitForTimeout(100);
+		const next = await project(page, point);
+		if (Math.abs(next[0] - last[0]) < 0.5 && Math.abs(next[1] - last[1]) < 0.5) return next;
+		last = next;
+	}
+	return last;
+}
+
 test('a shared map shows its frame completely, in the viewer and in the editor', async ({ page }) => {
 	// the viewer, in a window of another shape
 	await page.setViewportSize({ width: 500, height: 800 });
@@ -58,4 +70,30 @@ test('an empty shared map without a frame shows the whole world', async ({ page 
 		(window as unknown as { map: { getBounds(): { toArray(): number[][] } } }).map.getBounds().toArray()
 	);
 	expect(bounds[1][0] - bounds[0][0]).toBeGreaterThanOrEqual(300);
+});
+
+test('the viewer shows the frame again when its size changes, until the visitor moves the map', async ({ page }) => {
+	await page.setViewportSize({ width: 1000, height: 600 });
+	await page.goto('/view#' + encodeState({ frame, elements }));
+	await waitForMapIsReady(page);
+
+	// e.g. a rotated phone: the frame fits the new, narrower width, and fills it (without the padding
+	// of the map and of the frame, 10 px each on both sides)
+	await page.setViewportSize({ width: 400, height: 700 });
+	await expect.poll(async () => (await frameOnPage(page, frame)).right).toBeLessThanOrEqual(400 - 9);
+	const shown = await frameOnPage(page, frame);
+	expect(shown.left).toBeGreaterThanOrEqual(9);
+	expect(shown.right - shown.left).toBeGreaterThanOrEqual(355);
+
+	// once the visitor has moved the map, a new size keeps the view
+	await page.mouse.move(200, 350);
+	await page.mouse.down();
+	await page.mouse.move(100, 250, { steps: 5 });
+	await page.mouse.up();
+	const moved = await settledPosition(page, [13.4, 52.5]);
+	// the marker is left of the middle, where showing the frame again would put it
+	expect(moved[0]).toBeLessThan(150);
+	await page.setViewportSize({ width: 400, height: 600 });
+	const after = await settledPosition(page, [13.4, 52.5]);
+	expect(after[0]).toBeCloseTo(moved[0], -1);
 });
