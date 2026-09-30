@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/state/manager.js';
-	import { Dialog, Button } from '$lib/components/ui/index.js';
+	import { Dialog, Button, ChoiceGroup } from '$lib/components/ui/index.js';
 	import { digitsForResolution, resolutionOfDigits } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
 
@@ -10,6 +10,7 @@
 	let iframe: HTMLIFrameElement | undefined;
 	let btnLink: HTMLButtonElement | undefined = $state();
 	let btnEmbed: HTMLButtonElement | undefined = $state();
+	const uid = $props.id();
 	let previewAspectRatio: 'wide' | 'square' | 'tall' = $state('wide');
 
 	// the shared map opens in the read-only viewer, next to the editor
@@ -98,12 +99,15 @@
 		}, 2000);
 	}
 
-	function selectPreview(event: Event) {
-		const target = event.target as HTMLInputElement;
-		if (target.checked) {
-			previewAspectRatio = target.value as 'wide' | 'square' | 'tall';
-			setTimeout(() => iframe?.contentWindow?.location.reload(), 0);
-		}
+	const RATIOS: { value: 'wide' | 'square' | 'tall'; label: string }[] = [
+		{ value: 'wide', label: 'Horizontal' },
+		{ value: 'square', label: 'Square' },
+		{ value: 'tall', label: 'Vertical' }
+	];
+
+	function selectPreview(ratio: 'wide' | 'square' | 'tall') {
+		previewAspectRatio = ratio;
+		setTimeout(() => iframe?.contentWindow?.location.reload(), 0);
 	}
 </script>
 
@@ -169,17 +173,16 @@
 		</div>
 		<div class="bottom">
 			<Button onclick={() => update(0)}>Reload</Button>
-			<fieldset class="aspect-ratio">
-				<legend>Aspect ratio of the preview</legend>
-				<div>
-					<input type="radio" id="preview-wide" name="preview-ratio" value="wide" onclick={selectPreview} checked />
-					<label for="preview-wide">horizontal</label>
-					<input type="radio" id="preview-square" name="preview-ratio" value="square" onclick={selectPreview} />
-					<label for="preview-square">square</label>
-					<input type="radio" id="preview-tall" name="preview-ratio" value="tall" onclick={selectPreview} />
-					<label for="preview-tall">vertical</label>
-				</div>
-			</fieldset>
+			<div class="aspect-ratio">
+				<span class="caption" id="{uid}-ratio">Aspect ratio of the preview</span>
+				<ChoiceGroup
+					labelledby="{uid}-ratio"
+					size="md"
+					value={previewAspectRatio}
+					onchange={selectPreview}
+					options={RATIOS}
+				/>
+			</div>
 		</div>
 	</div>
 </Dialog>
@@ -369,69 +372,19 @@
 		font-size: 0.8em;
 	}
 
-	/* the aspect ratio of the preview, as a row of buttons */
-	fieldset.aspect-ratio {
+	/* the aspect ratio of the preview, with its caption above */
+	.aspect-ratio {
 		position: relative;
-		display: inline-block;
-		padding: 0;
-		border: none;
-		font-size: 0.8rem;
 
-		legend {
+		.caption {
 			position: absolute;
-			top: -1.3em;
+			top: -1.6em;
 			right: 0;
 			left: 0;
-			display: block;
-			padding-inline: 0;
+			color: var(--color-text-muted);
+			font-size: var(--font-size-sm);
 			text-align: center;
-		}
-
-		& > div {
-			display: inline-flex;
-			overflow: hidden;
-			padding: 0;
-			border: none;
-			border-radius: var(--border-radius);
-
-			/* the options that are not selected, in the colors of a light button */
-			& > label {
-				position: relative;
-				display: inline-block;
-				margin: 0;
-				padding: 0.6em 1.2em;
-				border: none;
-				border-left: 0.5px solid color-mix(in srgb, var(--color-blue) 30%, transparent);
-				background-color: color-mix(in srgb, var(--color-blue) 15%, var(--color-bg));
-				color: var(--color-blue-text);
-				font-weight: 600;
-				cursor: pointer;
-				transition: background-color 0.1s ease-in-out;
-
-				&:first-of-type {
-					border-left: none;
-				}
-			}
-
-			/* hidden visually, but reachable by keyboard and screen readers (unlike display: none) */
-			input[type='radio'] {
-				position: absolute;
-				width: 1px;
-				height: 1px;
-				margin: 0;
-				opacity: 0;
-			}
-
-			input:focus-visible + label {
-				outline: 2px solid var(--color-accent-line);
-				outline-offset: -4px;
-			}
-
-			input:checked + label,
-			label:hover {
-				background-color: var(--color-blue);
-				color: var(--color-on-blue);
-			}
+			white-space: nowrap;
 		}
 	}
 </style>

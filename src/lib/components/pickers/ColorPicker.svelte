@@ -392,12 +392,17 @@
 			height: auto;
 			aspect-ratio: 1;
 			padding: 0;
+			border: none;
+			border-radius: var(--radius-sm);
+			box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
 			cursor: pointer;
 		}
 
+		/* the chosen color: a ring in the accent inside, like a chosen picture (the focus ring is outside) */
 		.swatch.active {
-			outline: 2px solid var(--color-accent-line);
-			outline-offset: 1px;
+			box-shadow:
+				inset 0 0 0 2px var(--color-accent-line),
+				inset 0 0 0 4px var(--color-bg);
 		}
 	}
 </style>

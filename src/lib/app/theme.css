@@ -25,8 +25,8 @@
 	--color-on-accent: #fff;
 	/* thin lines: the focus ring (as on versatiles.org) and the ring of chosen pictures */
 	--color-accent-line: #9d35ff;
-	/* purple text, e.g. of links */
-	--color-accent-text: #810098;
+	/* chosen pictures, and selected rows of lists */
+	--color-accent-tint: color-mix(in srgb, #9d35ff 13%, transparent);
 
 	/* bars, menus, popups, dialogs */
 	--color-bg: #fff;
@@ -67,7 +67,9 @@
 	--space-1: 4px;
 	--space-2: 8px;
 	--space-3: 12px;
-	/* the size of controls and their text */
+	/* the size of small texts, e.g. in cells, and of controls and their text */
+	--font-size-xs: 11px;
+	--font-size-sm: 12px;
 	--font-size-md: 13px;
 
 	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
@@ -77,7 +79,6 @@
 	/* The names before the design system, until all components use the new ones */
 	--color-blue: var(--color-accent);
 	--color-on-blue: var(--color-on-accent);
-	--color-blue-text: var(--color-accent-text);
 	--color-green: var(--color-success);
 	--shadow: var(--shadow-lg);
 	--btn-gap: 5px;
@@ -111,7 +112,7 @@
 		color-scheme: dark;
 		/* the dark purple of the logo; the bright one is too strong on the dark background */
 		--color-accent: #6b0075;
-		--color-accent-text: #c28bff;
+		--color-accent-tint: color-mix(in srgb, #9d35ff 24%, transparent);
 		/* the background of versatiles.org */
 		--color-bg: #1b1b1f;
 		/* the cards of versatiles.org */
