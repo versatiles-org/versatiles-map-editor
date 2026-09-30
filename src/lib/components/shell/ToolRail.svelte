@@ -86,7 +86,9 @@
 		height: 100%;
 		padding: 7px 0;
 		background: var(--color-bg);
-		border-right: 1px solid var(--color-border);
+		/* a line instead of a border, which would take a pixel of the width: the tools stay
+		   centered on whole pixels, which all browsers draw alike */
+		box-shadow: inset -1px 0 var(--color-border);
 	}
 
 	hr {

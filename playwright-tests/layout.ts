@@ -289,3 +289,46 @@ for (const viewport of [
 		});
 	});
 }
+
+// An icon between two pixels is smoothed by each browser in its own way, e.g. a pixel higher or
+// blurred: on whole pixels, all browsers draw it alike. Icons, not pictures, e.g. of patterns.
+test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, async ({ page }) => {
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	// the drawer, and the selection bar and the inspector of an element
+	await page.keyboard.press('e');
+	const drawer = page.getByRole('complementary', { name: /^Elements/ });
+	await drawer.getByRole('option').first().click();
+	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+
+	const between = await page.evaluate(() =>
+		[...document.querySelectorAll('svg.icon, button svg')]
+			.map((svg) => {
+				const box = svg.getBoundingClientRect();
+				const owner = svg.closest('[aria-label], button, [role=option], a');
+				const name = owner?.getAttribute('aria-label') ?? owner?.textContent?.trim() ?? '';
+				return { name, x: box.x, y: box.y, width: box.width };
+			})
+			.filter(({ x, y, width }) => width > 0 && (x % 1 !== 0 || y % 1 !== 0))
+	);
+	// except after a text, whose width differs by browser: undo and redo after the name of the
+	// editor, and the icon of "Share" before its text
+	expect(between.filter(({ name }) => !['Undo', 'Redo', 'Share'].includes(name))).toStrictEqual([]);
+
+	// and centered in their 24×24 grid, so they are centered in their buttons, e.g. the cursor of
+	// "Select": at most 1.25 units off (1px of an icon of 20px), for slanted shapes like the brush
+	const offCenter = await page.evaluate(() =>
+		[...document.querySelectorAll<SVGSVGElement>('svg.icon')]
+			// those that are shown, e.g. not in a closed menu
+			.filter((svg) => svg.getBBox().width > 0)
+			.map((svg) => {
+				const box = svg.getBBox();
+				const owner = svg.closest('[aria-label], button, [role=option], a');
+				const name = owner?.getAttribute('aria-label') ?? owner?.textContent?.trim() ?? '';
+				const off = [box.x + box.width / 2 - 12, box.y + box.height / 2 - 12];
+				return { name, off: off.map((v) => Math.round(v * 100) / 100) };
+			})
+			.filter(({ off }) => off.some((v) => Math.abs(v) > 1.25))
+	);
+	expect(offCenter).toStrictEqual([]);
+});

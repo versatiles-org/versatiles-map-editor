@@ -46,10 +46,11 @@
 		box-sizing: border-box;
 		height: 100%;
 		padding: 0 8px;
-		background: var(--color-bg);
-		/* the line of versatiles.org */
-		border-bottom: 1px solid transparent;
-		border-image: var(--brand-gradient) 1;
+		/* the line of versatiles.org, as a background instead of a border, which would take a pixel
+		   of the height: the buttons stay centered on whole pixels, which all browsers draw alike */
+		background:
+			var(--brand-gradient) bottom / 100% 1px no-repeat,
+			var(--color-bg);
 		color: var(--color-text);
 	}
 

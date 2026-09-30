@@ -4,11 +4,14 @@
 	 * vertical center, as CSS; `right` is the width of the sidebar, whose edge it is on.
 	 */
 	let { open = $bindable(), top, right }: { open: boolean; top: string; right: number } = $props();
+	const HEIGHT = 48;
 </script>
 
+<!-- its top on a whole pixel, which all browsers draw alike -->
 <button
 	class="sidebar-toggle"
-	style:top
+	style:top="round(down, {top} - {HEIGHT / 2}px, 1px)"
+	style:height="{HEIGHT}px"
 	style:right="{right}px"
 	aria-controls="sidebar"
 	aria-expanded={open}
@@ -16,7 +19,8 @@
 	title={open ? 'Hide sidebar' : 'Show sidebar'}
 	onclick={() => (open = !open)}
 >
-	<svg viewBox="0 0 7 12" aria-hidden="true" class:open>
+	<!-- 8px wide, an even width like the tab's, so the arrow is centered on whole pixels -->
+	<svg viewBox="-0.5 0 8 12" aria-hidden="true" class:open>
 		<path d="M6,0L0,6L6,12L7,11,L2,6L7,1z" />
 	</svg>
 </button>
@@ -25,11 +29,11 @@
 	/* a tab at the edge of the sidebar, which hides and shows it */
 	.sidebar-toggle {
 		position: absolute;
-		top: 50%;
-		translate: 0 -50%;
 		z-index: var(--z-floating);
+		/* the arrow centered as a box, not on the baseline of the text, which differs by browser */
+		display: grid;
+		place-items: center;
 		width: 20px;
-		height: 48px;
 		padding: 0;
 		border: none;
 		border-radius: var(--radius-md) 0 0 var(--radius-md);
@@ -45,7 +49,7 @@
 		}
 
 		svg {
-			width: 7px;
+			width: 8px;
 			height: 12px;
 			fill: currentcolor;
 

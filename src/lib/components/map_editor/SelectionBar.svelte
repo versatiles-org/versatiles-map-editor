@@ -50,9 +50,10 @@
 		let y = y0 - h - GAP - (elements.some((e) => e.getStyleLayers().symbol) ? 24 : 0);
 		if (y < top + GAP) y = y1 + GAP;
 		const x = (x0 + x1) / 2 - w / 2;
+		// on whole pixels, so all browsers draw its icons alike
 		position = {
-			x: Math.max(left + GAP, Math.min(width - right - w - GAP, x)),
-			y: Math.max(top + GAP, Math.min(height - bottom - h - GAP, y))
+			x: Math.round(Math.max(left + GAP, Math.min(width - right - w - GAP, x))),
+			y: Math.round(Math.max(top + GAP, Math.min(height - bottom - h - GAP, y)))
 		};
 	}
 
