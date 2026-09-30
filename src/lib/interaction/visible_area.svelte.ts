@@ -8,6 +8,8 @@ const MOUSE_TOLERANCE = 8;
 const TOUCH_TOLERANCE = 16;
 /** The smallest width and height of the frame, in pixels. */
 const MIN_SIZE = 20;
+/** The smallest width and height of the bounds of the elements, in pixels, e.g. around a single marker. */
+const MIN_BOUNDS = 40;
 /** The northernmost latitude of the Web Mercator projection. */
 const MAX_LATITUDE = 85.051129;
 
@@ -55,11 +57,39 @@ export class VisibleAreaMode {
 			const handle = this.#handleAt(e.point, MOUSE_TOLERANCE);
 			doc.cursor.setResize(handle && CURSORS[handle]);
 		});
+		// the bounds of the elements have a size in pixels
+		map.on('zoom', () => {
+			if (this.active && !doc.frame) this.render();
+		});
 	}
 
 	/** The area whose handles are shown: the frame, else the bounds of the elements. */
 	get #area(): Bounds | undefined {
-		return this.#doc.frame ?? this.#doc.getBounds();
+		return this.#doc.frame ?? this.#elementBounds();
+	}
+
+	/**
+	 * The bounds of the elements, grown around their center to at least `MIN_BOUNDS` pixels wide
+	 * and high, so e.g. the handles around a single marker are apart.
+	 */
+	#elementBounds(): Bounds | undefined {
+		const bounds = this.#doc.getBounds();
+		if (!bounds) return undefined;
+		const map = this.#doc.view.map;
+		const southWest = map.project([bounds[0], bounds[1]]);
+		const northEast = map.project([bounds[2], bounds[3]]);
+		const growX = Math.max(0, MIN_BOUNDS - (northEast.x - southWest.x)) / 2;
+		const growY = Math.max(0, MIN_BOUNDS - (southWest.y - northEast.y)) / 2;
+		let [west, south, east, north] = bounds;
+		if (growX > 0) {
+			west = map.unproject([southWest.x - growX, southWest.y]).lng;
+			east = map.unproject([northEast.x + growX, northEast.y]).lng;
+		}
+		if (growY > 0) {
+			south = map.unproject([southWest.x, southWest.y + growY]).lat;
+			north = map.unproject([northEast.x, northEast.y - growY]).lat;
+		}
+		return withinMap([west, south, east, north]);
 	}
 
 	/** Start editing the visible area. `onDone` is called when it ends with Done or Escape. */
@@ -110,7 +140,7 @@ export class VisibleAreaMode {
 	public render() {
 		if (!this.active) return;
 		const doc = this.#doc;
-		doc.view.showVisibleArea(doc.frame, doc.frame ? undefined : doc.getBounds());
+		doc.view.showVisibleArea(doc.frame, doc.frame ? undefined : this.#elementBounds());
 	}
 
 	/** The handle at a pixel, if there is one within `tolerance` pixels. */
@@ -177,6 +207,11 @@ export class VisibleAreaMode {
 		if (handle.includes('s')) {
 			south = map.unproject([topLeft.x, Math.max(point.y, topLeft.y + MIN_SIZE)]).lat;
 		}
-		return [Math.max(-180, west), Math.max(-MAX_LATITUDE, south), Math.min(180, east), Math.min(MAX_LATITUDE, north)];
+		return withinMap([west, south, east, north]);
 	}
+}
+
+/** The area within the latitudes of the map, and not across the date line. */
+function withinMap([west, south, east, north]: Bounds): Bounds {
+	return [Math.max(-180, west), Math.max(-MAX_LATITUDE, south), Math.min(180, east), Math.min(MAX_LATITUDE, north)];
 }

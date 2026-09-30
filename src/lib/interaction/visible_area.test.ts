@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapDocumentInteractive } from '../map_document_interactive.js';
 import { LngLat, MockMap, Point, type MaplibreMap } from '../__mocks__/map.js';
 import { handlePosition, type Handle } from '../rendering/index.js';
+import type { Bounds } from '@versatiles/map-state';
 import { addElement } from '../__mocks__/elements.js';
 
 describe('VisibleAreaMode', () => {
@@ -104,8 +105,15 @@ describe('VisibleAreaMode', () => {
 			preventDefault: vi.fn()
 		});
 		const pixel = (lng: number, lat: number): [number, number] => [lng, -lat];
+		/** The area that is drawn: the frame, else the bounds of the elements. */
+		function area(): Bounds {
+			if (doc.frame) return doc.frame;
+			const features = setData.mock.lastCall?.[0].features as GeoJSON.Feature<GeoJSON.LineString>[];
+			const ring = features.find((f) => f.properties?.kind === 'bounds')!.geometry.coordinates;
+			return [ring[0][0], ring[0][1], ring[2][0], ring[2][1]];
+		}
 		/** The pixel of a handle of the current area. */
-		const handle = (name: Handle): [number, number] => pixel(...handlePosition(doc.frame ?? doc.getBounds()!, name));
+		const handle = (name: Handle): [number, number] => pixel(...handlePosition(area(), name));
 		/** Drag with the mouse from one pixel to another. */
 		function drag([x0, y0]: [number, number], [x1, y1]: [number, number]) {
 			map.emit('mousedown', pointer(x0, y0));
@@ -156,13 +164,37 @@ describe('VisibleAreaMode', () => {
 			doc.addElement({
 				type: 'line',
 				points: [
-					[-10, -10],
-					[10, 10]
+					[-30, -30],
+					[30, 30]
 				]
 			});
 			doc.visibleArea.render();
-			drag(handle('se'), pixel(20, -30));
-			expect(doc.frame).toStrictEqual([-10, -30, 20, 10]);
+			drag(handle('se'), pixel(40, -50));
+			expect(doc.frame).toStrictEqual([-30, -50, 40, 30]);
+		});
+
+		it('are apart around a single marker, at every zoom', () => {
+			doc.frame = undefined;
+			doc.addElement({ type: 'marker', point: [10, 30] });
+			doc.visibleArea.render();
+			// 40 pixels wide and high, around the marker
+			expect(handle('nw')).toStrictEqual([-10, -50]);
+			expect(handle('se')).toStrictEqual([30, -10]);
+			drag(handle('e'), pixel(50, 30));
+			expect(doc.frame).toStrictEqual([-10, 10, 50, 50]);
+
+			// drawn again when the map zooms: 1 pixel per 2 degrees
+			doc.frame = undefined;
+			map.project.mockImplementation((lngLat) => {
+				const { lng, lat } = LngLat.convert(lngLat);
+				return new Point(lng / 2, -lat / 2);
+			});
+			map.unproject.mockImplementation((point) => {
+				const { x, y } = Point.convert(point);
+				return new LngLat(x * 2, -y * 2);
+			});
+			map.emit('zoom');
+			expect(area()).toStrictEqual([-30, -10, 50, 70]);
 		});
 
 		it('leave the map to be moved elsewhere', () => {
