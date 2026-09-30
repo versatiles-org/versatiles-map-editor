@@ -1,5 +1,5 @@
 import { expect, test } from './lib/test.js';
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	drawElement,
@@ -137,6 +137,31 @@ test('the symbol picker', async ({ page }) => {
 		await page.getByRole('button', { name: 'Symbol Café' }).click();
 		await expect(filter).toHaveValue('');
 		await expect(items.first()).toHaveText('No symbol');
+	});
+
+	await test.step('the symbols have the color of the text, with a halo in the color of the background', async () => {
+		/** The colors of the opaque pixels of a canvas, as "r,g,b". */
+		const colors = (canvas: Locator) =>
+			canvas.evaluate((c: HTMLCanvasElement) => {
+				const { data } = c.getContext('2d')!.getImageData(0, 0, c.width, c.height);
+				const found = new Set<string>();
+				for (let i = 0; i < data.length; i += 4) if (data[i + 3] === 255) found.add(data.slice(i, i + 3).join(','));
+				return [...found];
+			});
+		await dialog.getByRole('searchbox', { name: 'Filter symbols' }).fill('anchor');
+		const symbol = dialog.getByRole('button', { name: 'Anchor', exact: true }).locator('canvas');
+		const button = page.getByRole('button', { name: 'Symbol Café' }).locator('canvas');
+
+		// black on white
+		await expect.poll(() => colors(symbol)).toEqual(expect.arrayContaining(['0,0,0', '255,255,255']));
+		expect(await colors(button)).toContain('0,0,0');
+
+		// white on the dark background in dark mode, drawn again while the picker is open
+		await page.emulateMedia({ colorScheme: 'dark' });
+		await expect.poll(() => colors(symbol)).toEqual(expect.arrayContaining(['255,255,255', '27,27,31']));
+		expect(await colors(symbol)).not.toContain('0,0,0');
+		await expect.poll(() => colors(button)).toContain('255,255,255');
+		expect(await colors(button)).not.toContain('0,0,0');
 	});
 });
 

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
+	import { onMount } from 'svelte';
 	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/symbols_catalog.js';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
+	import { themeColor } from '$lib/rendering/theme_color.js';
 	import { Dialog } from '$lib/components/ui/index.js';
 
 	let dialog: Dialog | undefined;
@@ -29,9 +31,24 @@
 
 	const symbolLibrary = getSymbolLibrary();
 
-	const drawIcon: Action<HTMLCanvasElement, string> = (canvas, name) => symbolLibrary.drawSymbol(canvas, name);
+	// The symbols in the color of the text, and in the list with a halo in the color of the
+	// background: black on white, or white on black in dark mode. Drawn again when that changes.
+	let theme = $state(0);
+	onMount(() => {
+		const dark = matchMedia('(prefers-color-scheme: dark)');
+		const redraw = () => theme++;
+		dark.addEventListener('change', redraw);
+		return () => dark.removeEventListener('change', redraw);
+	});
+	const textColor = (canvas: HTMLCanvasElement) => themeColor(canvas, '--color-text', '#000');
+	const drawIcon: Action<HTMLCanvasElement, string> = (canvas, name) =>
+		symbolLibrary.drawSymbol(canvas, name, { color: textColor(canvas) });
 	const drawIconHalo: Action<HTMLCanvasElement, string> = (canvas, name) =>
-		symbolLibrary.drawSymbol(canvas, name, { halo: 2 });
+		symbolLibrary.drawSymbol(canvas, name, {
+			color: textColor(canvas),
+			outline: themeColor(canvas, '--color-bg', '#fff'),
+			outlineWidth: 2
+		});
 
 	const info = $derived(symbol ? getSymbol(symbol) : undefined);
 
@@ -55,7 +72,7 @@
 </script>
 
 <button {id} aria-labelledby={id ? `${id}-label ${id}` : undefined} class="picker" onclick={() => dialog?.open()}>
-	{#key symbol}
+	{#key `${symbol} ${theme}`}
 		{#if info}<canvas
 				width={buttonIconSize * retina}
 				height={buttonIconSize * retina}
@@ -96,12 +113,14 @@
 			{#if showNone}
 				<button class="item" onclick={() => selectSymbol('')}>{noneLabel}</button>
 			{/if}
-			{#each symbols as item (item.name)}
-				<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
-					><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
-					></canvas><br />{item.title}</button
-				>
-			{/each}
+			{#key theme}
+				{#each symbols as item (item.name)}
+					<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
+						><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
+						></canvas><br />{item.title}</button
+					>
+				{/each}
+			{/key}
 		</div>
 		{#if symbols.length === 0 && !showNone}
 			<p class="empty" role="status">No symbol matches “{filter.trim()}”.</p>

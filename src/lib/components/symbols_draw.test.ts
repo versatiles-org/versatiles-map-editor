@@ -219,16 +219,19 @@ describe('drawImage', () => {
 		expect(row).toStrictEqual([...row].reverse());
 	});
 
-	it('draws a halo: the symbol in gray, with a white rim around it', () => {
-		const data = drawImage(image, true, { width: 30, height: 30 }, { halo: 3 });
-		// inside: dark
-		expect(pixel(data, 30, 15, 15)).toStrictEqual([0, 0, 0, 255]);
-		// 2 pixels outside the edge of the shape (at 7.5 and 19.5): white, and still covered by the halo
-		const rim = pixel(data, 30, 21, 15);
-		expect(rim.slice(0, 3)).toStrictEqual([255, 255, 255]);
-		expect(rim[3]).toBeGreaterThan(0);
-		// far outside: nothing
-		expect(pixel(data, 30, 29, 15)[3]).toBe(0);
+	it('draws a halo in the color of the background: black on white, or white on black', () => {
+		for (const [color, outline, inside, rim] of [
+			['#000', '#fff', 0, 255],
+			['#fff', '#000', 255, 0]
+		] as const) {
+			const data = drawImage(image, true, { width: 30, height: 30 }, { color, outline, outlineWidth: 3 });
+			// inside: the symbol
+			expect(pixel(data, 30, 15, 15)).toStrictEqual([inside, inside, inside, 255]);
+			// 2 pixels outside the edge of the shape (at 7.5 and 19.5): still covered by the halo
+			expect(pixel(data, 30, 21, 15)).toStrictEqual([rim, rim, rim, 255]);
+			// far outside: nothing
+			expect(pixel(data, 30, 29, 15)[3]).toBe(0);
+		}
 	});
 
 	it('draws no outline in a color that is invalid', () => {

@@ -6,9 +6,10 @@ import { parseColor } from '@versatiles/map-state';
 export interface DrawOptions {
 	/** The color of an SDF symbol, black by default. */
 	color?: string;
-	/** A white halo around an SDF symbol, in canvas pixels, with the symbol in gray. */
-	halo?: number;
-	/** An outline around an SDF symbol in this color, `outlineWidth` canvas pixels wide. */
+	/**
+	 * An outline around an SDF symbol in this color, `outlineWidth` canvas pixels wide, e.g. a halo
+	 * in the color of the background behind it.
+	 */
 	outline?: string;
 	outlineWidth?: number;
 	/** Scale the shape to fill the canvas, instead of the whole image with its empty border. */
@@ -28,7 +29,7 @@ export class SymbolLibrary {
 	}
 
 	/**
-	 * Draw the symbol into the canvas: black, or in `color`, or with a white `halo` or an `outline`.
+	 * Draw the symbol into the canvas: black, or in `color`, and with an `outline`.
 	 * If the sprite is not loaded yet, it is drawn once it is, while the canvas is on the page.
 	 */
 	drawSymbol(canvas: HTMLCanvasElement, name: string, options: DrawOptions = {}): void {
@@ -90,11 +91,10 @@ export function drawImage(
 	{ width, height }: { width: number; height: number },
 	options: DrawOptions
 ): Uint8ClampedArray<ArrayBuffer> {
-	const halo = options.halo ?? 0;
 	const outlineWidth = options.outline && parseColor(options.outline) ? (options.outlineWidth ?? 1) : 0;
 	const shape = options.crop ? shapeBox(image, sdf) : undefined;
 	// the outline and the antialiasing, in canvas pixels, around the scaled shape
-	const { scale, x0, y0 } = placement(image, shape, width, height, outlineWidth + halo + 0.5);
+	const { scale, x0, y0 } = placement(image, shape, width, height, outlineWidth + 0.5);
 	const paint = sdfPainter(options);
 
 	const data = new Uint8ClampedArray(width * height * 4);
@@ -140,22 +140,14 @@ function placement(
 	};
 }
 
-/** How an SDF image is painted: gray with a white halo, in its color with an outline, or only in its color. */
+/** How an SDF image is painted: in its color, with an outline or without. */
 function sdfPainter(options: DrawOptions): Painter {
-	const halo = options.halo ?? 0;
 	const rgb = (options.color && parseColor(options.color)) || { r: 0, g: 0, b: 0 };
 	const outline = options.outline ? parseColor(options.outline) : undefined;
 	const outlineWidth = outline ? (options.outlineWidth ?? 1) : 0;
 	// covered pixels, antialiased over one pixel around the edge
 	const fill = (distance: number) => clamp(distance + 0.5);
 
-	if (halo) {
-		return (data, i, distance) => {
-			const gray = 255 * clamp(0.5 - distance);
-			data[i] = data[i + 1] = data[i + 2] = gray;
-			data[i + 3] = 255 * clamp(distance + halo + 0.5);
-		};
-	}
 	if (outline) {
 		// the symbol over its outline
 		return (data, i, distance) => {
