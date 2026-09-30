@@ -16,7 +16,7 @@
 
 <style>
 	.inspector-section {
-		padding: var(--gap) 0;
+		padding: var(--space-3) 0;
 		border-bottom: 1px solid var(--color-border);
 	}
 
@@ -24,13 +24,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--gap);
+		gap: var(--space-2);
 	}
 
 	h3 {
 		margin: 0;
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-sm);
 		font-weight: 600;
 	}
 </style>

@@ -254,7 +254,7 @@
 
 	/* the button of the component Button */
 	.search :global(.add-marker) {
-		margin-top: var(--btn-gap);
+		margin-top: var(--space-2);
 	}
 	.sr-only {
 		position: absolute;

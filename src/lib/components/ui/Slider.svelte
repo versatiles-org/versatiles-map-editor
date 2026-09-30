@@ -82,17 +82,17 @@
 
 		&::-webkit-slider-runnable-track {
 			height: 4px;
-			border-radius: 2px;
+			border-radius: var(--radius-sm);
 			background: linear-gradient(to right, var(--color-accent) var(--fill), var(--color-border-field) var(--fill));
 		}
 		&::-moz-range-track {
 			height: 4px;
-			border-radius: 2px;
+			border-radius: var(--radius-sm);
 			background: var(--color-border-field);
 		}
 		&::-moz-range-progress {
 			height: 4px;
-			border-radius: 2px;
+			border-radius: var(--radius-sm);
 			background: var(--color-accent);
 		}
 		&::-webkit-slider-thumb {
@@ -101,6 +101,7 @@
 			margin-top: -5px;
 			border: 1px solid var(--color-border-field);
 			border-radius: 50%;
+			/* stylelint-disable-next-line color-no-hex -- white in both modes, seen on the track and on the map */
 			background: #fff;
 			box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
 			appearance: none;
@@ -111,6 +112,7 @@
 			height: 14px;
 			border: 1px solid var(--color-border-field);
 			border-radius: 50%;
+			/* stylelint-disable-next-line color-no-hex -- white in both modes, seen on the track and on the map */
 			background: #fff;
 			box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
 		}
@@ -143,6 +145,6 @@
 		flex: none;
 		min-width: 1em;
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-sm);
 	}
 </style>

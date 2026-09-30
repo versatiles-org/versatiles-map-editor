@@ -107,7 +107,7 @@
 
 <style>
 	.elements {
-		margin: 0 0 var(--btn-gap);
+		margin: 0 0 var(--space-1);
 		padding: 0;
 		list-style: none;
 

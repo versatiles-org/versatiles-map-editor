@@ -72,12 +72,12 @@
 		border-left: 1px solid var(--color-border);
 		box-sizing: border-box;
 		color: var(--color-text);
-		font-size: 0.875em;
+		font-size: var(--font-size-md);
 		height: 100%;
 		overflow-y: auto;
 		/* room for a scrollbar, so the content does not move when it appears */
 		scrollbar-gutter: stable;
-		padding: var(--gap);
+		padding: var(--space-3);
 		position: absolute;
 		right: 0;
 		top: 0;

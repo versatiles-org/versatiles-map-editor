@@ -49,7 +49,7 @@
 		backdrop-filter: blur(10px);
 		border-right: 1px solid var(--color-border);
 		color: var(--color-text);
-		font-size: 0.875em;
+		font-size: var(--font-size-md);
 		/* e.g. Shift+click to select several elements must not select text */
 		-webkit-user-select: none;
 		user-select: none;
@@ -59,14 +59,14 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 6px 6px 6px var(--gap);
+		padding: 6px 6px 6px var(--space-3);
 		border-bottom: 1px solid var(--color-border);
 	}
 
 	h2 {
 		flex: 1;
 		margin: 0;
-		font-size: 1em;
+		font-size: var(--font-size-lg);
 		font-weight: 600;
 	}
 
@@ -79,7 +79,7 @@
 		flex: 1;
 		min-height: 0;
 		overflow-y: auto;
-		padding: var(--gap);
+		padding: var(--space-3);
 	}
 
 	hr {

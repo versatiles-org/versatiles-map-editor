@@ -126,7 +126,7 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding-bottom: var(--gap);
+		padding-bottom: var(--space-3);
 		border-bottom: 1px solid var(--color-border);
 	}
 
@@ -134,9 +134,9 @@
 		display: grid;
 		flex: none;
 		place-items: center;
-		width: 28px;
-		height: 28px;
-		border-radius: 7px;
+		width: var(--size-sm);
+		height: var(--size-sm);
+		border-radius: var(--radius-md);
 		background: var(--color-hover);
 	}
 
@@ -149,14 +149,14 @@
 
 	h2 {
 		margin: 0;
-		font-size: 1em;
+		font-size: var(--font-size-lg);
 		font-weight: 600;
 	}
 
 	.subtitle {
 		overflow: hidden;
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-sm);
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
@@ -170,6 +170,6 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		margin-top: var(--gap);
+		margin-top: var(--space-3);
 	}
 </style>

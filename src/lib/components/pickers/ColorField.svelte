@@ -79,10 +79,11 @@
 />
 
 <style>
+	/* stylelint-disable color-no-hex -- the colors to choose from: black, white and the hues */
 	.field {
 		position: relative;
 		height: 120px;
-		border-radius: 3px;
+		border-radius: var(--radius-sm);
 		background-image: linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent);
 		cursor: crosshair;
 		/* dragging must not scroll the sidebar or zoom the page */
@@ -110,7 +111,7 @@
 		width: 100%;
 		height: 12px;
 		margin: 0;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
 	}
 

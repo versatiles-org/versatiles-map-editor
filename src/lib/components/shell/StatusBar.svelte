@@ -104,7 +104,7 @@
 		background: var(--color-bg);
 		border-top: 1px solid var(--color-border);
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-xs);
 	}
 
 	.hint {

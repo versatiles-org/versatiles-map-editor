@@ -93,6 +93,7 @@
 {/if}
 
 <style>
+	/* stylelint-disable declaration-property-value-allowed-list, color-no-hex -- the legend is part of the map, which keeps its colors and sizes */
 	.legend {
 		--margin: 10px;
 		position: absolute;

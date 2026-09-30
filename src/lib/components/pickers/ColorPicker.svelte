@@ -314,10 +314,10 @@
 		max-height: calc(100vh - 16px);
 		overflow-y: auto;
 		margin: 0;
-		padding: var(--gap);
+		padding: var(--space-3);
 		display: flex;
 		flex-direction: column;
-		gap: var(--gap);
+		gap: var(--space-3);
 		background: var(--color-bg);
 		color: var(--color-text);
 		border: 1px solid var(--color-border);
@@ -331,8 +331,8 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		margin: calc(-1 * var(--gap)) calc(-1 * var(--gap)) 0;
-		padding: 6px 6px 6px var(--gap);
+		margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-3)) 0;
+		padding: 6px 6px 6px var(--space-3);
 		border-bottom: 1px solid var(--color-border);
 		cursor: move;
 		/* dragging must not scroll or zoom the page */
@@ -348,8 +348,8 @@
 	.values {
 		display: grid;
 		grid-template-columns: 2fr 1fr 1fr 1fr;
-		gap: 2px var(--btn-gap);
-		font-size: 0.9em;
+		gap: 2px var(--space-1);
+		font-size: var(--font-size-sm);
 
 		input {
 			width: 100%;
@@ -374,15 +374,15 @@
 	}
 
 	.group-label {
-		font-size: 0.9em;
+		font-size: var(--font-size-sm);
 		opacity: 0.7;
-		margin-bottom: calc(-0.5 * var(--gap));
+		margin-bottom: calc(-0.5 * var(--space-3));
 	}
 
 	.palette {
 		display: grid;
 		grid-template-columns: repeat(8, 1fr);
-		gap: var(--btn-gap);
+		gap: var(--space-1);
 
 		.swatch {
 			width: 100%;

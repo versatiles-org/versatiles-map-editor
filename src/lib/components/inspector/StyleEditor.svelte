@@ -87,7 +87,7 @@
 		display: block;
 		width: 100%;
 		box-sizing: border-box;
-		margin: var(--gap) 0 0;
+		margin: var(--space-2) 0 0;
 		resize: vertical;
 		font: inherit;
 	}
@@ -100,7 +100,7 @@
 
 	.mixed {
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-sm);
 		font-style: italic;
 	}
 </style>

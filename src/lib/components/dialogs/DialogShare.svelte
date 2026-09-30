@@ -198,10 +198,10 @@
 			display: block;
 			width: 1.6em;
 			height: 1.6em;
-			border-radius: 1em;
-			background-color: var(--color-green);
-			color: var(--color-on-blue);
-			font-size: 1em;
+			border-radius: 50%;
+			background-color: var(--color-success);
+			color: var(--color-on-accent);
+			font-size: var(--font-size-md);
 			line-height: 1.6em;
 			text-align: center;
 			opacity: 0;
@@ -229,8 +229,8 @@
 			grid-column: 1 / -1;
 			grid-row: 1 / 1;
 			text-align: center;
-			font-size: 1.2em;
-			margin-bottom: 20px;
+			font-size: var(--font-size-lg);
+			margin-bottom: var(--space-5);
 		}
 
 		.left {
@@ -246,9 +246,8 @@
 				aspect-ratio: 16 / 9;
 				width: 100%;
 				height: auto;
-				border: 1px solid #000;
+				border: 1px solid var(--color-border);
 				box-sizing: border-box;
-				background: #fff;
 
 				@container preview (min-aspect-ratio: 16 / 9) {
 					width: auto;
@@ -292,12 +291,12 @@
 			.hint {
 				display: block;
 				width: 200px;
-				font-size: 0.8em;
+				font-size: var(--font-size-sm);
 				color: var(--color-text-muted);
 			}
 
 			textarea[readonly] {
-				font-size: 0.75rem;
+				font-size: var(--font-size-sm);
 				-webkit-user-select: all;
 				user-select: all;
 				color: var(--color-text-muted);
@@ -312,7 +311,7 @@
 			justify-content: center;
 			align-items: flex-end;
 			/* room for the caption above the aspect ratios, also when they wrap below "Reload" */
-			gap: 1.8em var(--btn-gap);
+			gap: 1.8em var(--space-2);
 			padding-top: 1.5rem;
 		}
 	}
@@ -324,7 +323,6 @@
 			grid-template-rows: auto;
 
 			.head {
-				font-size: 1em;
 				margin-bottom: 0;
 			}
 
@@ -369,7 +367,7 @@
 		width: 200px;
 		margin-top: 0.3em;
 		color: var(--color-error);
-		font-size: 0.8em;
+		font-size: var(--font-size-sm);
 	}
 
 	/* the aspect ratio of the preview, with its caption above */

@@ -142,7 +142,7 @@
 			overflow-wrap: anywhere;
 			cursor: pointer;
 			border: none;
-			font-size: 10px;
+			font-size: var(--font-size-xs);
 			background: none;
 			line-height: 1em;
 			text-align: center;

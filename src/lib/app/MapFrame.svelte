@@ -312,7 +312,7 @@
 			background-color: color-mix(in srgb, var(--color-bg) 50%, transparent) !important;
 			color: var(--color-text) !important;
 			opacity: 0.5;
-			font-size: 0.85em;
+			font-size: var(--font-size-xs);
 			line-height: normal !important;
 		}
 		:global(.maplibregl-ctrl-attrib a) {
@@ -337,7 +337,7 @@
 		z-index: var(--z-search);
 		display: flex;
 		flex-direction: column;
-		gap: var(--gap);
+		gap: var(--space-2);
 		/* the map can be dragged between them */
 		pointer-events: none;
 		& > * {
@@ -347,7 +347,7 @@
 
 	.hint {
 		align-self: center;
-		max-width: calc(100% - 2 * var(--gap));
+		max-width: calc(100% - 2 * var(--space-2));
 		padding: 6px var(--space-3);
 		border-radius: var(--radius-lg);
 		background: var(--color-glass);

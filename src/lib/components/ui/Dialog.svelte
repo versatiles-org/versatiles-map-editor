@@ -70,6 +70,7 @@
 		/* opened with showModal(), so it is in the top layer, over everything */
 		background-color: var(--color-bg);
 		color: var(--color-text);
+		font-size: var(--font-size-md);
 		box-shadow: var(--shadow-lg);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-lg);

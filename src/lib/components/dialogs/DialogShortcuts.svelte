@@ -92,20 +92,20 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 		align-items: start;
-		gap: var(--gap) 24px;
+		gap: var(--space-3) var(--space-5);
 		overflow-y: auto;
 	}
 
 	table {
 		width: 100%;
 		border-collapse: collapse;
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 	}
 
 	caption {
 		padding: 4px 0;
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--font-size-sm);
 		font-weight: 600;
 		text-align: left;
 	}

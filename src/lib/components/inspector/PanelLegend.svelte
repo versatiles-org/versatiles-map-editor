@@ -129,13 +129,13 @@
 
 <style>
 	.entry {
-		margin: var(--gap) 0;
-		padding: 0 var(--gap) var(--gap);
+		margin: var(--space-3) 0;
+		padding: 0 var(--space-3) var(--space-3);
 		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
-		border-radius: 4px;
+		border-radius: var(--radius-md);
 
 		legend {
-			font-size: 0.9em;
+			font-size: var(--font-size-sm);
 			opacity: 0.7;
 		}
 	}

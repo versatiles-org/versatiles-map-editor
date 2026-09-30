@@ -34,7 +34,7 @@
 		width: 1em;
 		height: 1em;
 		border: 2px solid var(--color-disabled-bg);
-		border-top-color: var(--color-blue);
+		border-top-color: var(--color-accent-line);
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}

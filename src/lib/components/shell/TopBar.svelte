@@ -53,7 +53,7 @@
 
 	h1 {
 		margin: 0 0 0 4px;
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		font-weight: 600;
 		white-space: nowrap;
 		overflow: hidden;

@@ -6,7 +6,9 @@
  * The colors come from the VersaTiles logo and versatiles.org: the purples #9d35ff, #810098 and
  * #6b0075, the greens #93a813 and #005034, and the dark grays of the website.
  *
- * The scales of the design, whose variables are added with the components that use them:
+ * Components take their font sizes, corners and colors from these variables, which stylelint
+ * checks (stylelint.config.js). The scales of the design (a variable exists once something uses
+ * it, since src/css_variables.test.ts rejects unused ones):
  * - font sizes 11, 12, 13, 15 and 17 px, weights 400 and 600
  * - heights of controls 24 (cells of grids), 28 (the sidebar), 32 (bars, menus, dialogs) and
  *   36 px (the tools)
@@ -73,23 +75,20 @@
 	--space-2: 8px;
 	--space-3: 12px;
 	--space-5: 24px;
-	/* the size of small texts, e.g. in cells, and of controls and their text */
+	/* the smallest texts, e.g. the status line, shortcuts and cells */
 	--font-size-xs: 11px;
+	/* labels, hints, section titles */
 	--font-size-sm: 12px;
+	/* controls, menus and the text of panels */
 	--font-size-md: 13px;
+	/* titles of panels */
+	--font-size-lg: 15px;
 	/* titles of dialogs */
 	--font-size-xl: 17px;
 
 	/* images in the colors of the theme: the arrow of lists, the mark of checkboxes */
 	--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
 	--checkmark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
-
-	/* The names before the design system, until all components use the new ones */
-	--color-blue: var(--color-accent);
-	--color-on-blue: var(--color-on-accent);
-	--color-green: var(--color-success);
-	--btn-gap: 5px;
-	--gap: 10px;
 
 	/* The stacking order of everything over the map, from the bottom up. Each overlay takes its
 	   level from here, so a new one cannot end up behind or in front of the wrong ones. */

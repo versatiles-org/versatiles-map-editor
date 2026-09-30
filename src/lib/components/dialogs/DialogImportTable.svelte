@@ -178,11 +178,11 @@
 	.import {
 		display: flex;
 		flex-direction: column;
-		gap: var(--gap);
+		gap: var(--space-3);
 		flex: 1;
 		min-height: 0;
 		overflow: auto;
-		font-size: 0.9em;
+		font-size: var(--font-size-sm);
 	}
 
 	textarea {

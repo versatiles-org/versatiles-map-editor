@@ -14,6 +14,17 @@ export default {
 			files: ['**/*.svelte'],
 			extends: ['stylelint-config-standard-scss', 'stylelint-config-html/svelte'],
 			rules: scssRules
+		},
+		// the design (src/lib/app/theme.css): font sizes, corners and colors come from its variables
+		{
+			files: ['src/lib/components/**/*.{svelte,css}', 'src/lib/app/*.svelte'],
+			rules: {
+				'declaration-property-value-allowed-list': {
+					'font-size': ['/^var\\(--font-size-/', 'inherit'],
+					'border-radius': ['/^(var\\(--radius-[a-z]+\\)|0|50%)( (var\\(--radius-[a-z]+\\)|0|50%))*$/']
+				},
+				'color-no-hex': true
+			}
 		}
 	],
 	rules: {

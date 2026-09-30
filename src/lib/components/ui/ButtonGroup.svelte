@@ -16,7 +16,7 @@
 	.button-group {
 		display: grid;
 		grid-template-columns: repeat(var(--columns), 1fr);
-		gap: var(--btn-gap);
+		gap: var(--space-2);
 		width: 100%;
 
 		/* the buttons of the component Button */
@@ -26,6 +26,6 @@
 	}
 
 	.spaced {
-		margin: var(--btn-gap) 0;
+		margin: var(--space-2) 0;
 	}
 </style>

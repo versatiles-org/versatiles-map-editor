@@ -194,7 +194,7 @@
 		max-height: 30vh;
 		table {
 			border-collapse: collapse;
-			font-size: 0.9em;
+			font-size: var(--font-size-sm);
 		}
 		th,
 		td {
@@ -211,11 +211,11 @@
 	.mapping {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: var(--gap);
+		gap: var(--space-3);
 		fieldset {
 			margin: 0;
 			border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
-			border-radius: 4px;
+			border-radius: var(--radius-sm);
 		}
 		fieldset > label {
 			display: block;
@@ -225,7 +225,7 @@
 	.categories {
 		margin: 0;
 		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
-		border-radius: 4px;
+		border-radius: var(--radius-sm);
 	}
 
 	.category {
@@ -234,8 +234,8 @@
 		grid-template-columns: minmax(8em, max-content) 16em 12em;
 		justify-content: start;
 		align-items: start;
-		gap: var(--btn-gap);
-		margin-bottom: var(--btn-gap);
+		gap: var(--space-1);
+		margin-bottom: var(--space-1);
 	}
 
 	.picker {
@@ -252,6 +252,6 @@
 
 	.buttons {
 		display: flex;
-		gap: var(--gap);
+		gap: var(--space-3);
 	}
 </style>
