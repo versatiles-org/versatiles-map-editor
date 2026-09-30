@@ -217,28 +217,38 @@
 		top: 100%;
 		left: 0;
 		right: 0;
-		margin: 2px 0 0;
-		padding: 0;
+		margin: var(--space-1) 0 0;
+		padding: var(--space-1);
 		list-style: none;
 		background: var(--color-bg);
-		border: 1px solid color-mix(in srgb, var(--color-text) 30%, transparent);
-		border-radius: 3px;
-		box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md);
+		box-shadow: var(--shadow-lg);
 
+		/* like the rows of the menu: hover the gray tint, the chosen result the accent tint */
 		li {
-			padding: 0.4em 0.6em;
+			display: flex;
+			align-items: center;
+			box-sizing: border-box;
+			min-height: var(--size-sm);
+			padding: 0 var(--space-2);
+			border-radius: var(--radius-sm);
 		}
 
 		li[role='option'] {
 			cursor: pointer;
+
+			&:hover {
+				background: var(--color-hover);
+			}
 		}
 
 		li.active {
-			background: color-mix(in srgb, var(--color-blue) 20%, transparent);
+			background: var(--color-accent-tint);
 		}
 
 		.status {
-			opacity: 0.6;
+			color: var(--color-text-muted);
 		}
 	}
 

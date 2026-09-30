@@ -85,19 +85,20 @@
 	hr {
 		margin: 6px 0;
 		border: none;
-		border-top: 1px solid var(--color-text);
-		opacity: 0.1;
+		border-top: 1px solid var(--color-border);
 	}
 
+	/* like the rows of the list of elements */
 	.row {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--space-2);
 		box-sizing: border-box;
 		width: 100%;
-		padding: 5px 8px;
+		min-height: var(--size-sm);
+		padding: 0 var(--space-2);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--color-text);
 		font: inherit;
@@ -108,7 +109,7 @@
 			background: var(--color-hover);
 		}
 		&[aria-pressed='true'] {
-			background: color-mix(in srgb, var(--color-blue) 20%, transparent);
+			background: var(--color-accent-tint);
 		}
 		&:focus-visible {
 			outline: 2px solid var(--color-accent-line);

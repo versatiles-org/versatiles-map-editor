@@ -300,7 +300,7 @@
 		border: 1px solid var(--color-border);
 		border-radius: 10px;
 		box-shadow: var(--shadow);
-		font-size: 0.875rem;
+		font-size: var(--font-size-md);
 		outline: none;
 
 		hr {
@@ -311,16 +311,17 @@
 		}
 	}
 
+	/* hover: the gray tint; keyboard focus: the ring, inside; the current map: the accent tint */
 	.item {
 		display: flex;
 		align-items: center;
-		gap: 8px;
+		gap: var(--space-2);
 		box-sizing: border-box;
 		width: 100%;
-		min-height: 32px;
-		padding: 0 10px;
+		min-height: var(--size-md);
+		padding: 0 var(--space-3);
 		border: none;
-		border-radius: 6px;
+		border-radius: var(--radius-md);
 		background: transparent;
 		color: var(--color-text);
 		font: inherit;
@@ -334,22 +335,23 @@
 
 		kbd {
 			font:
-				0.75rem ui-monospace,
+				var(--font-size-xs) ui-monospace,
 				Menlo,
 				Consolas,
 				monospace;
 			color: var(--color-text-muted);
 		}
 
-		&:hover:not(:disabled),
+		&:hover:not(:disabled) {
+			background: var(--color-hover);
+		}
 		&:focus-visible {
-			background: var(--color-blue);
-			color: var(--color-on-blue);
-			outline: none;
-
-			kbd {
-				color: inherit;
-			}
+			background: var(--color-hover);
+			outline: 2px solid var(--color-accent-line);
+			outline-offset: -2px;
+		}
+		&[aria-current='true'] {
+			background: var(--color-accent-tint);
 		}
 
 		&:disabled {
@@ -367,7 +369,7 @@
 	}
 
 	.group .item {
-		padding-left: 24px;
+		padding-left: var(--space-5);
 	}
 
 	.recent {
@@ -392,12 +394,7 @@
 
 		.changed {
 			color: var(--color-text-muted);
-			font-size: 0.75rem;
-		}
-
-		.item:hover:not(:disabled) .changed,
-		.item:focus-visible .changed {
-			color: inherit;
+			font-size: var(--font-size-xs);
 		}
 
 		.delete {

@@ -111,17 +111,15 @@
 		padding: 0;
 		list-style: none;
 
-		&:focus-visible {
-			outline: 2px solid var(--color-accent-line);
-			outline-offset: 1px;
-		}
-
+		/* hover: the gray tint; selected: the accent tint, since several can be selected */
 		li {
 			display: flex;
 			align-items: center;
-			gap: 8px;
-			padding: 5px 8px;
-			border-radius: 6px;
+			gap: var(--space-2);
+			box-sizing: border-box;
+			min-height: var(--size-sm);
+			padding: 0 var(--space-2);
+			border-radius: var(--radius-md);
 			cursor: pointer;
 			white-space: nowrap;
 			overflow: hidden;
@@ -133,7 +131,7 @@
 		}
 
 		li[aria-selected='true'] {
-			background: color-mix(in srgb, var(--color-blue) 20%, transparent);
+			background: var(--color-accent-tint);
 		}
 
 		&:focus-visible li.active {
