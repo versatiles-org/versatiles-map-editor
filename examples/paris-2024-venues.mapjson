@@ -1,16 +1,16 @@
 {
-	"map": { "center": [2.263307092985201, 48.85855659995556], "radius": 30854.270334055476 },
+	"map": { "center": [2.230654094568223, 48.871910743843245], "radius": 40051.18375802485 },
 	"frame": [1.8, 48.732, 2.83, 48.995],
 	"meta": {
-		"background": { "builder": "osm", "options": { "theme": "gray", "text": { "language": "local" } } },
+		"background": { "builder": "osm", "options": { "theme": "gray" } },
 		"legend": {
-			"position": "top-right",
 			"entries": [
-				{ "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Stadiums and arenas" },
-				{ "color": "#d55e00", "symbol": "base:icon-monument", "label": "Temporary venues at landmarks" },
-				{ "color": "#009e73", "symbol": "base:icon-outdoor", "label": "Venues in nature" },
-				{ "color": "#e69f00", "symbol": "base:icon-embassy", "label": "Olympic Village" }
-			]
+				{ "color": "#0072b2", "label": "Stadiums and arenas", "symbol": "base:icon-stadium" },
+				{ "color": "#d55e00", "label": "Temporary venues at landmarks", "symbol": "base:icon-monument" },
+				{ "color": "#009e73", "label": "Venues in nature", "symbol": "base:icon-outdoor" },
+				{ "color": "#cc9900", "label": "Olympic Village", "symbol": "base:icon-embassy" }
+			],
+			"position": "top-right"
 		},
 		"title": "Paris 2024 Olympic venues",
 		"labelFont": "noto_sans_bold"
@@ -20,11 +20,11 @@
 			"type": "marker",
 			"point": [2.331, 48.9115],
 			"style": {
-				"color": "#e69f00",
+				"color": "#cc9900",
 				"size": 2,
 				"symbol": "base:icon-stadium",
 				"label": "Olympic Village",
-				"labelColor": "#e69f00"
+				"labelColor": "#cc9900"
 			},
 			"popup": { "text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis" }
 		},
@@ -207,7 +207,7 @@
 				"symbol": "base:icon-monument",
 				"label": "Château de Versailles",
 				"align": 2,
-				"labelColor": "#d55e00"
+				"labelColor": "#b33c00"
 			},
 			"popup": { "text": "**Château de Versailles**\nEquestrian, modern pentathlon" }
 		},
