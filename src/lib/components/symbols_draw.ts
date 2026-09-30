@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { getContext, setContext } from 'svelte';
-import { parseHex } from './color.js';
+import { parseColor } from '@versatiles/map-state';
 
 /** Options for drawing a symbol, see `SymbolLibrary.drawSymbol`. */
 export interface DrawOptions {
@@ -91,7 +91,7 @@ export function drawImage(
 	options: DrawOptions
 ): Uint8ClampedArray<ArrayBuffer> {
 	const halo = options.halo ?? 0;
-	const outlineWidth = options.outline && parseHex(options.outline) ? (options.outlineWidth ?? 1) : 0;
+	const outlineWidth = options.outline && parseColor(options.outline) ? (options.outlineWidth ?? 1) : 0;
 	const shape = options.crop ? shapeBox(image, sdf) : undefined;
 	// the outline and the antialiasing, in canvas pixels, around the scaled shape
 	const { scale, x0, y0 } = placement(image, shape, width, height, outlineWidth + halo + 0.5);
@@ -143,8 +143,8 @@ function placement(
 /** How an SDF image is painted: gray with a white halo, in its color with an outline, or only in its color. */
 function sdfPainter(options: DrawOptions): Painter {
 	const halo = options.halo ?? 0;
-	const rgb = (options.color && parseHex(options.color)) || { r: 0, g: 0, b: 0 };
-	const outline = options.outline ? parseHex(options.outline) : undefined;
+	const rgb = (options.color && parseColor(options.color)) || { r: 0, g: 0, b: 0 };
+	const outline = options.outline ? parseColor(options.outline) : undefined;
 	const outlineWidth = outline ? (options.outlineWidth ?? 1) : 0;
 	// covered pixels, antialiased over one pixel around the edge
 	const fill = (distance: number) => clamp(distance + 0.5);

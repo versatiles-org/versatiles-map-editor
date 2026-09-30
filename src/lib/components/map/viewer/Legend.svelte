@@ -2,7 +2,7 @@
 	import type { Action } from 'svelte/action';
 	import type { StateLegend } from '@versatiles/map-state';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { parseHex, toHex } from '$lib/components/color.js';
+	import { formatHex, parseColor } from '@versatiles/map-state';
 	import type { Box } from '$lib/rendering/index.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
@@ -56,8 +56,8 @@
 
 	/** A darker shade of the color, for the outline, so e.g. white symbols show on the white legend. */
 	function darker(color: string): string {
-		const rgb = parseHex(color) ?? { r: 0, g: 0, b: 0 };
-		return toHex({ r: rgb.r / 2, g: rgb.g / 2, b: rgb.b / 2 });
+		const rgb = parseColor(color) ?? { r: 0, g: 0, b: 0 };
+		return formatHex({ r: rgb.r / 2, g: rgb.g / 2, b: rgb.b / 2, alpha: 1 });
 	}
 
 	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {

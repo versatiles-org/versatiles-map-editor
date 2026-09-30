@@ -80,6 +80,13 @@ describe('ColorPicker', () => {
 		expect(picker.value).toBe('#0000ff80');
 		expect(picker.onchange).toHaveBeenCalledTimes(1);
 
+		// also without "#", and as a CSS color
+		picker.change('#color-hex', 'ff0000');
+		expect(picker.value).toBe('#ff000080');
+		picker.change('#color-hex', 'rgb(0, 128, 0)');
+		expect(picker.value).toBe('#00800080');
+		picker.change('#color-hex', '#0000FF');
+
 		// an invalid color changes nothing and shows the value again
 		picker.change('#color-hex', 'blue');
 		expect(picker.value).toBe('#0000ff80');

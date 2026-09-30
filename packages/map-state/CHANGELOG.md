@@ -37,7 +37,8 @@ The first release.
 - The style vocabulary of the editor: defaults, names of patterns, stroke styles and label
   alignments.
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
-  the transparency of marker and line colors in KML of other tools.
+  the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
+  read and write colors with their opacity (`RGBA`).
 - Features that cannot be mapped are skipped on import, e.g. circles without a positive radius, and
   deeply nested KML is read without a stack overflow.
 - Metadata is stored only if one of its fields has a value, so the same map always gives the same

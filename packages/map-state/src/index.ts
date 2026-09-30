@@ -7,6 +7,7 @@ export * from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { CODEC_VERSION } from './constants.js';
+export { formatHex, parseColor, type RGBA } from './color.js';
 export { digitsForResolution, resolutionOfDigits } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
 export { sanitizeFrame } from './profile.js';

@@ -10,25 +10,6 @@ export interface HSV {
 	v: number; // value (brightness), 0…1
 }
 
-/** Parse "#rgb", "#rrggbb" or "#rrggbbaa". The alpha channel is ignored. Returns undefined if invalid. */
-export function parseHex(hex: string): RGB | undefined {
-	const m = /^#?([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.exec(hex.trim());
-	if (!m) return undefined;
-	let digits = m[1];
-	if (digits.length === 3) digits = digits.replace(/./g, (c) => c + c);
-	const n = parseInt(digits.slice(0, 6), 16);
-	return { r: n >> 16, g: (n >> 8) & 255, b: n & 255 };
-}
-
-/** Format as lowercase "#rrggbb". Channels are rounded and clamped. */
-export function toHex({ r, g, b }: RGB): string {
-	const channel = (c: number) =>
-		Math.max(0, Math.min(255, Math.round(c)))
-			.toString(16)
-			.padStart(2, '0');
-	return '#' + channel(r) + channel(g) + channel(b);
-}
-
 export function rgbToHsv({ r, g, b }: RGB): HSV {
 	r /= 255;
 	g /= 255;
@@ -53,12 +34,6 @@ export function hsvKeeping(color: RGB, previous: HSV): HSV {
 	if (next.v === 0) next.s = previous.s;
 	if (next.s === 0 || next.v === 0) next.h = previous.h;
 	return next;
-}
-
-/** The color as "#rrggbb", with the alpha channel of the previous value, if it had one. */
-export function toHexKeepingAlpha(color: RGB, previous: string | undefined): string {
-	const alpha = previous?.length === 9 ? previous.slice(7) : '';
-	return toHex(color) + alpha;
 }
 
 /** Saturation and brightness moved by the arrow key, in steps of 1% (10% with Shift). */

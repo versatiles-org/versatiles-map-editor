@@ -9,16 +9,8 @@
 	import { besideElement, keepInViewport } from './popup_position.js';
 	import ColorField from './ColorField.svelte';
 	import { IconButton } from '$lib/components/ui/index.js';
-	import {
-		hsvKeeping,
-		hsvToRgb,
-		parseHex,
-		rgbToHsv,
-		toHex,
-		toHexKeepingAlpha,
-		type HSV,
-		type RGB
-	} from '$lib/components/color.js';
+	import { hsvKeeping, hsvToRgb, rgbToHsv, type HSV, type RGB } from '$lib/components/color.js';
+	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 	import type { ColorPalette } from '$lib/color_palette.svelte.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 
@@ -43,30 +35,36 @@
 	let position: Position = $state({ x: 0, y: 0 });
 	let drag: { dx: number; dy: number } | undefined;
 
-	const rgb: RGB = $derived(parseHex(value) ?? { r: 0, g: 0, b: 0 });
+	/** The value, with its opacity; black if it cannot be read. */
+	function read(value: string): RGBA {
+		return parseColor(value) ?? { r: 0, g: 0, b: 0, alpha: 1 };
+	}
+
+	const color: RGBA = $derived(read(value));
+	const rgb: RGB = $derived({ r: color.r, g: color.g, b: color.b });
 	const schemes = $derived(config.current.colorSchemes);
 	const colorScheme = $derived(getColorScheme(palette?.scheme, schemes));
-	const hex = $derived(toHex(rgb));
+	const hex = $derived(formatHex({ ...rgb, alpha: 1 }));
 	// the whole value, with its opacity
-	const shown = $derived(toHexKeepingAlpha(rgb, value));
+	const shown = $derived(formatHex(color));
 
 	// HSV is kept separately from the value, so the hue and saturation survive while the
 	// color is gray or black. It is updated when the value changes from outside.
-	let hsv: HSV = $state(rgbToHsv(parseHex(value) ?? { r: 0, g: 0, b: 0 }));
+	let hsv: HSV = $state(rgbToHsv(read(value)));
 	let ownValue = value;
 	$effect(() => {
 		if (value === ownValue) return;
 		ownValue = value;
-		setHsvFromRgb(parseHex(value) ?? { r: 0, g: 0, b: 0 });
+		setHsvFromRgb(read(value));
 	});
 
 	function setHsvFromRgb(color: RGB) {
 		hsv = hsvKeeping(color, hsv);
 	}
 
-	function write(color: RGB) {
-		// an alpha channel (e.g. from an imported GeoJSON) is kept
-		ownValue = toHexKeepingAlpha(color, value);
+	function write(next: RGB) {
+		// the opacity is kept
+		ownValue = formatHex({ ...next, alpha: color.alpha });
 		value = ownValue;
 	}
 
@@ -145,9 +143,11 @@
 	}
 
 	function onHexChange(e: Event & { currentTarget: HTMLInputElement }) {
-		const color = parseHex(e.currentTarget.value);
-		if (color) {
-			setRgb(color);
+		// also hex digits without "#"
+		const text = e.currentTarget.value.trim();
+		const typed = parseColor(/^[0-9a-f]+$/i.test(text) ? '#' + text : text);
+		if (typed) {
+			setRgb(typed);
 			commit();
 		}
 		e.currentTarget.value = hex;
@@ -163,7 +163,7 @@
 	}
 
 	function pick(color: string) {
-		const parsed = parseHex(color);
+		const parsed = parseColor(color);
 		if (!parsed) return;
 		setHsvFromRgb(parsed);
 		ownValue = value = color;

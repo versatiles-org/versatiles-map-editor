@@ -51,6 +51,8 @@ stateFromKML(kml: string): MapState
   The default of 1 m keeps all detail; coarser values make shorter strings, e.g. for sharing.
   `digitsForResolution` and `resolutionOfDigits` convert between meters and decimal places.
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
+  `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
+  `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
 - `CODEC_VERSION` is the format version that `encodeState` writes.
 - `frame` in the state is the visible area of a shared map, `[west, south, east, north]` (the type
   `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
