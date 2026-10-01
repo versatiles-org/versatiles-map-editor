@@ -7,6 +7,7 @@
 	import { Icon, IconButton } from '$lib/components/ui/index.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
 	import type { RecentMap, SessionSync } from '$lib/session_sync.svelte.js';
+	import { fullscreen } from './fullscreen.svelte.js';
 
 	/**
 	 * The menu (☰) of the editor: the commands that are used rarely, like files, the recent maps,
@@ -127,7 +128,8 @@
 	});
 </script>
 
-<svelte:window onpointerdown={onWindowPointerdown} />
+<!-- F switches fullscreen on and off -->
+<svelte:window onpointerdown={onWindowPointerdown} onkeydown={fullscreen.onKeydown} />
 
 {#snippet item(
 	label: string,
@@ -237,6 +239,11 @@
 			{@render item('KML (Google Earth)', () => files.exportKML())}
 		</div>
 		{@render item('Visible area…', () => doc.visibleArea.open())}
+		{#if fullscreen.available}
+			{@render item(fullscreen.active ? 'Exit fullscreen' : 'Fullscreen', () => fullscreen.toggle(), {
+				keys: ['F', 'F', 'F']
+			})}
+		{/if}
 		<hr />
 		{@render item('Undo', () => doc.state.undo(), {
 			disabled: !history.undoEnabled,

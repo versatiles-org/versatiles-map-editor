@@ -29,6 +29,10 @@
 			]
 		},
 		{
+			title: 'View',
+			keys: [['Fullscreen, and back', 'F, and Escape']]
+		},
+		{
 			title: 'Drawing',
 			keys: [
 				['Finish a line or polygon', 'Enter, or double-click'],

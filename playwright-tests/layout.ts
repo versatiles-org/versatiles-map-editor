@@ -341,3 +341,18 @@ test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, a
 	);
 	expect(offCenter).toStrictEqual([]);
 });
+
+test('fullscreen with F or from the menu, and back', { tag: '@cross-browser' }, async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const isFullscreen = () => page.evaluate(() => document.fullscreenElement !== null);
+
+	await page.keyboard.press('f');
+	await expect.poll(isFullscreen).toBe(true);
+	await (await menuItem(page, 'Exit fullscreen')).click();
+	await expect.poll(isFullscreen).toBe(false);
+	await (await menuItem(page, 'Fullscreen')).click();
+	await expect.poll(isFullscreen).toBe(true);
+	await page.keyboard.press('f');
+	await expect.poll(isFullscreen).toBe(false);
+});
