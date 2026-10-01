@@ -30,6 +30,7 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "schema/*.schema.json",
     "README.md",
     "CHANGELOG.md",
     "LICENSE"
@@ -37,7 +38,8 @@
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "prepack": "npm run build",
-    "test": "cd ../.. && vitest run packages/map-state"
+    "test": "cd ../.. && vitest run packages/map-state",
+    "schema": "node schema/generate.mjs && prettier --write schema/mapjson-1.schema.json"
   },
   "dependencies": {
     "@types/geojson": "^7946.0.16"

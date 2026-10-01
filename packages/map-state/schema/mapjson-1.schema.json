@@ -1,0 +1,441 @@
+{
+	"title": "VersaTiles map (.mapjson), format version 1",
+	"description": "A map of the VersaTiles map editor: its view, visible area, properties and elements. See packages/map-state/MAPJSON.md.",
+	"$id": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$ref": "#/definitions/MapJSON",
+	"definitions": {
+		"MapJSON": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"map": {
+					"type": "object",
+					"properties": {
+						"center": {
+							"$ref": "#/definitions/Position"
+						},
+						"radius": {
+							"type": "number",
+							"description": "The radius of the largest circle that the window shows, in meters.",
+							"exclusiveMinimum": 0
+						}
+					},
+					"required": ["center", "radius"],
+					"additionalProperties": false,
+					"description": "The camera: where the author's editor looks, e.g. after a reload. Links for sharing and embedding leave it out; they show the `frame`, else the elements."
+				},
+				"frame": {
+					"$ref": "#/definitions/Bounds",
+					"description": "The visible area: what a shared or embedded map shows completely, whatever the size and the shape of the window. Without it, the bounds of the elements are shown."
+				},
+				"meta": {
+					"$ref": "#/definitions/StateMetadata"
+				},
+				"elements": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/StateElement"
+					},
+					"description": "The elements, in drawing order: the first one at the back, the last one in front."
+				},
+				"$schema": {
+					"type": "string",
+					"description": "The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`."
+				}
+			},
+			"required": ["$schema", "elements"],
+			"description": "The content of a .mapjson file: a map state with the URL of its schema."
+		},
+		"Position": {
+			"type": "array",
+			"minItems": 2,
+			"items": [
+				{
+					"type": "number",
+					"title": "longitude"
+				},
+				{
+					"type": "number",
+					"title": "latitude"
+				}
+			],
+			"maxItems": 2,
+			"description": "A position on the map: longitude and latitude, in degrees (WGS 84)."
+		},
+		"Bounds": {
+			"type": "array",
+			"minItems": 4,
+			"items": [
+				{
+					"type": "number",
+					"title": "west"
+				},
+				{
+					"type": "number",
+					"title": "south"
+				},
+				{
+					"type": "number",
+					"title": "east"
+				},
+				{
+					"type": "number",
+					"title": "north"
+				}
+			],
+			"maxItems": 4,
+			"description": "A geographic area: west, south, east and north, in degrees (WGS 84)."
+		},
+		"StateMetadata": {
+			"type": "object",
+			"properties": {
+				"background": {
+					"$ref": "#/definitions/StateBackground",
+					"description": "The background map. Without it, the map has the editor's default background."
+				},
+				"legend": {
+					"$ref": "#/definitions/StateLegend",
+					"description": "A legend, defined by the author, not generated from the elements."
+				},
+				"colorScheme": {
+					"type": "string",
+					"description": "The id of the color scheme offered for the map's colors. Without it, the default scheme."
+				},
+				"viewer": {
+					"$ref": "#/definitions/StateViewer",
+					"description": "What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend."
+				},
+				"labelFont": {
+					"type": "string",
+					"description": "The glyph font of the labels of all markers, e.g. \"noto_sans_bold\". Without it, they have the font of the labels of the background map."
+				},
+				"labelOverlap": {
+					"type": "string",
+					"const": "hide",
+					"description": "Hide the labels of markers that would overlap other labels (\"hide\"); their symbols stay. Without it, all labels are shown, also on top of each other."
+				},
+				"labelMinZoom": {
+					"type": "number",
+					"description": "The zoom level from which the labels of markers are shown, with one decimal place, above 0 and up to 24, e.g. 12.5. Without it, at every zoom level.",
+					"exclusiveMinimum": 0,
+					"maximum": 24,
+					"multipleOf": 0.1
+				},
+				"mapLabelsOnTop": {
+					"type": "boolean",
+					"description": "Draw the labels of the background map over the areas and lines of the elements. Without it, they are under them. The labels of markers are always on top."
+				},
+				"title": {
+					"type": "string",
+					"description": "The title of the map, e.g. for the list of maps, the title of the page and file names."
+				}
+			},
+			"additionalProperties": false
+		},
+		"StateBackground": {
+			"type": "object",
+			"properties": {
+				"builder": {
+					"type": "string",
+					"enum": ["osm", "satellite"]
+				},
+				"options": {
+					"type": "object",
+					"additionalProperties": {}
+				}
+			},
+			"required": ["builder", "options"],
+			"additionalProperties": false,
+			"description": "A background map built with `@versatiles/style`: the builder and its options, minimized (e.g. with `osm.minimizeOptions`). Storing the options instead of a preset keeps every current and future option of `@versatiles/style` available."
+		},
+		"StateLegend": {
+			"type": "object",
+			"properties": {
+				"layout": {
+					"type": "string",
+					"enum": ["vertical", "horizontal", "inline"],
+					"description": "How the entries are arranged. \"inline\" flows like text. Default: \"vertical\"."
+				},
+				"font": {
+					"type": "string",
+					"enum": ["sans-serif", "serif", "monospace"],
+					"description": "Default: \"sans-serif\"."
+				},
+				"bold": {
+					"type": "boolean",
+					"description": "The texts of all entries in bold. Default: false."
+				},
+				"italic": {
+					"type": "boolean",
+					"description": "The texts of all entries in italic. Default: false."
+				},
+				"entries": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/StateLegendEntry"
+					}
+				}
+			},
+			"required": ["entries"],
+			"additionalProperties": false
+		},
+		"StateLegendEntry": {
+			"type": "object",
+			"properties": {
+				"color": {
+					"$ref": "#/definitions/HexColor"
+				},
+				"symbol": {
+					"type": "string",
+					"description": "A marker symbol, by the name of its image. Without it, the entry shows a color swatch."
+				},
+				"label": {
+					"type": "string"
+				}
+			},
+			"required": ["color", "label"],
+			"additionalProperties": false,
+			"description": "A row of the legend: a color, or a symbol in this color, and a text."
+		},
+		"HexColor": {
+			"type": "string",
+			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
+			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+		},
+		"StateViewer": {
+			"type": "object",
+			"properties": {
+				"search": {
+					"type": "string",
+					"enum": ["top-left", "top-right", "none"],
+					"description": "The address search. Default: \"none\"."
+				},
+				"navigation": {
+					"type": "string",
+					"enum": ["top-left", "top-right", "bottom-left", "bottom-right", "none"],
+					"description": "The buttons for zooming in and out. Default: \"top-right\"."
+				},
+				"legend": {
+					"type": "string",
+					"enum": ["bottom-left", "bottom", "bottom-right", "right", "top-right", "top", "top-left", "left", "none"],
+					"description": "The legend, if the map has one: a side (centered) or a corner. Default: \"bottom-left\"."
+				}
+			},
+			"additionalProperties": false,
+			"description": "What the viewer shows over the map, and where: each at a position, or \"none\". Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
+		},
+		"StateElement": {
+			"anyOf": [
+				{
+					"$ref": "#/definitions/StateElementMarker"
+				},
+				{
+					"$ref": "#/definitions/StateElementLine"
+				},
+				{
+					"$ref": "#/definitions/StateElementPolygon"
+				},
+				{
+					"$ref": "#/definitions/StateElementCircle"
+				}
+			]
+		},
+		"StateElementMarker": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "marker"
+				},
+				"point": {
+					"$ref": "#/definitions/Position"
+				},
+				"style": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`."
+				},
+				"popup": {
+					"$ref": "#/definitions/StatePopup"
+				}
+			},
+			"required": ["type", "point"],
+			"additionalProperties": false,
+			"description": "A symbol at a point, with an optional label."
+		},
+		"StateStyle": {
+			"type": "object",
+			"properties": {
+				"halo": {
+					"type": "number",
+					"description": "Markers: the width of the halo around the symbol and the label, in pixels.",
+					"minimum": 0,
+					"default": 1
+				},
+				"pattern": {
+					"type": "integer",
+					"description": "Areas: 0 solid, 1 diagonal lines, 2 thin diagonal lines. Lines and outlines: 0 solid, 1 dashed, 2 dotted.",
+					"minimum": 0,
+					"maximum": 2,
+					"default": 0
+				},
+				"rotate": {
+					"type": "number",
+					"description": "Markers: the rotation of the symbol, in degrees clockwise.",
+					"minimum": -180,
+					"maximum": 180,
+					"default": 0
+				},
+				"size": {
+					"type": "number",
+					"description": "Markers: the size of the symbol and the label, as a factor.",
+					"exclusiveMinimum": 0,
+					"default": 1
+				},
+				"width": {
+					"type": "number",
+					"description": "Lines and outlines: the width, in pixels.",
+					"minimum": 0,
+					"default": 2
+				},
+				"align": {
+					"type": "integer",
+					"description": "Markers: the position of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom.",
+					"minimum": 0,
+					"maximum": 4,
+					"default": 0
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the symbol, the line, or the area, with its opacity.",
+					"default": "#ff0000"
+				},
+				"label": {
+					"type": "string",
+					"description": "Markers: the text of the label; \"\" for none.",
+					"default": ""
+				},
+				"visible": {
+					"type": "boolean",
+					"description": "Outlines: whether the outline is drawn.",
+					"default": true
+				},
+				"symbol": {
+					"type": "string",
+					"description": "The symbol of a marker: the name of its image, e.g. \"icons:anchor\", or \"\" for none."
+				},
+				"labelColor": {
+					"$ref": "#/definitions/HexColor",
+					"description": "Markers: the color of the text of the label.",
+					"default": "#000000"
+				},
+				"haloColor": {
+					"$ref": "#/definitions/HexColor",
+					"description": "Markers: the color of the halo around the symbol and the label.",
+					"default": "#ffffff"
+				}
+			},
+			"additionalProperties": false,
+			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
+		},
+		"StatePopup": {
+			"type": "object",
+			"properties": {
+				"text": {
+					"type": "string",
+					"description": "Plain text with simple formatting: **bold**, line breaks and links."
+				}
+			},
+			"required": ["text"],
+			"additionalProperties": false,
+			"description": "A popup that opens when the element is clicked or tapped in the viewer."
+		},
+		"StateElementLine": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "line"
+				},
+				"points": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Position"
+					},
+					"minItems": 2
+				},
+				"style": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The line: `color`, `width`, `pattern` (solid, dashed, dotted)."
+				},
+				"popup": {
+					"$ref": "#/definitions/StatePopup"
+				}
+			},
+			"required": ["type", "points"],
+			"additionalProperties": false,
+			"description": "A line through points."
+		},
+		"StateElementPolygon": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "polygon"
+				},
+				"points": {
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/Position"
+					},
+					"minItems": 3
+				},
+				"style": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin)."
+				},
+				"strokeStyle": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted)."
+				},
+				"popup": {
+					"$ref": "#/definitions/StatePopup"
+				}
+			},
+			"required": ["type", "points"],
+			"additionalProperties": false,
+			"description": "An area within points; the last point connects to the first one."
+		},
+		"StateElementCircle": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "circle"
+				},
+				"point": {
+					"$ref": "#/definitions/Position"
+				},
+				"radius": {
+					"type": "number",
+					"description": "The radius, in meters.",
+					"exclusiveMinimum": 0
+				},
+				"style": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin)."
+				},
+				"strokeStyle": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted)."
+				},
+				"popup": {
+					"$ref": "#/definitions/StatePopup"
+				}
+			},
+			"required": ["type", "point", "radius"],
+			"additionalProperties": false,
+			"description": "A circle around a point."
+		}
+	}
+}

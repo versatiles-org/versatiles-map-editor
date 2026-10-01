@@ -8,7 +8,10 @@ export const MAPJSON_VERSION = 1;
 export const MAPJSON_SCHEMA_URL = `https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-${MAPJSON_VERSION}.schema.json`;
 
 /** The content of a .mapjson file: a map state with the URL of its schema. */
-export type MapJSON = { $schema: string } & MapState;
+export type MapJSON = {
+	/** The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`. */
+	$schema: string;
+} & MapState;
 
 /** A .mapjson file of a newer version than this one can read. */
 export class MapJSONVersionError extends Error {

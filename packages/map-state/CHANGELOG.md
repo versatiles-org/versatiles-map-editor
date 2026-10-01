@@ -46,6 +46,9 @@ The first release.
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
   one, upgrades files of older versions without `$schema`, and throws a `MapJSONVersionError` for a
   newer version.
+- The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package),
+  generated from the types with their descriptions, units, ranges and defaults
+  (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
 - `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
   `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata;

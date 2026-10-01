@@ -1,14 +1,27 @@
-/** A map: its viewport, its properties and its elements. */
-/** A geographic area: west, south, east and north, in degrees. */
+/** A geographic area: west, south, east and north, in degrees (WGS 84). */
 export type Bounds = [west: number, south: number, east: number, north: number];
 
+/** A position on the map: longitude and latitude, in degrees (WGS 84). */
+export type Position = [longitude: number, latitude: number];
+
+/**
+ * A color as hex code: "#rrggbb", or "#rrggbbaa" with its opacity (alpha). Written in lower case.
+ * @pattern ^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$
+ */
+export type HexColor = string;
+
+/** A map: its viewport, its properties and its elements. */
 export interface MapState {
 	/**
 	 * The camera: where the author's editor looks, e.g. after a reload. Links for sharing and
 	 * embedding leave it out; they show the `frame`, else the elements.
 	 */
 	map?: {
-		center: [number, number];
+		center: Position;
+		/**
+		 * The radius of the largest circle that the window shows, in meters.
+		 * @exclusiveMinimum 0
+		 */
 		radius: number;
 	};
 	/**
@@ -17,58 +30,133 @@ export interface MapState {
 	 */
 	frame?: Bounds;
 	meta?: StateMetadata;
+	/** The elements, in drawing order: the first one at the back, the last one in front. */
 	elements: StateElement[];
 }
 
 export type StateElement = StateElementMarker | StateElementLine | StateElementPolygon | StateElementCircle;
 
+/** A symbol at a point, with an optional label. */
 export interface StateElementMarker {
 	type: 'marker';
-	point: [number, number];
+	point: Position;
+	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`. */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
 
+/** A line through points. */
 export interface StateElementLine {
 	type: 'line';
-	points: [number, number][];
+	/** @minItems 2 */
+	points: Position[];
+	/** The line: `color`, `width`, `pattern` (solid, dashed, dotted). */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
 
+/** An area within points; the last point connects to the first one. */
 export interface StateElementPolygon {
 	type: 'polygon';
-	points: [number, number][];
+	/** @minItems 3 */
+	points: Position[];
+	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
 	style?: StateStyle;
+	/** The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }
 
+/** A circle around a point. */
 export interface StateElementCircle {
 	type: 'circle';
-	point: [number, number];
+	point: Position;
+	/**
+	 * The radius, in meters.
+	 * @exclusiveMinimum 0
+	 */
 	radius: number;
+	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
 	style?: StateStyle;
+	/** The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }
 
+/**
+ * The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which
+ * fields count depends on what it styles (see the elements); missing fields have their default.
+ */
 export interface StateStyle {
+	/**
+	 * Markers: the width of the halo around the symbol and the label, in pixels.
+	 * @minimum 0
+	 * @default 1
+	 */
 	halo?: number;
+	/**
+	 * Areas: 0 solid, 1 diagonal lines, 2 thin diagonal lines. Lines and outlines: 0 solid,
+	 * 1 dashed, 2 dotted.
+	 * @asType integer
+	 * @minimum 0
+	 * @maximum 2
+	 * @default 0
+	 */
 	pattern?: number;
+	/**
+	 * Markers: the rotation of the symbol, in degrees clockwise.
+	 * @minimum -180
+	 * @maximum 180
+	 * @default 0
+	 */
 	rotate?: number;
+	/**
+	 * Markers: the size of the symbol and the label, as a factor.
+	 * @exclusiveMinimum 0
+	 * @default 1
+	 */
 	size?: number;
+	/**
+	 * Lines and outlines: the width, in pixels.
+	 * @minimum 0
+	 * @default 2
+	 */
 	width?: number;
+	/**
+	 * Markers: the position of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom.
+	 * @asType integer
+	 * @minimum 0
+	 * @maximum 4
+	 * @default 0
+	 */
 	align?: number;
-	color?: string;
+	/**
+	 * The color of the symbol, the line, or the area, with its opacity.
+	 * @default "#ff0000"
+	 */
+	color?: HexColor;
+	/**
+	 * Markers: the text of the label; "" for none.
+	 * @default ""
+	 */
 	label?: string;
+	/**
+	 * Outlines: whether the outline is drawn.
+	 * @default true
+	 */
 	visible?: boolean;
 	/** The symbol of a marker: the name of its image, e.g. "icons:anchor", or "" for none. */
 	symbol?: string;
-	/** The color of the text of a marker's label. */
-	labelColor?: string;
-	/** The color of the halo around a marker's symbol and label. */
-	haloColor?: string;
+	/**
+	 * Markers: the color of the text of the label.
+	 * @default "#000000"
+	 */
+	labelColor?: HexColor;
+	/**
+	 * Markers: the color of the halo around the symbol and the label.
+	 * @default "#ffffff"
+	 */
+	haloColor?: HexColor;
 }
 
 export interface StateMetadata {
@@ -93,6 +181,9 @@ export interface StateMetadata {
 	/**
 	 * The zoom level from which the labels of markers are shown, with one decimal place, above 0 and
 	 * up to 24, e.g. 12.5. Without it, at every zoom level.
+	 * @exclusiveMinimum 0
+	 * @maximum 24
+	 * @multipleOf 0.1
 	 */
 	labelMinZoom?: number;
 	/**
@@ -150,7 +241,7 @@ export interface StateLegend {
 
 /** A row of the legend: a color, or a symbol in this color, and a text. */
 export interface StateLegendEntry {
-	color: string;
+	color: HexColor;
 	/** A marker symbol, by the name of its image. Without it, the entry shows a color swatch. */
 	symbol?: string;
 	label: string;
