@@ -46,8 +46,8 @@ class Touchscreen {
 		await this.send('touchEnd', []);
 	}
 
-	drag(from: Point, to: Point) {
-		return this.gesture([from], [to]);
+	drag(from: Point, to: Point, steps?: number) {
+		return this.gesture([from], [to], steps);
 	}
 }
 
@@ -180,4 +180,42 @@ test('dragging a handle of the visible area with a finger, a bit off the handle'
 	await waitForMapIsIdle(page);
 	expect((await mapCenter(page))[0]).toBeLessThan(viewCenter[0]);
 	expect((await settledStoredState(page)).frame).toStrictEqual(dragged);
+});
+
+test('dragging elements in the list with a finger, by their handles', async ({ page }) => {
+	// more than fit into the drawer, so it scrolls
+	const elements = Array.from({ length: 40 }, (_, i) => ({
+		type: 'marker' as const,
+		point: [13.3 + i * 0.005, 52.5] as Point,
+		style: { label: `M${i + 1}` }
+	}));
+	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Elements', exact: true }).tap();
+	const touch = await Touchscreen.create(page);
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	const option = (label: string) => list.getByRole('option', { name: new RegExp(`: ${label}$`) });
+	const order = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	const box = async (label: string) => (await option(label).boundingBox())!;
+	const scrolled = () => list.evaluate((l) => l.closest('.content')!.scrollTop);
+
+	// on a touch screen, the handles are shown without hovering
+	const grip = option('M39').locator('.grip');
+	await expect(grip).toHaveCSS('opacity', '1');
+
+	// the list is front to back: M40 … M1; M39 by its handle to the upper edge of M40, the front
+	const handle = (await grip.boundingBox())!;
+	const [x, y] = [handle.x + handle.width / 2, handle.y + handle.height / 2];
+	await touch.drag([x, y], [x, (await box('M40')).y + 3]);
+	await expect.poll(async () => (await order()).slice(-2)).toStrictEqual(['M40', 'M39']);
+	await expect(list.getByRole('option').first()).toHaveText(/M39/);
+	const reordered = await order();
+
+	// a swipe over the rows, off the handles, scrolls the list and moves no element
+	expect(await scrolled()).toBe(0);
+	const row = await box('M30');
+	await touch.drag([row.x + 40, row.y + row.height / 2], [row.x + 40, row.y - 200], 10);
+	await expect.poll(scrolled).toBeGreaterThan(100);
+	await waitForMapIsIdle(page);
+	expect(await order()).toStrictEqual(reordered);
 });
