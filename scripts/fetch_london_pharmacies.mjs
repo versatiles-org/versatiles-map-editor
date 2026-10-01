@@ -43,6 +43,8 @@ out center tags;`;
 
 const COLOR = '#009e73';
 const SYMBOL = 'base:icon-pill';
+// a darker shade of the color, readable on the gray map
+const LABEL_COLOR = '#00664a';
 
 async function query() {
 	for (let attempt = 0; attempt < 3; attempt++) {
@@ -101,16 +103,33 @@ const state = {
 	map: { center, radius },
 	frame,
 	meta: {
-		background: { builder: 'osm', options: { theme: 'colorful' } },
+		// a faded gray map, so the markers stand out
+		background: {
+			builder: 'osm',
+			options: { theme: 'gray', text: { spacing: 2 }, recolor: { brightness: 0.15, contrast: 0.7 } }
+		},
+		// the legend is kept in the map, but not shown
 		legend: { entries: [{ color: COLOR, label: 'Pharmacy', symbol: SYMBOL }] },
+		viewer: { search: 'top-left', legend: 'none' },
 		title: 'Pharmacies in Inner London',
-		// readable at every zoom level: labels that would overlap are hidden
-		labelOverlap: 'hide'
+		labelFont: 'noto_sans_bold',
+		// readable at every zoom level: labels that would overlap are hidden, and all are shown only
+		// from the zoom level where the streets of the city are drawn
+		labelOverlap: 'hide',
+		labelMinZoom: 12.9
 	},
 	elements: pharmacies.map(({ point, name }) => ({
 		type: 'marker',
 		point,
-		style: { color: COLOR, symbol: SYMBOL, ...(name && { label: name }) }
+		style: {
+			color: COLOR,
+			size: 0.8,
+			symbol: SYMBOL,
+			...(name && { label: name }),
+			// the label above the symbol
+			align: 3,
+			labelColor: LABEL_COLOR
+		}
 	}))
 };
 
