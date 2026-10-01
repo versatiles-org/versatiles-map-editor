@@ -78,8 +78,8 @@ export interface StateMetadata {
 	legend?: StateLegend;
 	/** The id of the color scheme offered for the map's colors. Without it, the default scheme. */
 	colorScheme?: string;
-	/** Show an address search in the read-only viewer, e.g. in an embedded map. */
-	search?: boolean;
+	/** What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend. */
+	viewer?: StateViewer;
 	/**
 	 * The glyph font of the labels of all markers, e.g. "noto_sans_bold". Without it, they have the
 	 * font of the labels of the background map.
@@ -108,9 +108,25 @@ export const LEGEND_LAYOUTS = ['vertical', 'horizontal', 'inline'] as const;
 /** Generic CSS font families, which every browser has, unlike the glyph fonts of the map. */
 export const LEGEND_FONTS = ['sans-serif', 'serif', 'monospace'] as const;
 
+/** The places of the address search: at the top, since its results open downwards. */
+export const SEARCH_POSITIONS = ['top-left', 'top-right'] as const;
+/** The places of the buttons for zooming: the corners. */
+export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
+
+/**
+ * What the viewer shows over the map, and where: each at a position, or "none". Controls in the
+ * same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
+ */
+export interface StateViewer {
+	/** The address search. Default: "none". */
+	search?: (typeof SEARCH_POSITIONS)[number] | 'none';
+	/** The buttons for zooming in and out. Default: "top-right". */
+	navigation?: (typeof NAVIGATION_POSITIONS)[number] | 'none';
+	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
+	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
+}
+
 export interface StateLegend {
-	/** A side (centered) or a corner of the map. Default: "bottom-left". */
-	position?: (typeof LEGEND_POSITIONS)[number];
 	/** How the entries are arranged. "inline" flows like text. Default: "vertical". */
 	layout?: (typeof LEGEND_LAYOUTS)[number];
 	/** Default: "sans-serif". */

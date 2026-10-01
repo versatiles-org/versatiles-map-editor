@@ -8,9 +8,9 @@ const state: MapState = {
 	map: { center: [13.4, 52.5], radius: 12345 },
 	meta: {
 		background: { builder: 'osm', options: { theme: 'gray' } },
-		legend: { position: 'top', entries: [{ color: '#ff0000', symbol: 'icons:anchor', label: 'Cafés & <shops>' }] },
+		legend: { entries: [{ color: '#ff0000', symbol: 'icons:anchor', label: 'Cafés & <shops>' }] },
 		colorScheme: 'dark2',
-		search: true
+		viewer: { search: 'top-left', legend: 'top' }
 	},
 	elements: [
 		{ type: 'marker', point: [13.41, 52.51] },

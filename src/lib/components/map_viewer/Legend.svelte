@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
-	import type { StateLegend } from '@versatiles/map-state';
+	import type { StateLegend, LEGEND_POSITIONS } from '@versatiles/map-state';
+
+	type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { parseColor } from '@versatiles/map-state';
 
@@ -17,6 +19,7 @@
 	/** `onmove` tells where it is on the map, so a fitted area keeps clear of it. */
 	let {
 		legend,
+		position = 'bottom-left',
 		left = 0,
 		right = 0,
 		top = 0,
@@ -27,6 +30,8 @@
 		onmove
 	}: {
 		legend: StateLegend;
+		/** A side (centered) or a corner of the map. */
+		position?: LegendPosition;
 		left?: number;
 		right?: number;
 		top?: number;
@@ -41,7 +46,7 @@
 	let height = $state(0);
 	// after each change of its size or place; relative to the page, which is as large as the map
 	$effect(() => {
-		void [width, height, left, right, top, bottom, legend.position, legend.layout];
+		void [width, height, left, right, top, bottom, position, legend.layout];
 		const page = element?.offsetParent;
 		if (!element || !page) return;
 		const rect = element.getBoundingClientRect();
@@ -77,7 +82,7 @@
 	<!-- a click selects it in the editor; with the keyboard, "Edit legend" of the inspector does -->
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 	<div
-		class="legend position-{legend.position ?? 'bottom-left'} layout-{legend.layout ?? 'vertical'}"
+		class="legend position-{position} layout-{legend.layout ?? 'vertical'}"
 		class:selectable={onselect !== undefined}
 		class:selected
 		onclick={onselect}

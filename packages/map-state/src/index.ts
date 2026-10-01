@@ -24,7 +24,11 @@ export {
 	LABEL_ALIGN_NAMES,
 	removeDefaultFields,
 	LEGEND_DEFAULTS,
-	removeLegendDefaults
+	removeLegendDefaults,
+	VIEWER_DEFAULTS,
+	VIEWER_CHOICES,
+	removeViewerDefaults,
+	sanitizeViewer
 } from './profile.js';
 
 /**

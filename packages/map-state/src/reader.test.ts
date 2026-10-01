@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
-import type { StateMetadata, MapState, StateStyle } from './types.js';
+import type { StateMetadata, MapState, StateStyle, StateViewer } from './types.js';
 import { StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 
@@ -601,11 +601,10 @@ describe('background', () => {
 });
 
 describe('legend', () => {
-	it('round-trips positions, layouts and entries', () => {
+	it('round-trips layouts and entries', () => {
 		const state: MapState = {
 			meta: {
 				legend: {
-					position: 'top-right',
 					layout: 'inline',
 					font: 'serif',
 					entries: [
@@ -621,8 +620,8 @@ describe('legend', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('does not store the default position and layout', () => {
-		const legend = { position: 'bottom-left' as const, layout: 'vertical' as const, entries: [] };
+	it('does not store the default layout', () => {
+		const legend = { layout: 'vertical' as const, entries: [] };
 		expect(decodeState(encodeState({ meta: { legend }, elements: [] })).meta).toStrictEqual({
 			legend: { entries: [] }
 		});
@@ -642,14 +641,31 @@ describe('color scheme', () => {
 	});
 });
 
-describe('search', () => {
-	it('round-trips as a flag', () => {
-		const state: MapState = { meta: { search: true }, elements: [] };
-		expect(decodeState(encodeState(state))).toStrictEqual(state);
-		// not stored, like missing metadata
-		expect(encodeState({ meta: { search: false }, elements: [] })).toBe(encodeState({ elements: [] }));
-		expect(decodeState(encodeState({ meta: { search: false, colorScheme: '' }, elements: [] }))).toStrictEqual({
-			elements: []
+describe('viewer', () => {
+	it('round-trips the search, the zoom buttons and the legend, each at a position or none', () => {
+		for (const viewer of [
+			{ search: 'top-right', navigation: 'bottom-left', legend: 'right' },
+			{ search: 'top-left' },
+			{ navigation: 'none', legend: 'none' }
+		] as StateViewer[]) {
+			const state: MapState = { meta: { viewer }, elements: [] };
+			expect(decodeState(encodeState(state))).toStrictEqual(state);
+		}
+	});
+
+	it('does not store the defaults, like missing metadata', () => {
+		const defaults: StateViewer = { search: 'none', navigation: 'top-right', legend: 'bottom-left' };
+		expect(encodeState({ meta: { viewer: defaults }, elements: [] })).toBe(encodeState({ elements: [] }));
+		expect(
+			decodeState(encodeState({ meta: { viewer: { search: 'top-left', legend: 'bottom-left' } }, elements: [] }))
+		).toStrictEqual({ meta: { viewer: { search: 'top-left' } }, elements: [] });
+	});
+
+	it('reads the search and the position of the legend of older links', () => {
+		// written before: the search as a flag, the legend at the top right
+		expect(decodeState('IX-AAAUAAhiQYQgGEGEACgA').meta).toStrictEqual({
+			legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+			viewer: { search: 'top-left', legend: 'top-right' }
 		});
 	});
 });

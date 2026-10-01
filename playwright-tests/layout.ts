@@ -9,7 +9,7 @@ import { coveredPoints, menuItem, project, waitForMapIsReady, type MapWindow } f
 const center: [number, number] = [13.4, 52.5];
 const state: MapState = {
 	map: { center, radius: 10000 },
-	meta: { legend: { position: 'top-left', entries: [{ color: '#ff0000', label: 'Route' }] } },
+	meta: { viewer: { legend: 'top-left' }, legend: { entries: [{ color: '#ff0000', label: 'Route' }] } },
 	elements: [
 		{
 			type: 'polygon',
@@ -132,7 +132,7 @@ test('the legend keeps its corner, and the search and the attribution go to the 
 	const attribution = page.locator('.maplibregl-ctrl-attrib');
 	for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
 		await test.step(`a legend at ${position}`, async () => {
-			await page.goto('/#' + encodeState({ ...state, meta: { legend: { ...state.meta!.legend!, position } } }));
+			await page.goto('/#' + encodeState({ ...state, meta: { ...state.meta, viewer: { legend: position } } }));
 			await waitForMapIsReady(page);
 			await expect(legendList).toContainClass(`position-${position}`);
 			const map = (await page.locator('.map').boundingBox())!;
@@ -171,7 +171,7 @@ test('the legend keeps its corner, and the search and the attribution go to the 
 
 const zoomIn = (page: Page) => page.getByRole('button', { name: 'Zoom in' });
 
-test('the editor has buttons for zooming, the viewer not yet', async ({ page }) => {
+test('the editor has buttons for zooming, the viewer too unless the map has none', async ({ page }) => {
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
@@ -182,6 +182,10 @@ test('the editor has buttons for zooming, the viewer not yet', async ({ page }) 
 	await expect.poll(zoom).toBeCloseTo(before, 1);
 
 	await page.goto('/view#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await expect(zoomIn(page)).toBeVisible();
+	await page.goto('/view#' + encodeState({ ...state, meta: { ...state.meta, viewer: { navigation: 'none' } } }));
+	await page.reload();
 	await waitForMapIsReady(page);
 	await expect(zoomIn(page)).toHaveCount(0);
 });
@@ -202,7 +206,9 @@ test.describe('in the viewer', () => {
 				}
 			})
 		);
-		await page.goto('/#' + encodeState({ ...state, meta: { ...state.meta, search: true } }));
+		await page.goto(
+			'/#' + encodeState({ ...state, meta: { ...state.meta, viewer: { ...state.meta!.viewer, search: 'top-left' } } })
+		);
 		await waitForMapIsReady(page);
 		await page.getByRole('combobox', { name: 'Search address or place' }).fill('Place');
 		const results = page.getByRole('listbox', { name: 'Search results' });

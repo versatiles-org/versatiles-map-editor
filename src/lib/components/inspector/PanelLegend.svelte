@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
+	import type { LEGEND_POSITIONS, StateLegend, StateLegendEntry } from '@versatiles/map-state';
 	import { InputRow, ChoiceGroup, Button, ButtonGroup } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
@@ -11,7 +11,7 @@
 	const legend: StateLegend = $derived(doc.legend ?? { entries: [] });
 	const log = () => doc.state.log();
 
-	type Position = NonNullable<StateLegend['position']>;
+	type Position = (typeof LEGEND_POSITIONS)[number];
 	// at their places in a 3×3 grid, without the center
 	const positions: { value: Position; label: string; cell: [number, number] }[] = [
 		{ value: 'top-left', label: 'Top left', cell: [1, 1] },
@@ -61,8 +61,12 @@
 		<ChoiceGroup
 			layout="grid"
 			labelledby="{uid}-position-label"
-			value={legend.position ?? 'bottom-left'}
-			onchange={(position) => change({ position })}
+			value={doc.controls.legend === 'none' ? undefined : doc.controls.legend}
+			onchange={(position) => {
+				// a setting of the viewer: where shared and embedded maps show the legend
+				doc.viewer = { ...doc.viewer, legend: position };
+				log();
+			}}
 			options={positions}
 		/>
 	</InputRow>

@@ -6,8 +6,8 @@
 			"builder": "osm",
 			"options": { "theme": "gray", "recolor": { "brightness": 0.175, "contrast": 0.65 } }
 		},
+		"viewer": { "legend": "bottom-right" },
 		"legend": {
-			"position": "bottom-right",
 			"entries": [
 				{ "color": "#d55e00", "label": "Closed for renovation, Aug 2025 – Apr 2026" },
 				{ "color": "#0072b2", "label": "Detour of long-distance trains" }

@@ -141,9 +141,8 @@ test.describe('overlays of the viewer on a phone', () => {
 					const state: MapState = {
 						map: { center: [13.4, 52.5], radius: 10000 },
 						meta: {
-							search,
+							viewer: { search: search ? 'top-left' : 'none', legend: position },
 							legend: {
-								position,
 								entries: [
 									{ color: '#ff0000', label: 'A long legend entry' },
 									{ color: '#00ff00', label: 'Another entry' }

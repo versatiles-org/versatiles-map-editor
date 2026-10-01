@@ -58,10 +58,13 @@ describe('FileCommands', () => {
 			expect(files.filename).toBe('trip.mapjson');
 		});
 
-		it('keeps the title of the map in the file', async () => {
+		it('keeps the title of the map in the file, and the search of an older version in the viewer', async () => {
 			choose('trip.mapjson', JSON.stringify({ ...map, meta: { title: 'Holidays', search: true } }));
 			await files.openFile();
-			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'Holidays', search: true } });
+			expect(maps.openMap).toHaveBeenCalledWith({
+				...map,
+				meta: { title: 'Holidays', viewer: { search: 'top-left' } }
+			});
 		});
 
 		it('opens a file of an older version, whose fills have an opacity of their own', async () => {

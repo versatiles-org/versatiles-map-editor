@@ -27,5 +27,13 @@
 	}
 </script>
 
-<!-- the search if the map offers it -->
-<MapFrame {createDocument} bind:mapDocument search={mapDocument?.search === true} {hint} {sessions} {onMapLoad} />
+<!-- the search and the zoom buttons, as the map has them -->
+<MapFrame
+	{createDocument}
+	bind:mapDocument
+	search={mapDocument !== undefined && mapDocument.controls.search !== 'none'}
+	navigation={mapDocument !== undefined && mapDocument.controls.navigation !== 'none'}
+	{hint}
+	{sessions}
+	{onMapLoad}
+/>

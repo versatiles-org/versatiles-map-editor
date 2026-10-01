@@ -9,8 +9,8 @@
 				"osmOverlay": { "recolor": { "brightness": 0.05, "contrast": 0.9 } }
 			}
 		},
+		"viewer": { "legend": "top-left" },
 		"legend": {
-			"position": "top-left",
 			"entries": [
 				{ "color": "#d55e00", "label": "10 km zone" },
 				{ "color": "#e69f00", "label": "30 km exclusion zone" }

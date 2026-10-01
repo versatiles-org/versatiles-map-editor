@@ -1,7 +1,7 @@
 import * as maplibre from 'maplibre-gl';
-import type { StateLegend } from '@versatiles/map-state';
+import type { LEGEND_POSITIONS } from '@versatiles/map-state';
 
-export type LegendPosition = NonNullable<StateLegend['position']>;
+export type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 export type AttributionCorner = 'bottom-left' | 'bottom-right';
 export type NavigationCorner = 'top-right' | 'bottom-right';
 

@@ -244,14 +244,26 @@ describe('MapDocument', () => {
 		const entries = [{ color: '#ff0000', label: 'A' }];
 		await mapDocument.loadState({
 			elements: [],
-			meta: { legend: { position: 'bottom-left', layout: 'vertical', font: 'sans-serif', entries } }
+			meta: { legend: { layout: 'vertical', font: 'sans-serif', entries } }
 		});
 		expect(mapDocument.legend).toStrictEqual({ entries });
 		// also when it is changed, e.g. in the panel of the legend
-		mapDocument.legend = { position: 'top-right', font: 'sans-serif', entries };
-		expect(mapDocument.legend).toStrictEqual({ position: 'top-right', entries });
+		mapDocument.legend = { layout: 'inline', font: 'sans-serif', entries };
+		expect(mapDocument.legend).toStrictEqual({ layout: 'inline', entries });
 		mapDocument.legend = undefined;
 		expect(mapDocument.legend).toBeUndefined();
+	});
+
+	it('keeps the settings of the viewer without their defaults, and gives them with defaults as controls', async () => {
+		await mapDocument.loadState({
+			elements: [],
+			meta: { viewer: { search: 'top-right', navigation: 'top-right', legend: 'none' } }
+		});
+		expect(mapDocument.viewer).toStrictEqual({ search: 'top-right', legend: 'none' });
+		expect(mapDocument.controls).toStrictEqual({ search: 'top-right', navigation: 'top-right', legend: 'none' });
+		mapDocument.viewer = { search: 'none' };
+		expect(mapDocument.viewer).toBeUndefined();
+		expect(mapDocument.controls).toStrictEqual({ search: 'none', navigation: 'top-right', legend: 'bottom-left' });
 	});
 
 	it('should identify as non-interactive', () => {

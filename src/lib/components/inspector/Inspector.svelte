@@ -43,7 +43,7 @@
 	}
 
 	function toggleSearch(search: boolean) {
-		doc.search = search;
+		doc.viewer = { ...doc.viewer, search: search ? 'top-left' : 'none' };
 		doc.state.log();
 	}
 
@@ -113,7 +113,11 @@
 		</InspectorSection>
 		<InspectorSection title="Shared map">
 			<label class="check">
-				<input type="checkbox" checked={doc.search} onchange={(e) => toggleSearch(e.currentTarget.checked)} />
+				<input
+					type="checkbox"
+					checked={doc.controls.search !== 'none'}
+					onchange={(e) => toggleSearch(e.currentTarget.checked)}
+				/>
 				Address search for visitors
 			</label>
 			<Hint>Visitors can search for a place, e.g. their street. The map content does not change.</Hint>

@@ -225,7 +225,11 @@ describe('MapDocument', () => {
 		it('should add an imported state: its elements and its map properties', () => {
 			addElement(doc, 'marker');
 			doc.addState({
-				meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] }, colorScheme: 'dark2', search: true },
+				meta: {
+					legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+					colorScheme: 'dark2',
+					viewer: { search: 'top-left' }
+				},
 				elements: [
 					{
 						type: 'line',
@@ -239,7 +243,7 @@ describe('MapDocument', () => {
 			expect(doc.elements.map((e) => e.getState().type)).toStrictEqual(['marker', 'line']);
 			expect(doc.legend?.entries.length).toBe(1);
 			expect(doc.colors.scheme).toBe('dark2');
-			expect(doc.search).toBe(true);
+			expect(doc.viewer).toStrictEqual({ search: 'top-left' });
 		});
 
 		it('should add several elements and select them all', () => {

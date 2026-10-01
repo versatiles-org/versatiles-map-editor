@@ -22,4 +22,19 @@ describe('upgradeState', () => {
 			undefined
 		]);
 	});
+
+	it('makes the search and the position of the legend of an older version settings of the viewer', () => {
+		const old = {
+			meta: { search: true, legend: { position: 'right', layout: 'inline', entries: [] }, title: 'T' },
+			elements: []
+		} as unknown as MapState;
+		expect(upgradeState(old).meta).toStrictEqual({
+			legend: { layout: 'inline', entries: [] },
+			title: 'T',
+			viewer: { search: 'top-left', legend: 'right' }
+		});
+		// without them, nothing changes
+		const current: MapState = { meta: { title: 'T', viewer: { navigation: 'none' } }, elements: [] };
+		expect(upgradeState(current)).toStrictEqual(current);
+	});
 });

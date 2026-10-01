@@ -166,11 +166,11 @@ describe('categories', () => {
 		const { categories } = tableCategories(table, 1, ['#111111', '#222222'], '');
 		categories[1].symbol = 'icons:anchor';
 		const legend = legendWithCategories(
-			{ position: 'top-left', entries: [{ color: '#000000', label: 'Old' }] },
+			{ layout: 'inline', entries: [{ color: '#000000', label: 'Old' }] },
 			categories
 		);
 		expect(legend).toStrictEqual({
-			position: 'top-left',
+			layout: 'inline',
 			entries: [
 				{ color: '#000000', label: 'Old' },
 				// "" is no symbol

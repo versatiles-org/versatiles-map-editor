@@ -240,9 +240,10 @@
 				<label class="check">
 					<input
 						type="checkbox"
-						checked={stateManager.mapDocument.search}
+						checked={stateManager.mapDocument.controls.search !== 'none'}
 						onchange={(e) => {
-							stateManager.mapDocument.search = e.currentTarget.checked;
+							const doc = stateManager.mapDocument;
+							doc.viewer = { ...doc.viewer, search: e.currentTarget.checked ? 'top-left' : 'none' };
 							stateManager.log();
 							update(0);
 						}}

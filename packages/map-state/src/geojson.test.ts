@@ -267,10 +267,7 @@ describe('background', () => {
 
 describe('legend', () => {
 	it('round-trips as the meta member', () => {
-		const legend = {
-			position: 'top' as const,
-			entries: [{ color: '#ff0000', symbol: 'extras:pin-teardrop', label: 'A' }]
-		};
+		const legend = { entries: [{ color: '#ff0000', symbol: 'extras:pin-teardrop', label: 'A' }] };
 		const doc = stateToGeoJSON({ meta: { legend }, elements: [] });
 		expect(doc.meta).toStrictEqual({ legend });
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ legend });
@@ -318,12 +315,24 @@ describe('color scheme', () => {
 	});
 });
 
-describe('search', () => {
-	it('round-trips as the meta member', () => {
-		const doc = stateToGeoJSON({ meta: { search: true }, elements: [] });
-		expect(doc.meta).toStrictEqual({ search: true });
-		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ search: true });
-		expect(stateFromGeoJSON({ ...doc, meta: { search: 'yes' } } as unknown as GeoJSONDocument).meta).toBeUndefined();
+describe('viewer', () => {
+	it('round-trips as the meta member, without defaults and invalid values', () => {
+		const viewer = { search: 'top-right', navigation: 'none', legend: 'top' } as const;
+		const doc = stateToGeoJSON({ meta: { viewer }, elements: [] });
+		expect(doc.meta).toStrictEqual({ viewer });
+		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ viewer });
+		const foreign = { search: 'bottom', navigation: 'top-right', legend: 'right', zoom: true };
+		expect(stateFromGeoJSON({ ...doc, meta: { viewer: foreign } } as unknown as GeoJSONDocument).meta).toStrictEqual({
+			viewer: { legend: 'right' }
+		});
+	});
+
+	it('reads the search and the position of the legend of older files', () => {
+		const old = { search: true, legend: { position: 'top', entries: [{ color: '#ff0000', label: 'A' }] } };
+		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [], meta: old } as never).meta).toStrictEqual({
+			legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+			viewer: { search: 'top-left', legend: 'top' }
+		});
 	});
 });
 

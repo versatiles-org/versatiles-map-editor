@@ -15,6 +15,8 @@ import {
 	popupFromProps,
 	sanitizeBackground,
 	sanitizeLegend,
+	sanitizeViewer,
+	removeViewerDefaults,
 	sanitizeNumber,
 	sanitizeFrame,
 	sanitizeString,
@@ -115,7 +117,8 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	if (state.meta?.background) meta.background = state.meta.background;
 	if (state.meta?.legend) meta.legend = state.meta.legend;
 	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
-	if (state.meta?.search) meta.search = true;
+	const viewer = removeViewerDefaults(state.meta?.viewer);
+	if (viewer) meta.viewer = viewer;
 	if (state.meta?.labelFont) meta.labelFont = state.meta.labelFont;
 	if (state.meta?.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 	if (state.meta?.title) meta.title = state.meta.title;
@@ -280,7 +283,14 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		if (legend) meta.legend = legend;
 		const colorScheme = sanitizeString(doc.meta.colorScheme);
 		if (colorScheme) meta.colorScheme = colorScheme;
-		if (doc.meta.search === true) meta.search = true;
+		// older files: the search as a flag, and the position in the legend
+		const old = doc.meta as { search?: unknown; legend?: { position?: unknown } };
+		const viewer = sanitizeViewer({
+			...(old.search === true && { search: 'top-left' }),
+			...(typeof old.legend === 'object' && old.legend !== null && { legend: old.legend.position }),
+			...(typeof doc.meta.viewer === 'object' && doc.meta.viewer)
+		});
+		if (viewer) meta.viewer = viewer;
 		const labelFont = sanitizeString(doc.meta.labelFont);
 		if (labelFont) meta.labelFont = labelFont;
 		if (doc.meta.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;

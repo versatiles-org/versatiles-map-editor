@@ -441,8 +441,9 @@ test('editing the legend', async ({ page }) => {
 
 	await page.getByRole('radiogroup', { name: 'Position' }).getByRole('radio', { name: 'Top right' }).check();
 	await page.getByRole('radiogroup', { name: 'Layout' }).getByRole('radio', { name: 'Horizontal' }).check();
+	// the position is a setting of the viewer
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ legend: 'top-right' });
 	await expect.poll(legendInUrl).toMatchObject({
-		position: 'top-right',
 		layout: 'horizontal',
 		entries: [
 			{ color: '#00aa00', label: 'Park' },

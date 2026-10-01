@@ -1,9 +1,9 @@
 import { parseColor } from './color.js';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { boundsOf, centerOf } from './bounds.js';
-import { LEGEND_DEFAULTS, sanitizeFrame } from './profile.js';
+import { LEGEND_DEFAULTS, removeViewerDefaults, sanitizeFrame, VIEWER_CHOICES } from './profile.js';
 import { StateReader } from './reader.js';
-import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
@@ -16,7 +16,8 @@ import type {
 	StateLegend,
 	StatePopup,
 	MapState,
-	StateStyle
+	StateStyle,
+	StateViewer
 } from './types.js';
 
 export class StateWriter {
@@ -221,7 +222,7 @@ export class StateWriter {
 				(metadata.background ||
 					metadata.legend ||
 					metadata.colorScheme ||
-					metadata.search ||
+					removeViewerDefaults(metadata.viewer) ||
 					metadata.labelFont ||
 					metadata.mapLabelsOnTop ||
 					metadata.title));
@@ -253,10 +254,6 @@ export class StateWriter {
 			this.writeInteger(4, 6);
 			this.writeString(metadata.colorScheme);
 		}
-		if (metadata.search) {
-			// a flag: the key alone
-			this.writeInteger(5, 6);
-		}
 		if (metadata.labelFont) {
 			this.writeInteger(6, 6);
 			this.writeString(metadata.labelFont);
@@ -268,6 +265,12 @@ export class StateWriter {
 		if (metadata.title) {
 			this.writeInteger(9, 6);
 			this.writeString(metadata.title);
+		}
+		// key 5 was the search of older links, as a flag
+		const viewer = removeViewerDefaults(metadata.viewer);
+		if (viewer) {
+			this.writeInteger(10, 6);
+			this.writeViewer(viewer);
 		}
 		this.writeInteger(0, 6);
 	}
@@ -334,12 +337,22 @@ export class StateWriter {
 		this.writePopup(element.popup);
 	}
 
-	// key/value pairs like a style, so fields can be added later
+	/**
+	 * The choices that differ from the defaults, as key/value pairs like a style: the key of the
+	 * control, and the index of its choice in `VIEWER_CHOICES`.
+	 */
+	writeViewer(viewer: StateViewer) {
+		Object.entries(VIEWER_CHOICES).forEach(([name, choices], i) => {
+			const choice = viewer[name as keyof StateViewer];
+			if (choice === undefined) return;
+			this.writeInteger(i + 1, 4);
+			this.writeVarint((choices as readonly string[]).indexOf(choice));
+		});
+		this.writeInteger(0, 4);
+	}
+
+	// key/value pairs like a style, so fields can be added later; key 1 was the position of older links
 	writeLegend(legend: StateLegend) {
-		if (legend.position && legend.position !== LEGEND_DEFAULTS.position) {
-			this.writeInteger(1, 4);
-			this.writeVarint(LEGEND_POSITIONS.indexOf(legend.position));
-		}
 		if (legend.layout && legend.layout !== LEGEND_DEFAULTS.layout) {
 			this.writeInteger(2, 4);
 			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));

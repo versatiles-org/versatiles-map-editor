@@ -9,9 +9,9 @@
 				{ "color": "#d55e00", "label": "Temporary venues at landmarks", "symbol": "base:icon-monument" },
 				{ "color": "#009e73", "label": "Venues in nature", "symbol": "base:icon-outdoor" },
 				{ "color": "#cc9900", "label": "Olympic Village", "symbol": "base:icon-stadium" }
-			],
-			"position": "top-right"
+			]
 		},
+		"viewer": { "legend": "top-right" },
 		"title": "Paris 2024 Olympic venues",
 		"labelFont": "noto_sans_bold"
 	},

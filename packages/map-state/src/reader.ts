@@ -11,10 +11,11 @@ import type {
 	StateLegendEntry,
 	StatePopup,
 	MapState,
-	StateStyle
+	StateStyle,
+	StateViewer
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
-import { sanitizeBackground } from './profile.js';
+import { removeViewerDefaults, sanitizeBackground, VIEWER_CHOICES } from './profile.js';
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
@@ -250,12 +251,23 @@ export class StateReader {
 			if (!this.readBit()) return undefined;
 
 			const metadata: StateMetadata = {};
+			// of older links: the search as a flag, and the position in the legend
+			let oldSearch = false;
+			this.oldLegendPosition = undefined;
 			while (true) {
 				const key = this.readInteger(6);
 				switch (key) {
-					case 0:
+					case 0: {
+						if (!metadata.viewer && (oldSearch || this.oldLegendPosition)) {
+							const viewer = removeViewerDefaults({
+								search: oldSearch ? 'top-left' : undefined,
+								legend: this.oldLegendPosition
+							});
+							if (viewer) metadata.viewer = viewer;
+						}
 						// no metadata, like the writer does now (older hashes could store it empty)
 						return Object.keys(metadata).length > 0 ? metadata : undefined;
+					}
 					//case 1:
 					//	metadata.heading = this.readString();
 					//	break;
@@ -269,7 +281,8 @@ export class StateReader {
 						metadata.colorScheme = this.readString();
 						break;
 					case 5:
-						metadata.search = true;
+						// older links: the address search, as a flag
+						oldSearch = true;
 						break;
 					case 6:
 						metadata.labelFont = this.readString();
@@ -279,6 +292,9 @@ export class StateReader {
 						break;
 					case 9:
 						metadata.title = this.readString();
+						break;
+					case 10:
+						metadata.viewer = this.readViewer();
 						break;
 					case 8:
 						// not a field of the metadata: the symbols of the styles and of the legend
@@ -351,8 +367,9 @@ export class StateReader {
 					case 0:
 						return legend;
 					case 1:
-						legend.position = LEGEND_POSITIONS[this.readVarint()];
-						if (!legend.position) throw new Error('Invalid legend position');
+						// older links: the position of the legend, which is one of the viewer now
+						this.oldLegendPosition = LEGEND_POSITIONS[this.readVarint()];
+						if (!this.oldLegendPosition) throw new Error('Invalid legend position');
 						break;
 					case 2:
 						legend.layout = LEGEND_LAYOUTS[this.readVarint()];
@@ -377,6 +394,28 @@ export class StateReader {
 			}
 		} catch (cause) {
 			throw new Error(`Error reading legend`, { cause });
+		}
+	}
+
+	/** The position of the legend in an older link, kept for the viewer settings. */
+	private oldLegendPosition: (typeof LEGEND_POSITIONS)[number] | undefined;
+
+	/** The settings of the viewer: a choice per control, by its index in `VIEWER_CHOICES`. */
+	readViewer(): StateViewer {
+		try {
+			const viewer: Record<string, string> = {};
+			const keys = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
+			while (true) {
+				const key = this.readInteger(4);
+				if (key === 0) return viewer as StateViewer;
+				const name = keys[key - 1];
+				if (!name) throw new Error(`Invalid viewer key: ${key}`);
+				const choice = VIEWER_CHOICES[name][this.readVarint()];
+				if (!choice) throw new Error(`Invalid viewer ${name}`);
+				viewer[name] = choice;
+			}
+		} catch (cause) {
+			throw new Error(`Error reading viewer`, { cause });
 		}
 	}
 

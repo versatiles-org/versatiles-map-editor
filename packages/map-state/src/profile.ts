@@ -1,7 +1,15 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
-import type { StateBackground, StateLegend, StateLegendEntry, StatePopup, StateStyle, Bounds } from './types.js';
-import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import type {
+	StateBackground,
+	StateLegend,
+	StateLegendEntry,
+	StatePopup,
+	StateStyle,
+	StateViewer,
+	Bounds
+} from './types.js';
+import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS, NAVIGATION_POSITIONS, SEARCH_POSITIONS } from './types.js';
 
 // ---------------------------------------------------------------------------
 // Style vocabulary of the serialization format.
@@ -236,11 +244,10 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 // ----- legend -----
 
 /**
- * The values of a legend that are not stored: at the bottom left, entries below each other, a
- * sans-serif font, neither bold nor italic.
+ * The values of a legend that are not stored: entries below each other, a sans-serif font,
+ * neither bold nor italic. Its position is one of the viewer, see `VIEWER_DEFAULTS`.
  */
 export const LEGEND_DEFAULTS = {
-	position: 'bottom-left',
 	layout: 'vertical',
 	font: 'sans-serif',
 	bold: false,
@@ -262,13 +269,10 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 /** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const { position, layout, font, bold, italic, entries } = value as Record<string, unknown>;
+	const { layout, font, bold, italic, entries } = value as Record<string, unknown>;
 	if (!Array.isArray(entries)) return undefined;
 
 	const legend: StateLegend = { entries: [] };
-	if (LEGEND_POSITIONS.includes(position as StateLegend['position'] & string)) {
-		legend.position = position as StateLegend['position'];
-	}
 	if (LEGEND_LAYOUTS.includes(layout as StateLegend['layout'] & string)) {
 		legend.layout = layout as StateLegend['layout'];
 	}
@@ -288,4 +292,37 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		legend.entries.push(result);
 	}
 	return removeLegendDefaults(legend);
+}
+
+// ----- viewer -----
+
+/** What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left. */
+export const VIEWER_DEFAULTS = { search: 'none', navigation: 'top-right', legend: 'bottom-left' } as const;
+
+/** The choices of each control of the viewer: "none", or one of its positions. */
+export const VIEWER_CHOICES = {
+	search: ['none', ...SEARCH_POSITIONS],
+	navigation: ['none', ...NAVIGATION_POSITIONS],
+	legend: ['none', ...LEGEND_POSITIONS]
+} as const;
+
+/** The settings of the viewer without those with their default value, or undefined if all have it. */
+export function removeViewerDefaults(viewer: StateViewer | undefined): StateViewer | undefined {
+	if (!viewer) return undefined;
+	const result: StateViewer = { ...viewer };
+	for (const key of Object.keys(VIEWER_DEFAULTS) as (keyof StateViewer)[]) {
+		if (result[key] === undefined || result[key] === VIEWER_DEFAULTS[key]) delete result[key];
+	}
+	return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/** Valid settings of the viewer, without defaults, or undefined. Invalid values are left out. */
+export function sanitizeViewer(value: unknown): StateViewer | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const viewer: Record<string, string> = {};
+	for (const [key, choices] of Object.entries(VIEWER_CHOICES)) {
+		const choice = (value as Record<string, unknown>)[key];
+		if ((choices as readonly unknown[]).includes(choice)) viewer[key] = choice as string;
+	}
+	return removeViewerDefaults(viewer as StateViewer);
 }

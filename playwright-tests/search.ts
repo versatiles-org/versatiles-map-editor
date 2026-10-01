@@ -106,9 +106,9 @@ test.describe('address search in the viewer', () => {
 		await expect(option).not.toBeChecked();
 		await option.check();
 
-		await expect.poll(async () => (await storedState(page)).meta?.search).toBe(true);
+		await expect.poll(async () => (await storedState(page)).meta?.viewer?.search).toBe('top-left');
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
-		expect(decodeState(new URL(link).hash.slice(1)).meta?.search).toBe(true);
+		expect(decodeState(new URL(link).hash.slice(1)).meta?.viewer?.search).toBe('top-left');
 		// the preview is the embedded viewer, with the search
 		await expect(
 			page.frameLocator('iframe[title=preview]').getByRole('combobox', { name: 'Search address or place' })
@@ -135,7 +135,10 @@ test.describe('address search in the viewer', () => {
 			);
 			const state: MapState = {
 				map: { center: [13.4, 52.5], radius: 10000 },
-				meta: { search: true, legend: { position: 'top-left', entries: [{ color: '#ff0000', label: 'Area' }] } },
+				meta: {
+					viewer: { search: 'top-left', legend: 'top-left' },
+					legend: { entries: [{ color: '#ff0000', label: 'Area' }] }
+				},
 				elements: [{ type: 'marker', point: [13.4, 52.5] }]
 			};
 			const hash = encodeState(state);

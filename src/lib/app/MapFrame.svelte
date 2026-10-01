@@ -25,7 +25,14 @@
 	import type { Box } from '$lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
-	import { addAttribution, addNavigation, layoutOverlays, type AttributionSize } from './overlay_layout.js';
+	import {
+		addAttribution,
+		addNavigation,
+		layoutOverlays,
+		type AttributionSize,
+		type LegendPosition
+	} from './overlay_layout.js';
+	import { VIEWER_DEFAULTS } from '@versatiles/map-state';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -119,9 +126,14 @@
 	let topOverlaysHeight = $state(0);
 
 	// The legend keeps its corner: the search and the attribution go to the other side
-	const legendPosition = $derived(
-		mapDocument?.legend?.entries.length ? (mapDocument.legend.position ?? 'bottom-left') : undefined
-	);
+	// The legend at its place in the viewer. A legend hidden in the viewer is still shown in the
+	// editor, at the default place, so it can be edited.
+	const legendPosition: LegendPosition | undefined = $derived.by(() => {
+		if (!mapDocument?.legend?.entries.length) return undefined;
+		const position = mapDocument.controls.legend;
+		if (position !== 'none') return position;
+		return editor ? VIEWER_DEFAULTS.legend : undefined;
+	});
 	let pageWidth = $state(0);
 	let searchWidth = $state(0);
 	let legendWidth = $state(0);
@@ -274,10 +286,11 @@
 		<LoadingIndicator right={covered.right} />
 	{/if}
 	<Notifications right={covered.right} />
-	{#if mapDocument?.legend}
+	{#if mapDocument?.legend && legendPosition}
 		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
 		<Legend
 			legend={mapDocument.legend}
+			position={legendPosition}
 			left={covered.left}
 			right={covered.right}
 			top={covered.top + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}

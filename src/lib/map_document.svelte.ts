@@ -4,12 +4,15 @@ import type { MapDocumentInteractive } from './map_document_interactive.js';
 import {
 	boundsOf,
 	removeLegendDefaults,
+	removeViewerDefaults,
+	VIEWER_DEFAULTS,
 	type Bounds,
 	type StateBackground,
 	type StateLegend,
 	type MapState,
 	type StateElement,
-	type StateMetadata
+	type StateMetadata,
+	type StateViewer
 } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
 import { MapView, layerIdsOf, type ElementIndex } from './rendering/index.js';
@@ -20,8 +23,21 @@ export class MapDocument {
 	#elements: AbstractElement[] = $state.raw([]);
 	/** The map on the screen, which shows the elements. */
 	public readonly view: MapView;
-	/** Whether the read-only viewer shows an address search. */
-	public search = $state(false);
+	/**
+	 * What a shared or embedded map shows over it, and where: the search, the zoom buttons, the
+	 * legend. Without the defaults, as links store it; undefined if all have their default.
+	 */
+	get viewer(): StateViewer | undefined {
+		return this.#viewer;
+	}
+	set viewer(value: StateViewer | undefined) {
+		this.#viewer = removeViewerDefaults(value);
+	}
+	#viewer: StateViewer | undefined = $state.raw(undefined);
+	/** The settings of the viewer, with the defaults, e.g. `controls.search` is "none" without a search. */
+	public get controls(): Required<StateViewer> {
+		return { ...VIEWER_DEFAULTS, ...this.#viewer };
+	}
 	/** The title of the map, e.g. for the title of the page and file names. Empty without one. */
 	public title = $state('');
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
@@ -292,7 +308,7 @@ export class MapDocument {
 	/** Take the properties of the map from the state, e.g. its legend. */
 	protected applyMetadata(meta: StateMetadata | undefined) {
 		this.legend = meta?.legend;
-		this.search = meta?.search === true;
+		this.viewer = meta?.viewer;
 		this.title = meta?.title ?? '';
 		this.labelFont = meta?.labelFont;
 		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;
