@@ -81,7 +81,7 @@ jobs:
 
       # The browsers of the installed Playwright version
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/Library/Caches/ms-playwright
           key: playwright-browsers-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -91,7 +91,7 @@ jobs:
 
       # Responses of the tile server and the geocoder, so the tests do not depend on them
       - name: Cache server responses
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: playwright-tests/.request-cache
           key: playwright-requests-${{ github.run_id }}
