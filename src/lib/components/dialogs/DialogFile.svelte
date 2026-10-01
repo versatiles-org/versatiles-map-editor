@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Dialog, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import { Dialog, Button, ButtonGroup, TextField } from '$lib/components/ui/index.js';
 	import { EventHandler } from '$lib/event_handler.js';
 
 	/** The dialog that asks for the name of a downloaded file. */
 	type Mode = 'download' | null;
 	let mode: Mode = $state(null);
 	let dialog: Dialog | null = null;
-	let input: HTMLInputElement | null = $state(null);
+	let input: HTMLInputElement | undefined = $state();
 	const eventHandler = new EventHandler<{
 		confirm: void;
 		cancel: void;
@@ -72,7 +72,7 @@
 	{#if mode == 'download'}
 		<label>
 			File name
-			<input type="text" bind:this={input} spellcheck="false" onkeydown={onFilenameKeydown} />
+			<TextField bind:element={input} spellcheck="false" onkeydown={onFilenameKeydown} />
 		</label>
 		<ButtonGroup columns={2} spaced={false}>
 			<Button variant="ghost" size="md" onclick={cancel}>Cancel</Button>

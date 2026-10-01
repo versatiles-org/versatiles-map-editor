@@ -1,8 +1,9 @@
 /*
- * The fields of the editor and the viewer: text, numbers, lists, text areas and checkboxes, and
- * the focus ring of every control. A global stylesheet, since fields are in many components.
- * Everything is in :where(), without specificity, so a component can still change a field, e.g.
- * its width.
+ * The look of every control of the editor and the viewer, in one place: the fields of the
+ * components TextField, TextArea, Select and Checkbox (in ui/), the number field of the slider,
+ * the buttons that open a popup (e.g. of a color), and the focus ring. The tokens (--control-…) are
+ * those of the buttons too. Everything is in :where(), without specificity, so a component can
+ * still change a field, e.g. its width.
  */
 
 /* one focus ring for every control */
@@ -11,62 +12,43 @@
 	outline-offset: 2px;
 }
 
-/* text, numbers and lists: 28 px high, like all controls of the sidebar */
-:where(.map-editor-theme)
-	:where(
-		input:not([type]),
-		input[type='text'],
-		input[type='search'],
-		input[type='number'],
-		input[type='url'],
-		input[type='email'],
-		select,
-		textarea
-	) {
+/* text, numbers, lists and popup buttons: 28 px high, like the buttons of the sidebar */
+:where(.map-editor-theme) :where(.field, button.picker) {
 	box-sizing: border-box;
 	min-width: 0;
 	height: var(--size-sm);
 	margin: 0;
 	padding: 0 var(--space-2);
-	border: 1px solid var(--color-border-field);
+	border: 1px solid var(--control-border);
 	border-radius: var(--radius-md);
-	background-color: var(--color-field);
+	background-color: var(--control-bg);
 	color: var(--color-text);
 	font: inherit;
+	font-size: var(--font-size-md);
 }
 
-:where(.map-editor-theme)
-	:where(
-		input:not([type]),
-		input[type='text'],
-		input[type='search'],
-		input[type='number'],
-		input[type='url'],
-		input[type='email'],
-		select,
-		textarea
-	):where(:hover:not(:disabled, :focus)) {
-	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+:where(.map-editor-theme) :where(.field, button.picker):where(:hover:not(:disabled, :focus)) {
+	border-color: var(--control-border-hover);
 }
 
-:where(.map-editor-theme) :where(input, select, textarea):where(:disabled) {
+:where(.map-editor-theme) :where(.field):where(:disabled) {
 	background-color: var(--color-disabled-bg);
 	color: var(--color-disabled-text);
 }
 
-:where(.map-editor-theme) :where(input, textarea)::placeholder {
+:where(.map-editor-theme) :where(.field)::placeholder {
 	color: var(--color-text-muted);
 	opacity: 1;
 }
 
-:where(.map-editor-theme) :where(textarea) {
+:where(.map-editor-theme) :where(textarea.field) {
 	height: auto;
 	padding: 6px var(--space-2);
 	resize: vertical;
 }
 
-/* a list, with an arrow of our own instead of the browser's */
-:where(.map-editor-theme) :where(select) {
+/* a list, and a button that opens a popup: an arrow of our own instead of the browser's */
+:where(.map-editor-theme) :where(select.field, button.picker) {
 	appearance: none;
 	padding-right: 26px;
 	background-image: var(--chevron-down);
@@ -76,64 +58,45 @@
 	cursor: pointer;
 }
 
-/* a checkbox: a small field, filled like a primary button when checked */
-:where(.map-editor-theme) :where(input[type='checkbox']) {
-	appearance: none;
-	flex: none;
-	box-sizing: border-box;
-	width: 16px;
-	height: 16px;
-	margin: 0;
-	border: 1px solid var(--color-border-field);
-	border-radius: var(--radius-sm);
-	background-color: var(--color-field);
-	cursor: pointer;
-}
-
-:where(.map-editor-theme) :where(input[type='checkbox']):where(:hover:not(:disabled)) {
-	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
-}
-
-:where(.map-editor-theme) :where(input[type='checkbox']):where(:checked) {
-	border-color: var(--color-accent);
-	background: var(--color-accent) var(--checkmark) center / 12px no-repeat;
-}
-
-:where(.map-editor-theme) :where(input[type='checkbox']):where(:checked:hover:not(:disabled)) {
-	border-color: var(--color-accent-hover);
-	background-color: var(--color-accent-hover);
-}
-
-:where(.map-editor-theme) :where(input[type='checkbox']):where(:disabled) {
-	background-color: var(--color-disabled-bg);
-	cursor: default;
-}
-
-/* radio buttons of the browser, in the accent color (most choices are ChoiceGroups) */
-:where(.map-editor-theme) :where(input[type='radio']) {
-	accent-color: var(--color-accent);
-}
-
-/* a button that opens a popup to choose a value, e.g. a color: it looks like a list */
+/* a popup button shows its value, e.g. a color and its code, in one line */
 :where(.map-editor-theme) :where(button.picker) {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	box-sizing: border-box;
-	min-width: 0;
-	height: var(--size-sm);
-	padding: 0 26px 0 var(--space-2);
 	overflow: hidden;
-	border: 1px solid var(--color-border-field);
-	border-radius: var(--radius-md);
-	background: var(--color-field) var(--chevron-down) no-repeat right var(--space-2) center / 12px;
-	color: var(--color-text);
-	font: inherit;
 	text-align: left;
 	white-space: nowrap;
+}
+
+/* a checkbox: a field of 18 px, filled like a primary button when checked */
+:where(.map-editor-theme) :where(.checkbox) {
+	appearance: none;
+	flex: none;
+	box-sizing: border-box;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	border: 1px solid var(--control-border);
+	border-radius: var(--radius-sm);
+	background-color: var(--control-bg);
 	cursor: pointer;
 }
 
-:where(.map-editor-theme) :where(button.picker):where(:hover:not(:disabled)) {
-	border-color: color-mix(in srgb, var(--color-text) 45%, transparent);
+:where(.map-editor-theme) :where(.checkbox):where(:hover:not(:disabled)) {
+	border-color: var(--control-border-hover);
+}
+
+:where(.map-editor-theme) :where(.checkbox):where(:checked) {
+	border-color: var(--color-accent);
+	background: var(--color-accent) var(--checkmark) center / 14px no-repeat;
+}
+
+:where(.map-editor-theme) :where(.checkbox):where(:checked:hover:not(:disabled)) {
+	border-color: var(--color-accent-hover);
+	background-color: var(--color-accent-hover);
+}
+
+:where(.map-editor-theme) :where(.checkbox):where(:disabled) {
+	background-color: var(--color-disabled-bg);
+	cursor: default;
 }

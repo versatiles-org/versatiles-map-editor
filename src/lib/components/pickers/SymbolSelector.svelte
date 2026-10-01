@@ -4,7 +4,7 @@
 	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/symbols_catalog.js';
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
 	import { themeColor } from '$lib/rendering/theme_color.js';
-	import { Dialog } from '$lib/components/ui/index.js';
+	import { Dialog, TextField } from '$lib/components/ui/index.js';
 
 	let dialog: Dialog | undefined;
 	let filterInput: HTMLInputElement | undefined = $state();
@@ -94,8 +94,8 @@
 	{#await loadSymbols() then}
 		{@const symbols = filterSymbols(allSymbols(), filter)}
 		{@const showNone = matchesFilter(noneLabel, filter)}
-		<input
-			bind:this={filterInput}
+		<TextField
+			bind:element={filterInput}
 			bind:value={filter}
 			class="filter"
 			type="search"
@@ -129,7 +129,7 @@
 </Dialog>
 
 <style lang="scss">
-	.filter {
+	:global(.field.filter) {
 		flex-shrink: 0;
 		box-sizing: border-box;
 		width: 100%;

@@ -10,7 +10,16 @@
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/background/index.js';
-	import { InputRow, ChoiceGroup, Slider, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
+	import {
+		InputRow,
+		ChoiceGroup,
+		Checkbox,
+		Slider,
+		Button,
+		ButtonGroup,
+		Hint,
+		Select
+	} from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 
@@ -86,21 +95,20 @@
 
 	{#if settings.base === 'vector'}
 		<InputRow id="{uid}-theme" label="Theme">
-			<select id="{uid}-theme" value={settings.theme} onchange={(e) => change('theme', e.currentTarget.value)}>
+			<Select id="{uid}-theme" value={settings.theme} onchange={(e) => change('theme', e.currentTarget.value)}>
 				{#if !THEMES.some((t) => t.id === settings.theme)}<option value={settings.theme}>{settings.theme}</option>{/if}
 				{#each THEMES as { id, name } (id)}
 					<option value={id}>{name}</option>
 				{/each}
-			</select>
+			</Select>
 		</InputRow>
 	{/if}
 
 	{#if settings.base === 'satellite'}
 		<!-- the labels are set below, independently -->
 		<InputRow id="{uid}-streets" label="Streets">
-			<input
+			<Checkbox
 				id="{uid}-streets"
-				type="checkbox"
 				checked={settings.streets}
 				onchange={(e) => change('streets', e.currentTarget.checked)}
 			/>
@@ -170,7 +178,7 @@
 		<FontSelect id={uid} value={settings.font} onchange={(font) => font && change('font', font)} />
 
 		<InputRow id="{uid}-language" label="Language">
-			<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
+			<Select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
 				<option value="user">Browser language</option>
 				<option value="local">Local names</option>
 				{#if !['user', 'local', ...LANGUAGES].includes(settings.language)}
@@ -179,7 +187,7 @@
 				{#each languages as { id, name } (id)}
 					<option value={id}>{name}</option>
 				{/each}
-			</select>
+			</Select>
 		</InputRow>
 
 		<InputRow id="{uid}-label-size" label="Label size">
@@ -207,9 +215,8 @@
 		</InputRow>
 		<!-- the labels of markers are always on top -->
 		<InputRow id="{uid}-labels-on-top" label="Over areas and lines">
-			<input
+			<Checkbox
 				id="{uid}-labels-on-top"
-				type="checkbox"
 				checked={doc.mapLabelsOnTop}
 				onchange={(e) => setMapLabelsOnTop(e.currentTarget.checked)}
 			/>

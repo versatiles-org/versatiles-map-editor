@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { config, closestFace, facesOf, familiesOf, unknownFace } from '$lib/background/index.js';
-	import { InputRow } from '$lib/components/ui/index.js';
+	import { InputRow, Select } from '$lib/components/ui/index.js';
 
 	/**
 	 * A font of the tile server as a family and a style (e.g. "Lato" and "Bold"). Another family
@@ -41,20 +41,20 @@
 </script>
 
 <InputRow id="{id}-font" label="Font">
-	<select id="{id}-font" value={font?.family ?? ''} onchange={(e) => onFamily(e.currentTarget.value)}>
+	<Select id="{id}-font" value={font?.family ?? ''} onchange={(e) => onFamily(e.currentTarget.value)}>
 		{#if inherit}<option value="">{inherit}</option>{/if}
 		{#each families as family (family)}
 			<option value={family}>{family}</option>
 		{/each}
-	</select>
+	</Select>
 </InputRow>
 
 {#if font}
 	<InputRow id="{id}-face" label="Style">
-		<select id="{id}-face" value={font.id} onchange={(e) => onchange(e.currentTarget.value)}>
+		<Select id="{id}-face" value={font.id} onchange={(e) => onchange(e.currentTarget.value)}>
 			{#each faces as { id: glyphs, face } (glyphs)}
 				<option value={glyphs}>{face}</option>
 			{/each}
-		</select>
+		</Select>
 	</InputRow>
 {/if}

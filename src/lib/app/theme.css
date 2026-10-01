@@ -81,6 +81,10 @@
 	--size-xs: 24px;
 	--size-sm: 28px;
 	--size-md: 32px;
+	/* the look of every control: fields, lists, checkboxes and secondary buttons (text: --font-size-md) */
+	--control-bg: var(--color-field);
+	--control-border: var(--color-border-field);
+	--control-border-hover: color-mix(in srgb, var(--color-text) 45%, transparent);
 	--size-lg: 36px;
 	/* corners: of small parts, of controls, of surfaces (menus, popups, bars, dialogs) */
 	--radius-sm: 4px;

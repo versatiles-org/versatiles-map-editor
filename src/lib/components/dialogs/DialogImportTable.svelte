@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Dialog, Button } from '$lib/components/ui/index.js';
+	import { Dialog, Button, TextArea } from '$lib/components/ui/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import {
 		applyCategory,
@@ -129,7 +129,7 @@
 				onchange={readFile}
 			/>
 			<label for="{uid}-paste">Or paste the table here:</label>
-			<textarea id="{uid}-paste" rows="8" bind:value={text}></textarea>
+			<TextArea id="{uid}-paste" class="table" rows={8} bind:value={text} />
 			<Button variant="primary" size="md" disabled={!text.trim()} onclick={() => startMapping(undefined)}
 				>Continue</Button
 			>
@@ -185,7 +185,7 @@
 		font-size: var(--font-size-sm);
 	}
 
-	textarea {
+	:global(textarea.field.table) {
 		font-family: monospace;
 		resize: vertical;
 	}

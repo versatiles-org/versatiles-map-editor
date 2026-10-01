@@ -11,7 +11,8 @@
 		ChoiceGroup,
 		Hint,
 		InputRow,
-		Slider
+		Slider,
+		TextField
 	} from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
@@ -120,9 +121,8 @@
 		<InspectorSection title="Map">
 			<!-- changes the title of the page while it is typed, and is an undo step when it is done -->
 			<InputRow id="{uid}-title" label="Title">
-				<input
+				<TextField
 					id="{uid}-title"
-					type="text"
 					value={doc.title}
 					placeholder="Untitled map"
 					oninput={(e) => (doc.title = e.currentTarget.value)}

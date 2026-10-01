@@ -71,16 +71,20 @@ describe('DialogImportTable', () => {
 		expect(categories).toStrictEqual(['cafe (2)', 'shop (1)']);
 	});
 
+	/** The radio button of a choice, by its label. */
+	const radio = (label: string) =>
+		[...document.querySelectorAll('label')].find((l) => l.textContent?.trim() === label)!.querySelector('input')!;
+
 	it('uses an address column if there are no coordinates', () => {
 		paste('name,address\nTown hall,Rathausstraße 15 Berlin');
-		expect(document.querySelector<HTMLInputElement>('input[value="address"]')!.checked).toBe(true);
+		expect(radio('Address (searched)').checked).toBe(true);
 		expect(selected('Address')).toBe('address');
 		expect(selected('City')).toBe('(none)');
 	});
 
 	it('recognizes an address spread over several columns', () => {
 		paste('Name;Straße;Nr;PLZ;Ort\nRathaus;Markt;1;53111;Bonn');
-		expect(document.querySelector<HTMLInputElement>('input[value="address"]')!.checked).toBe(true);
+		expect(radio('Address (searched)').checked).toBe(true);
 		expect(selected('Address')).toBe('(none)');
 		expect(selected('Street')).toBe('Straße');
 		expect(selected('House number')).toBe('Nr');

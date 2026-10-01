@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/index.js';
+	import { Button, TextField } from '$lib/components/ui/index.js';
 	import { geocode, type GeocodingResult } from '$lib/components/geocoding.js';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 
@@ -150,7 +150,7 @@
 </script>
 
 <div class="search">
-	<input
+	<TextField
 		id="{uid}-input"
 		type="search"
 		role="combobox"
@@ -206,7 +206,7 @@
 		position: relative;
 	}
 
-	input {
+	.search :global(.field) {
 		width: 100%;
 		box-sizing: border-box;
 	}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { InputRow, Button } from '$lib/components/ui/index.js';
+	import { InputRow, Button, Checkbox, ChoiceGroup, Select } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { formatCount } from '$lib/components/format.js';
@@ -43,12 +43,17 @@
 	function setCategory(column: number) {
 		applyCategory(settings, table, column, colors);
 	}
+
+	// where the places are: in two columns of coordinates, or in columns of an address to search
+	const POSITION_TYPES: { value: 'coordinates' | 'address'; label: string }[] = [
+		{ value: 'coordinates', label: 'Latitude and longitude' },
+		{ value: 'address', label: 'Address (searched)' }
+	];
 </script>
 
-<label class="checkbox">
-	<input type="checkbox" bind:checked={hasHeader} onchange={() => setCategory(settings.category)} />
+<Checkbox bind:checked={hasHeader} onchange={() => setCategory(settings.category)}>
 	The first row contains the column names
-</label>
+</Checkbox>
 
 <div class="preview">
 	<table>
@@ -70,9 +75,13 @@
 
 <div class="mapping">
 	<fieldset>
-		<legend>Position</legend>
-		<label><input type="radio" bind:group={settings.positionType} value="coordinates" /> Latitude and longitude</label>
-		<label><input type="radio" bind:group={settings.positionType} value="address" /> Address (searched)</label>
+		<legend id="{uid}-position">Position</legend>
+		<ChoiceGroup
+			labelledby="{uid}-position"
+			value={settings.positionType}
+			onchange={(type) => (settings.positionType = type)}
+			options={POSITION_TYPES}
+		/>
 		{#if settings.positionType === 'coordinates'}
 			{@render columnSelect(
 				'latitude',
@@ -98,7 +107,7 @@
 				)}
 			{/each}
 			<InputRow id="{uid}-bias" label="Prefer places">
-				<select
+				<Select
 					id="{uid}-bias"
 					value={settings.bias}
 					onchange={(e) => (settings.bias = e.currentTarget.value as LocationBias)}
@@ -106,12 +115,11 @@
 					<option value="view">near the map view</option>
 					<option value="region">in the region of the map view</option>
 					<option value="none">anywhere</option>
-				</select>
+				</Select>
 			</InputRow>
-			<label class="checkbox">
-				<input type="checkbox" bind:checked={settings.importUncertain} />
+			<Checkbox bind:checked={settings.importUncertain}>
 				Also import uncertain matches (e.g. another street found)
-			</label>
+			</Checkbox>
 		{/if}
 	</fieldset>
 
@@ -163,10 +171,7 @@
 				<SymbolSelector id="{uid}-category-{i}-symbol" bind:symbol={() => c.symbol, (v) => (c.symbol = v ?? '')} />
 			</div>
 		{/each}
-		<label class="checkbox">
-			<input type="checkbox" bind:checked={settings.addLegend} />
-			Add the categories to the legend
-		</label>
+		<Checkbox bind:checked={settings.addLegend}>Add the categories to the legend</Checkbox>
 	</fieldset>
 {/if}
 
@@ -179,12 +184,12 @@
 
 {#snippet columnSelect(id: string, name: string, get: () => number, set: (value: number) => void, optional = false)}
 	<InputRow id="{uid}-{id}" label={name}>
-		<select id="{uid}-{id}" value={get()} onchange={(e) => set(Number(e.currentTarget.value))}>
+		<Select id="{uid}-{id}" value={get()} onchange={(e) => set(Number(e.currentTarget.value))}>
 			{#if optional}<option value={-1}>(none)</option>{/if}
 			{#each table.columns as column, i (i)}
 				<option value={i}>{column}</option>
 			{/each}
-		</select>
+		</Select>
 	</InputRow>
 {/snippet}
 
@@ -217,8 +222,11 @@
 			border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
 			border-radius: var(--radius-sm);
 		}
-		fieldset > label {
-			display: block;
+		/* a choice or a checkbox on a line of its own */
+		fieldset > :global(.choices),
+		fieldset > :global(.checkbox-label) {
+			display: flex;
+			margin: var(--space-1) 0;
 		}
 	}
 

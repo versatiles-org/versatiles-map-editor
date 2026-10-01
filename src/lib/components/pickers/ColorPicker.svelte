@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import { besideElement, keepInViewport } from './popup_position.js';
-	import { ChoiceGroup, IconButton, Slider } from '$lib/components/ui/index.js';
+	import { ChoiceGroup, IconButton, Slider, Select, TextField } from '$lib/components/ui/index.js';
 	import {
 		channelTrack,
 		hsvKeeping,
@@ -359,11 +359,11 @@
 
 		<div class="hex">
 			<label for="{id}-hex">Hex</label>
-			<input id="{id}-hex" type="text" value={shown} maxlength="30" spellcheck="false" onchange={onHexChange} />
+			<TextField id="{id}-hex" value={shown} maxlength={30} spellcheck="false" onchange={onHexChange} />
 		</div>
 
 		{#if palette}
-			<select
+			<Select
 				class="scheme"
 				aria-label="Color scheme"
 				value={colorScheme.id}
@@ -377,7 +377,7 @@
 				{#each schemes as { id, name } (id)}
 					<option value={id}>{name}</option>
 				{/each}
-			</select>
+			</Select>
 			{@render swatches(colorScheme.colors, colorScheme.name, pickScheme)}
 		{/if}
 
@@ -496,7 +496,7 @@
 			font-size: var(--font-size-sm);
 		}
 
-		input {
+		:global(.field) {
 			flex: 1;
 			min-width: 0;
 			font-family: ui-monospace, Menlo, Consolas, monospace;
@@ -515,7 +515,7 @@
 		border: 0;
 	}
 
-	.scheme {
+	:global(.field.scheme) {
 		width: 100%;
 	}
 

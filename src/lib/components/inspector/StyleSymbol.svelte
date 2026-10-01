@@ -3,7 +3,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { labelPositions, SymbolStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Slider, TextField } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 
 	/** The symbol layers of all selected markers, which are edited together. */
@@ -71,7 +71,7 @@
 
 <InspectorSection title="Label">
 	<InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
-		<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
+		<TextField id="{uid}-label" bind:value={label.value} onchange={log} />
 	</InputRow>
 
 	<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>

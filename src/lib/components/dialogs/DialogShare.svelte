@@ -1,6 +1,15 @@
 <script lang="ts">
 	import type { StateManager } from '$lib/state/manager.js';
-	import { Dialog, Button, ChoiceGroup, Hint } from '$lib/components/ui/index.js';
+	import {
+		Dialog,
+		Button,
+		Checkbox,
+		ChoiceGroup,
+		Hint,
+		Select,
+		TextArea,
+		TextField
+	} from '$lib/components/ui/index.js';
 	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
 	import { defaultPlace, PLACES } from './viewer_controls.js';
@@ -225,14 +234,12 @@
 					{#if key !== 'legend' || stateManager.mapDocument.legend?.entries.length}
 						{@const place = stateManager.mapDocument.controls[key]}
 						<div class="control">
-							<label class="check">
-								<input
-									type="checkbox"
-									checked={place !== 'none'}
-									onchange={(e) => setControl(key, e.currentTarget.checked ? defaultPlace(key) : 'none')}
-								/>
+							<Checkbox
+								checked={place !== 'none'}
+								onchange={(e) => setControl(key, e.currentTarget.checked ? defaultPlace(key) : 'none')}
+							>
 								{label}
-							</label>
+							</Checkbox>
 							{#if place !== 'none'}
 								<span class="sr-only" id="{uid}-{key}-place">Place of the {label.toLowerCase()}</span>
 								<ChoiceGroup
@@ -253,7 +260,7 @@
 				<h3><label for="text-link">Link</label></h3>
 				<Hint>Anyone with the link can view the map, but not change it.</Hint>
 				<div class="row">
-					<input id="text-link" type="text" readonly value={linkCode} onfocus={(e) => e.currentTarget.select()} />
+					<TextField id="text-link" class="code" readonly value={linkCode} onfocus={(e) => e.currentTarget.select()} />
 					<Button variant="primary" class="copy" bind:element={btnLink} onclick={copyLink}>Copy link</Button>
 				</div>
 			</section>
@@ -261,7 +268,14 @@
 			<section>
 				<h3><label for="text-iframe">Embed code</label></h3>
 				<Hint>Paste it into the HTML of a website.</Hint>
-				<textarea id="text-iframe" rows="4" readonly onfocus={(e) => e.currentTarget.select()}>{embedCode}</textarea>
+				<TextArea
+					id="text-iframe"
+					class="code"
+					rows={4}
+					readonly
+					value={embedCode}
+					onfocus={(e) => e.currentTarget.select()}
+				/>
 				<div class="buttons">
 					<Button class="copy" bind:element={btnEmbed} onclick={copyEmbedCode}>Copy embed code</Button>
 				</div>
@@ -271,9 +285,9 @@
 
 			<section aria-labelledby="{uid}-options">
 				<h3 id="{uid}-options">Options</h3>
-				<div class="field">
+				<div class="setting">
 					<label for="share-precision">Precision</label>
-					<select
+					<Select
 						id="share-precision"
 						value={String(precision)}
 						onchange={(e) => {
@@ -286,7 +300,7 @@
 						{#each [5, 4, 3, 2] as digits (digits)}
 							<option value={String(digits)}>About {formatLength(resolutionOfDigits(digits))}</option>
 						{/each}
-					</select>
+					</Select>
 				</div>
 				<Hint>Coarser positions make shorter links.</Hint>
 			</section>
@@ -437,7 +451,7 @@
 		display: flex;
 		gap: var(--space-2);
 
-		input {
+		:global(.field) {
 			flex: 1;
 			min-width: 0;
 		}
@@ -449,34 +463,28 @@
 		gap: var(--space-2);
 	}
 
-	input[readonly],
-	textarea[readonly] {
+	/* the link and the embed code, to copy */
+	:global(.field.code) {
 		color: var(--color-text-muted);
 		font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 		font-size: var(--font-size-sm);
 	}
 
-	textarea {
+	:global(textarea.field.code) {
 		width: 100%;
 		box-sizing: border-box;
 		resize: none;
 	}
 
-	.field {
+	/* a setting with its label above it */
+	.setting {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
 
-		select {
+		:global(.field) {
 			width: 100%;
 		}
-	}
-
-	.check {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		margin-top: var(--space-2);
 	}
 
 	/* a control of the viewer: whether it is shown, and where */
@@ -486,10 +494,6 @@
 		justify-content: space-between;
 		gap: var(--space-2);
 		margin-top: var(--space-2);
-
-		.check {
-			margin-top: 0;
-		}
 	}
 
 	/* a warning about what visitors may miss; the buttons below say what can be done about it */

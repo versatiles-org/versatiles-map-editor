@@ -515,7 +515,7 @@
 		font-family: var(--font-family);
 		font-size: var(--font-size-md);
 		/* a field (fields.css) on the map: in the size of bars, and with a shadow */
-		:global(input) {
+		:global(.field) {
 			height: var(--size-md);
 			border-color: var(--color-border);
 			box-shadow: var(--shadow-sm);

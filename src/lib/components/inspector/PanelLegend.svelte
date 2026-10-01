@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
-	import { InputRow, ChoiceGroup, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Button, ButtonGroup, Checkbox, Hint, TextField } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import InspectorSection from './InspectorSection.svelte';
@@ -69,17 +69,15 @@
 		</InputRow>
 
 		<InputRow id="{uid}-bold" label="Bold">
-			<input
+			<Checkbox
 				id="{uid}-bold"
-				type="checkbox"
 				checked={legend.bold === true}
 				onchange={(e) => change({ bold: e.currentTarget.checked })}
 			/>
 		</InputRow>
 		<InputRow id="{uid}-italic" label="Italic">
-			<input
+			<Checkbox
 				id="{uid}-italic"
-				type="checkbox"
 				checked={legend.italic === true}
 				onchange={(e) => change({ italic: e.currentTarget.checked })}
 			/>
@@ -91,9 +89,8 @@
 			<fieldset class="entry">
 				<legend>Entry {i + 1}</legend>
 				<InputRow id="{uid}-{i}-label" label="Text">
-					<input
+					<TextField
 						id="{uid}-{i}-label"
-						type="text"
 						value={entry.label}
 						oninput={(e) => updateEntry(i, { label: e.currentTarget.value })}
 						onchange={log}

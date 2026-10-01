@@ -82,13 +82,14 @@
 		}
 	}
 
+	/* in the look of the fields (see fields.css) */
 	.secondary {
-		border-color: var(--color-border-field);
-		background-color: var(--color-bg);
+		border-color: var(--control-border);
+		background-color: var(--control-bg);
 		color: var(--color-text);
 
 		&:hover:not(:disabled) {
-			background-color: var(--color-hover);
+			border-color: var(--control-border-hover);
 		}
 	}
 
@@ -105,8 +106,8 @@
 	}
 
 	.danger {
-		border-color: var(--color-border-field);
-		background-color: var(--color-bg);
+		border-color: var(--control-border);
+		background-color: var(--control-bg);
 		color: var(--color-error);
 
 		&:hover:not(:disabled) {

@@ -6,7 +6,7 @@
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
-	import { InputRow, Hint } from '$lib/components/ui/index.js';
+	import { Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
 
@@ -44,7 +44,7 @@
 			{#snippet heading()}
 				<label class="switch" title="Draw an outline">
 					{#if strokeVisible.mixed}<span class="mixed">(mixed)</span>{/if}
-					<input type="checkbox" aria-label="Draw outline" bind:checked={strokeVisible.value} onchange={log} />
+					<Checkbox aria-label="Draw outline" bind:checked={strokeVisible.value} onchange={log} />
 				</label>
 			{/snippet}
 			{#if strokeVisible.value}
@@ -61,13 +61,14 @@
 	{/if}
 	{#if single}
 		<InspectorSection title="Popup">
-			<textarea
+			<TextArea
 				class="popup"
-				rows="3"
+				rows={3}
 				aria-label="Popup"
 				bind:value={single.popup}
 				onchange={log}
-				placeholder="Shown on click: **bold**, [link](https://…)"></textarea>
+				placeholder="Shown on click: **bold**, [link](https://…)"
+			/>
 		</InspectorSection>
 	{/if}
 	{#if single?.getStyleLayers().stroke}
@@ -82,13 +83,12 @@
 {/key}
 
 <style>
-	.popup {
+	/* the text area of TextArea, which is styled in its own component */
+	:global(.field.popup) {
 		display: block;
 		width: 100%;
 		box-sizing: border-box;
 		margin: var(--space-2) 0 0;
-		resize: vertical;
-		font: inherit;
 	}
 
 	.switch {
