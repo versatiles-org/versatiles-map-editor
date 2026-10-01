@@ -5,6 +5,7 @@
  */
 export { default as ElementsDrawer } from './ElementsDrawer.svelte';
 export { default as MainMenu } from './MainMenu.svelte';
+export { default as Preview } from './Preview.svelte';
 export { default as Sidebar } from './Sidebar.svelte';
 export { default as SidebarToggle } from './SidebarToggle.svelte';
 export { default as StatusBar } from './StatusBar.svelte';

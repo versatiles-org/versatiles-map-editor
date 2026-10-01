@@ -8,7 +8,15 @@
 	// Imported with the page, not loaded once the editor starts: on a slow network (300 ms latency),
 	// the editor then starts about 0.5 s sooner. Phones, which get the viewer, load ~95 KiB more.
 	import { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { ElementsDrawer, Sidebar, SidebarToggle, StatusBar, ToolRail, TopBar } from '$lib/components/shell/index.js';
+	import {
+		ElementsDrawer,
+		Preview,
+		Sidebar,
+		SidebarToggle,
+		StatusBar,
+		ToolRail,
+		TopBar
+	} from '$lib/components/shell/index.js';
 	import { DrawBar, NodeDeleteButton, SelectionBar, VisibleAreaBar } from '$lib/components/map_editor/index.js';
 	import { newMarkerState } from '$lib/element/marker.js';
 	import { loadConfig } from '$lib/background/index.js';
@@ -58,6 +66,8 @@
 	const RAIL_WIDTH = 48;
 	// the list of elements, in a drawer right of the tools, over the map
 	let drawerOpen = $state(false);
+	// the map as visitors see it, over the editor
+	let previewing = $state(false);
 	const DRAWER_WIDTH = 250;
 	// the width at the left that the tools and the drawer cover, e.g. for the legend
 	const coveredLeft = $derived(RAIL_WIDTH + (drawerOpen ? DRAWER_WIDTH : 0));
@@ -118,7 +128,7 @@
 		<!-- from the start, so the map does not move when the editor has started -->
 		<div class="topbar-slot" style:height="{TOPBAR_HEIGHT}px">
 			{#if mapDocument?.isInteractive() && sync && files}
-				<TopBar doc={mapDocument} {sync} {files} />
+				<TopBar doc={mapDocument} {sync} {files} bind:previewing />
 			{/if}
 		</div>
 		<div class="rail-slot" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" style:width="{RAIL_WIDTH}px">
@@ -162,6 +172,8 @@
 				top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
 				right={sidebarWidth}
 			/>
+			<!-- over all of the editor but its top bar -->
+			<Preview doc={mapDocument} bind:open={previewing} top={TOPBAR_HEIGHT} />
 		{/if}
 
 		<DialogFile bind:this={dialogFile} />

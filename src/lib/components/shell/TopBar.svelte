@@ -9,7 +9,18 @@
 	import logo from './versatiles-logo.svg';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */
-	const { doc, sync, files }: { doc: MapDocumentInteractive; sync: SessionSync; files: FileCommands } = $props();
+	let {
+		doc,
+		sync,
+		files,
+		previewing = $bindable(false)
+	}: {
+		doc: MapDocumentInteractive;
+		sync: SessionSync;
+		files: FileCommands;
+		/** Whether the map is shown as visitors see it, see Preview. */
+		previewing?: boolean;
+	} = $props();
 
 	const history = $derived(doc.state.history);
 	let dialogShare: DialogShare | undefined = $state();
@@ -34,6 +45,12 @@
 		onclick={() => doc.state.redo()}
 	/>
 	<span class="spacer"></span>
+	<Button
+		size="md"
+		aria-pressed={previewing}
+		title={previewing ? 'Back to editing (Escape)' : 'The map as visitors see it'}
+		onclick={() => (previewing = !previewing)}><Icon name="preview" size={16} />Preview</Button
+	>
 	<Button variant="primary" size="md" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</Button>
 	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>

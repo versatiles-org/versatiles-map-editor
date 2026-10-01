@@ -321,8 +321,8 @@ test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, a
 			.filter(({ x, y, width }) => width > 0 && (x % 1 !== 0 || y % 1 !== 0))
 	);
 	// except after a text, whose width differs by browser: undo and redo after the name of the
-	// editor, and the icon of "Share" before its text
-	expect(between.filter(({ name }) => !['Undo', 'Redo', 'Share'].includes(name))).toStrictEqual([]);
+	// editor, and the icons of "Preview" and "Share" left of the texts of both buttons
+	expect(between.filter(({ name }) => !['Undo', 'Redo', 'Preview', 'Share'].includes(name))).toStrictEqual([]);
 
 	// and centered in their 24×24 grid, so they are centered in their buttons, e.g. the cursor of
 	// "Select": at most 1.25 units off (1px of an icon of 20px), for slanted shapes like the brush

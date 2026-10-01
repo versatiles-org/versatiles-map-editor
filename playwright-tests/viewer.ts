@@ -323,3 +323,71 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toBeUndefined();
 	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
 });
+
+test('the preview shows the map as visitors see it, over the editor', { tag: '@cross-browser' }, async ({ page }) => {
+	const point: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center: point, radius: 3000 },
+				elements: [{ type: 'marker', point, style: { label: 'Cafe' }, popup: { text: 'A café' } }]
+			})
+	);
+	await waitForMapIsReady(page);
+	// the marker is selected in the editor
+	const [x, y] = await project(page, point);
+	await page.mouse.click(x + 6, y - 8);
+	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+
+	const button = page.getByRole('button', { name: 'Preview' });
+	await button.click();
+	await expect(button).toHaveAttribute('aria-pressed', 'true');
+	const preview = page.frameLocator('iframe[title="Preview of the shared map"]');
+	await expect(preview.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+	await expect
+		.poll(() =>
+			page
+				.locator('iframe[title="Preview of the shared map"]')
+				.evaluate((f: HTMLIFrameElement) => (f.contentWindow as unknown as MapWindow).map?.loaded() === true)
+		)
+		.toBe(true);
+
+	// the popups of the viewer open on click
+	const frame = page.locator('iframe[title="Preview of the shared map"]');
+	const box = (await frame.boundingBox())!;
+	const [px, py] = await frame.evaluate((f: HTMLIFrameElement, p) => {
+		const { x, y } = (f.contentWindow as unknown as MapWindow).map.project(p);
+		return [x, y];
+	}, point);
+	await page.mouse.click(box.x + px + 6, box.y + py - 8);
+	await expect(preview.getByText('A café')).toBeVisible();
+
+	// the keys of the editor do nothing behind it, e.g. Delete
+	await page.locator('body').press('Delete');
+	await expect.poll(async () => (await storedState(page)).elements).toHaveLength(1);
+
+	// it follows the changes of the map
+	await button.focus();
+	await page.locator('body').press('Escape');
+	await expect(button).toHaveAttribute('aria-pressed', 'false');
+	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeVisible();
+	await page.getByRole('button', { name: 'Delete' }).click();
+	await button.click();
+	await expect
+		.poll(() =>
+			page
+				.locator('iframe[title="Preview of the shared map"]')
+				.evaluate(
+					(f: HTMLIFrameElement) =>
+						(f.contentWindow as unknown as MapWindow).map?.queryRenderedFeatures({ layers: ['elements_symbol'] }).length
+				)
+		)
+		.toBe(0);
+	// e.g. an undo with the button of the top bar (the keys belong to the preview)
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).elements).toHaveLength(1);
+
+	// back to the editor, which kept its selection
+	await button.click();
+	await expect(page.locator('iframe[title="Preview of the shared map"]')).toHaveCount(0);
+});

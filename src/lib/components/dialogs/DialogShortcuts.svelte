@@ -30,7 +30,10 @@
 		},
 		{
 			title: 'View',
-			keys: [['Fullscreen, and back', 'F, and Escape']]
+			keys: [
+				['Fullscreen, and back', 'F, and Escape'],
+				['Close the preview', 'Escape']
+			]
 		},
 		{
 			title: 'Drawing',
