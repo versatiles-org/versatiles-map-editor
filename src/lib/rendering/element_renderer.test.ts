@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { MapDocument } from '../map_document.svelte.js';
-import { ELEMENT_LAYERS, elementStyle, layerIdsOf, MAX_LABEL_GROUPS } from './element_renderer.js';
+import { ELEMENT_LAYERS, elementStyle, groupElements, layerIdsOf, MAX_GROUPS, type Drawn } from './element_renderer.js';
 import type { PolygonElement } from '../element/polygon.js';
 import type { MarkerElement } from '../element/marker.js';
 
@@ -151,7 +151,7 @@ describe('ElementRenderer', () => {
 		});
 
 		it('share one layer if there are too many, since every layer costs time', async () => {
-			await markers(Array.from({ length: MAX_LABEL_GROUPS + 1 }, (_, i) => `Label ${i}`));
+			await markers(Array.from({ length: MAX_GROUPS + 1 }, (_, i) => `Label ${i}`));
 			expect(new Set(groups().map(([, group]) => group))).toStrictEqual(new Set([0]));
 			expect(map.addLayer).not.toHaveBeenCalled();
 		});
@@ -164,5 +164,60 @@ describe('ElementRenderer', () => {
 			expect(map.addLayer).toHaveBeenCalledTimes(2);
 			expect(map.removeLayer).not.toHaveBeenCalled();
 		});
+	});
+
+	it('draws a polygon over a marker in front of it with layers of another group', async () => {
+		map.addLayer.mockClear();
+		await doc.setState({
+			elements: [
+				{ type: 'marker', point: [0, 0] },
+				{
+					type: 'polygon',
+					points: [
+						[0, 0],
+						[1, 0],
+						[0, 1]
+					]
+				}
+			]
+		});
+		doc.view.renderer.flush();
+		// the polygon's area and outline above the marker
+		expect(map.addLayer.mock.calls.map(([layer]) => layer.id)).toStrictEqual(['elements_fill_1', 'elements_stroke_1']);
+		expect(doc.view.renderer.layerIds('fill')).toStrictEqual(['elements_fill', 'elements_fill_1']);
+		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([1]);
+		expect(lastFeatures('symbol').map((f) => f.properties?.group)).toStrictEqual([0]);
+
+		// in the fixed order (e.g. with the labels of the background map over areas and lines): one group
+		doc.view.renderer.setFixedOrder(true);
+		doc.view.renderer.flush();
+		expect(map.removeLayer.mock.calls.map(([id]) => id)).toStrictEqual(['elements_stroke_1', 'elements_fill_1']);
+		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([0]);
+	});
+});
+
+describe('groupElements', () => {
+	const marker: Drawn = { roles: ['symbol'], label: false };
+	const labeled: Drawn = { roles: ['symbol'], label: true };
+	const polygon: Drawn = { roles: ['fill', 'stroke'], label: false };
+	const area: Drawn = { roles: ['fill'], label: false };
+	const line: Drawn = { roles: ['stroke'], label: false };
+
+	it('keeps elements in one group while nothing of them is drawn under something before them', () => {
+		expect(groupElements([area, area, line, line, marker, marker])).toStrictEqual([0, 0, 0, 0, 0, 0]);
+		// an area over an outline, a line over a marker, a marker over a label: a new group
+		expect(groupElements([polygon, polygon])).toStrictEqual([0, 1]);
+		expect(groupElements([marker, line])).toStrictEqual([0, 1]);
+		expect(groupElements([labeled, marker, labeled, marker])).toStrictEqual([0, 1, 1, 2]);
+		// a marker under a polygon, and another marker over it
+		expect(groupElements([marker, polygon, marker])).toStrictEqual([0, 1, 1]);
+	});
+
+	it('draws in the fixed order on demand, or with too many groups', () => {
+		expect(groupElements([marker, polygon, labeled, marker], true)).toStrictEqual([0, 0, 0, 1]);
+		const many = Array.from({ length: MAX_GROUPS + 1 }, () => polygon);
+		expect(new Set(groupElements(many))).toStrictEqual(new Set([0]));
+		// up to the limit, each in a group of its own
+		expect(groupElements(many.slice(1))).toStrictEqual(many.slice(1).map((_, i) => i));
 	});
 });

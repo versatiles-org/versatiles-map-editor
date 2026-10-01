@@ -14,7 +14,7 @@ export function duplicateSelection(doc: MapDocumentInteractive): void {
 
 /**
  * Move the selected elements in the drawing order: to the front, one step forward, one step
- * backward, or to the back. Within their layer: areas stay under lines, lines under markers.
+ * backward, or to the back.
  */
 export function moveSelection(doc: MapDocumentInteractive, to: 'front' | 'forward' | 'backward' | 'back'): void {
 	const elements = doc.selection.selectedElements;

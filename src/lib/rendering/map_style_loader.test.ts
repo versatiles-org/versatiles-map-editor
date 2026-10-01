@@ -15,6 +15,7 @@ describe('MapStyleLoader', () => {
 		renderer = {
 			redraw: vi.fn(),
 			onStyleLoad: vi.fn(),
+			setFixedOrder: vi.fn(),
 			symbolLayerIds: () => ['elements_symbol']
 		} as unknown as ElementRenderer;
 		loader = new MapStyleLoader(map as unknown as MaplibreMap, renderer);

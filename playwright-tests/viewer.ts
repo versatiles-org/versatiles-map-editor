@@ -391,3 +391,41 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await button.click();
 	await expect(page.locator('iframe[title="Preview of the shared map"]')).toHaveCount(0);
 });
+
+// Each element at its place in the drawing order, also across kinds, e.g. an area over a marker
+test('an area in front of a marker covers it', { tag: '@cross-browser' }, async ({ page }) => {
+	const point: [number, number] = [13.4, 52.5];
+	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
+	const area: MapState['elements'][number] = {
+		type: 'polygon',
+		points: [
+			[13.39, 52.495],
+			[13.41, 52.495],
+			[13.41, 52.505],
+			[13.39, 52.505]
+		],
+		style: { color: '#0000ff' }
+	};
+	/** The red pixels of the marker. */
+	async function redOfMarker(elements: MapState['elements']): Promise<number> {
+		await page.goto('/view#' + encodeState({ map: { center: point, radius: 2000 }, elements }));
+		await page.reload();
+		await waitForMapIsReady(page);
+		const [x, y] = await project(page, point);
+		const png = await page.screenshot({ clip: { x: x - 20, y: y - 40, width: 40, height: 40 } });
+		return page.evaluate(async (base64) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = new OffscreenCanvas(image.width, image.height);
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			const { data } = context.getImageData(0, 0, image.width, image.height);
+			let red = 0;
+			for (let i = 0; i < data.length; i += 4) if (data[i] > 200 && data[i + 1] < 60 && data[i + 2] < 60) red++;
+			return red;
+		}, png.toString('base64'));
+	}
+	expect(await redOfMarker([area, marker])).toBeGreaterThan(50);
+	expect(await redOfMarker([marker, area])).toBe(0);
+});

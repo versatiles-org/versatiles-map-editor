@@ -58,24 +58,24 @@ describe('commands', () => {
 			expect(order()).toStrictEqual([0, 1, 2, 3]);
 		});
 
-		it('one step, past the next element of the same layer', () => {
+		it('one step, past the next element of any kind', () => {
 			const marker1 = addElement(doc, 'marker');
 			const polygon = addElement(doc, 'polygon');
 			const marker2 = addElement(doc, 'marker');
 			const line = addElement(doc, 'line');
 			doc.selection.selectElement(marker1);
-			// past the polygon, which is drawn under all markers, to after the next marker
+			// over the polygon, which can be drawn over markers
 			moveSelection(doc, 'forward');
-			expect(doc.elements).toStrictEqual([polygon, marker2, marker1, line]);
-			// no marker in front of it: it stays
-			moveSelection(doc, 'forward');
-			expect(doc.elements).toStrictEqual([polygon, marker2, marker1, line]);
-			moveSelection(doc, 'backward');
 			expect(doc.elements).toStrictEqual([polygon, marker1, marker2, line]);
-			// a line shares the layer of the outline of the polygon
+			moveSelection(doc, 'forward');
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([polygon, marker2, line, marker1]);
+			// in front already: it stays
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([polygon, marker2, line, marker1]);
 			doc.selection.selectElement(line);
 			moveSelection(doc, 'backward');
-			expect(doc.elements).toStrictEqual([line, polygon, marker1, marker2]);
+			expect(doc.elements).toStrictEqual([polygon, line, marker2, marker1]);
 		});
 
 		it('one step, several elements: each past the next one that is not moved', () => {

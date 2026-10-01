@@ -15,7 +15,7 @@ import {
 	type StateViewer
 } from '@versatiles/map-state';
 import { elementFromState } from './element/registry.js';
-import { MapView, layerIdsOf, type ElementIndex } from './rendering/index.js';
+import { MapView, type ElementIndex } from './rendering/index.js';
 import { getSettings, sameBackground } from './background/index.js';
 
 export class MapDocument {
@@ -178,10 +178,8 @@ export class MapDocument {
 	}
 
 	/**
-	 * Move the elements in the drawing order: to the front (the end of the list), one step forward,
-	 * one step backward, or to the back. A step passes the next element that is drawn in the same
-	 * layer, since the layers keep their order: areas under lines, lines under markers. Moving a
-	 * marker past a polygon changes nothing on the map. The moved elements keep their order.
+	 * Move the elements in the drawing order: to the front (the end of the list), one step forward
+	 * past the next element, one step backward, or to the back. The moved elements keep their order.
 	 */
 	public moveElements(moved: AbstractElement[], to: 'front' | 'forward' | 'backward' | 'back') {
 		const set = new Set(moved);
@@ -192,22 +190,11 @@ export class MapDocument {
 
 		// forward: the element nearest to the front first, so it makes room for the next one
 		const list = [...this.elements];
-		const forward = to === 'forward';
-		const step = forward ? 1 : -1;
-		const sharesLayer = (a: AbstractElement, b: AbstractElement) => {
-			const layers = new Set(layerIdsOf(a));
-			return layerIdsOf(b).some((id) => layers.has(id));
-		};
-		for (const element of forward ? [...selected].reverse() : selected) {
+		const step = to === 'forward' ? 1 : -1;
+		for (const element of step > 0 ? [...selected].reverse() : selected) {
 			const from = list.indexOf(element);
-			let target = from + step;
-			// past the next element of the same layer that is not moved, if there is one
-			while (target >= 0 && target < list.length) {
-				const other = list[target];
-				if (set.has(other)) break;
-				if (sharesLayer(element, other)) break;
-				target += step;
-			}
+			const target = from + step;
+			// past the next element that is not moved, if there is one
 			if (target < 0 || target >= list.length || set.has(list[target])) continue;
 			list.splice(from, 1);
 			list.splice(target, 0, element);

@@ -9,8 +9,8 @@ import { allSymbols } from '../symbols_catalog.js';
 export type Role = keyof StyleLayers;
 
 /**
- * The layer (and source) of each role, in drawing order: all areas at the bottom, then lines and
- * outlines, then markers. Within a layer, the elements keep their order (the "order" property).
+ * The source of each role, and the layer of its first group, see `groupElements`. Within a layer,
+ * the elements keep their order (the "order" property).
  */
 export const ELEMENT_LAYERS: Record<Role, string> = {
 	fill: 'elements_fill',
@@ -20,17 +20,67 @@ export const ELEMENT_LAYERS: Record<Role, string> = {
 const ROLES = Object.keys(ELEMENT_LAYERS) as Role[];
 
 /**
- * MapLibre draws the symbols of a layer first, then its labels, so in one layer every label covers
- * every symbol (maplibre-gl-js issue #49). So the markers are drawn by several layers of the same
- * source, from the back to the front: each group of markers ends with a labeled one. Up to this
- * many labeled markers; with more, all markers share one layer again, since every layer costs
- * time, and their labels cover all symbols.
+ * The most groups of layers, see `groupElements`: every layer costs time, so with more, the
+ * elements are drawn in the fixed order.
  */
-export const MAX_LABEL_GROUPS = 100;
+export const MAX_GROUPS = 100;
 
-/** The layer of a group of markers: the first one is `elements_symbol`, the next ones are above it. */
+/** The layer of a role in a group: the first group has `elements_fill` etc., the next ones are above it. */
+export function layerId(role: Role, group: number): string {
+	return group === 0 ? ELEMENT_LAYERS[role] : `${ELEMENT_LAYERS[role]}_${group}`;
+}
+
+/** The layer of a group of markers. */
 export function symbolLayerId(group: number): string {
-	return group === 0 ? ELEMENT_LAYERS.symbol : `${ELEMENT_LAYERS.symbol}_${group}`;
+	return layerId('symbol', group);
+}
+
+/** What an element draws, for its group: the roles of its style, and whether it has a label. */
+export interface Drawn {
+	roles: Role[];
+	label: boolean;
+}
+
+/**
+ * The group of each element, in drawing order. The elements of a group are drawn by one layer per
+ * role: its areas, then its lines and outlines, then its markers; MapLibre draws the symbols of a
+ * layer before all its labels (maplibre-gl-js issue #49). So an element joins the group of the one
+ * before it, unless something of it would be drawn under something earlier in the group: its area
+ * under a line or a marker, its line under a marker, its marker under a label. This looks the same
+ * as one layer per element, with far fewer layers.
+ *
+ * In the fixed order (e.g. while the labels of the background map are between the areas and lines
+ * and the markers), or with more than `MAX_GROUPS` groups, all areas and lines are in the first
+ * group, under all markers, and the markers in groups that each end with a labeled marker, if
+ * there are at most `MAX_GROUPS` of them.
+ */
+export function groupElements(elements: Drawn[], fixedOrder = false): number[] {
+	if (!fixedOrder) {
+		let group = 0;
+		let stroke = false;
+		let symbol = false;
+		let label = false;
+		const groups = elements.map(({ roles, label: hasLabel }) => {
+			const has = (role: Role) => roles.includes(role);
+			if ((has('fill') && (stroke || symbol)) || (has('stroke') && symbol) || (has('symbol') && label)) {
+				group++;
+				stroke = symbol = label = false;
+			}
+			stroke ||= has('stroke');
+			symbol ||= has('symbol');
+			label ||= hasLabel;
+			return group;
+		});
+		if (group < MAX_GROUPS) return groups;
+	}
+	const separate = elements.filter((e) => e.label).length <= MAX_GROUPS;
+	let group = 0;
+	return elements.map(({ roles, label }) => {
+		if (!roles.includes('symbol')) return 0;
+		const current = group;
+		if (separate && label) group++;
+		return current;
+	});
 }
 
 /** The ids of the layers that draw the element: one per role of its style, shared with the other elements. */
@@ -68,32 +118,43 @@ export function elementStyle(font: string): {
 	const empty = (): SourceSpecification => ({ type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 	return {
 		sources: Object.fromEntries(ROLES.map((role) => [ELEMENT_LAYERS[role], empty()])),
-		layers: [
-			{
-				id: ELEMENT_LAYERS.fill,
+		layers: [elementLayer('fill', 0, font), elementLayer('stroke', 0, font), elementLayer('symbol', 0, font)]
+	};
+}
+
+/** The layer of a role in a group, see `groupElements`; markers with the glyph font of their labels. */
+export function elementLayer(role: Role, group: number, font: string): LayerSpecification {
+	const filter: ExpressionSpecification = ['==', ['get', 'group'], group];
+	switch (role) {
+		case 'fill':
+			return {
+				id: layerId('fill', group),
 				source: ELEMENT_LAYERS.fill,
 				type: 'fill',
+				filter,
 				layout: { 'fill-sort-key': ['get', 'order'] },
 				paint: { 'fill-pattern': ['get', 'pattern'], 'fill-opacity': ['get', 'opacity'] }
-			},
-			{
-				id: ELEMENT_LAYERS.stroke,
+			};
+		case 'stroke':
+			return {
+				id: layerId('stroke', group),
 				source: ELEMENT_LAYERS.stroke,
 				type: 'line',
+				filter,
 				layout: { 'line-cap': 'round', 'line-join': 'round', 'line-sort-key': ['get', 'order'] },
 				paint: {
 					'line-color': ['get', 'color'],
 					'line-width': ['get', 'width'],
 					'line-dasharray': DASH_ARRAYS
 				}
-			},
-			symbolLayer(font, 0)
-		]
-	};
+			};
+		case 'symbol':
+			return symbolLayer(font, group);
+	}
 }
 
-/** The layer of the markers of a group, with the glyph font of their labels, see `MAX_LABEL_GROUPS`. */
-export function symbolLayer(font: string, group: number): LayerSpecification {
+/** The layer of the markers of a group, with the glyph font of their labels. */
+function symbolLayer(font: string, group: number): LayerSpecification {
 	return {
 		id: symbolLayerId(group),
 		source: ELEMENT_LAYERS.symbol,
@@ -137,8 +198,8 @@ export function symbolLayer(font: string, group: number): LayerSpecification {
 }
 
 /**
- * Draws all elements with one source and layer per role, instead of a source and layers per
- * element, so maps with many elements (e.g. a table import) stay fast. The elements are features
+ * Draws all elements with one source per role and groups of layers (see `groupElements`), instead
+ * of a source and layers per element, so maps with many elements (e.g. a table import) stay fast. The elements are features
  * with their element id; their styles are feature properties that the layers read.
  *
  * Changes are collected and written once per microtask: a change of the element list replaces
@@ -151,11 +212,13 @@ export class ElementRenderer {
 	private changed = new Set<AbstractElement>();
 	private all = false;
 	private scheduled = false;
-	/** The group of each marker, see `MAX_LABEL_GROUPS`, and the markers with a label. */
+	/** The group of each element, see `groupElements`, and what each draws, to notice a change. */
 	private groups = new Map<AbstractElement, number>();
-	private labeled = new Set<AbstractElement>();
-	/** The number of layers of markers that the map style has, at least `elements_symbol`. */
-	private symbolLayers = 1;
+	private drawn = new Map<AbstractElement, string>();
+	/** Whether the elements are drawn in the fixed order, see `groupElements`. */
+	private fixedOrder = false;
+	/** The layers of the groups after the first, which the map style has, in drawing order. */
+	private extraLayers: string[] = [];
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -169,72 +232,94 @@ export class ElementRenderer {
 		this.redraw();
 	}
 
-	/** Whether the element is a marker with a label. */
-	private static hasLabel(element: AbstractElement): boolean {
-		const label = element.getStyleLayers().symbol?.getProperties().label;
-		return typeof label === 'string' && label.trim() !== '';
+	/** What the element draws, for its group. */
+	private static drawnOf(element: AbstractElement): Drawn {
+		const layers = element.getStyleLayers();
+		const label = layers.symbol?.getProperties().label;
+		return { roles: ROLES.filter((role) => layers[role]), label: typeof label === 'string' && label.trim() !== '' };
+	}
+
+	private static key({ roles, label }: Drawn): string {
+		return `${roles.join()}${label ? ' label' : ''}`;
+	}
+
+	/** The groups of the elements, see `groupElements`. */
+	private regroup() {
+		const drawn = this.elements.map((element) => ElementRenderer.drawnOf(element));
+		const groups = groupElements(drawn, this.fixedOrder);
+		this.groups = new Map(this.elements.map((element, i) => [element, groups[i]]));
+		this.drawn = new Map(this.elements.map((element, i) => [element, ElementRenderer.key(drawn[i])]));
 	}
 
 	/**
-	 * The groups of the markers, from the back to the front: each group ends with a labeled marker,
-	 * so no label is drawn under a symbol in front of it. All in one group with too many labels.
+	 * Draw the elements in the fixed order, e.g. while the labels of the background map are between
+	 * the areas and lines and the markers; else each at its place in the order.
 	 */
-	private regroup() {
-		const markers = this.elements.filter((element) => element.getStyleLayers().symbol);
-		this.labeled = new Set(markers.filter((element) => ElementRenderer.hasLabel(element)));
-		const separate = this.labeled.size <= MAX_LABEL_GROUPS;
-		this.groups = new Map();
-		let group = 0;
-		for (const marker of markers) {
-			this.groups.set(marker, group);
-			if (separate && this.labeled.has(marker)) group++;
-		}
+	public setFixedOrder(fixed: boolean) {
+		if (fixed === this.fixedOrder) return;
+		this.fixedOrder = fixed;
+		this.regroup();
+		this.redraw();
 	}
 
-	/** The ids of the layers of the markers, from the back to the front, e.g. to find a marker. */
+	/** The ids of the layers of a role, e.g. to find an element under the mouse. */
+	public layerIds(role: Role): string[] {
+		return [ELEMENT_LAYERS[role], ...this.extraLayers.filter((id) => id.startsWith(`${ELEMENT_LAYERS[role]}_`))];
+	}
+
+	/** The ids of the layers of the markers, e.g. to set the font of their labels. */
 	public symbolLayerIds(): string[] {
-		return Array.from({ length: this.symbolLayers }, (_, group) => symbolLayerId(group));
+		return this.layerIds('symbol');
 	}
 
-	/** A new map style has only the first layer of the markers: the others are added again. */
+	/** A new map style has only the layers of the first group: the others are added again. */
 	public onStyleLoad() {
-		this.symbolLayers = 1;
+		this.extraLayers = [];
 		this.redraw();
 	}
 
 	/**
-	 * Add or remove layers of markers, so there is one for each group. The new ones are above the
-	 * others, with the label font of the first one.
+	 * Add or remove the layers of the groups after the first, one per role that the group has, above
+	 * the layers of the first group: only those after the first difference. Markers get the label
+	 * font of the first layer of markers.
 	 */
-	private syncSymbolLayers() {
+	private syncLayers() {
 		const map = this.map;
 		if (!map.style || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
-		// the groups that have markers: a group starts after a labeled marker only if one follows
-		let wanted = 1;
-		for (const group of this.groups.values()) wanted = Math.max(wanted, group + 1);
-		while (this.symbolLayers > wanted) {
-			this.symbolLayers--;
-			map.removeLayer(symbolLayerId(this.symbolLayers));
+		const roles: Set<Role>[] = [];
+		for (const [element, group] of this.groups) {
+			roles[group] ??= new Set();
+			for (const role of ElementRenderer.drawnOf(element).roles) roles[group].add(role);
 		}
-		if (this.symbolLayers === wanted) return;
+		const wanted = roles.flatMap((has, group) =>
+			group === 0 ? [] : ROLES.filter((role) => has?.has(role)).map((role) => layerId(role, group))
+		);
+		let same = 0;
+		while (same < wanted.length && wanted[same] === this.extraLayers[same]) same++;
+		for (const id of this.extraLayers.slice(same).reverse()) map.removeLayer(id);
+		if (same === wanted.length) {
+			this.extraLayers = wanted;
+			return;
+		}
 		const font = (
 			map.getLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font') as ['literal', string[]] | undefined
 		)?.[1]?.[0];
 		const order = map.getLayersOrder();
-		// the layer above the last layer of the markers, e.g. of the selection
-		const before = order[order.indexOf(symbolLayerId(this.symbolLayers - 1)) + 1];
-		while (this.symbolLayers < wanted) {
-			map.addLayer(symbolLayer(font ?? 'noto_sans_regular', this.symbolLayers), before);
-			this.symbolLayers++;
+		// above the last layer of the elements that stays, under e.g. the selection
+		const before = order[order.indexOf(same > 0 ? wanted[same - 1] : ELEMENT_LAYERS.symbol) + 1];
+		for (const id of wanted.slice(same)) {
+			const [, role, group] = /^elements_(fill|stroke|symbol)_(\d+)$/.exec(id)!;
+			map.addLayer(elementLayer(role as Role, Number(group), font ?? 'noto_sans_regular'), before);
 		}
+		this.extraLayers = wanted;
 	}
 
 	/** Draw the element again, e.g. after a change of its geometry or style. */
 	public update(element: AbstractElement) {
 		// an element that is not (yet) on the map is drawn when it is added
 		if (!this.order.has(element)) return;
-		// a label added or removed changes the groups of the markers
-		if (ElementRenderer.hasLabel(element) !== this.labeled.has(element)) {
+		// e.g. a label or an outline added or removed can change the groups
+		if (ElementRenderer.key(ElementRenderer.drawnOf(element)) !== this.drawn.get(element)) {
 			this.regroup();
 			return this.redraw();
 		}
@@ -258,7 +343,7 @@ export class ElementRenderer {
 	public flush() {
 		this.scheduled = false;
 		if (this.all) {
-			this.syncSymbolLayers();
+			this.syncLayers();
 			for (const role of ROLES) {
 				const features = this.elements.flatMap((element) => this.featureOf(element, role) ?? []);
 				this.source(role)?.setData({ type: 'FeatureCollection', features });
@@ -288,12 +373,11 @@ export class ElementRenderer {
 		const properties = element.getStyleLayers()[role]?.getProperties();
 		if (!properties) return undefined;
 		const { geometry } = element.getFeature();
-		const group = role === 'symbol' ? (this.groups.get(element) ?? 0) : undefined;
 		return {
 			type: 'Feature',
 			id: element.id,
 			geometry,
-			properties: { ...properties, order: this.order.get(element), ...(group !== undefined && { group }) }
+			properties: { ...properties, order: this.order.get(element), group: this.groups.get(element) ?? 0 }
 		};
 	}
 }
