@@ -202,6 +202,18 @@ export class MapDocument {
 		this.elements = list;
 	}
 
+	/**
+	 * Draw the elements in this order, e.g. after a drag in the list of elements. The same elements
+	 * as before, else nothing changes.
+	 */
+	public setDrawingOrder(order: AbstractElement[]) {
+		// each of the elements once
+		const current = new Set(this.elements);
+		const next = new Set(order);
+		if (order.length !== current.size || next.size !== current.size || !order.every((e) => current.has(e))) return;
+		this.elements = order;
+	}
+
 	/** Remove the elements for good, e.g. when they are deleted. */
 	public deleteElements(elements: AbstractElement[]) {
 		this.removeElements(elements);

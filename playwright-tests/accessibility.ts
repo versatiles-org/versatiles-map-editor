@@ -287,3 +287,43 @@ test('the list of elements selects like lists of files', { tag: '@cross-browser'
 	await expect(selectedLabels()).toHaveCount(5);
 	await expect(page.locator('.sidebar').getByRole('heading', { name: '5 elements' })).toBeVisible();
 });
+
+test('dragging elements in the list changes the drawing order', { tag: '@cross-browser' }, async ({ page }) => {
+	const elements = Array.from({ length: 4 }, (_, i) => ({
+		type: 'marker' as const,
+		point: [13.38 + i * 0.01, 52.5] as [number, number],
+		style: { label: `M${i + 1}` }
+	}));
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements }));
+	await waitForMapIsReady(page);
+	await page.keyboard.press('e');
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	const option = (label: string) => list.getByRole('option', { name: new RegExp(`: ${label}$`) });
+	const order = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	/** Drag a row to the upper edge of another one. */
+	async function drag(from: string, to: string) {
+		const a = (await option(from).boundingBox())!;
+		const b = (await option(to).boundingBox())!;
+		await page.mouse.move(a.x + 40, a.y + a.height / 2);
+		await page.mouse.down();
+		await page.mouse.move(b.x + 40, b.y + 3, { steps: 8 });
+		await page.mouse.up();
+	}
+
+	// the list is front to back: M4 … M1; M1 to the front
+	await drag('M1', 'M4');
+	await expect.poll(order).toStrictEqual(['M2', 'M3', 'M4', 'M1']);
+	await expect(list.getByRole('option')).toHaveText([/M1/, /M4/, /M3/, /M2/]);
+
+	// the selected ones together: M3 and M2 before M4
+	await option('M3').click();
+	await option('M2').click({ modifiers: ['ControlOrMeta'] });
+	await drag('M2', 'M4');
+	await expect.poll(order).toStrictEqual(['M4', 'M2', 'M3', 'M1']);
+
+	// a click without moving still selects; each drop is one undo step
+	await option('M4').click();
+	await expect(list.getByRole('option', { selected: true })).toHaveText([/M4/]);
+	await page.keyboard.press('ControlOrMeta+z');
+	await expect.poll(order).toStrictEqual(['M2', 'M3', 'M4', 'M1']);
+});

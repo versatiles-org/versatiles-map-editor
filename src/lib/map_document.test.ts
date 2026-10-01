@@ -240,6 +240,19 @@ describe('MapDocument', () => {
 		});
 	});
 
+	it('draws the elements in a new order, but only the same elements', async () => {
+		await mapDocument.setState({
+			elements: [0, 1, 2].map((i) => ({ type: 'marker' as const, point: [i, 0] as [number, number] }))
+		});
+		const [a, b, c] = mapDocument.elements;
+		mapDocument.setDrawingOrder([c, a, b]);
+		expect(mapDocument.elements).toStrictEqual([c, a, b]);
+		// e.g. one missing, or another one: nothing changes
+		mapDocument.setDrawingOrder([a, b]);
+		mapDocument.setDrawingOrder([a, b, b]);
+		expect(mapDocument.elements).toStrictEqual([c, a, b]);
+	});
+
 	it('keeps the legend without its default values, as links store it', async () => {
 		const entries = [{ color: '#ff0000', label: 'A' }];
 		await mapDocument.loadState({

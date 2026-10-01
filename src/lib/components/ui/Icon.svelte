@@ -20,6 +20,8 @@
 		back: ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14'],
 		external: ['M14 4h6v6', 'M20 4l-9 9', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],
 		front: ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14'],
+		// a handle to drag, e.g. a row of a list
+		grip: ['M7 9h10M7 15h10'],
 		layers: ['M12 4.5l9 5-9 5-9-5z', 'M3 14.5l9 5 9-5'],
 		legend: ['M5 5h3v3H5zM5 16h3v3H5z', 'M11 6.5h8M11 17.5h8'],
 		line: ['M4 18l5-7 5 4 6-9'],
