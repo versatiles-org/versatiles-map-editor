@@ -52,8 +52,8 @@ export class MapStyleLoader {
 	public setMapLabelsOnTop(onTop: boolean) {
 		if (onTop === this.#mapLabelsOnTop) return;
 		this.#mapLabelsOnTop = onTop;
-		// the labels between the areas and lines and the markers: those in the fixed order
-		this.#renderer.setFixedOrder(onTop);
+		// the labels between the areas and lines and the markers: the markers over all areas and lines
+		this.#renderer.setMarkersOnTop(onTop);
 		this.#applyLayerOrder();
 	}
 

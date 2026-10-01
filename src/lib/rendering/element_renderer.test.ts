@@ -114,7 +114,12 @@ describe('ElementRenderer', () => {
 		const addedLayers = () => map.addLayer.mock.calls.map(([layer]) => [layer.id, layer.filter]);
 
 		it('are drawn in groups by layers from the back to the front, each group ending with a label', async () => {
-			map.getLayersOrder.mockReturnValue(['elements_symbol', 'selection']);
+			// the layers of the map, also those that are added
+			const order = ['elements_symbol', 'selection'];
+			map.getLayersOrder.mockImplementation(() => [...order]);
+			map.addLayer.mockImplementation((layer: { id: string }, before?: string) => {
+				order.splice(before ? order.indexOf(before) : order.length, 0, layer.id);
+			});
 			await markers(['A', '', 'B', '', '']);
 			// MapLibre draws the labels of a layer over all its symbols
 			expect(groups()).toStrictEqual([
@@ -208,8 +213,9 @@ describe('ElementRenderer', () => {
 		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([1]);
 		expect(lastFeatures('symbol').map((f) => f.properties?.group)).toStrictEqual([0]);
 
-		// in the fixed order (e.g. with the labels of the background map over areas and lines): one group
-		doc.view.renderer.setFixedOrder(true);
+		// with the markers on top (e.g. with the labels of the background map over areas and lines):
+		// the polygon is the first of the areas and lines, so one group
+		doc.view.renderer.setMarkersOnTop(true);
 		doc.view.renderer.flush();
 		expect(map.removeLayer.mock.calls.map(([id]) => id)).toStrictEqual(['elements_stroke_1', 'elements_fill_1']);
 		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([0]);
@@ -224,21 +230,33 @@ describe('groupElements', () => {
 	const line: Drawn = { roles: ['stroke'], label: false };
 
 	it('keeps elements in one group while nothing of them is drawn under something before them', () => {
-		expect(groupElements([area, area, line, line, marker, marker])).toStrictEqual([0, 0, 0, 0, 0, 0]);
+		const groups = (elements: Drawn[], markersOnTop?: boolean) => groupElements(elements, markersOnTop).groups;
+		expect(groups([area, area, line, line, marker, marker])).toStrictEqual([0, 0, 0, 0, 0, 0]);
 		// an area over an outline, a line over a marker, a marker over a label: a new group
-		expect(groupElements([polygon, polygon])).toStrictEqual([0, 1]);
-		expect(groupElements([marker, line])).toStrictEqual([0, 1]);
-		expect(groupElements([labeled, marker, labeled, marker])).toStrictEqual([0, 1, 1, 2]);
+		expect(groups([polygon, polygon])).toStrictEqual([0, 1]);
+		expect(groups([marker, line])).toStrictEqual([0, 1]);
+		expect(groups([labeled, marker, labeled, marker])).toStrictEqual([0, 1, 1, 2]);
 		// a marker under a polygon, and another marker over it
-		expect(groupElements([marker, polygon, marker])).toStrictEqual([0, 1, 1]);
+		expect(groups([marker, polygon, marker])).toStrictEqual([0, 1, 1]);
+		expect(groupElements([marker, polygon]).markersOnTop).toBe(false);
 	});
 
-	it('draws in the fixed order on demand, or with too many groups', () => {
-		expect(groupElements([marker, polygon, labeled, marker], true)).toStrictEqual([0, 0, 0, 1]);
+	it('keeps the order of areas and lines, and of markers, with the markers on top', () => {
+		// the markers over the polygon, but each polygon over the one before, also its outline
+		expect(groupElements([marker, polygon, labeled, marker, polygon], true)).toStrictEqual({
+			groups: [0, 0, 0, 1, 1],
+			markersOnTop: true
+		});
+		// with too many groups: also with the markers on top
 		const many = Array.from({ length: MAX_GROUPS + 1 }, () => polygon);
-		expect(new Set(groupElements(many))).toStrictEqual(new Set([0]));
+		expect(groupElements([...many, labeled, marker])).toStrictEqual({
+			groups: [...many.map(() => 0), 0, 1],
+			markersOnTop: true
+		});
 		// up to the limit, each in a group of its own
-		expect(groupElements(many.slice(1))).toStrictEqual(many.slice(1).map((_, i) => i));
+		expect(groupElements(many.slice(1))).toStrictEqual({ groups: many.slice(1).map((_, i) => i), markersOnTop: false });
+		const lines = Array.from({ length: MAX_GROUPS }, () => line);
+		expect(groupElements([...many.slice(1), marker, ...lines], true).groups.slice(-2)).toStrictEqual([99, 99]);
 	});
 });
 

@@ -1,4 +1,5 @@
 import { expect, test } from './lib/test.js';
+import type { Page } from '@playwright/test';
 import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
 import {
 	boxesOverlap,
@@ -398,6 +399,28 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await expect(page.locator('iframe[title="Preview of the shared map"]')).toHaveCount(0);
 });
 
+/** How many pixels of the page in the box are near the color, e.g. red: [255, 0, 0]. */
+async function pixelsOfColor(page: Page, clip: { x: number; y: number; width: number; height: number }, rgb: number[]) {
+	const png = await page.screenshot({ clip });
+	return page.evaluate(
+		async ([base64, rgb]) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = new OffscreenCanvas(image.width, image.height);
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			const { data } = context.getImageData(0, 0, image.width, image.height);
+			let count = 0;
+			for (let i = 0; i < data.length; i += 4) {
+				if (rgb.every((value, j) => Math.abs(data[i + j] - value) < 60)) count++;
+			}
+			return count;
+		},
+		[png.toString('base64'), rgb] as const
+	);
+}
+
 // Each element at its place in the drawing order, also across kinds, e.g. an area over a marker
 test('an area in front of a marker covers it', { tag: '@cross-browser' }, async ({ page }) => {
 	const point: [number, number] = [13.4, 52.5];
@@ -418,22 +441,55 @@ test('an area in front of a marker covers it', { tag: '@cross-browser' }, async 
 		await page.reload();
 		await waitForMapIsReady(page);
 		const [x, y] = await project(page, point);
-		const png = await page.screenshot({ clip: { x: x - 20, y: y - 40, width: 40, height: 40 } });
-		return page.evaluate(async (base64) => {
-			const image = new Image();
-			image.src = 'data:image/png;base64,' + base64;
-			await image.decode();
-			const canvas = new OffscreenCanvas(image.width, image.height);
-			const context = canvas.getContext('2d')!;
-			context.drawImage(image, 0, 0);
-			const { data } = context.getImageData(0, 0, image.width, image.height);
-			let red = 0;
-			for (let i = 0; i < data.length; i += 4) if (data[i] > 200 && data[i + 1] < 60 && data[i + 2] < 60) red++;
-			return red;
-		}, png.toString('base64'));
+		return pixelsOfColor(page, { x: x - 20, y: y - 40, width: 40, height: 40 }, [255, 0, 0]);
 	}
 	expect(await redOfMarker([area, marker])).toBeGreaterThan(50);
 	expect(await redOfMarker([marker, area])).toBe(0);
+});
+
+// With the labels of the background map over areas and lines, the markers are drawn over all
+// areas and lines, under which the labels are; but areas and lines keep their order among
+// themselves, e.g. the outline of an area behind another one is covered by it
+test('areas keep their order under the labels of the background map', { tag: '@cross-browser' }, async ({ page }) => {
+	const point: [number, number] = [13.4, 52.5];
+	const square = (size: number): [number, number][] => [
+		[13.4 - size, 52.5 - size / 1.6],
+		[13.4 + size, 52.5 - size / 1.6],
+		[13.4 + size, 52.5 + size / 1.6],
+		[13.4 - size, 52.5 + size / 1.6]
+	];
+	// a blue outline, crossing the green area
+	const behind: MapState['elements'][number] = {
+		type: 'polygon',
+		points: [
+			[13.4, 52.49],
+			[13.4, 52.51],
+			[13.42, 52.5]
+		],
+		style: { color: '#00000000' },
+		strokeStyle: { color: '#0000ff', width: 8 }
+	};
+	const area: MapState['elements'][number] = {
+		type: 'polygon',
+		points: square(0.004),
+		style: { color: '#00ff00' },
+		strokeStyle: { visible: false }
+	};
+	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
+	async function colors(elements: MapState['elements']) {
+		const meta = { mapLabelsOnTop: true };
+		await page.goto('/view#' + encodeState({ map: { center: point, radius: 2000 }, meta, elements }));
+		await page.reload();
+		await waitForMapIsReady(page);
+		const [x, y] = await project(page, point);
+		const clip = { x: x - 60, y: y - 40, width: 120, height: 80 };
+		return { blue: await pixelsOfColor(page, clip, [0, 0, 255]), red: await pixelsOfColor(page, clip, [255, 0, 0]) };
+	}
+	// the marker behind the areas is still on top of them
+	const back = await colors([marker, behind, area]);
+	expect(back.blue).toBe(0);
+	expect(back.red).toBeGreaterThan(50);
+	expect((await colors([marker, area, behind])).blue).toBeGreaterThan(50);
 });
 
 // More than 100 labels share one layer of markers; with overlapping labels hidden, the labels are

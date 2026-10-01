@@ -20,8 +20,8 @@ export const ELEMENT_LAYERS: Record<Role, string> = {
 const ROLES = Object.keys(ELEMENT_LAYERS) as Role[];
 
 /**
- * The most groups of layers, see `groupElements`: every layer costs time, so with more, the
- * elements are drawn in the fixed order.
+ * The most groups of layers of a kind, see `groupElements`: every layer costs time, so with more,
+ * the markers are drawn over all areas and lines, or a kind is drawn in one group.
  */
 export const MAX_GROUPS = 100;
 
@@ -42,44 +42,51 @@ export interface Drawn {
 }
 
 /**
- * The group of each element, in drawing order. The elements of a group are drawn by one layer per
- * role: its areas, then its lines and outlines, then its markers; MapLibre draws the symbols of a
- * layer before all its labels (maplibre-gl-js issue #49). So an element joins the group of the one
- * before it, unless something of it would be drawn under something earlier in the group: its area
- * under a line or a marker, its line under a marker, its marker under a label. This looks the same
- * as one layer per element, with far fewer layers.
+ * The group of each element, in drawing order, and whether the markers are drawn over all areas
+ * and lines. The elements of a group are drawn by one layer per role: its areas, then its lines
+ * and outlines, then its markers; MapLibre draws the symbols of a layer before all its labels
+ * (maplibre-gl-js issue #49). So an element joins the group of the one before it, unless something
+ * of it would be drawn under something earlier in the group: its area under a line or a marker,
+ * its line under a marker, its marker under a label. This looks the same as one layer per
+ * element, with far fewer layers.
  *
- * In the fixed order (e.g. while the labels of the background map are between the areas and lines
- * and the markers), or with more than `MAX_GROUPS` groups, all areas and lines are in the first
- * group, under all markers, and the markers in groups that each end with a labeled marker, if
- * there are at most `MAX_GROUPS` of them.
+ * With `markersOnTop` (e.g. while the labels of the background map are between the areas and lines
+ * and the markers), or with more than `MAX_GROUPS` groups, the markers are drawn over all areas and
+ * lines: the areas and lines are grouped among themselves, and the markers among themselves, so
+ * each keeps its place among the others of its kind. If that gives more than `MAX_GROUPS` groups
+ * of a kind, all of it is in the first group: areas under all lines, markers under all labels.
  */
-export function groupElements(elements: Drawn[], fixedOrder = false): number[] {
-	if (!fixedOrder) {
-		let group = 0;
-		let stroke = false;
-		let symbol = false;
-		let label = false;
-		const groups = elements.map(({ roles, label: hasLabel }) => {
-			const has = (role: Role) => roles.includes(role);
-			if ((has('fill') && (stroke || symbol)) || (has('stroke') && symbol) || (has('symbol') && label)) {
-				group++;
-				stroke = symbol = label = false;
-			}
-			stroke ||= has('stroke');
-			symbol ||= has('symbol');
-			label ||= hasLabel;
-			return group;
-		});
-		if (group < MAX_GROUPS) return groups;
+export function groupElements(elements: Drawn[], markersOnTop = false): { groups: number[]; markersOnTop: boolean } {
+	if (!markersOnTop) {
+		const groups = chain(elements);
+		if (Math.max(0, ...groups) < MAX_GROUPS) return { groups, markersOnTop: false };
 	}
-	const separate = elements.filter((e) => e.label).length <= MAX_GROUPS;
+	const groups = new Array<number>(elements.length);
+	for (const markers of [false, true]) {
+		const indices = elements.flatMap((e, i) => (e.roles.includes('symbol') === markers ? [i] : []));
+		const kind = chain(indices.map((i) => elements[i]));
+		const separate = Math.max(0, ...kind) < MAX_GROUPS;
+		indices.forEach((i, j) => (groups[i] = separate ? kind[j] : 0));
+	}
+	return { groups, markersOnTop: true };
+}
+
+/** The groups of elements in one order, see `groupElements`. */
+function chain(elements: Drawn[]): number[] {
 	let group = 0;
-	return elements.map(({ roles, label }) => {
-		if (!roles.includes('symbol')) return 0;
-		const current = group;
-		if (separate && label) group++;
-		return current;
+	let stroke = false;
+	let symbol = false;
+	let label = false;
+	return elements.map(({ roles, label: hasLabel }) => {
+		const has = (role: Role) => roles.includes(role);
+		if ((has('fill') && (stroke || symbol)) || (has('stroke') && symbol) || (has('symbol') && label)) {
+			group++;
+			stroke = symbol = label = false;
+		}
+		stroke ||= has('stroke');
+		symbol ||= has('symbol');
+		label ||= hasLabel;
+		return group;
 	});
 }
 
@@ -263,10 +270,14 @@ export class ElementRenderer {
 	/** The group of each element, see `groupElements`, and what each draws, to notice a change. */
 	private groups = new Map<AbstractElement, number>();
 	private drawn = new Map<AbstractElement, string>();
-	/** Whether the elements are drawn in the fixed order, see `groupElements`. */
-	private fixedOrder = false;
+	/** Whether the markers must be drawn over all areas and lines, see `groupElements`. */
+	private markersOnTop = false;
+	/** Whether they are, also because there are too many groups otherwise. */
+	private grouped: ReturnType<typeof groupElements> = { groups: [], markersOnTop: false };
 	/** The layers of the groups after the first, which the map style has, in drawing order. */
 	private extraLayers: string[] = [];
+	/** Whether they were placed with the markers on top, see `syncLayers`. */
+	private extraOnTop = false;
 	/** How the labels of markers are shown, see `LabelOptions`. */
 	private labels: LabelOptions = DEFAULT_LABEL_OPTIONS;
 	/** Whether the labels of the markers have a layer of their own, see `LABELS_LAYER`. */
@@ -298,19 +309,23 @@ export class ElementRenderer {
 	/** The groups of the elements, see `groupElements`. */
 	private regroup() {
 		const drawn = this.elements.map((element) => ElementRenderer.drawnOf(element));
-		const groups = groupElements(drawn, this.fixedOrder);
+		this.grouped = groupElements(drawn, this.markersOnTop);
+		const { groups } = this.grouped;
 		this.groups = new Map(this.elements.map((element, i) => [element, groups[i]]));
 		this.drawn = new Map(this.elements.map((element, i) => [element, ElementRenderer.key(drawn[i])]));
 		this.sharedLabels = drawn.filter((d) => d.label).length > MAX_GROUPS;
 	}
 
 	/**
-	 * Draw the elements in the fixed order, e.g. while the labels of the background map are between
-	 * the areas and lines and the markers; else each at its place in the order.
+	 * Draw the markers over all areas and lines, e.g. while the labels of the background map are
+	 * between them; else each element at its place in the order.
 	 */
-	public setFixedOrder(fixed: boolean) {
-		if (fixed === this.fixedOrder) return;
-		this.fixedOrder = fixed;
+	public setMarkersOnTop(onTop: boolean) {
+		if (onTop === this.markersOnTop) return;
+		this.markersOnTop = onTop;
+		// the layers of the groups are in other places now: all are added again
+		if (this.map.style) for (const id of [...this.extraLayers].reverse()) this.map.removeLayer(id);
+		this.extraLayers = [];
 		this.regroup();
 		this.redraw();
 	}
@@ -364,8 +379,10 @@ export class ElementRenderer {
 
 	/**
 	 * Add or remove the layers of the groups after the first, one per role that the group has, above
-	 * the layers of the first group: only those after the first difference. Markers get the label
-	 * font of the first layer of markers.
+	 * the layers of the first group: only those after the first difference. With the markers on top,
+	 * the layers of the areas and lines are above those of the first group of areas and lines (e.g.
+	 * under the labels of the background map), and those of the markers above the first one of
+	 * markers. Markers get the label font of the first layer of markers.
 	 */
 	private syncLayers() {
 		const map = this.map;
@@ -375,17 +392,26 @@ export class ElementRenderer {
 			roles[group] ??= new Set();
 			for (const role of ElementRenderer.drawnOf(element).roles) roles[group].add(role);
 		}
-		const wanted = roles.flatMap((has, group) =>
-			group === 0 ? [] : ROLES.filter((role) => has?.has(role)).map((role) => layerId(role, group))
-		);
+		const layersOf = (kinds: Role[]) =>
+			roles.flatMap((has, group) =>
+				group === 0 ? [] : kinds.filter((role) => has?.has(role)).map((role) => layerId(role, group))
+			);
+		const onTop = this.grouped.markersOnTop;
+		const wanted = onTop ? [...layersOf(['fill', 'stroke']), ...layersOf(['symbol'])] : layersOf(ROLES);
 		if (this.sharedLabels) wanted.push(LABELS_LAYER);
 		let same = 0;
-		while (same < wanted.length && wanted[same] === this.extraLayers[same]) same++;
+		// placed otherwise before: all are added again
+		while (onTop === this.extraOnTop && same < wanted.length && wanted[same] === this.extraLayers[same]) same++;
 		for (const id of this.extraLayers.slice(same).reverse()) map.removeLayer(id);
-		const order = map.getLayersOrder();
-		// above the last layer of the elements that stays, under e.g. the selection
-		const before = order[order.indexOf(same > 0 ? wanted[same - 1] : ELEMENT_LAYERS.symbol) + 1];
-		for (const id of wanted.slice(same)) {
+		const roleOf = (id: string) => /^elements_(fill|stroke|symbol)_\d+$/.exec(id)?.[1] ?? 'symbol';
+		const isArea = (id: string) => onTop && roleOf(id) !== 'symbol';
+		for (const [i, id] of wanted.entries()) {
+			if (i < same) continue;
+			// above the layer before it of its kind, or the first one of its kind; under e.g. the selection
+			const previous = wanted.slice(0, i).findLast((other) => isArea(other) === isArea(id));
+			const after = previous ?? (isArea(id) ? ELEMENT_LAYERS.stroke : ELEMENT_LAYERS.symbol);
+			const order = map.getLayersOrder();
+			const before = order[order.indexOf(after) + 1];
 			const [, role, group] = /^elements_(fill|stroke|symbol)_(\d+)$/.exec(id) ?? [id, 'labels', '0'];
 			map.addLayer(
 				role === 'labels'
@@ -401,6 +427,7 @@ export class ElementRenderer {
 			}
 		}
 		this.extraLayers = wanted;
+		this.extraOnTop = onTop;
 		this.applyLabels();
 	}
 
