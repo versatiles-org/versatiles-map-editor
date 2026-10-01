@@ -42,6 +42,10 @@ The first release.
   top right, the legend at the bottom left), `VIEWER_CHOICES`, `removeViewerDefaults` and
   `sanitizeViewer`. The search and the position of the legend of older links, GeoJSON files and
   map states (`upgradeState`) are read into it.
+- The `.mapjson` file format, with its version: `stateToMapJSON` writes a map state with
+  `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
+  one, upgrades files of older versions without `$schema`, and throws a `MapJSONVersionError` for a
+  newer version.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
 - `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
   `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata;

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MapState } from '@versatiles/map-state';
+import { MAPJSON_SCHEMA_URL, type MapState } from '@versatiles/map-state';
 import { FileCommands, fileBaseName, type FileQuestions, type MapList } from './file_commands.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
@@ -77,6 +77,15 @@ describe('FileCommands', () => {
 			});
 		});
 
+		it('tells the user about a file of a newer version of the editor', async () => {
+			choose('trip.mapjson', JSON.stringify({ $schema: MAPJSON_SCHEMA_URL.replace('-1.', '-2.'), elements: [] }));
+			await files.openFile();
+			expect(notify).toHaveBeenLastCalledWith(
+				'The map was saved by a newer version of the editor. Please reload the page and try again.'
+			);
+			expect(maps.openMap).not.toHaveBeenCalled();
+		});
+
 		it('tells the user about a file that is no map, or cannot be read', async () => {
 			choose('trip.mapjson', '{"no": "elements"}');
 			await files.openFile();
@@ -104,7 +113,8 @@ describe('FileCommands', () => {
 		questions.askDownloadFilename.mockResolvedValueOnce('berlin.mapjson');
 		await files.downloadFile();
 		expect(questions.askDownloadFilename).toHaveBeenLastCalledWith('map.mapjson');
-		expect(downloadJSON).toHaveBeenCalledWith(state, 'berlin.mapjson');
+		// with the URL of the schema of its version first
+		expect(downloadJSON).toHaveBeenCalledWith({ $schema: MAPJSON_SCHEMA_URL, ...state }, 'berlin.mapjson');
 
 		await files.downloadFile();
 		expect(questions.askDownloadFilename).toHaveBeenLastCalledWith('berlin.mapjson');

@@ -12,6 +12,14 @@ export { digitsForResolution, resolutionOfDigits } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
 export { sanitizeFrame } from './profile.js';
 export { upgradeState } from './legacy.js';
+export {
+	MAPJSON_SCHEMA_URL,
+	MAPJSON_VERSION,
+	MapJSONVersionError,
+	stateFromMapJSON,
+	stateToMapJSON,
+	type MapJSON
+} from './mapjson.js';
 export { stateFromKML, stateToKML } from './kml.js';
 
 // The style vocabulary: defaults and names of the style values, e.g. for rendering the elements

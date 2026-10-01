@@ -1,4 +1,5 @@
 {
+	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
 	"map": { "center": [30.175189454575417, 51.39166926981753], "radius": 47169.86443603064 },
 	"frame": [29.558, 51.066, 31.0, 51.712],
 	"meta": {

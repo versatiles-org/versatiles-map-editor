@@ -1,4 +1,11 @@
-import { stateFromKML, stateToKML, upgradeState, type MapState } from '@versatiles/map-state';
+import {
+	MapJSONVersionError,
+	stateFromKML,
+	stateFromMapJSON,
+	stateToKML,
+	stateToMapJSON,
+	type MapState
+} from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
@@ -74,9 +81,8 @@ export class FileCommands {
 		try {
 			const file = await chooseTextFile('.mapjson');
 			if (!file) return;
-			// e.g. a file of an older version, whose fills have an opacity of their own
-			const state: MapState = upgradeState(JSON.parse(file.text));
-			if (!Array.isArray(state?.elements)) throw new Error('File contains no map elements');
+			// e.g. a file of an older version, whose fills have an opacity of their own, is upgraded
+			const state = stateFromMapJSON(JSON.parse(file.text));
 			// named after the file, without a title of its own
 			const title = state.meta?.title || file.name.replace(EXTENSION, '');
 			await this.#maps.openMap({ ...state, meta: { ...state.meta, title } });
@@ -84,7 +90,9 @@ export class FileCommands {
 		} catch (error) {
 			console.error(error);
 			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
-			else notify('Failed to open the map. Please check the file format.');
+			else if (error instanceof MapJSONVersionError) {
+				notify('The map was saved by a newer version of the editor. Please reload the page and try again.');
+			} else notify('Failed to open the map. Please check the file format.');
 		}
 	}
 
@@ -92,7 +100,7 @@ export class FileCommands {
 		const filename = await this.#questions.askDownloadFilename(this.filename);
 		if (!filename) return;
 		this.#filename = filename;
-		downloadJSON(this.#doc.getState(), filename);
+		downloadJSON(stateToMapJSON(this.#doc.getState()), filename);
 	}
 
 	public importGeoJSON(): Promise<void> {
