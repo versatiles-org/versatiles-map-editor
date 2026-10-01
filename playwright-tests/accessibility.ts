@@ -241,3 +241,49 @@ test('names show the popup text without its formatting', async ({ page }) => {
 	await option.click();
 	await expect(page.locator('.sidebar .subtitle')).toHaveText('Low-emission zone');
 });
+
+test('the list of elements selects like lists of files', { tag: '@cross-browser' }, async ({ page }) => {
+	const elements = Array.from({ length: 5 }, (_, i) => ({
+		type: 'marker' as const,
+		point: [13.38 + i * 0.01, 52.5] as [number, number],
+		style: { label: `M${i + 1}` }
+	}));
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements }));
+	await waitForMapIsReady(page);
+	await page.keyboard.press('e');
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	const option = (label: string) => list.getByRole('option', { name: new RegExp(`: ${label}$`) });
+	const selectedLabels = () => list.getByRole('option', { selected: true });
+
+	// front first: M5 … M1
+	await option('M4').click();
+	await expect(selectedLabels()).toHaveText([/M4/]);
+	// a range from the anchor M4
+	await option('M2').click({ modifiers: ['Shift'] });
+	await expect(selectedLabels()).toHaveText([/M4/, /M3/, /M2/]);
+	// another range from the same anchor replaces it
+	await option('M5').click({ modifiers: ['Shift'] });
+	await expect(selectedLabels()).toHaveText([/M5/, /M4/]);
+	// Cmd/Ctrl-click adds or removes one, and is the new anchor
+	await option('M1').click({ modifiers: ['ControlOrMeta'] });
+	await expect(selectedLabels()).toHaveText([/M5/, /M4/, /M1/]);
+	await option('M4').click({ modifiers: ['ControlOrMeta'] });
+	await expect(selectedLabels()).toHaveText([/M5/, /M1/]);
+
+	// with the keyboard, from the focus on M4: Shift+arrows extend the range, Space adds or removes
+	await list.focus();
+	await page.keyboard.press('ArrowDown');
+	await expect(selectedLabels()).toHaveText([/M3/]);
+	await page.keyboard.press('Shift+ArrowDown');
+	await expect(selectedLabels()).toHaveText([/M3/, /M2/]);
+	// the arrows select; Space removes the focused one and adds it again
+	await page.keyboard.press('ArrowDown');
+	await expect(selectedLabels()).toHaveText([/M1/]);
+	await page.keyboard.press('Space');
+	await expect(selectedLabels()).toHaveCount(0);
+	await page.keyboard.press('Space');
+	await expect(selectedLabels()).toHaveText([/M1/]);
+	await page.keyboard.press('ControlOrMeta+a');
+	await expect(selectedLabels()).toHaveCount(5);
+	await expect(page.locator('.sidebar').getByRole('heading', { name: '5 elements' })).toBeVisible();
+});

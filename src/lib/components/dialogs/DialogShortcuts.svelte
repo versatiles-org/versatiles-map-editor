@@ -70,9 +70,10 @@
 		{
 			title: 'List of elements',
 			keys: [
-				['Choose an element', '↑ ↓'],
-				['Add it to the selection', `${shift}↑ ↓`],
-				['Select it', 'Enter']
+				['Choose an element', '↑ ↓, or click'],
+				['Select a range', `${shift}↑ ↓, or ${shift}click`],
+				['Add or remove one', `Space, or ${mod}click`],
+				['Select all', `${mod}A`]
 			]
 		}
 	];
