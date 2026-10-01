@@ -296,9 +296,14 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 
 // ----- labels of markers -----
 
-/** A zoom level from which the labels of markers are shown: a whole number from 1 to 24, else undefined. */
+/**
+ * A zoom level from which the labels of markers are shown, with one decimal place, above 0 and up
+ * to 24, else undefined. Other numbers are rounded to one decimal place.
+ */
 export function sanitizeLabelMinZoom(value: unknown): number | undefined {
-	return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 24 ? value : undefined;
+	if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
+	const zoom = Math.round(value * 10) / 10;
+	return zoom > 0 && zoom <= 24 ? zoom : undefined;
 }
 
 // ----- viewer -----

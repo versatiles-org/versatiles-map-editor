@@ -7,7 +7,8 @@ describe('the options of the labels of markers', () => {
 		for (const meta of [
 			{ labelOverlap: 'hide' },
 			{ labelMinZoom: 14 },
-			{ labelOverlap: 'hide', labelMinZoom: 1 }
+			{ labelMinZoom: 12.5 },
+			{ labelOverlap: 'hide', labelMinZoom: 0.1 }
 		] as const) {
 			const state: MapState = { meta, elements: [] };
 			expect(decodeState(encodeState(state))).toStrictEqual(state);
@@ -17,10 +18,15 @@ describe('the options of the labels of markers', () => {
 
 	it('are left out without a valid value, like missing metadata', () => {
 		const plain = encodeState({ elements: [] });
-		for (const labelMinZoom of [0, 25, 12.5, -3]) {
+		for (const labelMinZoom of [0, 0.04, 25, -3, NaN]) {
 			expect(encodeState({ meta: { labelMinZoom }, elements: [] })).toBe(plain);
 		}
 		const foreign = { labelOverlap: 'yes', labelMinZoom: '14' };
 		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [], meta: foreign } as never).meta).toBeUndefined();
+	});
+
+	it('keep one decimal place of the zoom level', () => {
+		const decoded = decodeState(encodeState({ meta: { labelMinZoom: 12.55 }, elements: [] }));
+		expect(decoded.meta).toStrictEqual({ labelMinZoom: 12.6 });
 	});
 });

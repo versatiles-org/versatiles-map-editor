@@ -300,7 +300,8 @@ export class StateReader {
 						metadata.labelOverlap = 'hide';
 						break;
 					case 12: {
-						const zoom = sanitizeLabelMinZoom(this.readVarint());
+						// in tenths of a zoom level
+						const zoom = sanitizeLabelMinZoom(this.readVarint() / 10);
 						if (zoom === undefined) throw new Error('Invalid zoom level of labels');
 						metadata.labelMinZoom = zoom;
 						break;

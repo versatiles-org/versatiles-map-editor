@@ -281,7 +281,8 @@ export class StateWriter {
 		const labelMinZoom = sanitizeLabelMinZoom(metadata.labelMinZoom);
 		if (labelMinZoom !== undefined) {
 			this.writeInteger(12, 6);
-			this.writeVarint(labelMinZoom);
+			// in tenths of a zoom level
+			this.writeVarint(Math.round(labelMinZoom * 10));
 		}
 		// key 5 was the search of older links, as a flag
 		const viewer = removeViewerDefaults(metadata.viewer);

@@ -10,7 +10,8 @@
 		ButtonGroup,
 		ChoiceGroup,
 		Hint,
-		InputRow
+		InputRow,
+		Slider
 	} from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
@@ -50,8 +51,17 @@
 		{ value: 'show', label: 'Show all' },
 		{ value: 'hide', label: 'Hide' }
 	];
-	// the zoom levels from which the labels are shown: all, or from a city to a street
-	const MIN_ZOOMS = [0, 6, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+	// the zoom level of the map, to show the labels from it
+	let zoom = $state(0);
+	$effect(() => {
+		const map = doc.view.map;
+		const onZoom = () => (zoom = map.getZoom());
+		onZoom();
+		map.on('zoom', onZoom);
+		return () => {
+			map.off('zoom', onZoom);
+		};
+	});
 
 	/** Labels that would overlap others shown or hidden, as one undo step. */
 	function setLabelOverlap(overlap: 'show' | 'hide') {
@@ -64,6 +74,13 @@
 		doc.labelMinZoom = zoom;
 		doc.state.log();
 	}
+
+	/** From the zoom level the map is at, so the labels are shown as the map is now, and closer. */
+	function labelsFromThisZoom() {
+		// rounded down to one decimal place, so the labels show at this zoom
+		setLabelMinZoom(Math.min(MAX_LABEL_ZOOM, Math.max(0.1, Math.floor(zoom * 10) / 10)));
+	}
+	const MAX_LABEL_ZOOM = 22;
 
 	function setLabelFont(font: string | undefined) {
 		doc.labelFont = font;
@@ -130,21 +147,21 @@
 					options={OVERLAPS}
 				/>
 			</InputRow>
+			<!-- the labels change while the slider moves; one undo step when it is released -->
 			<InputRow id="{uid}-min-zoom" label="Shown from">
-				<select
+				<Slider
 					id="{uid}-min-zoom"
-					value={String(doc.labelMinZoom)}
-					onchange={(e) => setLabelMinZoom(Number(e.currentTarget.value))}
-				>
-					{#if !MIN_ZOOMS.includes(doc.labelMinZoom)}
-						<option value={String(doc.labelMinZoom)}>Zoom {doc.labelMinZoom}</option>
-					{/if}
-					{#each MIN_ZOOMS as zoom (zoom)}
-						<option value={String(zoom)}>{zoom === 0 ? 'Every zoom level' : `Zoom ${zoom}`}</option>
-					{/each}
-				</select>
+					min={0}
+					max={MAX_LABEL_ZOOM}
+					step={0.1}
+					bind:value={() => doc.labelMinZoom, (value) => (doc.labelMinZoom = value)}
+					onchange={() => doc.state.log()}
+				/>
 			</InputRow>
-			<Hint>The zoom level of the map is shown in the status line at the bottom.</Hint>
+			<ButtonGroup>
+				<Button onclick={labelsFromThisZoom}>From this zoom ({zoom.toFixed(1)})</Button>
+			</ButtonGroup>
+			<Hint>The zoom level from which the labels are shown; 0 for every zoom level.</Hint>
 		</InspectorSection>
 		<InspectorSection title="Legend">
 			{#if legend}

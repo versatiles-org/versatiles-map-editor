@@ -91,8 +91,8 @@ export interface StateMetadata {
 	 */
 	labelOverlap?: 'hide';
 	/**
-	 * The zoom level from which the labels of markers are shown, a whole number from 1 to 24.
-	 * Without it, at every zoom level.
+	 * The zoom level from which the labels of markers are shown, with one decimal place, above 0 and
+	 * up to 24, e.g. 12.5. Without it, at every zoom level.
 	 */
 	labelMinZoom?: number;
 	/**
