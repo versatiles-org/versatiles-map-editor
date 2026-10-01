@@ -98,21 +98,39 @@ test('Enter searches at once and goes to the first result', async ({ page }) => 
 });
 
 test.describe('address search in the viewer', () => {
-	test('is enabled in the share dialog', async ({ page }) => {
+	test('is set in the share dialog, with the other controls of the viewer', async ({ page }) => {
 		await page.goto('/');
 		await waitForMapIsReady(page, { count: 1 });
 		await page.getByRole('button', { name: /^Share/ }).click();
-		const option = page.getByRole('checkbox', { name: 'Address search in the map' });
+		const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+		const preview = page.frameLocator('iframe[title=preview]');
+		const viewer = async () => (await storedState(page)).meta?.viewer;
+
+		// off by default; on at the top left, then at the top right
+		const option = dialog.getByRole('checkbox', { name: 'Address search' });
 		await expect(option).not.toBeChecked();
 		await option.check();
-
-		await expect.poll(async () => (await storedState(page)).meta?.viewer?.search).toBe('top-left');
-		const link = await page.getByLabel('Link', { exact: true }).inputValue();
-		expect(decodeState(new URL(link).hash.slice(1)).meta?.viewer?.search).toBe('top-left');
+		await expect.poll(viewer).toStrictEqual({ search: 'top-left' });
+		await dialog
+			.getByRole('radiogroup', { name: 'Place of the address search' })
+			.getByRole('radio', { name: 'Top right' })
+			.check();
+		await expect.poll(viewer).toStrictEqual({ search: 'top-right' });
+		const link = await dialog.getByLabel('Link', { exact: true }).inputValue();
+		expect(decodeState(new URL(link).hash.slice(1)).meta?.viewer?.search).toBe('top-right');
 		// the preview is the embedded viewer, with the search
-		await expect(
-			page.frameLocator('iframe[title=preview]').getByRole('combobox', { name: 'Search address or place' })
-		).toBeVisible();
+		await expect(preview.getByRole('combobox', { name: 'Search address or place' })).toBeVisible();
+
+		// the zoom buttons are on by default, and can be hidden
+		await expect(preview.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await dialog.getByRole('checkbox', { name: 'Zoom buttons' }).uncheck();
+		await expect.poll(viewer).toStrictEqual({ search: 'top-right', navigation: 'none' });
+		await expect(preview.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
+
+		// one undo step each
+		await page.keyboard.press('Escape');
+		await page.keyboard.press('ControlOrMeta+z');
+		await expect.poll(viewer).toStrictEqual({ search: 'top-right' });
 	});
 
 	test.describe('small screens', () => {

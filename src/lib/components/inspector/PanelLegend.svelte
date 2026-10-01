@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { LEGEND_POSITIONS, StateLegend, StateLegendEntry } from '@versatiles/map-state';
-	import { InputRow, ChoiceGroup, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
+	import { InputRow, ChoiceGroup, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 
@@ -11,18 +11,6 @@
 	const legend: StateLegend = $derived(doc.legend ?? { entries: [] });
 	const log = () => doc.state.log();
 
-	type Position = (typeof LEGEND_POSITIONS)[number];
-	// at their places in a 3×3 grid, without the center
-	const positions: { value: Position; label: string; cell: [number, number] }[] = [
-		{ value: 'top-left', label: 'Top left', cell: [1, 1] },
-		{ value: 'top', label: 'Top', cell: [1, 2] },
-		{ value: 'top-right', label: 'Top right', cell: [1, 3] },
-		{ value: 'left', label: 'Left', cell: [2, 1] },
-		{ value: 'right', label: 'Right', cell: [2, 3] },
-		{ value: 'bottom-left', label: 'Bottom left', cell: [3, 1] },
-		{ value: 'bottom', label: 'Bottom', cell: [3, 2] },
-		{ value: 'bottom-right', label: 'Bottom right', cell: [3, 3] }
-	];
 	const layouts: { value: NonNullable<StateLegend['layout']>; label: string }[] = [
 		{ value: 'vertical', label: 'Vertical' },
 		{ value: 'horizontal', label: 'Horizontal' },
@@ -57,19 +45,7 @@
 </script>
 
 {#if legend.entries.length > 0}
-	<InputRow id="{uid}-position" label="Position" group>
-		<ChoiceGroup
-			layout="grid"
-			labelledby="{uid}-position-label"
-			value={doc.controls.legend === 'none' ? undefined : doc.controls.legend}
-			onchange={(position) => {
-				// a setting of the viewer: where shared and embedded maps show the legend
-				doc.viewer = { ...doc.viewer, legend: position };
-				log();
-			}}
-			options={positions}
-		/>
-	</InputRow>
+	<Hint>Where shared maps show the legend, or whether they show it, is set in “Share”.</Hint>
 
 	<InputRow id="{uid}-layout" label="Layout" group>
 		<ChoiceGroup

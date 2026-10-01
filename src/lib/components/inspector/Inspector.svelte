@@ -42,11 +42,6 @@
 		doc.state.log();
 	}
 
-	function toggleSearch(search: boolean) {
-		doc.viewer = { ...doc.viewer, search: search ? 'top-left' : 'none' };
-		doc.state.log();
-	}
-
 	function addLegend() {
 		addLegendEntry(doc);
 		selection.selectLegend();
@@ -112,15 +107,7 @@
 			{/if}
 		</InspectorSection>
 		<InspectorSection title="Shared map">
-			<label class="check">
-				<input
-					type="checkbox"
-					checked={doc.controls.search !== 'none'}
-					onchange={(e) => toggleSearch(e.currentTarget.checked)}
-				/>
-				Address search for visitors
-			</label>
-			<Hint>Visitors can search for a place, e.g. their street. The map content does not change.</Hint>
+			<Hint>The address search, the zoom buttons and the place of the legend are set in “Share”.</Hint>
 			<Hint>
 				{doc.frame
 					? 'Shared maps show the visible area that you set, on every screen.'
@@ -174,12 +161,5 @@
 	/* the paragraph of the component Hint */
 	.inspector :global(.hint) {
 		margin: 0.5em 0;
-	}
-
-	.check {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		margin-top: var(--space-3);
 	}
 </style>

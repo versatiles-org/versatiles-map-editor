@@ -187,7 +187,8 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 		for (const control of [
 			dialog.getByRole('button', { name: 'Copy embed code' }),
 			dialog.getByRole('combobox', { name: 'Precision' }),
-			dialog.getByRole('checkbox', { name: 'Address search in the map' }),
+			dialog.getByRole('checkbox', { name: 'Address search' }),
+			dialog.getByRole('checkbox', { name: 'Zoom buttons' }),
 			dialog.getByRole('button', { name: 'Reload' })
 		]) {
 			await control.scrollIntoViewIfNeeded();
@@ -299,4 +300,26 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 	expect(alone).toBeGreaterThan(50);
 	// the label of A, under B, covers nothing of it
 	expect(await redOfB('AAAAAAAAAAAAAAAA')).toBeGreaterThanOrEqual(alone * 0.95);
+});
+
+test('a legend hidden in the viewer stays in the editor, to be edited', async ({ page }) => {
+	const legend = { entries: [{ color: '#ff0000', label: 'Park' }] };
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	const preview = page.frameLocator('iframe[title=preview]');
+	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
+
+	await dialog.getByRole('checkbox', { name: 'Legend' }).uncheck();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ legend: 'none' });
+	await expect(preview.getByRole('list', { name: 'Legend' })).toHaveCount(0);
+	await page.keyboard.press('Escape');
+	await expect(page.getByRole('list', { name: 'Legend' })).toBeVisible();
+
+	// shown again at its default place
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await dialog.getByRole('checkbox', { name: 'Legend' }).check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toBeUndefined();
+	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
 });

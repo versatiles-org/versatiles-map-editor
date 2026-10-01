@@ -37,7 +37,7 @@ const sidebarAria = `
   - button /^Add a legend/
 - region "Shared map":
   - heading "Shared map" [level=3]
-  - checkbox "Address search for visitors"
+  - paragraph: /set in “Share”/
 `;
 
 /**

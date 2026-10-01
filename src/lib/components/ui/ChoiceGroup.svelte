@@ -4,7 +4,7 @@
 	/**
 	 * A choice of one value, shown as buttons instead of a drop-down, since the options are few
 	 * and can be seen at once: side by side (`segmented`), as pictures (`pictures`, drawn by
-	 * `picture`), or at their places in a 3×3 grid (`grid`, e.g. positions). Native radio
+	 * `picture`), or at their places in a grid (`grid`, e.g. positions in a 3×3 grid). Native radio
 	 * buttons, so arrow keys and screen readers work as usual.
 	 *
 	 * The chosen text option is solid in the accent, like a primary button; a chosen picture gets
@@ -35,9 +35,18 @@
 	} = $props();
 
 	const uid = $props.id();
+	// the rows and columns of a grid, e.g. 2×2 for the corners or 3×3 for all positions
+	const rows = $derived(Math.max(1, ...options.map((option) => option.cell?.[0] ?? 1)));
+	const columns = $derived(Math.max(1, ...options.map((option) => option.cell?.[1] ?? 1)));
 </script>
 
-<div class="choices {layout} {size}" role="radiogroup" aria-labelledby={labelledby}>
+<div
+	class="choices {layout} {size}"
+	role="radiogroup"
+	aria-labelledby={labelledby}
+	style:--rows={layout === 'grid' ? rows : undefined}
+	style:--columns={layout === 'grid' ? columns : undefined}
+>
 	{#each options as option, i (i)}
 		<label
 			class="choice"
@@ -166,11 +175,11 @@
 		}
 	}
 
-	/* the cells of a 3×3 grid, e.g. positions */
+	/* the cells of a grid, e.g. 3×3 positions */
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(3, 30px);
-		grid-template-rows: repeat(3, var(--size-xs));
+		grid-template-columns: repeat(var(--columns), 30px);
+		grid-template-rows: repeat(var(--rows), var(--size-xs));
 		width: max-content;
 
 		/* empty cells, which are seen as fields */

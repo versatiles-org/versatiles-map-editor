@@ -3,6 +3,8 @@
 	import { Dialog, Button, ChoiceGroup, Hint } from '$lib/components/ui/index.js';
 	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
+	import { defaultPlace, PLACES } from './viewer_controls.js';
+	import type { StateViewer } from '@versatiles/map-state';
 
 	const { state: stateManager }: { state: StateManager } = $props();
 
@@ -81,6 +83,25 @@
 		stateManager.log();
 		update(0);
 	}
+
+	/** Show a control of the viewer at a place, or hide it ("none"); one undo step. */
+	function setControl<K extends keyof StateViewer>(key: K, place: NonNullable<StateViewer[K]>) {
+		const doc = stateManager.mapDocument;
+		doc.viewer = { ...doc.viewer, [key]: place };
+		stateManager.log();
+		update(0);
+	}
+
+	const CONTROLS: { key: keyof StateViewer; label: string; hint: string; layout: 'segmented' | 'grid' }[] = [
+		{
+			key: 'search',
+			label: 'Address search',
+			hint: 'Visitors can find a place, e.g. their street. The map content does not change.',
+			layout: 'segmented'
+		},
+		{ key: 'navigation', label: 'Zoom buttons', hint: 'Buttons to zoom in and out.', layout: 'grid' },
+		{ key: 'legend', label: 'Legend', hint: 'The legend that you made for the map.', layout: 'grid' }
+	];
 
 	function getLinkCode() {
 		const digits = precision === 'auto' ? autoDigits : precision;
@@ -197,6 +218,37 @@
 				</div>
 			</section>
 
+			<!-- what visitors see over the map, and where -->
+			<section aria-labelledby="{uid}-controls">
+				<h3 id="{uid}-controls">Controls</h3>
+				{#each CONTROLS as { key, label, hint, layout } (key)}
+					{#if key !== 'legend' || stateManager.mapDocument.legend?.entries.length}
+						{@const place = stateManager.mapDocument.controls[key]}
+						<div class="control">
+							<label class="check">
+								<input
+									type="checkbox"
+									checked={place !== 'none'}
+									onchange={(e) => setControl(key, e.currentTarget.checked ? defaultPlace(key) : 'none')}
+								/>
+								{label}
+							</label>
+							{#if place !== 'none'}
+								<span class="sr-only" id="{uid}-{key}-place">Place of the {label.toLowerCase()}</span>
+								<ChoiceGroup
+									{layout}
+									labelledby="{uid}-{key}-place"
+									value={place}
+									onchange={(value) => setControl(key, value)}
+									options={PLACES[key]}
+								/>
+							{/if}
+						</div>
+						<Hint>{hint}</Hint>
+					{/if}
+				{/each}
+			</section>
+
 			<section>
 				<h3><label for="text-link">Link</label></h3>
 				<Hint>Anyone with the link can view the map, but not change it.</Hint>
@@ -237,20 +289,6 @@
 					</select>
 				</div>
 				<Hint>Coarser positions make shorter links.</Hint>
-				<label class="check">
-					<input
-						type="checkbox"
-						checked={stateManager.mapDocument.controls.search !== 'none'}
-						onchange={(e) => {
-							const doc = stateManager.mapDocument;
-							doc.viewer = { ...doc.viewer, search: e.currentTarget.checked ? 'top-left' : 'none' };
-							stateManager.log();
-							update(0);
-						}}
-					/>
-					Address search in the map
-				</label>
-				<Hint>Visitors can find a place, e.g. their street. The map content does not change.</Hint>
 			</section>
 		</div>
 	</div>
@@ -439,6 +477,19 @@
 		align-items: center;
 		gap: var(--space-2);
 		margin-top: var(--space-2);
+	}
+
+	/* a control of the viewer: whether it is shown, and where */
+	.control {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+
+		.check {
+			margin-top: 0;
+		}
 	}
 
 	/* a warning about what visitors may miss; the buttons below say what can be done about it */
