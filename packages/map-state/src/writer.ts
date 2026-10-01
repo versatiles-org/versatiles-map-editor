@@ -1,7 +1,13 @@
 import { parseColor } from './color.js';
 import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { boundsOf, centerOf } from './bounds.js';
-import { LEGEND_DEFAULTS, removeViewerDefaults, sanitizeFrame, VIEWER_CHOICES } from './profile.js';
+import {
+	LEGEND_DEFAULTS,
+	removeViewerDefaults,
+	sanitizeFrame,
+	sanitizeLabelMinZoom,
+	VIEWER_CHOICES
+} from './profile.js';
 import { StateReader } from './reader.js';
 import { LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
@@ -224,6 +230,8 @@ export class StateWriter {
 					metadata.colorScheme ||
 					removeViewerDefaults(metadata.viewer) ||
 					metadata.labelFont ||
+					metadata.labelOverlap === 'hide' ||
+					sanitizeLabelMinZoom(metadata.labelMinZoom) !== undefined ||
 					metadata.mapLabelsOnTop ||
 					metadata.title));
 		if (!stored) {
@@ -265,6 +273,15 @@ export class StateWriter {
 		if (metadata.title) {
 			this.writeInteger(9, 6);
 			this.writeString(metadata.title);
+		}
+		if (metadata.labelOverlap === 'hide') {
+			// a flag: the key alone
+			this.writeInteger(11, 6);
+		}
+		const labelMinZoom = sanitizeLabelMinZoom(metadata.labelMinZoom);
+		if (labelMinZoom !== undefined) {
+			this.writeInteger(12, 6);
+			this.writeVarint(labelMinZoom);
 		}
 		// key 5 was the search of older links, as a flag
 		const viewer = removeViewerDefaults(metadata.viewer);

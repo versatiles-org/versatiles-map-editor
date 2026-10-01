@@ -43,6 +43,9 @@ The first release.
   `sanitizeViewer`. The search and the position of the legend of older links, GeoJSON files and
   map states (`upgradeState`) are read into it.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
+- `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
+  `labelMinZoom` (the zoom level from which they are shown) in the metadata;
+  `sanitizeLabelMinZoom`.
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).

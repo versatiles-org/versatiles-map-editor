@@ -86,6 +86,16 @@ export interface StateMetadata {
 	 */
 	labelFont?: string;
 	/**
+	 * Hide the labels of markers that would overlap other labels ("hide"); their symbols stay.
+	 * Without it, all labels are shown, also on top of each other.
+	 */
+	labelOverlap?: 'hide';
+	/**
+	 * The zoom level from which the labels of markers are shown, a whole number from 1 to 24.
+	 * Without it, at every zoom level.
+	 */
+	labelMinZoom?: number;
+	/**
 	 * Draw the labels of the background map over the areas and lines of the elements. Without it,
 	 * they are under them. The labels of markers are always on top.
 	 */

@@ -153,6 +153,56 @@ export function elementLayer(role: Role, group: number, font: string): LayerSpec
 	}
 }
 
+/**
+ * How the labels of markers are shown: all, also on top of each other ("show"), or without those
+ * that would overlap other labels or symbols ("hide"); from a zoom level (0: always).
+ */
+export interface LabelOptions {
+	overlap: 'show' | 'hide';
+	minZoom: number;
+}
+
+export const DEFAULT_LABEL_OPTIONS: LabelOptions = { overlap: 'show', minZoom: 0 };
+
+/** The layout properties of the labels of markers for the options, see `LabelOptions`. */
+export function labelLayout({ overlap, minZoom }: LabelOptions) {
+	// a property, so "{…}" in a label is not replaced with feature properties
+	const label: ExpressionSpecification = ['get', 'label'];
+	return {
+		// no label below the zoom level, so it neither shows nor takes room
+		'text-field': minZoom > 0 ? (['step', ['zoom'], '', minZoom, label] as ExpressionSpecification) : label,
+		'text-overlap': overlap === 'hide' ? ('never' as const) : ('always' as const),
+		// a marker whose label has no room is shown without it
+		'text-optional': overlap === 'hide'
+	};
+}
+
+/**
+ * The layer of the labels of markers when more than `MAX_GROUPS` markers have labels: they share
+ * one layer of symbols, whose labels would be placed from the back, so the marker behind keeps its
+ * label where two overlap. This layer draws them all, placed from the front, above the markers.
+ * (Under them, each label would collide with the symbol of its own marker and be hidden.) Labels
+ * hidden where they overlap still avoid each other, but may cover the symbols of other markers.
+ */
+export const LABELS_LAYER = 'elements_labels';
+
+/** The layer of the labels of the markers, see `LABELS_LAYER`: their texts without the symbols. */
+export function labelsLayer(font: string): LayerSpecification {
+	const markers = symbolLayer(font, 0) as { layout: Record<string, unknown>; paint: Record<string, unknown> };
+	const text = (properties: Record<string, unknown>) =>
+		Object.fromEntries(Object.entries(properties).filter(([key]) => key.startsWith('text-')));
+	return {
+		id: LABELS_LAYER,
+		source: ELEMENT_LAYERS.symbol,
+		type: 'symbol',
+		layout: { ...text(markers.layout), 'symbol-sort-key': ['get', 'order'] },
+		paint: text(markers.paint)
+	} as LayerSpecification;
+}
+
+/** The layout properties of the labels of markers that each layer of markers has alike. */
+export const LABEL_LAYOUT_KEYS = ['text-font', 'text-field', 'text-overlap', 'text-optional'] as const;
+
 /** The layer of the markers of a group, with the glyph font of their labels. */
 function symbolLayer(font: string, group: number): LayerSpecification {
 	return {
@@ -168,13 +218,11 @@ function symbolLayer(font: string, group: number): LayerSpecification {
 			'icon-allow-overlap': true,
 			'icon-rotate': ['get', 'rotate'],
 			'icon-size': ['get', 'size'],
-			// a property, so "{…}" in a label is not replaced with feature properties
-			'text-field': ['get', 'label'],
+			...labelLayout(DEFAULT_LABEL_OPTIONS),
 			// marker labels use the font of the map labels
 			'text-font': ['literal', [font]],
 			'text-size': ['*', ['get', 'size'], 16],
 			'text-justify': 'left',
-			'text-overlap': 'always',
 			'text-variable-anchor-offset': lookup(
 				'position',
 				Object.entries(labelPositionTable(allSymbols())),
@@ -219,6 +267,10 @@ export class ElementRenderer {
 	private fixedOrder = false;
 	/** The layers of the groups after the first, which the map style has, in drawing order. */
 	private extraLayers: string[] = [];
+	/** How the labels of markers are shown, see `LabelOptions`. */
+	private labels: LabelOptions = DEFAULT_LABEL_OPTIONS;
+	/** Whether the labels of the markers have a layer of their own, see `LABELS_LAYER`. */
+	private sharedLabels = false;
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -249,6 +301,7 @@ export class ElementRenderer {
 		const groups = groupElements(drawn, this.fixedOrder);
 		this.groups = new Map(this.elements.map((element, i) => [element, groups[i]]));
 		this.drawn = new Map(this.elements.map((element, i) => [element, ElementRenderer.key(drawn[i])]));
+		this.sharedLabels = drawn.filter((d) => d.label).length > MAX_GROUPS;
 	}
 
 	/**
@@ -264,7 +317,38 @@ export class ElementRenderer {
 
 	/** The ids of the layers of a role, e.g. to find an element under the mouse. */
 	public layerIds(role: Role): string[] {
-		return [ELEMENT_LAYERS[role], ...this.extraLayers.filter((id) => id.startsWith(`${ELEMENT_LAYERS[role]}_`))];
+		const ids = [ELEMENT_LAYERS[role], ...this.extraLayers.filter((id) => id.startsWith(`${ELEMENT_LAYERS[role]}_`))];
+		// the labels of the markers, if they have a layer of their own
+		return role === 'symbol' && this.extraLayers.includes(LABELS_LAYER) ? [...ids, LABELS_LAYER] : ids;
+	}
+
+	/** Show the labels of the markers all, or without those that overlap, and from a zoom level. */
+	public setLabelOptions(options: LabelOptions) {
+		this.labels = options;
+		this.applyLabels();
+	}
+
+	/**
+	 * The options of the labels on the layers of the markers. If the labels have a layer of their
+	 * own, the layers of the markers draw no labels, and the labels are placed from the front when
+	 * overlapping ones are hidden.
+	 */
+	private applyLabels() {
+		const map = this.map;
+		if (!map.style || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
+		const layout = labelLayout(this.labels);
+		const own = this.extraLayers.includes(LABELS_LAYER);
+		for (const id of this.layerIds('symbol')) {
+			for (const [key, value] of Object.entries(layout)) {
+				const label = id === LABELS_LAYER || !own;
+				map.setLayoutProperty(id, key as keyof typeof layout, key === 'text-field' && !label ? '' : value);
+			}
+		}
+		if (own) {
+			const order: ExpressionSpecification = ['get', 'order'];
+			const front = this.labels.overlap === 'hide';
+			map.setLayoutProperty(LABELS_LAYER, 'symbol-sort-key', front ? ['-', 0, order] : order);
+		}
 	}
 
 	/** The ids of the layers of the markers, e.g. to set the font of their labels. */
@@ -294,24 +378,30 @@ export class ElementRenderer {
 		const wanted = roles.flatMap((has, group) =>
 			group === 0 ? [] : ROLES.filter((role) => has?.has(role)).map((role) => layerId(role, group))
 		);
+		if (this.sharedLabels) wanted.push(LABELS_LAYER);
 		let same = 0;
 		while (same < wanted.length && wanted[same] === this.extraLayers[same]) same++;
 		for (const id of this.extraLayers.slice(same).reverse()) map.removeLayer(id);
-		if (same === wanted.length) {
-			this.extraLayers = wanted;
-			return;
-		}
-		const font = (
-			map.getLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font') as ['literal', string[]] | undefined
-		)?.[1]?.[0];
 		const order = map.getLayersOrder();
 		// above the last layer of the elements that stays, under e.g. the selection
 		const before = order[order.indexOf(same > 0 ? wanted[same - 1] : ELEMENT_LAYERS.symbol) + 1];
 		for (const id of wanted.slice(same)) {
-			const [, role, group] = /^elements_(fill|stroke|symbol)_(\d+)$/.exec(id)!;
-			map.addLayer(elementLayer(role as Role, Number(group), font ?? 'noto_sans_regular'), before);
+			const [, role, group] = /^elements_(fill|stroke|symbol)_(\d+)$/.exec(id) ?? [id, 'labels', '0'];
+			map.addLayer(
+				role === 'labels'
+					? labelsLayer('noto_sans_regular')
+					: elementLayer(role as Role, Number(group), 'noto_sans_regular'),
+				before
+			);
+			// the font like that of the first layer of markers
+			if (role === 'fill' || role === 'stroke') continue;
+			for (const key of LABEL_LAYOUT_KEYS) {
+				const value = map.getLayoutProperty(ELEMENT_LAYERS.symbol, key);
+				if (value !== undefined) map.setLayoutProperty(id, key, value);
+			}
 		}
 		this.extraLayers = wanted;
+		this.applyLabels();
 	}
 
 	/** Draw the element again, e.g. after a change of its geometry or style. */

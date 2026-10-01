@@ -110,6 +110,26 @@ export class MapDocument {
 		this.view.style.setFont(this.font);
 	}
 
+	/** Whether the labels of markers that would overlap other labels are hidden; their symbols stay. */
+	public get labelOverlap(): 'show' | 'hide' {
+		return this.#labelOverlap;
+	}
+	public set labelOverlap(overlap: 'show' | 'hide') {
+		this.#labelOverlap = overlap;
+		this.view.style.setLabelOptions({ overlap, minZoom: this.#labelMinZoom });
+	}
+	#labelOverlap: 'show' | 'hide' = $state('show');
+
+	/** The zoom level from which the labels of markers are shown; 0 for all zoom levels. */
+	public get labelMinZoom(): number {
+		return this.#labelMinZoom;
+	}
+	public set labelMinZoom(zoom: number) {
+		this.#labelMinZoom = zoom;
+		this.view.style.setLabelOptions({ overlap: this.#labelOverlap, minZoom: zoom });
+	}
+	#labelMinZoom = $state(0);
+
 	/**
 	 * Whether the labels of the background map are drawn over the areas and lines of the elements,
 	 * instead of under them. The labels of markers are always on top.
@@ -310,6 +330,8 @@ export class MapDocument {
 		this.viewer = meta?.viewer;
 		this.title = meta?.title ?? '';
 		this.labelFont = meta?.labelFont;
+		this.labelOverlap = meta?.labelOverlap === 'hide' ? 'hide' : 'show';
+		this.labelMinZoom = meta?.labelMinZoom ?? 0;
 		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;
 	}
 

@@ -100,7 +100,9 @@ const state = {
 	meta: {
 		background: { builder: 'osm', options: { theme: 'colorful' } },
 		legend: { entries: [{ color: COLOR, label: 'Pharmacy', symbol: SYMBOL }] },
-		title: 'Pharmacies in Inner London'
+		title: 'Pharmacies in Inner London',
+		// readable at every zoom level: labels that would overlap are hidden
+		labelOverlap: 'hide'
 	},
 	elements: pharmacies.map(({ point, name }) => ({
 		type: 'marker',

@@ -2,7 +2,16 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
-	import { Icon, IconButton, type IconName, Button, ButtonGroup, Hint, InputRow } from '$lib/components/ui/index.js';
+	import {
+		Icon,
+		IconButton,
+		type IconName,
+		Button,
+		ButtonGroup,
+		ChoiceGroup,
+		Hint,
+		InputRow
+	} from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
@@ -37,6 +46,25 @@
 	});
 
 	/** One font for the labels of all markers, or the one of the background map. */
+	const OVERLAPS: { value: 'show' | 'hide'; label: string }[] = [
+		{ value: 'show', label: 'Show all' },
+		{ value: 'hide', label: 'Hide' }
+	];
+	// the zoom levels from which the labels are shown: all, or from a city to a street
+	const MIN_ZOOMS = [0, 6, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+
+	/** Labels that would overlap others shown or hidden, as one undo step. */
+	function setLabelOverlap(overlap: 'show' | 'hide') {
+		doc.labelOverlap = overlap;
+		doc.state.log();
+	}
+
+	/** The zoom level from which the labels are shown, as one undo step. */
+	function setLabelMinZoom(zoom: number) {
+		doc.labelMinZoom = zoom;
+		doc.state.log();
+	}
+
 	function setLabelFont(font: string | undefined) {
 		doc.labelFont = font;
 		doc.state.log();
@@ -93,6 +121,30 @@
 				inherited={getSettings(doc.background).font}
 				onchange={setLabelFont}
 			/>
+			<!-- e.g. for many markers: labels that would overlap hidden, or shown only when zoomed in -->
+			<InputRow id="{uid}-overlap" label="Overlapping" group>
+				<ChoiceGroup
+					labelledby="{uid}-overlap-label"
+					value={doc.labelOverlap}
+					onchange={setLabelOverlap}
+					options={OVERLAPS}
+				/>
+			</InputRow>
+			<InputRow id="{uid}-min-zoom" label="Shown from">
+				<select
+					id="{uid}-min-zoom"
+					value={String(doc.labelMinZoom)}
+					onchange={(e) => setLabelMinZoom(Number(e.currentTarget.value))}
+				>
+					{#if !MIN_ZOOMS.includes(doc.labelMinZoom)}
+						<option value={String(doc.labelMinZoom)}>Zoom {doc.labelMinZoom}</option>
+					{/if}
+					{#each MIN_ZOOMS as zoom (zoom)}
+						<option value={String(zoom)}>{zoom === 0 ? 'Every zoom level' : `Zoom ${zoom}`}</option>
+					{/each}
+				</select>
+			</InputRow>
+			<Hint>The zoom level of the map is shown in the status line at the bottom.</Hint>
 		</InspectorSection>
 		<InspectorSection title="Legend">
 			{#if legend}

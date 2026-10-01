@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import { inlineSources } from '@versatiles/style';
-import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
+import { ELEMENT_LAYERS, type ElementRenderer, type LabelOptions } from './element_renderer.js';
 import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
 import { themeColor } from './theme_color.js';
 import { addFillPatternImage } from './fill_patterns.js';
@@ -80,6 +80,14 @@ export class MapStyleLoader {
 	public destroy() {
 		this.#destroyed = true;
 		this.#abortController.abort();
+	}
+
+	/**
+	 * Show the labels of the markers all, or without those that overlap, and from a zoom level. The
+	 * renderer keeps them, also for the next style, since it knows which layers draw labels.
+	 */
+	public setLabelOptions(options: LabelOptions) {
+		this.#renderer.setLabelOptions(options);
 	}
 
 	/** Set the font on the layers of the markers, once the style has them. */

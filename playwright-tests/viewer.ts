@@ -429,3 +429,42 @@ test('an area in front of a marker covers it', { tag: '@cross-browser' }, async 
 	expect(await redOfMarker([area, marker])).toBeGreaterThan(50);
 	expect(await redOfMarker([marker, area])).toBe(0);
 });
+
+// More than 100 labels share one layer of markers; with overlapping labels hidden, the labels are
+// placed from the front in a layer of their own, so the marker in front keeps its label
+test('with many labels, the marker in front keeps its label where labels overlap', async ({ page }) => {
+	const point: [number, number] = [13.4, 52.5];
+	const many = Array.from({ length: 120 }, (_, i) => ({
+		type: 'marker' as const,
+		point: [13.3 + (i % 12) * 0.002, 52.45 + Math.floor(i / 12) * 0.002] as [number, number],
+		style: { label: `L${i}` }
+	}));
+	const state: MapState = {
+		map: { center: point, radius: 2000 },
+		meta: { labelOverlap: 'hide' },
+		elements: [
+			...many,
+			{ type: 'marker', point, style: { color: '#0000ff', label: 'Blue behind' } },
+			{ type: 'marker', point, style: { color: '#ff0000', label: 'Red in front' } }
+		]
+	};
+	await page.goto('/view#' + encodeState(state));
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, point);
+	const shown = () =>
+		page.evaluate(
+			({ x, y }) =>
+				(window as unknown as MapWindow).map
+					.queryRenderedFeatures(
+						[
+							[x - 100, y - 60],
+							[x + 200, y + 60]
+						],
+						{ layers: ['elements_labels'] }
+					)
+					.map((f) => f.properties.label),
+			{ x, y }
+		);
+	// the label of the marker behind moves to another side, if there is room
+	await expect.poll(shown).toContain('Red in front');
+});

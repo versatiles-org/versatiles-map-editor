@@ -15,7 +15,7 @@ import type {
 	StateViewer
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
-import { removeViewerDefaults, sanitizeBackground, VIEWER_CHOICES } from './profile.js';
+import { removeViewerDefaults, sanitizeBackground, sanitizeLabelMinZoom, VIEWER_CHOICES } from './profile.js';
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
@@ -296,6 +296,15 @@ export class StateReader {
 					case 10:
 						metadata.viewer = this.readViewer();
 						break;
+					case 11:
+						metadata.labelOverlap = 'hide';
+						break;
+					case 12: {
+						const zoom = sanitizeLabelMinZoom(this.readVarint());
+						if (zoom === undefined) throw new Error('Invalid zoom level of labels');
+						metadata.labelMinZoom = zoom;
+						break;
+					}
 					case 8:
 						// not a field of the metadata: the symbols of the styles and of the legend
 						this.readSymbols();

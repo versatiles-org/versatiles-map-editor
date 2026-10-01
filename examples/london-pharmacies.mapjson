@@ -20,7 +20,8 @@
 				}
 			]
 		},
-		"title": "Pharmacies in Inner London"
+		"title": "Pharmacies in Inner London",
+		"labelOverlap": "hide"
 	},
 	"elements": [
 		{

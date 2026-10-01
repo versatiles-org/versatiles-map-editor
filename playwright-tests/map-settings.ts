@@ -601,3 +601,48 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect.poll(async () => (await storedState(page)).meta?.legend).toMatchObject({ font: 'serif', italic: true });
 	expect((await storedState(page)).meta?.legend?.bold).toBeUndefined();
 });
+
+test('labels of markers: overlapping ones hidden, and shown from a zoom level', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				elements: [
+					{ type: 'marker', point: center, style: { label: 'A' } },
+					{ type: 'marker', point: center, style: { label: 'B' } }
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	const labels = page.getByRole('region', { name: 'Labels of markers' });
+	/** A layout property of every layer of markers (two labels: two layers). */
+	const layout = (key: string) =>
+		page.evaluate((key) => {
+			const map = (window as unknown as MapWindow).map;
+			const ids = map.getLayersOrder().filter((id) => id.startsWith('elements_symbol'));
+			return ids.map((id) => JSON.stringify(map.getLayoutProperty(id, key as 'text-field')));
+		}, key);
+	const meta = async () => (await storedState(page)).meta;
+
+	await expect.poll(() => layout('text-overlap')).toStrictEqual(['"always"', '"always"']);
+	await labels.getByRole('radiogroup', { name: 'Overlapping' }).getByRole('radio', { name: 'Hide' }).check();
+	await expect.poll(() => layout('text-overlap')).toStrictEqual(['"never"', '"never"']);
+	expect(await layout('text-optional')).toStrictEqual(['true', 'true']);
+	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide' });
+
+	await labels.getByRole('combobox', { name: 'Shown from' }).selectOption('Zoom 14');
+	const step = JSON.stringify(['step', ['zoom'], '', 14, ['get', 'label']]);
+	await expect.poll(() => layout('text-field')).toStrictEqual([step, step]);
+	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide', labelMinZoom: 14 });
+
+	// kept in the map, e.g. when it is opened again
+	await page.reload();
+	await waitForMapIsReady(page);
+	await expect.poll(() => layout('text-field')).toStrictEqual([step, step]);
+	await expect(labels.getByRole('combobox', { name: 'Shown from' })).toHaveValue('14');
+
+	// one undo step each
+	await page.keyboard.press('ControlOrMeta+z');
+	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide' });
+});

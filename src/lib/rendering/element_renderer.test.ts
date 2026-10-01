@@ -1,7 +1,15 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { MapDocument } from '../map_document.svelte.js';
-import { ELEMENT_LAYERS, elementStyle, groupElements, layerIdsOf, MAX_GROUPS, type Drawn } from './element_renderer.js';
+import {
+	ELEMENT_LAYERS,
+	elementStyle,
+	groupElements,
+	labelLayout,
+	layerIdsOf,
+	MAX_GROUPS,
+	type Drawn
+} from './element_renderer.js';
 import type { PolygonElement } from '../element/polygon.js';
 import type { MarkerElement } from '../element/marker.js';
 
@@ -153,7 +161,19 @@ describe('ElementRenderer', () => {
 		it('share one layer if there are too many, since every layer costs time', async () => {
 			await markers(Array.from({ length: MAX_GROUPS + 1 }, (_, i) => `Label ${i}`));
 			expect(new Set(groups().map(([, group]) => group))).toStrictEqual(new Set([0]));
-			expect(map.addLayer).not.toHaveBeenCalled();
+			// only a layer for their labels, above the markers, which draw none
+			expect(addedLayers().map(([id]) => id)).toStrictEqual(['elements_labels']);
+			const layout = (id: string, key: string) =>
+				map.setLayoutProperty.mock.calls.filter(([i, k]) => i === id && k === key).at(-1)?.[2];
+			expect(layout('elements_symbol', 'text-field')).toBe('');
+			expect(layout('elements_labels', 'text-field')).toStrictEqual(['get', 'label']);
+			expect(layout('elements_labels', 'symbol-sort-key')).toStrictEqual(['get', 'order']);
+			// labels that would overlap hidden: placed from the front, so the marker in front keeps its label
+			doc.view.renderer.setLabelOptions({ overlap: 'hide', minZoom: 0 });
+			expect(layout('elements_labels', 'symbol-sort-key')).toStrictEqual(['-', 0, ['get', 'order']]);
+			expect(layout('elements_labels', 'text-overlap')).toBe('never');
+			expect(layout('elements_symbol', 'text-field')).toBe('');
+			expect(doc.view.renderer.symbolLayerIds()).toStrictEqual(['elements_symbol', 'elements_labels']);
 		});
 
 		it('get their layers again in a new map style', async () => {
@@ -219,5 +239,23 @@ describe('groupElements', () => {
 		expect(new Set(groupElements(many))).toStrictEqual(new Set([0]));
 		// up to the limit, each in a group of its own
 		expect(groupElements(many.slice(1))).toStrictEqual(many.slice(1).map((_, i) => i));
+	});
+});
+
+describe('labelLayout', () => {
+	it('shows all labels at every zoom level by default', () => {
+		expect(labelLayout({ overlap: 'show', minZoom: 0 })).toStrictEqual({
+			'text-field': ['get', 'label'],
+			'text-overlap': 'always',
+			'text-optional': false
+		});
+	});
+
+	it('hides labels that would overlap, keeping their markers, and those below a zoom level', () => {
+		expect(labelLayout({ overlap: 'hide', minZoom: 14 })).toStrictEqual({
+			'text-field': ['step', ['zoom'], '', 14, ['get', 'label']],
+			'text-overlap': 'never',
+			'text-optional': true
+		});
 	});
 });

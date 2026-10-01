@@ -28,7 +28,8 @@ export {
 	VIEWER_DEFAULTS,
 	VIEWER_CHOICES,
 	removeViewerDefaults,
-	sanitizeViewer
+	sanitizeViewer,
+	sanitizeLabelMinZoom
 } from './profile.js';
 
 /**

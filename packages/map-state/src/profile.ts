@@ -294,6 +294,13 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	return removeLegendDefaults(legend);
 }
 
+// ----- labels of markers -----
+
+/** A zoom level from which the labels of markers are shown: a whole number from 1 to 24, else undefined. */
+export function sanitizeLabelMinZoom(value: unknown): number | undefined {
+	return typeof value === 'number' && Number.isInteger(value) && value >= 1 && value <= 24 ? value : undefined;
+}
+
 // ----- viewer -----
 
 /** What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left. */

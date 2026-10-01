@@ -18,6 +18,7 @@ import {
 	sanitizeViewer,
 	removeViewerDefaults,
 	sanitizeNumber,
+	sanitizeLabelMinZoom,
 	sanitizeFrame,
 	sanitizeString,
 	strokePropsFromStyle,
@@ -120,6 +121,9 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	const viewer = removeViewerDefaults(state.meta?.viewer);
 	if (viewer) meta.viewer = viewer;
 	if (state.meta?.labelFont) meta.labelFont = state.meta.labelFont;
+	if (state.meta?.labelOverlap === 'hide') meta.labelOverlap = 'hide';
+	const labelMinZoom = sanitizeLabelMinZoom(state.meta?.labelMinZoom);
+	if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
 	if (state.meta?.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 	if (state.meta?.title) meta.title = state.meta.title;
 	if (Object.keys(meta).length > 0) doc.meta = meta;
@@ -293,6 +297,9 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		if (viewer) meta.viewer = viewer;
 		const labelFont = sanitizeString(doc.meta.labelFont);
 		if (labelFont) meta.labelFont = labelFont;
+		if (doc.meta.labelOverlap === 'hide') meta.labelOverlap = 'hide';
+		const labelMinZoom = sanitizeLabelMinZoom(doc.meta.labelMinZoom);
+		if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
 		if (doc.meta.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;
 		const title = sanitizeString(doc.meta.title);
 		if (title) meta.title = title;
