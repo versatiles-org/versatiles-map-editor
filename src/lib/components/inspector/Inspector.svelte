@@ -19,7 +19,7 @@
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementNames, elementText } from '$lib/components/element_names.js';
+	import { countTypes, elementText, typeName } from '$lib/components/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
@@ -32,7 +32,7 @@
 	const elements = $derived(selection.selectedElements);
 	const legend = $derived(doc.legend);
 
-	// the name as in the list of elements, e.g. "Marker 2"
+	// the name as in the list of elements, e.g. "Marker", and its label or popup text
 	const header = $derived.by((): { icon: IconName; title: string; subtitle: string } => {
 		if (selection.legendSelected && legend) return { icon: 'legend', title: 'Legend', subtitle: 'Part of the map' };
 		if (elements.length === 0) return { icon: 'map', title: 'Map', subtitle: 'Nothing selected' };
@@ -41,10 +41,7 @@
 			const icon = new Set(types).size === 1 ? types[0] : 'layers';
 			return { icon: icon as IconName, title: `${elements.length} elements`, subtitle: countTypes(types) };
 		}
-		const element = elements[0];
-		const index = doc.elements.indexOf(element);
-		const name = elementNames(doc.elements.map((e) => e.getState().type))[index];
-		return { icon: types[0] as IconName, title: name, subtitle: elementText(element) };
+		return { icon: types[0] as IconName, title: typeName(types[0]), subtitle: elementText(elements[0]) };
 	});
 
 	/** One font for the labels of all markers, or the one of the background map. */

@@ -3,7 +3,7 @@
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import ElementName from './ElementName.svelte';
 	import { Icon, type IconName, Hint } from '$lib/components/ui/index.js';
-	import { elementNames } from '$lib/components/element_names.js';
+	import { typeName } from '$lib/components/element_names.js';
 	import { isToggleClick, TOGGLE_KEY } from '$lib/interaction/index.js';
 	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
 
@@ -22,8 +22,6 @@
 
 	// front to back: the reverse drawing order
 	const elements = $derived([...doc.elements].reverse());
-	// the type and the number among the elements of this type in drawing order, e.g. "Marker 2"
-	const names = $derived(elementNames(doc.elements.map((element) => element.getState().type)).reverse());
 
 	// the option with the keyboard focus
 	let active = $state(0);
@@ -229,7 +227,7 @@
 			<span class="type" style:color={element.getColors()[0]}
 				><Icon name={element.getState().type as IconName} size={14} /></span
 			>
-			<span class="name"><ElementName {element} name={names[i]} /></span>
+			<span class="name"><ElementName {element} name={typeName(element.getState().type)} /></span>
 			<!-- to drag with a finger; a mouse drags the whole row -->
 			<span class="grip" aria-hidden="true"><Icon name="grip" size={14} /></span>
 		</li>

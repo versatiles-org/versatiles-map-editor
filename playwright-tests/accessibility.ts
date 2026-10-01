@@ -107,26 +107,26 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	const list = page.getByRole('listbox', { name: 'Elements' });
 	const options = list.getByRole('option');
 	// the element in front first
-	await expect(options).toHaveText(['Polygon 1: Park', 'Line 1', 'Marker 1: Berlin']);
+	await expect(options).toHaveText(['Polygon: Park', 'Line', 'Marker: Berlin']);
 
 	// the selection follows the focus, and Shift adds to it
 	await list.focus();
 	await page.keyboard.press('ArrowDown');
-	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1']);
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line']);
 	await page.keyboard.press('Shift+ArrowDown');
-	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1', 'Marker 1: Berlin']);
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line', 'Marker: Berlin']);
 	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 
 	// Delete removes the selected elements
 	await page.keyboard.press('Delete');
-	await expect(options).toHaveText(['Polygon 1: Park']);
+	await expect(options).toHaveText(['Polygon: Park']);
 	await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(['polygon']);
 
 	// Enter selects the element, like a click on the map
 	await page.keyboard.press('Home');
 	await page.keyboard.press('Enter');
-	await expect(list.getByRole('option', { selected: true })).toHaveText(['Polygon 1: Park']);
-	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Polygon 1');
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Polygon: Park']);
+	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Polygon');
 });
 
 test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
@@ -182,8 +182,8 @@ test('the drawer of elements opens with E, and chooses the map, the legend or el
 
 	await drawer.getByRole('button', { name: 'Legend' }).click();
 	await expect(title).toHaveText('Legend');
-	await drawer.getByRole('option', { name: 'Marker 1' }).click();
-	await expect(title).toHaveText('Marker 1');
+	await drawer.getByRole('option', { name: 'Marker' }).click();
+	await expect(title).toHaveText('Marker');
 	await drawer.getByRole('button', { name: 'Map settings' }).click();
 	await expect(title).toHaveText('Map');
 
@@ -237,7 +237,7 @@ test('names show the popup text without its formatting', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	const option = page.getByRole('listbox', { name: 'Elements' }).getByRole('option');
-	await expect(option).toHaveText('Polygon 1: Low-emission zone');
+	await expect(option).toHaveText('Polygon: Low-emission zone');
 	await option.click();
 	await expect(page.locator('.sidebar .subtitle')).toHaveText('Low-emission zone');
 });

@@ -8,15 +8,6 @@ export function typeName(type: string): string {
 	return TYPE_NAMES[type] ?? type;
 }
 
-/** The names of elements: the type and the number among the elements of this type, e.g. "Marker 2". */
-export function elementNames(types: string[]): string[] {
-	const counts: Record<string, number> = {};
-	return types.map((type) => {
-		counts[type] = (counts[type] ?? 0) + 1;
-		return `${typeName(type)} ${counts[type]}`;
-	});
-}
-
 /** How many elements of each type, e.g. "2 markers, 1 line". */
 export function countTypes(types: string[]): string {
 	const counts = new Map<string, number>();

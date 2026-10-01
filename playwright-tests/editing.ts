@@ -371,7 +371,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	const a = await project(page, [13.34, 52.475]);
 	const b = await project(page, [13.41, 52.475]);
 	await page.mouse.click(...a);
-	await expect(styleTitle).toHaveText('Polygon 1');
+	await expect(styleTitle).toHaveText('Polygon');
 	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...b);
 	await page.keyboard.up('ControlOrMeta');
@@ -409,7 +409,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	// a marker and polygons have no style properties in common
 	const moved = await project(page, [13.34, 52.465]);
 	await page.mouse.click(...moved);
-	await expect(styleTitle).toHaveText('Polygon 1');
+	await expect(styleTitle).toHaveText('Polygon');
 	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...((await project(page, [13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
 	await page.keyboard.up('ControlOrMeta');
@@ -420,7 +420,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...moved);
 	await page.keyboard.up('ControlOrMeta');
-	await expect(styleTitle).toHaveText('Marker 1');
+	await expect(styleTitle).toHaveText('Marker');
 	await expect(page.getByRole('button', { name: /^Symbol/ })).toBeVisible();
 });
 
@@ -633,7 +633,7 @@ test('the inspector and the actions follow the selection', async ({ page }) => {
 	// a selected marker: its style, and its actions above it
 	const [x, y] = await project(page, center);
 	await page.mouse.click(x + 6, y - 8);
-	await expect(title).toHaveText('Marker 1');
+	await expect(title).toHaveText('Marker');
 	await expect(page.getByRole('region', { name: 'Symbol' })).toBeVisible();
 	const box = (await bar.boundingBox())!;
 	expect(box.y + box.height).toBeLessThan(y - 8);
@@ -843,13 +843,13 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 	await expect(label).toHaveValue('B');
 	await page.keyboard.press('e');
 	const list = page.getByRole('listbox', { name: 'Elements' });
-	await expect(list.getByRole('option')).toHaveText([/Marker 2: B/, /Marker 1: A/]);
+	await expect(list.getByRole('option')).toHaveText([/Marker: B/, /Marker: A/]);
 	await expect(list.getByRole('option', { selected: true })).toHaveText(/: B/);
 
 	// B to the back: now A is in front and gets the click
 	await page.getByRole('button', { name: 'Send to back' }).click();
 	await expect.poll(labels).toStrictEqual(['B', 'A']);
-	await expect(list.getByRole('option')).toHaveText([/Marker 2: A/, /Marker 1: B/]);
+	await expect(list.getByRole('option')).toHaveText([/Marker: A/, /Marker: B/]);
 	await expect(list.getByRole('option', { selected: true })).toHaveText(/: B/);
 	await page.keyboard.press('Escape');
 	await clickMarker();
