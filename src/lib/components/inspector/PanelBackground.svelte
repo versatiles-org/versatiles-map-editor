@@ -5,11 +5,12 @@
 		DEFAULT_COLORS,
 		getSettings,
 		LANGUAGES,
+		pushLevels,
 		THEMES,
 		type BackgroundSettings,
 		type MapColors
 	} from '$lib/background/index.js';
-	import { InputRow, ChoiceGroup, Slider, Button, ButtonGroup } from '$lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Slider, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
@@ -45,14 +46,17 @@
 	let haloWidth = $derived(settings.haloWidth);
 	const colorsChanged = $derived(JSON.stringify(settings.colors) !== JSON.stringify(DEFAULT_COLORS));
 
-	/** Black is never lighter than white: the changed one pushes the other along. */
-	function changeLevels(changed: 'black' | 'white') {
-		if (black > white) {
-			if (changed === 'black') white = black;
-			else black = white;
-		}
-		change('colors', colors());
+	/**
+	 * Move black or white while its slider moves; the other moves along where the map needs it
+	 * (see pushLevels), so it is seen at once. The map changes when the slider is released.
+	 */
+	function moveLevel(changed: 'black' | 'white', value: number) {
+		const pushed = pushLevels({ ...colors(), [changed]: value }, changed, settings.base);
+		black = pushed.black;
+		white = pushed.white;
 	}
+	// on the satellite map beyond black and white, where both can move together
+	const levelsCoupled = $derived(settings.base === 'satellite' && (black < 0 || white > 1));
 
 	function change<K extends keyof BackgroundSettings>(key: K, value: BackgroundSettings[K]) {
 		// The background is set at once, while its style loads. So the change is logged at once,
@@ -120,8 +124,8 @@
 		min={-1}
 		max={1}
 		step={0.05}
-		bind:value={black}
-		onchange={() => changeLevels('black')}
+		bind:value={() => black, (value) => moveLevel('black', value)}
+		onchange={() => change('colors', colors())}
 		scale={100}
 		unit="%"
 	/>
@@ -132,12 +136,15 @@
 		min={0}
 		max={2}
 		step={0.05}
-		bind:value={white}
-		onchange={() => changeLevels('white')}
+		bind:value={() => white, (value) => moveLevel('white', value)}
+		onchange={() => change('colors', colors())}
 		scale={100}
 		unit="%"
 	/>
 </InputRow>
+{#if levelsCoupled}
+	<Hint>The satellite imagery keeps its mid-gray between 0 % and 100 %, so black and white move together.</Hint>
+{/if}
 <ButtonGroup>
 	<Button disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</Button>
 </ButtonGroup>

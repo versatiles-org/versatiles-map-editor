@@ -300,6 +300,14 @@ test('black and white become exactly what is set, on both maps', { tag: '@cross-
 	await expect.poll(async () => (await channelRange(page))[0]).toBeLessThanOrEqual(near(0)[1]);
 	expect((await channelRange(page))[1]).toBeGreaterThanOrEqual(near(255)[0]);
 
+	// the imagery keeps its mid-gray from 0 to 100 %: black 50 % pushes white down to 150 %
+	const hint = page.getByText('black and white move together');
+	await expect(hint).toBeVisible();
+	await setLevel('Black becomes', '50');
+	await expect(page.getByRole('spinbutton', { name: 'White becomes' })).toHaveValue('150');
+	await setLevel('Black becomes', '-100');
+	await setLevel('White becomes', '200');
+
 	// the same on the vector map: its labels become black, but their edges stay mixed with their halo
 	await page.getByRole('radio', { name: 'OpenStreetMap' }).check();
 	await waitForMapIsIdle(page);

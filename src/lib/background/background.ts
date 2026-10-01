@@ -171,6 +171,23 @@ function levels(saturation: number, black: number, white: number): MapColors {
 	return { saturation, black: round(b), white: round(clamp(Math.max(b, white), 0, 2)) };
 }
 
+/**
+ * Black and white after one of them changed, as the map can show them: black is never lighter
+ * than white, and on the satellite map mid-gray ((black + white) / 2) stays from 0 to 1, see
+ * rasterLevels. The changed one pushes the other along, within the ranges of both.
+ */
+export function pushLevels(colors: MapColors, changed: 'black' | 'white', base: BackgroundSettings['base']): MapColors {
+	let { black, white } = colors;
+	if (changed === 'black') {
+		white = Math.max(white, black);
+		if (base === 'satellite') white = clamp(white, -black, 2 - black);
+	} else {
+		black = Math.min(black, white);
+		if (base === 'satellite') black = clamp(black, -white, 2 - white);
+	}
+	return { ...colors, black: round(clamp(black, -1, 1)), white: round(clamp(white, 0, 2)) };
+}
+
 /** The factor of MapLibre's `raster-contrast`, from -1 (all gray) to 1 (infinite). */
 function contrastFactor(contrast: number): number {
 	return contrast > 0 ? 1 / (1 - contrast) : 1 + contrast;

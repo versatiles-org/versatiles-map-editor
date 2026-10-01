@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { changeSettings, DEFAULT_COLORS, getSettings, minimizeBackground, sameBackground } from './background.js';
+import {
+	changeSettings,
+	DEFAULT_COLORS,
+	getSettings,
+	minimizeBackground,
+	sameBackground,
+	pushLevels
+} from './background.js';
 
 describe('getSettings', () => {
 	it('reads the editor default', () => {
@@ -315,5 +322,27 @@ describe('sameBackground', () => {
 		expect(sameBackground(gray, { builder: 'osm', options: { theme: 'colorful' } })).toBe(false);
 		expect(sameBackground(undefined, undefined)).toBe(true);
 		expect(sameBackground(gray, undefined)).toBe(false);
+	});
+});
+
+describe('pushLevels', () => {
+	const colors = (black: number, white: number) => ({ saturation: 0, black, white });
+
+	it('keeps black from being lighter than white, on both maps', () => {
+		for (const base of ['vector', 'satellite'] as const) {
+			expect(pushLevels(colors(0.6, 0.5), 'black', base)).toStrictEqual(colors(0.6, 0.6));
+			expect(pushLevels(colors(0.6, 0.5), 'white', base)).toStrictEqual(colors(0.5, 0.5));
+		}
+	});
+
+	it('moves black and white together on the satellite map, where mid-gray stays from 0 to 1', () => {
+		// white 200 %, then black 50 %: mid-gray would be 125 %, so white comes down to 150 %
+		expect(pushLevels(colors(0.5, 2), 'black', 'satellite')).toStrictEqual(colors(0.5, 1.5));
+		// black −100 %, then white 50 %: mid-gray would be −25 %, so black comes up to −50 %
+		expect(pushLevels(colors(-1, 0.5), 'white', 'satellite')).toStrictEqual(colors(-0.5, 0.5));
+		// within the range nothing moves
+		expect(pushLevels(colors(-1, 2), 'black', 'satellite')).toStrictEqual(colors(-1, 2));
+		// the vector map can show all of them
+		expect(pushLevels(colors(0.5, 2), 'black', 'vector')).toStrictEqual(colors(0.5, 2));
 	});
 });
