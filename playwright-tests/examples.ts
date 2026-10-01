@@ -66,7 +66,10 @@ for (const name of EXAMPLES) {
 			await page.setViewportSize({ width: 500, height: 500 });
 			await page.goto('/#' + encodeState(state));
 			await waitForMapIsReady(page);
-			await expect(page.getByRole('list', { name: 'Legend' }).getByRole('listitem')).toHaveText(legend);
+			// the legend, unless the map hides it in the viewer
+			const items = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
+			if (state.meta?.viewer?.legend === 'none') await expect(items).toHaveCount(0);
+			else await expect(items).toHaveText(legend);
 			await expect(page.getByRole('toolbar', { name: 'Tools' })).toHaveCount(0);
 		});
 	});
