@@ -5,6 +5,7 @@
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
 	import MainMenu from './MainMenu.svelte';
+	import { wholeWidth } from './whole_width.js';
 	// the logo of versatiles.org
 	import logo from './versatiles-logo.svg';
 
@@ -24,11 +25,21 @@
 
 	const history = $derived(doc.state.history);
 	let dialogShare: DialogShare | undefined = $state();
+
+	// The title and the buttons with a text are as wide as whole pixels, so the icons after them
+	// are on whole pixels, which all browsers draw alike (e.g. undo, and the icon of "Share")
+	let title: HTMLElement | undefined = $state();
+	let preview: HTMLButtonElement | undefined = $state();
+	let share: HTMLButtonElement | undefined = $state();
+	$effect(() => {
+		const stops = [title, preview, share].flatMap((element) => (element ? [wholeWidth(element)] : []));
+		return () => stops.forEach((stop) => stop());
+	});
 </script>
 
 <header class="topbar">
 	<MainMenu {doc} {sync} {files} />
-	<h1><img src={logo} alt="" width="19" height="22" /><span>VersaTiles Map Editor</span></h1>
+	<h1 bind:this={title}><img src={logo} alt="" width="19" height="22" /><span>VersaTiles Map Editor</span></h1>
 	<span class="separator"></span>
 	<IconButton
 		icon="undo"
@@ -46,12 +57,16 @@
 	/>
 	<span class="spacer"></span>
 	<Button
+		bind:element={preview}
+		class="whole"
 		size="md"
 		aria-pressed={previewing}
 		title={previewing ? 'Back to editing (Escape)' : 'The map as visitors see it'}
 		onclick={() => (previewing = !previewing)}><Icon name="preview" size={16} />Preview</Button
 	>
-	<Button variant="primary" size="md" onclick={() => dialogShare?.open()}><Icon name="share" size={16} />Share</Button>
+	<Button bind:element={share} class="whole" variant="primary" size="md" onclick={() => dialogShare?.open()}
+		><Icon name="share" size={16} />Share</Button
+	>
 	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>
 
@@ -99,6 +114,11 @@
 		height: 20px;
 		margin: 0 4px;
 		background: var(--color-border);
+	}
+
+	/* the content at the start, not centered: the icon on a whole pixel in a button of whole pixels */
+	.topbar :global(.btn.whole) {
+		justify-content: flex-start;
 	}
 
 	.spacer {

@@ -320,9 +320,9 @@ test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, a
 			})
 			.filter(({ x, y, width }) => width > 0 && (x % 1 !== 0 || y % 1 !== 0))
 	);
-	// except after a text, whose width differs by browser: undo and redo after the name of the
-	// editor, and the icons of "Preview" and "Share" left of the texts of both buttons
-	expect(between.filter(({ name }) => !['Undo', 'Redo', 'Preview', 'Share'].includes(name))).toStrictEqual([]);
+	// also after a text, whose width differs by browser: undo and redo after the name of the
+	// editor, and the icons of "Preview" and "Share" after the texts of the buttons left of them
+	expect(between).toStrictEqual([]);
 
 	// the names in the drawer start in one column: "Map settings", "Legend" and the elements
 	const starts = await drawer.evaluate((aside) =>
