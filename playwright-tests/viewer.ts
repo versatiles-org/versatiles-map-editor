@@ -262,3 +262,42 @@ test('a marker with an opacity fades together with its halo', async ({ page }) =
 	// since the next map of a link keeps the opacity of the layer.
 	expect(difference(translucent, await pixels(marker('#d55e00'), 128 / 255))).toBeLessThanOrEqual(2);
 });
+
+// MapLibre draws the labels of a layer over all its symbols, so the markers are drawn in groups by
+// several layers: a marker in front covers the label of a marker behind it.
+test('a marker in front covers the label of a marker behind it', { tag: '@cross-browser' }, async ({ page }) => {
+	const a: [number, number] = [13.4, 52.5];
+	const b: [number, number] = [13.4035, 52.5];
+	/** The red pixels of the flag of B, which is in front of the long label of A at the right of A. */
+	async function redOfB(labelOfA: string): Promise<number> {
+		await page.goto(
+			'/view#' +
+				encodeState({
+					map: { center: a, radius: 2000 },
+					elements: [
+						{ type: 'marker', point: a, style: { label: labelOfA, color: '#0000ff', size: 2, align: 1 } },
+						{ type: 'marker', point: b, style: { label: 'B', color: '#ff0000', size: 2, align: 1 } }
+					]
+				})
+		);
+		await waitForMapIsReady(page);
+		const [x, y] = await project(page, b);
+		const png = await page.screenshot({ clip: { x: x - 10, y: y - 40, width: 40, height: 40 } });
+		return page.evaluate(async (base64) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = new OffscreenCanvas(image.width, image.height);
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			const { data } = context.getImageData(0, 0, image.width, image.height);
+			let red = 0;
+			for (let i = 0; i < data.length; i += 4) if (data[i] > 200 && data[i + 1] < 60 && data[i + 2] < 60) red++;
+			return red;
+		}, png.toString('base64'));
+	}
+	const alone = await redOfB('');
+	expect(alone).toBeGreaterThan(50);
+	// the label of A, under B, covers nothing of it
+	expect(await redOfB('AAAAAAAAAAAAAAAA')).toBeGreaterThanOrEqual(alone * 0.95);
+});

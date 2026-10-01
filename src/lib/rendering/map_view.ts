@@ -2,7 +2,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { GeoPoint } from '../geometry.js';
-import { ElementRenderer, layerIdsOf } from './element_renderer.js';
+import { ELEMENT_LAYERS, ElementRenderer, layerIdsOf } from './element_renderer.js';
 import { MapStyleLoader } from './map_style_loader.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
@@ -97,7 +97,8 @@ export class MapView {
 				[x - tolerance, y - tolerance],
 				[x + tolerance, y + tolerance]
 			],
-			{ layers: layerIds }
+			// the markers are drawn by several layers, see MAX_LABEL_GROUPS
+			{ layers: layerIds.flatMap((id) => (id === ELEMENT_LAYERS.symbol ? this.renderer.symbolLayerIds() : [id])) }
 		);
 		// the topmost first; the element layers share the element ids as feature ids
 		for (const feature of features) {

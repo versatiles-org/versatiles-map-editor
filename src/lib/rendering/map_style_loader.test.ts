@@ -12,7 +12,11 @@ describe('MapStyleLoader', () => {
 
 	beforeEach(() => {
 		map = new MockMap();
-		renderer = { redraw: vi.fn() } as unknown as ElementRenderer;
+		renderer = {
+			redraw: vi.fn(),
+			onStyleLoad: vi.fn(),
+			symbolLayerIds: () => ['elements_symbol']
+		} as unknown as ElementRenderer;
 		loader = new MapStyleLoader(map as unknown as MaplibreMap, renderer);
 	});
 

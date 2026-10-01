@@ -49,6 +49,7 @@ export class MockMap {
 	setLayoutProperty = vi.fn();
 	getLayer = vi.fn((id: string): unknown => ({ id }));
 	getLayersOrder = vi.fn((): string[] => []);
+	getLayoutProperty = vi.fn((): unknown => undefined);
 	removeLayer = vi.fn();
 	moveLayer = vi.fn();
 	hasImage = vi.fn();

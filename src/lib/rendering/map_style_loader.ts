@@ -30,6 +30,8 @@ export class MapStyleLoader {
 		this.#renderer = renderer;
 		map.on('style.load', () => {
 			this.#loaded = true;
+			// the layers of the markers after the first one
+			this.#renderer.onStyleLoad();
 			// e.g. a label font that was set while the style loaded
 			this.#applyFont();
 			this.#applyLayerOrder();
@@ -78,10 +80,11 @@ export class MapStyleLoader {
 		this.#abortController.abort();
 	}
 
-	/** Set the font on the layer of the markers, once the style has it. */
+	/** Set the font on the layers of the markers, once the style has them. */
 	#applyFont() {
-		if (this.#font && this.#loaded && this.#map.getLayer(ELEMENT_LAYERS.symbol)) {
-			this.#map.setLayoutProperty(ELEMENT_LAYERS.symbol, 'text-font', ['literal', [this.#font]]);
+		if (!this.#font || !this.#loaded) return;
+		for (const id of this.#renderer.symbolLayerIds()) {
+			if (this.#map.getLayer(id)) this.#map.setLayoutProperty(id, 'text-font', ['literal', [this.#font]]);
 		}
 	}
 

@@ -48,7 +48,7 @@ describe('MapDocument', () => {
 		});
 
 		it('removes all elements', () => {
-			const element = { destroy: vi.fn() } as unknown as AbstractElement;
+			const element = { destroy: vi.fn(), getStyleLayers: () => ({}) } as unknown as AbstractElement;
 			mapDocument['appendElement'](element);
 			mapDocument.destroy();
 			expect(element.destroy).toHaveBeenCalled();
