@@ -147,6 +147,9 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 		// white on the accent, also in dark mode
 		expect(await style('button.btn:not([disabled])', 'color')).toBe('rgb(255, 255, 255)');
 		expect(await style('button.btn', 'transition-duration')).toBe('0s');
+		// the zoom buttons too: dark, with light icons
+		expect(await style('.maplibregl-ctrl-group', 'background-color')).toBe('rgb(27, 27, 31)');
+		expect(await style('.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon', 'filter')).toBe('invert(1)');
 	});
 
 	test('the viewer keeps the colors of the map', async ({ page }) => {
@@ -154,6 +157,8 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 		await page.goto('/');
 		await waitForMapIsReady(page);
 		expect(await page.locator('.page').evaluate((el) => getComputedStyle(el).colorScheme)).toBe('normal');
+		// also its zoom buttons
+		await expect(page.locator('.maplibregl-ctrl-group')).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 	});
 });
 

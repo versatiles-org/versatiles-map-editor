@@ -421,6 +421,22 @@
 			color: var(--color-text) !important;
 		}
 
+		/* the zoom buttons of the editor in the colors of its theme, e.g. dark; the viewer keeps the
+		   colors of the map */
+		.editor & :global(.maplibregl-ctrl-group) {
+			background: var(--color-bg);
+			box-shadow: var(--shadow-sm);
+		}
+		.editor & :global(.maplibregl-ctrl-group button + button) {
+			border-top-color: var(--color-border);
+		}
+		.editor & :global(.maplibregl-ctrl-group button:not(:disabled):hover) {
+			background-color: var(--color-hover);
+		}
+		.editor & :global(.maplibregl-ctrl-group .maplibregl-ctrl-icon) {
+			filter: var(--icon-filter);
+		}
+
 		/* The controls in the corners, clear of the bars, e.g. the tools, the drawer, the sidebar and
 		   the status line, and of the hint. Stacked from the edge inwards, in the order of
 		   CONTROL_ORDER; at the bottom from the bottom up. */

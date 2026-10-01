@@ -53,6 +53,8 @@
 	/* inside fields */
 	--color-field: #fff;
 	--color-text: #000;
+	/* icons of others that are drawn dark, e.g. the zoom buttons of MapLibre: as they are, or light */
+	--icon-filter: none;
 	/* at least 4.5:1 on the (translucent) white of the sidebar */
 	--color-text-muted: #555;
 	/* edges of surfaces, dividers */
@@ -142,6 +144,7 @@
 		/* the cards of versatiles.org */
 		--color-field: #26262b;
 		--color-text: #fff;
+		--icon-filter: invert(1);
 		/* at least 4.5:1 on the (translucent) dark sidebar, also above a light map */
 		--color-text-muted: #aaa;
 		--color-border: rgb(255 255 255 / 13%);
