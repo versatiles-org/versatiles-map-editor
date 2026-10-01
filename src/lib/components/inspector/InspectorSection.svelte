@@ -15,9 +15,10 @@
 </section>
 
 <style>
+	/* clearly apart: a line between the sections, and a heading in the color of the text */
 	.inspector-section {
 		padding: var(--space-3) 0;
-		border-bottom: 1px solid var(--color-border);
+		border-bottom: 1px solid var(--color-border-field);
 	}
 
 	.heading {
@@ -25,12 +26,13 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
+		margin-bottom: var(--space-2);
 	}
 
 	h3 {
 		margin: 0;
-		color: var(--color-text-muted);
-		font-size: var(--font-size-sm);
-		font-weight: 600;
+		color: var(--color-text);
+		font-size: var(--font-size-md);
+		font-weight: 700;
 	}
 </style>

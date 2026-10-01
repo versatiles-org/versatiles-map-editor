@@ -1,4 +1,5 @@
 <script lang="ts">
+	import InspectorSection from './InspectorSection.svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import { labelPositions, SymbolStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
@@ -41,57 +42,64 @@
 	}));
 </script>
 
-<InputRow id="{uid}-symbol" label="Symbol" mixed={symbol.mixed}>
-	<SymbolSelector
-		id="{uid}-symbol"
-		bind:symbol={
-			() => symbol.value,
-			(v) => {
-				symbol.value = v ?? '';
-				log();
+<InspectorSection title="Symbol">
+	<InputRow id="{uid}-symbol" label="Symbol" mixed={symbol.mixed}>
+		<SymbolSelector
+			id="{uid}-symbol"
+			bind:symbol={
+				() => symbol.value,
+				(v) => {
+					symbol.value = v ?? '';
+					log();
+				}
 			}
-		}
-	/>
-</InputRow>
+		/>
+	</InputRow>
 
-<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
-	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
-</InputRow>
+	<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
+		<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
+	</InputRow>
 
-<InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
-	<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
-</InputRow>
+	<InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
+		<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
+	</InputRow>
 
-<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
-	<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
-</InputRow>
+	<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
+		<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
+	</InputRow>
+</InspectorSection>
 
-<InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
-	<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} unit="px" />
-</InputRow>
+<InspectorSection title="Label">
+	<InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
+		<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
+	</InputRow>
 
-<InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>
-	<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={doc.colors} />
-</InputRow>
+	<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
+		<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={doc.colors} />
+	</InputRow>
 
-<InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
-	<input id="{uid}-label" type="text" bind:value={label.value} onchange={log} />
-</InputRow>
+	<InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>
+		<ChoiceGroup
+			layout="grid"
+			labelledby="{uid}-labelAlign-label"
+			value={labelAlign.value}
+			mixed={labelAlign.mixed}
+			onchange={(index) => {
+				labelAlign.value = index;
+				log();
+			}}
+			options={alignments}
+		/>
+	</InputRow>
+</InspectorSection>
 
-<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
-	<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={doc.colors} />
-</InputRow>
+<!-- around the symbol and the label -->
+<InspectorSection title="Halo">
+	<InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
+		<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} unit="px" />
+	</InputRow>
 
-<InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>
-	<ChoiceGroup
-		layout="grid"
-		labelledby="{uid}-labelAlign-label"
-		value={labelAlign.value}
-		mixed={labelAlign.mixed}
-		onchange={(index) => {
-			labelAlign.value = index;
-			log();
-		}}
-		options={alignments}
-	/>
-</InputRow>
+	<InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>
+		<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={doc.colors} />
+	</InputRow>
+</InspectorSection>

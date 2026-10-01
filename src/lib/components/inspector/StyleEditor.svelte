@@ -33,9 +33,8 @@
 
 {#key elements}
 	{#if symbolLayers.length > 0}
-		<InspectorSection title="Symbol">
-			<StyleSymbol layers={symbolLayers} {doc} />
-		</InspectorSection>
+		<!-- its sections: symbol, label, halo -->
+		<StyleSymbol layers={symbolLayers} {doc} />
 	{/if}
 	{#if fillLayers.length > 0 && strokeVisible}
 		<InspectorSection title="Fill">

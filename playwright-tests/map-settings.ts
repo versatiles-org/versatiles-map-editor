@@ -331,8 +331,8 @@ test('one font for the labels of all markers, which need not be the one of the b
 	await waitForMapIsReady(page);
 	const symbolFont = () =>
 		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
-	const labels = page.getByRole('region', { name: 'Labels of markers' });
-	const background = page.getByRole('region', { name: 'Background map' });
+	const labels = page.getByRole('region', { name: 'Marker labels' });
+	const background = page.getByRole('region', { name: 'Background labels' });
 
 	// like the background map, at first
 	await expect(labels.getByRole('combobox', { name: 'Font' })).toHaveValue('');
@@ -560,7 +560,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	// the configured face comes first, in its family, with the names from the tile server. The map
 	// settings are shown after a click on the empty map.
 	await page.mouse.click(150, 600);
-	const settings = page.getByRole('region', { name: 'Background map' });
+	const settings = page.getByRole('region', { name: 'Background labels' });
 	const family = settings.getByRole('combobox', { name: 'Font' });
 	const face = settings.getByRole('combobox', { name: 'Style' });
 	await expect(family.getByRole('option').first()).toHaveText('Lato');
@@ -615,7 +615,7 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 			})
 	);
 	await waitForMapIsReady(page);
-	const labels = page.getByRole('region', { name: 'Labels of markers' });
+	const labels = page.getByRole('region', { name: 'Marker labels' });
 	/** A layout property of every layer of markers (two labels: two layers). */
 	const layout = (key: string) =>
 		page.evaluate((key) => {

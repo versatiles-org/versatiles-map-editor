@@ -25,19 +25,26 @@ const railAria = `
 `;
 const sidebarAria = `
 - heading "Map" [level=2]
+- region "Map":
+  - heading "Map" [level=3]
+  - textbox "Title"
+  - paragraph: /set in “Share”/
 - region "Background map":
   - heading "Background map" [level=3]
   - radiogroup "Base map"
   - combobox "Theme"
+- region "Background colors":
+  - heading "Background colors" [level=3]
+- region "Background labels":
+  - heading "Background labels" [level=3]
+  - radiogroup "Labels"
   - combobox "Font"
   - combobox "Language"
-  - radiogroup "Labels"
+- region "Marker labels":
+  - heading "Marker labels" [level=3]
 - region "Legend":
   - heading "Legend" [level=3]
   - button /^Add a legend/
-- region "Shared map":
-  - heading "Shared map" [level=3]
-  - paragraph: /set in “Share”/
 `;
 
 /**

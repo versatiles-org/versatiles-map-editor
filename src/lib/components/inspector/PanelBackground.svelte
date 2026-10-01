@@ -12,6 +12,7 @@
 	} from '$lib/background/index.js';
 	import { InputRow, ChoiceGroup, Slider, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
 	import { FontSelect } from '$lib/components/pickers/index.js';
+	import InspectorSection from './InspectorSection.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
@@ -72,141 +73,146 @@
 	}
 </script>
 
-<InputRow id="{uid}-base" label="Base map" group>
-	<ChoiceGroup
-		labelledby="{uid}-base-label"
-		value={settings.base}
-		onchange={(base) => change('base', base)}
-		options={BASES}
-	/>
-</InputRow>
-
-{#if settings.base === 'vector'}
-	<InputRow id="{uid}-theme" label="Theme">
-		<select id="{uid}-theme" value={settings.theme} onchange={(e) => change('theme', e.currentTarget.value)}>
-			{#if !THEMES.some((t) => t.id === settings.theme)}<option value={settings.theme}>{settings.theme}</option>{/if}
-			{#each THEMES as { id, name } (id)}
-				<option value={id}>{name}</option>
-			{/each}
-		</select>
-	</InputRow>
-{/if}
-
-{#if settings.base === 'satellite'}
-	<!-- the labels are set below, independently -->
-	<InputRow id="{uid}-streets" label="Streets">
-		<input
-			id="{uid}-streets"
-			type="checkbox"
-			checked={settings.streets}
-			onchange={(e) => change('streets', e.currentTarget.checked)}
+<!-- the map under the elements -->
+<InspectorSection title="Background map">
+	<InputRow id="{uid}-base" label="Base map" group>
+		<ChoiceGroup
+			labelledby="{uid}-base-label"
+			value={settings.base}
+			onchange={(base) => change('base', base)}
+			options={BASES}
 		/>
 	</InputRow>
-{/if}
+
+	{#if settings.base === 'vector'}
+		<InputRow id="{uid}-theme" label="Theme">
+			<select id="{uid}-theme" value={settings.theme} onchange={(e) => change('theme', e.currentTarget.value)}>
+				{#if !THEMES.some((t) => t.id === settings.theme)}<option value={settings.theme}>{settings.theme}</option>{/if}
+				{#each THEMES as { id, name } (id)}
+					<option value={id}>{name}</option>
+				{/each}
+			</select>
+		</InputRow>
+	{/if}
+
+	{#if settings.base === 'satellite'}
+		<!-- the labels are set below, independently -->
+		<InputRow id="{uid}-streets" label="Streets">
+			<input
+				id="{uid}-streets"
+				type="checkbox"
+				checked={settings.streets}
+				onchange={(e) => change('streets', e.currentTarget.checked)}
+			/>
+		</InputRow>
+	{/if}
+</InspectorSection>
 
 <!-- the colors of the vector map or of the satellite imagery -->
-<InputRow id="{uid}-saturation" label="Saturation">
-	<Slider
-		id="{uid}-saturation"
-		min={-1}
-		max={1}
-		step={0.05}
-		bind:value={saturation}
-		onchange={() => change('colors', colors())}
-		scale={100}
-		unit="%"
-	/>
-</InputRow>
-<!-- what black and white become, and all other colors between them: e.g. faded with white or black -->
-<InputRow id="{uid}-black" label="Black becomes">
-	<Slider
-		id="{uid}-black"
-		min={-1}
-		max={1}
-		step={0.05}
-		bind:value={() => black, (value) => moveLevel('black', value)}
-		onchange={() => change('colors', colors())}
-		scale={100}
-		unit="%"
-	/>
-</InputRow>
-<InputRow id="{uid}-white" label="White becomes">
-	<Slider
-		id="{uid}-white"
-		min={0}
-		max={2}
-		step={0.05}
-		bind:value={() => white, (value) => moveLevel('white', value)}
-		onchange={() => change('colors', colors())}
-		scale={100}
-		unit="%"
-	/>
-</InputRow>
-{#if levelsCoupled}
-	<Hint>The satellite imagery keeps its mid-gray between 0 % and 100 %, so black and white move together.</Hint>
-{/if}
-<ButtonGroup>
-	<Button disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</Button>
-</ButtonGroup>
-
-<!-- the font and language of the labels, unless the satellite map has none -->
-{#if settings.base === 'vector' || settings.labels !== 'none'}
-	<FontSelect id={uid} value={settings.font} onchange={(font) => font && change('font', font)} />
-
-	<InputRow id="{uid}-language" label="Language">
-		<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
-			<option value="user">Browser language</option>
-			<option value="local">Local names</option>
-			{#if !['user', 'local', ...LANGUAGES].includes(settings.language)}
-				<option value={settings.language}>{settings.language}</option>
-			{/if}
-			{#each languages as { id, name } (id)}
-				<option value={id}>{name}</option>
-			{/each}
-		</select>
-	</InputRow>
-{/if}
-
-<InputRow id="{uid}-labels" label="Labels" group>
-	<ChoiceGroup
-		labelledby="{uid}-labels-label"
-		value={settings.labels}
-		onchange={(labels) => change('labels', labels)}
-		options={LABELS}
-	/>
-</InputRow>
-
-{#if settings.labels !== 'none'}
-	<InputRow id="{uid}-label-size" label="Label size">
+<InspectorSection title="Background colors">
+	<InputRow id="{uid}-saturation" label="Saturation">
 		<Slider
-			id="{uid}-label-size"
-			min={0.5}
-			max={2}
+			id="{uid}-saturation"
+			min={-1}
+			max={1}
 			step={0.05}
-			bind:value={labelSize}
-			onchange={() => change('labelSize', labelSize)}
+			bind:value={saturation}
+			onchange={() => change('colors', colors())}
 			scale={100}
 			unit="%"
 		/>
 	</InputRow>
-	<InputRow id="{uid}-halo-width" label="Halo width">
+	<!-- what black and white become, and all other colors between them: e.g. faded with white or black -->
+	<InputRow id="{uid}-black" label="Black becomes">
 		<Slider
-			id="{uid}-halo-width"
+			id="{uid}-black"
+			min={-1}
+			max={1}
+			step={0.05}
+			bind:value={() => black, (value) => moveLevel('black', value)}
+			onchange={() => change('colors', colors())}
+			scale={100}
+			unit="%"
+		/>
+	</InputRow>
+	<InputRow id="{uid}-white" label="White becomes">
+		<Slider
+			id="{uid}-white"
 			min={0}
-			max={5}
-			step={0.25}
-			bind:value={haloWidth}
-			onchange={() => change('haloWidth', haloWidth)}
-			unit="px"
+			max={2}
+			step={0.05}
+			bind:value={() => white, (value) => moveLevel('white', value)}
+			onchange={() => change('colors', colors())}
+			scale={100}
+			unit="%"
 		/>
 	</InputRow>
-	<!-- the labels of markers are always on top -->
-	<InputRow id="{uid}-labels-on-top" label="Over areas and lines">
-		<input
-			id="{uid}-labels-on-top"
-			type="checkbox"
-			checked={doc.mapLabelsOnTop}
-			onchange={(e) => setMapLabelsOnTop(e.currentTarget.checked)}
+	{#if levelsCoupled}
+		<Hint>The satellite imagery keeps its mid-gray between 0 % and 100 %, so black and white move together.</Hint>
+	{/if}
+	<ButtonGroup>
+		<Button disabled={!colorsChanged} onclick={() => change('colors', DEFAULT_COLORS)}>Reset colors</Button>
+	</ButtonGroup>
+</InspectorSection>
+
+<!-- the labels of places, streets and so on: how many, then their font, language and look -->
+<InspectorSection title="Background labels">
+	<InputRow id="{uid}-labels" label="Labels" group>
+		<ChoiceGroup
+			labelledby="{uid}-labels-label"
+			value={settings.labels}
+			onchange={(labels) => change('labels', labels)}
+			options={LABELS}
 		/>
 	</InputRow>
-{/if}
+
+	{#if settings.labels !== 'none'}
+		<FontSelect id={uid} value={settings.font} onchange={(font) => font && change('font', font)} />
+
+		<InputRow id="{uid}-language" label="Language">
+			<select id="{uid}-language" value={settings.language} onchange={(e) => change('language', e.currentTarget.value)}>
+				<option value="user">Browser language</option>
+				<option value="local">Local names</option>
+				{#if !['user', 'local', ...LANGUAGES].includes(settings.language)}
+					<option value={settings.language}>{settings.language}</option>
+				{/if}
+				{#each languages as { id, name } (id)}
+					<option value={id}>{name}</option>
+				{/each}
+			</select>
+		</InputRow>
+
+		<InputRow id="{uid}-label-size" label="Label size">
+			<Slider
+				id="{uid}-label-size"
+				min={0.5}
+				max={2}
+				step={0.05}
+				bind:value={labelSize}
+				onchange={() => change('labelSize', labelSize)}
+				scale={100}
+				unit="%"
+			/>
+		</InputRow>
+		<InputRow id="{uid}-halo-width" label="Halo width">
+			<Slider
+				id="{uid}-halo-width"
+				min={0}
+				max={5}
+				step={0.25}
+				bind:value={haloWidth}
+				onchange={() => change('haloWidth', haloWidth)}
+				unit="px"
+			/>
+		</InputRow>
+		<!-- the labels of markers are always on top -->
+		<InputRow id="{uid}-labels-on-top" label="Over areas and lines">
+			<input
+				id="{uid}-labels-on-top"
+				type="checkbox"
+				checked={doc.mapLabelsOnTop}
+				onchange={(e) => setMapLabelsOnTop(e.currentTarget.checked)}
+			/>
+		</InputRow>
+	{/if}
+</InspectorSection>

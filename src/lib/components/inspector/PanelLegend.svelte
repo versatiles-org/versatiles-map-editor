@@ -4,6 +4,7 @@
 	import { InputRow, ChoiceGroup, Button, ButtonGroup, Hint } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
+	import InspectorSection from './InspectorSection.svelte';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
@@ -45,84 +46,92 @@
 </script>
 
 {#if legend.entries.length > 0}
-	<Hint>Where shared maps show the legend, or whether they show it, is set in “Share”.</Hint>
+	<!-- how all entries look -->
+	<InspectorSection title="Legend style">
+		<Hint>Where shared maps show the legend, or whether they show it, is set in “Share”.</Hint>
 
-	<InputRow id="{uid}-layout" label="Layout" group>
-		<ChoiceGroup
-			labelledby="{uid}-layout-label"
-			value={legend.layout ?? 'vertical'}
-			onchange={(layout) => change({ layout })}
-			options={layouts}
-		/>
-	</InputRow>
+		<InputRow id="{uid}-layout" label="Layout" group>
+			<ChoiceGroup
+				labelledby="{uid}-layout-label"
+				value={legend.layout ?? 'vertical'}
+				onchange={(layout) => change({ layout })}
+				options={layouts}
+			/>
+		</InputRow>
 
-	<InputRow id="{uid}-font" label="Font" group>
-		<ChoiceGroup
-			labelledby="{uid}-font-label"
-			value={legend.font ?? 'sans-serif'}
-			onchange={(font) => change({ font })}
-			options={fonts}
-		/>
-	</InputRow>
+		<InputRow id="{uid}-font" label="Font" group>
+			<ChoiceGroup
+				labelledby="{uid}-font-label"
+				value={legend.font ?? 'sans-serif'}
+				onchange={(font) => change({ font })}
+				options={fonts}
+			/>
+		</InputRow>
 
-	<InputRow id="{uid}-bold" label="Bold">
-		<input
-			id="{uid}-bold"
-			type="checkbox"
-			checked={legend.bold === true}
-			onchange={(e) => change({ bold: e.currentTarget.checked })}
-		/>
-	</InputRow>
-	<InputRow id="{uid}-italic" label="Italic">
-		<input
-			id="{uid}-italic"
-			type="checkbox"
-			checked={legend.italic === true}
-			onchange={(e) => change({ italic: e.currentTarget.checked })}
-		/>
-	</InputRow>
+		<InputRow id="{uid}-bold" label="Bold">
+			<input
+				id="{uid}-bold"
+				type="checkbox"
+				checked={legend.bold === true}
+				onchange={(e) => change({ bold: e.currentTarget.checked })}
+			/>
+		</InputRow>
+		<InputRow id="{uid}-italic" label="Italic">
+			<input
+				id="{uid}-italic"
+				type="checkbox"
+				checked={legend.italic === true}
+				onchange={(e) => change({ italic: e.currentTarget.checked })}
+			/>
+		</InputRow>
+	</InspectorSection>
 
-	{#each legend.entries as entry, i (i)}
-		<fieldset class="entry">
-			<legend>Entry {i + 1}</legend>
-			<InputRow id="{uid}-{i}-label" label="Text">
-				<input
-					id="{uid}-{i}-label"
-					type="text"
-					value={entry.label}
-					oninput={(e) => updateEntry(i, { label: e.currentTarget.value })}
-					onchange={log}
-				/>
-			</InputRow>
-			<InputRow id="{uid}-{i}-color" label="Color">
-				<ColorPicker
-					id="{uid}-{i}-color"
-					bind:value={() => entry.color, (color) => updateEntry(i, { color })}
-					onchange={log}
-					palette={doc.colors}
-				/>
-			</InputRow>
-			<InputRow id="{uid}-{i}-symbol" label="Symbol">
-				<SymbolSelector
-					id="{uid}-{i}-symbol"
-					noneLabel="Color only"
-					bind:symbol={
-						() => entry.symbol ?? '',
-						(symbol) => {
-							updateEntry(i, { symbol: symbol || undefined });
-							log();
+	<InspectorSection title="Entries">
+		{#each legend.entries as entry, i (i)}
+			<fieldset class="entry">
+				<legend>Entry {i + 1}</legend>
+				<InputRow id="{uid}-{i}-label" label="Text">
+					<input
+						id="{uid}-{i}-label"
+						type="text"
+						value={entry.label}
+						oninput={(e) => updateEntry(i, { label: e.currentTarget.value })}
+						onchange={log}
+					/>
+				</InputRow>
+				<InputRow id="{uid}-{i}-color" label="Color">
+					<ColorPicker
+						id="{uid}-{i}-color"
+						bind:value={() => entry.color, (color) => updateEntry(i, { color })}
+						onchange={log}
+						palette={doc.colors}
+					/>
+				</InputRow>
+				<InputRow id="{uid}-{i}-symbol" label="Symbol">
+					<SymbolSelector
+						id="{uid}-{i}-symbol"
+						noneLabel="Color only"
+						bind:symbol={
+							() => entry.symbol ?? '',
+							(symbol) => {
+								updateEntry(i, { symbol: symbol || undefined });
+								log();
+							}
 						}
-					}
-				/>
-			</InputRow>
-			<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
-		</fieldset>
-	{/each}
+					/>
+				</InputRow>
+				<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
+			</fieldset>
+		{/each}
+		<ButtonGroup>
+			<Button onclick={() => addLegendEntry(doc)}>Add legend entry</Button>
+		</ButtonGroup>
+	</InspectorSection>
+{:else}
+	<ButtonGroup>
+		<Button onclick={() => addLegendEntry(doc)}>Add legend entry</Button>
+	</ButtonGroup>
 {/if}
-
-<ButtonGroup>
-	<Button onclick={() => addLegendEntry(doc)}>Add legend entry</Button>
-</ButtonGroup>
 
 <style>
 	.entry {

@@ -123,7 +123,7 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, elements }));
 	await waitForMapIsReady(page);
 	const bar = page.getByRole('group', { name: 'Visible area' });
-	const shared = page.getByRole('region', { name: 'Shared map' });
+	const shared = page.locator('.sidebar').getByRole('region', { name: 'Map', exact: true });
 	await expect(shared).toContainText('Shared maps show all elements.');
 
 	// from the Map panel; without a frame, the bar shows the elements (a single marker has no size)

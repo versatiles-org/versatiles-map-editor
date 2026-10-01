@@ -116,21 +116,30 @@
 	{:else if elements.length > 0}
 		<StyleEditor {elements} {doc} />
 	{:else}
-		<!-- changes the title of the page while it is typed, and is an undo step when it is done -->
-		<InputRow id="{uid}-title" label="Title">
-			<input
-				id="{uid}-title"
-				type="text"
-				value={doc.title}
-				placeholder="Untitled map"
-				oninput={(e) => (doc.title = e.currentTarget.value)}
-				onchange={() => doc.state.log()}
-			/>
-		</InputRow>
-		<InspectorSection title="Background map">
-			<PanelBackground {doc} />
+		<!-- the map as a whole: its name, and what shared maps show of it -->
+		<InspectorSection title="Map">
+			<!-- changes the title of the page while it is typed, and is an undo step when it is done -->
+			<InputRow id="{uid}-title" label="Title">
+				<input
+					id="{uid}-title"
+					type="text"
+					value={doc.title}
+					placeholder="Untitled map"
+					oninput={(e) => (doc.title = e.currentTarget.value)}
+					onchange={() => doc.state.log()}
+				/>
+			</InputRow>
+			<Hint>
+				{doc.frame
+					? 'Shared maps show the visible area that you set, on every screen.'
+					: 'Shared maps show all elements. You can set the area that they show.'}
+			</Hint>
+			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit visible area…</Button></ButtonGroup>
+			<Hint>The address search, the zoom buttons and the place of the legend are set in “Share”.</Hint>
 		</InspectorSection>
-		<InspectorSection title="Labels of markers">
+		<!-- its sections: the background map, its colors and its labels -->
+		<PanelBackground {doc} />
+		<InspectorSection title="Marker labels">
 			<FontSelect
 				id="{uid}-labels"
 				value={doc.labelFont}
@@ -175,15 +184,6 @@
 				<ButtonGroup><Button onclick={addLegend}>Add a legend</Button></ButtonGroup>
 			{/if}
 		</InspectorSection>
-		<InspectorSection title="Shared map">
-			<Hint>The address search, the zoom buttons and the place of the legend are set in “Share”.</Hint>
-			<Hint>
-				{doc.frame
-					? 'Shared maps show the visible area that you set, on every screen.'
-					: 'Shared maps show all elements. You can set the area that they show.'}
-			</Hint>
-			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit visible area…</Button></ButtonGroup>
-		</InspectorSection>
 	{/if}
 </div>
 
@@ -193,7 +193,8 @@
 		align-items: center;
 		gap: 8px;
 		padding-bottom: var(--space-3);
-		border-bottom: 1px solid var(--color-border);
+		/* like the lines between the sections */
+		border-bottom: 1px solid var(--color-border-field);
 	}
 
 	.icon {
