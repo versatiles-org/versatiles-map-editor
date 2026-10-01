@@ -42,10 +42,11 @@ describe('SelectionPointer', () => {
 			expect(event.preventDefault).toHaveBeenCalled();
 		});
 
-		it('should not call selectElement on click if shiftKey is pressed', () => {
+		it('should not call selectElement on click if Cmd/Ctrl is pressed', () => {
 			mockMap.queryRenderedFeatures.mockReturnValue([]);
 			const selectElementSpy = vi.spyOn(handler, 'selectElement');
-			const event = { type: 'click', point: {}, originalEvent: { shiftKey: true }, preventDefault: vi.fn() };
+			// Ctrl, since the tests do not run on macOS
+			const event = { type: 'click', point: {}, originalEvent: { ctrlKey: true }, preventDefault: vi.fn() };
 			mockMap.emit('click', event);
 			expect(selectElementSpy).not.toHaveBeenCalled();
 			expect(event.preventDefault).toHaveBeenCalled();
@@ -292,11 +293,15 @@ describe('SelectionPointer', () => {
 	describe('multiple elements', () => {
 		let elements: Mocked<AbstractElement>[];
 		let elementAt: Mock;
-		const mouseEvent = (type: string, keys: { shiftKey?: boolean; altKey?: boolean } = {}, lng = 10) => ({
+		const mouseEvent = (
+			type: string,
+			keys: { shiftKey?: boolean; ctrlKey?: boolean; altKey?: boolean } = {},
+			lng = 10
+		) => ({
 			type,
 			point: { x: 1, y: 2 },
 			lngLat: { lng, lat: 0 },
-			originalEvent: { shiftKey: false, altKey: false, ...keys },
+			originalEvent: { shiftKey: false, ctrlKey: false, metaKey: false, altKey: false, ...keys },
 			preventDefault: vi.fn()
 		});
 		const selected = () => handler.selectedElements;
@@ -315,19 +320,26 @@ describe('SelectionPointer', () => {
 			mockMap.queryRenderedFeatures.mockReturnValue([]);
 		});
 
-		it('selects the clicked element, or adds it with Shift+click', () => {
+		it('selects the clicked element, or adds it with Cmd/Ctrl+click (Ctrl, not on macOS)', () => {
 			elementAt.mockReturnValue(elements[0]);
 			mockMap.emit('click', mouseEvent('click'));
 			expect(selected()).toStrictEqual([elements[0]]);
 
 			elementAt.mockReturnValue(elements[1]);
-			mockMap.emit('click', mouseEvent('click', { shiftKey: true }));
+			mockMap.emit('click', mouseEvent('click', { ctrlKey: true }));
 			expect(selected()).toStrictEqual([elements[0], elements[1]]);
 
-			// Shift+click next to the elements keeps the selection
-			elementAt.mockReturnValue(undefined);
+			// Shift+click does not add any more: it selects only this one
 			mockMap.emit('click', mouseEvent('click', { shiftKey: true }));
-			expect(selected()).toStrictEqual([elements[0], elements[1]]);
+			expect(selected()).toStrictEqual([elements[1]]);
+			elementAt.mockReturnValue(elements[0]);
+			mockMap.emit('click', mouseEvent('click', { ctrlKey: true }));
+			expect(selected()).toStrictEqual([elements[1], elements[0]]);
+
+			// Cmd/Ctrl+click next to the elements keeps the selection
+			elementAt.mockReturnValue(undefined);
+			mockMap.emit('click', mouseEvent('click', { ctrlKey: true }));
+			expect(selected()).toStrictEqual([elements[1], elements[0]]);
 
 			// a click next to the elements deselects all
 			mockMap.emit('click', mouseEvent('click'));
@@ -375,13 +387,15 @@ describe('SelectionPointer', () => {
 			expect(elements[2].moveBy).toHaveBeenCalledTimes(2);
 		});
 
-		it('does not drag with Shift or on unselected elements', () => {
+		it('does not drag with Cmd/Ctrl (a click), with Shift (box zoom) or on unselected elements', () => {
 			handler.selectElements([elements[0]]);
 
 			elementAt.mockReturnValue(elements[0]);
-			const shiftDown = mouseEvent('mousedown', { shiftKey: true });
-			mockMap.emit('mousedown', shiftDown);
-			expect(shiftDown.preventDefault).not.toHaveBeenCalled();
+			for (const keys of [{ ctrlKey: true }, { shiftKey: true }]) {
+				const down = mouseEvent('mousedown', keys);
+				mockMap.emit('mousedown', down);
+				expect(down.preventDefault).not.toHaveBeenCalled();
+			}
 
 			elementAt.mockReturnValue(undefined);
 			const down = mouseEvent('mousedown');

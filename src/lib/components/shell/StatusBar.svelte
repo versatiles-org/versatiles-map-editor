@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { TOGGLE_KEY } from '$lib/interaction/index.js';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import type { SessionSync } from '$lib/session_sync.svelte.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
@@ -40,7 +41,7 @@
 		if (selection.legendSelected) return 'The legend is part of the map. Escape goes back to the map settings.';
 		const elements = selection.selectedElements;
 		if (elements.length > 1) {
-			return `${elements.length} elements selected. Shift-click adds or removes elements. Dragging one moves all.`;
+			return `${elements.length} elements selected. ${TOGGLE_KEY}-click adds or removes elements. Dragging one moves all.`;
 		}
 		if (selection.selectedNode) return 'Drag the node to move it. Delete or × removes it.';
 		const element = elements[0];
@@ -48,7 +49,7 @@
 			return 'Click an element to select it, or choose a tool on the left to draw. Press ? for all shortcuts.';
 		switch (element.getState().type) {
 			case 'marker':
-				return 'Drag the marker to move it, Alt-drag to move a copy. Shift-click adds elements to the selection.';
+				return `Drag the marker to move it, Alt-drag to move a copy. ${TOGGLE_KEY}-click adds elements to the selection.`;
 			case 'circle':
 				return 'Drag the circle to move it. Drag the node on its edge to change the radius.';
 			default:

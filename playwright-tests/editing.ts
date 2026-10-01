@@ -367,14 +367,14 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	// the heading of the inspector: the name of the selected element, or the number of elements
 	const styleTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
 
-	// Shift+click adds the second polygon; the fill colors differ
+	// Cmd/Ctrl+click adds the second polygon; the fill colors differ
 	const a = await project(page, [13.34, 52.475]);
 	const b = await project(page, [13.41, 52.475]);
 	await page.mouse.click(...a);
 	await expect(styleTitle).toHaveText('Polygon 1');
-	await page.keyboard.down('Shift');
+	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...b);
-	await page.keyboard.up('Shift');
+	await page.keyboard.up('ControlOrMeta');
 	await expect(styleTitle).toHaveText('2 elements');
 	const fillColor = page.getByRole('button', { name: /^Color/ }).first();
 	await expect(page.getByText('(mixed)').first()).toBeVisible();
@@ -410,16 +410,16 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	const moved = await project(page, [13.34, 52.465]);
 	await page.mouse.click(...moved);
 	await expect(styleTitle).toHaveText('Polygon 1');
-	await page.keyboard.down('Shift');
+	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...((await project(page, [13.37, 52.52])).map((v, i) => v + [6, -8][i]) as [number, number]));
-	await page.keyboard.up('Shift');
+	await page.keyboard.up('ControlOrMeta');
 	await expect(styleTitle).toHaveText('2 elements');
 	await expect(page.getByText('These elements have no style properties in common.')).toBeVisible();
 
-	// Shift+click on a selected element removes it from the selection
-	await page.keyboard.down('Shift');
+	// Cmd/Ctrl+click on a selected element removes it from the selection
+	await page.keyboard.down('ControlOrMeta');
 	await page.mouse.click(...moved);
-	await page.keyboard.up('Shift');
+	await page.keyboard.up('ControlOrMeta');
 	await expect(styleTitle).toHaveText('Marker 1');
 	await expect(page.getByRole('button', { name: /^Symbol/ })).toBeVisible();
 });
@@ -469,11 +469,11 @@ test('copying and pasting a style', async ({ page }) => {
 
 	// paste it onto the polygon and the marker at once
 	await page.mouse.click(...(await project(page, [13.35, 52.475])));
-	await page.keyboard.down('Shift');
+	await page.keyboard.down('ControlOrMeta');
 	// the flag icon of the marker is drawn above and right of its point
 	const [mx, my] = await project(page, [13.42, 52.5]);
 	await page.mouse.click(mx + 6, my - 8);
-	await page.keyboard.up('Shift');
+	await page.keyboard.up('ControlOrMeta');
 	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 	await pasteButton.click();
 
@@ -864,4 +864,18 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 	// one undo step each
 	await page.keyboard.press('ControlOrMeta+z');
 	await expect.poll(labels).toStrictEqual(['A', 'B']);
+});
+
+test('Shift-drag on the map zooms to a box', async ({ page }) => {
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+	const before = await zoom();
+	await page.keyboard.down('Shift');
+	await page.mouse.move(400, 300);
+	await page.mouse.down();
+	await page.mouse.move(500, 380, { steps: 5 });
+	await page.mouse.up();
+	await page.keyboard.up('Shift');
+	await expect.poll(zoom).toBeGreaterThan(before + 1);
 });

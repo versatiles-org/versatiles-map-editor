@@ -1,3 +1,4 @@
+import { isToggleClick } from './modifiers.js';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import type { SelectionHandler } from './selection.svelte.js';
@@ -16,7 +17,7 @@ import {
 const MOUSE_TOLERANCE = 3;
 
 /**
- * The mouse and touch on the map, for the selection: a click selects an element (Shift+click adds
+ * The mouse and touch on the map, for the selection: a click selects an element (Cmd/Ctrl+click adds
  * it), dragging moves the selected elements or reshapes one at a node, and the cursor shows what
  * can be clicked or dragged. It changes the selection only through its methods.
  */
@@ -63,8 +64,8 @@ export class SelectionPointer {
 			if (this.findNode(e)) return;
 			e.preventDefault();
 			const element = this.doc.elementAt(e.point, MOUSE_TOLERANCE);
-			// Shift+click adds an element to the selection or removes it, like in graphics software
-			if (e.originalEvent.shiftKey) {
+			// Cmd/Ctrl+click adds an element to the selection or removes it
+			if (isToggleClick(e.originalEvent)) {
 				if (element) this.selection.toggleElement(element);
 			} else {
 				this.selection.selectElement(element);
@@ -82,8 +83,8 @@ export class SelectionPointer {
 
 	/** Dragging a selected element moves all selected elements. Alt/Option-drag moves copies. */
 	private handleElementDown(e: MapPointerEvent) {
-		// Shift+click toggles the selection instead
-		if (e.originalEvent.shiftKey) return;
+		// Cmd/Ctrl+click toggles the selection instead, and Shift+drag zooms to a box
+		if (isToggleClick(e.originalEvent) || e.originalEvent.shiftKey) return;
 		const selected = this.selection.selectedElements;
 		const element = this.doc.elementAt(e.point, isTouchEvent(e) ? TOUCH_TOLERANCE : MOUSE_TOLERANCE, selected);
 		if (!element) return;

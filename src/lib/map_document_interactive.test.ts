@@ -270,8 +270,8 @@ describe('MapDocument', () => {
 			expect(doc.getState().meta).toStrictEqual({ colorScheme: 'dark2' });
 		});
 
-		it('should disable box zoom, which would swallow Shift+clicks', () => {
-			expect(doc.view.map.boxZoom.disable).toHaveBeenCalled();
+		it('should keep box zoom (Shift+drag), since Cmd/Ctrl+click selects several elements', () => {
+			expect(doc.view.map.boxZoom.disable).not.toHaveBeenCalled();
 		});
 
 		describe('duplicate', () => {

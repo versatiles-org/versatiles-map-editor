@@ -30,8 +30,6 @@ export class MapDocumentInteractive extends MapDocument {
 	constructor(map: maplibregl.Map) {
 		super(map);
 		this.cursor = new Cursor(map.getCanvasContainer());
-		// Shift+click selects several elements. Box zoom (Shift+drag) would swallow these clicks.
-		map.boxZoom.disable();
 		// first, so it can take the clicks while the visible area is edited
 		this.visibleArea = new VisibleAreaMode(this);
 		// before the selection, so a click with a drawing tool draws instead of selecting

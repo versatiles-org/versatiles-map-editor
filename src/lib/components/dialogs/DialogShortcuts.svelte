@@ -48,7 +48,8 @@
 			keys: [
 				['Undo', `${mod}Z`],
 				['Redo', mac ? `${shift}${mod}Z` : 'Ctrl+Shift+Z, or Ctrl+Y'],
-				['Add to the selection', `${shift}click`],
+				['Add to the selection, or remove', `${mod}click`],
+				['Zoom to a box', `${shift}drag`],
 				['Duplicate', `${mod}D, or ${alt}drag`],
 				['Bring forward, send backward', `${mod}↑ ↓`],
 				['Bring to front, send to back', `${shift}${mod}↑ ↓`],
