@@ -324,6 +324,19 @@ test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, a
 	// editor, and the icons of "Preview" and "Share" left of the texts of both buttons
 	expect(between.filter(({ name }) => !['Undo', 'Redo', 'Preview', 'Share'].includes(name))).toStrictEqual([]);
 
+	// the names in the drawer start in one column: "Map settings", "Legend" and the elements
+	const starts = await drawer.evaluate((aside) =>
+		[...aside.querySelectorAll('.row, [role=option] .name')].map((row) => {
+			// the text after the icon
+			const text = [...row.childNodes].reverse().find((n) => n.nodeType === Node.TEXT_NODE && n.textContent?.trim());
+			const range = document.createRange();
+			range.selectNodeContents(text ?? row);
+			return Math.round(range.getBoundingClientRect().left);
+		})
+	);
+	expect(starts.length).toBeGreaterThan(2);
+	expect(new Set(starts).size).toBe(1);
+
 	// and centered in their 24×24 grid, so they are centered in their buttons, e.g. the cursor of
 	// "Select": at most 1.25 units off (1px of an icon of 20px), for slanted shapes like the brush
 	const offCenter = await page.evaluate(() =>

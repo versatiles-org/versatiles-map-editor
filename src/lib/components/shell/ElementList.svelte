@@ -145,9 +145,12 @@
 		}
 	}
 
+	/* as wide as the icons of "Map settings" and "Legend" above the list, so the names line up */
 	.type {
 		display: grid;
 		flex: none;
+		place-items: center;
+		width: 16px;
 	}
 
 	.name {
