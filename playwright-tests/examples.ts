@@ -15,7 +15,8 @@ const EXAMPLES = [
 	'paris-2024-venues',
 	'hamburg-berlin-railway',
 	'berlin-low-emission-zone',
-	'chernobyl-exclusion-zone'
+	'chernobyl-exclusion-zone',
+	'london-pharmacies'
 ];
 
 for (const name of EXAMPLES) {
@@ -70,3 +71,15 @@ for (const name of EXAMPLES) {
 		});
 	});
 }
+
+// the largest example: 557 markers with 536 labels, more than the 100 that are drawn in order
+test('the map with many markers opens within a few seconds, in the editor and in the viewer', async ({ page }) => {
+	const state: MapState = JSON.parse(readFileSync('examples/london-pharmacies.mapjson', 'utf-8'));
+	for (const path of ['/', '/view']) {
+		const start = Date.now();
+		await page.goto(path + '#' + encodeState(state));
+		await waitForMapIsReady(page);
+		await waitForMapIsIdle(page);
+		expect(Date.now() - start, path).toBeLessThan(10000);
+	}
+});
