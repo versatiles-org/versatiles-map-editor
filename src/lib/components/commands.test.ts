@@ -8,6 +8,7 @@ import {
 	copyStyle,
 	deleteSelection,
 	duplicateSelection,
+	moveSelection,
 	pasteStyle
 } from './commands.js';
 import { addElement } from '../__mocks__/elements.js';
@@ -33,6 +34,70 @@ describe('commands', () => {
 
 		doc.state.undo();
 		expect(types()).toStrictEqual(['marker', 'line']);
+	});
+
+	describe('move the selected elements in the drawing order', () => {
+		/** Markers at different places, so each order is another state of the map. */
+		const markers = (count: number) =>
+			Array.from({ length: count }, (_, i) => doc.addElement({ type: 'marker', point: [i, 0] }));
+
+		it('to the front or the back, keeping their order, in one undo step', () => {
+			const [a, b, c, d] = markers(4);
+			doc.state.log();
+			doc.selection.selectElements([b, a]);
+			moveSelection(doc, 'front');
+			expect(doc.elements).toStrictEqual([c, d, a, b]);
+			moveSelection(doc, 'back');
+			expect(doc.elements).toStrictEqual([a, b, c, d]);
+			doc.selection.selectElement(b);
+			moveSelection(doc, 'front');
+			// by their places, since undo changes the elements in place
+			const order = () => doc.elements.map((e) => (e.getState() as { point: [number, number] }).point[0]);
+			expect(order()).toStrictEqual([0, 2, 3, 1]);
+			doc.state.undo();
+			expect(order()).toStrictEqual([0, 1, 2, 3]);
+		});
+
+		it('one step, past the next element of the same layer', () => {
+			const marker1 = addElement(doc, 'marker');
+			const polygon = addElement(doc, 'polygon');
+			const marker2 = addElement(doc, 'marker');
+			const line = addElement(doc, 'line');
+			doc.selection.selectElement(marker1);
+			// past the polygon, which is drawn under all markers, to after the next marker
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([polygon, marker2, marker1, line]);
+			// no marker in front of it: it stays
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([polygon, marker2, marker1, line]);
+			moveSelection(doc, 'backward');
+			expect(doc.elements).toStrictEqual([polygon, marker1, marker2, line]);
+			// a line shares the layer of the outline of the polygon
+			doc.selection.selectElement(line);
+			moveSelection(doc, 'backward');
+			expect(doc.elements).toStrictEqual([line, polygon, marker1, marker2]);
+		});
+
+		it('one step, several elements: each past the next one that is not moved', () => {
+			const [a, b, c, d] = markers(4);
+			doc.selection.selectElements([a, c]);
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([b, a, d, c]);
+			// c is in front already, a passes d
+			moveSelection(doc, 'forward');
+			expect(doc.elements).toStrictEqual([b, d, a, c]);
+		});
+
+		it('nothing without a selection', () => {
+			const [a, b] = markers(2);
+			doc.state.log();
+			doc.selection.selectElement();
+			moveSelection(doc, 'front');
+			expect(doc.elements).toStrictEqual([a, b]);
+			// no undo step: undo goes back to the empty map
+			doc.state.undo();
+			expect(doc.elements).toStrictEqual([]);
+		});
 	});
 
 	it('delete the selected elements in one undo step', () => {

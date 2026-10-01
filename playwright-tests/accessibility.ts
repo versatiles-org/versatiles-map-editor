@@ -106,26 +106,27 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await page.getByRole('button', { name: 'Elements' }).click();
 	const list = page.getByRole('listbox', { name: 'Elements' });
 	const options = list.getByRole('option');
-	await expect(options).toHaveText(['Marker 1: Berlin', 'Line 1', 'Polygon 1: Park']);
+	// the element in front first
+	await expect(options).toHaveText(['Polygon 1: Park', 'Line 1', 'Marker 1: Berlin']);
 
 	// the selection follows the focus, and Shift adds to it
 	await list.focus();
 	await page.keyboard.press('ArrowDown');
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1']);
 	await page.keyboard.press('Shift+ArrowDown');
-	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1', 'Polygon 1: Park']);
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line 1', 'Marker 1: Berlin']);
 	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
 
 	// Delete removes the selected elements
 	await page.keyboard.press('Delete');
-	await expect(options).toHaveText(['Marker 1: Berlin']);
-	await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(['marker']);
+	await expect(options).toHaveText(['Polygon 1: Park']);
+	await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(['polygon']);
 
 	// Enter selects the element, like a click on the map
 	await page.keyboard.press('Home');
 	await page.keyboard.press('Enter');
-	await expect(list.getByRole('option', { selected: true })).toHaveText(['Marker 1: Berlin']);
-	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Marker 1');
+	await expect(list.getByRole('option', { selected: true })).toHaveText(['Polygon 1: Park']);
+	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Polygon 1');
 });
 
 test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {

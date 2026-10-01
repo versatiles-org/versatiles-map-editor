@@ -818,3 +818,50 @@ test('the text color and the halo color of a label', async ({ page }) => {
 	);
 	expect(drawn).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
 });
+
+test('moving elements to the front and to the back', { tag: '@cross-browser' }, async ({ page }) => {
+	// two markers at the same place: B is drawn over A
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				elements: [
+					{ type: 'marker', point: center, style: { label: 'A' } },
+					{ type: 'marker', point: center, style: { label: 'B' } }
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+	const label = page.getByRole('textbox', { name: 'Label' });
+	const labels = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	// a click selects the marker in front, the list shows it first
+	const clickMarker = () => page.mouse.click(x + 6, y - 8);
+
+	await clickMarker();
+	await expect(label).toHaveValue('B');
+	await page.keyboard.press('e');
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	await expect(list.getByRole('option')).toHaveText([/Marker 2: B/, /Marker 1: A/]);
+	await expect(list.getByRole('option', { selected: true })).toHaveText(/: B/);
+
+	// B to the back: now A is in front and gets the click
+	await page.getByRole('button', { name: 'Send to back' }).click();
+	await expect.poll(labels).toStrictEqual(['B', 'A']);
+	await expect(list.getByRole('option')).toHaveText([/Marker 2: A/, /Marker 1: B/]);
+	await expect(list.getByRole('option', { selected: true })).toHaveText(/: B/);
+	await page.keyboard.press('Escape');
+	await clickMarker();
+	await expect(label).toHaveValue('A');
+
+	// with the keyboard: A one step backward, and back to the front
+	await page.locator('body').press('ControlOrMeta+ArrowDown');
+	await expect.poll(labels).toStrictEqual(['A', 'B']);
+	await page.locator('body').press('Shift+ControlOrMeta+ArrowUp');
+	await expect.poll(labels).toStrictEqual(['B', 'A']);
+
+	// one undo step each
+	await page.keyboard.press('ControlOrMeta+z');
+	await expect.poll(labels).toStrictEqual(['A', 'B']);
+});

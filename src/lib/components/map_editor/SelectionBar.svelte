@@ -104,6 +104,19 @@
 		title="Duplicate (Cmd/Ctrl+D, or Alt/Option-drag)"
 		onclick={() => commands.duplicateSelection(doc)}
 	/>
+	<!-- in front of or behind the other elements of their kind: markers stay over lines and areas -->
+	<IconButton
+		icon="front"
+		label="Bring to front"
+		title="Bring to front, over the others of its kind (Shift+Cmd/Ctrl+↑; one step: Cmd/Ctrl+↑)"
+		onclick={() => commands.moveSelection(doc, 'front')}
+	/>
+	<IconButton
+		icon="back"
+		label="Send to back"
+		title="Send to back, under the others of its kind (Shift+Cmd/Ctrl+↓; one step: Cmd/Ctrl+↓)"
+		onclick={() => commands.moveSelection(doc, 'back')}
+	/>
 	<IconButton
 		icon="pipette"
 		label="Copy style"

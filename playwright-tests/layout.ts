@@ -259,8 +259,11 @@ for (const viewport of [
 				.click();
 			expect(await needlessScrolling(page), 'color picker').toStrictEqual([]);
 			await page.keyboard.press('Escape');
-			const [x, y] = await project(page, [13.3, 52.52]);
-			await page.mouse.click(x + 6, y - 8);
+			// from the list, since on a small screen the bar of the selected polygon may cover the marker
+			await page
+				.getByRole('listbox', { name: 'Elements' })
+				.getByRole('option', { name: /^Marker/ })
+				.click();
 			await page.getByRole('button', { name: /^Symbol/ }).click();
 			expect(await needlessScrolling(page), 'symbol picker').toStrictEqual([]);
 			await page.keyboard.press('Escape');

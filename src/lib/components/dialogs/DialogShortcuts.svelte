@@ -43,6 +43,8 @@
 				['Redo', mac ? `${shift}${mod}Z` : 'Ctrl+Shift+Z, or Ctrl+Y'],
 				['Add to the selection', `${shift}click`],
 				['Duplicate', `${mod}D, or ${alt}drag`],
+				['Bring forward, send backward', `${mod}↑ ↓`],
+				['Bring to front, send to back', `${shift}${mod}↑ ↓`],
 				['Copy style', `${alt}${mod}C`],
 				['Paste style', `${alt}${mod}V`],
 				['Delete the node or the elements', del],

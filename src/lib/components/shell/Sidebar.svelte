@@ -29,6 +29,16 @@
 			commands.duplicateSelection(mapDocument);
 		}
 
+		// Cmd/Ctrl+↑/↓ one step forward or backward, with Shift to the front or the back, like in
+		// Google Slides (Cmd+[ and Cmd+] are the history of the browser on macOS)
+		if ((e.metaKey || e.ctrlKey) && !e.altKey && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+			if (selectedElements.length === 0) return;
+			e.preventDefault();
+			const up = e.key === 'ArrowUp';
+			commands.moveSelection(mapDocument, e.shiftKey ? (up ? 'front' : 'back') : up ? 'forward' : 'backward');
+			return;
+		}
+
 		// Cmd/Ctrl+Alt+C/V, like in Keynote and PowerPoint. By e.code, since Alt changes e.key (e.g. to "ç" on macOS).
 		if ((e.metaKey || e.ctrlKey) && e.altKey && !e.shiftKey && (e.code === 'KeyC' || e.code === 'KeyV')) {
 			if (selectedElements.length === 0) return;

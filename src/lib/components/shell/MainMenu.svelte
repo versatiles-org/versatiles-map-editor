@@ -250,6 +250,22 @@
 			disabled: !hasSelection,
 			keys: ['⌘D', 'Ctrl+D', 'Meta+D Control+D']
 		})}
+		{@render item('Bring to front', () => commands.moveSelection(doc, 'front'), {
+			disabled: !hasSelection,
+			keys: ['⇧⌘↑', 'Ctrl+Shift+↑', 'Meta+Shift+ArrowUp Control+Shift+ArrowUp']
+		})}
+		{@render item('Bring forward', () => commands.moveSelection(doc, 'forward'), {
+			disabled: !hasSelection,
+			keys: ['⌘↑', 'Ctrl+↑', 'Meta+ArrowUp Control+ArrowUp']
+		})}
+		{@render item('Send backward', () => commands.moveSelection(doc, 'backward'), {
+			disabled: !hasSelection,
+			keys: ['⌘↓', 'Ctrl+↓', 'Meta+ArrowDown Control+ArrowDown']
+		})}
+		{@render item('Send to back', () => commands.moveSelection(doc, 'back'), {
+			disabled: !hasSelection,
+			keys: ['⇧⌘↓', 'Ctrl+Shift+↓', 'Meta+Shift+ArrowDown Control+Shift+ArrowDown']
+		})}
 		{@render item('Copy style', () => commands.copyStyle(doc), {
 			disabled: !commands.canCopyStyle(doc),
 			keys: ['⌥⌘C', 'Ctrl+Alt+C', 'Meta+Alt+C Control+Alt+C']
