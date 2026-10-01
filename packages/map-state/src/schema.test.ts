@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { Ajv } from 'ajv';
 // @ts-expect-error a script without types
 import { mapJsonSchema, SCHEMA_FILE } from '../schema/generate.mjs';
-import { MAPJSON_SCHEMA_URL, stateToMapJSON, type MapState } from './index.js';
+import { MAPJSON_SCHEMA_URL, stateFromMapJSON, stateToMapJSON, type MapState } from './index.js';
 
 const committed = JSON.parse(readFileSync(SCHEMA_FILE, 'utf-8'));
 const validate = new Ajv({ allErrors: true }).compile(committed);
@@ -93,6 +93,39 @@ describe('the JSON Schema of .mapjson files', () => {
 			{ $schema: MAPJSON_SCHEMA_URL }
 		]) {
 			expect(validate(wrong), JSON.stringify(wrong)).toBe(false);
+		}
+	});
+});
+
+describe('the guide to .mapjson files (MAPJSON.md)', () => {
+	const guide = readFileSync('packages/map-state/MAPJSON.md', 'utf-8');
+
+	it('has examples that fit the schema and are read as maps', () => {
+		const examples = [...guide.matchAll(/```json\n([\s\S]*?)```/g)].map(([, json]) => JSON.parse(json));
+		expect(examples.length).toBeGreaterThan(1);
+		for (const example of examples) {
+			validate(example);
+			expect(errors()).toStrictEqual([]);
+			expect(stateFromMapJSON(example).elements.length).toBeGreaterThan(0);
+		}
+	});
+
+	it('describes every field of the schema', () => {
+		const fields = new Set<string>();
+		const collect = (node: unknown) => {
+			if (typeof node !== 'object' || node === null) return;
+			const { properties } = node as { properties?: Record<string, unknown> };
+			if (properties) for (const name of Object.keys(properties)) fields.add(name);
+			for (const value of Object.values(node)) collect(value);
+		};
+		collect(committed.definitions);
+		const missing = [...fields].filter((name) => !guide.includes(`\`${name}\``));
+		expect(missing).toStrictEqual([]);
+	});
+
+	it('links to files that exist', () => {
+		for (const [, target] of guide.matchAll(/\]\(((?:\.\.\/)*[\w./-]+?)(?:#[\w-]*)?\)/g)) {
+			expect(globSync(`packages/map-state/${target}`), target).not.toStrictEqual([]);
 		}
 	});
 });

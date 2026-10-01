@@ -132,6 +132,10 @@ How a map is encoded (URL hash, GeoJSON, KML) is published as its own npm packag
 [`@versatiles/map-state`](packages/map-state), e.g. to render shared maps in other apps or to
 create links on a server. The editor uses it from `packages/map-state/src`.
 
+The file format of the editor, `.mapjson`, is explained in
+[`packages/map-state/MAPJSON.md`](packages/map-state/MAPJSON.md), with its JSON Schema in
+[`packages/map-state/schema`](packages/map-state/schema).
+
 To release a new version of the package:
 
 1. Raise the version in `packages/map-state/package.json` and move the entries under

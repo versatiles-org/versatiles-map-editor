@@ -45,6 +45,9 @@ decodeGeoJSON(base64: string): GeoJSONDocument // = stateToGeoJSON(decodeState(b
 
 stateToKML(state: MapState): string
 stateFromKML(kml: string): MapState
+
+stateToMapJSON(state: MapState): MapJSON // the content of a .mapjson file, with $schema
+stateFromMapJSON(json: unknown): MapState // upgrades older files, refuses newer ones
 ```
 
 - `resolution`: the precision of the coordinates in meters, rounded to decimal places of degrees.
@@ -54,14 +57,19 @@ stateFromKML(kml: string): MapState
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
 - `CODEC_VERSION` is the format version that `encodeState` writes.
+- `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) name the JSON Schema of their format version in
+  `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION`); `stateFromMapJSON` throws a
+  `MapJSONVersionError` for a file of a newer version. The schema is in the package, at
+  `schema/mapjson-1.schema.json`.
 - `frame` in the state is the visible area of a shared map, `[west, south, east, north]` (the type
   `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
   `centerOf(bounds)` their center.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
-  the way the editor does. `LEGEND_DEFAULTS` are the position, layout and font of a legend that
-  names none, and `removeLegendDefaults` leaves them out, as the base64 string does.
+  the way the editor does. `LEGEND_DEFAULTS` are the layout, font, bold and italic of a legend
+  that names none, and `removeLegendDefaults` leaves them out, as the base64 string does;
+  `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.
 
@@ -75,12 +83,13 @@ The following sections describe the formats in detail. File names refer to the s
 [`packages/map-state/src`](https://github.com/versatiles-org/versatiles-map-editor/tree/main/packages/map-state/src),
 which are internal: only the exports above are the public API.
 
-| Representation | Source                      | Notes                                                                    |
-| -------------- | --------------------------- | ------------------------------------------------------------------------ |
-| `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle` |
-| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                     |
-| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` and `meta` foreign members                   |
-| KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`              |
+| Representation | Source                      | Notes                                                                              |
+| -------------- | --------------------------- | ---------------------------------------------------------------------------------- |
+| `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle`           |
+| `.mapjson`     | `mapjson.ts`                | the map state as JSON, the file format of the editor; see [MAPJSON.md](MAPJSON.md) |
+| base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                               |
+| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` and `meta` foreign members                             |
+| KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`                        |
 
 ## GeoJSON profile (`profile.ts`)
 
