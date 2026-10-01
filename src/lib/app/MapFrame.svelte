@@ -28,11 +28,16 @@
 	import {
 		addAttribution,
 		addNavigation,
+		CONTROL_ORDER,
+		cornerControl,
+		CORNERS,
+		isCorner,
 		layoutOverlays,
-		type AttributionSize,
-		type LegendPosition
+		type Corner,
+		type LegendPosition,
+		type StackSize
 	} from './overlay_layout.js';
-	import { VIEWER_DEFAULTS } from '@versatiles/map-state';
+	import { VIEWER_DEFAULTS, type StateLegend } from '@versatiles/map-state';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -122,50 +127,91 @@
 
 	// until the map has loaded for the first time, and while a map from a link or file loads
 	const loading = $derived(!triggeredMapReady || mapDocument?.loading === true);
-	// the height of the search and the hint at the top of the map
-	let topOverlaysHeight = $state(0);
+	// the height of the hint at the top of the map, under which the controls of the top corners start
+	let hintHeight = $state(0);
+	const hintOffset = $derived(hint === undefined ? 0 : hintHeight + MAP_PADDING);
 
-	// The legend keeps its corner: the search and the attribution go to the other side
-	// The legend at its place in the viewer. A legend hidden in the viewer is still shown in the
-	// editor, at the default place, so it can be edited.
+	// The legend, the search and the buttons for zooming at their places in the viewer. The editor
+	// always shows the search and the buttons, at their places or at the defaults, and a legend
+	// hidden in the viewer at the default place, so it can be edited.
 	const legendPosition: LegendPosition | undefined = $derived.by(() => {
 		if (!mapDocument?.legend?.entries.length) return undefined;
 		const position = mapDocument.controls.legend;
 		if (position !== 'none') return position;
 		return editor ? VIEWER_DEFAULTS.legend : undefined;
 	});
+	const searchCorner: Corner | undefined = $derived.by(() => {
+		if (!search || !mapDocument) return undefined;
+		const position = mapDocument.controls.search;
+		return position === 'none' ? 'top-left' : position;
+	});
+	const navigationCorner: Corner | undefined = $derived.by(() => {
+		if (!navigation || !mapDocument) return undefined;
+		const position = mapDocument.controls.navigation;
+		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
+	});
+
 	let pageWidth = $state(0);
-	let searchWidth = $state(0);
+	let pageHeight = $state(0);
 	let legendWidth = $state(0);
+	let legendHeight = $state(0);
 	let legendBox: Box | undefined = $state();
+	let legendView: Legend | undefined = $state();
 	// a shared map keeps its area clear of the legend
 	$effect(() => {
 		mapDocument?.view.setCovered(legendPosition ? legendBox : undefined);
 	});
-	let attributionSize: AttributionSize = $state({ width: 0, top: 0 });
-	const layout = $derived(
-		layoutOverlays(legendPosition, {
-			freeWidth: pageWidth - covered.left - covered.right - 3 * MAP_PADDING,
-			legendWidth,
-			searchWidth,
-			attributionWidth: attributionSize.width,
-			topOverlaysHeight,
-			hint: hint !== undefined
-		})
-	);
 
-	// the attribution in the bottom corner without the legend; a value of its own, since the
-	// layout changes with the size of the attribution, which must not add it again
+	// the controls in the corners of the map, stacked, with their sizes
+	const noStack: StackSize = { width: 0, height: 0 };
+	let stacks: Record<Corner, StackSize> = $state({
+		'top-left': noStack,
+		'top-right': noStack,
+		'bottom-left': noStack,
+		'bottom-right': noStack
+	});
+	$effect(() => {
+		const m = mapDocument?.view.map;
+		if (!m) return;
+		const containers = CORNERS.map((corner) => m.getContainer().querySelector(`.maplibregl-ctrl-${corner}`));
+		const observer = new ResizeObserver(() => {
+			const sizes = containers.map((c) => c?.getBoundingClientRect() ?? noStack);
+			stacks = Object.fromEntries(
+				CORNERS.map((corner, i) => [corner, { width: sizes[i].width, height: sizes[i].height }])
+			) as Record<Corner, StackSize>;
+			// e.g. the search above it came or went
+			legendView?.measure();
+		});
+		for (const c of containers) if (c) observer.observe(c);
+		return () => observer.disconnect();
+	});
+
+	const freeWidth = $derived(pageWidth - covered.left - covered.right - 2 * MAP_PADDING);
+	const layout = $derived(
+		layoutOverlays(
+			{ legend: legendPosition, navigation: navigationCorner, search: searchCorner },
+			{ freeWidth, legendWidth, stacks }
+		)
+	);
+	// a legend in a corner: as wide as the map between the bars, and as high as the other controls there leave
+	const legendMaxHeight = $derived.by(() => {
+		const free = pageHeight - covered.top - covered.bottom - 2 * MAP_PADDING;
+		if (!isCorner(legendPosition)) return free;
+		const others = Math.max(0, stacks[legendPosition].height - legendHeight - MAP_PADDING);
+		return free - others - (legendPosition.startsWith('top') ? hintOffset : 0);
+	});
+
+	// the attribution in a bottom corner that nothing else takes; a value of its own, so a change of
+	// the layout does not add it again
 	const attributionCorner = $derived(layout.attributionCorner);
 	$effect(() => {
 		const corner = attributionCorner;
 		const m = mapDocument?.view.map;
 		if (!m) return;
-		return addAttribution(m, corner, (size) => (attributionSize = size));
+		return addAttribution(m, corner);
 	});
 
-	// the buttons for zooming, in the right corner that the legend and the search leave free
-	const navigationCorner = $derived(navigation ? layout.navigationCorner : undefined);
+	// the buttons for zooming
 	$effect(() => {
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
@@ -274,7 +320,8 @@
 	class="page map-editor-theme"
 	class:editor
 	bind:clientWidth={pageWidth}
-	style:--covered-top="{covered.top}px"
+	bind:clientHeight={pageHeight}
+	style:--corner-top="{covered.top + hintOffset}px"
 	style:--covered-left="{covered.left}px"
 	style:--covered-right="{covered.right}px"
 	style:--covered-bottom="{covered.bottom}px"
@@ -287,40 +334,61 @@
 	{/if}
 	<Notifications right={covered.right} />
 	{#if mapDocument?.legend && legendPosition}
-		<!-- a legend at the top goes below the bar, and the search and the hint if it would cover them -->
-		<Legend
-			legend={mapDocument.legend}
-			position={legendPosition}
-			left={covered.left}
-			right={covered.right}
-			top={covered.top + (layout.legendBelowOverlays ? topOverlaysHeight + 10 : 0)}
-			bottom={layout.legendAboveAttribution ? attributionSize.top : covered.bottom}
-			bind:width={legendWidth}
-			onmove={(box) => (legendBox = box)}
-			selected={mapDocument.isInteractive() && mapDocument.selection.legendSelected}
-			onselect={onselectlegend}
-		/>
-	{/if}
-	{#if mapDocument && (search || hint)}
-		<div
-			class="top-overlays"
-			style:top="{covered.top + 10}px"
-			style:left="{covered.left + 10}px"
-			style:right="{covered.right + 10}px"
-			bind:offsetHeight={topOverlaysHeight}
-		>
-			{#if search}
-				<div class="map-search" class:right={layout.searchRight} bind:offsetWidth={searchWidth}>
-					<SearchPlace map={mapDocument.view.map} {onmark} />
+		{#if isCorner(legendPosition)}
+			<!-- stacked with the other controls of its corner, e.g. the search; wrapped, see cornerControl -->
+			<div class="control-slot">
+				<div use:cornerControl={{ map: mapDocument.view.map, corner: legendPosition, order: CONTROL_ORDER.legend }}>
+					{@render legend(mapDocument.legend, legendPosition, true)}
 				</div>
-			{/if}
-			{#if hint}
-				<div class="hint">{hint}</div>
-			{/if}
+			</div>
+		{:else}
+			{@render legend(mapDocument.legend, legendPosition, false)}
+		{/if}
+	{/if}
+	{#if mapDocument && searchCorner}
+		<div class="control-slot">
+			<div
+				class="map-search"
+				use:cornerControl={{ map: mapDocument.view.map, corner: searchCorner, order: CONTROL_ORDER.search }}
+			>
+				<SearchPlace map={mapDocument.view.map} {onmark} />
+			</div>
+		</div>
+	{/if}
+	{#if hint}
+		<div
+			class="hint"
+			style:top="{covered.top + MAP_PADDING}px"
+			style:left="{covered.left + MAP_PADDING}px"
+			style:right="{covered.right + MAP_PADDING}px"
+			bind:offsetHeight={hintHeight}
+		>
+			<span>{hint}</span>
 		</div>
 	{/if}
 	{@render children?.()}
 </div>
+
+<!-- a legend at the center of the top or the bottom moves past the controls of the corners beside it -->
+{#snippet legend(data: StateLegend, position: LegendPosition, inCorner: boolean)}
+	<Legend
+		bind:this={legendView}
+		legend={data}
+		{position}
+		{inCorner}
+		maxWidth={freeWidth}
+		maxHeight={legendMaxHeight}
+		left={covered.left}
+		right={covered.right}
+		top={covered.top + hintOffset + (position === 'top' ? layout.legendOffset : 0)}
+		bottom={covered.bottom + (position === 'bottom' ? layout.legendOffset : 0)}
+		bind:width={legendWidth}
+		bind:height={legendHeight}
+		onmove={(box) => (legendBox = box)}
+		selected={mapDocument?.isInteractive() === true && mapDocument.selection.legendSelected}
+		onselect={onselectlegend}
+	/>
+{/snippet}
 
 <style>
 	.page,
@@ -353,10 +421,37 @@
 			color: var(--color-text) !important;
 		}
 
-		/* the attribution and the buttons for zooming, clear of the bars, e.g. the tools, the drawer,
-		   the sidebar and the status line */
+		/* The controls in the corners, clear of the bars, e.g. the tools, the drawer, the sidebar and
+		   the status line, and of the hint. Stacked from the edge inwards, in the order of
+		   CONTROL_ORDER; at the bottom from the bottom up. */
+		:global(.maplibregl-ctrl-top-left),
+		:global(.maplibregl-ctrl-top-right),
+		:global(.maplibregl-ctrl-bottom-left),
+		:global(.maplibregl-ctrl-bottom-right) {
+			display: flex;
+			flex-direction: column;
+		}
+		:global(.maplibregl-ctrl-bottom-left),
+		:global(.maplibregl-ctrl-bottom-right) {
+			flex-direction: column-reverse;
+		}
+		:global(.maplibregl-ctrl-top-left),
+		:global(.maplibregl-ctrl-bottom-left) {
+			align-items: flex-start;
+		}
+		:global(.maplibregl-ctrl-top-right),
+		:global(.maplibregl-ctrl-bottom-right) {
+			align-items: flex-end;
+		}
+		/* the search at the top, with its results over the other controls, e.g. a legend */
+		:global(.maplibregl-ctrl-top-left) {
+			z-index: var(--z-search);
+			top: var(--corner-top);
+			left: var(--covered-left);
+		}
 		:global(.maplibregl-ctrl-top-right) {
-			top: var(--covered-top);
+			z-index: var(--z-search);
+			top: var(--corner-top);
 			right: var(--covered-right);
 		}
 		:global(.maplibregl-ctrl-bottom-left) {
@@ -369,40 +464,39 @@
 		}
 	}
 
-	/* The search, and the hint, at the top, since the attribution at the bottom can expand to the
-	   full width. Stacked, so they do not overlap. */
-	.top-overlays {
+	/* e.g. "Open this page on a larger screen", at the top center; the corners start below it */
+	.hint {
 		position: absolute;
 		z-index: var(--z-search);
 		display: flex;
-		flex-direction: column;
-		gap: var(--space-2);
-		/* the map can be dragged between them */
+		justify-content: center;
 		pointer-events: none;
-		& > * {
+
+		span {
+			padding: 6px var(--space-3);
+			border-radius: var(--radius-lg);
+			background: var(--color-glass);
+			backdrop-filter: blur(10px);
+			box-shadow: var(--shadow-sm);
+			color: var(--color-text);
+			font-size: var(--font-size-sm);
+			text-align: center;
 			pointer-events: auto;
 		}
 	}
 
-	.hint {
-		align-self: center;
-		max-width: calc(100% - 2 * var(--space-2));
-		padding: 6px var(--space-3);
-		border-radius: var(--radius-lg);
-		background: var(--color-glass);
-		backdrop-filter: blur(10px);
-		box-shadow: var(--shadow-sm);
-		color: var(--color-text);
-		font-size: var(--font-size-sm);
-		text-align: center;
+	/* a control in a corner, which moves there out of its slot */
+	.control-slot {
+		display: none;
 	}
 
 	.map-search {
-		width: min(260px, 100%);
-		/* at the right, if the legend is at the top left */
-		&.right {
-			align-self: flex-end;
-		}
+		/* its results over the other controls of its corner, e.g. a legend below it (each control of
+		   MapLibre is a stacking context of its own, by a transform) */
+		z-index: 1;
+		width: min(260px, calc(100vw - 2 * var(--space-3)));
+		/* in the font of the editor, not in the one of the map */
+		font-family: var(--font-family);
 		font-size: var(--font-size-md);
 		/* a field (fields.css) on the map: in the size of bars, and with a shadow */
 		:global(input) {

@@ -14,6 +14,7 @@
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
+	/** `inCorner`: it is a control in a corner of the map, stacked with the others, not placed itself. */
 	/** In the editor, a click selects it (`onselect`). */
 	/** `width` is its width, e.g. to move it below the search if both do not fit side by side. */
 	/** `onmove` tells where it is on the map, so a fitted area keeps clear of it. */
@@ -27,6 +28,10 @@
 		selected = false,
 		onselect,
 		width = $bindable(0),
+		height = $bindable(0),
+		inCorner = false,
+		maxWidth,
+		maxHeight,
 		onmove
 	}: {
 		legend: StateLegend;
@@ -39,15 +44,27 @@
 		selected?: boolean;
 		onselect?: () => void;
 		width?: number;
+		height?: number;
+		inCorner?: boolean;
+		/** The largest size in pixels, e.g. the space between the bars; else the map. */
+		maxWidth?: number;
+		maxHeight?: number;
 		onmove?: (box: Box) => void;
 	} = $props();
 
 	let element: HTMLDivElement | undefined = $state();
-	let height = $state(0);
-	// after each change of its size or place; relative to the page, which is as large as the map
+	// after each change of its size or place
 	$effect(() => {
 		void [width, height, left, right, top, bottom, position, legend.layout];
-		const page = element?.offsetParent;
+		measure();
+	});
+
+	/**
+	 * Tell where it is on the map, e.g. after the controls above it in its corner changed. Relative
+	 * to the page, which is as large as the map.
+	 */
+	export function measure() {
+		const page = element?.closest('.page') ?? element?.offsetParent;
 		if (!element || !page) return;
 		const rect = element.getBoundingClientRect();
 		const origin = page.getBoundingClientRect();
@@ -57,7 +74,7 @@
 			right: rect.right - origin.left,
 			bottom: rect.bottom - origin.top
 		});
-	});
+	}
 
 	const symbolSize = 18;
 	// twice the pixels of the screen, which the browser scales down to smooth edges
@@ -84,6 +101,9 @@
 	<div
 		class="legend position-{position} layout-{legend.layout ?? 'vertical'}"
 		class:selectable={onselect !== undefined}
+		class:in-corner={inCorner}
+		style:--max-width={maxWidth === undefined ? undefined : `${maxWidth}px`}
+		style:--max-height={maxHeight === undefined ? undefined : `${maxHeight}px`}
 		class:selected
 		onclick={onselect}
 		style:--left="{left}px"
@@ -130,8 +150,8 @@
 		display: flex;
 		gap: 4px 12px;
 		box-sizing: border-box;
-		max-width: calc(100% - var(--left) - var(--sidebar) - 2 * var(--margin));
-		max-height: calc(100% - 2 * var(--margin) - var(--top) - var(--bottom));
+		max-width: var(--max-width, calc(100% - var(--left) - var(--sidebar) - 2 * var(--margin)));
+		max-height: var(--max-height, calc(100% - 2 * var(--margin) - var(--top) - var(--bottom)));
 		overflow: auto;
 		padding: 6px 10px;
 		border-radius: 6px;
@@ -140,6 +160,11 @@
 		color: #000;
 		font-size: 12px;
 		line-height: 1.3;
+	}
+
+	/* stacked with the other controls of its corner, which places it */
+	.in-corner {
+		position: static;
 	}
 
 	.selectable {

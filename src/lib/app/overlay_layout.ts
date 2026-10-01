@@ -1,59 +1,94 @@
 import * as maplibre from 'maplibre-gl';
+import type { Action } from 'svelte/action';
 import type { LEGEND_POSITIONS } from '@versatiles/map-state';
 
 export type LegendPosition = (typeof LEGEND_POSITIONS)[number];
+export type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 export type AttributionCorner = 'bottom-left' | 'bottom-right';
-export type NavigationCorner = 'top-right' | 'bottom-right';
 
-/** The measured sizes of the overlays, in pixels. */
-export interface OverlaySizes {
-	/** The width of the map between the bars, without the margins at the sides and between two controls. */
-	freeWidth: number;
-	legendWidth: number;
-	searchWidth: number;
-	/** The width of the attribution, which changes when it is expanded or collapsed. */
-	attributionWidth: number;
-	/** The height of the search and the hint at the top; 0 if neither is shown. */
-	topOverlaysHeight: number;
-	/** Whether the hint of the viewer is shown, at the center and nearly as wide as the map. */
-	hint: boolean;
-}
+export const CORNERS: Corner[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
-export interface OverlayLayout {
-	/** Whether the search is at the right, instead of the left. */
-	searchRight: boolean;
-	attributionCorner: AttributionCorner;
-	/** Where the buttons for zooming go: top right, unless the legend or the search is there. */
-	navigationCorner: NavigationCorner;
-	/** Whether the legend goes below the search and the hint, since it would cover them. */
-	legendBelowOverlays: boolean;
-	/** Whether the legend goes above the attribution, e.g. while that is expanded. */
-	legendAboveAttribution: boolean;
+export function isCorner(position: string | undefined): position is Corner {
+	return (CORNERS as (string | undefined)[]).includes(position);
 }
 
 /**
- * Where the overlays of the map go. The legend keeps its corner: the search and the attribution
- * go to the other side. Only if they do not fit side by side, the legend moves out of their way.
- * Without a legend (`position` undefined), everything is at its default place.
+ * The order of the controls in a corner, from its edge inwards: at the top the search, the
+ * buttons for zooming and the legend; at the bottom the attribution, the buttons and the legend.
  */
-export function layoutOverlays(position: LegendPosition | undefined, sizes: OverlaySizes): OverlayLayout {
-	const { freeWidth, legendWidth } = sizes;
-	/** Whether the legend and a control at the side of the legend's position do not fit side by side. */
-	function collide(width: number): boolean {
+export const CONTROL_ORDER = { search: 0, attribution: 0, navigation: 1, legend: 2 };
+
+/** The size of the controls in a corner, with their margins. */
+export interface StackSize {
+	width: number;
+	height: number;
+}
+
+/** The measured sizes of the overlays, in pixels. */
+export interface OverlaySizes {
+	/** The width of the map between the bars, without the margins at the sides. */
+	freeWidth: number;
+	legendWidth: number;
+	/** The controls in each corner. */
+	stacks: Record<Corner, StackSize>;
+}
+
+/** Where the overlays are: the legend, the buttons for zooming and the search, if they are shown. */
+export interface OverlayPlaces {
+	legend?: LegendPosition;
+	navigation?: Corner;
+	search?: Corner;
+}
+
+export interface OverlayLayout {
+	/** The bottom corner of the attribution: one that nothing else takes, the left one if both are free. */
+	attributionCorner: AttributionCorner;
+	/**
+	 * How far a legend at the center of the top or the bottom moves inwards, past the controls of
+	 * the corners beside it, if they do not fit side by side. 0 for other legends.
+	 */
+	legendOffset: number;
+}
+
+/**
+ * Where the attribution goes, and how far a legend at the top or bottom center moves out of the
+ * way of the controls in the corners. The controls in a corner are stacked, see `CONTROL_ORDER`.
+ */
+export function layoutOverlays(places: OverlayPlaces, sizes: OverlaySizes): OverlayLayout {
+	const taken = new Set([places.legend, places.navigation]);
+	const attributionCorner: AttributionCorner =
+		taken.has('bottom-left') && !taken.has('bottom-right') ? 'bottom-right' : 'bottom-left';
+
+	let legendOffset = 0;
+	if (places.legend === 'top' || places.legend === 'bottom') {
+		const [left, right] = [sizes.stacks[`${places.legend}-left`], sizes.stacks[`${places.legend}-right`]];
 		// a legend at the center reaches half of its width to each side
-		const centered = position === 'top' || position === 'bottom';
-		return centered ? legendWidth / 2 + width > freeWidth / 2 : legendWidth + width > freeWidth;
+		const collide = sizes.legendWidth / 2 + Math.max(left.width, right.width) > sizes.freeWidth / 2;
+		if (collide) legendOffset = Math.max(left.height, right.height);
 	}
-	const top = position?.startsWith('top') === true;
-	const bottom = position?.startsWith('bottom') === true;
+	return { attributionCorner, legendOffset };
+}
+
+/** A control of MapLibre at its place in the order of the controls of its corner. */
+function ordered(control: maplibre.IControl, order: number): maplibre.IControl {
 	return {
-		searchRight: position === 'top-left',
-		attributionCorner: position === 'bottom-left' ? 'bottom-right' : 'bottom-left',
-		// a legend at the top or at the right (or the search, beside a legend at the top left) takes
-		// the top right corner; the attribution is at the bottom left then
-		navigationCorner: top || position === 'right' ? 'bottom-right' : 'top-right',
-		legendBelowOverlays: sizes.topOverlaysHeight > 0 && top && (sizes.hint || collide(sizes.searchWidth)),
-		legendAboveAttribution: bottom && collide(sizes.attributionWidth)
+		onAdd(map) {
+			const element = control.onAdd(map);
+			element.style.order = String(order);
+			return element;
+		},
+		onRemove(map) {
+			control.onRemove(map);
+		}
+	};
+}
+
+/** Add a control of MapLibre to a corner. Returns a function that removes it again. */
+function addOrdered(map: maplibre.Map, control: maplibre.IControl, corner: Corner, order: number): () => void {
+	const placed = ordered(control, order);
+	map.addControl(placed, corner);
+	return () => {
+		if (map.hasControl(placed)) map.removeControl(placed);
 	};
 }
 
@@ -61,44 +96,37 @@ export function layoutOverlays(position: LegendPosition | undefined, sizes: Over
  * Add the buttons for zooming in and out in a corner. Without a compass, since the map is not
  * rotated. Returns a function that removes them again.
  */
-export function addNavigation(map: maplibre.Map, corner: NavigationCorner): () => void {
-	const navigation = new maplibre.NavigationControl({ showCompass: false });
-	map.addControl(navigation, corner);
-	return () => {
-		if (map.hasControl(navigation)) map.removeControl(navigation);
-	};
+export function addNavigation(map: maplibre.Map, corner: Corner): () => void {
+	return addOrdered(map, new maplibre.NavigationControl({ showCompass: false }), corner, CONTROL_ORDER.navigation);
 }
 
-/** The width of the attribution, and the height from the bottom of the map to its top. */
-export interface AttributionSize {
-	width: number;
-	top: number;
+/** Add the attribution of the map in a bottom corner. Returns a function that removes it again. */
+export function addAttribution(map: maplibre.Map, corner: AttributionCorner): () => void {
+	return addOrdered(map, new maplibre.AttributionControl({ compact: true }), corner, CONTROL_ORDER.attribution);
 }
 
 /**
- * Add the attribution of the map in a corner, and report its size whenever it changes: when it
- * is expanded or collapsed, or gets other sources. Returns a function that removes it again.
+ * Show the element as a control in a corner of the map, stacked with the others there, e.g. the
+ * search or a legend. The element must not be at the top of a block of Svelte, which would
+ * remove the siblings it has in the corner: it is wrapped in an element of its own.
  */
-export function addAttribution(
-	map: maplibre.Map,
-	corner: AttributionCorner,
-	onResize: (size: AttributionSize) => void
-): () => void {
-	const attribution = new maplibre.AttributionControl({ compact: true });
-	map.addControl(attribution, corner);
-	const remove = () => {
-		if (map.hasControl(attribution)) map.removeControl(attribution);
+export const cornerControl: Action<HTMLElement, { map: maplibre.Map; corner: Corner; order: number }> = (
+	node,
+	params
+) => {
+	let remove = add(params);
+	function add({ map, corner, order }: typeof params) {
+		const control: maplibre.IControl = { onAdd: () => node, onRemove: () => node.remove() };
+		node.classList.add('maplibregl-ctrl');
+		return addOrdered(map, control, corner, order);
+	}
+	return {
+		update(next) {
+			remove();
+			remove = add(next);
+		},
+		destroy() {
+			remove();
+		}
 	};
-	const element = map.getContainer().querySelector<HTMLElement>('.maplibregl-ctrl-attrib');
-	if (!element) return remove;
-	const observer = new ResizeObserver(() => {
-		const container = map.getContainer().getBoundingClientRect();
-		const box = element.getBoundingClientRect();
-		onResize({ width: box.width, top: container.bottom - box.top });
-	});
-	observer.observe(element);
-	return () => {
-		observer.disconnect();
-		remove();
-	};
-}
+};

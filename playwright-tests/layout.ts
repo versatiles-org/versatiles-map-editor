@@ -126,9 +126,14 @@ test('a message is above the drawer and the bars', async ({ page }) => {
 });
 
 // one page for all positions: a new map in the URL hash replaces the legend without a reload
-test('the legend keeps its corner, and the search and the attribution go to the other side', async ({ page }) => {
+test('the legend keeps its corner, stacked with the search or the zoom buttons there', async ({ page }) => {
 	const legendList = page.getByRole('list', { name: 'Legend' });
+	const box = async (locator: Locator) => {
+		const b = (await locator.boundingBox())!;
+		return { top: b.y, bottom: b.y + b.height, left: b.x, right: b.x + b.width };
+	};
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
+	const zoom = page.locator('.maplibregl-ctrl-group').filter({ has: zoomIn(page) });
 	const attribution = page.locator('.maplibregl-ctrl-attrib');
 	for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
 		await test.step(`a legend at ${position}`, async () => {
@@ -136,35 +141,30 @@ test('the legend keeps its corner, and the search and the attribution go to the 
 			await waitForMapIsReady(page);
 			await expect(legendList).toContainClass(`position-${position}`);
 			const map = (await page.locator('.map').boundingBox())!;
-			const [vertical, horizontal] = position.split('-');
-			// the legend is at most 10px from the edges of the map between the bars, e.g. of the tools
-			const legend = async () => {
-				const box = (await legendList.boundingBox())!;
-				return { top: box.y, bottom: box.y + box.height, left: box.x, right: box.x + box.width };
+			const edges = {
+				top: map.y + 44 + 10,
+				bottom: map.y + map.height - 26 - 10,
+				left: map.x + 48 + 10,
+				right: map.x + map.width - 250 - 10
 			};
-			await expect
-				.poll(async () => (await legend())[vertical as 'top' | 'bottom'])
-				.toBeCloseTo(vertical === 'top' ? map.y + 44 + 10 : map.y + map.height - 26 - 10, -1);
-			await expect
-				.poll(async () => (await legend())[horizontal as 'left' | 'right'])
-				.toBeCloseTo(horizontal === 'left' ? map.x + 48 + 10 : map.x + map.width - 250 - 10, -1);
-
-			// the search at the top and the attribution at the bottom are on the other side of the map
-			const other = vertical === 'top' ? search : attribution;
-			const box = (await other.boundingBox())!;
+			const [vertical, horizontal] = position.split('-') as ['top' | 'bottom', 'left' | 'right'];
+			// at most 10px from the edge of the map between the bars, e.g. of the tools
+			await expect.poll(async () => (await box(legendList))[horizontal]).toBeCloseTo(edges[horizontal], -1);
+			const legend = await box(legendList);
+			if (vertical === 'top') {
+				// below the search (top left) or the zoom buttons (top right) of the editor
+				const above = await box(horizontal === 'left' ? search : zoom);
+				expect(above.top).toBeCloseTo(edges.top, -1);
+				expect(legend.top).toBeCloseTo(above.bottom + 10, -1);
+			} else {
+				expect(legend.bottom).toBeCloseTo(edges.bottom, -1);
+			}
+			// the zoom buttons stay at the top right; the attribution is in the other bottom corner
+			expect((await box(zoom)).right).toBeCloseTo(edges.right, -1);
 			const middle = map.x + map.width / 2;
-			if (horizontal === 'left') expect(box.x).toBeGreaterThan(middle);
-			else expect(box.x + box.width).toBeLessThan(middle);
-
-			// the buttons for zooming at the right, left of the sidebar: at the top, unless the legend
-			// or the search is there
-			const zoom = (await page
-				.locator('.maplibregl-ctrl-group')
-				.filter({ has: zoomIn(page) })
-				.boundingBox())!;
-			expect(zoom.x + zoom.width).toBeCloseTo(map.x + map.width - 250 - 10, -1);
-			if (vertical === 'top') expect(zoom.y + zoom.height).toBeCloseTo(map.y + map.height - 26 - 10, -1);
-			else expect(zoom.y).toBeCloseTo(map.y + 44 + 10, -1);
+			const a = await box(attribution);
+			if (position === 'bottom-left') expect(a.left).toBeGreaterThan(middle);
+			else expect(a.right).toBeLessThan(middle);
 		});
 	}
 });
