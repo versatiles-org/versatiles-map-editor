@@ -339,9 +339,15 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await page.mouse.click(x + 6, y - 8);
 	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeVisible();
 
+	// the button of the top bar is "Preview" in the editor and "Editor" in the preview
 	const button = page.getByRole('button', { name: 'Preview' });
+	const back = page.getByRole('button', { name: 'Editor' });
 	await button.click();
-	await expect(button).toHaveAttribute('aria-pressed', 'true');
+	await expect(back).toBeVisible();
+	await expect(button).toHaveCount(0);
+	// measured again for its new text: as wide as whole pixels, and the text fits
+	const size = () => back.evaluate((b) => [b.getBoundingClientRect().width % 1, b.scrollWidth - b.clientWidth]);
+	await expect.poll(size).toStrictEqual([0, 0]);
 	const preview = page.frameLocator('iframe[title="Preview of the shared map"]');
 	await expect(preview.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 	await expect
@@ -367,9 +373,9 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await expect.poll(async () => (await storedState(page)).elements).toHaveLength(1);
 
 	// it follows the changes of the map
-	await button.focus();
+	await back.focus();
 	await page.locator('body').press('Escape');
-	await expect(button).toHaveAttribute('aria-pressed', 'false');
+	await expect(button).toBeVisible();
 	await expect(page.getByRole('button', { name: 'Duplicate' })).toBeVisible();
 	await page.getByRole('button', { name: 'Delete' }).click();
 	await button.click();
@@ -388,7 +394,7 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await expect.poll(async () => (await storedState(page)).elements).toHaveLength(1);
 
 	// back to the editor, which kept its selection
-	await button.click();
+	await back.click();
 	await expect(page.locator('iframe[title="Preview of the shared map"]')).toHaveCount(0);
 });
 

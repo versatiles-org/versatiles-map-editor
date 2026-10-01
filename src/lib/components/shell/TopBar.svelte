@@ -32,6 +32,8 @@
 	let preview: HTMLButtonElement | undefined = $state();
 	let share: HTMLButtonElement | undefined = $state();
 	$effect(() => {
+		// measured again when the text of "Preview" changes to "Editor" and back
+		void previewing;
 		const stops = [title, preview, share].flatMap((element) => (element ? [wholeWidth(element)] : []));
 		return () => stops.forEach((stop) => stop());
 	});
@@ -60,9 +62,9 @@
 		bind:element={preview}
 		class="whole"
 		size="md"
-		aria-pressed={previewing}
 		title={previewing ? 'Back to editing (Escape)' : 'The map as visitors see it'}
-		onclick={() => (previewing = !previewing)}><Icon name="preview" size={16} />Preview</Button
+		onclick={() => (previewing = !previewing)}
+		>{#if previewing}<Icon name="edit" size={16} />Editor{:else}<Icon name="preview" size={16} />Preview{/if}</Button
 	>
 	<Button bind:element={share} class="whole" variant="primary" size="md" onclick={() => dialogShare?.open()}
 		><Icon name="share" size={16} />Share</Button
