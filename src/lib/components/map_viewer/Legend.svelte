@@ -11,6 +11,7 @@
 		return parseColor(color)?.alpha ?? 1;
 	}
 	import type { Box } from '$lib/rendering/index.js';
+	import { capCenterShift, measureLine } from './cap_center.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
@@ -76,6 +77,23 @@
 		});
 	}
 
+	// The texts move so that the middle of their capitals is the middle of their symbol or swatch:
+	// a line centers the whole height of the font, whose capitals are not in its middle. All texts
+	// have the same font, so the first one is measured.
+	let shift = $state(0);
+	$effect(() => {
+		void [legend.font, legend.bold, legend.italic, element];
+		if (!element) return;
+		const measure = () => {
+			const text = element?.querySelector<HTMLElement>('.text');
+			const line = text && measureLine(text, shift);
+			shift = line ? Math.round(capCenterShift(line) * 4) / 4 : 0;
+		};
+		measure();
+		// again once a web font is loaded
+		void document.fonts?.ready.then(measure);
+	});
+
 	const symbolSize = 18;
 	// twice the pixels of the screen, which the browser scales down to smooth edges
 	const resolution = 2 * (window.devicePixelRatio || 1);
@@ -135,7 +153,9 @@
 					<span class="swatch" style:background-color={entry.color}></span>
 				{/if}
 				<!-- the text in the same color as its symbol or swatch -->
-				<span class="text" style:color={entry.color}>{entry.label}</span>
+				<span class="text" style:color={entry.color} style:translate={shift ? `0 ${shift}px` : undefined}
+					>{entry.label}</span
+				>
 			</div>
 		{/each}
 	</div>

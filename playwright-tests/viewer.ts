@@ -531,3 +531,61 @@ test('with many labels, the marker in front keeps its label where labels overlap
 	// the label of the marker behind moves to another side, if there is room
 	await expect.poll(shown).toContain('Red in front');
 });
+
+// The middle of the capitals of each text is the middle of its symbol or swatch, measured in the
+// pixels, at four times the resolution of the screen
+test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
+	test.use({ deviceScaleFactor: 4 });
+
+	test('are centered on their symbols and swatches', async ({ page }) => {
+		const entries = [
+			{ color: '#0072b2', label: 'HHHH' },
+			{ color: '#d55e00', label: 'HHHH', symbol: 'icons:anchor' }
+		];
+		for (const font of ['sans-serif', 'serif', 'monospace'] as const) {
+			for (const layout of ['vertical', 'horizontal', 'inline'] as const) {
+				const legend = { font, layout, bold: font === 'serif', entries };
+				await page.goto(
+					'/view#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] })
+				);
+				await waitForMapIsReady(page);
+				const rows = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
+				for (const [i, kind] of ['swatch', 'symbol'].entries()) {
+					const row = rows.nth(i);
+					const box = (await row.boundingBox())!;
+					const mark = (await row.locator('canvas, .swatch').boundingBox())!;
+					const png = await row.screenshot();
+					// the rows of pixels with ink: of the symbol or swatch, and of the text right of it
+					const [ink, text] = await page.evaluate(
+						async ([base64, split]) => {
+							const image = new Image();
+							image.src = 'data:image/png;base64,' + base64;
+							await image.decode();
+							const canvas = new OffscreenCanvas(image.width, image.height);
+							const context = canvas.getContext('2d')!;
+							context.drawImage(image, 0, 0);
+							const { data, width, height } = context.getImageData(0, 0, image.width, image.height);
+							const rows = (from: number, to: number) => {
+								const found: number[] = [];
+								for (let y = 0; y < height; y++) {
+									for (let x = from; x < to; x++) {
+										const k = (y * width + x) * 4;
+										if (data[k] + data[k + 1] + data[k + 2] < 500) {
+											found.push(y);
+											break;
+										}
+									}
+								}
+								return [Math.min(...found), Math.max(...found) + 1];
+							};
+							return [rows(0, split), rows(split, width)];
+						},
+						[png.toString('base64'), Math.round((mark.x + mark.width - box.x) * 4)] as const
+					);
+					const middle = ([top, bottom]: number[]) => (top + bottom) / 2 / 4;
+					expect(Math.abs(middle(text) - middle(ink)), `${kind}, ${font}, ${layout}`).toBeLessThanOrEqual(0.6);
+				}
+			}
+		}
+	});
+});
