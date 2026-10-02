@@ -14,10 +14,10 @@ describe('Legend', () => {
 
 	it('shows the text of each entry in exactly the color of its symbol or swatch', () => {
 		const entries = [
-			{ type: 'polygon' as const, style: { color: '#0072b2' }, label: 'Blue' },
-			{ type: 'polygon' as const, style: { color: '#d55e0080' }, label: 'Translucent orange' },
-			{ type: 'polygon' as const, style: { color: '#e69f00' }, label: 'Yellow' },
-			{ type: 'polygon' as const, style: { color: '#ffffff' }, label: 'White' }
+			{ type: 'marker' as const, style: { color: '#0072b2', symbol: '' }, label: 'Blue' },
+			{ type: 'marker' as const, style: { color: '#d55e0080', symbol: '' }, label: 'Translucent orange' },
+			{ type: 'marker' as const, style: { color: '#e69f00', symbol: '' }, label: 'Yellow' },
+			{ type: 'marker' as const, style: { color: '#ffffff', symbol: '' }, label: 'White' }
 		];
 		const library = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map);
 		component = mount(Legend, {

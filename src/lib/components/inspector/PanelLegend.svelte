@@ -1,7 +1,18 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { SYMBOL_DEFAULTS, type StateLegend, type StateLegendEntry, type StateViewer } from '@versatiles/map-state';
+	import {
+		FILL_DEFAULTS,
+		formatHex,
+		LINE_DEFAULTS,
+		parseColor,
+		removeDefaultFields,
+		SYMBOL_DEFAULTS,
+		type StateLegend,
+		type StateLegendEntry,
+		type StateStyle,
+		type StateViewer
+	} from '@versatiles/map-state';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -17,6 +28,8 @@
 	import { addLegendEntry } from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import InspectorSection from './InspectorSection.svelte';
+	import StyleFill from './StyleFill.svelte';
+	import StyleStroke from './StyleStroke.svelte';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
@@ -58,21 +71,98 @@
 		update({ entries: legend.entries.map((entry, i) => (i === index ? { ...entry, ...change } : entry)) });
 	}
 
-	/** The color of an entry's style. */
-	const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
-	/** The symbol of a marker entry, "" for others. */
-	const symbolOf = (entry: StateLegendEntry) =>
-		entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : '';
+	const TYPES: { value: StateLegendEntry['type']; label: string }[] = [
+		{ value: 'marker', label: 'Marker' },
+		{ value: 'line', label: 'Line' },
+		{ value: 'polygon', label: 'Area' }
+	];
 
-	/** A marker with the symbol, or without one ("") an area of the entry's color without an outline. */
-	function setSymbol(index: number, symbol: string) {
-		const { label } = legend.entries[index];
-		const color = colorOf(legend.entries[index]);
-		const entry: StateLegendEntry = symbol
-			? { type: 'marker', style: { color, symbol }, label }
-			: { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label };
-		update({ entries: legend.entries.map((e, i) => (i === index ? entry : e)) });
+	/** The main color of an entry: of its symbol, its line or its area. */
+	const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
+
+	/**
+	 * Another type for the entry, in its color: a marker with the default symbol, a line, or an area
+	 * without an outline, as a new entry is.
+	 */
+	function setType(index: number, type: StateLegendEntry['type']) {
+		const entry = legend.entries[index];
+		if (type === entry.type) return;
+		const style = { color: colorOf(entry) };
+		const changed: StateLegendEntry =
+			type === 'polygon'
+				? { type, style, strokeStyle: { visible: false }, label: entry.label }
+				: { type, style, label: entry.label };
+		update({ entries: legend.entries.map((e, i) => (i === index ? changed : e)) });
 		log();
+	}
+
+	/**
+	 * Draw the outline of an area entry, or not. An outline without a color of its own gets the
+	 * color of the fill, opaque, instead of the default red.
+	 */
+	function setOutline(index: number, visible: boolean) {
+		const entry = legend.entries[index];
+		const outline = entryStyle(index, 'strokeStyle', LINE_DEFAULTS);
+		if (visible && !entry.strokeStyle?.color) {
+			const fill = parseColor(colorOf(entry));
+			if (fill) outline.color = formatHex({ ...fill, alpha: 1 });
+		}
+		outline.visible = visible;
+		log();
+	}
+
+	/** The entry with the style (`style` or `strokeStyle`), without it if it is undefined. */
+	function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style: StateStyle | undefined) {
+		const result = { ...entry };
+		if (style) result[key] = style;
+		else delete result[key];
+		return result;
+	}
+
+	/**
+	 * A style of an entry with the properties of the style of an element (see StyleFill and
+	 * StyleStroke), which edit it like that of an element: a field that gets its default is left out.
+	 */
+	function entryStyle(index: number, key: 'style' | 'strokeStyle', defaults: StateStyle) {
+		const get = () => ({ ...defaults, ...legend.entries[index]?.[key] });
+		const set = (field: keyof StateStyle, value: unknown) => {
+			const entry = legend.entries[index];
+			const style = removeDefaultFields({ ...get(), [field]: value }, defaults);
+			update({ entries: legend.entries.map((e, i) => (i === index ? withStyle(entry, key, style) : e)) });
+		};
+		return {
+			get color() {
+				return get().color!;
+			},
+			set color(value: string) {
+				set('color', value);
+			},
+			get pattern() {
+				return get().pattern!;
+			},
+			set pattern(value: number) {
+				set('pattern', value);
+			},
+			// the name of the pattern of lines in LineStyle
+			get dashed() {
+				return get().pattern!;
+			},
+			set dashed(value: number) {
+				set('pattern', value);
+			},
+			get width() {
+				return get().width!;
+			},
+			set width(value: number) {
+				set('width', value);
+			},
+			get visible() {
+				return get().visible !== false;
+			},
+			set visible(value: boolean) {
+				set('visible', value);
+			}
+		};
 	}
 
 	function removeEntry(index: number) {
@@ -257,21 +347,52 @@
 								onchange={log}
 							/>
 						</InputRow>
-						<InputRow id="{uid}-{i}-color" label="Color">
-							<ColorPicker
-								id="{uid}-{i}-color"
-								bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
-								onchange={log}
-								palette={doc.colors}
+						<InputRow id="{uid}-{i}-type" label="Shows" group>
+							<ChoiceGroup
+								labelledby="{uid}-{i}-type-label"
+								value={entry.type}
+								onchange={(type) => setType(i, type)}
+								options={TYPES}
 							/>
 						</InputRow>
-						<InputRow id="{uid}-{i}-symbol" label="Symbol">
-							<SymbolSelector
-								id="{uid}-{i}-symbol"
-								noneLabel="Color only"
-								bind:symbol={() => symbolOf(entry), (symbol) => setSymbol(i, symbol)}
-							/>
-						</InputRow>
+						<!-- the controls of the style of an element of the type -->
+						{#if entry.type === 'marker'}
+							<InputRow id="{uid}-{i}-symbol" label="Symbol">
+								<SymbolSelector
+									id="{uid}-{i}-symbol"
+									bind:symbol={
+										() => entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol,
+										(symbol) => {
+											updateEntry(i, { style: { ...entry.style, symbol: symbol ?? '' } });
+											log();
+										}
+									}
+								/>
+							</InputRow>
+							<InputRow id="{uid}-{i}-color" label="Color">
+								<ColorPicker
+									id="{uid}-{i}-color"
+									bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
+									onchange={log}
+									palette={doc.colors}
+								/>
+							</InputRow>
+						{:else if entry.type === 'line'}
+							<StyleStroke layers={[entryStyle(i, 'style', LINE_DEFAULTS)]} {doc} />
+						{:else}
+							{@const outline = entryStyle(i, 'strokeStyle', LINE_DEFAULTS)}
+							<StyleFill layers={[entryStyle(i, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />
+							<InputRow id="{uid}-{i}-outline" label="Outline">
+								<Checkbox
+									id="{uid}-{i}-outline"
+									checked={outline.visible}
+									onchange={(e) => setOutline(i, e.currentTarget.checked)}
+								/>
+							</InputRow>
+							{#if outline.visible}
+								<StyleStroke layers={[outline]} {doc} colorLabel="Outline color" />
+							{/if}
+						{/if}
 						<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
 					</fieldset>
 				</div>
@@ -315,6 +436,8 @@
 	}
 
 	.entry {
+		/* not as wide as its widest content, as fieldsets are by default (e.g. in Firefox) */
+		min-width: 0;
 		margin: 0;
 		padding: 0 var(--space-3) var(--space-3);
 		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);

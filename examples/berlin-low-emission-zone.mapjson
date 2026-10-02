@@ -21,14 +21,14 @@
 			"entries": [
 				{
 					"type": "polygon",
-					"style": { "color": "#0072b2" },
-					"strokeStyle": { "visible": false },
+					"style": { "color": "#0072b24d", "pattern": 2 },
+					"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 					"label": "Low-emission zone, inside the S-Bahn ring"
 				},
 				{
 					"type": "polygon",
-					"style": { "color": "#009e73" },
-					"strokeStyle": { "visible": false },
+					"style": { "color": "#009e734d" },
+					"strokeStyle": { "color": "#009e73" },
 					"label": "Large parks"
 				}
 			]

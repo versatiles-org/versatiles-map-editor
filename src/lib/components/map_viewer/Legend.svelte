@@ -7,17 +7,12 @@
 	import { parseColor, SYMBOL_DEFAULTS } from '@versatiles/map-state';
 
 	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
-	/** The color of an entry, and its symbol if it is a marker ("" for a swatch). */
-	function shownAs(entry: StateLegendEntry): { color: string; symbol: string } {
-		const color = entry.style?.color ?? SYMBOL_DEFAULTS.color;
-		return { color, symbol: entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : '' };
-	}
-
 	function opacityOf(color: string): number {
 		return parseColor(color)?.alpha ?? 1;
 	}
 	import type { Box } from '$lib/rendering/index.js';
 	import { capCenterShift, measureLine } from './cap_center.js';
+	import { drawArea, drawLine, MARK_HEIGHT, MARK_WIDTH, textColor } from './legend_marks.js';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
@@ -105,6 +100,14 @@
 	const resolution = 2 * (window.devicePixelRatio || 1);
 	const symbolLibrary = getSymbolLibrary();
 
+	/** Draw the line or the area of an entry, as on the map. */
+	const drawMark: Action<HTMLCanvasElement, StateLegendEntry> = (canvas, entry) => {
+		const draw = (e: StateLegendEntry) =>
+			e.type === 'line' ? drawLine(canvas, e.style) : drawArea(canvas, e.style, e.strokeStyle);
+		draw(entry);
+		return { update: draw };
+	};
+
 	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {
 		const draw = (p: { symbol: string; color: string }) => {
 			canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
@@ -144,23 +147,39 @@
 		aria-label="Legend"
 	>
 		{#each legend.entries as entry, i (i)}
-			{@const { color, symbol } = shownAs(entry)}
+			{@const color = entry.style?.color ?? SYMBOL_DEFAULTS.color}
+			{@const symbol = entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : ''}
 			<div class="entry" role="listitem">
-				{#if symbol}
-					<canvas
-						class="symbol"
-						width={symbolSize * resolution}
-						height={symbolSize * resolution}
-						style:width="{symbolSize}px"
-						style:height="{symbolSize}px"
-						style:opacity={opacityOf(color)}
-						use:drawSymbol={{ symbol, color }}
-					></canvas>
-				{:else}
-					<span class="swatch" style:background-color={color}></span>
-				{/if}
-				<!-- the text in the same color as its symbol or swatch -->
-				<span class="text" style:color style:translate={shift ? `0 ${shift}px` : undefined}>{entry.label}</span>
+				<!-- a small copy of the element: its symbol, its line or its area -->
+				<span class="mark">
+					{#if entry.type !== 'marker'}
+						<canvas
+							width={MARK_WIDTH * resolution}
+							height={MARK_HEIGHT * resolution}
+							style:width="{MARK_WIDTH}px"
+							style:height="{MARK_HEIGHT}px"
+							use:drawMark={entry}
+						></canvas>
+					{:else if symbol}
+						<canvas
+							class="symbol"
+							width={symbolSize * resolution}
+							height={symbolSize * resolution}
+							style:width="{symbolSize}px"
+							style:height="{symbolSize}px"
+							style:opacity={opacityOf(color)}
+							style:rotate={entry.style?.rotate ? `${entry.style.rotate}deg` : undefined}
+							use:drawSymbol={{ symbol, color }}
+						></canvas>
+					{:else}
+						<!-- a marker without a symbol -->
+						<span class="swatch" style:background-color={color}></span>
+					{/if}
+				</span>
+				<!-- the text in the color of its symbol, line or area -->
+				<span class="text" style:color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}
+					>{entry.label}</span
+				>
 			</div>
 		{/each}
 	</div>
@@ -255,6 +274,14 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
+	}
+
+	.mark {
+		display: grid;
+		flex-shrink: 0;
+		place-items: center;
+		width: 28px;
+		height: 18px;
 	}
 
 	.swatch {

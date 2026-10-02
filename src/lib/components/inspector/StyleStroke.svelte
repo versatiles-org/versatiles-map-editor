@@ -5,8 +5,20 @@
 	import { InputRow, ChoiceGroup, Slider } from '$lib/components/ui/index.js';
 	import { ColorPicker } from '$lib/components/pickers/index.js';
 
-	/** The line layers of all selected elements, which are edited together. */
-	const { layers, doc }: { layers: LineStyle[]; doc: MapDocumentInteractive } = $props();
+	/**
+	 * The line layers of all selected elements, which are edited together; or anything with these
+	 * properties, e.g. the style of a legend entry.
+	 */
+	const {
+		layers,
+		doc,
+		colorLabel = 'Color'
+	}: {
+		layers: Pick<LineStyle, 'color' | 'width' | 'dashed'>[];
+		doc: MapDocumentInteractive;
+		/** The name of the color, e.g. "Outline color" next to the color of a fill. */
+		colorLabel?: string;
+	} = $props();
 	const uid = $props.id();
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
@@ -21,7 +33,7 @@
 	}
 </script>
 
-<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
+<InputRow id="{uid}-color" label={colorLabel} mixed={color.mixed}>
 	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 

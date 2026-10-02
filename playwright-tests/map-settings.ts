@@ -481,7 +481,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 
 test('rearranging the entries of the legend', { tag: '@cross-browser' }, async ({ page }) => {
 	// tall enough for all entries in the sidebar, for the mouse to reach them
-	await page.setViewportSize({ width: 1280, height: 1100 });
+	await page.setViewportSize({ width: 1280, height: 1600 });
 	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
 		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
@@ -529,6 +529,63 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
 });
 
+test(
+	'legend entries show a marker, a line or an area, styled like elements',
+	{ tag: '@cross-browser' },
+	async ({ page }) => {
+		await page.setViewportSize({ width: 1280, height: 1100 });
+		const entries = [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'A' }];
+		await page.goto(
+			'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+		);
+		await waitForMapIsReady(page);
+		await page.getByRole('button', { name: 'Edit legend' }).click();
+		const entry = page.getByRole('group', { name: 'Entry 1' });
+		const stored = async () => (await storedState(page)).meta?.legend?.entries[0];
+		const mark = page.getByRole('list', { name: 'Legend' }).getByRole('listitem').locator('.mark canvas');
+		/** How many pixels of the mark are drawn, at the resolution of the canvas. */
+		const inked = () =>
+			mark.evaluate((canvas: HTMLCanvasElement) => {
+				const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+				let count = 0;
+				for (let i = 3; i < data.length; i += 4) if (data[i] > 128) count++;
+				return count;
+			});
+
+		// a line in the color of the marker, dotted, thicker
+		await entry.getByRole('radio', { name: 'Line' }).check();
+		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff' }, label: 'A' });
+		await expect.poll(inked).toBeGreaterThan(0);
+		const solid = await inked();
+		await entry.getByRole('radio', { name: 'dotted' }).check();
+		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff', pattern: 2 }, label: 'A' });
+		// dots, with gaps between them
+		await expect.poll(inked).toBeLessThan(solid * 0.8);
+		await entry.getByRole('spinbutton', { name: 'Width' }).fill('3');
+		await entry.getByRole('spinbutton', { name: 'Width' }).press('Enter');
+		await expect.poll(async () => (await stored())?.style?.width).toBe(3);
+
+		// an area without an outline, then with one in the color of the fill
+		await entry.getByRole('radio', { name: 'Area' }).check();
+		await expect
+			.poll(stored)
+			.toStrictEqual({ type: 'polygon', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
+		await entry.getByRole('radio', { name: 'diagonal', exact: true }).check();
+		await entry.getByRole('checkbox', { name: 'Outline' }).check();
+		await expect.poll(stored).toStrictEqual({
+			type: 'polygon',
+			style: { color: '#0000ff', pattern: 1 },
+			strokeStyle: { color: '#0000ff' },
+			label: 'A'
+		});
+		await expect(entry.getByRole('button', { name: /^Outline color/ })).toBeVisible();
+
+		// each change is one undo step: the outline is gone again
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(async () => (await stored())?.strokeStyle).toStrictEqual({ visible: false });
+	}
+);
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];
@@ -568,14 +625,15 @@ test('editing the legend', async ({ page }) => {
 	await page.getByRole('textbox', { name: 'Text' }).press('Enter');
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park']);
 
-	// a second entry with a blue symbol
+	// a second entry, a marker with a blue symbol: a new entry is an area, which keeps its color
 	await page.getByRole('button', { name: 'Add legend entry' }).click();
 	const entry = page.getByRole('group', { name: 'Entry 2' });
 	await entry.getByRole('textbox', { name: 'Text' }).fill('Cafe');
 	await entry.getByRole('textbox', { name: 'Text' }).press('Enter');
-	await entry.getByRole('button', { name: /^Color/ }).click();
+	await entry.getByRole('button', { name: /^Fill color/ }).click();
 	await entry.getByLabel('Hex').fill('#0000ff');
 	await entry.getByLabel('Hex').press('Enter');
+	await entry.getByRole('radio', { name: 'Marker' }).check();
 	await entry.getByRole('button', { name: /^Symbol/ }).click();
 	await page.getByRole('button', { name: 'Café', exact: true }).click();
 
@@ -599,7 +657,8 @@ test('editing the legend', async ({ page }) => {
 		]
 	});
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park', 'Cafe']);
-	await expect(overlay.locator('canvas')).toHaveCount(1);
+	// the symbol of the marker, the area drawn
+	await expect(overlay.locator('canvas.symbol')).toHaveCount(1);
 	await page.screenshot({ path: 'test-results/legend.png' });
 
 	// shown in the read-only viewer

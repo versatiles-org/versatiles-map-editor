@@ -102,7 +102,7 @@ test('overlays of the editor are above what they open over', async ({ page }) =>
 	});
 
 	await test.step('the bar of the drawing is above the map overlays', async () => {
-		await page.locator('.map canvas').focus();
+		await page.locator('.map canvas.maplibregl-canvas').focus();
 		await page.keyboard.press('l');
 		await expect(page.getByRole('group', { name: 'Drawing' })).toBeVisible();
 		await expectOnTop(page.getByRole('group', { name: 'Drawing' }).getByRole('button'));

@@ -5,8 +5,20 @@
 	import { InputRow, ChoiceGroup } from '$lib/components/ui/index.js';
 	import { ColorPicker } from '$lib/components/pickers/index.js';
 
-	/** The fill layers of all selected elements, which are edited together. */
-	const { layers, doc }: { layers: FillStyle[]; doc: MapDocumentInteractive } = $props();
+	/**
+	 * The fill layers of all selected elements, which are edited together; or anything with these
+	 * properties, e.g. the style of a legend entry.
+	 */
+	const {
+		layers,
+		doc,
+		colorLabel = 'Color'
+	}: {
+		layers: Pick<FillStyle, 'color' | 'pattern'>[];
+		doc: MapDocumentInteractive;
+		/** The name of the color, e.g. "Fill color" next to the color of an outline. */
+		colorLabel?: string;
+	} = $props();
 	const uid = $props.id();
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
@@ -16,7 +28,7 @@
 	const stripes = [0, 2.5, 1];
 </script>
 
-<InputRow label="Color" id="{uid}-color" mixed={color.mixed}>
+<InputRow label={colorLabel} id="{uid}-color" mixed={color.mixed}>
 	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
