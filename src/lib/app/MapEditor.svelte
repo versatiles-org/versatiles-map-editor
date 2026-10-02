@@ -103,8 +103,8 @@
 	}
 
 	/** A click on the legend selects it in the editor, to edit it. */
-	function selectLegend() {
-		if (mapDocument?.isInteractive()) mapDocument.selection.selectLegend();
+	function selectLegend(entry?: number) {
+		if (mapDocument?.isInteractive()) mapDocument.selection.selectLegend(true, entry);
 	}
 </script>
 

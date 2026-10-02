@@ -1,18 +1,12 @@
 <script lang="ts">
-	import type { Action } from 'svelte/action';
-	import type { StateLegend, StateLegendEntry, LEGEND_POSITIONS } from '@versatiles/map-state';
+	import type { StateLegend, LEGEND_POSITIONS } from '@versatiles/map-state';
 
 	type LegendPosition = (typeof LEGEND_POSITIONS)[number];
-	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { parseColor, SYMBOL_DEFAULTS } from '@versatiles/map-state';
 
-	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
-	function opacityOf(color: string): number {
-		return parseColor(color)?.alpha ?? 1;
-	}
 	import type { Box } from '$lib/rendering/index.js';
 	import { capCenterShift, measureLine } from './cap_center.js';
-	import { drawArea, drawLine, MARK_HEIGHT, MARK_WIDTH, textColor } from './legend_marks.js';
+	import { textColor } from './legend_marks.js';
+	import LegendMark from './LegendMark.svelte';
 
 	/** The legend over the map, in the editor and in the viewer. `left` and `right` keep it clear of the bars. */
 	/** `top` and `bottom` keep it clear of e.g. the search and the attribution. */
@@ -44,7 +38,8 @@
 		top?: number;
 		bottom?: number;
 		selected?: boolean;
-		onselect?: () => void;
+		/** A click on it, with the index of the clicked entry, if one was clicked. */
+		onselect?: (entry?: number) => void;
 		width?: number;
 		height?: number;
 		inCorner?: boolean;
@@ -94,32 +89,6 @@
 		// again once a web font is loaded
 		void document.fonts?.ready.then(measure);
 	});
-
-	const symbolSize = 18;
-	// twice the pixels of the screen, which the browser scales down to smooth edges
-	const resolution = 2 * (window.devicePixelRatio || 1);
-	const symbolLibrary = getSymbolLibrary();
-
-	/** Draw the line or the area of an entry, as on the map. */
-	const drawMark: Action<HTMLCanvasElement, StateLegendEntry> = (canvas, entry) => {
-		const draw = (e: StateLegendEntry) =>
-			e.type === 'line' ? drawLine(canvas, e.style) : drawArea(canvas, e.style, e.strokeStyle);
-		draw(entry);
-		return { update: draw };
-	};
-
-	const drawSymbol: Action<HTMLCanvasElement, { symbol: string; color: string }> = (canvas, params) => {
-		const draw = (p: { symbol: string; color: string }) => {
-			canvas.getContext('2d')?.clearRect(0, 0, canvas.width, canvas.height);
-			// the shape fills the canvas
-			symbolLibrary.drawSymbol(canvas, p.symbol, {
-				color: p.color,
-				crop: true
-			});
-		};
-		draw(params);
-		return { update: draw };
-	};
 </script>
 
 {#if legend.entries.length > 0}
@@ -132,7 +101,10 @@
 		style:--max-width={maxWidth === undefined ? undefined : `${maxWidth}px`}
 		style:--max-height={maxHeight === undefined ? undefined : `${maxHeight}px`}
 		class:selected
-		onclick={onselect}
+		onclick={(e) => {
+			const entry = (e.target as Element).closest<HTMLElement>('.entry')?.dataset.index;
+			onselect?.(entry === undefined ? undefined : Number(entry));
+		}}
 		style:--left="{left}px"
 		style:--sidebar="{right}px"
 		style:--top="{top}px"
@@ -147,35 +119,9 @@
 		aria-label="Legend"
 	>
 		{#each legend.entries as entry, i (i)}
-			{@const color = entry.style?.color ?? SYMBOL_DEFAULTS.color}
-			{@const symbol = entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : ''}
-			<div class="entry" role="listitem">
+			<div class="entry" role="listitem" data-index={i}>
 				<!-- a small copy of the element: its symbol, its line or its area -->
-				<span class="mark">
-					{#if entry.type !== 'marker'}
-						<canvas
-							width={MARK_WIDTH * resolution}
-							height={MARK_HEIGHT * resolution}
-							style:width="{MARK_WIDTH}px"
-							style:height="{MARK_HEIGHT}px"
-							use:drawMark={entry}
-						></canvas>
-					{:else if symbol}
-						<canvas
-							class="symbol"
-							width={symbolSize * resolution}
-							height={symbolSize * resolution}
-							style:width="{symbolSize}px"
-							style:height="{symbolSize}px"
-							style:opacity={opacityOf(color)}
-							style:rotate={entry.style?.rotate ? `${entry.style.rotate}deg` : undefined}
-							use:drawSymbol={{ symbol, color }}
-						></canvas>
-					{:else}
-						<!-- a marker without a symbol -->
-						<span class="swatch" style:background-color={color}></span>
-					{/if}
-				</span>
+				<LegendMark {entry} />
 				<!-- the text in the color of its symbol, line or area -->
 				<span class="text" style:color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}
 					>{entry.label}</span
@@ -274,25 +220,5 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-	}
-
-	.mark {
-		display: grid;
-		flex-shrink: 0;
-		place-items: center;
-		width: 28px;
-		height: 18px;
-	}
-
-	.swatch {
-		flex-shrink: 0;
-		width: 14px;
-		height: 14px;
-		border-radius: 2px;
-		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
-	}
-
-	.symbol {
-		flex-shrink: 0;
 	}
 </style>

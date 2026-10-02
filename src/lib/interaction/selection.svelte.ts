@@ -39,10 +39,20 @@ export class SelectionHandler {
 		return this.#legendSelected;
 	}
 
-	/** Select the legend instead of the elements, or deselect it. */
-	public selectLegend(selected = true) {
+	/**
+	 * The entry of the legend that was clicked last on the map, e.g. to show it in the inspector; a
+	 * new object for each click, also on the same entry.
+	 */
+	public get legendEntry(): { index: number } | undefined {
+		return this.#legendEntry;
+	}
+	#legendEntry: { index: number } | undefined = $state.raw();
+
+	/** Select the legend instead of the elements, or deselect it; `entry`: the index of a clicked entry. */
+	public selectLegend(selected = true, entry?: number) {
 		if (selected) this.selectElements([]);
 		this.#legendSelected = selected;
+		if (selected && entry !== undefined) this.#legendEntry = { index: entry };
 	}
 
 	private selectedNodeIndex: number | undefined;

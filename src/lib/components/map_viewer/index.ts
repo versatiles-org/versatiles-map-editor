@@ -4,5 +4,6 @@
  * components of this folder import each other directly, others import from here.
  */
 export { default as Legend } from './Legend.svelte';
+export { default as LegendMark } from './LegendMark.svelte';
 export { default as LoadingIndicator } from './LoadingIndicator.svelte';
 export { default as SearchPlace } from './SearchPlace.svelte';

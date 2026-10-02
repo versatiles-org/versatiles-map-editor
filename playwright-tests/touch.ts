@@ -241,6 +241,7 @@ test('taking the style of an element for a legend entry with a tap', async ({ pa
 	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();
+	await page.getByRole('button', { name: 'Open entry 1' }).tap();
 	await page.getByRole('button', { name: /Take style from/ }).tap();
 	// a finger may be a bit off the line
 	const [x, y] = await project(page, onLine);

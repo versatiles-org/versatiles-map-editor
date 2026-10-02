@@ -531,8 +531,9 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 	await page.getByRole('button', { name: 'Edit legend' }).click();
 	const order = async () => (await storedState(page)).meta?.legend?.entries.map((e) => e.label);
 	const overlay = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
+	for (const n of [1, 2, 3]) await page.getByRole('button', { name: `Open entry ${n}` }).click();
 
-	// with the buttons: the focus stays on the button of the moved entry
+	// with the buttons: the focus stays on the button of the moved entry, which stays open
 	await page.getByRole('button', { name: 'Move entry 1 down' }).click();
 	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
 	await expect(page.getByRole('button', { name: 'Move entry 2 down' })).toBeFocused();
@@ -570,6 +571,46 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
 });
 
+test('the entries of the legend are closed, and open to edit them', async ({ page }) => {
+	const entries = ['A', 'B'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+	);
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const entry = (n: number) => page.getByRole('group', { name: `Entry ${n}` });
+	const details = (n: number) => entry(n).getByRole('radiogroup', { name: 'Shows' });
+
+	// closed: the look and the text, which can be edited
+	await expect(details(1)).toBeHidden();
+	await expect(details(2)).toBeHidden();
+	await expect(entry(1).locator('.mark canvas')).toBeVisible();
+	await entry(1).getByRole('textbox', { name: 'Text' }).fill('Parks');
+	await entry(1).getByRole('textbox', { name: 'Text' }).press('Enter');
+	await expect.poll(async () => (await storedState(page)).meta?.legend?.entries[0].label).toBe('Parks');
+
+	// opened and closed again
+	const toggle = entry(2).getByRole('button', { name: 'Open entry 2' });
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await toggle.click();
+	await expect(details(2)).toBeVisible();
+	await expect(entry(2).getByRole('button', { name: 'Close entry 2' })).toHaveAttribute('aria-expanded', 'true');
+	await entry(2).getByRole('button', { name: 'Close entry 2' }).click();
+	await expect(details(2)).toBeHidden();
+
+	// a new entry is open
+	await page.getByRole('button', { name: 'Add legend entry' }).click();
+	await expect(details(3)).toBeVisible();
+	await expect(details(1)).toBeHidden();
+
+	// a click on an entry of the legend on the map opens it
+	await page.keyboard.press('Escape');
+	await page.getByRole('list', { name: 'Legend' }).getByRole('listitem').nth(1).click();
+	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
+	await expect(details(2)).toBeVisible();
+	await expect(details(1)).toBeHidden();
+});
+
 test(
 	'legend entries show a marker, a line or an area, styled like elements',
 	{ tag: '@cross-browser' },
@@ -581,6 +622,7 @@ test(
 		);
 		await waitForMapIsReady(page);
 		await page.getByRole('button', { name: 'Edit legend' }).click();
+		await page.getByRole('button', { name: 'Open entry 1' }).click();
 		const entry = page.getByRole('group', { name: 'Entry 1' });
 		const stored = async () => (await storedState(page)).meta?.legend?.entries[0];
 		const mark = page.getByRole('list', { name: 'Legend' }).getByRole('listitem').locator('.mark canvas');
@@ -671,6 +713,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
+	await page.getByRole('button', { name: 'Open entry 1' }).click();
 	const paste = page.getByRole('group', { name: 'Entry 1' }).getByRole('button', { name: 'Paste style' });
 	// nothing copied yet
 	await expect(paste).toBeDisabled();
@@ -681,6 +724,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 	// back to the map, and to the legend
 	await page.locator('body').press('Escape');
 	await page.getByRole('button', { name: 'Edit legend' }).click();
+	await page.getByRole('button', { name: 'Open entry 1' }).click();
 	await paste.click();
 	await expect
 		.poll(async () => (await storedState(page)).meta?.legend?.entries)
@@ -706,6 +750,7 @@ test(
 		await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 		await waitForMapIsReady(page);
 		await page.getByRole('button', { name: 'Edit legend' }).click();
+		await page.getByRole('button', { name: 'Open entry 1' }).click();
 		const take = page.getByRole('group', { name: 'Entry 1' }).getByRole('button', { name: /Take style from/ });
 		const entry = async () => (await storedState(page)).meta?.legend?.entries[0];
 		const cursor = () => page.locator('.maplibregl-canvas-container').evaluate((e: HTMLElement) => e.style.cursor);
@@ -843,7 +888,9 @@ test('editing the legend', async ({ page }) => {
 
 	// without entries, there is no legend
 	await page.getByRole('button', { name: 'Edit legend' }).click();
+	await page.getByRole('button', { name: 'Open entry 2' }).click();
 	await page.getByRole('button', { name: 'Remove entry 2' }).click();
+	await page.getByRole('button', { name: 'Open entry 1' }).click();
 	await page.getByRole('button', { name: 'Remove entry 1' }).click();
 	await expect(overlay).toBeHidden();
 	await expect(inspectorTitle).toHaveText('Map');

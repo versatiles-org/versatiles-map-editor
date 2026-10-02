@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import {
 		FILL_DEFAULTS,
@@ -32,6 +32,7 @@
 		takeStyleForEntry
 	} from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
+	import { LegendMark } from '$lib/components/map_viewer/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
@@ -183,7 +184,40 @@
 		};
 	}
 
+	// Which entries are open, by index: closed at first, a new entry open. The open state moves
+	// with an entry that is moved, and goes with one that is removed.
+	let open: boolean[] = $state([]);
+	let counted = untrack(() => legend.entries.length);
+	$effect(() => {
+		const count = legend.entries.length;
+		untrack(() => {
+			// added (e.g. "Add legend entry"), or fewer (e.g. undo)
+			if (count > counted) for (let i = counted; i < count; i++) open[i] = true;
+			else if (count < counted) open = open.slice(0, count);
+			counted = count;
+		});
+	});
+
+	/** Open or close an entry. */
+	function toggle(index: number) {
+		open[index] = !open[index];
+	}
+
+	// an entry clicked on the map: opened, and scrolled to
+	$effect(() => {
+		const clicked = doc.selection.legendEntry;
+		if (!clicked) return;
+		untrack(() => {
+			open[clicked.index] = true;
+			void tick().then(() =>
+				document.getElementById(`${uid}-${clicked.index}-entry`)?.scrollIntoView({ block: 'nearest' })
+			);
+		});
+	});
+
 	function removeEntry(index: number) {
+		open = open.filter((_, i) => i !== index);
+		counted = legend.entries.length - 1;
 		update({ entries: legend.entries.filter((_, i) => i !== index) });
 		log();
 	}
@@ -194,6 +228,9 @@
 		if (at === from) return from;
 		const entries = legend.entries.filter((_, i) => i !== from);
 		entries.splice(at, 0, legend.entries[from]);
+		const opened = open.filter((_, i) => i !== from);
+		opened.splice(at, 0, open[from] ?? false);
+		open = opened;
 		update({ entries });
 		log();
 		return at;
@@ -333,102 +370,119 @@
 					class:drop-before={dropIndex === i && drag?.index !== i && drag?.index !== i - 1}
 					class:drop-after={dropIndex === legend.entries.length && i === legend.entries.length - 1 && drag?.index !== i}
 				>
-					<fieldset class="entry">
-						<legend>Entry {i + 1}</legend>
-						<!-- to rearrange the entries: drag the handle, or with the buttons, e.g. with the keyboard -->
-						<div class="head">
+					<fieldset class="entry" id="{uid}-{i}-entry">
+						<legend class="visually-hidden">Entry {i + 1}</legend>
+						<!-- closed: the handle to drag it, its look, its text, and the button to open it -->
+						<div class="row">
 							<span class="grip" aria-hidden="true" title="Drag to move" onpointerdown={(e) => onGripDown(e, i)}
 								><Icon name="grip" size={14} /></span
 							>
-							<IconButton
-								id="{uid}-{i}-up"
-								icon="up"
-								size="xs"
-								label="Move entry {i + 1} up"
-								disabled={i === 0}
-								onclick={() => step(i, -1)}
-							/>
-							<IconButton
-								id="{uid}-{i}-down"
-								icon="down"
-								size="xs"
-								label="Move entry {i + 1} down"
-								disabled={i === legend.entries.length - 1}
-								onclick={() => step(i, 1)}
-							/>
-						</div>
-						<InputRow id="{uid}-{i}-label" label="Text">
+							<LegendMark {entry} />
 							<TextField
 								id="{uid}-{i}-label"
+								class="text"
+								aria-label="Text"
 								value={entry.label}
 								oninput={(e) => updateEntry(i, { label: e.currentTarget.value })}
 								onchange={log}
 							/>
-						</InputRow>
-						<InputRow id="{uid}-{i}-type" label="Shows" group>
-							<ChoiceGroup
-								labelledby="{uid}-{i}-type-label"
-								value={entry.type}
-								onchange={(type) => setType(i, type)}
-								options={TYPES}
+							<IconButton
+								icon="chevron"
+								size="xs"
+								class={['toggle', { open: open[i] }]}
+								label="{open[i] ? 'Close' : 'Open'} entry {i + 1}"
+								aria-expanded={open[i] === true}
+								aria-controls={open[i] ? `${uid}-${i}-details` : undefined}
+								onclick={() => toggle(i)}
 							/>
-						</InputRow>
-						<!-- the style of an element, after "Copy style" of the element -->
-						<ButtonGroup>
-							<Button
-								disabled={!canPasteStyleToEntry(doc)}
-								title="The style of an element, copied with “Copy style”"
-								onclick={() => pasteStyleToEntry(doc, i)}>Paste style</Button
-							>
-							<!-- a pipette: the next click on an element of the map; again to cancel -->
-							<Button
-								aria-pressed={picking === i}
-								title="Click an element on the map to take its style"
-								onclick={() => pickStyle(i)}><Icon name="pipette" size={16} />Take style from…</Button
-							>
-						</ButtonGroup>
-						{#if picking === i}
-							<div role="status"><Hint>Click an element on the map to take its style. Escape cancels.</Hint></div>
+						</div>
+						{#if open[i]}
+							<div class="details" id="{uid}-{i}-details">
+								<!-- to rearrange the entries with the buttons, e.g. with the keyboard -->
+								<div class="head">
+									<IconButton
+										id="{uid}-{i}-up"
+										icon="up"
+										size="xs"
+										label="Move entry {i + 1} up"
+										disabled={i === 0}
+										onclick={() => step(i, -1)}
+									/>
+									<IconButton
+										id="{uid}-{i}-down"
+										icon="down"
+										size="xs"
+										label="Move entry {i + 1} down"
+										disabled={i === legend.entries.length - 1}
+										onclick={() => step(i, 1)}
+									/>
+								</div>
+								<InputRow id="{uid}-{i}-type" label="Shows" group>
+									<ChoiceGroup
+										labelledby="{uid}-{i}-type-label"
+										value={entry.type}
+										onchange={(type) => setType(i, type)}
+										options={TYPES}
+									/>
+								</InputRow>
+								<!-- the style of an element, after "Copy style" of the element -->
+								<ButtonGroup>
+									<Button
+										disabled={!canPasteStyleToEntry(doc)}
+										title="The style of an element, copied with “Copy style”"
+										onclick={() => pasteStyleToEntry(doc, i)}>Paste style</Button
+									>
+									<!-- a pipette: the next click on an element of the map; again to cancel -->
+									<Button
+										aria-pressed={picking === i}
+										title="Click an element on the map to take its style"
+										onclick={() => pickStyle(i)}><Icon name="pipette" size={16} />Take style from…</Button
+									>
+								</ButtonGroup>
+								{#if picking === i}
+									<div role="status"><Hint>Click an element on the map to take its style. Escape cancels.</Hint></div>
+								{/if}
+								<!-- the controls of the style of an element of the type -->
+								{#if entry.type === 'marker'}
+									<InputRow id="{uid}-{i}-symbol" label="Symbol">
+										<SymbolSelector
+											id="{uid}-{i}-symbol"
+											bind:symbol={
+												() => entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol,
+												(symbol) => {
+													updateEntry(i, { style: { ...entry.style, symbol: symbol ?? '' } });
+													log();
+												}
+											}
+										/>
+									</InputRow>
+									<InputRow id="{uid}-{i}-color" label="Color">
+										<ColorPicker
+											id="{uid}-{i}-color"
+											bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
+											onchange={log}
+											palette={doc.colors}
+										/>
+									</InputRow>
+								{:else if entry.type === 'line'}
+									<StyleStroke layers={[entryStyle(i, 'style', LINE_DEFAULTS)]} {doc} />
+								{:else}
+									{@const outline = entryStyle(i, 'strokeStyle', LINE_DEFAULTS)}
+									<StyleFill layers={[entryStyle(i, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />
+									<InputRow id="{uid}-{i}-outline" label="Outline">
+										<Checkbox
+											id="{uid}-{i}-outline"
+											checked={outline.visible}
+											onchange={(e) => setOutline(i, e.currentTarget.checked)}
+										/>
+									</InputRow>
+									{#if outline.visible}
+										<StyleStroke layers={[outline]} {doc} colorLabel="Outline color" />
+									{/if}
+								{/if}
+								<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
+							</div>
 						{/if}
-						<!-- the controls of the style of an element of the type -->
-						{#if entry.type === 'marker'}
-							<InputRow id="{uid}-{i}-symbol" label="Symbol">
-								<SymbolSelector
-									id="{uid}-{i}-symbol"
-									bind:symbol={
-										() => entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol,
-										(symbol) => {
-											updateEntry(i, { style: { ...entry.style, symbol: symbol ?? '' } });
-											log();
-										}
-									}
-								/>
-							</InputRow>
-							<InputRow id="{uid}-{i}-color" label="Color">
-								<ColorPicker
-									id="{uid}-{i}-color"
-									bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
-									onchange={log}
-									palette={doc.colors}
-								/>
-							</InputRow>
-						{:else if entry.type === 'line'}
-							<StyleStroke layers={[entryStyle(i, 'style', LINE_DEFAULTS)]} {doc} />
-						{:else}
-							{@const outline = entryStyle(i, 'strokeStyle', LINE_DEFAULTS)}
-							<StyleFill layers={[entryStyle(i, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />
-							<InputRow id="{uid}-{i}-outline" label="Outline">
-								<Checkbox
-									id="{uid}-{i}-outline"
-									checked={outline.visible}
-									onchange={(e) => setOutline(i, e.currentTarget.checked)}
-								/>
-							</InputRow>
-							{#if outline.visible}
-								<StyleStroke layers={[outline]} {doc} colorLabel="Outline color" />
-							{/if}
-						{/if}
-						<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
 					</fieldset>
 				</div>
 			{/each}
@@ -474,23 +528,50 @@
 		/* not as wide as its widest content, as fieldsets are by default (e.g. in Firefox) */
 		min-width: 0;
 		margin: 0;
-		padding: 0 var(--space-3) var(--space-3);
+		padding: var(--space-1) var(--space-2);
 		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
 		border-radius: var(--radius-md);
+	}
 
-		legend {
-			font-size: var(--font-size-sm);
-			opacity: 0.7;
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	/* the closed entry: handle, look, text and the button to open it, in one line */
+	.row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+
+		:global(.text) {
+			flex: 1;
 		}
 	}
 
-	/* the handle and the buttons to move the entry, at its top right */
+	/* the chevron points right when closed, down when open */
+	.row :global(.toggle svg) {
+		transition: rotate 0.1s ease-in-out;
+	}
+	.row :global(.toggle.open svg) {
+		rotate: 90deg;
+	}
+
+	.details {
+		padding: 0 0 var(--space-2);
+	}
+
+	/* the buttons to move the entry, at its top right */
 	.head {
 		display: flex;
 		justify-content: flex-end;
 		align-items: center;
 		gap: var(--space-1);
-		margin-top: calc(-1 * var(--space-2));
+		margin-top: var(--space-1);
 	}
 
 	.grip {

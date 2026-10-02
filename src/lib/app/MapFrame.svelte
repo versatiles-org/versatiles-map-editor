@@ -73,7 +73,8 @@
 		/** Called to mark a place that the search found. */
 		onmark?: (point: [number, number]) => void;
 		/** Called when the legend is clicked, e.g. to edit it. */
-		onselectlegend?: () => void;
+		/** A click on the legend, with the index of the clicked entry, if one was clicked. */
+		onselectlegend?: (entry?: number) => void;
 		/** A hint at the top of the map. */
 		hint?: string;
 		/** Whether this is the editor, which follows the dark mode of the system. */
