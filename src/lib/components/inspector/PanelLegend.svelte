@@ -1,18 +1,7 @@
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import {
-		FILL_DEFAULTS,
-		formatHex,
-		LINE_DEFAULTS,
-		parseColor,
-		removeDefaultFields,
-		SYMBOL_DEFAULTS,
-		type StateLegend,
-		type StateLegendEntry,
-		type StateStyle,
-		type StateViewer
-	} from '@versatiles/map-state';
+	import type { StateLegend, StateViewer } from '@versatiles/map-state';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -24,24 +13,18 @@
 		IconButton,
 		TextField
 	} from '$lib/components/ui/index.js';
-	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
-	import {
-		addLegendEntry,
-		canPasteStyleToEntry,
-		pasteStyleToEntry,
-		takeStyleForEntry
-	} from '$lib/components/commands.js';
+	import { addLegendEntry, takeStyleForEntry } from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import { LegendMark } from '$lib/components/map_viewer/index.js';
 	import { unusedEntries } from '$lib/legend_looks.js';
 	import InspectorSection from './InspectorSection.svelte';
-	import StyleFill from './StyleFill.svelte';
-	import StyleStroke from './StyleStroke.svelte';
+	import LegendEntryDetails from './LegendEntryDetails.svelte';
+	import { legendOf, updateEntry, updateLegend } from './legend_entries.js';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
-	const legend: StateLegend = $derived(doc.legend ?? { entries: [] });
+	const legend: StateLegend = $derived(legendOf(doc));
 	const log = () => doc.state.log();
 	// entries whose style no element has, e.g. after some elements got another style; not on a map without elements
 	const unused = $derived(
@@ -70,15 +53,9 @@
 		{ value: 'monospace', label: 'Mono' }
 	];
 
-	/** A legend without entries is no legend. */
-	function update(change: Partial<StateLegend>) {
-		const next = { ...legend, ...change };
-		doc.legend = next.entries.length > 0 ? next : undefined;
-	}
-
 	/** A property of the legend, as one undo step. */
 	function change(properties: Partial<StateLegend>) {
-		update(properties);
+		updateLegend(doc, properties);
 		log();
 	}
 
@@ -88,16 +65,6 @@
 		doc.viewer = { ...doc.viewer, legend };
 		log();
 	}
-
-	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
-		update({ entries: legend.entries.map((entry, i) => (i === index ? { ...entry, ...change } : entry)) });
-	}
-
-	const TYPES: { value: StateLegendEntry['type']; label: string }[] = [
-		{ value: 'marker', label: 'Marker' },
-		{ value: 'line', label: 'Line' },
-		{ value: 'polygon', label: 'Area' }
-	];
 
 	// the entry whose style is picked on the map now, see `pickStyle`
 	let picking: number | undefined = $state();
@@ -110,94 +77,6 @@
 		if (picking === index) return doc.stylePicker.close();
 		doc.stylePicker.open({ onPick: (element) => takeStyleForEntry(doc, index, element) });
 		picking = index;
-	}
-
-	/** The main color of an entry: of its symbol, its line or its area. */
-	const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
-
-	/**
-	 * Another type for the entry, in its color: a marker with the default symbol, a line, or an area
-	 * without an outline, as a new entry is.
-	 */
-	function setType(index: number, type: StateLegendEntry['type']) {
-		const entry = legend.entries[index];
-		if (type === entry.type) return;
-		const style = { color: colorOf(entry) };
-		const changed: StateLegendEntry =
-			type === 'polygon'
-				? { type, style, strokeStyle: { visible: false }, label: entry.label }
-				: { type, style, label: entry.label };
-		update({ entries: legend.entries.map((e, i) => (i === index ? changed : e)) });
-		log();
-	}
-
-	/**
-	 * Draw the outline of an area entry, or not. An outline without a color of its own gets the
-	 * color of the fill, opaque, instead of the default red.
-	 */
-	function setOutline(index: number, visible: boolean) {
-		const entry = legend.entries[index];
-		const outline = entryStyle(index, 'strokeStyle', LINE_DEFAULTS);
-		if (visible && !entry.strokeStyle?.color) {
-			const fill = parseColor(colorOf(entry));
-			if (fill) outline.color = formatHex({ ...fill, alpha: 1 });
-		}
-		outline.visible = visible;
-		log();
-	}
-
-	/** The entry with the style (`style` or `strokeStyle`), without it if it is undefined. */
-	function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style: StateStyle | undefined) {
-		const result = { ...entry };
-		if (style) result[key] = style;
-		else delete result[key];
-		return result;
-	}
-
-	/**
-	 * A style of an entry with the properties of the style of an element (see StyleFill and
-	 * StyleStroke), which edit it like that of an element: a field that gets its default is left out.
-	 */
-	function entryStyle(index: number, key: 'style' | 'strokeStyle', defaults: StateStyle) {
-		const get = () => ({ ...defaults, ...legend.entries[index]?.[key] });
-		const set = (field: keyof StateStyle, value: unknown) => {
-			const entry = legend.entries[index];
-			const style = removeDefaultFields({ ...get(), [field]: value }, defaults);
-			update({ entries: legend.entries.map((e, i) => (i === index ? withStyle(entry, key, style) : e)) });
-		};
-		return {
-			get color() {
-				return get().color!;
-			},
-			set color(value: string) {
-				set('color', value);
-			},
-			get pattern() {
-				return get().pattern!;
-			},
-			set pattern(value: number) {
-				set('pattern', value);
-			},
-			// the name of the pattern of lines in LineStyle
-			get dashed() {
-				return get().pattern!;
-			},
-			set dashed(value: number) {
-				set('pattern', value);
-			},
-			get width() {
-				return get().width!;
-			},
-			set width(value: number) {
-				set('width', value);
-			},
-			get visible() {
-				return get().visible !== false;
-			},
-			set visible(value: boolean) {
-				set('visible', value);
-			}
-		};
 	}
 
 	// Which entries are open, by index: closed at first, a new entry open. The open state moves
@@ -234,7 +113,7 @@
 	function removeEntry(index: number) {
 		open = open.filter((_, i) => i !== index);
 		counted = legend.entries.length - 1;
-		update({ entries: legend.entries.filter((_, i) => i !== index) });
+		updateLegend(doc, { entries: legend.entries.filter((_, i) => i !== index) });
 		log();
 	}
 
@@ -247,7 +126,7 @@
 		const opened = open.filter((_, i) => i !== from);
 		opened.splice(at, 0, open[from] ?? false);
 		open = opened;
-		update({ entries });
+		updateLegend(doc, { entries });
 		log();
 		return at;
 	}
@@ -407,7 +286,7 @@
 								class="text"
 								aria-label="Text"
 								value={entry.label}
-								oninput={(e) => updateEntry(i, { label: e.currentTarget.value })}
+								oninput={(e) => updateEntry(doc, i, { label: e.currentTarget.value })}
 								onchange={log}
 							/>
 							<IconButton
@@ -424,91 +303,17 @@
 							<Hint>No element has this style.</Hint>
 						{/if}
 						{#if open[i]}
-							<div class="details" id="{uid}-{i}-details">
-								<!-- to rearrange the entries with the buttons, e.g. with the keyboard -->
-								<div class="head">
-									<IconButton
-										id="{uid}-{i}-up"
-										icon="up"
-										size="xs"
-										label="Move entry {i + 1} up"
-										disabled={i === 0}
-										onclick={() => step(i, -1)}
-									/>
-									<IconButton
-										id="{uid}-{i}-down"
-										icon="down"
-										size="xs"
-										label="Move entry {i + 1} down"
-										disabled={i === legend.entries.length - 1}
-										onclick={() => step(i, 1)}
-									/>
-								</div>
-								<InputRow id="{uid}-{i}-type" label="Shows" group>
-									<ChoiceGroup
-										labelledby="{uid}-{i}-type-label"
-										value={entry.type}
-										onchange={(type) => setType(i, type)}
-										options={TYPES}
-									/>
-								</InputRow>
-								<!-- the style of an element, after "Copy style" of the element -->
-								<ButtonGroup>
-									<Button
-										disabled={!canPasteStyleToEntry(doc)}
-										title="The style of an element, copied with “Copy style”"
-										onclick={() => pasteStyleToEntry(doc, i)}>Paste style</Button
-									>
-									<!-- a pipette: the next click on an element of the map; again to cancel -->
-									<Button
-										aria-pressed={picking === i}
-										title="Click an element on the map to take its style"
-										onclick={() => pickStyle(i)}><Icon name="pipette" size={16} />Take style from…</Button
-									>
-								</ButtonGroup>
-								{#if picking === i}
-									<div role="status"><Hint>Click an element on the map to take its style. Escape cancels.</Hint></div>
-								{/if}
-								<!-- the controls of the style of an element of the type -->
-								{#if entry.type === 'marker'}
-									<InputRow id="{uid}-{i}-symbol" label="Symbol">
-										<SymbolSelector
-											id="{uid}-{i}-symbol"
-											bind:symbol={
-												() => entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol,
-												(symbol) => {
-													updateEntry(i, { style: { ...entry.style, symbol: symbol ?? '' } });
-													log();
-												}
-											}
-										/>
-									</InputRow>
-									<InputRow id="{uid}-{i}-color" label="Color">
-										<ColorPicker
-											id="{uid}-{i}-color"
-											bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
-											onchange={log}
-											palette={doc.colors}
-										/>
-									</InputRow>
-								{:else if entry.type === 'line'}
-									<StyleStroke layers={[entryStyle(i, 'style', LINE_DEFAULTS)]} {doc} />
-								{:else}
-									{@const outline = entryStyle(i, 'strokeStyle', LINE_DEFAULTS)}
-									<StyleFill layers={[entryStyle(i, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />
-									<InputRow id="{uid}-{i}-outline" label="Outline">
-										<Checkbox
-											id="{uid}-{i}-outline"
-											checked={outline.visible}
-											onchange={(e) => setOutline(i, e.currentTarget.checked)}
-										/>
-									</InputRow>
-									{#if outline.visible}
-										<StyleStroke layers={[outline]} {doc} colorLabel="Outline color" />
-									{/if}
-								{/if}
-								<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>
-							</div>
+							<LegendEntryDetails
+								{doc}
+								id="{uid}-{i}"
+								index={i}
+								count={legend.entries.length}
+								{entry}
+								picking={picking === i}
+								onpick={() => pickStyle(i)}
+								onstep={(by) => step(i, by)}
+								onremove={() => removeEntry(i)}
+							/>
 						{/if}
 					</fieldset>
 				</div>
@@ -586,19 +391,6 @@
 	}
 	.row :global(.toggle.open svg) {
 		rotate: 90deg;
-	}
-
-	.details {
-		padding: 0 0 var(--space-2);
-	}
-
-	/* the buttons to move the entry, at its top right */
-	.head {
-		display: flex;
-		justify-content: flex-end;
-		align-items: center;
-		gap: var(--space-1);
-		margin-top: var(--space-1);
 	}
 
 	.grip {
