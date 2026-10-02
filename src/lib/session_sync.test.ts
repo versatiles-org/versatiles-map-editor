@@ -150,6 +150,25 @@ describe('SessionSync', () => {
 		location.hash = '';
 	});
 
+	it('skips maps that it cannot read, e.g. of an older format, but lists them to delete them', async () => {
+		const now = vi.spyOn(Date, 'now');
+		now.mockReturnValue(1000);
+		const readable = store.create(step([marker(1)]), { camera });
+		now.mockReturnValue(2000);
+		// the newer map, in a format that this editor cannot read
+		store.create('not a map');
+		now.mockRestore();
+
+		// opens the readable map, without a note about another tab
+		const opening = await sync.prepare('');
+		expect(opening).toMatchObject({ kind: 'session', stored: { session: { id: readable } } });
+		expect(notify).not.toHaveBeenCalled();
+		expect((await sync.last())?.elements).toStrictEqual([marker(1)]);
+
+		await sync.attach(doc, opening);
+		expect((await sync.recent()).map(({ name }) => name)).toStrictEqual(['Unreadable map', '1 marker']);
+	});
+
 	it('keeps the map in memory without a browser storage', async () => {
 		sync = new SessionSync(undefined, removeHash);
 		const opening = await sync.prepare('');

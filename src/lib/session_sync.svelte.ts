@@ -102,22 +102,26 @@ export class SessionSync {
 		// a reload: the session of the tab; a duplicated tab: a copy of it, since the original is open
 		const own = readTabSession();
 		const stored = own ? await store.load(own) : undefined;
-		if (own && stored && stored.states.length > 0) {
+		if (own && stored && currentState(stored)) {
 			if (await this.#locks.acquire(own, RELOAD_WAIT)) return opened(stored);
 			const copy = await store.copy(own);
 			const copied = copy ? await store.load(copy) : undefined;
 			if (copy && copied && (await this.#locks.acquire(copy))) return opened(copied);
 		}
 
-		// the most recently changed map that no other tab has open
+		// the most recently changed map that no other tab has open, and that this editor can read
 		const sessions = await store.list();
+		let elsewhere = false;
 		for (const { id } of sessions) {
-			if (!(await this.#locks.acquire(id))) continue;
+			if (!(await this.#locks.acquire(id))) {
+				elsewhere = true;
+				continue;
+			}
 			const stored = await store.load(id);
-			if (stored && stored.states.length > 0) return opened(stored);
+			if (stored && currentState(stored)) return opened(stored);
 			this.#locks.release(id);
 		}
-		if (sessions.length > 0) notify('Your last map is open in another tab.', 'info');
+		if (elsewhere) notify('Your last map is open in another tab.', 'info');
 		return { kind: 'new' };
 	}
 
@@ -146,10 +150,9 @@ export class SessionSync {
 
 	/** The current state of the most recently changed map, with its camera, e.g. for the viewer on phones. */
 	public async last(): Promise<MapState | undefined> {
-		const stored = await this.#findSession(async () => true);
-		if (!stored) return undefined;
-		const state = decodeState(stored.states[stored.position]);
-		return { ...state, map: stored.session.camera };
+		const stored = await this.#findSession(async (stored) => currentState(stored) !== undefined);
+		const state = stored && currentState(stored);
+		return stored && state ? { ...state, map: stored.session.camera } : undefined;
 	}
 
 	/** The most recently changed maps, e.g. for the menu. */
@@ -162,10 +165,10 @@ export class SessionSync {
 			sessions.map(async ({ id, title, changed }): Promise<RecentMap> => {
 				let name = title;
 				if (!name) {
-					// what the map contains
+					// what the map contains, e.g. not of a map of an older format
 					const stored = await store.load(id);
-					const current = stored?.states[stored.position];
-					name = current ? countTypes(decodeState(current).elements.map((e) => e.type)) : '';
+					const state = stored && currentState(stored);
+					name = state ? countTypes(state.elements.map((e) => e.type)) : stored ? 'Unreadable map' : '';
 				}
 				return {
 					id,
@@ -358,6 +361,19 @@ export class SessionSync {
 			const stored = await this.#store.load(session.id);
 			if (stored && stored.states.length > 0 && (await match(stored))) return stored;
 		}
+		return undefined;
+	}
+}
+
+/**
+ * The current state of a stored map, or undefined if it has none or this editor cannot read it,
+ * e.g. one saved in an older format.
+ */
+function currentState(stored: StoredSession): MapState | undefined {
+	if (stored.states.length === 0) return undefined;
+	try {
+		return decodeState(stored.states[stored.position]);
+	} catch {
 		return undefined;
 	}
 }
