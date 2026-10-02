@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
-import type { StateMetadata } from './types.js';
+import type { MapState, StateMetadata } from './types.js';
+import { decodeState, encodeState } from './index.js';
 
 describe('StateWriter', () => {
 	it('should initialize with an empty bits array', () => {
@@ -106,6 +107,17 @@ describe('StateWriter', () => {
 				expect(roundTrip({ radius, center: [5, 6] })).toBeUndefined();
 			}
 			expect(roundTrip({ radius: 100, center: [NaN, 6] })).toBeUndefined();
+		});
+
+		it('should skip degenerate viewports of a whole map, whose elements are kept', () => {
+			const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+			for (const map of [
+				{ radius: 100, center: [NaN, 6] as [number, number] },
+				{ radius: 100, center: [5, Infinity] as [number, number] },
+				{ radius: 0, center: [5, 6] as [number, number] }
+			]) {
+				expect(decodeState(encodeState({ map, elements }))).toStrictEqual({ elements });
+			}
 		});
 
 		it('should clamp tiny radii to 1 m', () => {

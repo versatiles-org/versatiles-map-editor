@@ -178,7 +178,8 @@ export class StateWriter {
 
 		// The coordinates of the frame and the elements are steps from an origin near them, so the
 		// numbers stay small: the center of the frame, else of the camera, else of the elements
-		const near = (frame && centerOf(frame)) ?? root.map?.center ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
+		const near =
+			(frame && centerOf(frame)) ?? storedCamera(root.map)?.center ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
 		const origin: [number, number] = [Math.round(near[0] * ORIGIN_SCALE), Math.round(near[1] * ORIGIN_SCALE)];
 		this.writeVarint(origin[0], true);
 		this.writeVarint(origin[1], true);
@@ -257,9 +258,9 @@ export class StateWriter {
 	}
 
 	/** Returns the center as the reader decodes it, or undefined without a map. */
-	writeMap(map: MapState['map']): [number, number] | undefined {
-		// A degenerate viewport (e.g. from a zero-sized map container) is not worth storing
-		if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) {
+	writeMap(camera: MapState['map']): [number, number] | undefined {
+		const map = storedCamera(camera);
+		if (!map) {
 			this.writeBit(false);
 			return undefined;
 		}
@@ -789,4 +790,10 @@ export function collectColors(root: MapState): string[] {
 		else counts.set(key, { color, count: 1, first: i });
 	});
 	return [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first).map((entry) => entry.color);
+}
+
+/** The camera, unless it is degenerate (e.g. from a zero-sized map container), which is not stored. */
+function storedCamera(map: MapState['map']): MapState['map'] {
+	if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) return undefined;
+	return map;
 }
