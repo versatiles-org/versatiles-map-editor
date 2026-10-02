@@ -34,12 +34,11 @@ export class StateReader {
 	public offset: number = 0;
 	// the colors, which are referenced by index (see `readPalette`)
 	private palette: string[] = [];
-	// the names of the symbols, which are referenced by index (see `readSymbols`)
-	private symbols: string[] = [];
-	// the strings of the string table (see `readStringTable`)
-	private strings: string[] = [];
-	// 1 + the highest index of the string table referenced so far (see `readStringRef`)
-	private nextString = 0;
+	// the strings of the 2 sections of the string table: the words of the format and the others
+	// (see `readStringTable`)
+	private strings: [string[], string[]] = [[], []];
+	// of each section, 1 + the highest index referenced so far (see `readStringRef`)
+	private nextString: [number, number] = [0, 0];
 	// the styles read so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -202,7 +201,6 @@ export class StateReader {
 			if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
 			this.readPalette();
 			this.readStringTable();
-			this.symbols = [];
 			this.styleHistory = new StyleHistory();
 
 			// the camera
@@ -323,20 +321,20 @@ export class StateReader {
 					//	metadata.heading = this.readString();
 					//	break;
 					case 2:
-						metadata.background = parseBackground(this.readStringRef());
+						metadata.background = parseBackground(this.readStringRef(true));
 						break;
 					case 3:
 						metadata.legend = this.readLegend();
 						break;
 					case 4:
-						metadata.colorScheme = this.readStringRef();
+						metadata.colorScheme = this.readStringRef(true);
 						break;
 					case 5:
 						// older links: the address search, as a flag
 						oldSearch = true;
 						break;
 					case 6:
-						metadata.labelFont = this.readStringRef();
+						metadata.labelFont = this.readStringRef(true);
 						break;
 					case 7:
 						metadata.mapLabelsOnTop = true;
@@ -357,10 +355,6 @@ export class StateReader {
 						metadata.labelMinZoom = zoom;
 						break;
 					}
-					case 8:
-						// not a field of the metadata: the symbols of the styles and of the legend
-						this.readSymbols();
-						break;
 					default:
 						throw new Error(`Invalid state key: ${key}`);
 				}
@@ -527,7 +521,7 @@ export class StateReader {
 					label = this.readStringRef();
 					break;
 				case 4:
-					old = { ...old, symbol: this.readSymbolValue() };
+					old = { ...old, symbol: this.readStringRef(true) };
 					break;
 				case 5:
 					type = LEGEND_ENTRY_TYPES[this.readVarint()];
@@ -627,7 +621,7 @@ export class StateReader {
 					style.haloColor = this.readColorValue();
 					break;
 				case 13:
-					style.symbol = this.readSymbolValue();
+					style.symbol = this.readStringRef(true);
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readInteger(4);
@@ -651,30 +645,21 @@ export class StateReader {
 		this.palette = this.readArray(() => this.readColor());
 	}
 
-	/** The names of the symbols, each as the length of the beginning it shares with the previous one and the rest. */
-	readSymbols() {
-		let previous = '';
-		this.symbols = this.readArray(() => {
-			const shared = this.readVarint();
-			if (shared > previous.length) throw new Error(`Invalid symbol name: ${shared} shared characters`);
-			previous = previous.slice(0, shared) + this.readString();
-			return previous;
-		});
-	}
-
 	/** The strings of the metadata, the labels and the popups, each once, which are referenced afterwards. */
 	readStringTable(): string[] {
 		try {
 			const count = this.readVarint();
-			this.strings = [];
+			let strings: string[] = [];
+			let formatCount = 0;
 			if (count > 0) {
 				// the first are words of the format
-				const formatCount = this.readVarint();
+				formatCount = this.readVarint();
 				if (formatCount > count) throw new Error(`Invalid number of words of the format: ${formatCount}`);
-				this.strings = decodeStrings(this.readBlock(this.readVarint()), count, formatCount);
+				strings = decodeStrings(this.readBlock(this.readVarint()), count, formatCount);
 			}
-			this.nextString = 0;
-			return this.strings;
+			this.strings = [strings.slice(0, formatCount), strings.slice(formatCount)];
+			this.nextString = [0, 0];
+			return strings;
 		} catch (cause) {
 			throw new Error(`Error reading string table`, { cause });
 		}
@@ -689,20 +674,14 @@ export class StateReader {
 	}
 
 	/** See `StateWriter.writeStringRef`. */
-	readStringRef(): string {
-		const index = this.readBit() ? this.nextString : this.readVarint();
-		const value = this.strings[index];
+	/** See `StateWriter.writeStringRef`. */
+	readStringRef(format = false): string {
+		const section = format ? 0 : 1;
+		const index = this.readBit() ? this.nextString[section] : this.readVarint();
+		const value = this.strings[section][index];
 		if (value === undefined) throw new Error(`Invalid string index: ${index}`);
-		this.nextString = Math.max(this.nextString, index + 1);
+		this.nextString[section] = Math.max(this.nextString[section], index + 1);
 		return value;
-	}
-
-	/** A symbol, as its index in the list of symbols. */
-	readSymbolValue(): string {
-		const index = this.readVarint();
-		const name = this.symbols[index];
-		if (name === undefined) throw new Error(`Invalid symbol index: ${index}`);
-		return name;
 	}
 
 	/** A color, as its index in the palette. */

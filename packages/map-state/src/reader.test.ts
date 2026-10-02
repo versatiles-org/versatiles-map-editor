@@ -641,8 +641,37 @@ describe('legend', () => {
 	});
 
 	it('reads the entries of older links, a color and maybe a symbol, as markers and areas', () => {
-		// written before: a blue anchor, and a translucent red swatch
-		expect(decodeState('IgAAf7_AADACAKjKCKgqSpm7bYZbaGWTCAAABICAYKYMIONEGIYWMQDMQQEAOAhHAAAAA').meta).toStrictEqual({
+		// as written before: a blue anchor, and a translucent red swatch
+		const writer = new StateWriter();
+		writer.writeInteger(1, 3); // version
+		writer.writePalette(['#0000ff', '#ff000080']);
+		writer.writeStringTable(['Harbour', 'Area'], ['icons:anchor']);
+		writer.writeBit(false); // no camera
+		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
+		writer.writeVarint(0, true); // the origin
+		writer.writeVarint(0, true);
+		writer.writeInteger(0, 5); // the order of the code of the coordinates
+		writer.writeBit(false); // the points of markers and circles from the origin
+		writer.writeBit(false); // no frame
+		writer.writeBit(true); // metadata
+		writer.writeInteger(3, 6); // the legend
+		writer.writeInteger(3, 4); // its entries
+		writer.writeVarint(2);
+		writer.writeInteger(1, 4); // the color of older entries
+		writer.writeColorValue('#0000ff');
+		writer.writeInteger(4, 4); // the symbol of older entries
+		writer.writeStringRef('icons:anchor', true);
+		writer.writeInteger(3, 4); // the label
+		writer.writeStringRef('Harbour');
+		writer.writeInteger(0, 4);
+		writer.writeInteger(1, 4); // the color of older entries
+		writer.writeColorValue('#ff000080');
+		writer.writeInteger(3, 4); // the label
+		writer.writeStringRef('Area');
+		writer.writeInteger(0, 4);
+		writer.writeInteger(0, 4); // the end of the legend
+		writer.writeInteger(0, 6); // the end of the metadata
+		expect(decodeState(writer.asBase64()).meta).toStrictEqual({
 			legend: {
 				entries: [
 					{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },

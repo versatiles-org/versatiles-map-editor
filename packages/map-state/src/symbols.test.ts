@@ -58,20 +58,23 @@ describe('symbols', () => {
 		expect(decode(encode(state)).meta).toBeUndefined();
 	});
 
-	it('are stored once, sorted, with the beginning they share with the previous name', () => {
-		const writer = new StateWriter();
-		writer.writeSymbols([...NAMES, 'base:icon-bank']);
-		const reader = new StateReader(writer.bits);
-		expect(reader.readVarint()).toBe(5);
-		const entries = Array.from({ length: 5 }, () => [reader.readVarint(), reader.readString()]);
-		expect(entries).toStrictEqual([
-			[0, 'base:icon-atm'],
-			[10, 'bakery'],
-			[12, 'nk'],
-			[12, 'r'],
-			[0, 'icons:anchor']
+	it('are words of the format in the string table, each once, in the order they are written', () => {
+		const state: MapState = {
+			meta: { legend: { entries: [{ type: 'marker', style: { symbol: 'icons:anchor' }, label: 'Harbour' }] } },
+			elements: NAMES.map((symbol, i) => ({ type: 'marker', point: [13 + i / 100, 52], style: { symbol } }))
+		};
+		const reader = StateReader.fromBase64(encode(state));
+		reader.readInteger(3);
+		reader.readPalette();
+		// the words of the format, then the others
+		expect(reader.readStringTable()).toStrictEqual([
+			'icons:anchor',
+			'base:icon-bakery',
+			'base:icon-bank',
+			'base:icon-bar',
+			'base:icon-atm',
+			'Harbour'
 		]);
-		expect(reader.ended()).toBe(true);
 	});
 
 	it('keep many symbols short', () => {
@@ -82,7 +85,7 @@ describe('symbols', () => {
 		expect(decode(encoded)).toStrictEqual(state);
 	});
 
-	it('are rejected if the index is not in the list, e.g. in older links with the names in the styles', () => {
+	it('are rejected if they are not in the string table', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeVarint(0); // no colors
@@ -94,33 +97,22 @@ describe('symbols', () => {
 		writer.writeInteger(0, 5); // the order of the code of the coordinates
 		writer.writeBit(false); // the points of markers and circles from the origin
 		writer.writeBit(false); // no frame
-		writer.writeBit(false); // no metadata, so no symbols
+		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeVarint(0); // no reference
 		writer.writeInteger(13, 4); // symbol
-		// the name instead of its index: its length, 12, is read as the index
-		writer.writeString('icons:anchor');
+		// not the next string, but the one with index 5
+		writer.writeBit(false);
+		writer.writeVarint(5);
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
 			expect.objectContaining({
 				cause: expect.objectContaining({
-					cause: expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid symbol index: 12' }) })
+					cause: expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid string index: 5' }) })
 				})
-			})
-		);
-	});
-
-	it('reject a name that shares more than the previous one has', () => {
-		const writer = new StateWriter();
-		writer.writeVarint(1);
-		writer.writeVarint(3);
-		writer.writeString('x');
-		expect(() => new StateReader(writer.bits).readSymbols()).toThrow(
-			expect.objectContaining({
-				cause: expect.objectContaining({ message: 'Invalid symbol name: 3 shared characters' })
 			})
 		);
 	});

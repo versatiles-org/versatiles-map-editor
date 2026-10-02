@@ -15,13 +15,12 @@ The first release.
   KML.
 - Format version 1 of the base64 string (`CODEC_VERSION`):
   - a color palette;
-  - a string table: the background as JSON, the color scheme, the label font, the title, the
-    labels, the legend labels and the popups stored once, and
-    referenced with 1 bit for the next new string, else by index; the strings are coded by an
-    adaptive order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in
-    alphabetic scripts and 12 in Chinese and Japanese, instead of 7–19; the background, the color
-    scheme and the label font with a model that learned the vocabulary of the format before;
-  - the names of the symbols stored once, sharing their beginnings, and referenced by index;
+  - a string table: the background as JSON, the color scheme, the label font, the names of the
+    symbols, the title, the labels, the legend labels and the popups stored once, and referenced
+    with 1 bit for the next new string, else by index; the strings are coded by an adaptive
+    order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in alphabetic
+    scripts and 12 in Chinese and Japanese, instead of 7–19; the words of the format with a model
+    that learned the vocabulary of the format before;
   - style references to similar earlier styles;
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;

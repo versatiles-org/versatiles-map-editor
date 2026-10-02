@@ -64,6 +64,24 @@ describe('the string table', () => {
 		expect(bits).toBe('1' + '1' + '0' + '000000' + '0' + '000010');
 	});
 
+	it('counts the next string of each section by itself, so both can be written in turns', () => {
+		const writer = new StateWriter();
+		writer.writeStringTable(['A', 'B'], ['s1', 's2']);
+		const start = writer.bits.length;
+		writer.writeStringRef('A');
+		writer.writeStringRef('s1', true);
+		writer.writeStringRef('B');
+		writer.writeStringRef('s2', true);
+		expect(writer.asBitString().slice(start)).toBe('1111');
+	});
+
+	it('can have a string in both sections, e.g. a label that is also the name of a symbol', () => {
+		const state: MapState = {
+			elements: [{ type: 'marker', point: [13, 52], style: { symbol: 'icons:anchor', label: 'icons:anchor' } }]
+		};
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+
 	it('refers to a string out of order with its index', () => {
 		const writer = new StateWriter();
 		writer.writeStringTable(['a', 'b', 'c']);

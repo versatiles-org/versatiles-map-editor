@@ -162,18 +162,15 @@ To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
-- the strings (the background as JSON, the color scheme, the label font, the title, the labels,
-  the legend labels and the popups) are stored once in a string table, in
-  the order they are written, and referenced by 1 bit for the next new string, else by index. The
+- the strings are stored once in a string table of 2 sections, each in the order they are
+  written: the words of the format (the background as JSON, the color scheme, the label font, the
+  names of the symbols), then the others (the title, the labels, the legend labels, the popups).
+  A field refers to a string of its section by 1 bit for the next new one, else by its index. The
   table is one block of bits (`string_coder.ts`): an adaptive model predicts each character from
   the two before it (PPM of order 2 over code points), and an arithmetic coder spends fewer bits
-  on likelier characters. The model starts empty and learns the strings of the map, so text in
-  any script gets shorter, and repeated words cost little. Only the words of the format (the
-  background as JSON, the color scheme, the label font) come first in the table and have a model
-  that learned the format's vocabulary before (`string_primer.ts`);
-- the names of the symbols of all styles and of the legend are stored once in the metadata,
-  sorted, each with the length of the beginning it shares with the previous name (e.g.
-  `base:icon-`) and the rest, and referenced by index;
+  on likelier characters. For the words of the format, the model has learned the format's
+  vocabulary before (`string_primer.ts`). For the others, it starts empty and learns the strings
+  of the map, so text in any script gets shorter, and repeated words cost little;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`);
 - an element that has the type and the styles of the element before costs 1 bit for them; the

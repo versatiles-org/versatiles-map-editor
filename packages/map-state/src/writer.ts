@@ -40,12 +40,11 @@ export class StateWriter {
 	bits: boolean[] = [];
 	// the colors of the state, most frequent first, by their color key (see `writePalette`)
 	private palette = new Map<string, number>();
-	// the index of each symbol name in the list of the metadata (see `writeSymbols`)
-	private symbols = new Map<string, number>();
-	// the index of each string in the string table (see `writeStringTable`)
-	private strings = new Map<string, number>();
-	// 1 + the highest index of the string table referenced so far (see `writeStringRef`)
-	private nextString = 0;
+	// the index of each string in the 2 sections of the string table: the words of the format and
+	// the others (see `writeStringTable`)
+	private strings: [Map<string, number>, Map<string, number>] = [new Map(), new Map()];
+	// of each section, 1 + the highest index referenced so far (see `writeStringRef`)
+	private nextString: [number, number] = [0, 0];
 	// the styles written so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -164,7 +163,7 @@ export class StateWriter {
 		this.writeBit(this.relativePoints);
 
 		this.writeFrame(frame);
-		this.writeMetadata(root.meta, collectSymbols(root));
+		this.writeMetadata(root.meta);
 
 		// each element after the first: 1 bit whether it repeats the type and the styles of the one before
 		let previous: string | undefined;
@@ -307,35 +306,24 @@ export class StateWriter {
 		for (let i = length - 1; i >= 0; i--) this.writeBit(Math.floor(code / 2 ** i) % 2 === 1);
 	}
 
-	/**
-	 * `symbols`: the names of all symbols of the map, which styles and the legend reference by index.
-	 * Without it, those of the legend.
-	 */
-	writeMetadata(metadata?: StateMetadata, symbols = collectSymbols({ meta: metadata, elements: [] })) {
+	writeMetadata(metadata?: StateMetadata) {
 		// only the fields that are stored count, e.g. not `search: false`
 		const stored =
-			symbols.length > 0 ||
-			(metadata &&
-				(metadata.background ||
-					metadata.legend ||
-					metadata.colorScheme ||
-					removeViewerDefaults(metadata.viewer) ||
-					metadata.labelFont ||
-					metadata.labelOverlap === 'hide' ||
-					sanitizeLabelMinZoom(metadata.labelMinZoom) !== undefined ||
-					metadata.mapLabelsOnTop ||
-					metadata.title));
+			metadata &&
+			(metadata.background ||
+				metadata.legend ||
+				metadata.colorScheme ||
+				removeViewerDefaults(metadata.viewer) ||
+				metadata.labelFont ||
+				metadata.labelOverlap === 'hide' ||
+				sanitizeLabelMinZoom(metadata.labelMinZoom) !== undefined ||
+				metadata.mapLabelsOnTop ||
+				metadata.title);
 		if (!stored) {
 			return this.writeBit(false);
 		}
 
 		this.writeBit(true);
-		// first, since the legend references them
-		if (symbols.length > 0) {
-			this.writeInteger(8, 6);
-			this.writeSymbols(symbols);
-		}
-		if (!metadata) return this.writeInteger(0, 6);
 		//if (metadata.heading) {
 		//	this.writeInteger(1, 6);
 		//	this.writeString(metadata.heading);
@@ -344,15 +332,15 @@ export class StateWriter {
 		if (metadata.background) {
 			this.writeInteger(2, 6);
 			// as JSON, so any option of @versatiles/style can be stored
-			this.writeStringRef(JSON.stringify(metadata.background));
+			this.writeStringRef(JSON.stringify(metadata.background), true);
 		}
 		if (metadata.colorScheme) {
 			this.writeInteger(4, 6);
-			this.writeStringRef(metadata.colorScheme);
+			this.writeStringRef(metadata.colorScheme, true);
 		}
 		if (metadata.labelFont) {
 			this.writeInteger(6, 6);
-			this.writeStringRef(metadata.labelFont);
+			this.writeStringRef(metadata.labelFont, true);
 		}
 		if (metadata.legend) {
 			this.writeInteger(3, 6);
@@ -491,7 +479,7 @@ export class StateWriter {
 		// not with a spread: a style can have many bits
 		for (const bit of best!.bits) this.bits.push(bit);
 		// the strings the chosen encoding referenced
-		this.nextString = best!.nextString;
+		this.nextString = [...best!.nextString];
 		this.styleHistory.remember(style);
 	}
 
@@ -532,46 +520,20 @@ export class StateWriter {
 			case 'label':
 				return this.writeStringRef(style.label!);
 			case 'symbol':
-				return this.writeSymbolValue(style.symbol!);
+				return this.writeStringRef(style.symbol!, true);
 			case 'visible':
 				// the key alone means "false"
 				return;
 		}
 	}
 
-	/** A writer for trying out an encoding, with the same palette, symbols and strings. */
+	/** A writer for trying out an encoding, with the same palette and strings. */
 	private fork(): StateWriter {
 		const writer = new StateWriter({ resolution: this.resolution });
 		writer.palette = this.palette;
-		writer.symbols = this.symbols;
 		writer.strings = this.strings;
-		writer.nextString = this.nextString;
+		writer.nextString = [...this.nextString];
 		return writer;
-	}
-
-	/**
-	 * The names of the symbols, each once and sorted, and afterwards only their index. The names
-	 * share long beginnings (e.g. "base:icon-"), so each stores only the length of the beginning it
-	 * shares with the previous name, and the rest.
-	 */
-	writeSymbols(names: string[]) {
-		const sorted = [...new Set(names)].sort();
-		let previous = '';
-		this.writeArray(sorted, (name) => {
-			let shared = 0;
-			while (shared < previous.length && shared < name.length && previous[shared] === name[shared]) shared++;
-			this.writeVarint(shared);
-			this.writeString(name.slice(shared));
-			previous = name;
-		});
-		this.symbols = new Map(sorted.map((name, index) => [name, index]));
-	}
-
-	/** A symbol, as its index in the list of symbols. */
-	writeSymbolValue(name: string) {
-		const index = this.symbols.get(name);
-		if (index === undefined) throw new Error(`Symbol not in the list: ${name}`);
-		this.writeVarint(index);
 	}
 
 	/** The colors, each once, and afterwards only their index. */
@@ -588,41 +550,47 @@ export class StateWriter {
 	}
 
 	/**
-	 * The strings of the metadata, the labels and the popups, each once, in the order they are
-	 * written, and afterwards only a reference (see `writeStringRef`): the words of the format
-	 * first (`formatStrings`, e.g. the background as JSON), then the others. Their number, and unless
-	 * 0, the number of words of the format, the length of the block in bits and the block (see
-	 * `encodeStrings`).
+	 * The strings of the map, each once in its section, in the order they are written, and
+	 * afterwards only a reference (see `writeStringRef`). 2 sections: the words of the format
+	 * (`formatStrings`: the background as JSON, the color scheme, the label font, the names of
+	 * symbols), then the others (titles, labels, popups). Their number, and unless 0, the number of
+	 * words of the format, the length of the block in bits and the block (see `encodeStrings`).
 	 */
 	writeStringTable(strings: string[], formatStrings: string[] = []) {
-		const format = [...new Set(formatStrings)];
-		const unique = [...new Set([...format, ...strings])];
-		this.writeVarint(unique.length);
-		if (unique.length > 0) {
-			this.writeVarint(format.length);
-			const block = encodeStrings(unique, format.length);
+		const sections: [string[], string[]] = [[...new Set(formatStrings)], [...new Set(strings)]];
+		const all = [...sections[0], ...sections[1]];
+		this.writeVarint(all.length);
+		if (all.length > 0) {
+			this.writeVarint(sections[0].length);
+			const block = encodeStrings(all, sections[0].length);
 			this.writeVarint(block.length);
 			// not with a spread: the block can have many bits
 			for (const bit of block) this.bits.push(bit);
 		}
-		this.strings = new Map(unique.map((value, index) => [value, index]));
-		this.nextString = 0;
+		this.strings = [
+			new Map(sections[0].map((value, index) => [value, index])),
+			new Map(sections[1].map((value, index) => [value, index]))
+		];
+		this.nextString = [0, 0];
 	}
 
 	/**
-	 * A string of the table: 1 bit "1" for the next string not referenced so far, which is the usual
-	 * case, since the table is in the order of the writing. Otherwise "0" and the index.
+	 * A string of the table, in the section of the words of the format (`format`), else of the
+	 * others; which one, each field knows. 1 bit "1" for the next string of the section not referenced
+	 * so far, which is the usual case, since the table is in the order of the writing. Otherwise "0"
+	 * and its index in the section.
 	 */
-	writeStringRef(value: string) {
-		const index = this.strings.get(value);
+	writeStringRef(value: string, format = false) {
+		const section = format ? 0 : 1;
+		const index = this.strings[section].get(value);
 		if (index === undefined) throw new Error(`String not in the table: ${value}`);
-		if (index === this.nextString) {
+		if (index === this.nextString[section]) {
 			this.writeBit(true);
 		} else {
 			this.writeBit(false);
 			this.writeVarint(index);
 		}
-		this.nextString = Math.max(this.nextString, index + 1);
+		this.nextString[section] = Math.max(this.nextString[section], index + 1);
 	}
 
 	writeColor(color: string) {
@@ -647,15 +615,6 @@ export class StateWriter {
 	}
 }
 
-/** The names of the symbols of all styles and of the legend, each once. */
-export function collectSymbols(root: MapState): string[] {
-	const symbols = new Set<string>();
-	for (const style of allStyles(root)) {
-		if (style.symbol != null) symbols.add(style.symbol);
-	}
-	return [...symbols];
-}
-
 /** The styles of all elements and of all entries of the legend. */
 function allStyles(root: MapState): StateStyle[] {
 	return [...root.elements, ...(root.meta?.legend?.entries ?? [])].flatMap((item) => [
@@ -666,13 +625,19 @@ function allStyles(root: MapState): StateStyle[] {
 
 /**
  * The words of the format in the string table, in the order the writer writes them: the
- * background as JSON, the color scheme, the label font.
+ * background as JSON, the color scheme, the label font, and the names of the symbols of the
+ * legend and of the elements.
  */
 export function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
-	return [meta?.background && JSON.stringify(meta.background), meta?.colorScheme, meta?.labelFont].filter(
+	const strings = [meta?.background && JSON.stringify(meta.background), meta?.colorScheme, meta?.labelFont].filter(
 		(value): value is string => !!value
 	);
+	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
+		const styles = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
+		for (const style of styles) if (style?.symbol != null) strings.push(style.symbol);
+	}
+	return strings;
 }
 
 /**
