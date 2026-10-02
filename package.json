@@ -70,9 +70,6 @@
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
   },
-  "overrides": {
-    "cookie": "^0.7.0"
-  },
   "allowScripts": {
     "@parcel/watcher": true,
     "esbuild": true,

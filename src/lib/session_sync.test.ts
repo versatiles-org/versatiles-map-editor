@@ -288,13 +288,14 @@ describe('SessionSync', () => {
 			expect(elements).toContainEqual([1]);
 		});
 
-		it('keeps the camera of the map before when opening another one or a new one', async () => {
+		it('keeps the stored cameras when opening a map, of it and of the map before', async () => {
 			// as MapLibre's fitBounds without animation: it moves the map, and fires moveend at once
 			map.fitBounds.mockImplementation((bounds) => {
 				map.setCenter(LngLatBounds.convert(bounds).getCenter());
 				map.emit('moveend');
 			});
-			const other = store.create(step([marker(1)]), { camera: { center: [2, 48], radius: 5000 } });
+			const otherCamera: MapState['map'] = { center: [2, 48], radius: 5000 };
+			const other = store.create(step([marker(1)]), { camera: otherCamera });
 			await sync.attach(doc, await sync.prepare(encodeState({ map: camera, elements: [marker(13.4)] })));
 			const first = (await store.list()).find(({ id }) => id !== other)!.id;
 			await store.flush();
@@ -304,11 +305,12 @@ describe('SessionSync', () => {
 			expect(await sync.openRecent(other)).toBe(true);
 			await store.flush();
 			expect(await cameraOf(first)).toStrictEqual(before);
+			// not stored again from the map, e.g. slightly changed on each reload
+			expect(await cameraOf(other)).toStrictEqual(otherCamera);
 
-			const opened = await cameraOf(other);
 			await sync.newMap();
 			await store.flush();
-			expect(await cameraOf(other)).toStrictEqual(opened);
+			expect(await cameraOf(other)).toStrictEqual(otherCamera);
 		});
 
 		it('opens a map of a file as a new map', async () => {

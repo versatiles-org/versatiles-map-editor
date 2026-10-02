@@ -1,4 +1,6 @@
+import staticAdapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { readdirSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
 import { join, resolve } from 'path';
@@ -118,7 +120,22 @@ function docBundle(page: string | undefined): { plugin?: Plugin; manualChunks?: 
 const doc = docBundle(process.env.DOC_BUNDLE);
 
 export default defineConfig({
-	plugins: [maplibreWorker(), examples(), sveltekit(), doc.plugin],
+	plugins: [
+		maplibreWorker(),
+		examples(),
+		sveltekit({
+			preprocess: vitePreprocess(),
+			adapter: staticAdapter(),
+			alias: {
+				// SvelteKit 3 has #lib instead; kept until the imports move to it
+				$lib: 'src/lib',
+				// the map state codec, used from its source (packages/map-state), so it needs no build
+				'@versatiles/map-state': 'packages/map-state/src/index.ts'
+			},
+			prerender: { handleMissingId: 'ignore' }
+		}),
+		doc.plugin
+	],
 	// Component tests need Svelte's client build, which is only resolved with the browser condition
 	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {

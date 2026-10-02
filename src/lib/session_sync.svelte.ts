@@ -63,6 +63,8 @@ export class SessionSync {
 	#first: string | undefined;
 	/** The title of the map as its session has it, e.g. for the list of maps. */
 	#title: string | undefined;
+	/** Whether a map is being loaded, which moves the map to the camera that its session already has. */
+	#loading = false;
 	/** Whether the map is kept in the browser storage, e.g. for the status line. */
 	public status: SaveStatus = $state('saved');
 
@@ -207,9 +209,7 @@ export class SessionSync {
 	public async newMap() {
 		const doc = this.#doc;
 		if (!doc) return;
-		// before loading, which moves the map: the camera of the map before stays
-		this.#setSession(undefined);
-		await doc.loadState({ elements: [] });
+		await this.#load(doc, { elements: [] });
 		await this.#open({ kind: 'new' });
 	}
 
@@ -256,18 +256,17 @@ export class SessionSync {
 				case 'session': {
 					const { stored, camera } = opening;
 					const state = decodeState(stored.states[stored.position]);
-					// before loading, which moves the map: its camera belongs to this session
+					await this.#load(doc, { ...state, map: camera });
+					doc.state.history.restore(stored.states, stored.position);
 					this.#setSession(stored.session.id);
 					this.#title = stored.session.title;
-					await doc.loadState({ ...state, map: camera });
-					doc.state.history.restore(stored.states, stored.position);
 					break;
 				}
 				case 'link':
 					// stored at once, while the map loads
 					this.#title = opening.state.meta?.title;
 					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.map, title: this.#title }));
-					await doc.loadState(opening.state);
+					await this.#load(doc, opening.state);
 					break;
 				case 'new':
 					this.#setSession(undefined);
@@ -278,6 +277,19 @@ export class SessionSync {
 		} catch (error) {
 			console.error('Failed to load map state', error);
 			notify('The map could not be loaded completely.');
+		}
+	}
+
+	/**
+	 * Load a map into the document. Its moves are not stored: they would give the camera to the
+	 * session open before, and each reload would store the camera again, slightly changed.
+	 */
+	async #load(doc: MapDocumentInteractive, state: MapState) {
+		this.#loading = true;
+		try {
+			await doc.loadState(state);
+		} finally {
+			this.#loading = false;
 		}
 	}
 
@@ -339,7 +351,7 @@ export class SessionSync {
 
 	#onMove = () => {
 		const doc = this.#doc;
-		if (this.#id && doc) this.#store?.setCamera(this.#id, doc.view.getViewport());
+		if (this.#id && doc && !this.#loading) this.#store?.setCamera(this.#id, doc.view.getViewport());
 	};
 
 	// the links of the address bar, one after the other, so a link opens one session only
