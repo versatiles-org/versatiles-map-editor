@@ -16,7 +16,8 @@ const EXAMPLES = [
 	'hamburg-berlin-railway',
 	'berlin-low-emission-zone',
 	'chernobyl-exclusion-zone',
-	'london-pharmacies'
+	'london-pharmacies',
+	'warsaw-christmas-markets-2025'
 ];
 
 for (const name of EXAMPLES) {
