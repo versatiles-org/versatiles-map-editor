@@ -8,6 +8,8 @@
 	 * `track` is a background for the track instead of the filled part in the accent, e.g. a
 	 * gradient through the colors of a channel; `checkered` draws it over a checkerboard, e.g. for
 	 * an opacity. `wide` fills the width of the container, instead of the part of an input row.
+	 * `format` shows the value as a text instead of the number field, e.g. "570 m" for a step of a
+	 * scale whose numbers mean nothing to the reader; screen readers announce this text too.
 	 */
 	let {
 		id,
@@ -20,7 +22,8 @@
 		scale = 1,
 		track,
 		checkered = false,
-		wide = false
+		wide = false,
+		format
 	}: {
 		id: string;
 		min: number;
@@ -33,6 +36,7 @@
 		track?: string;
 		checkered?: boolean;
 		wide?: boolean;
+		format?: (value: number) => string;
 	} = $props();
 
 	// as many decimals as the steps of the slider have, e.g. 1 for steps of 0.1
@@ -68,17 +72,23 @@
 		class:checkered
 		style:--fill={fill}
 		style:--track={track}
+		aria-valuetext={format?.(value)}
 	/>
-	<input
-		class="field"
-		type="number"
-		step="any"
-		min={min * scale}
-		max={max * scale}
-		value={shown}
-		aria-labelledby="{id}-label"
-		onchange={onFieldChange}
-	/>
+	{#if format}
+		<!-- for the eyes: the slider tells screen readers its value itself -->
+		<span class="text" aria-hidden="true">{format(value)}</span>
+	{:else}
+		<input
+			class="field"
+			type="number"
+			step="any"
+			min={min * scale}
+			max={max * scale}
+			value={shown}
+			aria-labelledby="{id}-label"
+			onchange={onFieldChange}
+		/>
+	{/if}
 	{#if unit}<span class="unit" aria-hidden="true">{unit}</span>{/if}
 </span>
 
@@ -180,6 +190,15 @@
 	}
 
 	/* a field like the others, only narrow */
+	/* the value as a text, as wide as the number field, so sliders line up */
+	.text {
+		flex: none;
+		min-width: 3.6em;
+		font-variant-numeric: tabular-nums;
+		text-align: right;
+		white-space: nowrap;
+	}
+
 	.field {
 		flex: none;
 		width: 3.6em;

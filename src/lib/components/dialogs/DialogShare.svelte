@@ -6,7 +6,8 @@
 		Checkbox,
 		ChoiceGroup,
 		Hint,
-		Select,
+		InputRow,
+		Slider,
 		TextArea,
 		TextField
 	} from '$lib/components/ui/index.js';
@@ -49,7 +50,6 @@
 	// of the coordinates, 0.00001° × 2^exponent: about 1 m, 2 m, 4 m, … 36 km
 	let precision: 'auto' | number = $state('auto');
 	let autoExponent = $state(0);
-	const EXPONENTS = Array.from({ length: MAX_EXPONENT + 1 }, (_, exponent) => exponent);
 
 	/** The half of the larger side of an area, in meters. */
 	function radiusOf([west, south, east, north]: Bounds): number {
@@ -293,23 +293,30 @@
 
 			<section aria-labelledby="{uid}-options">
 				<h3 id="{uid}-options">Options</h3>
-				<div class="setting">
-					<label for="share-precision">Precision</label>
-					<Select
+				<!-- from 1 m to 36 km, each step twice the one before; moving it ends "Automatic" -->
+				<InputRow id="share-precision" label="Precision">
+					<Slider
 						id="share-precision"
-						value={String(precision)}
-						onchange={(e) => {
-							const value = e.currentTarget.value;
-							precision = value === 'auto' ? 'auto' : Number(value);
-							update(0);
-						}}
-					>
-						<option value="auto">Automatic ({formatPrecision(resolutionOfExponent(autoExponent))})</option>
-						{#each EXPONENTS as exponent (exponent)}
-							<option value={String(exponent)}>{formatPrecision(resolutionOfExponent(exponent))}</option>
-						{/each}
-					</Select>
-				</div>
+						min={0}
+						max={MAX_EXPONENT}
+						step={1}
+						bind:value={
+							() => (precision === 'auto' ? autoExponent : precision),
+							(exponent) => {
+								precision = exponent;
+								update(0);
+							}
+						}
+						format={(exponent) => formatPrecision(resolutionOfExponent(exponent))}
+					/>
+				</InputRow>
+				<Checkbox
+					checked={precision === 'auto'}
+					onchange={(e) => {
+						precision = e.currentTarget.checked ? 'auto' : autoExponent;
+						update(0);
+					}}>Automatic, fine enough for the visible area</Checkbox
+				>
 				<Hint>Coarser positions make shorter links.</Hint>
 			</section>
 		</div>

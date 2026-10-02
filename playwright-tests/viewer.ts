@@ -106,7 +106,8 @@ test('precision of a shared map', async ({ page }) => {
 	);
 	await waitForMapIsReady(page, { count: 1 });
 	await page.getByRole('button', { name: /^Share/ }).click();
-	const precision = page.getByRole('combobox', { name: 'Precision' });
+	const precision = page.getByRole('slider', { name: 'Precision' });
+	const automatic = page.getByRole('checkbox', { name: /^Automatic/ });
 	const shared = async () => {
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
 		// the shared map opens in the viewer
@@ -117,19 +118,29 @@ test('precision of a shared map', async ({ page }) => {
 
 	// automatic: about a thousandth of the size of the visible area, in steps of 0.00001° × 2^n:
 	// 0.00004°, about 4 m; the coordinates keep at most 5 decimal places
-	await expect(precision.getByRole('option').first()).toHaveText('Automatic (4 m)');
+	await expect(automatic).toBeChecked();
+	await expect(precision).toHaveAttribute('aria-valuetext', '4 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41236, 52.51236]);
-	const automatic = await shared();
+	const auto = await shared();
 
-	// all 16 steps, from 1 m to 36 km
-	await expect(precision.getByRole('option')).toHaveCount(17);
-	await expect(precision.getByRole('option').last()).toHaveText('36 km');
-	await precision.selectOption('1 m');
+	// 16 steps, from 1 m to 36 km; moving the slider ends "Automatic"
+	await precision.focus();
+	await page.keyboard.press('End');
+	await expect(precision).toHaveAttribute('aria-valuetext', '36 km');
+	await expect(automatic).not.toBeChecked();
+	await page.keyboard.press('Home');
+	await expect(precision).toHaveAttribute('aria-valuetext', '1 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
 	// 0.01024°
-	await precision.selectOption('1.1 km');
+	await precision.fill('10');
+	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('1.1 km');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4144, 52.51072]);
-	expect((await shared()).length).toBeLessThan(automatic.length);
+	expect((await shared()).length).toBeLessThan(auto.length);
+
+	// automatic again
+	await automatic.check();
+	await expect(precision).toHaveAttribute('aria-valuetext', '4 m');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41236, 52.51236]);
 
 	// the map in the editor keeps its precision
 	expect(((await storedState(page)).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
@@ -192,7 +203,7 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 
 		for (const control of [
 			dialog.getByRole('button', { name: 'Copy embed code' }),
-			dialog.getByRole('combobox', { name: 'Precision' }),
+			dialog.getByRole('slider', { name: 'Precision' }),
 			dialog.getByRole('checkbox', { name: 'Address search' }),
 			dialog.getByRole('checkbox', { name: 'Zoom buttons' }),
 			dialog.getByRole('button', { name: 'Reload' })
