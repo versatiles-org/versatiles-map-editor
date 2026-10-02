@@ -309,7 +309,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBitString()).toBe(
-				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000000100000110100100110101100000000110100100110101100000'
+				'001000000000000110000010001111011101011011101110011010110111110000100000001000100110010000101100000001000001101001001101011000000001101001001101011000000'
 			);
 
 			const reader = new StateReader(writer.bits);
@@ -353,7 +353,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYUUKAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXmQgIIUCAgMOsIQMOsIWYbECBggQQA'
+				'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYUUKAACEBRbwBRbwBpNYBpNYBtSmwria7q0pNoZwNyjHnTiShBjchfkAfibhZJiGhdhUiDhajXEmV6SkRxQBeZCAghQIAgMOsIQMOsIWYbECBggQQA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -365,7 +365,7 @@ describe('StateReader', () => {
 		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
 		// the outline of a polygon, the outline referring to the style of the fill
 		const state = StateReader.fromBase64(
-			'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYKlSAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXihEgIIUCAgMOsIQMOsIWYbECBggQQA'
+			'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYKlSAACEBRbwBRbwBpNYBpNYBtSmwria7q0pNoZwNyjHnTiShBjchfkAfibhZJiGhdhUiDhajXEmV6SkRxQBeKESAghQIAgMOsIQMOsIWYbECBggQQA'
 		).readRoot();
 		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
 		// at most opaque
@@ -466,7 +466,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'IVUAAAS0RPExgi2QIcPdEVzsmyjOuJjWSmkCGcQ1FQTRJYlNIV6FcF8ox5wYnIUYzoU5AQY14WQYjISYkog4WI2SJkenoz8UBpQoAAc6wo6oXs4kwGUkR20KFMDIdtEpjCORQbYADIPQjGJ7BIZQAAA'
+				'IVUAAAS0RPExgi2QIcPdEVzsmyjOuJjWSmkCGcQ1FQTRJYlNIV6FcF8ox5wYnIUYzoU5AQY14WQYjISYkog4WI2SJkenoz8UBpQoAAHOsKOqF7OIGykiO2hYyHbRKYwjkUG2AAyD0IRie4RmUA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [

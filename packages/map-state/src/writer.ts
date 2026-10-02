@@ -12,9 +12,18 @@ import { StateReader } from './reader.js';
 import { encodeStrings } from './string_coder.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
-import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
+import {
+	canonical,
+	colorKey,
+	encodedValue,
+	STYLE_FIELDS,
+	STYLE_REMOVE_KEY,
+	StyleHistory,
+	withoutLabel
+} from './style_history.js';
 import type {
 	Bounds,
+	StateElement,
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
@@ -137,26 +146,54 @@ export class StateWriter {
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta, collectSymbols(root));
 
+		// each element after the first: 1 bit whether it repeats the type and the styles of the one before
+		let previous: string | undefined;
 		root.elements.forEach((element) => {
+			const key = repeatKey(element);
+			const repeat = key === previous;
+			if (previous !== undefined) this.writeBit(repeat);
+			previous = key;
 			switch (element.type) {
 				case 'marker':
-					this.writeInteger(1, 3);
-					this.writeElementMarker(element);
+					if (!repeat) this.writeInteger(1, 3);
+					this.writeElementMarker(element, repeat);
 					break;
 				case 'line':
-					this.writeInteger(2, 3);
-					this.writeElementLine(element);
+					if (!repeat) this.writeInteger(2, 3);
+					this.writeElementLine(element, repeat);
 					break;
 				case 'polygon':
-					this.writeInteger(3, 3);
-					this.writeElementPolygon(element);
+					if (!repeat) this.writeInteger(3, 3);
+					this.writeElementPolygon(element, repeat);
 					break;
 				case 'circle':
-					this.writeInteger(4, 3);
-					this.writeElementCircle(element);
+					if (!repeat) this.writeInteger(4, 3);
+					this.writeElementCircle(element, repeat);
 					break;
 			}
 		});
+	}
+
+	/**
+	 * The styles of an element, unless it repeats those of the element before: the style without
+	 * its label, and for areas the outline.
+	 */
+	private writeElementStyles(element: StateElement, repeat: boolean) {
+		if (repeat) return;
+		this.writeOptionalStyle(element.style && withoutLabel(element.style));
+		if (element.type === 'polygon' || element.type === 'circle') this.writeOptionalStyle(element.strokeStyle);
+	}
+
+	private writeOptionalStyle(style: StateStyle | undefined) {
+		this.writeBit(style !== undefined);
+		if (style) this.writeStyle(style);
+	}
+
+	/** The label of the style of an element: a field of the element, since it differs more often than the style. */
+	private writeElementLabel(element: StateElement) {
+		const label = element.style?.label;
+		this.writeBit(label != null);
+		if (label != null) this.writeStringRef(label);
 	}
 
 	/** The frame: its south-west corner on the grid, and its width and height in steps of the grid. */
@@ -300,65 +337,33 @@ export class StateWriter {
 		this.writeInteger(0, 6);
 	}
 
-	writeElementMarker(element: StateElementMarker) {
+	/** `repeat`: the element has the type and the styles of the element before, which are not written. */
+	writeElementMarker(element: StateElementMarker, repeat = false) {
 		this.writeElementPoint(element.point);
-		if (element.style) {
-			this.writeBit(true);
-			this.writeStyle(element.style);
-		} else {
-			this.writeBit(false);
-		}
+		this.writeElementStyles(element, repeat);
+		this.writeElementLabel(element);
 		this.writePopup(element.popup);
-		return element;
 	}
 
-	writeElementLine(element: StateElementLine) {
+	writeElementLine(element: StateElementLine, repeat = false) {
 		this.writeElementPoints(element.points);
-		if (element.style) {
-			this.writeBit(true);
-			this.writeStyle(element.style);
-		} else {
-			this.writeBit(false);
-		}
+		this.writeElementStyles(element, repeat);
+		this.writeElementLabel(element);
 		this.writePopup(element.popup);
-		return element;
 	}
 
-	writeElementPolygon(element: StateElementPolygon) {
+	writeElementPolygon(element: StateElementPolygon, repeat = false) {
 		this.writeElementPoints(element.points);
-		if (element.style) {
-			this.writeBit(true);
-			this.writeStyle(element.style);
-		} else {
-			this.writeBit(false);
-		}
-		if (element.strokeStyle) {
-			this.writeBit(true);
-			this.writeStyle(element.strokeStyle);
-		} else {
-			this.writeBit(false);
-		}
+		this.writeElementStyles(element, repeat);
+		this.writeElementLabel(element);
 		this.writePopup(element.popup);
 	}
 
-	writeElementCircle(element: StateElementCircle) {
+	writeElementCircle(element: StateElementCircle, repeat = false) {
 		this.writeElementPoint(element.point);
 		this.writeVarint(Math.round(element.radius));
-
-		if (element.style) {
-			this.writeBit(true);
-			this.writeStyle(element.style);
-		} else {
-			this.writeBit(false);
-		}
-
-		if (element.strokeStyle) {
-			this.writeBit(true);
-			this.writeStyle(element.strokeStyle);
-		} else {
-			this.writeBit(false);
-		}
-
+		this.writeElementStyles(element, repeat);
+		this.writeElementLabel(element);
 		this.writePopup(element.popup);
 	}
 
@@ -622,10 +627,19 @@ export function collectStrings(root: MapState): string[] {
 	}
 	if (root.meta?.title) strings.push(root.meta.title);
 	for (const element of root.elements) {
-		ofStyles(element);
+		// the label of the outline is written inside it, before the label of the element
+		if ('strokeStyle' in element && element.strokeStyle?.label != null) strings.push(element.strokeStyle.label);
+		if (element.style?.label != null) strings.push(element.style.label);
 		if (element.popup?.text) strings.push(element.popup.text);
 	}
 	return strings;
+}
+
+/** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
+function repeatKey(element: StateElement): string {
+	const key = (style: StateStyle | undefined) => (style ? canonical(style) : '-');
+	const strokeStyle = 'strokeStyle' in element ? element.strokeStyle : undefined;
+	return [element.type, key(element.style && withoutLabel(element.style)), key(strokeStyle)].join('|');
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

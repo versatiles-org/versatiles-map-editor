@@ -2,6 +2,7 @@ import { formatHex } from './color.js';
 import type {
 	Bounds,
 	StateBackground,
+	StateElement,
 	StateElementCircle,
 	StateElementLine,
 	StateElementMarker,
@@ -25,7 +26,7 @@ import {
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid } from './grid.js';
 import { decodeStrings } from './string_coder.js';
-import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
+import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory, withoutLabel } from './style_history.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
@@ -192,33 +193,39 @@ export class StateReader {
 			root.meta = this.readMetadata();
 			if (!root.meta) delete root.meta;
 
-			// Read the elements
+			// Read the elements: each after the first with 1 bit whether it repeats the type and the
+			// styles of the one before
+			let previous: StateElement | undefined;
 			while (true) {
 				let key: number;
+				let repeat = false;
 				try {
-					key = this.readInteger(3);
+					if (previous) repeat = this.readBit();
+					key = repeat ? ELEMENT_KEYS[previous!.type] : this.readInteger(3);
 				} catch (_) {
 					key = 0;
 				}
+				const before = repeat ? previous : undefined;
 				switch (key) {
 					case 0:
 						return root;
 					case 1:
-						root.elements.push(this.readElementMarker());
+						previous = this.readElementMarker(before);
 						break;
 					case 2:
-						root.elements.push(this.readElementLine());
+						previous = this.readElementLine(before);
 						break;
 					case 3:
-						root.elements.push(this.readElementPolygon());
+						previous = this.readElementPolygon(before);
 						break;
 					case 4:
-						root.elements.push(this.readElementCircle());
+						previous = this.readElementCircle(before);
 						break;
 					default:
 						// The element's length is unknown, so the rest of the stream cannot be read reliably
 						throw new Error(`Unknown element key: ${key}`);
 				}
+				root.elements.push(previous);
 			}
 		} catch (cause) {
 			throw new Error(`Error reading root`, { cause });
@@ -331,11 +338,12 @@ export class StateReader {
 		}
 	}
 
-	readElementMarker(): StateElementMarker {
+	/** `previous`: the element before, if this one repeats its type and styles. */
+	readElementMarker(previous?: StateElement): StateElementMarker {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
-			// a copy: the style can be shared with other elements, e.g. as the base of their styles
-			if (this.readBit()) element.style = { ...this.readStyle() };
+			this.readElementStyles(element, previous);
+			this.readElementLabel(element);
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
@@ -343,10 +351,11 @@ export class StateReader {
 		}
 	}
 
-	readElementLine(): StateElementLine {
+	readElementLine(previous?: StateElement): StateElementLine {
 		try {
 			const element: StateElementLine = { type: 'line', points: this.readElementPoints() };
-			if (this.readBit()) element.style = this.readStyle();
+			this.readElementStyles(element, previous);
+			this.readElementLabel(element);
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
@@ -354,11 +363,11 @@ export class StateReader {
 		}
 	}
 
-	readElementPolygon(): StateElementPolygon {
+	readElementPolygon(previous?: StateElement): StateElementPolygon {
 		try {
 			const element: StateElementPolygon = { type: 'polygon', points: this.readElementPoints() };
-			if (this.readBit()) element.style = this.readStyle();
-			if (this.readBit()) element.strokeStyle = this.readStyle();
+			this.readElementStyles(element, previous);
+			this.readElementLabel(element);
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
@@ -366,18 +375,42 @@ export class StateReader {
 		}
 	}
 
-	readElementCircle(): StateElementCircle {
+	readElementCircle(previous?: StateElement): StateElementCircle {
 		try {
 			const point = this.readElementPoint();
 			const radius = this.readVarint();
 			const element: StateElementCircle = { type: 'circle', point, radius };
-			if (this.readBit()) element.style = this.readStyle();
-			if (this.readBit()) element.strokeStyle = this.readStyle();
+			this.readElementStyles(element, previous);
+			this.readElementLabel(element);
 			if (this.readBit()) element.popup = this.readPopup();
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading circle element`, { cause });
 		}
+	}
+
+	/**
+	 * The styles of an element: those of the element before (`previous`), if it repeats them, else
+	 * read. Copies: a style is shared with the history, and the element gets its own label.
+	 */
+	private readElementStyles(element: StateElement, previous?: StateElement) {
+		const hasStroke = element.type === 'polygon' || element.type === 'circle';
+		if (previous) {
+			if (previous.style) element.style = withoutLabel(previous.style);
+			if (hasStroke && 'strokeStyle' in previous && previous.strokeStyle) {
+				element.strokeStyle = { ...previous.strokeStyle };
+			}
+			return;
+		}
+		if (this.readBit()) element.style = { ...this.readStyle() };
+		if (hasStroke && this.readBit()) element.strokeStyle = { ...this.readStyle() };
+	}
+
+	/** See `StateWriter.writeElementLabel`. */
+	private readElementLabel(element: StateElement) {
+		if (!this.readBit()) return;
+		if (!element.style) throw new Error('A label without a style');
+		element.style.label = this.readStringRef();
 	}
 
 	readLegend(): StateLegend {
@@ -675,6 +708,9 @@ export class StateReader {
 		}
 	}
 }
+
+/** The keys of the element types. */
+const ELEMENT_KEYS: Record<StateElement['type'], number> = { marker: 1, line: 2, polygon: 3, circle: 4 };
 
 function parseBackground(json: string): StateBackground {
 	const background = sanitizeBackground(JSON.parse(json));

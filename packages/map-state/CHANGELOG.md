@@ -21,6 +21,8 @@ The first release.
     alphabetic scripts and 12 in Chinese and Japanese, instead of 7–19;
   - the names of the symbols stored once, sharing their beginnings, and referenced by index;
   - style references to similar earlier styles;
+  - 1 bit for an element with the type and the styles of the element before, whose label is
+    stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short,
     in steps of 0.00001° × 2^n (n from 0 to 15, in 4 bits: about 1 m to 36 km), which decode to
     at most 5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`.

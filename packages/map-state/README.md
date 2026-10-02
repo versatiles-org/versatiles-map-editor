@@ -171,6 +171,9 @@ hashes short:
   `base:icon-`) and the rest, and referenced by index;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`);
+- an element that has the type and the styles of the element before costs 1 bit for them; the
+  label of an element's style is stored as a field of the element, so elements that differ only
+  in their labels still repeat their style;
 - the coordinates of the frame and the elements are whole steps from an origin near them (the
   center of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a
   global step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each

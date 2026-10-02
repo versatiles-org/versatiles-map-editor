@@ -42,8 +42,15 @@ export function encodedValue(style: StateStyle, field: (typeof STYLE_FIELDS)[num
 	return value == null ? undefined : field.encoded(value as never);
 }
 
-function canonical(style: StateStyle): string {
+/** The fields of a style as they are encoded: styles that encode identically have the same one. */
+export function canonical(style: StateStyle): string {
 	return JSON.stringify(STYLE_FIELDS.map((field) => encodedValue(style, field)));
+}
+
+/** A style without its label, which an element stores by itself; a copy. */
+export function withoutLabel(style: StateStyle): StateStyle {
+	const { label: _label, ...rest } = style;
+	return rest;
 }
 
 /** Styles are referenced by their distance from the end, so the size is limited. */
