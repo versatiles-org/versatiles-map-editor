@@ -4,6 +4,8 @@ import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import {
 	addLegendEntry,
 	addToLegend,
+	canPasteStyleToEntry,
+	pasteStyleToEntry,
 	canCopyStyle,
 	canPasteStyle,
 	copyStyle,
@@ -230,5 +232,53 @@ describe('addToLegend', () => {
 		expect(doc.legend).toBe(before);
 		doc.state.undo();
 		expect(doc.legend).toBeUndefined();
+	});
+});
+
+describe('pasteStyleToEntry', () => {
+	let doc: MapDocumentInteractive;
+	beforeEach(() => {
+		doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+		doc.legend = { entries: [{ type: 'polygon', style: { color: '#000000' }, label: 'Kept' }] };
+		doc.state.log();
+	});
+	const points: [number, number][] = [
+		[0, 0],
+		[1, 0],
+		[0, 1]
+	];
+	/** Copy the style of an element, paste it onto the entry, and return the entry. */
+	function paste(state: Parameters<MapDocumentInteractive['addElement']>[0]) {
+		doc.styleClipboard.copy(doc.addElement(state));
+		pasteStyleToEntry(doc, 0);
+		return doc.legend?.entries[0];
+	}
+
+	it('gives the entry the copied style and the type of its element, and keeps its text', () => {
+		expect(canPasteStyleToEntry(doc)).toBe(false);
+		// a marker: without its label, halo and the defaults
+		const style = { color: '#0000ff', symbol: 'icons:anchor', rotate: 0, label: 'X', labelColor: '#ff00ff', halo: 2 };
+		expect(paste({ type: 'marker', point: [0, 0], style })).toStrictEqual({
+			type: 'marker',
+			style: { color: '#0000ff', symbol: 'icons:anchor' },
+			label: 'Kept'
+		});
+		expect(canPasteStyleToEntry(doc)).toBe(true);
+		expect(paste({ type: 'line', points, style: { color: '#d55e00', pattern: 2 } })).toStrictEqual({
+			type: 'line',
+			style: { color: '#d55e00', pattern: 2 },
+			label: 'Kept'
+		});
+		expect(
+			paste({ type: 'circle', point: [0, 0], radius: 1, style: { pattern: 1 }, strokeStyle: { visible: false } })
+		).toStrictEqual({ type: 'polygon', style: { pattern: 1 }, strokeStyle: { visible: false }, label: 'Kept' });
+		// all defaults
+		expect(paste({ type: 'polygon', points })).toStrictEqual({ type: 'polygon', label: 'Kept' });
+	});
+
+	it('is one undo step', () => {
+		paste({ type: 'line', points, style: { color: '#d55e00' } });
+		doc.state.undo();
+		expect(doc.legend?.entries[0]).toStrictEqual({ type: 'polygon', style: { color: '#000000' }, label: 'Kept' });
 	});
 });

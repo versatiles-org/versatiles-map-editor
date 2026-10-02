@@ -25,7 +25,7 @@
 		TextField
 	} from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
-	import { addLegendEntry } from '$lib/components/commands.js';
+	import { addLegendEntry, canPasteStyleToEntry, pasteStyleToEntry } from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import StyleFill from './StyleFill.svelte';
@@ -355,6 +355,14 @@
 								options={TYPES}
 							/>
 						</InputRow>
+						<!-- the style of an element, after "Copy style" of the element -->
+						<ButtonGroup>
+							<Button
+								disabled={!canPasteStyleToEntry(doc)}
+								title="The style of an element, copied with “Copy style”"
+								onclick={() => pasteStyleToEntry(doc, i)}>Paste style</Button
+							>
+						</ButtonGroup>
 						<!-- the controls of the style of an element of the type -->
 						{#if entry.type === 'marker'}
 							<InputRow id="{uid}-{i}-symbol" label="Symbol">

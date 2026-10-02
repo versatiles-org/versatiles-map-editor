@@ -620,6 +620,34 @@ test('adding the look of an element to the legend', async ({ page }) => {
 	await expect.poll(async () => (await storedState(page)).meta?.legend?.entries).toHaveLength(1);
 });
 
+test('pasting the style of an element onto a legend entry', async ({ page }) => {
+	const points: [number, number][] = [
+		[13.39, 52.5],
+		[13.41, 52.5]
+	];
+	const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Route' }] };
+	const elements = [{ type: 'line' as const, points, style: { color: '#d55e00', pattern: 1, width: 4 } }];
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const paste = page.getByRole('group', { name: 'Entry 1' }).getByRole('button', { name: 'Paste style' });
+	// nothing copied yet
+	await expect(paste).toBeDisabled();
+
+	await page.keyboard.press('e');
+	await page.getByRole('listbox', { name: 'Elements' }).getByRole('option').first().click();
+	await page.getByRole('button', { name: 'Copy style' }).click();
+	// back to the map, and to the legend
+	await page.locator('body').press('Escape');
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	await paste.click();
+	await expect
+		.poll(async () => (await storedState(page)).meta?.legend?.entries)
+		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', pattern: 1, width: 4 }, label: 'Route' }]);
+	// the controls of a line
+	await expect(page.getByRole('group', { name: 'Entry 1' }).getByRole('radio', { name: 'Line' })).toBeChecked();
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

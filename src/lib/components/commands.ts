@@ -1,4 +1,11 @@
-import type { StateLegendEntry, StateStyle } from '@versatiles/map-state';
+import {
+	FILL_DEFAULTS,
+	LINE_DEFAULTS,
+	removeDefaultFields,
+	SYMBOL_DEFAULTS,
+	type StateLegendEntry,
+	type StateStyle
+} from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { elementText } from './element_names.js';
@@ -108,6 +115,38 @@ export function addToLegend(doc: MapDocumentInteractive): number {
 	doc.legend = { ...doc.legend, entries: [...entries, ...news] };
 	doc.state.log();
 	return news.length;
+}
+
+/** Whether a style was copied, which an entry of the legend can take. */
+export function canPasteStyleToEntry(doc: MapDocumentInteractive): boolean {
+	return doc.styleClipboard.style !== undefined;
+}
+
+/**
+ * Give an entry of the legend the copied style, and the type of the element it was copied from:
+ * a marker, a line, or an area. It keeps its text. One undo step.
+ */
+export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): void {
+	const copied = doc.styleClipboard.style;
+	const entries = doc.legend?.entries;
+	if (!copied || !entries?.[index]) return;
+	const label = entries[index].label;
+	// without the defaults, which the copy has
+	const style = (s: StateStyle | undefined, defaults: StateStyle) => s && removeDefaultFields(s, defaults);
+	const entry: StateLegendEntry = copied.symbol
+		? { type: 'marker', style: markerLook(style(copied.symbol, SYMBOL_DEFAULTS)), label }
+		: copied.fill
+			? {
+					type: 'polygon',
+					style: style(copied.fill, FILL_DEFAULTS),
+					strokeStyle: style(copied.stroke, LINE_DEFAULTS),
+					label
+				}
+			: { type: 'line', style: style(copied.stroke, LINE_DEFAULTS), label };
+	if (!entry.style) delete entry.style;
+	if (!entry.strokeStyle) delete entry.strokeStyle;
+	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? entry : e)) };
+	doc.state.log();
 }
 
 export function pasteStyle(doc: MapDocumentInteractive): void {
