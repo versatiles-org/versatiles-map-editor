@@ -1,4 +1,4 @@
-import { formatHex } from './color.js';
+import { formatHex, parseColor } from './color.js';
 import type {
 	Bounds,
 	StateBackground,
@@ -26,6 +26,7 @@ import {
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid } from './grid.js';
 import { decodeStrings } from './string_coder.js';
+import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory, withoutLabel } from './style_history.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
@@ -640,7 +641,17 @@ export class StateReader {
 
 	/** The colors, each once, which are referenced by index afterwards. */
 	readPalette() {
-		this.palette = this.readArray(() => this.readColor());
+		this.palette = this.readArray(() => this.readPaletteColor());
+	}
+
+	/** See `StateWriter.writePaletteColor`. */
+	readPaletteColor(): string {
+		if (!this.readBit()) return this.readColor();
+		const index = this.readInteger(BUILT_IN_COLOR_BITS);
+		const color = BUILT_IN_COLORS[index];
+		if (color === undefined) throw new Error(`Invalid built-in color: ${index}`);
+		const rgb = parseColor(color)!;
+		return formatHex({ ...rgb, alpha: this.readAlpha() });
 	}
 
 	/** The strings of the metadata, the labels and the popups, each once, which are referenced afterwards. */
@@ -690,15 +701,18 @@ export class StateReader {
 		return color;
 	}
 
+	/** See `StateWriter.writeAlpha`. */
+	private readAlpha(): number {
+		return this.readBit() ? this.readInteger(8) / 255 : 1;
+	}
+
 	readColor(): string {
 		try {
 			const r = this.readInteger(8);
 			const g = this.readInteger(8);
 			const b = this.readInteger(8);
 
-			let a = 1;
-			if (this.readBit()) a = this.readInteger(8) / 255;
-			return formatHex({ r, g, b, alpha: a });
+			return formatHex({ r, g, b, alpha: this.readAlpha() });
 		} catch (cause) {
 			throw new Error(`Error reading color`, { cause });
 		}

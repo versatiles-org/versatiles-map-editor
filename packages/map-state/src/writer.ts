@@ -1,5 +1,6 @@
 import { parseColor } from './color.js';
 import { BASE64_CHARS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS, rgbHex } from './color_schemes.js';
 import { boundsOf, centerOf } from './bounds.js';
 import {
 	LEGEND_DEFAULTS,
@@ -535,7 +536,7 @@ export class StateWriter {
 
 	/** The colors, each once, and afterwards only their index. */
 	writePalette(colors: string[]) {
-		this.writeArray(colors, (color) => this.writeColor(color));
+		this.writeArray(colors, (color) => this.writePaletteColor(color));
 		this.palette = new Map(colors.map((color, index) => [colorKey(color), index]));
 	}
 
@@ -590,18 +591,36 @@ export class StateWriter {
 		this.nextString[section] = Math.max(this.nextString[section], index + 1);
 	}
 
+	/**
+	 * A color of the palette: 1 bit whether it is one of the color schemes (`BUILT_IN_COLORS`), then
+	 * its index there, else its red, green and blue; then its alpha (see `writeColor`).
+	 */
+	writePaletteColor(color: string) {
+		const index = BUILT_IN_COLORS.indexOf(rgbHex(color));
+		if (index < 0) {
+			this.writeBit(false);
+			return this.writeColor(color);
+		}
+		this.writeBit(true);
+		this.writeInteger(index, BUILT_IN_COLOR_BITS);
+		this.writeAlpha(color);
+	}
+
+	/** A color: its red, green and blue in 8 bits each, then its alpha. */
 	writeColor(color: string) {
 		const rgb = parseColor(color);
 		if (!rgb) throw new Error(`Invalid color: ${color}`);
 		this.writeInteger(Math.round(rgb.r), 8);
 		this.writeInteger(Math.round(rgb.g), 8);
 		this.writeInteger(Math.round(rgb.b), 8);
-		if (rgb.alpha == 1) {
-			this.bits.push(false);
-		} else {
-			this.bits.push(true);
-			this.writeInteger(Math.round(rgb.alpha * 255), 8);
-		}
+		this.writeAlpha(color);
+	}
+
+	/** The alpha of a color: 1 bit whether it is translucent, then the alpha in 8 bits. */
+	private writeAlpha(color: string) {
+		const alpha = parseColor(color)!.alpha;
+		this.writeBit(alpha != 1);
+		if (alpha != 1) this.writeInteger(Math.round(alpha * 255), 8);
 	}
 }
 

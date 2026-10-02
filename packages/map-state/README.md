@@ -161,7 +161,8 @@ relative, the frame (optional: the visible area of a shared map), the metadata a
 To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
-  and referenced by index (#5);
+  and referenced by index (#5); a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
+  or white as its index there in 6 bits instead of 24;
 - the strings are stored once in a string table of 2 sections, each in the order they are
   written: the words of the format (the background as JSON, the color scheme, the label font, the
   names of the symbols), then the others (the title, the labels, the legend labels, the popups).

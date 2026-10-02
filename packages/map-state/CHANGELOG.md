@@ -14,7 +14,7 @@ The first release.
 - Encode and decode maps of the VersaTiles map editor as a compact base64 string, as GeoJSON and as
   KML.
 - Format version 1 of the base64 string (`CODEC_VERSION`):
-  - a color palette;
+  - a color palette, the colors of the built-in color schemes (`COLOR_SCHEMES`) as their index;
   - a string table: the background as JSON, the color scheme, the label font, the names of the
     symbols, the title, the labels, the legend labels and the popups stored once, and referenced
     with 1 bit for the next new string, else by index; the strings are coded by an adaptive

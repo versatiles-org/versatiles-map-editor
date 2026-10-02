@@ -356,7 +356,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWDggAw2AAAw2AQBYUUKAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWMAXmQgIIUCAIAAw1QAADDVAZhsQIGCBBAA'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAgCwooUAAEIABhrAAAYawAAMNgAAMNgANoAAlwVIAAJor-mNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisYAvMhAQQoEAQABhqgAAGGqAzDYgQMECCAA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -368,7 +368,7 @@ describe('StateReader', () => {
 		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
 		// the outline of a polygon, the outline referring to the style of the fill
 		const state = StateReader.fromBase64(
-			'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWDggAw2AAAw2AQBYKlSAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWMAXihEgIIUCAIAAw1QAADDVAZhsQIGCBBAAA'
+			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAgCwVKkAAEIABhrAAAYawAAMNgAAMNgANoAAlwVIAAJor-mNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisYAvFCJAQQoEAQABhqgAAGGqAzDYgQMECCAAA'
 		).readRoot();
 		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
 		// at most opaque
@@ -405,7 +405,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CxAD_oQQB4TDvlmyhAF4xkzEXJrnIgCdA');
+			expect(writer.asBase64()).toBe('CYgB_0IIA8Jh3yzZQgC8YyZiLk1zkQBOg');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -447,7 +447,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'IVUAAAQC0RPExgi2QIcPdEVzsmyjOuJjWSmkCGcQ1FQ4TQSSDijLlKh2us-DeeNcicDw28zg1mTpUfxMqQej_FXwGlCgAARzkzGF7OIGhIkOnYyAtOGtIdiCDYBAWHhGJ7hGZQAA'
+				'ISqAAAIBaIniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir4DShQAAI5yZjC9nEDQkSHTsZAWnDWkOxBBsAgLDwjE9wjMoAAA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -718,7 +718,7 @@ describe('viewer', () => {
 
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IX-AAAIBpNaAAABDEgwhAOACgAAAA').meta).toStrictEqual({
+		expect(decodeState('IT_AAAEA0mtAAAAhiQYQgHABQAAAAA').meta).toStrictEqual({
 			legend: {
 				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
 			},
