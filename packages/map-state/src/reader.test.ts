@@ -415,28 +415,6 @@ describe('StateReader', () => {
 		});
 	});
 
-	describe('readString', () => {
-		it('should read a string', () => {
-			const reader = StateReader.fromBase64('S4CUUmNEA9DtCxfvC');
-			expect(reader.readString()).toBe('Teddy: 🧸');
-			expect(reader.ended()).toBe(true);
-		});
-
-		it('should write and read a string', () => {
-			const text =
-				'Hello, world, 🌍, וועלט, მოსოფელი, دنیا, ܥܠܡܐ, ലോകം, العالم, دنی, 世界, ދުނިޔެ, Sè-kài, ពិភពលោក, ലോകം,';
-			const writer = new StateWriter();
-			writer.writeString(text);
-			expect(writer.asBase64()).toBe(
-				'JGzCCSSMsAqMQSUsA5DtCbxvCsArdCrdCFfC5dCxdCsA3NI7NIDPI7NIJPIpNI1NIxNIsAfjCNlCZtCPjCsALzCBzCDzChxCsAlTGXVGrRGFRGsAPjCJlCzjCPjCJlCLlCsAfjCNlCZtCsAthmZV6sAX5CV7CF5CR7Cp5CZ7CsA2RONCyBOKsAt5Kv7Kv5Kt5K35KJ9KB5KsAlTGXVGrRGFRGs'
-			);
-
-			const reader = new StateReader(writer.bits);
-			expect(reader.readString()).toBe(text);
-			expect(reader.ended()).toBe(true);
-		});
-	});
-
 	describe('readColor', () => {
 		it('should read a color', () => {
 			const reader = StateReader.fromBitString(['00000000', '01111011', '11111111', '1', '00110011'].join(''));
@@ -600,11 +578,22 @@ describe('background', () => {
 	it('rejects invalid backgrounds', () => {
 		for (const json of ['{"builder":"other","options":{}}', '{"builder":"osm","options":[]}', 'null', '{']) {
 			const writer = new StateWriter();
+			writer.writeStringTable([], [json]);
 			writer.writeBit(true);
-			writer.writeInteger(2, 6);
-			writer.writeString(json);
+			writer.writeInteger(2, 6); // the background
+			writer.writeStringRef(json, true);
 			writer.writeInteger(0, 6);
-			expect(() => new StateReader(writer.bits).readMetadata()).toThrow('Error reading metadata');
+			const reader = new StateReader(writer.bits);
+			reader.readStringTable();
+			// the JSON cannot be parsed, or it is not a background
+			expect(() => reader.readMetadata()).toThrow(
+				expect.objectContaining({
+					message: 'Error reading metadata',
+					cause: expect.objectContaining({
+						message: json === '{' ? expect.stringContaining('JSON') : 'Invalid background'
+					})
+				})
+			);
 		}
 	});
 });

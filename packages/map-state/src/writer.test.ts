@@ -216,27 +216,6 @@ describe('StateWriter', () => {
 		expect(writer.asBase64()).toBe('_wAAwA');
 	});
 
-	describe('writeString', () => {
-		it('should write a string correctly', () => {
-			const writer = new StateWriter();
-			writer.writeString('Teddy: 🧸');
-			expect(writer.asBase64()).toBe('S4CUUmNEA9DtCxfvC');
-		});
-
-		it('should have to correct bit length', () => {
-			function test(text: string) {
-				const writer = new StateWriter();
-				writer.writeString(text);
-				return writer.bits.length;
-			}
-
-			expect(test('')).toBe(6);
-			expect(test('T')).toBe(12);
-			expect(test('ä')).toBe(18);
-			expect(test('🧸')).toBe(54);
-		});
-	});
-
 	it('should convert bits to Base64 correctly', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(63, 6);

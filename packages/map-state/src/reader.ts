@@ -15,7 +15,7 @@ import type {
 	StateStyle,
 	StateViewer
 } from './types.js';
-import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import { BASE64_CODE2BITS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import {
 	oldLegendEntry,
 	removeViewerDefaults,
@@ -317,9 +317,7 @@ export class StateReader {
 						// no metadata, like the writer does now (older hashes could store it empty)
 						return Object.keys(metadata).length > 0 ? metadata : undefined;
 					}
-					//case 1:
-					//	metadata.heading = this.readString();
-					//	break;
+					// key 1 was the heading of older links
 					case 2:
 						metadata.background = parseBackground(this.readStringRef(true));
 						break;
@@ -703,25 +701,6 @@ export class StateReader {
 			return formatHex({ r, g, b, alpha: a });
 		} catch (cause) {
 			throw new Error(`Error reading color`, { cause });
-		}
-	}
-
-	readString(): string {
-		try {
-			const length = this.readVarint();
-			const charCodes: number[] = [];
-			for (let i = 0; i < length; i++) {
-				const value = this.readVarint();
-				charCodes.push(value < 128 ? CHAR_VALUE2CODE[value] : value);
-			}
-			// in chunks: spreading a long array into the arguments overflows the stack
-			let text = '';
-			for (let i = 0; i < charCodes.length; i += 8192) {
-				text += String.fromCharCode(...charCodes.slice(i, i + 8192));
-			}
-			return text;
-		} catch (cause) {
-			throw new Error(`Error reading string`, { cause });
 		}
 	}
 }

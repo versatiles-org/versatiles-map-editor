@@ -1,5 +1,5 @@
 import { parseColor } from './color.js';
-import { BASE64_CHARS, CHAR_CODE2VALUE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import { BASE64_CHARS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
 import { boundsOf, centerOf } from './bounds.js';
 import {
 	LEGEND_DEFAULTS,
@@ -324,10 +324,7 @@ export class StateWriter {
 		}
 
 		this.writeBit(true);
-		//if (metadata.heading) {
-		//	this.writeInteger(1, 6);
-		//	this.writeString(metadata.heading);
-		//}
+		// key 1 was the heading of older links
 		// first the words of the format, as they are first in the string table
 		if (metadata.background) {
 			this.writeInteger(2, 6);
@@ -605,13 +602,6 @@ export class StateWriter {
 			this.bits.push(true);
 			this.writeInteger(Math.round(rgb.alpha * 255), 8);
 		}
-	}
-
-	writeString(value: string) {
-		const charCodes = value.split('').map((c) => c.charCodeAt(0));
-		this.writeVarint(charCodes.length);
-		charCodes.forEach((c) => this.writeVarint(c < 128 ? CHAR_CODE2VALUE[c] : c));
-		return value;
 	}
 }
 
