@@ -57,6 +57,7 @@ describe('color palette', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray(['#ff0000'], (c) => writer.writeColor(c));
+		writer.writeVarint(0); // no strings
 		writer.writeBit(false); // no camera
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin

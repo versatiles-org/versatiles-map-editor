@@ -153,13 +153,15 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 ## Format version
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
-this version is read; a later version can be told apart by it. Then come the palette, the camera
-(`map`, optional: where the author's editor looks), the resolution, the origin of the coordinates,
+this version is read; a later version can be told apart by it. Then come the palette, the string
+table, the camera (`map`, optional: where the author's editor looks), the resolution, the origin of the coordinates,
 the frame (optional: the visible area of a shared map), the metadata and the elements. To keep
 hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
+- the title, the labels, the legend labels and the popups are stored once in a string table, in
+  the order they are written, and referenced by 1 bit for the next new string, else by index;
 - the names of the symbols of all styles and of the legend are stored once in the metadata,
   sorted, each with the length of the beginning it shares with the previous name (e.g.
   `base:icon-`) and the rest, and referenced by index;

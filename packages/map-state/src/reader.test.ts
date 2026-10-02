@@ -267,6 +267,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeInteger(1, 3); // version
 			writer.writeVarint(0); // no colors
+			writer.writeVarint(0); // no strings
 			writer.writeBit(false); // no camera
 			writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 			writer.writeVarint(0, true); // the origin
@@ -283,8 +284,10 @@ describe('StateReader', () => {
 		});
 
 		it('should read a root state', () => {
-			// version 1, no colors, no camera, the resolution, the origin, no frame, no metadata, no elements
-			const reader = StateReader.fromBitString('001' + '000000' + '0' + '001010' + '000000' + '000000' + '0' + '0');
+			// version 1, no colors, no strings, no camera, the resolution, the origin, no frame, no metadata, no elements
+			const reader = StateReader.fromBitString(
+				'001' + '000000' + '000000' + '0' + '001010' + '000000' + '000000' + '0' + '0'
+			);
 			const root = reader.readRoot();
 			expect(root).toStrictEqual({ elements: [] });
 		});
@@ -306,7 +309,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBitString()).toBe(
-				'00100000011000001000111101110101101110111001101011011111000010000000100010011001000010110000000100000110100100110101100000000110100100110101100000'
+				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000000100000110100100110101100000000110100100110101100000'
 			);
 
 			const reader = new StateReader(writer.bits);
@@ -350,7 +353,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JX-AAAAAP-yf_-ABERERERESyEN_pQL_awETIWAg0msA0msQBYUUKAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXmQgIIUCAgMOsIQMOsIWYbECBggQQA'
+				'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYUUKAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXmQgIIUCAgMOsIQMOsIWYbECBggQQA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -362,7 +365,7 @@ describe('StateReader', () => {
 		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
 		// the outline of a polygon, the outline referring to the style of the fill
 		const state = StateReader.fromBase64(
-			'JX-AAAAAP-yf_-ABERERERESyEN_pQL_awETIWAg0msA0msQBYKlSAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXihEgIIUCAgMOsIQMOsIWYbECBggQQA'
+			'JX-AAAAAP-yf_-ABEREREREQCyEN_pQL_awETIWAg0msA0msQBYKlSAAIQFFvAFFvAGk1gGk1gbUpsK4mu6tKTaGcDcox504koQY3IX5AH4m4WSYhoXYVIg4Wo1xJlekpEcUAXihEgIIUCAgMOsIQMOsIWYbECBggQQA'
 		).readRoot();
 		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
 		// at most opaque
@@ -396,11 +399,14 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			// the palette of the colors, which the style refers to
 			writer.writePalette(['#c400ff42']);
+			// the table of the strings, which the label refers to
+			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CxAD_oQAvGMmYi5Nc5EASQIEcJQA');
+			expect(writer.asBase64()).toBe('CxAD_oQRAgRwgAvGMmYi5Nc5EAToA');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
+			reader.readStringTable();
 			expect(reader.readStyle()).toStrictEqual(style);
 			expect(reader.ended()).toBe(true);
 		});
@@ -460,7 +466,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'IVUAACybKM64mNZKaQIZxDUVBNEliU0hXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxQGlCgABzrCjqheziSM-EQoAykiO2hQpK2EGQEAyHbRKYwjkUG2AAyD0IxiewSGUAA'
+				'IVUAAAQZ8IhQrYQZASybKM64mNZKaQIZxDUVBNEliU0hXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxQGlCgABzrCjqheziTAZSRHbQoUwMh20SmMI5FBtgAMg9CMYnsEhlAAA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -633,7 +639,7 @@ describe('legend', () => {
 
 	it('reads the entries of older links, a color and maybe a symbol, as markers and areas', () => {
 		// written before: a blue anchor, and a translucent red swatch
-		expect(decodeState('IgAAf7_AADAAAASAgGCmDCDjRBiGFjEAzEEBADOzCGQoMaQAQjIDCQCGAAA').meta).toStrictEqual({
+		expect(decodeState('IgAAf7_AADACHZhDIUGNIEBhIBDAAASAgGCmDCDjRBiGFjEAzEEBADgIRwAAA').meta).toStrictEqual({
 			legend: {
 				entries: [
 					{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },
@@ -691,7 +697,7 @@ describe('viewer', () => {
 
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IX-AAAAACGJBhCAYQYQAKAA').meta).toStrictEqual({
+		expect(decodeState('IX-AAAIIMIAACGJBhCAcAFAAA').meta).toStrictEqual({
 			legend: {
 				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
 			},

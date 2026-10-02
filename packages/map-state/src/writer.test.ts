@@ -168,7 +168,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JH-AAAA_wAAAH-__8AWQhv9KBf7WAiZCwEGk1gGk1iALyoQABCAot4Aot4A0msA0msQoCAxgYdYQgYdYQgaTWAaTWAaTWAaTWIUCBCgYEBZdrEBZdrEigGEEBhAA'
+			'JH-AAAA_wAAAH-__8AAWQhv9KBf7WAiZCwEGk1gGk1iALyoQABCAot4Aot4A0msA0msQoCAxgYdYQgYdYQgaTWAaTWAaTWAaTWIUCBCgYEBZdrEBZdrEigGEEBhAA'
 		);
 	});
 
@@ -181,13 +181,15 @@ describe('StateWriter', () => {
 			},
 			elements: []
 		});
-		expect(writer.asBitString()).toBe('001000000101100100000000000000000000000000000000000');
+		expect(writer.asBitString()).toBe('001000000000000101100100000000000000000000000000000000000');
 	});
 
 	it('should write a style correctly', () => {
 		const writer = new StateWriter();
 		// the palette of the colors, which the style refers to
 		writer.writePalette(['#ff0000']);
+		// the table of the strings, which the label refers to
+		writer.writeStringTable(['test']);
 		writer.writeStyle({
 			halo: 1.5,
 			pattern: 3,
@@ -199,7 +201,7 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('C_wAAAC8YyZiLk1zkQBJAgRwlA');
+		expect(writer.asBase64()).toBe('C_wAABECBHCAC8YyZiLk1zkQBOg');
 	});
 
 	it('should write a RGB color correctly', () => {

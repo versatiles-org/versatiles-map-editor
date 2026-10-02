@@ -34,6 +34,10 @@ export class StateReader {
 	private palette: string[] = [];
 	// the names of the symbols, which are referenced by index (see `readSymbols`)
 	private symbols: string[] = [];
+	// the strings of the string table (see `readStringTable`)
+	private strings: string[] = [];
+	// 1 + the highest index of the string table referenced so far (see `readStringRef`)
+	private nextString = 0;
 	// the styles read so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -166,6 +170,7 @@ export class StateReader {
 			const version = this.readInteger(3);
 			if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
 			this.readPalette();
+			this.readStringTable();
 			this.symbols = [];
 			this.styleHistory = new StyleHistory();
 
@@ -297,7 +302,7 @@ export class StateReader {
 						metadata.mapLabelsOnTop = true;
 						break;
 					case 9:
-						metadata.title = this.readString();
+						metadata.title = this.readStringRef();
 						break;
 					case 10:
 						metadata.viewer = this.readViewer();
@@ -453,7 +458,7 @@ export class StateReader {
 					old = { ...old, color: this.readColorValue() };
 					break;
 				case 3:
-					label = this.readString();
+					label = this.readStringRef();
 					break;
 				case 4:
 					old = { ...old, symbol: this.readSymbolValue() };
@@ -483,7 +488,7 @@ export class StateReader {
 					case 0:
 						return popup;
 					case 1:
-						popup.text = this.readString();
+						popup.text = this.readStringRef();
 						break;
 					default:
 						throw new Error(`Invalid popup key: ${key}`);
@@ -544,7 +549,7 @@ export class StateReader {
 					style.color = this.readColorValue();
 					break;
 				case 9:
-					style.label = this.readString();
+					style.label = this.readStringRef();
 					break;
 				case 10:
 					style.visible = false;
@@ -589,6 +594,21 @@ export class StateReader {
 			previous = previous.slice(0, shared) + this.readString();
 			return previous;
 		});
+	}
+
+	/** The title, the labels and the popups, each once, which are referenced afterwards. */
+	readStringTable() {
+		this.strings = this.readArray(() => this.readString());
+		this.nextString = 0;
+	}
+
+	/** See `StateWriter.writeStringRef`. */
+	readStringRef(): string {
+		const index = this.readBit() ? this.nextString : this.readVarint();
+		const value = this.strings[index];
+		if (value === undefined) throw new Error(`Invalid string index: ${index}`);
+		this.nextString = Math.max(this.nextString, index + 1);
+		return value;
 	}
 
 	/** A symbol, as its index in the list of symbols. */

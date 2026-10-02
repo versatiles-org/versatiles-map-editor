@@ -32,6 +32,10 @@ export class StateWriter {
 	private palette = new Map<string, number>();
 	// the index of each symbol name in the list of the metadata (see `writeSymbols`)
 	private symbols = new Map<string, number>();
+	// the index of each string in the string table (see `writeStringTable`)
+	private strings = new Map<string, number>();
+	// 1 + the highest index of the string table referenced so far (see `writeStringRef`)
+	private nextString = 0;
 	// the styles written so far
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
@@ -111,6 +115,7 @@ export class StateWriter {
 	writeRoot(root: MapState) {
 		this.writeInteger(CODEC_VERSION, 3);
 		this.writePalette(collectColors(root));
+		this.writeStringTable(collectStrings(root));
 		this.styleHistory = new StyleHistory();
 
 		// the camera, with its own center
@@ -273,7 +278,7 @@ export class StateWriter {
 		}
 		if (metadata.title) {
 			this.writeInteger(9, 6);
-			this.writeString(metadata.title);
+			this.writeStringRef(metadata.title);
 		}
 		if (metadata.labelOverlap === 'hide') {
 			// a flag: the key alone
@@ -401,7 +406,7 @@ export class StateWriter {
 			}
 			if (entry.label) {
 				this.writeInteger(3, 4);
-				this.writeString(entry.label);
+				this.writeStringRef(entry.label);
 			}
 			this.writeInteger(0, 4);
 		});
@@ -413,7 +418,7 @@ export class StateWriter {
 		this.writeBit(true);
 		// key/value pairs like a style, so fields can be added later
 		this.writeInteger(1, 4);
-		this.writeString(popup.text);
+		this.writeStringRef(popup.text);
 		this.writeInteger(0, 4);
 	}
 
@@ -422,15 +427,17 @@ export class StateWriter {
 	 * whichever is shortest.
 	 */
 	writeStyle(style: StateStyle) {
-		let best: boolean[] | undefined;
+		let best: StateWriter | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
 			const writer = this.fork();
 			writer.writeVarint(ref);
 			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
-			if (!best || writer.bits.length < best.length) best = writer.bits;
+			if (!best || writer.bits.length < best.bits.length) best = writer;
 		}
-		// not with a spread: a style with a long label has many bits
-		for (const bit of best!) this.bits.push(bit);
+		// not with a spread: a style can have many bits
+		for (const bit of best!.bits) this.bits.push(bit);
+		// the strings the chosen encoding referenced
+		this.nextString = best!.nextString;
 		this.styleHistory.remember(style);
 	}
 
@@ -469,7 +476,7 @@ export class StateWriter {
 			case 'haloColor':
 				return this.writeColorValue(style[name]!);
 			case 'label':
-				return this.writeString(style.label!);
+				return this.writeStringRef(style.label!);
 			case 'symbol':
 				return this.writeSymbolValue(style.symbol!);
 			case 'visible':
@@ -478,11 +485,13 @@ export class StateWriter {
 		}
 	}
 
-	/** A writer for trying out an encoding, with the same palette. */
+	/** A writer for trying out an encoding, with the same palette, symbols and strings. */
 	private fork(): StateWriter {
 		const writer = new StateWriter({ resolution: this.resolution });
 		writer.palette = this.palette;
 		writer.symbols = this.symbols;
+		writer.strings = this.strings;
+		writer.nextString = this.nextString;
 		return writer;
 	}
 
@@ -524,6 +533,33 @@ export class StateWriter {
 		this.writeVarint(index);
 	}
 
+	/**
+	 * The title, the labels and the popups, each once, in the order they are written, and
+	 * afterwards only a reference (see `writeStringRef`).
+	 */
+	writeStringTable(strings: string[]) {
+		const unique = [...new Set(strings)];
+		this.writeArray(unique, (value) => this.writeString(value));
+		this.strings = new Map(unique.map((value, index) => [value, index]));
+		this.nextString = 0;
+	}
+
+	/**
+	 * A string of the table: 1 bit "1" for the next string not referenced so far, which is the usual
+	 * case, since the table is in the order of the writing. Otherwise "0" and the index.
+	 */
+	writeStringRef(value: string) {
+		const index = this.strings.get(value);
+		if (index === undefined) throw new Error(`String not in the table: ${value}`);
+		if (index === this.nextString) {
+			this.writeBit(true);
+		} else {
+			this.writeBit(false);
+			this.writeVarint(index);
+		}
+		this.nextString = Math.max(this.nextString, index + 1);
+	}
+
 	writeColor(color: string) {
 		const rgb = parseColor(color);
 		if (!rgb) throw new Error(`Invalid color: ${color}`);
@@ -561,6 +597,27 @@ function allStyles(root: MapState): StateStyle[] {
 		...(item.style ? [item.style] : []),
 		...('strokeStyle' in item && item.strokeStyle ? [item.strokeStyle] : [])
 	]);
+}
+
+/**
+ * The strings of the string table, in the order the writer writes them: of the legend, the title,
+ * and of each element.
+ */
+export function collectStrings(root: MapState): string[] {
+	const strings: string[] = [];
+	const ofStyles = (item: { style?: StateStyle; strokeStyle?: StateStyle }) => {
+		for (const style of [item.style, item.strokeStyle]) if (style?.label != null) strings.push(style.label);
+	};
+	for (const entry of root.meta?.legend?.entries ?? []) {
+		ofStyles(entry);
+		if (entry.label) strings.push(entry.label);
+	}
+	if (root.meta?.title) strings.push(root.meta.title);
+	for (const element of root.elements) {
+		ofStyles(element);
+		if (element.popup?.text) strings.push(element.popup.text);
+	}
+	return strings;
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

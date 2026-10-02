@@ -126,7 +126,7 @@ describe('MapDocument', () => {
 				elements: [],
 				map: { center: [1, 2], radius: 312696.8037113758 }
 			});
-			expect(doc.state.getHash()).toBe('IG2haCUQgImQsA');
+			expect(doc.state.getHash()).toBe('IAG2haCUQgImQsA');
 
 			doc.view.map.setCenter({ lng: 12, lat: 34 });
 			doc.view.map.setZoom(5);
@@ -137,7 +137,7 @@ describe('MapDocument', () => {
 			});
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IGxYdVMa_AAriQ0mA');
+			expect(hash).toBe('IAGxYdVMa_AAriQ0mA');
 
 			await doc.setState(decodeState(hash));
 			expect(doc.elements.length).toBe(0);
@@ -162,7 +162,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IG2haCUQgImQsBBdJHEBBVHMgSRwEcIA');
+			expect(hash).toBe('IARHARwm2haCUQgImQsBBdJHEBBVHMgTA');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -187,7 +187,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IVXm97bQtBKIQETIWBCAAA0msA0msQIAA');
+			expect(hash).toBe('IVXm94DbQtBKIQETIWBCAAA0msA0msQIAA');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -214,7 +214,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IlXm94SNFZtoWglEICJkLAxAAAaTWAaTWIEABAgIA');
+			expect(hash).toBe('IlXm94SNFYBtoWglEICJkLAxAAAaTWAaTWIEABAgIA');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;

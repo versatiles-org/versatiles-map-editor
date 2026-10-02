@@ -86,8 +86,12 @@ describe('symbols', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeVarint(0); // no colors
+		writer.writeVarint(0); // no strings
 		writer.writeBit(false); // no map
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
+		writer.writeVarint(0, true); // the origin
+		writer.writeVarint(0, true);
+		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata, so no symbols
 		writer.writeInteger(1, 3); // marker
 		writer.writeVarint(0, true);
@@ -96,7 +100,9 @@ describe('symbols', () => {
 		writer.writeVarint(0); // no reference
 		writer.writeInteger(13, 4); // symbol
 		writer.writeString('icons:anchor');
-		expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
+			expect.objectContaining({ cause: expect.objectContaining({ message: 'Error reading marker element' }) })
+		);
 	});
 
 	it('reject a name that shares more than the previous one has', () => {
