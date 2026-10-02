@@ -350,6 +350,27 @@ describe('SessionSync', () => {
 			location.hash = '';
 		});
 
+		it('read only the current states of the maps to compare them and to name them, not their histories', async () => {
+			const other = store.create(step([marker(1)]), { camera });
+			for (let i = 2; i < 10; i++) store.push(other, step([marker(i)]));
+			// changed later, so it is opened
+			vi.spyOn(Date, 'now').mockReturnValue(Date.now() + 1000);
+			store.create(step([marker(13.4)]), { camera });
+			vi.restoreAllMocks();
+			await sync.attach(doc, await sync.prepare(''));
+			expect(doc.state.history.undoEnabled).toBe(false);
+			const load = vi.spyOn(store, 'load');
+
+			expect((await sync.recent()).map(({ name }) => name)).toStrictEqual(['1 marker', '1 marker']);
+			// a link with the map of a stored one opens that, with its history
+			location.hash = encodeState({ map: camera, elements: [marker(9)] });
+			dispatchEvent(new HashChangeEvent('hashchange'));
+			await vi.waitFor(() => expect(doc.state.history.undoEnabled).toBe(true));
+			// and no other one
+			expect(new Set(load.mock.calls.flat())).toStrictEqual(new Set([other]));
+			location.hash = '';
+		});
+
 		it('opens a map of a file as a new map', async () => {
 			await sync.attach(doc, await sync.prepare(''));
 			await sync.openMap({ meta: { title: 'File' }, elements: [marker(1)] });

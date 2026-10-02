@@ -50,6 +50,13 @@ export interface StoredSession {
 	position: number;
 }
 
+/** A session with only its current state, e.g. to compare it, which is quicker than its whole history. */
+export interface CurrentSession {
+	session: SessionRecord;
+	/** The encoded current state. */
+	state: string;
+}
+
 function request<T>(req: IDBRequest<T>): Promise<T> {
 	return new Promise((resolve, reject) => {
 		req.onsuccess = () => resolve(req.result);
@@ -159,6 +166,16 @@ export class SessionStore {
 		const tx = this.#db.transaction(SESSIONS, 'readonly');
 		const sessions = await request(tx.objectStore(SESSIONS).getAll() as IDBRequest<SessionRecord[]>);
 		return sessions.sort((a, b) => b.changed - a.changed);
+	}
+
+	/** A session with its current state only, or undefined if there is none with this id or it has no state. */
+	public async loadCurrent(id: string): Promise<CurrentSession | undefined> {
+		await this.flush();
+		const tx = this.#db.transaction([SESSIONS, STEPS], 'readonly');
+		const session = await request(tx.objectStore(SESSIONS).get(id) as IDBRequest<SessionRecord | undefined>);
+		if (!session || session.position < session.first) return undefined;
+		const step = await request(tx.objectStore(STEPS).get([id, session.position]) as IDBRequest<StepRecord | undefined>);
+		return step ? { session, state: step.state } : undefined;
 	}
 
 	/** A session with its history, or undefined if there is none with this id. */

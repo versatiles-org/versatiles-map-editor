@@ -48,6 +48,18 @@ describe('SessionStore', () => {
 		expect((await store.load(id))?.position).toBe(0);
 	});
 
+	it('reads only the current state of a session, also after undo and with trimmed steps', async () => {
+		const id = store.create('A');
+		store.push(id, 'B');
+		store.push(id, 'C');
+		expect(await store.loadCurrent(id)).toMatchObject({ session: { id }, state: 'C' });
+		store.setUndone(id, 1);
+		expect((await store.loadCurrent(id))?.state).toBe('B');
+		for (let i = 0; i < MAX_STEPS + 5; i++) store.push(id, String(i));
+		expect((await store.loadCurrent(id))?.state).toBe(String(MAX_STEPS + 4));
+		expect(await store.loadCurrent('none')).toBeUndefined();
+	});
+
 	it('keeps at most the last steps', async () => {
 		const id = store.create('0');
 		for (let i = 1; i < MAX_STEPS + 20; i++) store.push(id, String(i));

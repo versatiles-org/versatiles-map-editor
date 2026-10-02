@@ -1,6 +1,6 @@
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
-import { SessionStore, type StoredSession } from './session_store.js';
+import { SessionStore, type CurrentSession, type StoredSession } from './session_store.js';
 import { notify } from './notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
 import { countTypes } from './components/element_names.js';
@@ -144,12 +144,14 @@ export class SessionSync {
 			return undefined;
 		}
 		const encoded = encodeStep(state);
-		// a session with this map that no other tab has open
+		// a session with this map that no other tab has open, with its history
 		let stored: StoredSession | undefined;
 		try {
-			stored = await this.#findSession(
-				async (stored) => stored.states[stored.position] === encoded && (await this.#locks.acquire(stored.session.id))
+			const found = await this.#findSession(
+				async ({ session, state }) => state === encoded && (await this.#locks.acquire(session.id))
 			);
+			stored = found && (await this.#store?.load(found.session.id));
+			if (found && !stored) this.#locks.release(found.session.id);
 		} catch (error) {
 			// e.g. a closed storage: the map of the link opens as a new map
 			console.warn('Failed to look for the map of the link in the storage', error);
@@ -160,9 +162,9 @@ export class SessionSync {
 
 	/** The current state of the most recently changed map, with its camera, e.g. for the viewer on phones. */
 	public async last(): Promise<MapState | undefined> {
-		const stored = await this.#findSession(async (stored) => currentState(stored) !== undefined);
-		const state = stored && currentState(stored);
-		return stored && state ? { ...state, map: stored.session.camera } : undefined;
+		const found = await this.#findSession(async ({ state }) => decodeStep(state) !== undefined);
+		const state = found && decodeStep(found.state);
+		return found && state ? { ...state, map: found.session.camera } : undefined;
 	}
 
 	/** The most recently changed maps, e.g. for the menu. */
@@ -176,9 +178,9 @@ export class SessionSync {
 				let name = title;
 				if (!name) {
 					// what the map contains, e.g. not of a map of an older format
-					const stored = await store.load(id);
-					const state = stored && currentState(stored);
-					name = state ? countTypes(state.elements.map((e) => e.type)) : stored ? 'Unreadable map' : '';
+					const current = await store.loadCurrent(id);
+					const state = current && decodeStep(current.state);
+					name = state ? countTypes(state.elements.map((e) => e.type)) : current ? 'Unreadable map' : '';
 				}
 				return {
 					id,
@@ -383,13 +385,16 @@ export class SessionSync {
 			});
 	};
 
-	/** The most recently changed of the recent sessions that `match`. */
-	async #findSession(match: (stored: StoredSession) => Promise<boolean>): Promise<StoredSession | undefined> {
+	/**
+	 * The most recently changed of the recent sessions whose current state `match`es: only that
+	 * state, which is quicker than reading the histories, of up to `MAX_BYTES` each.
+	 */
+	async #findSession(match: (current: CurrentSession) => Promise<boolean>): Promise<CurrentSession | undefined> {
 		if (!this.#store) return undefined;
 		const sessions = await this.#store.list();
 		for (const session of sessions.slice(0, RECENT)) {
-			const stored = await this.#store.load(session.id);
-			if (stored && stored.states.length > 0 && (await match(stored))) return stored;
+			const current = await this.#store.loadCurrent(session.id);
+			if (current && (await match(current))) return current;
 		}
 		return undefined;
 	}
@@ -400,9 +405,14 @@ export class SessionSync {
  * e.g. one saved in an older format.
  */
 function currentState(stored: StoredSession): MapState | undefined {
-	if (stored.states.length === 0) return undefined;
+	return decodeStep(stored.states[stored.position]);
+}
+
+/** A stored state, or undefined if there is none or this editor cannot read it. */
+function decodeStep(state: string | undefined): MapState | undefined {
+	if (state === undefined) return undefined;
 	try {
-		return decodeState(stored.states[stored.position]);
+		return decodeState(state);
 	} catch {
 		return undefined;
 	}
