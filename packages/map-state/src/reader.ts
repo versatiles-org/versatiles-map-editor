@@ -15,7 +15,17 @@ import type {
 	StateStyle,
 	StateViewer
 } from './types.js';
-import { BASE64_CODE2BITS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import {
+	BASE64_CODE2BITS,
+	CODEC_VERSION,
+	ELEMENT_KEYS,
+	END_KEY,
+	LEGEND_ENTRY_KEYS,
+	LEGEND_KEYS,
+	METADATA_KEYS,
+	ORIGIN_SCALE,
+	POPUP_KEYS
+} from './constants.js';
 import {
 	FILL_PATTERN_NAMES,
 	LABEL_ALIGN_NAMES,
@@ -232,18 +242,18 @@ export class StateReader {
 				const { key, repeat } = this.readElementType(previous);
 				const before = repeat ? previous : undefined;
 				switch (key) {
-					case 0:
+					case END_KEY:
 						return root;
-					case 1:
+					case ELEMENT_KEYS.marker:
 						previous = this.readElementMarker(before);
 						break;
-					case 2:
+					case ELEMENT_KEYS.line:
 						previous = this.readElementLine(before);
 						break;
-					case 3:
+					case ELEMENT_KEYS.polygon:
 						previous = this.readElementPolygon(before);
 						break;
-					case 4:
+					case ELEMENT_KEYS.circle:
 						previous = this.readElementCircle(before);
 						break;
 					default:
@@ -335,30 +345,30 @@ export class StateReader {
 			while (true) {
 				const key = this.readInteger(6);
 				switch (key) {
-					case 0:
+					case END_KEY:
 						return metadata;
-					case 2:
+					case METADATA_KEYS.background:
 						metadata.background = parseBackground(this.readStringRef(true));
 						break;
-					case 3:
+					case METADATA_KEYS.legend:
 						metadata.legend = this.readLegend();
 						break;
-					case 4:
+					case METADATA_KEYS.colorScheme:
 						metadata.colorScheme = this.readStringRef(true);
 						break;
-					case 7:
+					case METADATA_KEYS.mapLabelsOnTop:
 						metadata.mapLabelsOnTop = true;
 						break;
-					case 9:
+					case METADATA_KEYS.title:
 						metadata.title = this.readStringRef();
 						break;
-					case 10:
+					case METADATA_KEYS.viewer:
 						metadata.viewer = this.readViewer();
 						break;
-					case 11:
+					case METADATA_KEYS.labelOverlap:
 						metadata.labelOverlap = 'hide';
 						break;
-					case 12: {
+					case METADATA_KEYS.labelMinZoom: {
 						// in tenths of a zoom level
 						const zoom = sanitizeLabelMinZoom(this.readVarint() / 10);
 						if (zoom === undefined) throw new Error('Invalid zoom level of labels');
@@ -462,26 +472,26 @@ export class StateReader {
 			while (true) {
 				const key = this.readInteger(4);
 				switch (key) {
-					case 0:
+					case END_KEY:
 						return legend;
-					case 2:
+					case LEGEND_KEYS.layout:
 						legend.layout = LEGEND_LAYOUTS[this.readVarint()];
 						if (!legend.layout) throw new Error('Invalid legend layout');
 						break;
-					case 3:
+					case LEGEND_KEYS.entries:
 						legend.entries = this.readArray(() => this.readLegendEntry());
 						break;
-					case 4:
+					case LEGEND_KEYS.font:
 						legend.font = LEGEND_FONTS[this.readVarint()];
 						if (!legend.font) throw new Error('Invalid legend font');
 						break;
-					case 5:
+					case LEGEND_KEYS.bold:
 						legend.bold = true;
 						break;
-					case 6:
+					case LEGEND_KEYS.italic:
 						legend.italic = true;
 						break;
-					case 7:
+					case LEGEND_KEYS.theme:
 						legend.theme = LEGEND_THEMES[this.readVarint()];
 						if (!legend.theme) throw new Error('Invalid legend theme');
 						break;
@@ -501,7 +511,7 @@ export class StateReader {
 			const keys = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
 			while (true) {
 				const key = this.readInteger(4);
-				if (key === 0) return viewer as StateViewer;
+				if (key === END_KEY) return viewer as StateViewer;
 				const name = keys[key - 1];
 				if (!name) throw new Error(`Invalid viewer key: ${key}`);
 				const choice = VIEWER_CHOICES[name][this.readVarint()];
@@ -522,20 +532,20 @@ export class StateReader {
 		while (true) {
 			const key = this.readInteger(4);
 			switch (key) {
-				case 0:
+				case END_KEY:
 					if (!type) throw new Error('Legend entry without type');
 					return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label };
-				case 3:
+				case LEGEND_ENTRY_KEYS.label:
 					label = this.readStringRef();
 					break;
-				case 5:
+				case LEGEND_ENTRY_KEYS.type:
 					type = LEGEND_ENTRY_TYPES[this.readVarint()];
 					if (!type) throw new Error('Invalid legend entry type');
 					break;
-				case 6:
+				case LEGEND_ENTRY_KEYS.style:
 					style = this.readStyle();
 					break;
-				case 7:
+				case LEGEND_ENTRY_KEYS.strokeStyle:
 					strokeStyle = this.readStyle();
 					break;
 				default:
@@ -552,9 +562,9 @@ export class StateReader {
 			while (true) {
 				const key = this.readInteger(4);
 				switch (key) {
-					case 0:
+					case END_KEY:
 						return popup;
-					case 1:
+					case POPUP_KEYS.text:
 						popup.text = this.readStringRef();
 						break;
 					default:
@@ -591,62 +601,59 @@ export class StateReader {
 	readStylePatch(style: StateStyle): StateStyle {
 		while (true) {
 			const key = this.readStyleKey();
-			switch (key) {
-				case 0:
-					return style;
-				case 1:
+			if (key === END_KEY) return style;
+			if (key === STYLE_REMOVE_KEY) {
+				const removed = this.readStyleKey();
+				const field = STYLE_FIELDS.find((f) => f.key === removed);
+				if (!field) throw new Error(`Invalid state key: ${removed}`);
+				delete style[field.name];
+				continue;
+			}
+			// the keys of the fields as the writer has them
+			const field = STYLE_FIELDS.find((f) => f.key === key);
+			if (!field) throw new Error(`Invalid state key: ${key}`);
+			switch (field.name) {
+				case 'halo':
 					style.halo = this.readVarint() / 10;
 					break;
-				case 3:
+				case 'pattern':
 					// of an area or of a line, which have as many
 					style.pattern = this.readIndex(Math.max(FILL_PATTERN_NAMES.length, STROKE_STYLE_NAMES.length));
 					break;
-				case 4:
+				case 'rotate':
 					style.rotate = this.readVarint(true);
 					if (Math.abs(style.rotate) > 180) throw new Error(`Invalid rotation: ${style.rotate}`);
 					break;
-				case 5:
+				case 'size':
 					style.size = this.readVarint() / 10;
 					break;
-				case 6:
+				case 'width':
 					style.width = this.readVarint() / 10;
 					break;
-				case 7:
+				case 'align':
 					style.align = this.readIndex(LABEL_ALIGN_NAMES.length);
 					break;
-				case 8:
-					style.color = this.readColorValue();
+				case 'color':
+				case 'labelColor':
+				case 'haloColor':
+					style[field.name] = this.readColorValue();
 					break;
-				case 9:
+				case 'label':
 					style.label = this.readStringRef();
 					break;
-				case 10:
+				case 'visible':
+					// the key alone means "false"
 					style.visible = false;
 					break;
-				case 11:
-					style.labelColor = this.readColorValue();
-					break;
-				case 12:
-					style.haloColor = this.readColorValue();
-					break;
-				case 13:
+				case 'symbol':
 					style.symbol = this.readStringRef(true);
 					break;
-				case 16:
+				case 'labelSize':
 					style.labelSize = this.readVarint() / 10;
 					break;
-				case 17:
+				case 'font':
 					style.font = this.readStringRef(true);
 					break;
-				case STYLE_REMOVE_KEY: {
-					const removed = this.readStyleKey();
-					const field = STYLE_FIELDS.find((f) => f.key === removed);
-					if (!field) throw new Error(`Invalid state key: ${removed}`);
-					delete style[field.name];
-					break;
-				}
-				default:
-					throw new Error(`Invalid state key: ${key}`);
 			}
 		}
 	}
@@ -741,7 +748,6 @@ export class StateReader {
 }
 
 /** The keys of the element types. */
-const ELEMENT_KEYS: Record<StateElement['type'], number> = { marker: 1, line: 2, polygon: 3, circle: 4 };
 
 function parseBackground(json: string): StateBackground {
 	const background = sanitizeBackground(JSON.parse(json));

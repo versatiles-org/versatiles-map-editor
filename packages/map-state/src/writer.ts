@@ -1,5 +1,15 @@
 import { parseColor } from './color.js';
-import { BASE64_CHARS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
+import {
+	BASE64_CHARS,
+	CODEC_VERSION,
+	ELEMENT_KEYS,
+	END_KEY,
+	LEGEND_ENTRY_KEYS,
+	LEGEND_KEYS,
+	METADATA_KEYS,
+	ORIGIN_SCALE,
+	POPUP_KEYS
+} from './constants.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS, rgbHex } from './color_schemes.js';
 import { boundsOf, centerOf } from './bounds.js';
 import {
@@ -357,42 +367,42 @@ export class StateWriter {
 		this.writeBit(true);
 		// first the words of the format, as they are first in the string table
 		if (metadata.background) {
-			this.writeInteger(2, 6);
+			this.writeInteger(METADATA_KEYS.background, 6);
 			// as JSON, so any option of @versatiles/style can be stored
 			this.writeStringRef(JSON.stringify(metadata.background), true);
 		}
 		if (metadata.colorScheme) {
-			this.writeInteger(4, 6);
+			this.writeInteger(METADATA_KEYS.colorScheme, 6);
 			this.writeStringRef(metadata.colorScheme, true);
 		}
 		if (metadata.legend) {
-			this.writeInteger(3, 6);
+			this.writeInteger(METADATA_KEYS.legend, 6);
 			this.writeLegend(metadata.legend);
 		}
 		if (metadata.mapLabelsOnTop) {
 			// a flag: the key alone
-			this.writeInteger(7, 6);
+			this.writeInteger(METADATA_KEYS.mapLabelsOnTop, 6);
 		}
 		if (metadata.title) {
-			this.writeInteger(9, 6);
+			this.writeInteger(METADATA_KEYS.title, 6);
 			this.writeStringRef(metadata.title);
 		}
 		if (metadata.labelOverlap === 'hide') {
 			// a flag: the key alone
-			this.writeInteger(11, 6);
+			this.writeInteger(METADATA_KEYS.labelOverlap, 6);
 		}
 		const labelMinZoom = sanitizeLabelMinZoom(metadata.labelMinZoom);
 		if (labelMinZoom !== undefined) {
-			this.writeInteger(12, 6);
+			this.writeInteger(METADATA_KEYS.labelMinZoom, 6);
 			// in tenths of a zoom level
 			this.writeVarint(Math.round(labelMinZoom * 10));
 		}
 		const viewer = removeViewerDefaults(metadata.viewer);
 		if (viewer) {
-			this.writeInteger(10, 6);
+			this.writeInteger(METADATA_KEYS.viewer, 6);
 			this.writeViewer(viewer);
 		}
-		this.writeInteger(0, 6);
+		this.writeInteger(END_KEY, 6);
 	}
 
 	/** `repeat`: the element has the type and the styles of the element before, which are not written. */
@@ -437,57 +447,57 @@ export class StateWriter {
 			this.writeInteger(i + 1, 4);
 			this.writeVarint((choices as readonly string[]).indexOf(choice));
 		});
-		this.writeInteger(0, 4);
+		this.writeInteger(END_KEY, 4);
 	}
 
 	// key/value pairs like a style, so fields can be added later
 	writeLegend(legend: StateLegend) {
 		if (legend.layout && legend.layout !== LEGEND_DEFAULTS.layout) {
-			this.writeInteger(2, 4);
+			this.writeInteger(LEGEND_KEYS.layout, 4);
 			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));
 		}
 		if (legend.font && legend.font !== LEGEND_DEFAULTS.font) {
-			this.writeInteger(4, 4);
+			this.writeInteger(LEGEND_KEYS.font, 4);
 			this.writeVarint(LEGEND_FONTS.indexOf(legend.font));
 		}
 		// only the key: they are false without it
-		if (legend.bold) this.writeInteger(5, 4);
-		if (legend.italic) this.writeInteger(6, 4);
+		if (legend.bold) this.writeInteger(LEGEND_KEYS.bold, 4);
+		if (legend.italic) this.writeInteger(LEGEND_KEYS.italic, 4);
 		if (legend.theme && legend.theme !== LEGEND_DEFAULTS.theme) {
-			this.writeInteger(7, 4);
+			this.writeInteger(LEGEND_KEYS.theme, 4);
 			this.writeVarint(LEGEND_THEMES.indexOf(legend.theme));
 		}
-		this.writeInteger(3, 4);
+		this.writeInteger(LEGEND_KEYS.entries, 4);
 		this.writeArray(legend.entries, (entry) => {
 			const type = LEGEND_ENTRY_TYPES.indexOf(entry.type);
 			if (type < 0) throw new Error(`Invalid legend entry type: ${entry.type}`);
-			this.writeInteger(5, 4);
+			this.writeInteger(LEGEND_ENTRY_KEYS.type, 4);
 			this.writeVarint(type);
 			// the styles like those of elements, which can refer to them
 			if (entry.style) {
-				this.writeInteger(6, 4);
+				this.writeInteger(LEGEND_ENTRY_KEYS.style, 4);
 				this.writeStyle(entry.style);
 			}
 			if (entry.strokeStyle) {
-				this.writeInteger(7, 4);
+				this.writeInteger(LEGEND_ENTRY_KEYS.strokeStyle, 4);
 				this.writeStyle(entry.strokeStyle);
 			}
 			if (entry.label) {
-				this.writeInteger(3, 4);
+				this.writeInteger(LEGEND_ENTRY_KEYS.label, 4);
 				this.writeStringRef(entry.label);
 			}
-			this.writeInteger(0, 4);
+			this.writeInteger(END_KEY, 4);
 		});
-		this.writeInteger(0, 4);
+		this.writeInteger(END_KEY, 4);
 	}
 
 	writePopup(popup?: StatePopup) {
 		if (!popup?.text) return this.writeBit(false);
 		this.writeBit(true);
 		// key/value pairs like a style, so fields can be added later
-		this.writeInteger(1, 4);
+		this.writeInteger(POPUP_KEYS.text, 4);
 		this.writeStringRef(popup.text);
-		this.writeInteger(0, 4);
+		this.writeInteger(END_KEY, 4);
 	}
 
 	/**
@@ -522,7 +532,7 @@ export class StateWriter {
 			this.writeStyleKey(field.key);
 			this.writeStyleValue(field.name, style);
 		}
-		this.writeInteger(0, 4);
+		this.writeInteger(END_KEY, 4);
 	}
 
 	/** The key of a style field: 4 bits, or `STYLE_EXTENDED_KEY` and 4 bits for keys from 16. */
@@ -766,7 +776,6 @@ export function bestExpGolombParameter(values: number[]): number {
 }
 
 /** The keys of the element types. */
-const ELEMENT_KEYS: Record<StateElement['type'], number> = { marker: 1, line: 2, polygon: 3, circle: 4 };
 
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
 function repeatKey(element: StateElement): string {
