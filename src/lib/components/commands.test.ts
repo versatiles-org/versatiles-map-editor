@@ -3,6 +3,7 @@ import { MapDocumentInteractive } from '../map_document_interactive.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import {
 	addLegendEntry,
+	addToLegend,
 	canCopyStyle,
 	canPasteStyle,
 	copyStyle,
@@ -162,5 +163,72 @@ describe('addLegendEntry', () => {
 
 		doc.state.undo();
 		expect(doc.legend?.entries).toHaveLength(1);
+	});
+});
+
+describe('addToLegend', () => {
+	let doc: MapDocumentInteractive;
+	beforeEach(() => {
+		doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+	});
+	const points: [number, number][] = [
+		[0, 0],
+		[1, 0],
+		[0, 1]
+	];
+
+	it('adds an entry with the look of each element, and its label or popup text', () => {
+		const cafe = doc.addElement({
+			type: 'marker',
+			point: [0, 0],
+			style: { color: '#0000ff', symbol: 'base:icon-cafe', label: 'Cafe', labelColor: '#000000', halo: 2 }
+		});
+		const route = doc.addElement({ type: 'line', points, style: { color: '#d55e00', pattern: 1, width: 4 } });
+		route.popup = 'Bus 100\nevery 10 minutes';
+		const park = doc.addElement({
+			type: 'polygon',
+			points,
+			style: { color: '#00ff004d', pattern: 2 },
+			strokeStyle: { color: '#00ff00' }
+		});
+		const zone = doc.addElement({ type: 'circle', point: [0, 0], radius: 100, strokeStyle: { visible: false } });
+		doc.selection.selectElements([cafe, route, park, zone]);
+
+		expect(addToLegend(doc)).toBe(4);
+		expect(doc.legend?.entries).toStrictEqual([
+			// without the label of the marker, which is the entry's text
+			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' },
+			{ type: 'line', style: { color: '#d55e00', pattern: 1, width: 4 }, label: 'Bus 100' },
+			{ type: 'polygon', style: { color: '#00ff004d', pattern: 2 }, strokeStyle: { color: '#00ff00' }, label: '' },
+			// a circle is an area
+			{ type: 'polygon', strokeStyle: { visible: false }, label: '' }
+		]);
+		doc.state.undo();
+		expect(doc.legend).toBeUndefined();
+	});
+
+	it('adds each look once, and none that the legend shows already', () => {
+		const markers = ['Boots', 'Boots', 'Superdrug'].map((label) =>
+			doc.addElement({ type: 'marker', point: [0, 0], style: { color: '#009e73', symbol: 'base:icon-pill', label } })
+		);
+		doc.selection.selectElements(markers.slice(0, 2));
+		addToLegend(doc);
+		// the text that they share
+		expect(doc.legend?.entries).toStrictEqual([
+			{ type: 'marker', style: { color: '#009e73', symbol: 'base:icon-pill' }, label: 'Boots' }
+		]);
+
+		doc.state.undo();
+		doc.selection.selectElements(markers);
+		addToLegend(doc);
+		// different texts: none
+		expect(doc.legend?.entries.map((entry) => entry.label)).toStrictEqual(['']);
+
+		// shown already: no change, and no undo step
+		const before = doc.legend;
+		expect(addToLegend(doc)).toBe(0);
+		expect(doc.legend).toBe(before);
+		doc.state.undo();
+		expect(doc.legend).toBeUndefined();
 	});
 });

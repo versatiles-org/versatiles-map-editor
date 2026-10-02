@@ -586,6 +586,40 @@ test(
 	}
 );
 
+test('adding the look of an element to the legend', async ({ page }) => {
+	const route = {
+		type: 'line' as const,
+		points: [
+			[13.39, 52.5],
+			[13.41, 52.5]
+		] as [number, number][]
+	};
+	const elements = [{ ...route, style: { color: '#d55e00', pattern: 1, width: 4 } }];
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements }));
+	await waitForMapIsReady(page);
+	await page.keyboard.press('e');
+	await page.getByRole('listbox', { name: 'Elements' }).getByRole('option').first().click();
+	const panel = page.locator('.sidebar');
+	await panel.getByRole('textbox', { name: 'Popup' }).fill('Bus 100');
+	await panel.getByRole('textbox', { name: 'Popup' }).blur();
+
+	await panel.getByRole('button', { name: 'Add to legend' }).click();
+	await expect(panel.getByRole('region', { name: 'Legend' }).getByRole('status')).toHaveText(
+		'Added an entry to the legend.'
+	);
+	await expect
+		.poll(async () => (await storedState(page)).meta?.legend?.entries)
+		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', pattern: 1, width: 4 }, label: 'Bus 100' }]);
+	await expect(page.getByRole('list', { name: 'Legend' }).getByRole('listitem')).toHaveText(['Bus 100']);
+
+	// once
+	await panel.getByRole('button', { name: 'Add to legend' }).click();
+	await expect(panel.getByRole('region', { name: 'Legend' }).getByRole('status')).toHaveText(
+		'The legend shows this style already.'
+	);
+	await expect.poll(async () => (await storedState(page)).meta?.legend?.entries).toHaveLength(1);
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

@@ -6,7 +6,8 @@
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
-	import { Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
+	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
+	import { addToLegend } from '$lib/components/commands.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
 
@@ -29,6 +30,13 @@
 	// lines and the outlines of polygons and circles
 	const strokeLayers = $derived(layersOfRole('stroke'));
 	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
+
+	// what "Add to legend" did, until another selection
+	let added: number | undefined = $state();
+	$effect(() => {
+		void elements;
+		added = undefined;
+	});
 </script>
 
 {#key elements}
@@ -71,6 +79,26 @@
 			/>
 		</InspectorSection>
 	{/if}
+	<!-- an entry with the look of the element, of each look of the selected elements -->
+	<InspectorSection title="Legend">
+		<ButtonGroup>
+			<Button onclick={() => (added = addToLegend(doc))}>Add to legend</Button>
+		</ButtonGroup>
+		<!-- announced, e.g. by screen readers -->
+		<div role="status">
+			<Hint>
+				{#if added === undefined}
+					{elements.length > 1
+						? 'An entry for each style of the elements, with the label or popup text that they share.'
+						: 'An entry with its style, and its label or popup text.'}
+				{:else if added === 0}
+					The legend shows {elements.length > 1 ? 'these styles' : 'this style'} already.
+				{:else}
+					Added {added === 1 ? 'an entry' : `${added} entries`} to the legend.
+				{/if}
+			</Hint>
+		</div>
+	</InspectorSection>
 	{#if single?.getStyleLayers().stroke}
 		<InspectorSection title="Info">
 			{#each single.measurements.map((m) => measurementText(m)) as { label, value }, i (label)}
