@@ -155,9 +155,10 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
 this version is read; a later version can be told apart by it. Then come the palette, the string
-table, the camera (`map`, optional: where the author's editor looks), the resolution, the origin of the coordinates,
-the order of the code of the element coordinates, the frame (optional: the visible area of a shared map), the metadata and the elements. To keep
-hashes short:
+table, the camera (`map`, optional: where the author's editor looks), the resolution, the origin
+of the coordinates, the order of the code of the element coordinates, whether points are
+relative, the frame (optional: the visible area of a shared map), the metadata and the elements.
+To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
@@ -186,7 +187,8 @@ hashes short:
 resolution })` takes it in meters: the default is 1 m; coarser values make shorter hashes, e.g.
   for sharing. The steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer
   chooses per map so they are shortest: a step up to about 2^order costs order + 1 bits, and each
-  doubling 2 bits more;
+  doubling 2 bits more. The points of markers and circles are differences to the point of the
+  marker or circle before, if that is shorter (1 bit), e.g. for points sorted by place;
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.

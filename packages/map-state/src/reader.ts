@@ -46,6 +46,10 @@ export class StateReader {
 	private grid: LocalGrid | undefined;
 	// the order of the Exp-Golomb code of the coordinates of the elements (see `readExpGolomb`)
 	private coordinateOrder = 0;
+	// whether the point of a marker or circle is a difference to the one before, else to the origin
+	private relativePoints = false;
+	// the point of the marker or circle before, on the grid
+	private lastPoint: [number, number] = [0, 0];
 
 	constructor(bits: boolean[]) {
 		this.bits = bits;
@@ -165,10 +169,14 @@ export class StateReader {
 		return this.grid;
 	}
 
-	/** A point of an element, on the grid. */
+	/** See `StateWriter.writeElementPoint`. */
 	readElementPoint(): [number, number] {
 		const order = this.coordinateOrder;
-		return this.elementGrid.fromGrid([this.readExpGolomb(order, true), this.readExpGolomb(order, true)]);
+		const [px, py] = this.relativePoints ? this.lastPoint : [0, 0];
+		const x = px + this.readExpGolomb(order, true);
+		const y = py + this.readExpGolomb(order, true);
+		this.lastPoint = [x, y];
+		return this.elementGrid.fromGrid([x, y]);
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
@@ -207,6 +215,8 @@ export class StateReader {
 			const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
 			this.grid = new LocalGrid(origin, exponent);
 			this.coordinateOrder = this.readInteger(5);
+			this.relativePoints = this.readBit();
+			this.lastPoint = [0, 0];
 
 			const frame = this.readFrame();
 			if (frame) root.frame = frame;

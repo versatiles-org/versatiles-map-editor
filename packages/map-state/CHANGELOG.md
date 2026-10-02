@@ -28,7 +28,8 @@ The first release.
   - coordinates as whole steps from an origin near them, so a link without a camera stays short,
     in steps of 0.00001° × 2^n (n from 0 to 15, in 4 bits: about 1 m to 36 km), which decode to
     at most 5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`;
-    those of the elements in an Exp-Golomb code of the order that makes them shortest;
+    those of the elements in an Exp-Golomb code of the order that makes them shortest, the points
+    of markers and circles as differences to the point before if that is shorter;
 - `frame` in the map state: the visible area (`[west, south, east, north]`, the type `Bounds`),
   which a shared or embedded map shows completely, whatever the size of its window. It is kept in
   the base64 string, in GeoJSON (a member `frame` of the FeatureCollection) and in KML (whose

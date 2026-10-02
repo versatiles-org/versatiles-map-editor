@@ -97,6 +97,7 @@ describe('style references', () => {
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
 		writer.writeInteger(0, 5); // the order of the code of the coordinates
+		writer.writeBit(false); // the points of markers and circles from the origin
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
