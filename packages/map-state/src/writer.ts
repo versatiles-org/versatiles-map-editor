@@ -552,7 +552,8 @@ export class StateWriter {
 	 * afterwards only a reference (see `writeStringRef`). 2 sections: the words of the format
 	 * (`formatStrings`: the background as JSON, the color scheme, the label font, the names of
 	 * symbols), then the others (titles, labels, popups). Their number, and unless 0, the number of
-	 * words of the format, the length of the block in bits and the block (see `encodeStrings`).
+	 * words of the format and the block (see `encodeStrings`), whose length the reader knows from
+	 * decoding it.
 	 */
 	writeStringTable(strings: string[], formatStrings: string[] = []) {
 		const sections: [string[], string[]] = [[...new Set(formatStrings)], [...new Set(strings)]];
@@ -561,7 +562,6 @@ export class StateWriter {
 		if (all.length > 0) {
 			this.writeVarint(sections[0].length);
 			const block = encodeStrings(all, sections[0].length);
-			this.writeVarint(block.length);
 			// not with a spread: the block can have many bits
 			for (const bit of block) this.bits.push(bit);
 		}

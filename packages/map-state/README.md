@@ -167,9 +167,9 @@ To keep hashes short:
   written: the words of the format (the background as JSON, the color scheme, the label font, the
   names of the symbols), then the others (the title, the labels, the legend labels, the popups).
   A field refers to a string of its section by 1 bit for the next new one, else by its index. The
-  table is one block of bits (`string_coder.ts`): an adaptive model predicts each character from
-  the two before it (PPM of order 2 over code points), and an arithmetic coder spends fewer bits
-  on likelier characters. For the words of the format, the model has learned the format's
+  table is one block of bits (`string_coder.ts`), without a length: the decoder knows where it
+  ends. An adaptive model predicts each character from the two before it (PPM of order 2 over
+  code points), and an arithmetic coder spends fewer bits on likelier characters. For the words of the format, the model has learned the format's
   vocabulary before (`string_primer.ts`). For the others, it starts empty and learns the strings
   of the map, so text in any script gets shorter, and repeated words cost little;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
@@ -199,11 +199,11 @@ characters:
 
 | Example                  | Elements |   JSON | Brotli |  Link | Strings | Coordinates |
 | ------------------------ | -------: | -----: | -----: | ----: | ------: | ----------: |
-| berlin-low-emission-zone |        3 |  3,718 |  1,698 |   762 |    49 % |        40 % |
-| chernobyl-exclusion-zone |        6 |  2,302 |    912 |   653 |    73 % |         5 % |
-| hamburg-berlin-railway   |        8 |  2,163 |    890 |   595 |    56 % |        26 % |
-| london-pharmacies        |      557 | 99,208 |  8,391 | 6,045 |    47 % |        43 % |
-| paris-2024-venues        |       24 |  4,273 |  1,062 |   688 |    59 % |        18 % |
+| berlin-low-emission-zone |        3 |  3,718 |  1,698 |   759 |    49 % |        40 % |
+| chernobyl-exclusion-zone |        6 |  2,302 |    912 |   650 |    73 % |         5 % |
+| hamburg-berlin-railway   |        8 |  2,163 |    890 |   592 |    56 % |        26 % |
+| london-pharmacies        |      557 | 99,208 |  8,391 | 6,042 |    47 % |        43 % |
+| paris-2024-venues        |       24 |  4,273 |  1,062 |   685 |    59 % |        18 % |
 
 Strings and coordinates are the shares of the link's bits. The rest are styles, colors,
 flags and keys. The JSON keeps the coordinates at their full precision, the link at 1 m.

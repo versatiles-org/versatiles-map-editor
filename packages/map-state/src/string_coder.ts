@@ -172,12 +172,17 @@ class Decoder {
 	private high = TOP;
 	private value = 0;
 	private offset = 0;
+	// the shifts of the interval, each a bit that the encoder wrote
+	private shifts = 0;
 
 	constructor(private readonly bits: boolean[]) {
 		for (let i = 0; i < 32; i++) this.value = 2 * this.value + this.nextBit();
 	}
 
-	/** Beyond the end of the block, the bits are zeros, as the encoder would have chosen them. */
+	/**
+	 * Beyond the block, the bits of what follows it, or zeros at the end: the 2 bits of the flush
+	 * of the encoder make the strings the same, whatever follows.
+	 */
 	private nextBit(): number {
 		// the decoder reads at most 32 bits ahead, so it is in an endless string of corrupt data
 		if (this.offset > this.bits.length + 64) throw new Error('The strings go beyond their block');
@@ -212,7 +217,16 @@ class Decoder {
 			this.low = 2 * this.low;
 			this.high = 2 * this.high + 1;
 			this.value = 2 * this.value + this.nextBit();
+			this.shifts++;
 		}
+	}
+
+	/**
+	 * The number of bits that the encoder wrote: one for each shift of the interval, and the 2 of
+	 * its flush (see `Encoder.finish`). So the block needs no length of its own.
+	 */
+	get length(): number {
+		return this.shifts + 2;
 	}
 }
 
@@ -268,6 +282,18 @@ export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 
 /** The `count` strings of a block of `encodeStrings`, the first `formatCount` words of the format. */
 export function decodeStrings(bits: boolean[], count: number, formatCount = 0): string[] {
+	return decodeStringBlock(bits, count, formatCount).strings;
+}
+
+/**
+ * The strings at the start of `bits` (see `decodeStrings`), and the length of their block, after
+ * which the bits go on.
+ */
+export function decodeStringBlock(
+	bits: boolean[],
+	count: number,
+	formatCount = 0
+): { strings: string[]; length: number } {
 	let model = new Model(formatCount > 0 ? STRING_PRIMER : []);
 	const decoder = new Decoder(bits);
 	const strings: string[] = [];
@@ -320,5 +346,5 @@ export function decodeStrings(bits: boolean[], count: number, formatCount = 0): 
 		for (let i = 0; i < codePoints.length; i += 8192) string += String.fromCodePoint(...codePoints.slice(i, i + 8192));
 		strings.push(string);
 	}
-	return strings;
+	return { strings, length: decoder.length };
 }

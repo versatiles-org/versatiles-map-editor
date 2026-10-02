@@ -405,7 +405,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIA8Jh3yzZQgC8YyZiLk1zkQBOg');
+			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQgC8YyZiLk1zkQBOg');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -447,7 +447,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIBaIniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir4DShQAAI5yZjC9nEDQkSHTsZAWnDWkOxBBsAgLDwjE9wjMoAAA'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir4DShQAAI5yZjC9nEDQkSHTsZAWnDWkOxBBsAgLDwjE9wjMoAAA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -718,7 +718,7 @@ describe('viewer', () => {
 
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IT_AAAEA0mtAAAAhiQYQgHABQAAAAA').meta).toStrictEqual({
+		expect(decodeState('IT_AAAEAmtAAAAhiQYQgHABQAAAAA').meta).toStrictEqual({
 			legend: {
 				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
 			},

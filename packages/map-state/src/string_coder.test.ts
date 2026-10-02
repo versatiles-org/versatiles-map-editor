@@ -1,6 +1,6 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
-import { decodeStrings, encodeStrings } from './string_coder.js';
+import { decodeStringBlock, decodeStrings, encodeStrings } from './string_coder.js';
 import { collectStrings } from './writer.js';
 import { stateFromMapJSON } from './index.js';
 
@@ -117,11 +117,25 @@ describe('the coder of the string table', () => {
 		}
 	});
 
-	it('reads only the bits of its block', () => {
-		const strings = ['Pharmacy', 'Boots', 'Superdrug'];
-		const block = encodeStrings(strings);
-		// whatever follows the block does not change the strings
-		expect(decodeStrings([...block, ...Array<boolean>(64).fill(true)], 3)).toStrictEqual(strings);
+	it('knows the length of its block, whatever follows it', () => {
+		const next = random(3);
+		const cases = [
+			['Pharmacy', 'Boots', 'Superdrug'],
+			[''],
+			['a'],
+			...files.map(stringsOf).filter((strings) => strings.length > 0)
+		];
+		for (const strings of cases) {
+			for (const formatCount of [0, 1]) {
+				const block = encodeStrings(strings, formatCount);
+				for (const after of [[], Array<boolean>(64).fill(true), Array.from({ length: 64 }, () => next() < 0.5)]) {
+					expect(decodeStringBlock([...block, ...after], strings.length, formatCount)).toStrictEqual({
+						strings,
+						length: block.length
+					});
+				}
+			}
+		}
 	});
 
 	it('stops in a corrupt block instead of reading on', () => {
