@@ -12,7 +12,7 @@ export class MockMap {
 
 	constructor() {}
 	getCanvasContainer = vi.fn(() => mockedCanvas);
-	getContainer = vi.fn(() => ({ clientWidth: 800, clientHeight: 600 }) as HTMLElement);
+	getContainer = vi.fn(() => ({ clientWidth: 800, clientHeight: 600, ownerDocument: document }) as HTMLElement);
 	getPadding = vi.fn(() => ({ top: 0, right: 0, bottom: 0, left: 0 }));
 	boxZoom = { disable: vi.fn(), enable: vi.fn() };
 	doubleClickZoom = { disable: vi.fn(), enable: vi.fn() };

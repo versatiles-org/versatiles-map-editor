@@ -32,7 +32,8 @@ export function isClaimed(e: MapPointerEvent): boolean {
 
 /**
  * Follow a drag with the mouse or a single finger, which starts with the event `start`.
- * A second finger ends the drag, so a pinch-zoom is not mistaken for a drag.
+ * A second finger ends the drag, so a pinch-zoom is not mistaken for a drag. The mouse ends it
+ * also outside the map, or when the window loses the focus, like the drags of MapLibre.
  * After a touch, the browser skips the emulated mouse events and click, which would handle
  * the tap a second time. (maplibre's touchstart listener is passive, so only touchend can do this.)
  */
@@ -43,11 +44,17 @@ export function trackDrag(
 	onEnd: () => void
 ) {
 	const touch = isTouchEvent(start);
+	const ownerDocument = map.getContainer().ownerDocument;
+	const ownerWindow = ownerDocument.defaultView;
+	let ended = false;
 	const move = (e: MapPointerEvent) => {
 		if (isMultiTouch(e)) return end();
 		onMove(e);
 	};
 	const end = (e?: MapPointerEvent) => {
+		// e.g. a mouseup on the map, and then on the document
+		if (ended) return;
+		ended = true;
 		if (touch) {
 			if (e?.originalEvent.cancelable) e.originalEvent.preventDefault();
 			map.off('touchmove', move);
@@ -56,9 +63,13 @@ export function trackDrag(
 		} else {
 			map.off('mousemove', move);
 			map.off('mouseup', end);
+			ownerDocument.removeEventListener('mouseup', endOutside);
+			ownerWindow?.removeEventListener('blur', endOutside);
 		}
 		onEnd();
 	};
+	// the map has no events of the mouse outside of it
+	const endOutside = () => end();
 
 	if (touch) {
 		map.on('touchmove', move);
@@ -67,5 +78,7 @@ export function trackDrag(
 	} else {
 		map.on('mousemove', move);
 		map.on('mouseup', end);
+		ownerDocument.addEventListener('mouseup', endOutside);
+		ownerWindow?.addEventListener('blur', endOutside);
 	}
 }
