@@ -9,10 +9,13 @@ import type { StateBackground } from '@versatiles/map-state';
 export interface BackgroundSettings {
 	base: 'vector' | 'satellite';
 	/**
-	 * Whether the satellite map shows streets, railways and ferries over the imagery. The vector
-	 * map always does. Without them and without labels, the satellite map is the imagery alone.
+	 * Whether the satellite map shows streets, railways, ferries and the symbols of points of
+	 * interest over the imagery. The vector map always does. Without them, without borders and
+	 * without labels, the satellite map is the imagery alone.
 	 */
 	streets: boolean;
+	/** Whether the satellite map shows the borders of countries and states. The vector map always does. */
+	borders: boolean;
 	/** Color preset of the vector map, e.g. "gray", light or `dark`. */
 	theme: string;
 	/** Whether the vector map has the dark theme of its color preset, e.g. "gray-dark". */
@@ -73,8 +76,10 @@ function splitTheme(theme: string): { theme: string; dark: boolean } {
 // Languages of the names in the OSM tiles of tiles.versatiles.org
 export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
 
-/** The layer groups of the streets over the imagery, hidden. */
-const STREETS_HIDDEN = (): Options => ({ roads: false, transit: false, markings: false });
+/** The layer groups of the streets over the imagery, hidden, with the symbols of points of interest along them. */
+const STREETS_HIDDEN = (): Options => ({ roads: false, transit: false, markings: false, pois: false });
+/** The layer group of the borders over the imagery, hidden. */
+const BORDERS_HIDDEN = (): Options => ({ boundaries: false });
 
 /**
  * The labels whose halo width the editor sets: those of places, borders, streets, water and
@@ -113,6 +118,7 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 	return {
 		base,
 		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
+		borders: background.builder !== 'satellite' || (!imageryAlone && layers.boundaries !== false),
 		...splitTheme(typeof overlay.theme === 'string' ? overlay.theme : 'colorful'),
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
@@ -272,6 +278,13 @@ export function changeSettings(
 		const kept: Options = {};
 		if (overlay.text !== undefined) kept.text = overlay.text;
 		if (overlay.layers !== undefined) kept.layers = overlay.layers;
+		// the vector map always has its streets and borders, which only the satellite map can hide
+		if (newBuilder === 'osm' && isObject(kept.layers)) {
+			const layers: Options = { ...kept.layers };
+			for (const group of Object.keys({ ...STREETS_HIDDEN(), ...BORDERS_HIDDEN() })) delete layers[group];
+			if (Object.keys(layers).length > 0) kept.layers = layers;
+			else delete kept.layers;
+		}
 		const colors = getColors({ builder, options });
 		options = newBuilder === 'osm' ? kept : { osmOverlay: kept };
 		builder = newBuilder;
@@ -283,12 +296,18 @@ export function changeSettings(
 	let overlay: Options = options;
 	if (builder === 'satellite') {
 		if (options.osmOverlay === false) {
-			// the imagery alone: showing streets or labels again starts the overlay with its defaults,
-			// and with the colors of the imagery, but only with what is shown
-			const shown = change.streets === true || (change.labels !== undefined && change.labels !== 'none');
-			if (!shown) return minimizeBackground({ builder, options });
+			// the imagery alone: showing streets, borders or labels again starts the overlay with its
+			// defaults, and with the colors of the imagery, but only with what is shown
+			const labels = change.labels !== undefined && change.labels !== 'none';
+			if (!change.streets && !change.borders && !labels) return minimizeBackground({ builder, options });
 			const colors = getColors({ builder, options });
-			options.osmOverlay = { layers: change.streets ? { labels: false } : STREETS_HIDDEN() };
+			options.osmOverlay = {
+				layers: {
+					...(change.streets ? {} : STREETS_HIDDEN()),
+					...(change.borders ? {} : BORDERS_HIDDEN()),
+					...(labels ? {} : { labels: false })
+				}
+			};
 			setColors(builder, options, colors);
 		}
 		if (!isObject(options.osmOverlay)) options.osmOverlay = {};
@@ -318,18 +337,22 @@ export function changeSettings(
 		if (change.labels === 'fewer') text.spacing = FEWER_LABELS_SPACING;
 		else delete text.spacing;
 	}
-	if (builder === 'satellite' && change.streets !== undefined) {
+	for (const [shown, hidden] of [
+		[change.streets, STREETS_HIDDEN()],
+		[change.borders, BORDERS_HIDDEN()]
+	] as const) {
+		if (builder !== 'satellite' || shown === undefined) continue;
 		if (!isObject(overlay.layers)) overlay.layers = {};
 		const layers = overlay.layers as Options;
-		for (const [group, value] of Object.entries(STREETS_HIDDEN())) {
-			if (change.streets) delete layers[group];
+		for (const [group, value] of Object.entries(hidden)) {
+			if (shown) delete layers[group];
 			else layers[group] = value;
 		}
 	}
-	// neither streets nor labels: the imagery alone, also without borders and points of interest
+	// neither streets nor borders nor labels: the imagery alone
 	if (builder === 'satellite') {
-		const { streets, labels } = getSettings({ builder, options });
-		if (!streets && labels === 'none') options.osmOverlay = false;
+		const { streets, borders, labels } = getSettings({ builder, options });
+		if (!streets && !borders && labels === 'none') options.osmOverlay = false;
 	}
 
 	return minimizeBackground({ builder, options });

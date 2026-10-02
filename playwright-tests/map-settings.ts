@@ -124,7 +124,7 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(labelsInGerman).toBe(true);
 });
 
-test('the satellite imagery without streets and labels', async ({ page }) => {
+test('the satellite imagery without streets, borders and labels', async ({ page }) => {
 	const state: MapState = {
 		map: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5], style: { label: 'Cafe' } }]
@@ -137,20 +137,30 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 
 	await page.getByRole('radio', { name: 'Satellite' }).check();
 	const streets = page.getByRole('checkbox', { name: 'Streets' });
+	const borders = page.getByRole('checkbox', { name: 'Borders' });
 	const labels = page.getByRole('radiogroup', { name: 'Labels' });
 	const layerIds = () =>
 		page.evaluate(() => (window as unknown as MapWindow).map.getStyle()?.layers.map((l) => l.id) ?? []);
 	await expect(streets).toBeChecked();
+	await expect(borders).toBeChecked();
+	const has = async (prefix: string) => (await layerIds()).some((id) => id.startsWith(prefix));
 
-	// the labels without the streets
+	// the labels and borders without the streets and their points of interest
 	await streets.uncheck();
 	await expect
 		.poll(async () => (await background())?.options.osmOverlay)
-		.toMatchObject({ layers: { roads: false, transit: false, markings: false } });
-	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(false);
-	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(true);
+		.toMatchObject({ layers: { roads: false, transit: false, markings: false, pois: false } });
+	await expect.poll(() => has('street-')).toBe(false);
+	expect(await has('poi-')).toBe(false);
+	expect(await has('boundary-')).toBe(true);
+	expect(await has('label-place')).toBe(true);
 
-	// neither: only the imagery and the elements, which are still drawn
+	// without the borders
+	await borders.uncheck();
+	await expect.poll(() => has('boundary-')).toBe(false);
+	expect(await has('label-place')).toBe(true);
+
+	// none of them: only the imagery and the elements, which are still drawn
 	await labels.getByRole('radio', { name: 'None' }).check();
 	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
 	await expect.poll(sources).not.toContain('versatiles-shortbread');
@@ -160,16 +170,18 @@ test('the satellite imagery without streets and labels', async ({ page }) => {
 	// without labels, there is no font or language to set
 	await expect(page.getByRole('combobox', { name: 'Language' })).toBeHidden();
 
-	// the streets without the labels
+	// the streets without the borders and labels
 	await streets.check();
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } });
+	await expect.poll(background).toStrictEqual({
+		builder: 'satellite',
+		options: { osmOverlay: { layers: { boundaries: false, labels: false } } }
+	});
 	await expect.poll(sources).toContain('versatiles-shortbread');
 	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(true);
 	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(false);
 
-	// and both again
+	// and all again
+	await borders.check();
 	await labels.getByRole('radio', { name: 'Normal' }).check();
 	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: {} });
 	await expect(page.getByRole('combobox', { name: 'Language' })).toBeVisible();

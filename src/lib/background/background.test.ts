@@ -13,6 +13,7 @@ describe('getSettings', () => {
 		expect(getSettings()).toStrictEqual({
 			base: 'vector',
 			streets: true,
+			borders: true,
 			theme: 'colorful',
 			dark: false,
 			font: 'noto_sans_regular',
@@ -33,6 +34,7 @@ describe('getSettings', () => {
 		).toStrictEqual({
 			base: 'vector',
 			streets: true,
+			borders: true,
 			theme: 'gray',
 			dark: false,
 			font: 'lato_regular',
@@ -107,39 +109,62 @@ describe('changeSettings', () => {
 		});
 	});
 
-	it('shows the streets and the labels over the imagery independently', () => {
+	it('shows the streets, the borders and the labels over the imagery independently', () => {
 		const sat = changeSettings(undefined, { base: 'satellite', language: 'fr' });
-		expect(getSettings(sat)).toMatchObject({ streets: true, labels: 'normal' });
+		expect(getSettings(sat)).toMatchObject({ streets: true, borders: true, labels: 'normal' });
 
-		// labels without streets: the roads, railways, ferries and one-way arrows are hidden
-		const labelsOnly = changeSettings(sat, { streets: false });
-		expect(labelsOnly?.options.osmOverlay).toStrictEqual({
+		// without streets: the roads, railways, ferries, one-way arrows and points of interest are hidden
+		const noStreets = changeSettings(sat, { streets: false });
+		expect(noStreets?.options.osmOverlay).toStrictEqual({
 			text: { language: 'fr' },
-			layers: { roads: false, transit: false, markings: false }
+			layers: { roads: false, transit: false, markings: false, pois: false }
 		});
-		expect(getSettings(labelsOnly)).toMatchObject({ streets: false, labels: 'normal' });
+		expect(getSettings(noStreets)).toMatchObject({ streets: false, borders: true, labels: 'normal' });
+
+		// without borders
+		const noBorders = changeSettings(sat, { borders: false });
+		expect(noBorders?.options.osmOverlay).toStrictEqual({ text: { language: 'fr' }, layers: { boundaries: false } });
+		expect(getSettings(noBorders)).toMatchObject({ streets: true, borders: false, labels: 'normal' });
 
 		// streets without labels
 		const streetsOnly = changeSettings(sat, { labels: 'none' });
-		expect(getSettings(streetsOnly)).toMatchObject({ streets: true, labels: 'none' });
+		expect(getSettings(streetsOnly)).toMatchObject({ streets: true, borders: true, labels: 'none' });
 
-		// neither: the imagery alone
-		const imagery = changeSettings(labelsOnly, { labels: 'none' });
+		// borders alone, and then none of them: the imagery alone
+		const bordersOnly = changeSettings(noStreets, { labels: 'none' });
+		expect(getSettings(bordersOnly)).toMatchObject({ streets: false, borders: true, labels: 'none' });
+		const imagery = changeSettings(bordersOnly, { borders: false });
 		expect(imagery).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
-		expect(changeSettings(streetsOnly, { streets: false })).toStrictEqual(imagery);
-		expect(getSettings(imagery)).toMatchObject({ base: 'satellite', streets: false, labels: 'none' });
+		expect(changeSettings(changeSettings(streetsOnly, { borders: false }), { streets: false })).toStrictEqual(imagery);
+		expect(getSettings(imagery)).toMatchObject({ base: 'satellite', streets: false, borders: false, labels: 'none' });
 		// hiding more changes nothing
 		expect(changeSettings(imagery, { labels: 'none' })).toStrictEqual(imagery);
 
 		// from the imagery alone, each comes back on its own
-		expect(getSettings(changeSettings(imagery, { streets: true }))).toMatchObject({ streets: true, labels: 'none' });
+		expect(getSettings(changeSettings(imagery, { streets: true }))).toMatchObject({
+			streets: true,
+			borders: false,
+			labels: 'none'
+		});
+		expect(getSettings(changeSettings(imagery, { borders: true }))).toMatchObject({
+			streets: false,
+			borders: true,
+			labels: 'none'
+		});
 		expect(getSettings(changeSettings(imagery, { labels: 'fewer' }))).toMatchObject({
 			streets: false,
+			borders: false,
 			labels: 'fewer'
 		});
 
-		// the vector map always has its streets
-		expect(getSettings(changeSettings(imagery, { base: 'vector' })).streets).toBe(true);
+		// the vector map always has its streets and borders, also in its options, and keeps no labels
+		expect(getSettings(changeSettings(imagery, { base: 'vector' }))).toMatchObject({ streets: true, borders: true });
+		const hidden = changeSettings(noStreets, { borders: false });
+		expect(changeSettings(hidden, { base: 'vector' })?.options).toStrictEqual({ text: { language: 'fr' } });
+		expect(changeSettings(changeSettings(noStreets, { labels: 'none' }), { base: 'vector' })?.options).toStrictEqual({
+			text: { language: 'fr' },
+			layers: { labels: false }
+		});
 	});
 
 	it('changes the size and the halo of the labels of both maps', () => {
@@ -291,11 +316,15 @@ describe('changeSettings', () => {
 			osmOverlay: { text: { language: 'user' }, recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
 		});
 		// the imagery alone keeps its colors, and the overlay gets them again when it is shown
-		const imagery = changeSettings(changeSettings(faded, { streets: false }), { labels: 'none' });
+		const hidden = changeSettings(changeSettings(faded, { streets: false }), { borders: false });
+		const imagery = changeSettings(hidden, { labels: 'none' });
 		expect(imagery?.options).toStrictEqual({ osmOverlay: false, raster: { saturation: -1, brightnessMin: 0.5 } });
 		expect(changeSettings(imagery, { streets: true })?.options).toStrictEqual({
 			raster: { saturation: -1, brightnessMin: 0.5 },
-			osmOverlay: { layers: { labels: false }, recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 } }
+			osmOverlay: {
+				layers: { boundaries: false, labels: false },
+				recolor: { saturate: -1, brightness: 0.25, contrast: 0.5 }
+			}
 		});
 		// and back to the unchanged colors
 		expect(changeSettings(faded, { colors: DEFAULT_COLORS })?.options).toStrictEqual({

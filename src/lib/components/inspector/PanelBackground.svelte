@@ -118,12 +118,19 @@
 	{/if}
 
 	{#if settings.base === 'satellite'}
-		<!-- the labels are set below, independently -->
+		<!-- streets (with the symbols of points of interest) and borders; the labels are set below, independently -->
 		<InputRow id="{uid}-streets" label="Streets">
 			<Checkbox
 				id="{uid}-streets"
 				checked={settings.streets}
 				onchange={(e) => change('streets', e.currentTarget.checked)}
+			/>
+		</InputRow>
+		<InputRow id="{uid}-borders" label="Borders">
+			<Checkbox
+				id="{uid}-borders"
+				checked={settings.borders}
+				onchange={(e) => change('borders', e.currentTarget.checked)}
 			/>
 		</InputRow>
 	{/if}
