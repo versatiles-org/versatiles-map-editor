@@ -4,6 +4,7 @@
 	type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 
 	import type { Box } from '$lib/rendering/index.js';
+	import { untrack } from 'svelte';
 	import { capCenterShift, measureLine } from './cap_center.js';
 	import { textColor } from './legend_marks.js';
 	import LegendMark from './LegendMark.svelte';
@@ -82,7 +83,9 @@
 		if (!element) return;
 		const measure = () => {
 			const text = element?.querySelector<HTMLElement>('.text');
-			const line = text && measureLine(text, shift);
+			// the shift so far, which the measurement takes out: not a reason to measure again
+			const before = untrack(() => shift);
+			const line = text && measureLine(text, before);
 			shift = line ? Math.round(capCenterShift(line) * 4) / 4 : 0;
 		};
 		measure();
