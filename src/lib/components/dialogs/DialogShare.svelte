@@ -15,8 +15,8 @@
 		boundsOf,
 		exponentForResolution,
 		MAX_EXPONENT,
-		resolutionOfExponent,
-		type Bounds
+		resolutionForArea,
+		resolutionOfExponent
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '$lib/components/format.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
@@ -51,22 +51,12 @@
 	let precision: 'auto' | number = $state('auto');
 	let autoExponent = $state(0);
 
-	/** The half of the larger side of an area, in meters. */
-	function radiusOf([west, south, east, north]: Bounds): number {
-		const meters = 111320;
-		const width = (east - west) * meters * Math.cos((((south + north) / 2) * Math.PI) / 180);
-		return Math.max(width, (north - south) * meters) / 2;
-	}
-
-	/**
-	 * Fine enough for what the shared map shows, its frame or else its elements: a thousandth of
-	 * their size, below a pixel of a typical embed.
-	 */
+	/** Fine enough for what the shared map shows, its frame or else its elements (see `resolutionForArea`). */
 	function updateAutoExponent() {
 		const doc = stateManager.mapDocument;
 		const area = doc.frame ?? doc.getBounds();
-		const radius = area && radiusOf(area);
-		autoExponent = radius ? exponentForResolution(radius / 1000) : 0;
+		const resolution = area && resolutionForArea(area);
+		autoExponent = resolution ? exponentForResolution(resolution) : 0;
 	}
 
 	// What visitors may miss: elements outside the frame, or an empty map without one

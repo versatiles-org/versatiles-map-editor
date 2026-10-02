@@ -27,7 +27,8 @@ The first release.
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short,
     in steps of 0.00001° × 2^n (n from 0 to 15, in 4 bits: about 1 m to 36 km), which decode to
-    at most 5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`;
+    at most 5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`,
+    `resolutionForArea` (the precision for sharing an area);
     those of the elements in an Exp-Golomb code of the order that makes them shortest, the points
     of markers and circles as differences to the point before if that is shorter;
 - `frame` in the map state: the visible area (`[west, south, east, north]`, the type `Bounds`),

@@ -13,7 +13,14 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs, styleText } from 'node:util';
-import { encodeState, stateFromMapJSON } from '../dist/index.js';
+import {
+	boundsOf,
+	encodeState,
+	exponentForResolution,
+	resolutionForArea,
+	resolutionOfExponent,
+	stateFromMapJSON
+} from '../dist/index.js';
 import { StateReader } from '../dist/reader.js';
 import { decodeStringBlock } from '../dist/string_coder.js';
 
@@ -25,7 +32,8 @@ Options:
   --min-percent <p>    merge the lines below p % of the bits into one (default: 0)
   --summary            a line per map instead of the tree: bits, characters, shares by kind
   --json               the summary and the tree as JSON, e.g. to compare two runs with diff
-  --resolution <m>     the precision of the coordinates in meters (default: 1)
+  --resolution <m>     the precision of the coordinates in meters, or "auto" as the share dialog
+                       chooses it: fine enough for the frame, else the elements (default: auto)
   --help               this text`;
 
 /**
@@ -180,7 +188,14 @@ function bar(fraction, width) {
 }
 
 const format = (n) => n.toLocaleString('en-US');
+const formatStep = (meters) => (meters < 1000 ? `${meters.toFixed(1)} m` : `${(meters / 1000).toFixed(1)} km`);
 const color = (style, text) => styleText(style, text);
+
+/** The resolution of the share dialog: fine enough for the frame, else the elements; 1 m without either. */
+function automaticResolution(state) {
+	const area = state.frame ?? boundsOf(state.elements);
+	return (area && resolutionForArea(area)) || 1;
+}
 
 /** The bits of a map: the calls of its reader as a tree, and the bits of each kind (see `KINDS`). */
 function analyse(state, base64, options) {
@@ -197,7 +212,14 @@ function analyse(state, base64, options) {
 	const elements = {};
 	for (const element of state.elements) elements[element.type] = (elements[element.type] ?? 0) + 1;
 	const tree = aggregate(reader.root, options.expand);
-	return { bits: tree.bits, characters: base64.length, elements, kinds: kindsOf(reader.root), tree };
+	return {
+		bits: tree.bits,
+		characters: base64.length,
+		step: options.step,
+		elements,
+		kinds: kindsOf(reader.root),
+		tree
+	};
 }
 
 /**
@@ -245,14 +267,14 @@ function kindsOf(span, kind = 'structure', kinds = Object.fromEntries(KIND_NAMES
 }
 
 function printTree(title, analysis, options) {
-	const { tree, bits: total, characters, elements } = analysis;
+	const { tree, bits: total, characters, step, elements } = analysis;
 	const lines = treeLines(tree, options, total);
 
 	console.log(color(['bold', 'magenta'], title));
 	console.log(
 		color(
 			'gray',
-			`${format(total)} bits · ${format(characters)} characters · ` +
+			`${format(total)} bits · ${format(characters)} characters · steps of ${formatStep(step)} · ` +
 				Object.entries(elements)
 					.map(([type, count]) => `${format(count)} ${type}${count === 1 ? '' : 's'}`)
 					.join(', ')
@@ -293,6 +315,7 @@ function printSummary(analyses) {
 		'map'.padEnd(width),
 		'bits'.padStart(8),
 		'chars'.padStart(7),
+		'step'.padStart(8),
 		...KIND_NAMES.map((k) => k.padStart(k.length > 7 ? k.length : 7))
 	];
 	console.log(color('gray', header.join('  ')));
@@ -308,6 +331,7 @@ function printSummary(analyses) {
 				color('magenta', title.padEnd(width)),
 				color('bold', format(analysis.bits).padStart(8)),
 				format(analysis.characters).padStart(7),
+				formatStep(analysis.step).padStart(8),
 				...shares
 			].join('  ')
 		);
@@ -329,7 +353,7 @@ function main() {
 			'min-percent': { type: 'string', default: '0' },
 			summary: { type: 'boolean', default: false },
 			json: { type: 'boolean', default: false },
-			resolution: { type: 'string', default: '1' },
+			resolution: { type: 'string', default: 'auto' },
 			help: { type: 'boolean', default: false }
 		}
 	});
@@ -339,7 +363,7 @@ function main() {
 		depth: values.depth === undefined ? Infinity : Number(values.depth),
 		expand: values.expand,
 		minPercent: Number(values['min-percent']),
-		resolution: Number(values.resolution)
+		resolution: values.resolution === 'auto' ? 'auto' : Number(values.resolution)
 	};
 
 	let files = positionals;
@@ -354,7 +378,10 @@ function main() {
 
 	const analyses = files.map((file) => {
 		const state = stateFromMapJSON(JSON.parse(readFileSync(file, 'utf8')));
-		const analysis = analyse(state, encodeState(state, { resolution: options.resolution }), options);
+		const resolution = options.resolution === 'auto' ? automaticResolution(state) : options.resolution;
+		// the step of the grid that the encoder uses for this resolution
+		const step = resolutionOfExponent(exponentForResolution(resolution));
+		const analysis = analyse(state, encodeState(state, { resolution }), { ...options, step });
 		return { title: basename(file), analysis };
 	});
 	if (values.json) {

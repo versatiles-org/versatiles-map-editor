@@ -9,7 +9,7 @@ export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { CODEC_VERSION } from './constants.js';
 export { formatHex, parseColor, type RGBA } from './color.js';
 export { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
-export { exponentForResolution, resolutionOfExponent, MAX_EXPONENT } from './grid.js';
+export { exponentForResolution, resolutionForArea, resolutionOfExponent, MAX_EXPONENT } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
 export { sanitizeFrame } from './profile.js';
 export { upgradeState } from './legacy.js';

@@ -1,3 +1,5 @@
+import type { Bounds } from './types.js';
+
 /** Meters per degree of latitude, and of longitude at the equator. */
 const METERS_PER_DEGREE = 111320;
 
@@ -15,6 +17,16 @@ export const MAX_EXPONENT = 15;
 export function exponentForResolution(meters: number): number {
 	const exponent = Math.round(Math.log2(meters / resolutionOfExponent(0)));
 	return Math.min(MAX_EXPONENT, Math.max(0, exponent));
+}
+
+/**
+ * A resolution in meters fine enough for what a map shows (its frame, else the bounds of its
+ * elements), e.g. for sharing: a thousandth of half the larger side of the area, below a pixel of a
+ * typical embed.
+ */
+export function resolutionForArea([west, south, east, north]: Bounds): number {
+	const width = (east - west) * METERS_PER_DEGREE * Math.cos((((south + north) / 2) * Math.PI) / 180);
+	return Math.max(width, (north - south) * METERS_PER_DEGREE) / 2 / 1000;
 }
 
 /** The resolution in meters of a step with this exponent (in latitude). */

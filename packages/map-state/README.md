@@ -53,7 +53,8 @@ stateFromMapJSON(json: unknown): MapState // upgrades older files, refuses newer
 - `resolution`: the precision of the coordinates in meters, rounded to a step of 0.00001° × 2^n
   (n from 0 to `MAX_EXPONENT`, 15): about 1 m, 2 m, 4 m, … 36 km. The default of 1 m keeps 5
   decimal places; coarser values make shorter strings, e.g. for sharing. `exponentForResolution`
-  and `resolutionOfExponent` convert between meters and n.
+  and `resolutionOfExponent` convert between meters and n; `resolutionForArea` is the precision
+  that the share dialog uses for an area: fine enough for it, a thousandth of its size.
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
@@ -163,31 +164,32 @@ To keep hashes short:
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5); a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
   or white as its index there in 6 bits instead of 24;
-- the strings are stored once in a string table of 2 sections, each in the order they are
-  written: the words of the format (the background as JSON, the color scheme, the label font, the
-  names of the symbols), then the others (the title, the labels, the legend labels, the popups).
-  A field refers to a string of its section by 1 bit for the next new one, else by its index. The
-  table is one block of bits (`string_coder.ts`), without a length: the decoder knows where it
-  ends. An adaptive model predicts each character from the two before it (PPM of order 2 over
-  code points), and an arithmetic coder spends fewer bits on likelier characters. For the words of the format, the model has learned the format's
-  vocabulary before (`string_primer.ts`). For the others, it starts empty and learns the strings
-  of the map, so text in any script gets shorter, and repeated words cost little;
+- the strings are stored once in a string table of 2 sections, each in the order they are written:
+  the words of the format (the background as JSON, the color scheme, the label font, the names of
+  the symbols), then the others (the title, the labels, the legend labels, the popups). A field
+  refers to a string of its section by 1 bit for the next new one, else by its index. The table is
+  one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
+  adaptive model predicts each character from the two before it (PPM of order 2 over code points),
+  and an arithmetic coder spends fewer bits on likelier characters. For the words of the format, the
+  model has learned the format's vocabulary before (`string_primer.ts`). For the others, it starts
+  empty and learns the strings of the map, so text in any script gets shorter, and repeated words
+  cost little;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`); the reference is an Exp-Golomb code, 1 bit
   for none and 3 bits for the latest style;
 - an element that has the type and the styles of the element before costs 1 bit for them; the
   label of an element's style is stored as a field of the element, so elements that differ only
   in their labels still repeat their style;
-- the coordinates of the frame and the elements are whole steps from an origin near them (the
-  center of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a
-  global step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each
-  zoom level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples
-  of 0.00001°, decoded coordinates have at most 5 decimal places.
-  `encodeState(state, { resolution })` takes it in meters: the default is 1 m; coarser values
-  make shorter hashes, e.g. for sharing. The steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer
-  chooses per map so they are shortest: a step up to about 2^order costs order + 1 bits, and each
-  doubling 2 bits more. The points of markers and circles are differences to the point of the
-  marker or circle before, if that is shorter (1 bit), e.g. for points sorted by place;
+- the coordinates of the frame and the elements are whole steps from an origin near them (the center
+  of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a global
+  step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each zoom
+  level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples of
+  0.00001°, decoded coordinates have at most 5 decimal places. `encodeState(state, { resolution })`
+  takes it in meters: the default is 1 m; coarser values make shorter hashes, e.g. for sharing. The
+  steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer chooses per map so
+  they are shortest: a step up to about 2^order costs order + 1 bits, and each doubling 2 bits more.
+  The points of markers and circles are differences to the point of the marker or circle before, if
+  that is shorter (1 bit), e.g. for points sorted by place;
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.
@@ -201,7 +203,8 @@ npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-per
 ```
 
 Without files, it analyses the examples. The tree shows each string of the string table with its
-bits, e.g. how much the background costs. `--summary` prints a line per map instead: its bits and
-the shares of strings, coordinates, styles, colors and so on. `--json` prints both as JSON, e.g. to
-compare two versions of the format with `diff`. Test maps with labels and popups in other languages
-and scripts are in `src/__fixtures__/languages/`.
+bits, e.g. how much the background costs. It encodes at the precision of the share dialog
+(`resolutionForArea`), or at `--resolution <m>`. `--summary` prints a line per map instead: its bits
+and the shares of strings, coordinates, styles, colors and so on. `--json` prints both as JSON, e.g.
+to compare two versions of the format with `diff`. Test maps with labels and popups in other
+languages and scripts are in `src/__fixtures__/languages/`.
