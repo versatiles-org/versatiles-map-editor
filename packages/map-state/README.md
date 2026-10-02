@@ -181,12 +181,38 @@ To keep hashes short:
   center of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a
   global step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each
   zoom level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples
-  of 0.00001°, decoded coordinates have at most 5 decimal places. `encodeState(state, {
-resolution })` takes it in meters: the default is 1 m; coarser values make shorter hashes, e.g.
-  for sharing. The steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer
+  of 0.00001°, decoded coordinates have at most 5 decimal places.
+  `encodeState(state, { resolution })` takes it in meters: the default is 1 m; coarser values
+  make shorter hashes, e.g. for sharing. The steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer
   chooses per map so they are shortest: a step up to about 2^order costs order + 1 bits, and each
   doubling 2 bits more. The points of markers and circles are differences to the point of the
   marker or circle before, if that is shorter (1 bit), e.g. for points sorted by place;
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.
+
+### Size
+
+The example maps (`examples/`) as links, at the default resolution of 1 m, compared with their
+minified JSON and with that JSON compressed by Brotli (quality 11) and base64 encoded, in
+characters:
+
+| Example                  | Elements |   JSON | Brotli |  Link | Strings | Coordinates |
+| ------------------------ | -------: | -----: | -----: | ----: | ------: | ----------: |
+| berlin-low-emission-zone |        3 |  3,718 |  1,698 |   762 |    49 % |        40 % |
+| chernobyl-exclusion-zone |        6 |  2,302 |    912 |   653 |    73 % |         5 % |
+| hamburg-berlin-railway   |        8 |  2,163 |    890 |   595 |    56 % |        26 % |
+| london-pharmacies        |      557 | 99,208 |  8,391 | 6,045 |    47 % |        43 % |
+| paris-2024-venues        |       24 |  4,273 |  1,062 |   688 |    59 % |        18 % |
+
+Strings and coordinates are the shares of the link's bits. The rest are styles, colors,
+flags and keys. The JSON keeps the coordinates at their full precision, the link at 1 m.
+
+To see where the bits of a map go, as a tree of the reads with their bits:
+
+```sh
+npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-percent p] [files…]
+```
+
+Without files, it analyses the examples. Test maps with labels and popups in other languages and
+scripts are in `src/__fixtures__/languages/`.
