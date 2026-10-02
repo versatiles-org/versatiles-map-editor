@@ -234,3 +234,18 @@ test('rearranging the entries of the legend with a finger', async ({ page }) => 
 		.poll(async () => (await storedState(page)).meta?.legend?.entries.map((e) => e.label))
 		.toStrictEqual(['B', 'C', 'A']);
 });
+
+test('taking the style of an element for a legend entry with a tap', async ({ page }) => {
+	const legend = { entries: [{ type: 'marker' as const, label: 'Route' }] };
+	const elements: MapState['elements'] = [{ type: 'line', points, style: { color: '#d55e00', width: 4 } }];
+	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, meta: { legend }, elements }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).tap();
+	await page.getByRole('button', { name: /Take style from/ }).tap();
+	// a finger may be a bit off the line
+	const [x, y] = await project(page, onLine);
+	await page.touchscreen.tap(x, y + 8);
+	await expect
+		.poll(async () => (await storedState(page)).meta?.legend?.entries[0])
+		.toStrictEqual({ type: 'line', style: { color: '#d55e00', width: 4 }, label: 'Route' });
+});

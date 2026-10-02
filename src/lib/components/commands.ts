@@ -149,6 +149,18 @@ export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): v
 	doc.state.log();
 }
 
+/**
+ * Give an entry of the legend the type and the style of the element, e.g. picked on the map with
+ * the pipette. It keeps its text. One undo step.
+ */
+export function takeStyleForEntry(doc: MapDocumentInteractive, index: number, element: AbstractElement): void {
+	const entries = doc.legend?.entries;
+	if (!entries?.[index]) return;
+	const entry = { ...legendEntryOf(element), label: entries[index].label };
+	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? entry : e)) };
+	doc.state.log();
+}
+
 export function pasteStyle(doc: MapDocumentInteractive): void {
 	const style = doc.styleClipboard.style;
 	if (!canPasteStyle(doc) || !style) return;

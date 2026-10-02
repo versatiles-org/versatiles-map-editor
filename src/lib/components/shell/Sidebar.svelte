@@ -11,6 +11,12 @@
 	const selectedElements = $derived(selection.selectedElements);
 
 	function onKeydown(e: KeyboardEvent) {
+		// Escape ends picking a style, wherever the focus is, e.g. on its button in the sidebar
+		if (e.key === 'Escape' && mapDocument.stylePicker.active) {
+			e.preventDefault();
+			mapDocument.stylePicker.close();
+			return;
+		}
 		if (isOwnKeyTarget(e)) return;
 		const target = e.target as HTMLElement | null;
 

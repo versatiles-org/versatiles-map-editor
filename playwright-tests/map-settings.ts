@@ -648,6 +648,67 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 	await expect(page.getByRole('group', { name: 'Entry 1' }).getByRole('radio', { name: 'Line' })).toBeChecked();
 });
 
+test(
+	'taking the style of an element for a legend entry with the pipette',
+	{ tag: '@cross-browser' },
+	async ({ page }) => {
+		const points: [number, number][] = [
+			[13.39, 52.495],
+			[13.41, 52.495],
+			[13.41, 52.505],
+			[13.39, 52.505]
+		];
+		const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Park' }] };
+		const elements = [
+			{ type: 'polygon' as const, points, style: { color: '#00ff004d', pattern: 1 }, strokeStyle: { color: '#00aa00' } }
+		];
+		await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
+		await waitForMapIsReady(page);
+		await page.getByRole('button', { name: 'Edit legend' }).click();
+		const take = page.getByRole('group', { name: 'Entry 1' }).getByRole('button', { name: /Take style from/ });
+		const entry = async () => (await storedState(page)).meta?.legend?.entries[0];
+		const cursor = () => page.locator('.maplibregl-canvas-container').evaluate((e: HTMLElement) => e.style.cursor);
+		const highlighted = () =>
+			page.evaluate(async () => {
+				const source = (window as unknown as MapWindow).map.getSource<GeoJSONSource>('highlight')!;
+				return ((await source.getData()) as GeoJSON.FeatureCollection).features.length;
+			});
+		const [x, y] = await project(page, [13.4, 52.5]);
+
+		// Escape cancels
+		await take.click();
+		await expect(take).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.locator('.statusbar')).toContainText('Click an element on the map to take its style');
+		expect(await cursor()).toContain('url(');
+		await page.keyboard.press('Escape');
+		await expect(take).toHaveAttribute('aria-pressed', 'false');
+		expect(await cursor()).not.toContain('url(');
+
+		// the element under the pipette is highlighted; a click beside it picks nothing
+		await take.click();
+		await page.mouse.move(x, y);
+		await expect.poll(highlighted).toBe(1);
+		await page.mouse.click(x + 300, y);
+		await expect(take).toHaveAttribute('aria-pressed', 'true');
+
+		// a click on it takes its style; the legend stays selected
+		await page.mouse.click(x, y);
+		await expect.poll(entry).toStrictEqual({
+			type: 'polygon',
+			style: { color: '#00ff004d', pattern: 1 },
+			strokeStyle: { color: '#00aa00' },
+			label: 'Park'
+		});
+		await expect(take).toHaveAttribute('aria-pressed', 'false');
+		await expect.poll(highlighted).toBe(0);
+		await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
+
+		// one undo step
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(entry).toStrictEqual(legend.entries[0]);
+	}
+);
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];

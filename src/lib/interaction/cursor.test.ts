@@ -55,4 +55,13 @@ describe('Cursor', () => {
 		cursor.toggleGrab('test', false);
 		expect(mockElement.style.cursor).toBe('crosshair');
 	});
+
+	it('shows the cursor of a mode over all others, e.g. the pipette', () => {
+		cursor.setResize('ns-resize');
+		cursor.toggleHover('test');
+		cursor.setMode('copy');
+		expect(mockElement.style.cursor).toBe('copy');
+		cursor.setMode(undefined);
+		expect(mockElement.style.cursor).toBe('ns-resize');
+	});
 });

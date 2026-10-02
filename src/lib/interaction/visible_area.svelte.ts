@@ -102,6 +102,7 @@ export class VisibleAreaMode {
 		this.#onDone = onDone;
 		if (this.active) return;
 		const doc = this.#doc;
+		doc.stylePicker.close();
 		doc.drawing.setTool('select');
 		doc.selection.selectElement();
 		this.active = true;

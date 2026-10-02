@@ -6,6 +6,7 @@ import {
 	addToLegend,
 	canPasteStyleToEntry,
 	pasteStyleToEntry,
+	takeStyleForEntry,
 	canCopyStyle,
 	canPasteStyle,
 	copyStyle,
@@ -280,5 +281,24 @@ describe('pasteStyleToEntry', () => {
 		paste({ type: 'line', points, style: { color: '#d55e00' } });
 		doc.state.undo();
 		expect(doc.legend?.entries[0]).toStrictEqual({ type: 'polygon', style: { color: '#000000' }, label: 'Kept' });
+	});
+});
+
+describe('takeStyleForEntry', () => {
+	it('gives the entry the type and the style of the element, keeps its text, in one undo step', () => {
+		const doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+		doc.legend = { entries: [{ type: 'line', label: 'Shop' }] };
+		const shop = doc.addElement({
+			type: 'marker',
+			point: [0, 0],
+			style: { color: '#0000ff', symbol: 'base:icon-shop', label: 'Aldi' }
+		});
+		doc.state.log();
+		takeStyleForEntry(doc, 0, shop);
+		expect(doc.legend?.entries).toStrictEqual([
+			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-shop' }, label: 'Shop' }
+		]);
+		doc.state.undo();
+		expect(doc.legend?.entries).toStrictEqual([{ type: 'line', label: 'Shop' }]);
 	});
 });

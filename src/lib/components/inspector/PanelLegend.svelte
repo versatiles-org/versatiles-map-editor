@@ -25,7 +25,12 @@
 		TextField
 	} from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
-	import { addLegendEntry, canPasteStyleToEntry, pasteStyleToEntry } from '$lib/components/commands.js';
+	import {
+		addLegendEntry,
+		canPasteStyleToEntry,
+		pasteStyleToEntry,
+		takeStyleForEntry
+	} from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import StyleFill from './StyleFill.svelte';
@@ -76,6 +81,19 @@
 		{ value: 'line', label: 'Line' },
 		{ value: 'polygon', label: 'Area' }
 	];
+
+	// the entry whose style is picked on the map now, see `pickStyle`
+	let picking: number | undefined = $state();
+	$effect(() => {
+		if (!doc.stylePicker.active) picking = undefined;
+	});
+
+	/** Take the style of the element that is clicked next on the map, with the pipette; again to cancel. */
+	function pickStyle(index: number) {
+		if (picking === index) return doc.stylePicker.close();
+		doc.stylePicker.open({ onPick: (element) => takeStyleForEntry(doc, index, element) });
+		picking = index;
+	}
 
 	/** The main color of an entry: of its symbol, its line or its area. */
 	const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
@@ -362,7 +380,16 @@
 								title="The style of an element, copied with “Copy style”"
 								onclick={() => pasteStyleToEntry(doc, i)}>Paste style</Button
 							>
+							<!-- a pipette: the next click on an element of the map; again to cancel -->
+							<Button
+								aria-pressed={picking === i}
+								title="Click an element on the map to take its style"
+								onclick={() => pickStyle(i)}><Icon name="pipette" size={16} />Take style from…</Button
+							>
 						</ButtonGroup>
+						{#if picking === i}
+							<div role="status"><Hint>Click an element on the map to take its style. Escape cancels.</Hint></div>
+						{/if}
 						<!-- the controls of the style of an element of the type -->
 						{#if entry.type === 'marker'}
 							<InputRow id="{uid}-{i}-symbol" label="Symbol">

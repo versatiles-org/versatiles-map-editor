@@ -39,6 +39,8 @@
 		const tool = TOOLS.find(({ key }) => key === e.key.toUpperCase());
 		if (!tool) return;
 		e.preventDefault();
+		// a tool ends picking a style
+		doc.stylePicker.close();
 		drawing.setTool(tool.id);
 	}
 </script>
@@ -57,6 +59,7 @@
 			onclick={() => {
 				// a tool ends editing the visible area, without returning e.g. to the share dialog
 				doc.visibleArea.close({ returning: false });
+				doc.stylePicker.close();
 				drawing.setTool(id);
 			}}
 		/>
