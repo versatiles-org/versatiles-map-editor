@@ -1,0 +1,123 @@
+{
+	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"map": {
+		"center": [139.739, 35.6746],
+		"radius": 8996
+	},
+	"meta": {
+		"title": "東京の主要駅"
+	},
+	"elements": [
+		{
+			"type": "marker",
+			"point": [139.7671, 35.6812],
+			"style": {
+				"color": "#0072b2",
+				"label": "東京駅"
+			},
+			"popup": {
+				"text": "東京駅\n千代田区丸の内一丁目\n赤レンガの駅舎は1914年に完成しました"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7006, 35.6896],
+			"style": {
+				"color": "#0072b2",
+				"label": "新宿駅"
+			},
+			"popup": {
+				"text": "新宿駅\n新宿区新宿三丁目\n1日の乗降客数が世界一の駅です"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7016, 35.658],
+			"style": {
+				"color": "#0072b2",
+				"label": "渋谷駅"
+			},
+			"popup": {
+				"text": "渋谷駅\n渋谷区道玄坂一丁目\nハチ公像とスクランブル交差点で有名です"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7109, 35.7295],
+			"style": {
+				"color": "#0072b2",
+				"label": "池袋駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7387, 35.6285],
+			"style": {
+				"color": "#0072b2",
+				"label": "品川駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7774, 35.7138],
+			"style": {
+				"color": "#0072b2",
+				"label": "上野駅"
+			},
+			"popup": {
+				"text": "上野駅\n台東区上野七丁目\n上野公園と東京国立博物館の最寄り駅です"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7731, 35.6984],
+			"style": {
+				"color": "#0072b2",
+				"label": "秋葉原駅"
+			},
+			"popup": {
+				"text": "秋葉原駅\n千代田区外神田一丁目\n電気街とアニメの街として知られています"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.757, 35.6555],
+			"style": {
+				"color": "#0072b2",
+				"label": "浜松町駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7284, 35.6197],
+			"style": {
+				"color": "#0072b2",
+				"label": "大崎駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.763, 35.6751],
+			"style": {
+				"color": "#0072b2",
+				"label": "有楽町駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7709, 35.6918],
+			"style": {
+				"color": "#0072b2",
+				"label": "神田駅"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [139.7748, 35.7074],
+			"style": {
+				"color": "#0072b2",
+				"label": "御徒町駅"
+			}
+		}
+	]
+}

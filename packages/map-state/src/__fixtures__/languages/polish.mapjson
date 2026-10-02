@@ -1,0 +1,115 @@
+{
+	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"map": {
+		"center": [19.9274, 50.0565],
+		"radius": 3907
+	},
+	"meta": {
+		"title": "Zabytki Krakowa"
+	},
+	"elements": [
+		{
+			"type": "marker",
+			"point": [19.9354, 50.054],
+			"style": {
+				"color": "#0072b2",
+				"label": "Wawel"
+			},
+			"popup": {
+				"text": "Zamek Królewski na Wawelu\nWzgórze Wawelskie, 31-001 Kraków\nCzynne od wtorku do niedzieli, 9:30–17:00"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9373, 50.0617],
+			"style": {
+				"color": "#0072b2",
+				"label": "Sukiennice"
+			},
+			"popup": {
+				"text": "Sukiennice\nRynek Główny 1/3, 31-042 Kraków\nGaleria Sztuki Polskiej XIX wieku na piętrze"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9393, 50.0616],
+			"style": {
+				"color": "#0072b2",
+				"label": "Kościół Mariacki"
+			},
+			"popup": {
+				"text": "Kościół Mariacki\nPlac Mariacki 5, 31-042 Kraków\nCo godzinę z wieży grany jest hejnał mariacki"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9413, 50.065],
+			"style": {
+				"color": "#0072b2",
+				"label": "Brama Floriańska"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9417, 50.0655],
+			"style": {
+				"color": "#0072b2",
+				"label": "Barbakan"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9334, 50.0617],
+			"style": {
+				"color": "#0072b2",
+				"label": "Collegium Maius"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9448, 50.0515],
+			"style": {
+				"color": "#0072b2",
+				"label": "Kazimierz"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9614, 50.0475],
+			"style": {
+				"color": "#0072b2",
+				"label": "Fabryka Schindlera"
+			},
+			"popup": {
+				"text": "Fabryka Schindlera\nulica Lipowa 4, 30-702 Kraków\nWystawa „Kraków – czas okupacji 1939–1945”"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.8933, 50.0549],
+			"style": {
+				"color": "#0072b2",
+				"label": "Kopiec Kościuszki"
+			},
+			"popup": {
+				"text": "Kopiec Kościuszki\nAleja Waszyngtona 1, 30-204 Kraków\nWidok na całe miasto, przy dobrej pogodzie aż do Tatr"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9354, 50.059],
+			"style": {
+				"color": "#0072b2",
+				"label": "Bazylika św. Franciszka z Asyżu"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [19.9496, 50.0489],
+			"style": {
+				"color": "#0072b2",
+				"label": "Most Ojca Bernatka"
+			}
+		}
+	]
+}

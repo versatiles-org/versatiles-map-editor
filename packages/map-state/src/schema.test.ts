@@ -19,7 +19,7 @@ describe('the JSON Schema of .mapjson files', () => {
 	});
 
 	it('fits the example maps', () => {
-		const files = globSync('examples/*.mapjson');
+		const files = globSync(['examples/*.mapjson', 'packages/map-state/src/__fixtures__/**/*.mapjson']);
 		expect(files.length).toBeGreaterThan(3);
 		for (const file of files) {
 			validate(JSON.parse(readFileSync(file, 'utf-8')));

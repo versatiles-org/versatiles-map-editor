@@ -1,0 +1,107 @@
+{
+	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"map": {
+		"center": [2.3428, 48.8755],
+		"radius": 5128
+	},
+	"meta": {
+		"title": "Musées de Paris"
+	},
+	"elements": [
+		{
+			"type": "marker",
+			"point": [2.3376, 48.8606],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée du Louvre"
+			},
+			"popup": {
+				"text": "Musée du Louvre\nRue de Rivoli, 75001 Paris\nOuvert tous les jours sauf le mardi, de 9 h à 18 h"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3266, 48.86],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée d’Orsay"
+			},
+			"popup": {
+				"text": "Musée d’Orsay\nEsplanade Valéry Giscard d’Estaing, 75007 Paris\nPeintures impressionnistes et post-impressionnistes"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3522, 48.8606],
+			"style": {
+				"color": "#0072b2",
+				"label": "Centre Pompidou"
+			},
+			"popup": {
+				"text": "Centre Pompidou\nPlace Georges-Pompidou, 75004 Paris\nFermé pour travaux jusqu’en 2030"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3159, 48.8553],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée Rodin"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3226, 48.8638],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée de l’Orangerie"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3146, 48.866],
+			"style": {
+				"color": "#0072b2",
+				"label": "Petit Palais"
+			},
+			"popup": {
+				"text": "Petit Palais\nAvenue Winston-Churchill, 75008 Paris\nMusée des Beaux-Arts de la Ville de Paris, accès libre"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3624, 48.8598],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée Picasso"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3625, 48.8576],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée Carnavalet"
+			},
+			"popup": {
+				"text": "Musée Carnavalet\n23 rue de Sévigné, 75003 Paris\nL’histoire de Paris, entrée gratuite aux collections permanentes"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.2976, 48.8609],
+			"style": {
+				"color": "#0072b2",
+				"label": "Musée du quai Branly – Jacques Chirac"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [2.3879, 48.8956],
+			"style": {
+				"color": "#0072b2",
+				"label": "Cité des sciences et de l’industrie"
+			}
+		}
+	]
+}

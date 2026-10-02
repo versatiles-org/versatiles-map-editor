@@ -1,0 +1,77 @@
+{
+	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"map": {
+		"center": [13.4289, 52.5228],
+		"radius": 4175
+	},
+	"meta": {
+		"title": "Coffee in Berlin ☕"
+	},
+	"elements": [
+		{
+			"type": "marker",
+			"point": [13.4062, 52.5389],
+			"style": {
+				"color": "#0072b2",
+				"label": "☕ Bonanza Coffee"
+			},
+			"popup": {
+				"text": "☕ Bonanza Coffee\nOderberger Str. 35\n⭐⭐⭐⭐⭐ Best flat white 🙌"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.4017, 52.5306],
+			"style": {
+				"color": "#0072b2",
+				"label": "☕ The Barn"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.4085, 52.5285],
+			"style": {
+				"color": "#0072b2",
+				"label": "🥐 Zeit für Brot"
+			},
+			"popup": {
+				"text": "🥐 Zeit für Brot\nAlte Schönhauser Str. 4\nCinnamon rolls 🤤 — go early!"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.417, 52.499],
+			"style": {
+				"color": "#0072b2",
+				"label": "🍰 Café Kreuzberg"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.456, 52.51],
+			"style": {
+				"color": "#0072b2",
+				"label": "🌱 Vöner"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.418, 52.5465],
+			"style": {
+				"color": "#0072b2",
+				"label": "🍦 Hokey Pokey"
+			},
+			"popup": {
+				"text": "🍦 Hokey Pokey\nStargarder Str. 73\nLong queue in summer 😅 but worth it 👍"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [13.4205, 52.533],
+			"style": {
+				"color": "#0072b2",
+				"label": "🍕 Standard Serious Pizza"
+			}
+		}
+	]
+}
