@@ -22,8 +22,27 @@ Options:
   --depth <n>          show the tree to this depth (default: all)
   --expand             a line per call, instead of the calls of the same method merged
   --min-percent <p>    merge the lines below p % of the bits into one (default: 0)
+  --summary            a line per map instead of the tree: bits, characters, shares by kind
+  --json               the summary and the tree as JSON, e.g. to compare two runs with diff
   --resolution <m>     the precision of the coordinates in meters (default: 1)
   --help               this text`;
+
+/**
+ * The kinds of bits, by the innermost of these read methods that read them; all others are
+ * structure: types, flags, keys, counts.
+ */
+const KINDS = {
+	readStringTable: 'strings',
+	readStringRef: 'string refs',
+	readElementPoint: 'coordinates',
+	readElementPoints: 'coordinates',
+	readStyle: 'styles',
+	readElementStyles: 'styles',
+	readPalette: 'colors',
+	readMap: 'camera & frame',
+	readFrame: 'camera & frame'
+};
+const KIND_NAMES = [...new Set(Object.values(KINDS)), 'structure'];
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
 const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'readExpGolomb', 'read6pack', 'readBlock']);
@@ -141,7 +160,8 @@ function bar(fraction, width) {
 const format = (n) => n.toLocaleString('en-US');
 const color = (style, text) => styleText(style, text);
 
-function printTree(title, state, base64, options) {
+/** The bits of a map: the calls of its reader as a tree, and the bits of each kind (see `KINDS`). */
+function analyse(state, base64, options) {
 	const bits = StateReader.fromBase64(base64).bits;
 	const reader = new TracingReader(bits);
 	reader.readRoot();
@@ -150,18 +170,30 @@ function printTree(title, state, base64, options) {
 	if (unread > 0)
 		reader.root.children.push({ name: '(padding)', start: reader.offset, end: bits.length, children: [] });
 
+	const elements = {};
+	for (const element of state.elements) elements[element.type] = (elements[element.type] ?? 0) + 1;
 	const tree = aggregate(reader.root, options.expand);
-	const total = tree.bits;
+	return { bits: tree.bits, characters: base64.length, elements, kinds: kindsOf(reader.root), tree };
+}
+
+/** The bits of each kind: those of the leaves, by the innermost classified call above them. */
+function kindsOf(span, kind = 'structure', kinds = Object.fromEntries(KIND_NAMES.map((name) => [name, 0]))) {
+	const own = KINDS[span.name] ?? kind;
+	if (span.children.length === 0) kinds[own] += span.end - span.start;
+	for (const child of span.children) kindsOf(child, own, kinds);
+	return kinds;
+}
+
+function printTree(title, analysis, options) {
+	const { tree, bits: total, characters, elements } = analysis;
 	const lines = treeLines(tree, options, total);
 
-	const counts = {};
-	for (const element of state.elements) counts[element.type] = (counts[element.type] ?? 0) + 1;
 	console.log(color(['bold', 'magenta'], title));
 	console.log(
 		color(
 			'gray',
-			`${format(total)} bits · ${format(base64.length)} characters · ` +
-				Object.entries(counts)
+			`${format(total)} bits · ${format(characters)} characters · ` +
+				Object.entries(elements)
 					.map(([type, count]) => `${format(count)} ${type}${count === 1 ? '' : 's'}`)
 					.join(', ')
 		)
@@ -194,6 +226,40 @@ function printTree(title, state, base64, options) {
 	console.log();
 }
 
+/** A line per map: its bits, characters and the share of each kind, the largest in bold. */
+function printSummary(analyses) {
+	const width = Math.max(...analyses.map(({ title }) => title.length), 3);
+	const header = [
+		'map'.padEnd(width),
+		'bits'.padStart(8),
+		'chars'.padStart(7),
+		...KIND_NAMES.map((k) => k.padStart(k.length > 7 ? k.length : 7))
+	];
+	console.log(color('gray', header.join('  ')));
+	for (const { title, analysis } of analyses) {
+		const largest = Math.max(...Object.values(analysis.kinds));
+		const shares = KIND_NAMES.map((kind) => {
+			const bits = analysis.kinds[kind];
+			const cell = ((100 * bits) / analysis.bits).toFixed(1).padStart(Math.max(kind.length, 7) - 1) + '%';
+			return bits === largest ? color('bold', cell) : bits === 0 ? color('gray', cell) : cell;
+		});
+		console.log(
+			[
+				color('magenta', title.padEnd(width)),
+				color('bold', format(analysis.bits).padStart(8)),
+				format(analysis.characters).padStart(7),
+				...shares
+			].join('  ')
+		);
+	}
+}
+
+/** A node of the tree as JSON: its name, calls and bits, and its children. */
+function nodeJSON(node) {
+	const children = [...node.children.values()].map(nodeJSON);
+	return { name: node.name, count: node.count, bits: node.bits, ...(children.length > 0 && { children }) };
+}
+
 function main() {
 	const { values, positionals } = parseArgs({
 		allowPositionals: true,
@@ -201,6 +267,8 @@ function main() {
 			depth: { type: 'string' },
 			expand: { type: 'boolean', default: false },
 			'min-percent': { type: 'string', default: '0' },
+			summary: { type: 'boolean', default: false },
+			json: { type: 'boolean', default: false },
 			resolution: { type: 'string', default: '1' },
 			help: { type: 'boolean', default: false }
 		}
@@ -224,10 +292,21 @@ function main() {
 			.map((name) => join(examples, name));
 	}
 
-	for (const file of files) {
+	const analyses = files.map((file) => {
 		const state = stateFromMapJSON(JSON.parse(readFileSync(file, 'utf8')));
-		printTree(basename(file), state, encodeState(state, { resolution: options.resolution }), options);
+		const analysis = analyse(state, encodeState(state, { resolution: options.resolution }), options);
+		return { title: basename(file), analysis };
+	});
+	if (values.json) {
+		const json = analyses.map(({ title, analysis: { tree, ...summary } }) => ({
+			map: title,
+			...summary,
+			tree: nodeJSON(tree)
+		}));
+		return console.log(JSON.stringify(json, null, 2));
 	}
+	if (values.summary) return printSummary(analyses);
+	for (const { title, analysis } of analyses) printTree(title, analysis, options);
 }
 
 main();

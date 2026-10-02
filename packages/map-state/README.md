@@ -200,5 +200,7 @@ To see where the bits of a map go, as a tree of the reads with their bits:
 npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-percent p] [files…]
 ```
 
-Without files, it analyses the examples. Test maps with labels and popups in other languages and
+Without files, it analyses the examples. `--summary` prints a line per map instead: its bits and
+the shares of strings, coordinates, styles, colors and so on. `--json` prints both as JSON, e.g. to
+compare two versions of the format with `diff`. Test maps with labels and popups in other languages and
 scripts are in `src/__fixtures__/languages/`.
