@@ -191,22 +191,7 @@ To keep hashes short:
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.
 
-### Size
-
-The example maps (`examples/`) as links, at the default resolution of 1 m, compared with their
-minified JSON and with that JSON compressed by Brotli (quality 11) and base64 encoded, in
-characters:
-
-| Example                  | Elements |   JSON | Brotli |  Link | Strings | Coordinates |
-| ------------------------ | -------: | -----: | -----: | ----: | ------: | ----------: |
-| berlin-low-emission-zone |        3 |  3,718 |  1,698 |   759 |    49 % |        40 % |
-| chernobyl-exclusion-zone |        6 |  2,302 |    912 |   650 |    73 % |         5 % |
-| hamburg-berlin-railway   |        8 |  2,163 |    890 |   592 |    56 % |        26 % |
-| london-pharmacies        |      557 | 99,208 |  8,391 | 6,042 |    47 % |        43 % |
-| paris-2024-venues        |       24 |  4,273 |  1,062 |   685 |    59 % |        18 % |
-
-Strings and coordinates are the shares of the link's bits. The rest are styles, colors,
-flags and keys. The JSON keeps the coordinates at their full precision, the link at 1 m.
+### Size of a link
 
 To see where the bits of a map go, as a tree of the reads with their bits:
 
