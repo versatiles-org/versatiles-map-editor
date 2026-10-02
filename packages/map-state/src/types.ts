@@ -239,11 +239,20 @@ export interface StateLegend {
 	entries: StateLegendEntry[];
 }
 
-/** A row of the legend: a color, or a symbol in this color, and a text. */
+/** What a legend entry shows: a marker, a line, or an area (e.g. of a polygon or a circle). */
+export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'polygon'] as const;
+
+/**
+ * A row of the legend: a small copy of an element, and a text. Its styles are those of an element
+ * of its type, with the same defaults (see the elements); the label of a marker style is not shown.
+ */
 export interface StateLegendEntry {
-	color: HexColor;
-	/** A marker symbol, by the name of its image. Without it, the entry shows a color swatch. */
-	symbol?: string;
+	type: (typeof LEGEND_ENTRY_TYPES)[number];
+	/** Markers: the symbol. Lines: the line. Polygons: the area. */
+	style?: StateStyle;
+	/** Polygons: the outline. */
+	strokeStyle?: StateStyle;
+	/** The text next to it. */
 	label: string;
 }
 

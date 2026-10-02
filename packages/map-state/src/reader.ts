@@ -15,11 +15,17 @@ import type {
 	StateViewer
 } from './types.js';
 import { BASE64_CODE2BITS, CHAR_VALUE2CODE, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
-import { removeViewerDefaults, sanitizeBackground, sanitizeLabelMinZoom, VIEWER_CHOICES } from './profile.js';
+import {
+	oldLegendEntry,
+	removeViewerDefaults,
+	sanitizeBackground,
+	sanitizeLabelMinZoom,
+	VIEWER_CHOICES
+} from './profile.js';
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid, MAX_DIGITS } from './grid.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
-import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -429,21 +435,38 @@ export class StateReader {
 		}
 	}
 
+	/** An entry of the legend. Older links have a color and maybe a symbol instead (see `oldLegendEntry`). */
 	readLegendEntry(): StateLegendEntry {
-		const entry: StateLegendEntry = { color: '#000000', label: '' };
+		let type: StateLegendEntry['type'] | undefined;
+		let style: StateStyle | undefined;
+		let strokeStyle: StateStyle | undefined;
+		let label = '';
+		let old: { color?: string; symbol?: string } = {};
 		while (true) {
 			const key = this.readInteger(4);
 			switch (key) {
-				case 0:
-					return entry;
+				case 0: {
+					if (type) return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label };
+					return oldLegendEntry(old.color ?? '#000000', old.symbol, label);
+				}
 				case 1:
-					entry.color = this.readColorValue();
+					old = { ...old, color: this.readColorValue() };
 					break;
 				case 3:
-					entry.label = this.readString();
+					label = this.readString();
 					break;
 				case 4:
-					entry.symbol = this.readSymbolValue();
+					old = { ...old, symbol: this.readSymbolValue() };
+					break;
+				case 5:
+					type = LEGEND_ENTRY_TYPES[this.readVarint()];
+					if (!type) throw new Error('Invalid legend entry type');
+					break;
+				case 6:
+					style = this.readStyle();
+					break;
+				case 7:
+					strokeStyle = this.readStyle();
 					break;
 				default:
 					throw new Error(`Invalid legend entry key: ${key}`);

@@ -31,10 +31,10 @@ describe('symbols', () => {
 			meta: {
 				legend: {
 					entries: [
-						{ color: '#ff0000', symbol: 'icons:anchor', label: 'Harbour' },
+						{ type: 'marker', style: { color: '#ff0000', symbol: 'icons:anchor' }, label: 'Harbour' },
 						// only in the legend
-						{ color: '#00ff00', symbol: 'base:icon-zoo', label: 'Zoo' },
-						{ color: '#0000ff', label: 'Area' }
+						{ type: 'marker', style: { color: '#00ff00', symbol: 'base:icon-zoo' }, label: 'Zoo' },
+						{ type: 'polygon', style: { color: '#0000ff' }, label: 'Area' }
 					]
 				}
 			},

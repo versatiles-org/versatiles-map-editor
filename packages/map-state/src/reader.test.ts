@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
-import type { StateMetadata, MapState, StateStyle, StateViewer } from './types.js';
+import type { StateLegend, StateMetadata, MapState, StateStyle, StateViewer } from './types.js';
 import { StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 
@@ -608,16 +608,44 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'serif',
 					entries: [
-						// the decoder returns colors in upper case
-						{ color: '#ff0000', label: 'Red area' },
-						{ color: '#0000ff', symbol: 'icons:anchor', label: 'Blue marker' },
-						{ color: '#00ff00', label: '' }
+						{ type: 'polygon', style: { color: '#ff0000', pattern: 1 }, strokeStyle: { width: 3 }, label: 'Red area' },
+						{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor', size: 1.5 }, label: 'Blue marker' },
+						{ type: 'line', style: { color: '#00ff00', pattern: 2 }, label: '' },
+						// all defaults
+						{ type: 'marker', label: 'Flag' }
 					]
 				}
 			},
-			elements: []
+			// an element with the style of an entry, which refers to it
+			elements: [
+				{
+					type: 'line',
+					points: [
+						[13, 52],
+						[13.1, 52]
+					],
+					style: { color: '#00ff00', pattern: 2 }
+				}
+			]
 		};
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
+	});
+
+	it('reads the entries of older links, a color and maybe a symbol, as markers and areas', () => {
+		// written before: a blue anchor, and a translucent red swatch
+		expect(decodeState('IgAAf7_AADACgAEgIBgpgwg40QYhhYxAMxBAQAzswhkKDGkAEIyAwkAhgAA').meta).toStrictEqual({
+			legend: {
+				entries: [
+					{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },
+					{ type: 'polygon', style: { color: '#ff000080' }, strokeStyle: { visible: false }, label: 'Area' }
+				]
+			}
+		});
+	});
+
+	it('refuses an entry without a valid type', () => {
+		const legend = { entries: [{ color: '#ff0000', label: 'A' }] } as unknown as StateLegend;
+		expect(() => encodeState({ meta: { legend }, elements: [] })).toThrow('Invalid legend entry type');
 	});
 
 	it('does not store the default layout', () => {
@@ -664,7 +692,9 @@ describe('viewer', () => {
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
 		expect(decodeState('IX-AAAUAAhiQYQgGEGEACgA').meta).toStrictEqual({
-			legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+			legend: {
+				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
+			},
 			viewer: { search: 'top-left', legend: 'top-right' }
 		});
 	});

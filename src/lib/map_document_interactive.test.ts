@@ -226,7 +226,7 @@ describe('MapDocument', () => {
 			addElement(doc, 'marker');
 			doc.addState({
 				meta: {
-					legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+					legend: { entries: [{ type: 'marker', style: { color: '#ff0000' }, label: 'A' }] },
 					colorScheme: 'dark2',
 					viewer: { search: 'top-left' }
 				},

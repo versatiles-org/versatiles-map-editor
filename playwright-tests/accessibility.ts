@@ -165,7 +165,7 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 test('the drawer of elements opens with E, and chooses the map, the legend or elements', async ({ page }) => {
 	const state = encodeState({
 		map: { center: [13.4, 52.5], radius: 10000 },
-		meta: { legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
+		meta: { legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }] } },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	});
 	await page.goto('/#' + state);

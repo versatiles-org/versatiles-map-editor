@@ -9,7 +9,14 @@ import type {
 	StateViewer,
 	Bounds
 } from './types.js';
-import { LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS, NAVIGATION_POSITIONS, SEARCH_POSITIONS } from './types.js';
+import {
+	LEGEND_ENTRY_TYPES,
+	LEGEND_FONTS,
+	LEGEND_LAYOUTS,
+	LEGEND_POSITIONS,
+	NAVIGATION_POSITIONS,
+	SEARCH_POSITIONS
+} from './types.js';
 
 // ---------------------------------------------------------------------------
 // Style vocabulary of the serialization format.
@@ -104,6 +111,36 @@ export function sanitizeBoolean(value: unknown): boolean | undefined {
 	if (value === 'true') return true;
 	if (value === 'false') return false;
 	return undefined;
+}
+
+/** A whole number from `min` to `max`, e.g. the index of a pattern; undefined for anything else. */
+function sanitizeIndex(value: unknown, min: number, max: number): number | undefined {
+	const n = sanitizeNumber(value);
+	return n !== undefined && Number.isInteger(n) && n >= min && n <= max ? n : undefined;
+}
+
+/**
+ * A style as JSON has it (e.g. of a legend entry in GeoJSON): only its valid fields, or undefined
+ * if none is.
+ */
+export function sanitizeStyle(value: unknown): StateStyle | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const v = value as Record<string, unknown>;
+	const s: StateStyle = {};
+	set(s, 'color', sanitizeColor(v.color));
+	set(s, 'labelColor', sanitizeColor(v.labelColor));
+	set(s, 'haloColor', sanitizeColor(v.haloColor));
+	set(s, 'halo', sanitizeNumber(v.halo, 0));
+	set(s, 'pattern', sanitizeIndex(v.pattern, 0, 2));
+	set(s, 'rotate', sanitizeRotation(v.rotate));
+	const size = sanitizeNumber(v.size, 0);
+	if (size) s.size = size;
+	set(s, 'width', sanitizeNumber(v.width, 0));
+	set(s, 'align', sanitizeIndex(v.align, 0, 4));
+	set(s, 'label', sanitizeString(v.label));
+	set(s, 'visible', sanitizeBoolean(v.visible));
+	set(s, 'symbol', sanitizeSymbol(v.symbol));
+	return Object.keys(s).length > 0 ? s : undefined;
 }
 
 /** Assign `value` to `style[key]` unless it is undefined. */
@@ -266,7 +303,17 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 	return result;
 }
 
-/** A valid legend, or undefined. Invalid entries (e.g. without a color) are skipped. */
+/**
+ * An entry of the legend as older versions have it: a color and maybe a symbol. With a symbol, it
+ * is a marker; else an area of the color without an outline, as its swatch was.
+ */
+export function oldLegendEntry(color: string, symbol: string | undefined, label: string): StateLegendEntry {
+	return symbol
+		? { type: 'marker', style: { color, symbol }, label }
+		: { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label };
+}
+
+/** A valid legend, or undefined. Invalid entries (e.g. without a type or a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const { layout, font, bold, italic, entries } = value as Record<string, unknown>;
@@ -284,12 +331,19 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;
-		const color = sanitizeColor(e.color);
-		if (!color) continue;
-		const result: StateLegendEntry = { color, label: sanitizeString(e.label) ?? '' };
-		const symbol = sanitizeSymbol(e.symbol);
-		if (symbol) result.symbol = symbol;
-		legend.entries.push(result);
+		const label = sanitizeString(e.label) ?? '';
+		if (e.type === undefined) {
+			// of an older version
+			const color = sanitizeColor(e.color);
+			if (color) legend.entries.push(oldLegendEntry(color, sanitizeSymbol(e.symbol), label));
+			continue;
+		}
+		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
+		if (!type) continue;
+		const style = sanitizeStyle(e.style);
+		// only areas have an outline
+		const strokeStyle = type === 'polygon' ? sanitizeStyle(e.strokeStyle) : undefined;
+		legend.entries.push({ type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label });
 	}
 	return removeLegendDefaults(legend);
 }

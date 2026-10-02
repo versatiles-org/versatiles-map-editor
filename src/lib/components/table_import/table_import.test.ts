@@ -166,17 +166,17 @@ describe('categories', () => {
 		const { categories } = tableCategories(table, 1, ['#111111', '#222222'], '');
 		categories[1].symbol = 'icons:anchor';
 		const legend = legendWithCategories(
-			{ layout: 'inline', entries: [{ color: '#000000', label: 'Old' }] },
+			{ layout: 'inline', entries: [{ type: 'polygon', style: { color: '#000000' }, label: 'Old' }] },
 			categories
 		);
+		// with the styles of their markers; "" is no symbol
 		expect(legend).toStrictEqual({
 			layout: 'inline',
 			entries: [
-				{ color: '#000000', label: 'Old' },
-				// "" is no symbol
-				{ color: '#111111', label: 'cafe' },
-				{ color: '#222222', symbol: 'icons:anchor', label: 'shop' },
-				{ color: '#111111', label: '(empty)' }
+				{ type: 'polygon', style: { color: '#000000' }, label: 'Old' },
+				{ type: 'marker', style: { color: '#111111', symbol: '' }, label: 'cafe' },
+				{ type: 'marker', style: { color: '#222222', symbol: 'icons:anchor' }, label: 'shop' },
+				{ type: 'marker', style: { color: '#111111', symbol: '' }, label: '(empty)' }
 			]
 		});
 		expect(legendWithCategories(undefined, []).entries).toStrictEqual([]);

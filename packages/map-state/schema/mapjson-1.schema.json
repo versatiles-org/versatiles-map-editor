@@ -183,85 +183,26 @@
 		"StateLegendEntry": {
 			"type": "object",
 			"properties": {
-				"color": {
-					"$ref": "#/definitions/HexColor"
-				},
-				"symbol": {
-					"type": "string",
-					"description": "A marker symbol, by the name of its image. Without it, the entry shows a color swatch."
-				},
-				"label": {
-					"type": "string"
-				}
-			},
-			"required": ["color", "label"],
-			"additionalProperties": false,
-			"description": "A row of the legend: a color, or a symbol in this color, and a text."
-		},
-		"HexColor": {
-			"type": "string",
-			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
-			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
-		},
-		"StateViewer": {
-			"type": "object",
-			"properties": {
-				"search": {
-					"type": "string",
-					"enum": ["top-left", "top-right", "none"],
-					"description": "The address search. Default: \"none\"."
-				},
-				"navigation": {
-					"type": "string",
-					"enum": ["top-left", "top-right", "bottom-left", "bottom-right", "none"],
-					"description": "The buttons for zooming in and out. Default: \"top-right\"."
-				},
-				"legend": {
-					"type": "string",
-					"enum": ["bottom-left", "bottom", "bottom-right", "right", "top-right", "top", "top-left", "left", "none"],
-					"description": "The legend, if the map has one: a side (centered) or a corner. Default: \"bottom-left\"."
-				}
-			},
-			"additionalProperties": false,
-			"description": "What the viewer shows over the map, and where: each at a position, or \"none\". Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
-		},
-		"StateElement": {
-			"anyOf": [
-				{
-					"$ref": "#/definitions/StateElementMarker"
-				},
-				{
-					"$ref": "#/definitions/StateElementLine"
-				},
-				{
-					"$ref": "#/definitions/StateElementPolygon"
-				},
-				{
-					"$ref": "#/definitions/StateElementCircle"
-				}
-			]
-		},
-		"StateElementMarker": {
-			"type": "object",
-			"properties": {
 				"type": {
 					"type": "string",
-					"const": "marker"
-				},
-				"point": {
-					"$ref": "#/definitions/Position"
+					"enum": ["marker", "line", "polygon"]
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`."
+					"description": "Markers: the symbol. Lines: the line. Polygons: the area."
 				},
-				"popup": {
-					"$ref": "#/definitions/StatePopup"
+				"strokeStyle": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "Polygons: the outline."
+				},
+				"label": {
+					"type": "string",
+					"description": "The text next to it."
 				}
 			},
-			"required": ["type", "point"],
+			"required": ["type", "label"],
 			"additionalProperties": false,
-			"description": "A symbol at a point, with an optional label."
+			"description": "A row of the legend: a small copy of an element, and a text. Its styles are those of an element of its type, with the same defaults (see the elements); the label of a marker style is not shown."
 		},
 		"StateStyle": {
 			"type": "object",
@@ -337,6 +278,71 @@
 			},
 			"additionalProperties": false,
 			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
+		},
+		"HexColor": {
+			"type": "string",
+			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
+			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+		},
+		"StateViewer": {
+			"type": "object",
+			"properties": {
+				"search": {
+					"type": "string",
+					"enum": ["top-left", "top-right", "none"],
+					"description": "The address search. Default: \"none\"."
+				},
+				"navigation": {
+					"type": "string",
+					"enum": ["top-left", "top-right", "bottom-left", "bottom-right", "none"],
+					"description": "The buttons for zooming in and out. Default: \"top-right\"."
+				},
+				"legend": {
+					"type": "string",
+					"enum": ["bottom-left", "bottom", "bottom-right", "right", "top-right", "top", "top-left", "left", "none"],
+					"description": "The legend, if the map has one: a side (centered) or a corner. Default: \"bottom-left\"."
+				}
+			},
+			"additionalProperties": false,
+			"description": "What the viewer shows over the map, and where: each at a position, or \"none\". Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
+		},
+		"StateElement": {
+			"anyOf": [
+				{
+					"$ref": "#/definitions/StateElementMarker"
+				},
+				{
+					"$ref": "#/definitions/StateElementLine"
+				},
+				{
+					"$ref": "#/definitions/StateElementPolygon"
+				},
+				{
+					"$ref": "#/definitions/StateElementCircle"
+				}
+			]
+		},
+		"StateElementMarker": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "marker"
+				},
+				"point": {
+					"$ref": "#/definitions/Position"
+				},
+				"style": {
+					"$ref": "#/definitions/StateStyle",
+					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`."
+				},
+				"popup": {
+					"$ref": "#/definitions/StatePopup"
+				}
+			},
+			"required": ["type", "point"],
+			"additionalProperties": false,
+			"description": "A symbol at a point, with an optional label."
 		},
 		"StatePopup": {
 			"type": "object",

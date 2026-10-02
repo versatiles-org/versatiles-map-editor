@@ -37,4 +37,29 @@ describe('upgradeState', () => {
 		const current: MapState = { meta: { title: 'T', viewer: { navigation: 'none' } }, elements: [] };
 		expect(upgradeState(current)).toStrictEqual(current);
 	});
+
+	it('makes the entries of the legend of an older version markers and areas', () => {
+		const old = {
+			meta: {
+				legend: {
+					layout: 'inline',
+					entries: [
+						{ color: '#0000ff', symbol: 'icons:anchor', label: 'Harbour' },
+						{ color: '#ff000080', label: 'Area' },
+						// already new ones stay as they are
+						{ type: 'line', style: { width: 3 }, label: 'Route' }
+					]
+				}
+			},
+			elements: []
+		} as unknown as MapState;
+		expect(upgradeState(old).meta?.legend).toStrictEqual({
+			layout: 'inline',
+			entries: [
+				{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },
+				{ type: 'polygon', style: { color: '#ff000080' }, strokeStyle: { visible: false }, label: 'Area' },
+				{ type: 'line', style: { width: 3 }, label: 'Route' }
+			]
+		});
+	});
 });

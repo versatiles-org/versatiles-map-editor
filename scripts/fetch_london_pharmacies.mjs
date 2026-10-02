@@ -109,7 +109,7 @@ const state = {
 			options: { theme: 'gray', text: { spacing: 2 }, recolor: { brightness: 0.15, contrast: 0.7 } }
 		},
 		// the legend is kept in the map, but not shown
-		legend: { entries: [{ color: COLOR, label: 'Pharmacy', symbol: SYMBOL }] },
+		legend: { entries: [{ type: 'marker', style: { color: COLOR, symbol: SYMBOL }, label: 'Pharmacy' }] },
 		viewer: { search: 'top-left', legend: 'none' },
 		title: 'Pharmacies in Inner London',
 		labelFont: 'noto_sans_bold',

@@ -10,8 +10,18 @@
 		"viewer": { "legend": "bottom-right" },
 		"legend": {
 			"entries": [
-				{ "color": "#d55e00", "label": "Closed for renovation, Aug 2025 – Apr 2026" },
-				{ "color": "#0072b2", "label": "Detour of long-distance trains" }
+				{
+					"type": "polygon",
+					"style": { "color": "#d55e00" },
+					"strokeStyle": { "visible": false },
+					"label": "Closed for renovation, Aug 2025 – Apr 2026"
+				},
+				{
+					"type": "polygon",
+					"style": { "color": "#0072b2" },
+					"strokeStyle": { "visible": false },
+					"label": "Detour of long-distance trains"
+				}
 			]
 		},
 		"title": "Hamburg–Berlin railway renovation",

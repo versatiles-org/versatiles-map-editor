@@ -7,7 +7,11 @@
 			"builder": "osm",
 			"options": { "theme": "gray", "text": { "spacing": 2 }, "recolor": { "brightness": 0.15, "contrast": 0.7 } }
 		},
-		"legend": { "entries": [{ "color": "#009e73", "label": "Pharmacy", "symbol": "base:icon-pill" }] },
+		"legend": {
+			"entries": [
+				{ "type": "marker", "style": { "color": "#009e73", "symbol": "base:icon-pill" }, "label": "Pharmacy" }
+			]
+		},
 		"viewer": { "search": "top-left", "legend": "none" },
 		"title": "Pharmacies in Inner London",
 		"labelFont": "noto_sans_bold",

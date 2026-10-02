@@ -9,7 +9,7 @@ import {
 	VIEWER_CHOICES
 } from './profile.js';
 import { StateReader } from './reader.js';
-import { LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
+import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 import { digitsForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
@@ -383,13 +383,20 @@ export class StateWriter {
 		if (legend.bold) this.writeInteger(5, 4);
 		if (legend.italic) this.writeInteger(6, 4);
 		this.writeInteger(3, 4);
+		// keys 1 and 4 were the color and the symbol of older links, key 2 is not used
 		this.writeArray(legend.entries, (entry) => {
-			this.writeInteger(1, 4);
-			this.writeColorValue(entry.color);
-			if (entry.symbol) {
-				// the image name, by its index in the list of symbols; key 2 is not used
-				this.writeInteger(4, 4);
-				this.writeSymbolValue(entry.symbol);
+			const type = LEGEND_ENTRY_TYPES.indexOf(entry.type);
+			if (type < 0) throw new Error(`Invalid legend entry type: ${entry.type}`);
+			this.writeInteger(5, 4);
+			this.writeVarint(type);
+			// the styles like those of elements, which can refer to them
+			if (entry.style) {
+				this.writeInteger(6, 4);
+				this.writeStyle(entry.style);
+			}
+			if (entry.strokeStyle) {
+				this.writeInteger(7, 4);
+				this.writeStyle(entry.strokeStyle);
 			}
 			if (entry.label) {
 				this.writeInteger(3, 4);
@@ -541,25 +548,26 @@ export class StateWriter {
 /** The names of the symbols of all styles and of the legend, each once. */
 export function collectSymbols(root: MapState): string[] {
 	const symbols = new Set<string>();
-	for (const element of root.elements) {
-		if (element.style?.symbol != null) symbols.add(element.style.symbol);
-	}
-	for (const entry of root.meta?.legend?.entries ?? []) {
-		if (entry.symbol) symbols.add(entry.symbol);
+	for (const style of allStyles(root)) {
+		if (style.symbol != null) symbols.add(style.symbol);
 	}
 	return [...symbols];
+}
+
+/** The styles of all elements and of all entries of the legend. */
+function allStyles(root: MapState): StateStyle[] {
+	return [...root.elements, ...(root.meta?.legend?.entries ?? [])].flatMap((item) => [
+		...(item.style ? [item.style] : []),
+		...('strokeStyle' in item && item.strokeStyle ? [item.strokeStyle] : [])
+	]);
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */
 export function collectColors(root: MapState): string[] {
 	const colors: string[] = [];
-	for (const element of root.elements) {
-		if (element.style?.color) colors.push(element.style.color);
-		if (element.style?.labelColor) colors.push(element.style.labelColor);
-		if (element.style?.haloColor) colors.push(element.style.haloColor);
-		if ('strokeStyle' in element && element.strokeStyle?.color) colors.push(element.strokeStyle.color);
+	for (const style of allStyles(root)) {
+		for (const color of [style.color, style.labelColor, style.haloColor]) if (color) colors.push(color);
 	}
-	for (const entry of root.meta?.legend?.entries ?? []) colors.push(entry.color);
 
 	const counts = new Map<string, { color: string; count: number; first: number }>();
 	colors.forEach((color, i) => {

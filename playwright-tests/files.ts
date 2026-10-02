@@ -85,7 +85,10 @@ test('the download dialog confirms with Enter, and cancels', async ({ page }) =>
 test('a new or opened map is a new map, and the one before is kept in the recent maps', async ({ page }) => {
 	const state: MapState = {
 		map: { center: [13.4, 52.5], radius: 10000 },
-		meta: { title: 'Markers', legend: { entries: [{ color: '#ff0000', label: 'A' }] } },
+		meta: {
+			title: 'Markers',
+			legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }] }
+		},
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -170,7 +173,7 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 		map: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
 			background: { builder: 'osm', options: { theme: 'gray' } },
-			legend: { entries: [{ color: '#00ff00', label: 'Park' }] }
+			legend: { entries: [{ type: 'polygon' as const, style: { color: '#00ff00' }, label: 'Park' }] }
 		},
 		elements: [
 			{ type: 'marker', point: [13.41, 52.51], style: { color: '#0000ff', label: 'Café' }, popup: { text: 'Open' } },
@@ -313,7 +316,9 @@ test.describe('importing a table', () => {
 			((await storedState(page)).elements as StateElementMarker[]).map((m) => m.style?.color?.toLowerCase());
 		await expect.poll(colors).toStrictEqual(['#4477aa', '#000000', '#4477aa', '#228833']);
 		await expect
-			.poll(async () => (await storedState(page)).meta?.legend?.entries.map((e) => [e.label, e.color.toLowerCase()]))
+			.poll(async () =>
+				(await storedState(page)).meta?.legend?.entries.map((e) => [e.label, e.style?.color?.toLowerCase()])
+			)
 			.toStrictEqual([
 				['Cafe', '#4477aa'],
 				['Shop', '#000000'],

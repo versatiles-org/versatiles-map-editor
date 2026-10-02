@@ -156,7 +156,9 @@ describe('addLegendEntry', () => {
 
 		addLegendEntry(doc);
 		addLegendEntry(doc);
-		expect(doc.legend?.entries.map((entry) => entry.color).sort()).toStrictEqual(['#111111', '#222222']);
+		expect(doc.legend?.entries.map((entry) => entry.style?.color).sort()).toStrictEqual(['#111111', '#222222']);
+		// areas of the color, without an outline
+		expect(doc.legend?.entries[0]).toMatchObject({ type: 'polygon', strokeStyle: { visible: false } });
 
 		doc.state.undo();
 		expect(doc.legend?.entries).toHaveLength(1);

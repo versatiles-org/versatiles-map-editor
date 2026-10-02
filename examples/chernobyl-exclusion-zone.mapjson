@@ -13,8 +13,18 @@
 		"viewer": { "legend": "top-left" },
 		"legend": {
 			"entries": [
-				{ "color": "#d55e00", "label": "10 km zone" },
-				{ "color": "#e69f00", "label": "30 km exclusion zone" }
+				{
+					"type": "polygon",
+					"style": { "color": "#d55e00" },
+					"strokeStyle": { "visible": false },
+					"label": "10 km zone"
+				},
+				{
+					"type": "polygon",
+					"style": { "color": "#e69f00" },
+					"strokeStyle": { "visible": false },
+					"label": "30 km exclusion zone"
+				}
 			]
 		},
 		"title": "Chernobyl exclusion zone",

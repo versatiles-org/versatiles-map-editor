@@ -482,7 +482,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 test('rearranging the entries of the legend', { tag: '@cross-browser' }, async ({ page }) => {
 	// tall enough for all entries in the sidebar, for the mouse to reach them
 	await page.setViewportSize({ width: 1280, height: 1100 });
-	const entries = ['A', 'B', 'C'].map((label) => ({ color: '#ff0000', label }));
+	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
 		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
@@ -552,7 +552,12 @@ test('editing the legend', async ({ page }) => {
 	await waitForMapIsReady(page);
 	const legendInUrl = async () => {
 		const legend = (await storedState(page)).meta?.legend;
-		return legend && { ...legend, entries: legend.entries.map((e) => ({ ...e, color: e.color.toLowerCase() })) };
+		return (
+			legend && {
+				...legend,
+				entries: legend.entries.map((e) => ({ ...e, style: { ...e.style, color: e.style?.color?.toLowerCase() } }))
+			}
+		);
 	};
 	const overlay = page.getByRole('list', { name: 'Legend' });
 
@@ -588,8 +593,9 @@ test('editing the legend', async ({ page }) => {
 	await expect.poll(legendInUrl).toMatchObject({
 		layout: 'horizontal',
 		entries: [
-			{ color: '#00aa00', label: 'Park' },
-			{ color: '#0000ff', label: 'Cafe', symbol: 'base:icon-cafe' }
+			// a new entry is an area without an outline, one with a symbol a marker
+			{ type: 'polygon', style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Park' },
+			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' }
 		]
 	});
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park', 'Cafe']);

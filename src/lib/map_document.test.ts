@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MapDocument } from './map_document.svelte.js';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
-import type { MapState } from '@versatiles/map-state';
+import type { MapState, StateLegendEntry } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import { MarkerElement } from './element/marker.js';
 import { inlineSources } from '@versatiles/style';
@@ -254,7 +254,7 @@ describe('MapDocument', () => {
 	});
 
 	it('keeps the legend without its default values, as links store it', async () => {
-		const entries = [{ color: '#ff0000', label: 'A' }];
+		const entries: StateLegendEntry[] = [{ type: 'polygon', style: { color: '#ff0000' }, label: 'A' }];
 		await mapDocument.loadState({
 			elements: [],
 			meta: { legend: { layout: 'vertical', font: 'sans-serif', entries } }

@@ -105,9 +105,10 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
   minimized options, stored as JSON in base64, so any current or future option fits;
-  `meta.legend`: position, layout, generic font and entries of a legend defined by the author;
+  `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
+  author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
-  `meta.search`: show an address search in the read-only viewer;
+  `meta.viewer`: what the read-only viewer shows over the map, and where;
   `meta.title`: the title of the map; `meta.labelFont`: one glyph font for the labels of all
   markers; `meta.mapLabelsOnTop`: the labels of the background map over the areas and lines)
 

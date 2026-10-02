@@ -14,10 +14,10 @@ describe('Legend', () => {
 
 	it('shows the text of each entry in exactly the color of its symbol or swatch', () => {
 		const entries = [
-			{ color: '#0072b2', label: 'Blue' },
-			{ color: '#d55e0080', label: 'Translucent orange' },
-			{ color: '#e69f00', label: 'Yellow' },
-			{ color: '#ffffff', label: 'White' }
+			{ type: 'polygon' as const, style: { color: '#0072b2' }, label: 'Blue' },
+			{ type: 'polygon' as const, style: { color: '#d55e0080' }, label: 'Translucent orange' },
+			{ type: 'polygon' as const, style: { color: '#e69f00' }, label: 'Yellow' },
+			{ type: 'polygon' as const, style: { color: '#ffffff' }, label: 'White' }
 		];
 		const library = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map);
 		component = mount(Legend, {
@@ -27,13 +27,13 @@ describe('Legend', () => {
 		});
 		flushSync();
 		const colors = [...document.querySelectorAll<HTMLElement>('.text')].map((text) => text.style.color);
-		expect(colors).toStrictEqual(entries.map((entry) => entry.color));
+		expect(colors).toStrictEqual(entries.map((entry) => entry.style.color));
 	});
 
 	it('draws the symbols in their color only, also light symbols', () => {
 		const entries = [
-			{ color: '#0072b2', symbol: 'icons:anchor', label: 'Blue' },
-			{ color: '#ffffff', symbol: 'icons:anchor', label: 'White' }
+			{ type: 'marker' as const, style: { color: '#0072b2', symbol: 'icons:anchor' }, label: 'Blue' },
+			{ type: 'marker' as const, style: { color: '#ffffff', symbol: 'icons:anchor' }, label: 'White' }
 		];
 		const library = new SymbolLibrary(new MockMap() as unknown as maplibregl.Map);
 		const drawSymbol = vi.spyOn(library, 'drawSymbol').mockImplementation(() => {});

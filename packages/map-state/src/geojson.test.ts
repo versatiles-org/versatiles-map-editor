@@ -267,7 +267,9 @@ describe('background', () => {
 
 describe('legend', () => {
 	it('round-trips as the meta member', () => {
-		const legend = { entries: [{ color: '#ff0000', symbol: 'extras:pin-teardrop', label: 'A' }] };
+		const legend = {
+			entries: [{ type: 'marker' as const, style: { color: '#ff0000', symbol: 'extras:pin-teardrop' }, label: 'A' }]
+		};
 		const doc = stateToGeoJSON({ meta: { legend }, elements: [] });
 		expect(doc.meta).toStrictEqual({ legend });
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ legend });
@@ -283,9 +285,13 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'monospace',
 					entries: [
-						{ color: '#F00', label: 5, symbol: 2.4 },
-						{ color: '#00F', label: 'y', symbol: 'flag' },
-						{ color: '#0F0', label: 'z', symbol: 'icons:anchor' },
+						{ type: 'line', style: { color: '#F00', width: '3', pattern: 7, size: -1, extra: 1 }, label: 5 },
+						// only areas have an outline
+						{ type: 'marker', style: { symbol: 'flag' }, strokeStyle: { color: '#000' }, label: 'y' },
+						{ type: 'polygon', style: 'red', strokeStyle: { visible: false }, label: 'z' },
+						{ type: 'circle', style: { color: '#0F0' }, label: 'x' },
+						// of an older version: a color, and maybe a symbol
+						{ color: '#0F0', label: 'old', symbol: 'icons:anchor' },
 						{ color: 'nope', label: 'x' },
 						'x'
 					]
@@ -297,10 +303,11 @@ describe('legend', () => {
 				layout: 'inline',
 				font: 'monospace',
 				entries: [
-					// a symbol is the name of its image, e.g. no number or short name
-					{ color: '#ff0000', label: '5' },
-					{ color: '#0000ff', label: 'y' },
-					{ color: '#00ff00', label: 'z', symbol: 'icons:anchor' }
+					// only valid fields; a symbol is the name of its image, e.g. no short name
+					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '5' },
+					{ type: 'marker', label: 'y' },
+					{ type: 'polygon', strokeStyle: { visible: false }, label: 'z' },
+					{ type: 'marker', style: { color: '#00ff00', symbol: 'icons:anchor' }, label: 'old' }
 				]
 			}
 		});
@@ -330,7 +337,9 @@ describe('viewer', () => {
 	it('reads the search and the position of the legend of older files', () => {
 		const old = { search: true, legend: { position: 'top', entries: [{ color: '#ff0000', label: 'A' }] } };
 		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [], meta: old } as never).meta).toStrictEqual({
-			legend: { entries: [{ color: '#ff0000', label: 'A' }] },
+			legend: {
+				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
+			},
 			viewer: { search: 'top-left', legend: 'top' }
 		});
 	});

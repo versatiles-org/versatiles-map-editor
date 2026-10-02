@@ -1,4 +1,4 @@
-import type { StateElementMarker, StateLegend, StateStyle } from '@versatiles/map-state';
+import type { StateElementMarker, StateLegend, StateLegendEntry, StateStyle } from '@versatiles/map-state';
 import { geocode, type GeocodingOptions, type GeocodingResult } from '../geocoding.js';
 import { parseNumber, type AddressPart, type Table } from './table.js';
 
@@ -174,11 +174,11 @@ export function markerStyle(color: string, symbol: string): StateStyle {
 	return { color, symbol };
 }
 
-/** The legend with an entry for each category, after its existing entries. */
+/** The legend with an entry for each category, with the style of its markers, after its existing entries. */
 export function legendWithCategories(legend: StateLegend | undefined, categories: Category[]): StateLegend {
-	const entries = categories.map((c) => ({
-		color: c.color,
-		...(c.symbol ? { symbol: c.symbol } : {}),
+	const entries = categories.map((c): StateLegendEntry => ({
+		type: 'marker',
+		style: markerStyle(c.color, c.symbol),
 		label: c.value || '(empty)'
 	}));
 	return { ...(legend ?? { entries: [] }), entries: [...(legend?.entries ?? []), ...entries] };

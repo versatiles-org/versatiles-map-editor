@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { StateLegend, StateLegendEntry, StateViewer } from '@versatiles/map-state';
+	import { SYMBOL_DEFAULTS, type StateLegend, type StateLegendEntry, type StateViewer } from '@versatiles/map-state';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -56,6 +56,23 @@
 
 	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
 		update({ entries: legend.entries.map((entry, i) => (i === index ? { ...entry, ...change } : entry)) });
+	}
+
+	/** The color of an entry's style. */
+	const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
+	/** The symbol of a marker entry, "" for others. */
+	const symbolOf = (entry: StateLegendEntry) =>
+		entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : '';
+
+	/** A marker with the symbol, or without one ("") an area of the entry's color without an outline. */
+	function setSymbol(index: number, symbol: string) {
+		const { label } = legend.entries[index];
+		const color = colorOf(legend.entries[index]);
+		const entry: StateLegendEntry = symbol
+			? { type: 'marker', style: { color, symbol }, label }
+			: { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label };
+		update({ entries: legend.entries.map((e, i) => (i === index ? entry : e)) });
+		log();
 	}
 
 	function removeEntry(index: number) {
@@ -243,7 +260,7 @@
 						<InputRow id="{uid}-{i}-color" label="Color">
 							<ColorPicker
 								id="{uid}-{i}-color"
-								bind:value={() => entry.color, (color) => updateEntry(i, { color })}
+								bind:value={() => colorOf(entry), (color) => updateEntry(i, { style: { ...entry.style, color } })}
 								onchange={log}
 								palette={doc.colors}
 							/>
@@ -252,13 +269,7 @@
 							<SymbolSelector
 								id="{uid}-{i}-symbol"
 								noneLabel="Color only"
-								bind:symbol={
-									() => entry.symbol ?? '',
-									(symbol) => {
-										updateEntry(i, { symbol: symbol || undefined });
-										log();
-									}
-								}
+								bind:symbol={() => symbolOf(entry), (symbol) => setSymbol(i, symbol)}
 							/>
 						</InputRow>
 						<Button variant="danger" wide onclick={() => removeEntry(i)}>Remove entry {i + 1}</Button>

@@ -34,7 +34,12 @@ its elements, on the editor's default background map.
 	"meta": {
 		"title": "A walk through Berlin",
 		"background": { "builder": "osm", "options": { "theme": "gray" } },
-		"legend": { "entries": [{ "color": "#0072b2", "symbol": "icons:anchor", "label": "Landing stage" }] },
+		"legend": {
+			"entries": [
+				{ "type": "marker", "style": { "color": "#0072b2", "symbol": "icons:anchor" }, "label": "Landing stage" },
+				{ "type": "line", "style": { "color": "#d55e00", "width": 4, "pattern": 1 }, "label": "Boat route" }
+			]
+		},
 		"viewer": { "search": "top-left", "legend": "top-right" }
 	},
 	"elements": [
@@ -156,8 +161,12 @@ does not offer itself.
 
 ### Legend
 
-`{ "entries": [ … ], "layout", "font", "bold", "italic" }`: the `entries` are `{ "color", "label" }`,
-with a `"symbol"` for a symbol in this color instead of a color swatch.
+`{ "entries": [ … ], "layout", "font", "bold", "italic" }`. Each of its `entries` is a small copy
+of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `type` is `"marker"`,
+`"line"` or `"polygon"` (an area, also for circles), and `style` and `strokeStyle` are styles like
+those of an element of that type (see [Styles](#styles)), with the same defaults: e.g. a marker
+entry without a style is a red flag. Only polygons have a `strokeStyle`, for their outline. The
+`label` of a marker style is not shown; the entry's `label` is its text.
 
 | Field    | Values                                                     | Default        |
 | -------- | ---------------------------------------------------------- | -------------- |
@@ -202,7 +211,9 @@ editor reads older versions and upgrades them.
 
 Files without `$schema` were written by the editor before the format had versions. They are read
 as version 1 and upgraded: a fill `opacity` becomes the alpha of its color, a `search: true` in
-`meta` becomes `viewer.search`, and the `position` of the legend becomes `viewer.legend`. A file of
+`meta` becomes `viewer.search`, the `position` of the legend becomes `viewer.legend`, and a legend
+entry of a `color` and maybe a `symbol` becomes a marker with that symbol, or else an area of
+that color without an outline. A file of
 a newer version than the editor knows is refused, instead of being read wrongly.
 
 ## Other forms

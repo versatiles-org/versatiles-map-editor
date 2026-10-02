@@ -6,10 +6,22 @@
 		"background": { "builder": "osm", "options": { "theme": "gray" } },
 		"legend": {
 			"entries": [
-				{ "color": "#0072b2", "label": "Stadiums and arenas", "symbol": "base:icon-stadium" },
-				{ "color": "#d55e00", "label": "Temporary venues at landmarks", "symbol": "base:icon-monument" },
-				{ "color": "#009e73", "label": "Venues in nature", "symbol": "base:icon-outdoor" },
-				{ "color": "#cc9900", "label": "Olympic Village", "symbol": "base:icon-stadium" }
+				{
+					"type": "marker",
+					"style": { "color": "#0072b2", "symbol": "base:icon-stadium" },
+					"label": "Stadiums and arenas"
+				},
+				{
+					"type": "marker",
+					"style": { "color": "#d55e00", "symbol": "base:icon-monument" },
+					"label": "Temporary venues at landmarks"
+				},
+				{
+					"type": "marker",
+					"style": { "color": "#009e73", "symbol": "base:icon-outdoor" },
+					"label": "Venues in nature"
+				},
+				{ "type": "marker", "style": { "color": "#cc9900", "symbol": "base:icon-stadium" }, "label": "Olympic Village" }
 			]
 		},
 		"viewer": { "legend": "top-right" },

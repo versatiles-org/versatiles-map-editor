@@ -1,3 +1,4 @@
+import type { StateLegendEntry } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 
 /*
@@ -47,9 +48,11 @@ export function canPasteStyle(doc: MapDocumentInteractive): boolean {
 /** Add an entry to the legend, or start a legend. It starts with a color of the map that the legend does not show yet. */
 export function addLegendEntry(doc: MapDocumentInteractive): void {
 	const entries = doc.legend?.entries ?? [];
-	const used = new Set(entries.map((entry) => entry.color.toLowerCase()));
+	const used = new Set(entries.flatMap((entry) => entry.style?.color?.toLowerCase() ?? []));
 	const color = doc.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
-	doc.legend = { ...doc.legend, entries: [...entries, { color, label: '' }] };
+	// an area of the color, without an outline
+	const entry: StateLegendEntry = { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label: '' };
+	doc.legend = { ...doc.legend, entries: [...entries, entry] };
 	doc.state.log();
 }
 

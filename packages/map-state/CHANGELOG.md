@@ -50,6 +50,11 @@ The first release.
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
+- Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
+  and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
+  styles are written like those of elements, which can refer to them. Entries of older links and
+  files (a `color` and maybe a `symbol`) are read as markers with that symbol, or else as areas of
+  that color without an outline.
 - `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
   `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata;
   `sanitizeLabelMinZoom`.

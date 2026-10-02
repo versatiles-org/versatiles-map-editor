@@ -33,7 +33,12 @@ describe('the JSON Schema of .mapjson files', () => {
 			frame: [13.3, 52.4, 13.5, 52.6],
 			meta: {
 				background: { builder: 'satellite', options: { osmOverlay: false } },
-				legend: { layout: 'inline', font: 'serif', bold: true, entries: [{ color: '#ff0000', label: 'A' }] },
+				legend: {
+					layout: 'inline',
+					font: 'serif',
+					bold: true,
+					entries: [{ type: 'polygon', style: { color: '#ff0000' }, label: 'A' }]
+				},
 				viewer: { search: 'top-right', navigation: 'none', legend: 'bottom' },
 				colorScheme: 'dark2',
 				labelFont: 'noto_sans_bold',

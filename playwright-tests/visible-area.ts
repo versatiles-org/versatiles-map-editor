@@ -56,7 +56,11 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 	// a window of the shape of the frame, so the frame would fill it, also under the legend
 	await page.setViewportSize({ width: 600, height: 500 });
-	const entries = ['Cafés', 'Bakeries', 'Parks', 'Museums'].map((label) => ({ color: '#ff0000', label }));
+	const entries = ['Cafés', 'Bakeries', 'Parks', 'Museums'].map((label) => ({
+		type: 'polygon' as const,
+		style: { color: '#ff0000' },
+		label
+	}));
 	await page.goto('/view#' + encodeState({ frame, elements, meta: { legend: { entries } } }));
 	await waitForMapIsReady(page);
 	const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;

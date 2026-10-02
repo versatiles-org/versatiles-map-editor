@@ -1,12 +1,18 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
-	import type { StateLegend, LEGEND_POSITIONS } from '@versatiles/map-state';
+	import type { StateLegend, StateLegendEntry, LEGEND_POSITIONS } from '@versatiles/map-state';
 
 	type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { parseColor } from '@versatiles/map-state';
+	import { parseColor, SYMBOL_DEFAULTS } from '@versatiles/map-state';
 
 	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
+	/** The color of an entry, and its symbol if it is a marker ("" for a swatch). */
+	function shownAs(entry: StateLegendEntry): { color: string; symbol: string } {
+		const color = entry.style?.color ?? SYMBOL_DEFAULTS.color;
+		return { color, symbol: entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : '' };
+	}
+
 	function opacityOf(color: string): number {
 		return parseColor(color)?.alpha ?? 1;
 	}
@@ -138,24 +144,23 @@
 		aria-label="Legend"
 	>
 		{#each legend.entries as entry, i (i)}
+			{@const { color, symbol } = shownAs(entry)}
 			<div class="entry" role="listitem">
-				{#if entry.symbol}
+				{#if symbol}
 					<canvas
 						class="symbol"
 						width={symbolSize * resolution}
 						height={symbolSize * resolution}
 						style:width="{symbolSize}px"
 						style:height="{symbolSize}px"
-						style:opacity={opacityOf(entry.color)}
-						use:drawSymbol={{ symbol: entry.symbol, color: entry.color }}
+						style:opacity={opacityOf(color)}
+						use:drawSymbol={{ symbol, color }}
 					></canvas>
 				{:else}
-					<span class="swatch" style:background-color={entry.color}></span>
+					<span class="swatch" style:background-color={color}></span>
 				{/if}
 				<!-- the text in the same color as its symbol or swatch -->
-				<span class="text" style:color={entry.color} style:translate={shift ? `0 ${shift}px` : undefined}
-					>{entry.label}</span
-				>
+				<span class="text" style:color style:translate={shift ? `0 ${shift}px` : undefined}>{entry.label}</span>
 			</div>
 		{/each}
 	</div>
