@@ -1,14 +1,13 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [20.9566494784099, 52.28504479050969], "radius": 31025.27488555647 },
+	"map": { "center": [20.956572165367135, 52.279325478348426], "radius": 33064.21650409205 },
 	"meta": {
-		"background": { "builder": "osm", "options": { "theme": "gray-dark", "text": { "spacing": 2 } } },
+		"background": { "builder": "satellite", "options": { "osmOverlay": false } },
 		"legend": {
-			"theme": "dark",
 			"entries": [
 				{
 					"type": "marker",
-					"style": { "color": "#e69f00", "symbol": "extras:shape-star", "size": 1.2 },
+					"style": { "color": "#ff4060", "symbol": "extras:shape-star", "size": 1.2 },
 					"label": "Christmas markets for weeks"
 				},
 				{
@@ -18,10 +17,11 @@
 				},
 				{
 					"type": "marker",
-					"style": { "color": "#ee6677", "symbol": "base:icon-marketplace", "size": 0.8 },
+					"style": { "color": "#ffb000", "symbol": "base:icon-marketplace", "size": 0.8 },
 					"label": "Markets near Warsaw, one day or weekend"
 				}
-			]
+			],
+			"theme": "dark"
 		},
 		"viewer": { "legend": "bottom-right", "search": "top-left" },
 		"title": "Christmas markets 2025 in and near Warsaw"
@@ -31,198 +31,208 @@
 			"type": "marker",
 			"point": [21.02774, 52.07428],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Piaseczno",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Kiermasz Świąteczny, Piaseczno**\nOn the market square, with the lighting of the Christmas tree\n7 December 2025, 11:00-17:00"
+				"text": "**Kiermasz Świąteczny, Piaseczno**\nOn the market square, with the lighting of the Christmas tree\n7 December 2025, 11:00–17:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [20.80837, 52.16495],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Pruszków",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Pruszków**\nOn Plac Jana Pawła II, with a Santa village\n7 December 2025, 11:00-20:00"
+				"text": "**Jarmark Bożonarodzeniowy, Pruszków**\nOn Plac Jana Pawła II, with a Santa village\n7 December 2025, 11:00–20:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.10955, 52.08601],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Konstancin-Jeziorna",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jarmark Świąteczny, Konstancin-Jeziorna**\nCrafts and ornaments at the Hugonówka house of culture\n7 December 2025, 12:00-19:00"
+				"text": "**Jarmark Świąteczny, Konstancin-Jeziorna**\nCrafts and ornaments at the Hugonówka house of culture\n7 December 2025, 12:00–19:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [20.91418, 52.37472],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Jabłonna",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Pałacowy Kiermasz Świąteczny, Jabłonna**\nAt the palace\n7 December 2025, 10:00-20:00" }
+			"popup": { "text": "**Pałacowy Kiermasz Świąteczny, Jabłonna**\nAt the palace\n7 December 2025, 10:00–20:00" }
 		},
 		{
 			"type": "marker",
 			"point": [21.03337, 52.42016],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Nieporęt",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Nieporęt**\nOn Plac Wolności, with a Christmas carousel\n7 December 2025, 10:00-18:00"
+				"text": "**Jarmark Bożonarodzeniowy, Nieporęt**\nOn Plac Wolności, with a Christmas carousel\n7 December 2025, 10:00–18:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [20.72715, 52.12234],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Podkowa Leśna",
-				"align": 4,
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Podkowa Leśna**\nIn the Polish-Hungarian Friendship Park, with over 100 exhibitors\n6-7 December 2025"
+				"text": "**Jarmark Bożonarodzeniowy, Podkowa Leśna**\nIn the Polish-Hungarian Friendship Park, with over 100 exhibitors\n6–7 December 2025"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.26181, 52.10819],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Otwock",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Otwock**\nOn ulica Andriollego, with over 50 stalls and a Ferris wheel\n13-14 December 2025, 10:00-20:00"
+				"text": "**Jarmark Bożonarodzeniowy, Otwock**\nOn ulica Andriollego, with over 50 stalls and a Ferris wheel\n13–14 December 2025, 10:00–20:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [20.75691, 52.11902],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Otrębusy",
-				"align": 5,
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Święta w Karolinie, Otrębusy**\nAt Karolin, the home of the folk ensemble Mazowsze\n13-14 December 2025, 11:00-20:00"
+				"text": "**Święta w Karolinie, Otrębusy**\nAt Karolin, the home of the folk ensemble Mazowsze\n13–14 December 2025, 11:00–20:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [20.80766, 52.09256],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Nadarzyn",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Nadarzyn**\nOn Plac Poniatowskiego\n13-14 December 2025" }
+			"popup": { "text": "**Jarmark Świąteczny, Nadarzyn**\nOn Plac Poniatowskiego\n13–14 December 2025" }
 		},
 		{
 			"type": "marker",
 			"point": [20.61776, 52.19467],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Błonie",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Błonie**\nOn the market square\n12-14 December 2025, 11:00-18:00" }
+			"popup": { "text": "**Jarmark Świąteczny, Błonie**\nOn the market square\n12–14 December 2025, 11:00–18:00" }
 		},
 		{
 			"type": "marker",
 			"point": [20.66858, 52.12441],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Milanówek",
-				"align": 2,
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Jarmark Bożonarodzeniowy, Milanówek**\nOn ulica Warszawska\n14 December 2025, 11:00-18:00" }
+			"popup": { "text": "**Jarmark Bożonarodzeniowy, Milanówek**\nOn ulica Warszawska\n14 December 2025, 11:00–18:00" }
 		},
 		{
 			"type": "marker",
 			"point": [21.05, 52.0995],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Józefosław",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Kiermasz Świąteczny, Józefosław**\nBy the Klub Kultury\n14 December 2025, 11:00-17:00" }
+			"popup": { "text": "**Kiermasz Świąteczny, Józefosław**\nBy the Klub Kultury\n14 December 2025, 11:00–17:00" }
 		},
 		{
 			"type": "marker",
 			"point": [21.2896, 52.24822],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Sulejówek",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
 				"text": "**Jarmark Bożonarodzeniowy, Sulejówek**\nIn the Glinianki park\n21 December 2025, from 10:00"
@@ -232,67 +242,98 @@
 			"type": "marker",
 			"point": [20.62823, 52.10871],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Grodzisk Mazowiecki",
-				"align": 2,
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Świąteczny Kiermasz Rękodzieła, Grodzisk Mazowiecki**\nA handicraft fair at the Mediateka\n21 December 2025, 10:00-16:00"
+				"text": "**Świąteczny Kiermasz Rękodzieła, Grodzisk Mazowiecki**\nA handicraft fair at the Mediateka\n21 December 2025, 10:00–16:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.07321, 52.5131],
 			"style": {
-				"color": "#ee6677",
+				"color": "#ffb000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"label": "Serock",
-				"labelColor": "#ee6677",
-				"haloColor": "#222222"
+				"labelColor": "#ffb000",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Serock**\nOn the market square\n21 December 2025, 14:00-19:00" }
+			"popup": { "text": "**Jarmark Świąteczny, Serock**\nOn the market square\n21 December 2025, 14:00–19:00" }
 		},
 		{
 			"type": "marker",
 			"point": [21.0058, 52.23177],
-			"style": { "color": "#56b4e9", "size": 0.8, "symbol": "base:icon-gift", "haloColor": "#222222" },
+			"style": {
+				"color": "#56b4e9",
+				"size": 0.8,
+				"symbol": "base:icon-gift",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
+			},
 			"popup": {
-				"text": "**Christmas fairs in the Palace of Culture**\nTarg Świąteczny w PKiN, 6-7 December 2025\nŚwiąteczne Targi WZORY, a design fair with over 200 exhibitors, 13-14 December 2025"
+				"text": "**Christmas fairs in the Palace of Culture**\nTarg Świąteczny w PKiN, 6–7 December 2025\nŚwiąteczne Targi WZORY, a design fair with over 200 exhibitors, 13–14 December 2025"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.02783, 52.24077],
-			"style": { "color": "#56b4e9", "size": 0.8, "symbol": "base:icon-gift", "haloColor": "#222222" },
+			"style": {
+				"color": "#56b4e9",
+				"size": 0.8,
+				"symbol": "base:icon-gift",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
+			},
 			"popup": {
-				"text": "**Jestem Slow! #Prezenty**\nA fair of local makers at Elektrownia Powiśle\n6-7 December 2025"
+				"text": "**Jestem Slow! #Prezenty**\nA fair of local makers at Elektrownia Powiśle\n6–7 December 2025"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.01102, 52.22222],
-			"style": { "color": "#56b4e9", "size": 0.8, "symbol": "base:icon-gift", "haloColor": "#222222" },
-			"popup": { "text": "**Targi Unikatów**\nHandmade, art and design at Hala Koszyki\n13-14 December 2025" }
+			"style": {
+				"color": "#56b4e9",
+				"size": 0.8,
+				"symbol": "base:icon-gift",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
+			},
+			"popup": { "text": "**Targi Unikatów**\nHandmade, art and design at Hala Koszyki\n13–14 December 2025" }
 		},
 		{
 			"type": "marker",
 			"point": [20.99083, 52.23228],
-			"style": { "color": "#56b4e9", "size": 0.8, "symbol": "base:icon-gift", "haloColor": "#222222" },
+			"style": {
+				"color": "#56b4e9",
+				"size": 0.8,
+				"symbol": "base:icon-gift",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
+			},
 			"popup": {
-				"text": "**Targi Sploty #Święta!**\nChristmas fashion and design at Fabryka Norblina\n13-14 December 2025"
+				"text": "**Targi Sploty #Święta!**\nChristmas fashion and design at Fabryka Norblina\n13–14 December 2025"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.00666, 52.2573],
-			"style": { "color": "#56b4e9", "size": 0.8, "symbol": "base:icon-gift", "haloColor": "#222222" },
+			"style": {
+				"color": "#56b4e9",
+				"size": 0.8,
+				"symbol": "base:icon-gift",
+				"font": "noto_sans_bold",
+				"haloColor": "#000000"
+			},
 			"popup": {
 				"text": "**Wielki Targ Świąteczny w Fortecy**\nThe Christmas farmers’ market at Fort Legionów\n21 December 2025"
 			}
@@ -301,51 +342,48 @@
 			"type": "marker",
 			"point": [21.01168, 52.24797],
 			"style": {
-				"color": "#e69f00",
+				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"label": "Old Town",
-				"align": 5,
-				"labelColor": "#e69f00",
+				"labelColor": "#ff4060",
 				"font": "noto_sans_bold",
-				"haloColor": "#222222"
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Christmas market at the Barbakan**\nJarmark Bożonarodzeniowy przy Barbakanie, along the city walls of the Old Town\n22 November 2025 - 6 January 2026, daily from 11:00"
+				"text": "**Christmas market at the Barbakan**\nJarmark Bożonarodzeniowy przy Barbakanie, along the city walls of the Old Town\n22 November 2025 – 6 January 2026, daily from 11:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.0094, 52.231],
 			"style": {
-				"color": "#e69f00",
+				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"label": "Plac Defilad",
-				"align": 1,
-				"labelColor": "#e69f00",
+				"labelColor": "#ff4060",
 				"font": "noto_sans_bold",
-				"haloColor": "#222222"
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Warsaw Christmas Market**\nJarmark Warszawski at the Palace of Culture, with over 100 stalls and a 55 m Ferris wheel\n28 November 2025 - 1 January 2026, daily from 11:00"
+				"text": "**Warsaw Christmas Market**\nJarmark Warszawski at the Palace of Culture, with over 100 stalls and a 55 m Ferris wheel\n28 November 2025 – 1 January 2026, daily from 11:00"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [21.00005, 52.22883],
 			"style": {
-				"color": "#e69f00",
+				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"label": "Varso Tower",
-				"align": 8,
-				"labelColor": "#e69f00",
+				"labelColor": "#ff4060",
 				"font": "noto_sans_bold",
-				"haloColor": "#222222"
+				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Christmas market above the clouds**\nJarmark Świąteczny Powyżej Chmur, on the terrace of the Varso Tower, 49 floors up, with tickets\nfrom 1 December 2025, daily 10:00-22:00"
+				"text": "**Christmas market above the clouds**\nJarmark Świąteczny Powyżej Chmur, on the terrace of the Varso Tower, 49 floors up, with tickets\nfrom 1 December 2025, daily 10:00–22:00"
 			}
 		}
 	]
