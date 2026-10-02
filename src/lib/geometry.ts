@@ -93,6 +93,14 @@ export function circleArea(radius: number): number {
 	return 2 * Math.PI * EARTH_RADIUS * EARTH_RADIUS * (1 - Math.cos(radius / EARTH_RADIUS));
 }
 
+/** The largest radius of a circle, in meters: a quarter of the Earth's circumference, a hemisphere. */
+export const MAX_CIRCLE_RADIUS = (Math.PI / 2) * EARTH_RADIUS;
+
+/** The radius of a circle on the Earth's surface with this area, the inverse of `circleArea`. */
+export function radiusForArea(area: number): number {
+	return EARTH_RADIUS * Math.acos(1 - area / (2 * Math.PI * EARTH_RADIUS * EARTH_RADIUS));
+}
+
 /** All positions of a geometry, e.g. of all rings of a polygon. */
 export function coordinatesOf(geometry: GeoJSON.Geometry): GeoJSON.Position[] {
 	switch (geometry.type) {

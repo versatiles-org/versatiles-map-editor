@@ -6,9 +6,11 @@ import {
 	distance,
 	getMiddlePoint,
 	lat2mercator,
+	MAX_CIRCLE_RADIUS,
 	movePoint,
 	pathLength,
 	polygonArea,
+	radiusForArea,
 	type GeoPoint
 } from './geometry.js';
 
@@ -90,6 +92,12 @@ describe('Geometry Utils', () => {
 		expect(circleArea(1000)).toBeCloseTo(Math.PI * 1000 * 1000, 0);
 		// a hemisphere
 		expect(circleArea((Math.PI / 2) * EARTH_RADIUS)).toBeCloseTo(2 * Math.PI * EARTH_RADIUS ** 2, -3);
+	});
+
+	it('radiusForArea is the inverse of circleArea', () => {
+		for (const radius of [1, 1000, 500000, MAX_CIRCLE_RADIUS]) {
+			expect(radiusForArea(circleArea(radius))).toBeCloseTo(radius, 3);
+		}
 	});
 });
 

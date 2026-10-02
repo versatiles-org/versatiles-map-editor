@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { formatArea, formatCount, formatLength, formatPrecision, measurementText } from './format.js';
+import {
+	formatArea,
+	formatCount,
+	formatLength,
+	formatPrecision,
+	measurementText,
+	parseArea,
+	parseLength,
+	unitOf
+} from './format.js';
 import { MAX_EXPONENT, resolutionOfExponent } from '@versatiles/map-state';
 
 describe('formatLength', () => {
@@ -95,5 +104,50 @@ describe('formatPrecision', () => {
 			'18 km',
 			'36 km'
 		]);
+	});
+});
+
+describe('parseLength and parseArea', () => {
+	it('read a number with a unit', () => {
+		expect(parseLength('850', 'm', 'en-US')).toBe(850);
+		expect(parseLength('850 m', 'km', 'en-US')).toBe(850);
+		expect(parseLength('1.5 km', 'm', 'en-US')).toBe(1500);
+		expect(parseLength('1.5km', 'm', 'en-US')).toBe(1500);
+		expect(parseLength(' 2 KM ', 'm', 'en-US')).toBe(2000);
+		expect(parseArea('3 ha', 'm²', 'en-US')).toBe(30000);
+		expect(parseArea('2 km²', 'm²', 'en-US')).toBe(2e6);
+		expect(parseArea('2 km2', 'm²', 'en-US')).toBe(2e6);
+		expect(parseArea('20,000 sqm', 'ha', 'en-US')).toBe(20000);
+	});
+
+	it('take the given unit without one', () => {
+		expect(parseLength('2', 'km', 'en-US')).toBe(2000);
+		expect(parseArea('1.5', 'ha', 'en-US')).toBe(15000);
+	});
+
+	it('read the numbers of the locale', () => {
+		expect(parseLength('1,5 km', 'm', 'de-DE')).toBe(1500);
+		expect(parseLength('1.500 m', 'm', 'de-DE')).toBe(1500);
+		expect(parseLength('1,500 m', 'm', 'en-US')).toBe(1500);
+	});
+
+	it('read what they format', () => {
+		for (const locale of ['en-US', 'de-DE', 'fr-FR']) {
+			for (const meters of [7, 850, 1230, 45600]) {
+				const text = formatLength(meters, locale);
+				expect(parseLength(text, unitOf(text), locale)).toBeCloseTo(meters, 0);
+			}
+			for (const squareMeters of [12, 9870, 123000, 4.5e6]) {
+				const text = formatArea(squareMeters, locale);
+				expect(parseArea(text, unitOf(text), locale)).toBeCloseTo(squareMeters, 0);
+			}
+		}
+	});
+
+	it('refuse what is no positive number with a known unit', () => {
+		for (const text of ['', 'abc', '0', '-5 m', '5 miles', '1.5.2 km', 'm']) {
+			expect(parseLength(text, 'm', 'en-US')).toBeUndefined();
+		}
+		expect(parseArea('5 m', 'm²', 'en-US')).toBeUndefined();
 	});
 });

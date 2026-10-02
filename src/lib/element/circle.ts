@@ -22,6 +22,13 @@ export class CircleElement extends AbstractElement {
 		this.changed();
 	}
 
+	/** Set the radius in meters, e.g. typed in the inspector. */
+	public setRadius(radius: number) {
+		if (radius === this.radius) return;
+		this.radius = radius;
+		this.changed();
+	}
+
 	getSelectionNodes(): SelectionNode[] {
 		return [
 			{ index: 0, coordinates: this.point },

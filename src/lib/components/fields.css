@@ -31,6 +31,10 @@
 	border-color: var(--control-border-hover);
 }
 
+:where(.map-editor-theme) :where(.field):where([aria-invalid='true']) {
+	border-color: var(--color-error);
+}
+
 :where(.map-editor-theme) :where(.field):where(:disabled) {
 	background-color: var(--color-disabled-bg);
 	color: var(--color-disabled-text);

@@ -6,6 +6,8 @@
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
+	import CircleSize from './CircleSize.svelte';
+	import type { CircleElement } from '$lib/element/circle.js';
 	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
 	import { addToLegend } from '$lib/components/commands.js';
 	import InspectorSection from './InspectorSection.svelte';
@@ -24,6 +26,8 @@
 		return layers.every((layer) => layer !== undefined) ? (layers as NonNullable<StyleLayers[R]>[]) : [];
 	}
 
+	// circles, to set their size, if all elements are circles
+	const circles = $derived(elements.every((e) => e.getState().type === 'circle') ? (elements as CircleElement[]) : []);
 	const symbolLayers = $derived(layersOfRole('symbol'));
 	// polygons and circles
 	const fillLayers = $derived(layersOfRole('fill'));
@@ -64,6 +68,9 @@
 			<StyleStroke layers={strokeLayers} {doc} />
 		</InspectorSection>
 	{/if}
+	{#if circles.length > 0}
+		<CircleSize {circles} {doc} />
+	{/if}
 	{#if elements.length > 1 && symbolLayers.length === 0 && strokeLayers.length === 0}
 		<Hint>These elements have no style properties in common.</Hint>
 	{/if}
@@ -99,7 +106,8 @@
 			</Hint>
 		</div>
 	</InspectorSection>
-	{#if single?.getStyleLayers().stroke}
+	<!-- the length of a line, the area of a polygon; circles have their size above -->
+	{#if single?.getStyleLayers().stroke && circles.length === 0}
 		<InspectorSection title="Info">
 			{#each single.measurements.map((m) => measurementText(m)) as { label, value }, i (label)}
 				<InputRow id="{uid}-measurement-{i}" {label}>

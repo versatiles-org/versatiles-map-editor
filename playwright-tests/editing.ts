@@ -889,6 +889,67 @@ test('a marker without symbol is a letter in the color of its label in the list'
 	await expect(icon(/: Pin/)).toHaveCSS('color', 'rgb(0, 255, 0)');
 });
 
+test('typing the radius or the area of circles', async ({ page }) => {
+	const a: [number, number] = [13.38, 52.5];
+	const b: [number, number] = [13.42, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center: [13.4, 52.5], radius: 5000 },
+				elements: [
+					{ type: 'circle', point: a, radius: 500 },
+					{ type: 'circle', point: b, radius: 800 }
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	const radii = async () => (await storedState(page)).elements.map((e) => (e.type === 'circle' ? e.radius : 0));
+	const radius = page.getByRole('textbox', { name: 'Radius' });
+	const area = page.getByRole('textbox', { name: 'Area' });
+
+	await test.step('one circle: the radius, the area, and a size that is none', async () => {
+		const [x, y] = await project(page, a);
+		await page.mouse.click(x, y);
+		await expect(radius).toHaveValue('500 m');
+		await radius.fill('1 km');
+		await radius.press('Enter');
+		await expect.poll(radii).toStrictEqual([1000, 800]);
+		await expect(radius).toHaveValue('1 km');
+		await expect(area).toHaveValue('3.14 km²');
+		// a number without unit has the unit of the field
+		await radius.fill('2');
+		await radius.press('Enter');
+		await expect.poll(radii).toStrictEqual([2000, 800]);
+		await expect(radius).toHaveValue('2 km');
+		// 50 ha: a radius of about 399 m
+		await area.fill('50 ha');
+		await area.press('Enter');
+		await expect(radius).toHaveValue('399 m');
+		await expect(area).toHaveValue('50 ha');
+		await area.fill('a lot');
+		await area.press('Enter');
+		await expect(area).toHaveAttribute('aria-invalid', 'true');
+		await expect(page.getByRole('alert')).toContainText('Type a size');
+		await expect(radius).toHaveValue('399 m');
+		// one undo step per change
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(radii).toStrictEqual([2000, 800]);
+	});
+
+	await test.step('two circles get the same size', async () => {
+		await page.mouse.click(...(await project(page, a)));
+		await page.keyboard.down('ControlOrMeta');
+		await page.mouse.click(...(await project(page, b)));
+		await page.keyboard.up('ControlOrMeta');
+		await expect(radius).toHaveValue('');
+		await expect(radius).toHaveAttribute('placeholder', 'Mixed');
+		await radius.fill('600');
+		await radius.press('Enter');
+		await expect.poll(radii).toStrictEqual([600, 600]);
+		await expect(radius).toHaveValue('600 m');
+	});
+});
+
 test('Shift-drag on the map zooms to a box', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
