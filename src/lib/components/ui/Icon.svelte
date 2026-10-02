@@ -18,6 +18,9 @@
 		],
 		// an arrow to the bar at the top or at the bottom: the front or the back of the drawing order
 		back: ['M12 4v12', 'M7 11l5 5 5-5', 'M5 20h14'],
+		// an arrow up or down, e.g. to move an entry of a list
+		up: ['M12 19V5', 'M6 11l6-6 6 6'],
+		down: ['M12 5v14', 'M6 13l6 6 6-6'],
 		// a pencil: back to the editor from the preview
 		edit: ['M4 20l1-4L16 5l3 3L8 19z', 'M14 7l3 3'],
 		external: ['M14 4h6v6', 'M20 4l-9 9', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],

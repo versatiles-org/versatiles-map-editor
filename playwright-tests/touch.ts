@@ -219,3 +219,18 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 	await waitForMapIsIdle(page);
 	expect(await order()).toStrictEqual(reordered);
 });
+
+test('rearranging the entries of the legend with a finger', async ({ page }) => {
+	const entries = ['A', 'B', 'C'].map((label) => ({ color: '#ff0000', label }));
+	await page.goto('/#' + encodeState({ map: { center, radius: 3000 }, meta: { legend: { entries } }, elements: [] }));
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).tap();
+	const touch = await Touchscreen.create(page);
+	const handle = (await page.getByRole('group', { name: 'Entry 1' }).locator('.grip').boundingBox())!;
+	const last = (await page.getByRole('group', { name: 'Entry 3' }).boundingBox())!;
+	const x = handle.x + handle.width / 2;
+	await touch.drag([x, handle.y + handle.height / 2], [x, last.y + last.height - 5]);
+	await expect
+		.poll(async () => (await storedState(page)).meta?.legend?.entries.map((e) => e.label))
+		.toStrictEqual(['B', 'C', 'A']);
+});

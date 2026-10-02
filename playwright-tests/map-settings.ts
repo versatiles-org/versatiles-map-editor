@@ -479,6 +479,56 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 	await expect.poll(() => drawnParts(page)).toStrictEqual(reference(false));
 });
 
+test('rearranging the entries of the legend', { tag: '@cross-browser' }, async ({ page }) => {
+	// tall enough for all entries in the sidebar, for the mouse to reach them
+	await page.setViewportSize({ width: 1280, height: 1100 });
+	const entries = ['A', 'B', 'C'].map((label) => ({ color: '#ff0000', label }));
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+	);
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const order = async () => (await storedState(page)).meta?.legend?.entries.map((e) => e.label);
+	const overlay = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
+
+	// with the buttons: the focus stays on the button of the moved entry
+	await page.getByRole('button', { name: 'Move entry 1 down' }).click();
+	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
+	await expect(page.getByRole('button', { name: 'Move entry 2 down' })).toBeFocused();
+	await page.keyboard.press('Enter');
+	await expect.poll(order).toStrictEqual(['B', 'C', 'A']);
+	await expect(overlay).toHaveText(['B', 'C', 'A']);
+	// at the end it cannot move further down, so the focus is on its other button
+	await expect(page.getByRole('button', { name: 'Move entry 3 down' })).toBeDisabled();
+	await expect(page.getByRole('button', { name: 'Move entry 3 up' })).toBeFocused();
+	await expect(page.getByRole('button', { name: 'Move entry 1 up' })).toBeDisabled();
+
+	// each move is one undo step
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
+
+	// with the mouse, by the handle: the last one to the top
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const grip = (n: number) => page.getByRole('group', { name: `Entry ${n}` }).locator('.grip');
+	const first = (await page.getByRole('group', { name: 'Entry 1' }).boundingBox())!;
+	const handle = (await grip(3).boundingBox())!;
+	await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+	await page.mouse.down();
+	await page.mouse.move(handle.x + handle.width / 2, first.y + 5, { steps: 8 });
+	await page.mouse.up();
+	await expect.poll(order).toStrictEqual(['C', 'B', 'A']);
+	await expect(overlay).toHaveText(['C', 'B', 'A']);
+
+	// dropped where it is: no change
+	const box = (await grip(2).boundingBox())!;
+	await page.mouse.move(box.x + 5, box.y + 5);
+	await page.mouse.down();
+	await page.mouse.move(box.x + 5, box.y + 15, { steps: 3 });
+	await page.mouse.up();
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
+});
+
 test('editing the legend', async ({ page }) => {
 	// e.g. a symbol drawn before the map has a style, when a map with a legend is opened
 	const pageErrors: string[] = [];
