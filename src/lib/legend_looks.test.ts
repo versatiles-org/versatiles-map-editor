@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { StateElement, StateLegendEntry } from '@versatiles/map-state';
-import { followStyleChanges, legendShows, lookOf, unusedEntries } from './legend_looks.js';
+import { followStyleChanges, legendColors, legendShows, lookOf, unusedEntries } from './legend_looks.js';
 
 const park = (color: string): StateElement => ({
 	type: 'polygon',
@@ -85,5 +85,21 @@ describe('legend looks', () => {
 		expect(legendShows(park('#008800'), 'Parks', [parks])).toBe('different');
 		expect(legendShows(park('#008800'), 'Lakes', [parks])).toBeUndefined();
 		expect(legendShows(park('#008800'), '', [parks])).toBeUndefined();
+	});
+
+	it('gives the colors that the legend draws, with the defaults of elements', () => {
+		expect(legendColors(undefined)).toStrictEqual([]);
+		expect(
+			legendColors({
+				entries: [
+					parks,
+					cafes,
+					{ type: 'line', style: { color: '#aa00aa' }, label: 'Bus' },
+					// an area with its outline, and a marker with the default red
+					{ type: 'polygon', style: { color: '#00ff0080' }, strokeStyle: { color: '#008800' }, label: 'Forest' },
+					{ type: 'marker', label: 'Flag' }
+				]
+			})
+		).toStrictEqual(['#00aa00', '#0000ff', '#aa00aa', '#00ff0080', '#008800', '#ff0000']);
 	});
 });

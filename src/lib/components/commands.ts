@@ -59,7 +59,11 @@ export function canPasteStyle(doc: MapDocumentInteractive): boolean {
 export function addLegendEntry(doc: MapDocumentInteractive): void {
 	const entries = doc.legend?.entries ?? [];
 	const used = new Set(entries.flatMap((entry) => entry.style?.color?.toLowerCase() ?? []));
-	const color = doc.colors.getColors().find((c) => !used.has(c)) ?? '#ff0000';
+	// the colors that stand for elements, not e.g. a white halo; the recently used ones first
+	const main = doc.elements.flatMap((element) => element.getColors('main').map((c) => c.toLowerCase()));
+	const isMain = new Set(main);
+	const candidates = [...doc.colors.getColors().filter((c) => isMain.has(c)), ...main.reverse()];
+	const color = candidates.find((c) => !used.has(c)) ?? '#ff0000';
 	// an area of the color, without an outline
 	const entry: StateLegendEntry = { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label: '' };
 	doc.legend = { ...doc.legend, entries: [...entries, entry] };

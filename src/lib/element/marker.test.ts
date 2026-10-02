@@ -22,6 +22,26 @@ describe('MarkerElement', () => {
 		expect(element.measurements).toEqual([]);
 	});
 
+	it('gives the colors that it draws: its symbol, its label and their halo', () => {
+		const layer = element.layer;
+		layer.color = '#0000ff';
+		// without a label: the symbol and its halo
+		expect(element.getColors()).toStrictEqual(['#0000ff', '#ffffff']);
+		layer.label = 'Cafe';
+		layer.labelColor = '#123456';
+		layer.haloColor = '#000000';
+		expect(element.getColors()).toStrictEqual(['#0000ff', '#123456', '#000000']);
+		// the color that stands for the marker: its symbol
+		expect(element.getColors('main')).toStrictEqual(['#0000ff']);
+		// without a halo
+		layer.halo = 0;
+		expect(element.getColors()).toStrictEqual(['#0000ff', '#123456']);
+		// without a symbol: the label stands for it
+		layer.symbol = '';
+		expect(element.getColors()).toStrictEqual(['#123456']);
+		expect(element.getColors('main')).toStrictEqual(['#123456']);
+	});
+
 	it('should initialize with a provided point', () => {
 		const customPoint: GeoPoint = [10, 20];
 		element = new MarkerElement(mockDoc, customPoint);

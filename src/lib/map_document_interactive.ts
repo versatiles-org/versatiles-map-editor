@@ -16,6 +16,7 @@ import {
 	type Bounds
 } from '@versatiles/map-state';
 import type { GeoPoint } from './geometry.js';
+import { legendColors } from './legend_looks.js';
 
 export class MapDocumentInteractive extends MapDocument {
 	public readonly selection: SelectionHandler;
@@ -27,7 +28,11 @@ export class MapDocumentInteractive extends MapDocument {
 	/** Picking the style of an element with a click, e.g. for an entry of the legend. */
 	public readonly stylePicker: StylePickerMode;
 	public readonly styleClipboard = new StyleClipboard();
-	public readonly colors = new ColorPalette(() => this.elements.flatMap((e) => e.getColors()));
+	// the colors of the legend first, so that the newest elements come first in the palette
+	public readonly colors = new ColorPalette(() => [
+		...legendColors(this.legend),
+		...this.elements.flatMap((e) => e.getColors())
+	]);
 
 	constructor(map: maplibregl.Map) {
 		super(map);

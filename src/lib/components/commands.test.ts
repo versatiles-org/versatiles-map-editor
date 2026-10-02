@@ -160,7 +160,10 @@ describe('addLegendEntry', () => {
 
 		addLegendEntry(doc);
 		addLegendEntry(doc);
+		// the colors of the symbols, not of their white halos
 		expect(doc.legend?.entries.map((entry) => entry.style?.color).sort()).toStrictEqual(['#111111', '#222222']);
+		// all colors are offered in the color picker, also those of the legend and of the halos
+		expect(doc.colors.getColors().sort()).toStrictEqual(['#111111', '#222222', '#ffffff']);
 		// areas of the color, without an outline
 		expect(doc.legend?.entries[0]).toMatchObject({ type: 'polygon', strokeStyle: { visible: false } });
 

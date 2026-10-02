@@ -30,11 +30,23 @@ export abstract class AbstractElement {
 		return this.isSelected;
 	}
 
-	/** The colors of the element, e.g. for the palette of used colors. A hidden outline has none. */
-	public getColors(): string[] {
+	/**
+	 * The colors that the element draws, e.g. for the palette of used colors: of a marker its symbol,
+	 * its label and their halo, of an area its fill and its outline, of a line the line. A hidden
+	 * part has none, e.g. a marker without symbol, a marker without label, or a halo of width 0.
+	 * `main`: only the color that stands for the element, e.g. for a new legend entry: of a marker
+	 * its symbol (else its label), not the colors of its label and halo.
+	 */
+	public getColors(parts: 'all' | 'main' = 'all'): string[] {
 		const { symbol, fill, stroke } = this.getStyleLayers();
 		const colors: string[] = [];
-		if (symbol) colors.push(symbol.color);
+		if (symbol) {
+			const hasSymbol = symbol.symbol !== '';
+			const hasLabel = symbol.label.trim() !== '';
+			if (hasSymbol) colors.push(symbol.color);
+			if (hasLabel && (parts === 'all' || !hasSymbol)) colors.push(symbol.labelColor);
+			if (parts === 'all' && symbol.halo > 0 && (hasSymbol || hasLabel)) colors.push(symbol.haloColor);
+		}
 		if (fill) colors.push(fill.color);
 		// a hidden outline is not drawn (a line cannot be hidden)
 		if (stroke?.visible) colors.push(stroke.color);

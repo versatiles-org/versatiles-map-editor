@@ -1,4 +1,12 @@
-import type { StateElement, StateLegendEntry, StateStyle } from '@versatiles/map-state';
+import {
+	FILL_DEFAULTS,
+	LINE_DEFAULTS,
+	SYMBOL_DEFAULTS,
+	type StateElement,
+	type StateLegend,
+	type StateLegendEntry,
+	type StateStyle
+} from '@versatiles/map-state';
 
 /*
  * The look of an element as a legend entry shows it, to compare entries with elements: e.g. to add
@@ -97,4 +105,17 @@ export function legendShows(
 	const name = text.trim();
 	if (name && entries.some((entry) => entry.label.trim() === name)) return 'different';
 	return undefined;
+}
+
+/**
+ * The colors that the legend draws, e.g. for the palette of used colors: of each entry its symbol,
+ * its line, or its area and its visible outline, with the defaults of an element.
+ */
+export function legendColors(legend: StateLegend | undefined): string[] {
+	return (legend?.entries ?? []).flatMap((entry) => {
+		if (entry.type === 'marker') return [entry.style?.color ?? SYMBOL_DEFAULTS.color];
+		if (entry.type === 'line') return [entry.style?.color ?? LINE_DEFAULTS.color];
+		const outline = { ...LINE_DEFAULTS, ...entry.strokeStyle };
+		return [entry.style?.color ?? FILL_DEFAULTS.color, ...(outline.visible ? [outline.color] : [])];
+	});
 }
