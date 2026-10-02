@@ -16,7 +16,15 @@ import type {
 	StateViewer
 } from './types.js';
 import { BASE64_CODE2BITS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
-import { sanitizeBackground, sanitizeLabelMinZoom, VIEWER_CHOICES } from './profile.js';
+import {
+	FILL_PATTERN_NAMES,
+	LABEL_ALIGN_NAMES,
+	sanitizeBackground,
+	sanitizeFrame,
+	sanitizeLabelMinZoom,
+	STROKE_STYLE_NAMES,
+	VIEWER_CHOICES
+} from './profile.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
@@ -117,6 +125,8 @@ export class StateReader {
 				value += this.readInteger(5) * factor;
 				factor *= 32;
 			} while (this.readBit());
+			// the last group can still go beyond them, which the writer never writes
+			if (!Number.isSafeInteger(value)) throw new Error('Varint beyond the safe integers');
 			if (!signed) return value;
 			return value % 2 === 1 ? -(value + 1) / 2 : value / 2;
 		} catch (cause) {
@@ -176,7 +186,7 @@ export class StateReader {
 		const x = px + this.readExpGolomb(this.coordinateParameters[0], true);
 		const y = py + this.readExpGolomb(this.coordinateParameters[1], true);
 		this.lastPoint = [x, y];
-		return this.elementGrid.fromGrid([x, y]);
+		return checkLatitude(this.elementGrid.fromGrid([x, y]));
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
@@ -189,7 +199,7 @@ export class StateReader {
 		for (let i = 0; i < length; i++) {
 			x += this.readExpGolomb(this.coordinateParameters[0], true);
 			y += this.readExpGolomb(this.coordinateParameters[1], true);
-			points.push(grid.fromGrid([x, y]));
+			points.push(checkLatitude(grid.fromGrid([x, y])));
 		}
 		return points;
 	}
@@ -292,7 +302,10 @@ export class StateReader {
 			if (width < 1 || height < 1) throw new Error('Invalid size of the frame');
 			const [west, south] = this.elementGrid.fromGrid([x0, y0]);
 			const [east, north] = this.elementGrid.fromGrid([x0 + width, y0 + height]);
-			return [west, south, east, north];
+			// as the writer writes it
+			const frame = sanitizeFrame([west, south, east, north]);
+			if (!frame) throw new Error('Frame beyond the map');
+			return frame;
 		} catch (cause) {
 			throw new Error(`Error reading frame`, { cause });
 		}
@@ -304,7 +317,7 @@ export class StateReader {
 
 			const radius = Math.pow(2, this.readInteger(10) / 40);
 			// effective resolution of coordinates is 1000 times the visible radius
-			const center = this.readPoint(radius / 1e3);
+			const center = checkLatitude(this.readPoint(radius / 1e3));
 
 			if (this.readBit()) throw new Error('Addtional map meta data is not supported yet');
 
@@ -378,6 +391,7 @@ export class StateReader {
 	readElementLine(previous?: StateElement): StateElementLine {
 		try {
 			const element: StateElementLine = { type: 'line', points: this.readElementPoints() };
+			if (element.points.length < 2) throw new Error('A line of fewer than 2 points');
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
 			const popup = this.readPopup();
@@ -391,6 +405,7 @@ export class StateReader {
 	readElementPolygon(previous?: StateElement): StateElementPolygon {
 		try {
 			const element: StateElementPolygon = { type: 'polygon', points: this.readElementPoints() };
+			if (element.points.length < 3) throw new Error('An area of fewer than 3 points');
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
 			const popup = this.readPopup();
@@ -405,6 +420,7 @@ export class StateReader {
 		try {
 			const point = this.readElementPoint();
 			const radius = this.readVarint();
+			if (radius < 1) throw new Error('A circle without a radius');
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
@@ -565,6 +581,13 @@ export class StateReader {
 	}
 
 	/** Apply the changed and removed fields to `style`. */
+	/** A varint below `count`, e.g. the index of a name. */
+	readIndex(count: number): number {
+		const index = this.readVarint();
+		if (index >= count) throw new Error(`Invalid index: ${index} of ${count}`);
+		return index;
+	}
+
 	readStylePatch(style: StateStyle): StateStyle {
 		while (true) {
 			const key = this.readStyleKey();
@@ -575,10 +598,12 @@ export class StateReader {
 					style.halo = this.readVarint() / 10;
 					break;
 				case 3:
-					style.pattern = this.readVarint();
+					// of an area or of a line, which have as many
+					style.pattern = this.readIndex(Math.max(FILL_PATTERN_NAMES.length, STROKE_STYLE_NAMES.length));
 					break;
 				case 4:
 					style.rotate = this.readVarint(true);
+					if (Math.abs(style.rotate) > 180) throw new Error(`Invalid rotation: ${style.rotate}`);
 					break;
 				case 5:
 					style.size = this.readVarint() / 10;
@@ -587,7 +612,7 @@ export class StateReader {
 					style.width = this.readVarint() / 10;
 					break;
 				case 7:
-					style.align = this.readVarint();
+					style.align = this.readIndex(LABEL_ALIGN_NAMES.length);
 					break;
 				case 8:
 					style.color = this.readColorValue();
@@ -722,4 +747,10 @@ function parseBackground(json: string): StateBackground {
 	const background = sanitizeBackground(JSON.parse(json));
 	if (!background) throw new Error('Invalid background');
 	return background;
+}
+
+/** A position whose latitude is on the map, as the writer writes it, which MapLibre needs. */
+function checkLatitude(position: [number, number]): [number, number] {
+	if (!(Math.abs(position[1]) <= 90)) throw new Error(`Invalid latitude: ${position[1]}`);
+	return position;
 }

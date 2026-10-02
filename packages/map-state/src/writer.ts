@@ -418,7 +418,8 @@ export class StateWriter {
 
 	writeElementCircle(element: StateElementCircle, repeat = false) {
 		this.writeElementPoint(element.point);
-		this.writeVarint(Math.round(element.radius));
+		// a circle smaller than 1 m, e.g. drawn by a short drag, is not 0 m
+		this.writeVarint(Math.max(1, Math.round(element.radius)));
 		this.writeElementStyles(element, repeat);
 		this.writeElementLabel(element);
 		this.writePopup(element.popup);

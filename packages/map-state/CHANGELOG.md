@@ -37,6 +37,10 @@ The first release.
     code with the parameter that makes them shortest, the points of markers and circles as
     differences to the point before if that is shorter, and a parameter for longitude and one for
     latitude if that is shorter;
+  - the decoder refuses what the writer never writes, so a corrupt link gives no map that cannot be
+    drawn: a line of fewer than 2 points, an area of fewer than 3, a circle of radius 0 (the writer
+    writes at least 1 m), a latitude beyond ±90°, a frame beyond the map, a pattern, a position of
+    the label or a rotation out of range, and numbers beyond the safe integers;
 - `frame` in the map state: the visible area (`[west, south, east, north]`, the type `Bounds`),
   which a shared or embedded map shows completely, whatever the size of its window. It is kept in
   the base64 string, in GeoJSON (a member `frame` of the FeatureCollection) and in KML (whose

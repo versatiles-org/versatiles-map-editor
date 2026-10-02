@@ -167,6 +167,15 @@ describe('StateReader', () => {
 			test(65536, true);
 			test(-65535, true);
 			test(-65536, true);
+			test(Number.MAX_SAFE_INTEGER);
+		});
+
+		it('should refuse a varint beyond the safe integers', () => {
+			// 11 groups of 5 bits: up to 2^55
+			const bits = Array.from({ length: 11 }, (_, i) => '11111' + (i < 10 ? '1' : '0')).join('');
+			expect(() => StateReader.fromBitString(bits).readVarint()).toThrow(
+				expect.objectContaining({ cause: expect.objectContaining({ message: 'Varint beyond the safe integers' }) })
+			);
 		});
 	});
 
@@ -371,7 +380,7 @@ describe('StateReader', () => {
 		it('should read a style correctly', () => {
 			const style: StateStyle = {
 				halo: 1.5,
-				pattern: 3,
+				pattern: 2,
 				rotate: -45,
 				size: 2.5,
 				width: 2.3,
@@ -386,7 +395,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQxeMZMxFya5yIAnQA');
+			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQxeMRMxFya5yIAnQA');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -654,5 +663,65 @@ describe('viewer', () => {
 		expect(
 			decodeState(encodeState({ meta: { viewer: { search: 'top-left', legend: 'bottom-left' } }, elements: [] }))
 		).toStrictEqual({ meta: { viewer: { search: 'top-left' } }, elements: [] });
+	});
+});
+
+describe('invalid links', () => {
+	/** The message of the innermost error of decoding the map, e.g. "Invalid latitude: 95". */
+	function decodeError(state: MapState): string {
+		try {
+			decodeState(encodeState(state));
+		} catch (error) {
+			let inner = error as Error;
+			while (inner.cause instanceof Error) inner = inner.cause;
+			return inner.message;
+		}
+		return 'no error';
+	}
+
+	it('are refused with elements that cannot be drawn, which the editor never writes', () => {
+		expect(decodeError({ elements: [{ type: 'line', points: [[0, 0]] }] })).toBe('A line of fewer than 2 points');
+		const twoPoints: [number, number][] = [
+			[0, 0],
+			[1, 1]
+		];
+		expect(decodeError({ elements: [{ type: 'polygon', points: twoPoints }] })).toBe('An area of fewer than 3 points');
+		expect(decodeError({ elements: [{ type: 'marker', point: [0, 95] }] })).toBe('Invalid latitude: 95');
+		expect(
+			decodeError({
+				elements: [
+					{
+						type: 'line',
+						points: [
+							[0, 0],
+							[1, -91]
+						]
+					}
+				]
+			})
+		).toBe('Invalid latitude: -91');
+		expect(decodeError({ map: { center: [0, 120], radius: 1000 }, elements: [] })).toMatch(/^Invalid latitude: 1[12]/);
+	});
+
+	it('are refused with style values beyond their names', () => {
+		const marker = (style: StateStyle): MapState => ({ elements: [{ type: 'marker', point: [0, 0], style }] });
+		expect(decodeError(marker({ pattern: 3 }))).toBe('Invalid index: 3 of 3');
+		expect(decodeError(marker({ align: 9 }))).toBe('Invalid index: 9 of 9');
+		expect(decodeError(marker({ rotate: 200 }))).toBe('Invalid rotation: 200');
+	});
+
+	it('keep a circle smaller than 1 m, as 1 m', () => {
+		const state = decodeState(encodeState({ elements: [{ type: 'circle', point: [0, 0], radius: 0.3 }] }));
+		expect(state.elements).toStrictEqual([{ type: 'circle', point: [0, 0], radius: 1 }]);
+	});
+
+	it('keep frames up to the edges of the map', () => {
+		for (const frame of [
+			[-180, -90, 180, 90],
+			[-180, -85.0511, 180, 85.0511],
+			[179.99999, 0, 180, 1]
+		] as [number, number, number, number][]) {
+			expect(decodeState(encodeState({ frame, elements: [] })).frame).toStrictEqual(frame);
+		}
 	});
 });

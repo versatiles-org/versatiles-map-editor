@@ -214,7 +214,8 @@ describe('MapDocument', () => {
 			const element = {
 				points: [
 					[1, 2],
-					[3, 4]
+					[3, 4],
+					[5, 2]
 				] as GeoPath,
 				style: { color: '#abcdef' },
 				strokeStyle: { color: '#123456' },
@@ -229,7 +230,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('Iirze8EjRWAbaFoJRCAiZCwAGJgAAYagQAAMNQPAAcBAA');
+			expect(hash).toBe('Iirze8EjRWAbaFoJRCAiZCwgGNAACAABxqAONQBxqAONP_AAcBAA');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
