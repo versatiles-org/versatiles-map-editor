@@ -1,6 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [2.230654094568223, 48.87320448419143], "radius": 44164.21924450145 },
+	"map": { "center": [2.2606320640051933, 48.87173308437002], "radius": 33131.697076372344 },
 	"frame": [1.8, 48.732, 2.83, 48.995],
 	"meta": {
 		"background": { "builder": "osm", "options": { "theme": "gray", "layers": { "labels": false } } },
@@ -41,7 +41,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Stade de France",
-				"align": 3,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -53,7 +52,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Aquatics Centre",
-				"align": 1,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -87,7 +85,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Porte de La Chapelle Arena",
-				"align": 1,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -99,7 +96,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "South Paris Arena",
-				"align": 4,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -122,7 +118,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Parc des Princes",
-				"align": 2,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -134,7 +129,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Roland-Garros",
-				"align": 3,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -146,7 +140,6 @@
 				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Yves-du-Manoir Stadium",
-				"align": 2,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -172,41 +165,13 @@
 				"labelColor": "#0072b2"
 			}
 		},
-		{
-			"type": "marker",
-			"point": [2.2976, 48.8552],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.3033, 48.8527],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.3126, 48.8661],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.3137, 48.8639],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.3125, 48.856],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.3212, 48.8656],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
-		{
-			"type": "marker",
-			"point": [2.2885, 48.8616],
-			"style": { "color": "#d55e00", "symbol": "base:icon-monument" }
-		},
+		{ "type": "marker", "point": [2.2976, 48.8552], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.3033, 48.8527], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.3126, 48.8661], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.3137, 48.8639], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.3125, 48.856], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.3212, 48.8656], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
+		{ "type": "marker", "point": [2.2885, 48.8616], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
 		{
 			"type": "marker",
 			"point": [2.1204, 48.8049],
@@ -214,7 +179,6 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-monument",
 				"label": "Château de Versailles",
-				"align": 2,
 				"labelColor": "#b33c00"
 			}
 		},
@@ -231,12 +195,7 @@
 		{
 			"type": "marker",
 			"point": [1.9588, 48.7822],
-			"style": {
-				"color": "#009e73",
-				"symbol": "base:icon-outdoor",
-				"label": "Élancourt Hill",
-				"labelColor": "#009e73"
-			}
+			"style": { "color": "#009e73", "symbol": "base:icon-outdoor", "label": "Élancourt Hill", "labelColor": "#009e73" }
 		},
 		{
 			"type": "marker",

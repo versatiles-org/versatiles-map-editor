@@ -1,6 +1,6 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [13.352132680850616, 52.51012599501459], "radius": 8413.28442543973 },
+	"map": { "center": [13.352132680850644, 52.510190983620504], "radius": 9278.322978475664 },
 	"frame": [13.27401, 52.46249, 13.48388, 52.55344],
 	"meta": {
 		"background": {
@@ -17,23 +17,8 @@
 				}
 			}
 		},
-		"legend": {
-			"entries": [
-				{
-					"type": "polygon",
-					"style": { "color": "#0072b24d", "pattern": 2 },
-					"strokeStyle": { "color": "#0072b2", "width": 2.5 },
-					"label": "Low-emission zone, inside the S-Bahn ring"
-				},
-				{
-					"type": "polygon",
-					"style": { "color": "#009e7380" },
-					"strokeStyle": { "color": "#009e73" },
-					"label": "Large parks"
-				}
-			]
-		},
 		"title": "Berlin low-emission zone",
+		"labelFont": "noto_sans_bold",
 		"mapLabelsOnTop": true
 	},
 	"elements": [
@@ -84,7 +69,7 @@
 				[13.283152202366125, 52.50790452390087],
 				[13.281495829112004, 52.50433706199928]
 			],
-			"style": { "color": "#0072b24d", "pattern": 2 },
+			"style": { "color": "#0072b280", "pattern": 2 },
 			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
 				"text": "** (Umweltzone)**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
@@ -139,6 +124,11 @@
 			"popup": {
 				"text": "**Tempelhofer Feld**\nThe former airport, closed in 2008, is a public park since 2010. A referendum in 2014 kept it free of buildings."
 			}
+		},
+		{
+			"type": "marker",
+			"point": [13.322328987122688, 52.47761485497213],
+			"style": { "size": 2, "symbol": "", "label": "Low-emission zone", "align": 4, "labelColor": "#0072b2" }
 		}
 	]
 }
