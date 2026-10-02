@@ -54,10 +54,10 @@ export function withoutLabel(style: StateStyle): StateStyle {
 }
 
 /**
- * The order of the Exp-Golomb code of style references: 0 (no reference) costs 1 bit, 1 and 2 (the
+ * The parameter k of the Exp-Golomb code of style references: 0 (no reference) costs 1 bit, 1 and 2 (the
  * latest styles) 3 bits, 3 to 6 5 bits.
  */
-export const STYLE_REFERENCE_ORDER = 0;
+export const STYLE_REFERENCE_PARAMETER = 0;
 
 /** Styles are referenced by their distance from the end, so the size is limited. */
 export const STYLE_HISTORY_SIZE = 32;

@@ -30,7 +30,7 @@ import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import {
 	OLD_OPACITY_KEY,
 	STYLE_FIELDS,
-	STYLE_REFERENCE_ORDER,
+	STYLE_REFERENCE_PARAMETER,
 	STYLE_REMOVE_KEY,
 	StyleHistory,
 	withoutLabel
@@ -51,9 +51,9 @@ export class StateReader {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
-	// the orders of the Exp-Golomb code of the coordinates of the elements, of longitude and of
+	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
 	// latitude (see `readExpGolomb`)
-	private coordinateOrders: [number, number] = [0, 0];
+	private coordinateParameters: [number, number] = [0, 0];
 	// whether the point of a marker or circle is a difference to the one before, else to the origin
 	private relativePoints = false;
 	// the point of the marker or circle before, on the grid
@@ -132,16 +132,16 @@ export class StateReader {
 	}
 
 	/** See `StateWriter.writeExpGolomb`. */
-	readExpGolomb(order: number, signed?: true): number {
+	readExpGolomb(k: number, signed?: true): number {
 		try {
 			let zeros = 0;
 			while (!this.readBit()) zeros++;
 			// beyond the safe integers
-			if (zeros + order > 52) throw new Error('Exp-Golomb code too long');
+			if (zeros + k > 52) throw new Error('Exp-Golomb code too long');
 			// after the leading 1
 			let code = 1;
-			for (let i = 0; i < zeros + order; i++) code = 2 * code + (this.readBit() ? 1 : 0);
-			const value = code - 2 ** order;
+			for (let i = 0; i < zeros + k; i++) code = 2 * code + (this.readBit() ? 1 : 0);
+			const value = code - 2 ** k;
 			if (!signed) return value;
 			return value % 2 === 1 ? -(value + 1) / 2 : value / 2;
 		} catch (cause) {
@@ -180,8 +180,8 @@ export class StateReader {
 	/** See `StateWriter.writeElementPoint`. */
 	readElementPoint(): [number, number] {
 		const [px, py] = this.relativePoints ? this.lastPoint : [0, 0];
-		const x = px + this.readExpGolomb(this.coordinateOrders[0], true);
-		const y = py + this.readExpGolomb(this.coordinateOrders[1], true);
+		const x = px + this.readExpGolomb(this.coordinateParameters[0], true);
+		const y = py + this.readExpGolomb(this.coordinateParameters[1], true);
 		this.lastPoint = [x, y];
 		return this.elementGrid.fromGrid([x, y]);
 	}
@@ -194,8 +194,8 @@ export class StateReader {
 		let x = 0;
 		let y = 0;
 		for (let i = 0; i < length; i++) {
-			x += this.readExpGolomb(this.coordinateOrders[0], true);
-			y += this.readExpGolomb(this.coordinateOrders[1], true);
+			x += this.readExpGolomb(this.coordinateParameters[0], true);
+			y += this.readExpGolomb(this.coordinateParameters[1], true);
 			points.push(grid.fromGrid([x, y]));
 		}
 		return points;
@@ -267,10 +267,10 @@ export class StateReader {
 		// the origin of the coordinates of the frame and the elements
 		const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
 		this.grid = new LocalGrid(origin, exponent);
-		// whether longitude and latitude have orders of their own
+		// whether longitude and latitude have parameters of their own
 		const perAxis = this.readBit();
-		const order = this.readInteger(5);
-		this.coordinateOrders = [order, perAxis ? this.readInteger(5) : order];
+		const k = this.readInteger(5);
+		this.coordinateParameters = [k, perAxis ? this.readInteger(5) : k];
 		this.relativePoints = this.readBit();
 		this.lastPoint = [0, 0];
 	}
@@ -596,7 +596,7 @@ export class StateReader {
 	 */
 	readStyle(): StateStyle {
 		try {
-			const ref = this.readExpGolomb(STYLE_REFERENCE_ORDER);
+			const ref = this.readExpGolomb(STYLE_REFERENCE_PARAMETER);
 			const base = this.styleHistory.get(ref);
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch({ ...base });

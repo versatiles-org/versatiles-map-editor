@@ -19,7 +19,7 @@ import {
 	encodedValue,
 	STYLE_FIELDS,
 	STYLE_REMOVE_KEY,
-	STYLE_REFERENCE_ORDER,
+	STYLE_REFERENCE_PARAMETER,
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
@@ -51,9 +51,9 @@ export class StateWriter {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
-	// the orders of the Exp-Golomb code of the coordinates of the elements, of longitude and of
+	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
 	// latitude (see `writeExpGolomb`)
-	private coordinateOrders: [number, number] = [0, 0];
+	private coordinateParameters: [number, number] = [0, 0];
 	// whether the point of a marker or circle is a difference to the one before, else to the origin
 	private relativePoints = false;
 	// the point of the marker or circle before, on the grid
@@ -184,30 +184,30 @@ export class StateWriter {
 		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], exponent);
 		// the coding of the element coordinates that makes them shortest: whether the points of
 		// markers and circles are differences to the point before, e.g. if they are sorted by place,
-		// and whether longitude and latitude have orders of their own, e.g. if they are sorted by
+		// and whether longitude and latitude have parameters of their own, e.g. if they are sorted by
 		// latitude, so its steps are small and those of longitude large
 		const codings = [false, true].flatMap((relative) => {
 			const steps = this.coordinateSteps(root.elements, relative);
-			const order = bestExpGolombOrder(steps);
+			const k = bestExpGolombParameter(steps);
 			const axes = [0, 1].map((axis) => steps.filter((_, i) => i % 2 === axis));
-			const orders = axes.map(bestExpGolombOrder) as [number, number];
+			const ks = axes.map(bestExpGolombParameter) as [number, number];
 			return [
-				{ relative, perAxis: false, orders: [order, order], bits: expGolombBits(steps, order) },
+				{ relative, perAxis: false, parameters: [k, k], bits: expGolombBits(steps, k) },
 				{
 					relative,
 					perAxis: true,
-					orders,
-					bits: expGolombBits(axes[0], orders[0]) + expGolombBits(axes[1], orders[1]) + 5
+					parameters: ks,
+					bits: expGolombBits(axes[0], ks[0]) + expGolombBits(axes[1], ks[1]) + 5
 				}
 			];
 		});
 		const coding = codings.reduce((best, coding) => (coding.bits < best.bits ? coding : best));
-		this.coordinateOrders = coding.orders as [number, number];
+		this.coordinateParameters = coding.parameters as [number, number];
 		this.relativePoints = coding.relative;
 		this.lastPoint = [0, 0];
 		this.writeBit(coding.perAxis);
-		this.writeInteger(this.coordinateOrders[0], 5);
-		if (coding.perAxis) this.writeInteger(this.coordinateOrders[1], 5);
+		this.writeInteger(this.coordinateParameters[0], 5);
+		if (coding.perAxis) this.writeInteger(this.coordinateParameters[1], 5);
 		this.writeBit(this.relativePoints);
 	}
 
@@ -288,8 +288,8 @@ export class StateWriter {
 	writeElementPoint(point: [number, number]) {
 		const [x, y] = this.elementGrid.toGrid(point);
 		const [px, py] = this.relativePoints ? this.lastPoint : [0, 0];
-		this.writeExpGolomb(x - px, this.coordinateOrders[0], true);
-		this.writeExpGolomb(y - py, this.coordinateOrders[1], true);
+		this.writeExpGolomb(x - px, this.coordinateParameters[0], true);
+		this.writeExpGolomb(y - py, this.coordinateParameters[1], true);
 		this.lastPoint = [x, y];
 	}
 
@@ -297,7 +297,7 @@ export class StateWriter {
 	writeElementPoints(points: [number, number][]) {
 		this.writeVarint(points.length);
 		pointSteps(this.elementGrid, points).forEach((step, i) =>
-			this.writeExpGolomb(step, this.coordinateOrders[i % 2], true)
+			this.writeExpGolomb(step, this.coordinateParameters[i % 2], true)
 		);
 	}
 
@@ -321,18 +321,18 @@ export class StateWriter {
 	}
 
 	/**
-	 * An integer as an Exp-Golomb code of order `order`: `value + 2^order` in binary, after as many
-	 * zeros as it has bits beyond `order + 1`. Values below about 2^order cost `order + 1` bits, and
+	 * An integer as an Exp-Golomb code with the parameter `k`: `value + 2^k` in binary, after as many
+	 * zeros as it has bits beyond `k + 1`. Values below about 2^k cost `k + 1` bits, and
 	 * each doubling 2 bits more. Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic
 	 * instead of bit operators, which would cut the values to 32 bits.
 	 */
-	writeExpGolomb(value: number, order: number, signed?: true) {
+	writeExpGolomb(value: number, k: number, signed?: true) {
 		if (!Number.isSafeInteger(value)) throw new Error(`value must be a safe integer: ${value}`);
 		if (signed) value = zigzag(value);
 		else if (value < 0) throw new Error('Unsigned Exp-Golomb code cannot be negative');
-		const code = value + 2 ** order;
+		const code = value + 2 ** k;
 		const length = bitLength(code);
-		for (let i = length - order - 1; i > 0; i--) this.writeBit(false);
+		for (let i = length - k - 1; i > 0; i--) this.writeBit(false);
 		for (let i = length - 1; i >= 0; i--) this.writeBit(Math.floor(code / 2 ** i) % 2 === 1);
 	}
 
@@ -499,7 +499,7 @@ export class StateWriter {
 		let best: StateWriter | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
 			const writer = this.fork();
-			writer.writeExpGolomb(ref, STYLE_REFERENCE_ORDER);
+			writer.writeExpGolomb(ref, STYLE_REFERENCE_PARAMETER);
 			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
 			if (!best || writer.bits.length < best.bits.length) best = writer;
 		}
@@ -730,21 +730,21 @@ function bitLength(value: number): number {
 	return length;
 }
 
-/** The number of bits of these unsigned values in the Exp-Golomb code of this order. */
-export function expGolombBits(values: number[], order: number): number {
+/** The number of bits of these unsigned values in the Exp-Golomb code with the parameter `k`. */
+export function expGolombBits(values: number[], k: number): number {
 	let bits = 0;
-	for (const value of values) bits += 2 * bitLength(value + 2 ** order) - order - 1;
+	for (const value of values) bits += 2 * bitLength(value + 2 ** k) - k - 1;
 	return bits;
 }
 
-/** The order of the Exp-Golomb code (0 to 31) that codes these unsigned values in the fewest bits. */
-export function bestExpGolombOrder(values: number[]): number {
+/** The parameter k of the Exp-Golomb code (0 to 31) that codes these unsigned values in the fewest bits. */
+export function bestExpGolombParameter(values: number[]): number {
 	let best = 0;
 	let bestBits = Infinity;
-	for (let order = 0; order < 32; order++) {
-		const bits = expGolombBits(values, order);
+	for (let k = 0; k < 32; k++) {
+		const bits = expGolombBits(values, k);
 		if (bits < bestBits) {
-			best = order;
+			best = k;
 			bestBits = bits;
 		}
 	}

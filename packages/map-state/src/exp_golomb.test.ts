@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
-import { bestExpGolombOrder, StateWriter } from './writer.js';
+import { bestExpGolombParameter, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { StateElement } from './types.js';
 
-function bits(value: number, order: number, signed?: true): string {
+function bits(value: number, k: number, signed?: true): string {
 	const writer = new StateWriter();
-	writer.writeExpGolomb(value, order, signed);
+	writer.writeExpGolomb(value, k, signed);
 	return writer.asBitString();
 }
 
 describe('the Exp-Golomb code', () => {
-	it('writes the code of order 0 and 2', () => {
+	it('writes the code with the parameter 0 and 2', () => {
 		expect([0, 1, 2, 3, 4].map((value) => bits(value, 0))).toStrictEqual(['1', '010', '011', '00100', '00101']);
 		expect([0, 3, 4, 11, 12].map((value) => bits(value, 2))).toStrictEqual(['100', '111', '01000', '01111', '0010000']);
 	});
@@ -22,13 +22,13 @@ describe('the Exp-Golomb code', () => {
 
 	it('reads what it writes, up to the largest safe integers', () => {
 		const values = [0, 1, -1, 1000, -123456, 2 ** 31, -(2 ** 31) - 1, 2 ** 51, -(2 ** 51)];
-		for (const order of [0, 5, 17, 31]) {
+		for (const k of [0, 5, 17, 31]) {
 			const writer = new StateWriter();
-			for (const value of values) writer.writeExpGolomb(value, order, true);
-			writer.writeExpGolomb(2 ** 52, order);
+			for (const value of values) writer.writeExpGolomb(value, k, true);
+			writer.writeExpGolomb(2 ** 52, k);
 			const reader = new StateReader(writer.bits);
-			expect(values.map(() => reader.readExpGolomb(order, true))).toStrictEqual(values);
-			expect(reader.readExpGolomb(order)).toBe(2 ** 52);
+			expect(values.map(() => reader.readExpGolomb(k, true))).toStrictEqual(values);
+			expect(reader.readExpGolomb(k)).toBe(2 ** 52);
 			expect(reader.ended()).toBe(true);
 		}
 	});
@@ -46,11 +46,11 @@ describe('the Exp-Golomb code', () => {
 		);
 	});
 
-	it('has the order that codes the values in the fewest bits', () => {
-		expect(bestExpGolombOrder([])).toBe(0);
-		expect(bestExpGolombOrder([0, 1, 0, 2])).toBe(0);
-		// order 10: 11 bits each; order 9 and 11: 12 bits each
-		expect(bestExpGolombOrder([600, 700, 900, 1000])).toBe(10);
+	it('has the parameter that codes the values in the fewest bits', () => {
+		expect(bestExpGolombParameter([])).toBe(0);
+		expect(bestExpGolombParameter([0, 1, 0, 2])).toBe(0);
+		// parameter 10: 11 bits each; 9 and 11: 12 bits each
+		expect(bestExpGolombParameter([600, 700, 900, 1000])).toBe(10);
 	});
 });
 
@@ -107,8 +107,8 @@ describe('the coordinates of elements', () => {
 		expect(decodeState(encodeState({ map, elements })).elements).toStrictEqual(elements);
 	});
 
-	it('have an order per axis if that is shorter, e.g. for points sorted by latitude', () => {
-		/** Whether the link stores an order per axis: the bit after the origin. */
+	it('have a parameter per axis if that is shorter, e.g. for points sorted by latitude', () => {
+		/** Whether the link stores a parameter per axis: the bit after the origin. */
 		function perAxis(elements: StateElement[]): boolean {
 			const reader = StateReader.fromBase64(encodeState({ elements }));
 			reader.readVersion();

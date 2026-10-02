@@ -272,8 +272,8 @@ describe('StateReader', () => {
 			writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 			writer.writeVarint(0, true); // the origin
 			writer.writeVarint(0, true);
-			writer.writeBit(false); // one order for longitude and latitude
-			writer.writeInteger(0, 5); // the order of the code of the coordinates
+			writer.writeBit(false); // one parameter for longitude and latitude
+			writer.writeInteger(0, 5); // the parameter of the code of the coordinates
 			writer.writeBit(false); // the points of markers and circles from the origin
 			writer.writeBit(false); // no frame
 			writer.writeBit(false); // no metadata
@@ -287,8 +287,8 @@ describe('StateReader', () => {
 		});
 
 		it('should read a root state', () => {
-			// version 1, no colors, no strings, no camera, the resolution, the origin, one order of the
-			// code of the coordinates, points from the origin, no frame, no metadata, no elements
+			// version 1, no colors, no strings, no camera, the resolution, the origin, one parameter of
+			// the code of the coordinates, points from the origin, no frame, no metadata, no elements
 			const reader = StateReader.fromBitString(
 				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0'
 			);
@@ -640,8 +640,8 @@ describe('legend', () => {
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
-		writer.writeBit(false); // one order for longitude and latitude
-		writer.writeInteger(0, 5); // the order of the code of the coordinates
+		writer.writeBit(false); // one parameter for longitude and latitude
+		writer.writeInteger(0, 5); // the parameter of the code of the coordinates
 		writer.writeBit(false); // the points of markers and circles from the origin
 		writer.writeBit(false); // no frame
 		writer.writeBit(true); // metadata
