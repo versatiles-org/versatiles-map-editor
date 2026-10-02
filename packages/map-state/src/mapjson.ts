@@ -1,3 +1,4 @@
+import { sanitizeCamera, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
 import type { MapState } from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
@@ -27,13 +28,23 @@ export function stateToMapJSON(state: MapState): MapJSON {
 
 /**
  * The map state of the content of a .mapjson file. One of a newer version (see `$schema`) throws a
- * `MapJSONVersionError`, and one without elements an error.
+ * `MapJSONVersionError`, and one without elements an error. A file may contain anything, so only
+ * its valid parts are kept, as of an imported GeoJSON: e.g. an element that cannot be drawn is
+ * left out, and so is a style field with an invalid value.
  */
 export function stateFromMapJSON(json: unknown): MapState {
 	if (typeof json !== 'object' || json === null || Array.isArray(json)) throw new Error('The file contains no map');
-	const { $schema, ...state } = json as Partial<MapJSON>;
+	const { $schema, map, frame, meta, elements } = json as Record<string, unknown>;
 	const version = typeof $schema === 'string' ? /mapjson-(\d+)\.schema\.json$/.exec($schema)?.[1] : undefined;
 	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
-	if (!Array.isArray(state.elements)) throw new Error('The file contains no map elements');
-	return state as MapState;
+	if (!Array.isArray(elements)) throw new Error('The file contains no map elements');
+
+	const state: MapState = { elements: elements.map(sanitizeElement).filter((element) => element !== undefined) };
+	const camera = sanitizeCamera(map);
+	if (camera) state.map = camera;
+	const area = sanitizeFrame(frame);
+	if (area) state.frame = area;
+	const metadata = sanitizeMetadata(meta);
+	if (metadata) state.meta = metadata;
+	return state;
 }

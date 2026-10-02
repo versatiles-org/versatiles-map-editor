@@ -13,14 +13,14 @@ import {
 	fillPropsFromStyle,
 	fillStyleFromProps,
 	popupFromProps,
-	sanitizeBackground,
-	sanitizeLegend,
-	sanitizeViewer,
 	removeViewerDefaults,
-	sanitizeNumber,
 	sanitizeLabelMinZoom,
+	sanitizeCamera,
+	sanitizeNumber,
 	sanitizeFrame,
-	sanitizeString,
+	sanitizeMetadata,
+	sanitizePosition,
+	sanitizePositions,
 	strokePropsFromStyle,
 	strokeStyleFromProps,
 	symbolPropsFromStyle,
@@ -37,8 +37,6 @@ export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
 };
-
-type Point = [number, number];
 
 function clean(properties: GeoJSON.GeoJsonProperties): GeoJSON.GeoJsonProperties {
 	// drop undefined values so emitted properties stay compact and comparable
@@ -157,26 +155,6 @@ function* flatten(features: GeoJSON.Feature[]): Generator<GeoJSON.Feature> {
 	}
 }
 
-/** A 2D position with finite coordinates (any altitude is dropped), or undefined. */
-function toPoint(position: unknown): Point | undefined {
-	if (!Array.isArray(position) || position.length < 2) return undefined;
-	const [x, y] = position;
-	if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
-	return [x, y];
-}
-
-/** All positions as points, or undefined if any of them is invalid. */
-function toPoints(positions: unknown): Point[] | undefined {
-	if (!Array.isArray(positions)) return undefined;
-	const points: Point[] = [];
-	for (const position of positions) {
-		const point = toPoint(position);
-		if (!point) return undefined;
-		points.push(point);
-	}
-	return points;
-}
-
 function featureToElement(feature: GeoJSON.Feature): StateElement | undefined {
 	const element = featureToElementWithoutPopup(feature);
 	if (!element) return undefined;
@@ -195,7 +173,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 
 	switch (g.type) {
 		case 'Point': {
-			const point = toPoint(g.coordinates);
+			const point = sanitizePosition(g.coordinates);
 			if (!point) return undefined;
 			if (p.subType === 'Circle') {
 				// a circle without a positive radius cannot be drawn: skipped, not turned into a marker
@@ -212,13 +190,13 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 			return { type: 'marker', point, style: symbolStyleFromProps(p) };
 		}
 		case 'LineString': {
-			const points = toPoints(g.coordinates);
+			const points = sanitizePositions(g.coordinates);
 			if (!points || points.length < 2) return undefined;
 			return { type: 'line', points, style: strokeStyleFromProps(p) };
 		}
 		case 'Polygon': {
 			// Only the outer ring is supported; holes are dropped.
-			const points = toPoints(g.coordinates?.[0]);
+			const points = sanitizePositions(g.coordinates?.[0]);
 			if (!points) return undefined;
 			const first = points[0];
 			const last = points[points.length - 1];
@@ -269,32 +247,17 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 	}
 
 	const state: MapState = { elements };
-	if (doc.type === 'FeatureCollection' && 'map' in doc && doc.map) {
-		const center = toPoint(doc.map.center);
-		const radius = sanitizeNumber(doc.map.radius, 0);
-		if (center && radius !== undefined) state.map = { center, radius };
+	if (doc.type === 'FeatureCollection' && 'map' in doc) {
+		const camera = sanitizeCamera(doc.map);
+		if (camera) state.map = camera;
 	}
 	if (doc.type === 'FeatureCollection' && 'frame' in doc) {
 		const frame = sanitizeFrame(doc.frame);
 		if (frame) state.frame = frame;
 	}
-	if (doc.type === 'FeatureCollection' && 'meta' in doc && doc.meta) {
-		const meta: StateMetadata = {};
-		const background = sanitizeBackground(doc.meta.background);
-		if (background) meta.background = background;
-		const legend = sanitizeLegend(doc.meta.legend);
-		if (legend) meta.legend = legend;
-		const colorScheme = sanitizeString(doc.meta.colorScheme);
-		if (colorScheme) meta.colorScheme = colorScheme;
-		const viewer = sanitizeViewer(doc.meta.viewer);
-		if (viewer) meta.viewer = viewer;
-		if (doc.meta.labelOverlap === 'hide') meta.labelOverlap = 'hide';
-		const labelMinZoom = sanitizeLabelMinZoom(doc.meta.labelMinZoom);
-		if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
-		if (doc.meta.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;
-		const title = sanitizeString(doc.meta.title);
-		if (title) meta.title = title;
-		if (Object.keys(meta).length > 0) state.meta = meta;
+	if (doc.type === 'FeatureCollection' && 'meta' in doc) {
+		const meta = sanitizeMetadata(doc.meta);
+		if (meta) state.meta = meta;
 	}
 	return state;
 }

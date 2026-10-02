@@ -82,7 +82,7 @@ export class FileCommands {
 		try {
 			const file = await chooseTextFile('.mapjson');
 			if (!file) return;
-			// e.g. a file of an older version, whose fills have an opacity of their own, is upgraded
+			// only its valid parts, since a file may contain anything
 			const state = stateFromMapJSON(JSON.parse(file.text));
 			// named after the file, without a title of its own
 			const title = state.meta?.title || file.name.replace(EXTENSION, '');

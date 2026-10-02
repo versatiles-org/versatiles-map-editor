@@ -61,7 +61,8 @@ The first release.
   `sanitizeViewer`.
 - The `.mapjson` file format, with its version: `stateToMapJSON` writes a map state with
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
-  one, and throws a `MapJSONVersionError` for a newer version.
+  one, and throws a `MapJSONVersionError` for a newer version; it keeps only the valid parts of a
+  file, like the GeoJSON import: elements that cannot be drawn and invalid values are left out.
 - The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package),
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.

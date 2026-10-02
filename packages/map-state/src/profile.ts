@@ -1,6 +1,17 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
-import type { StateBackground, StateLegend, StatePopup, StateStyle, StateViewer, Bounds } from './types.js';
+import type {
+	Bounds,
+	MapState,
+	Position,
+	StateBackground,
+	StateElement,
+	StateLegend,
+	StateMetadata,
+	StatePopup,
+	StateStyle,
+	StateViewer
+} from './types.js';
 import {
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
@@ -404,4 +415,116 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 		if ((choices as readonly unknown[]).includes(choice)) viewer[key] = choice as string;
 	}
 	return removeViewerDefaults(viewer as StateViewer);
+}
+
+// ----- whole maps, e.g. of a .mapjson file -----
+
+/** A 2D position with finite coordinates (any altitude is dropped), or undefined. */
+export function sanitizePosition(value: unknown): Position | undefined {
+	if (!Array.isArray(value) || value.length < 2) return undefined;
+	const [x, y] = value;
+	if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
+	return [x, y];
+}
+
+/** All positions, or undefined if any of them is invalid. */
+export function sanitizePositions(value: unknown): Position[] | undefined {
+	if (!Array.isArray(value)) return undefined;
+	const positions: Position[] = [];
+	for (const item of value) {
+		const position = sanitizePosition(item);
+		if (!position) return undefined;
+		positions.push(position);
+	}
+	return positions;
+}
+
+/** The camera of the editor: a center and a radius in meters, or undefined. */
+export function sanitizeCamera(value: unknown): MapState['map'] {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const { center, radius } = value as Record<string, unknown>;
+	const position = sanitizePosition(center);
+	const meters = sanitizeNumber(radius, 0);
+	return position && meters !== undefined ? { center: position, radius: meters } : undefined;
+}
+
+/** The valid properties of the whole map, or undefined if none is. */
+export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const v = value as Record<string, unknown>;
+	const meta: StateMetadata = {};
+	const background = sanitizeBackground(v.background);
+	if (background) meta.background = background;
+	const legend = sanitizeLegend(v.legend);
+	if (legend) meta.legend = legend;
+	const colorScheme = sanitizeString(v.colorScheme);
+	if (colorScheme) meta.colorScheme = colorScheme;
+	const viewer = sanitizeViewer(v.viewer);
+	if (viewer) meta.viewer = viewer;
+	if (v.labelOverlap === 'hide') meta.labelOverlap = 'hide';
+	const labelMinZoom = sanitizeLabelMinZoom(v.labelMinZoom);
+	if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
+	if (v.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;
+	const title = sanitizeString(v.title);
+	if (title) meta.title = title;
+	return Object.keys(meta).length > 0 ? meta : undefined;
+}
+
+/** A popup with a text that is not blank, or undefined. */
+function sanitizePopup(value: unknown): StatePopup | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const text = sanitizeString((value as Record<string, unknown>).text);
+	return text?.trim() ? { text } : undefined;
+}
+
+/**
+ * An element as the map state has it, with its valid styles and popup, or undefined if it cannot
+ * be drawn: e.g. a line of fewer than 2 points, an area of fewer than 3, a circle without a
+ * positive radius.
+ */
+export function sanitizeElement(value: unknown): StateElement | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const v = value as Record<string, unknown>;
+	let element: StateElement;
+	switch (v.type) {
+		case 'marker': {
+			const point = sanitizePosition(v.point);
+			if (!point) return undefined;
+			element = { type: 'marker', point, style: sanitizeStyle(v.style) };
+			break;
+		}
+		case 'line': {
+			const points = sanitizePositions(v.points);
+			if (!points || points.length < 2) return undefined;
+			element = { type: 'line', points, style: sanitizeStyle(v.style) };
+			break;
+		}
+		case 'polygon': {
+			const points = sanitizePositions(v.points);
+			if (!points || points.length < 3) return undefined;
+			element = { type: 'polygon', points, style: sanitizeStyle(v.style), strokeStyle: sanitizeStyle(v.strokeStyle) };
+			break;
+		}
+		case 'circle': {
+			const point = sanitizePosition(v.point);
+			const radius = sanitizeNumber(v.radius);
+			if (!point || radius === undefined || radius <= 0) return undefined;
+			element = {
+				type: 'circle',
+				point,
+				radius,
+				style: sanitizeStyle(v.style),
+				strokeStyle: sanitizeStyle(v.strokeStyle)
+			};
+			break;
+		}
+		default:
+			return undefined;
+	}
+	element.popup = sanitizePopup(v.popup);
+	// absent, not undefined, like in a decoded state
+	for (const key of Object.keys(element) as (keyof StateElement)[]) {
+		if (element[key] === undefined) delete element[key];
+	}
+	return element;
 }
