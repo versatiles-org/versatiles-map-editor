@@ -18,6 +18,7 @@ import {
 	colorKey,
 	encodedValue,
 	STYLE_FIELDS,
+	STYLE_EXTENDED_KEY,
 	STYLE_REMOVE_KEY,
 	STYLE_REFERENCE_PARAMETER,
 	StyleHistory,
@@ -517,13 +518,20 @@ export class StateWriter {
 			if (value === encodedValue(base, field)) continue;
 			if (value === undefined) {
 				this.writeInteger(STYLE_REMOVE_KEY, 4);
-				this.writeInteger(field.key, 4);
+				this.writeStyleKey(field.key);
 				continue;
 			}
-			this.writeInteger(field.key, 4);
+			this.writeStyleKey(field.key);
 			this.writeStyleValue(field.name, style);
 		}
 		this.writeInteger(0, 4);
+	}
+
+	/** The key of a style field: 4 bits, or `STYLE_EXTENDED_KEY` and 4 bits for keys from 16. */
+	private writeStyleKey(key: number) {
+		if (key < 16) return this.writeInteger(key, 4);
+		this.writeInteger(STYLE_EXTENDED_KEY, 4);
+		this.writeInteger(key - 16, 4);
 	}
 
 	private writeStyleValue(name: keyof StateStyle, style: StateStyle) {
@@ -536,6 +544,8 @@ export class StateWriter {
 				return this.writeVarint(style.rotate!, true);
 			case 'size':
 				return this.writeVarint(Math.round(style.size! * 10));
+			case 'labelSize':
+				return this.writeVarint(Math.round(style.labelSize! * 10));
 			case 'width':
 				return this.writeVarint(Math.round(style.width! * 10));
 			case 'align':

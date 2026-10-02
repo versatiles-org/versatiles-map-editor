@@ -38,11 +38,12 @@ export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> 
 	width: 2
 };
 export const SYMBOL_DEFAULTS: Defaults<
-	'color' | 'rotate' | 'size' | 'halo' | 'symbol' | 'label' | 'align' | 'labelColor' | 'haloColor'
+	'color' | 'rotate' | 'size' | 'halo' | 'symbol' | 'label' | 'align' | 'labelColor' | 'labelSize' | 'haloColor'
 > = {
 	color: '#ff0000',
 	rotate: 0,
 	size: 1,
+	labelSize: 1,
 	halo: 1,
 	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
 	symbol: 'base:icon-embassy',
@@ -135,6 +136,8 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'rotate', sanitizeRotation(v.rotate));
 	const size = sanitizeNumber(v.size, 0);
 	if (size) s.size = size;
+	const labelSize = sanitizeNumber(v.labelSize, 0);
+	if (labelSize) s.labelSize = labelSize;
 	set(s, 'width', sanitizeNumber(v.width, 0));
 	set(s, 'align', sanitizeIndex(v.align, 0, 4));
 	set(s, 'label', sanitizeString(v.label));
@@ -230,6 +233,7 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-label': s.label,
 		'symbol-label-align': nameOf(LABEL_ALIGN_NAMES, s.align),
 		'symbol-label-color': s.labelColor,
+		'symbol-label-size': s.labelSize,
 		'symbol-halo-color': s.haloColor
 	};
 }
@@ -244,6 +248,8 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'label', sanitizeString(p['symbol-label']));
 		set(s, 'align', indexOf(LABEL_ALIGN_NAMES, p['symbol-label-align']));
 		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));
+		const labelSize = sanitizeNumber(p['symbol-label-size'], 0);
+		if (labelSize) s.labelSize = labelSize;
 		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
 		set(s, 'symbol', sanitizeSymbol(p['symbol-pattern']));
 	}

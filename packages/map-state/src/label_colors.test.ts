@@ -35,7 +35,7 @@ describe('label colors', () => {
 	it('are kept in KML, where the text color is the color of the label style', () => {
 		const kml = stateToKML(state);
 		// KML colors are aabbggrr
-		expect(kml).toContain('<LabelStyle><color>ff563412</color></LabelStyle>');
+		expect(kml).toContain('<LabelStyle><color>ff563412</color><scale>1</scale></LabelStyle>');
 		expect(stateFromKML(kml).elements.map((e) => e.style)).toStrictEqual(state.elements.map((e) => e.style));
 
 		// from another program, which has no halo color

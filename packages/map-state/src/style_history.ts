@@ -4,7 +4,8 @@ import type { StateStyle } from './types.js';
 /**
  * The fields of a style with their key in the base64 format, and the value as it is encoded:
  * values that encode identically are equal, e.g. a halo of 1.04 and 1. Key 2 was the opacity of
- * fills, which older strings have; it is the alpha of the color now (see `OLD_OPACITY_KEY`).
+ * fills, which older strings have; it is the alpha of the color now (see `OLD_OPACITY_KEY`). Keys
+ * from 16 are written after `STYLE_EXTENDED_KEY`.
  */
 export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (value: never) => unknown }[] = [
 	{ key: 1, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
@@ -19,13 +20,17 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 10, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
 	{ key: 11, name: 'labelColor', encoded: (v: string) => colorKey(v) },
 	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) },
-	{ key: 13, name: 'symbol', encoded: (v: string) => v }
+	{ key: 13, name: 'symbol', encoded: (v: string) => v },
+	{ key: 16, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) }
 ];
 
 /** The key of the opacity of fills in older strings, which the reader turns into the alpha of the color. */
 export const OLD_OPACITY_KEY = 2;
 
-/** In a style patch: the next 4 bits are the key of a field to remove. */
+/** In a style patch: the next 4 bits are a key from 16 to 31, minus 16. */
+export const STYLE_EXTENDED_KEY = 14;
+
+/** In a style patch: the next key (4 bits, or 8 with `STYLE_EXTENDED_KEY`) is that of a field to remove. */
 export const STYLE_REMOVE_KEY = 15;
 
 /** Colors that are written identically have the same key, e.g. "#FF0000" and "#ff0000". */

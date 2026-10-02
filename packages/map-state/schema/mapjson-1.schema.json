@@ -229,7 +229,13 @@
 				},
 				"size": {
 					"type": "number",
-					"description": "Markers: the size of the symbol and the label, as a factor.",
+					"description": "Markers: the size of the symbol, as a factor.",
+					"exclusiveMinimum": 0,
+					"default": 1
+				},
+				"labelSize": {
+					"type": "number",
+					"description": "Markers: the size of the label, as a factor of 16 pixels.",
 					"exclusiveMinimum": 0,
 					"default": 1
 				},
@@ -334,7 +340,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`."
+					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `align`."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"

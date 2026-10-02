@@ -118,12 +118,13 @@ optional.
 | ------------ | --------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
 | `color`      | the symbol, default `"#ff0000"`                                             | the line, default `"#ff0000"`                  | the area with its opacity, default `"#ff0000"`                |
 | `symbol`     | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a flag | –                                              | –                                                             |
-| `size`       | a factor of the symbol and the label, default `1`                           | –                                              | –                                                             |
+| `size`       | a factor of the symbol, default `1`                                         | –                                              | –                                                             |
 | `rotate`     | the symbol, in degrees clockwise, −180 to 180, default `0`                  | –                                              | –                                                             |
 | `halo`       | around the symbol and the label, in pixels, default `1`                     | –                                              | –                                                             |
 | `haloColor`  | default `"#ffffff"`                                                         | –                                              | –                                                             |
 | `label`      | the text next to the symbol, default `""` (none)                            | –                                              | –                                                             |
 | `labelColor` | default `"#000000"`                                                         | –                                              | –                                                             |
+| `labelSize`  | a factor of the label (16 pixels), default `1`                              | –                                              | –                                                             |
 | `align`      | the place of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom       | –                                              | –                                                             |
 | `width`      | –                                                                           | in pixels, default `2`                         | –                                                             |
 | `pattern`    | –                                                                           | 0 solid, 1 dashed, 2 dotted; default `0`       | 0 solid, 1 diagonal lines, 2 thin diagonal lines; default `0` |

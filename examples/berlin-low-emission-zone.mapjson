@@ -128,7 +128,14 @@
 		{
 			"type": "marker",
 			"point": [13.322328987122688, 52.47761485497213],
-			"style": { "size": 2, "symbol": "", "label": "Low-emission zone", "align": 4, "labelColor": "#0072b2" }
+			"style": {
+				"size": 2,
+				"labelSize": 2,
+				"symbol": "",
+				"label": "Low-emission zone",
+				"align": 4,
+				"labelColor": "#0072b2"
+			}
 		}
 	]
 }

@@ -105,6 +105,7 @@ export class SymbolStyle extends StylePart {
 	#halo: number = $state(SYMBOL_DEFAULTS.halo);
 	#rotate: number = $state(SYMBOL_DEFAULTS.rotate);
 	#size: number = $state(SYMBOL_DEFAULTS.size);
+	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
 	#label: string = $state(SYMBOL_DEFAULTS.label);
 	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
@@ -135,12 +136,22 @@ export class SymbolStyle extends StylePart {
 		this.#rotate = value;
 		this.changed();
 	}
+	/** The size of the symbol, as a factor. */
 	get size(): number {
 		return this.#size;
 	}
 	set size(value: number) {
 		if (value === this.#size) return;
 		this.#size = value;
+		this.changed();
+	}
+	/** The size of the label, as a factor of 16 pixels. */
+	get labelSize(): number {
+		return this.#labelSize;
+	}
+	set labelSize(value: number) {
+		if (value === this.#labelSize) return;
+		this.#labelSize = value;
 		this.changed();
 	}
 	/** The image of the symbol, e.g. "icons:anchor", or "" for none. */
@@ -212,6 +223,9 @@ export class SymbolStyle extends StylePart {
 			opacity: symbol.opacity,
 			rotate: this.rotate,
 			size: this.size,
+			labelSize: this.labelSize,
+			// the label offsets around the symbol, in ems of the label, grow with the symbol
+			labelScale: info == null ? 1 : this.size / this.labelSize,
 			halo: this.halo,
 			label: this.label,
 			labelColor: text.color,
@@ -227,6 +241,7 @@ export class SymbolStyle extends StylePart {
 				color: this.color,
 				rotate: this.rotate,
 				size: this.size,
+				labelSize: this.labelSize,
 				halo: this.halo,
 				symbol: this.symbol,
 				label: this.label,
@@ -242,6 +257,7 @@ export class SymbolStyle extends StylePart {
 		if (style.color != null) this.color = style.color;
 		if (style.rotate != null) this.rotate = style.rotate;
 		if (style.size != null) this.size = style.size;
+		if (style.labelSize != null) this.labelSize = style.labelSize;
 		if (style.halo != null) this.halo = style.halo;
 		if (style.symbol != null) this.symbol = style.symbol;
 		if (style.label != null) this.label = style.label;

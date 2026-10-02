@@ -31,6 +31,7 @@ import {
 	OLD_OPACITY_KEY,
 	STYLE_FIELDS,
 	STYLE_REFERENCE_PARAMETER,
+	STYLE_EXTENDED_KEY,
 	STYLE_REMOVE_KEY,
 	StyleHistory,
 	withoutLabel
@@ -610,7 +611,7 @@ export class StateReader {
 	/** Apply the changed and removed fields to `style`, also the opacity of older strings. */
 	readStylePatch(style: OldStyle): OldStyle {
 		while (true) {
-			const key = this.readInteger(4);
+			const key = this.readStyleKey();
 			switch (key) {
 				case 0:
 					return style;
@@ -653,8 +654,11 @@ export class StateReader {
 				case 13:
 					style.symbol = this.readStringRef(true);
 					break;
+				case 16:
+					style.labelSize = this.readVarint() / 10;
+					break;
 				case STYLE_REMOVE_KEY: {
-					const removed = this.readInteger(4);
+					const removed = this.readStyleKey();
 					if (removed === OLD_OPACITY_KEY) {
 						delete style.opacity;
 						break;
@@ -668,6 +672,12 @@ export class StateReader {
 					throw new Error(`Invalid state key: ${key}`);
 			}
 		}
+	}
+
+	/** The key of a style field: 4 bits, or `STYLE_EXTENDED_KEY` and 4 bits for keys from 16. */
+	readStyleKey(): number {
+		const key = this.readInteger(4);
+		return key === STYLE_EXTENDED_KEY ? 16 + this.readInteger(4) : key;
 	}
 
 	/** The colors, each once, which are referenced by index afterwards. */

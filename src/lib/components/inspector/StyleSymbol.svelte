@@ -19,6 +19,9 @@
 	const labelColor = $derived(group(layers, 'labelColor'));
 	const haloColor = $derived(group(layers, 'haloColor'));
 	const size = $derived(group(layers, 'size'));
+	const labelSize = $derived(group(layers, 'labelSize'));
+	// color, size and rotation do nothing without a symbol (e.g. a marker that is only a label)
+	const hasSymbol = $derived(symbol.mixed || symbol.value !== '');
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
 	const CELLS: Record<string, [number, number]> = {
 		auto: [2, 2],
@@ -56,17 +59,19 @@
 		/>
 	</InputRow>
 
-	<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
-		<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
-	</InputRow>
+	{#if hasSymbol}
+		<InputRow id="{uid}-color" label="Color" mixed={color.mixed}>
+			<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
+		</InputRow>
 
-	<InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
-		<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
-	</InputRow>
+		<InputRow id="{uid}-size" label="Size" mixed={size.mixed}>
+			<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
+		</InputRow>
 
-	<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
-		<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
-	</InputRow>
+		<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
+			<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
+		</InputRow>
+	{/if}
 </InspectorSection>
 
 <InspectorSection title="Label">
@@ -76,6 +81,10 @@
 
 	<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
 		<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={doc.colors} />
+	</InputRow>
+
+	<InputRow id="{uid}-labelSize" label="Text size" mixed={labelSize.mixed}>
+		<Slider id="{uid}-labelSize" min={0.5} max={3} step={0.1} bind:value={labelSize.value} onchange={log} unit="×" />
 	</InputRow>
 
 	<InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>

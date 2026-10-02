@@ -39,6 +39,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Stade de France",
 				"labelColor": "#0072b2"
@@ -50,6 +51,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Aquatics Centre",
 				"labelColor": "#0072b2"
@@ -61,6 +63,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "La Défense Arena",
 				"labelColor": "#0072b2"
@@ -72,6 +75,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Bercy Arena",
 				"labelColor": "#0072b2"
@@ -83,6 +87,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Porte de La Chapelle Arena",
 				"labelColor": "#0072b2"
@@ -94,6 +99,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "South Paris Arena",
 				"labelColor": "#0072b2"
@@ -105,6 +111,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "North Paris Arena",
 				"labelColor": "#0072b2"
@@ -116,6 +123,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Parc des Princes",
 				"labelColor": "#0072b2"
@@ -127,6 +135,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Roland-Garros",
 				"labelColor": "#0072b2"
@@ -138,6 +147,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Yves-du-Manoir Stadium",
 				"labelColor": "#0072b2"
@@ -149,6 +159,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Le Bourget Climbing Venue",
 				"labelColor": "#0072b2"
@@ -160,6 +171,7 @@
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Velodrome",
 				"labelColor": "#0072b2"
@@ -208,6 +220,7 @@
 			"style": {
 				"color": "#cc9900",
 				"size": 2,
+				"labelSize": 2,
 				"halo": 2,
 				"symbol": "base:icon-stadium",
 				"label": "Olympic Village",

@@ -98,7 +98,10 @@ function featureToPlacemark(feature: GeoJSON.Feature): string {
 				xml('heading', String(p['symbol-rotate'] ?? 0))
 			]),
 			// KML has a color for the label text, but none for its halo
-			xml('LabelStyle', [xml('color', kmlColor(p['symbol-label-color']))])
+			xml('LabelStyle', [
+				xml('color', kmlColor(p['symbol-label-color'])),
+				xml('scale', String(p['symbol-label-size'] ?? 1))
+			])
 		];
 	} else if (g.type === 'LineString') {
 		geometry = xml('LineString', [xml('coordinates', coordinates(g.coordinates as Point[]))]);

@@ -23,6 +23,8 @@ The first release.
     that learned the vocabulary of the format before; the block needs no length, the decoder knows
     where it ends;
   - style references to similar earlier styles, in an Exp-Golomb code;
+  - style fields as 4-bit keys, and keys from 16 after the extended key 14, e.g. `labelSize` (the
+    size of a marker's label, apart from `size`, the size of its symbol);
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short, in

@@ -105,7 +105,8 @@ const KEY_VALUE_READS = new Set([
 	'readLegendEntry',
 	'readPopup',
 	'readViewer',
-	'readStylePatch'
+	'readStylePatch',
+	'readStyleKey'
 ]);
 
 /**

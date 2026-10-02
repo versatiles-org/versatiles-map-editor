@@ -40,7 +40,7 @@ export type StateElement = StateElementMarker | StateElementLine | StateElementP
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
-	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `align`. */
+	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `align`. */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -111,11 +111,17 @@ export interface StateStyle {
 	 */
 	rotate?: number;
 	/**
-	 * Markers: the size of the symbol and the label, as a factor.
+	 * Markers: the size of the symbol, as a factor.
 	 * @exclusiveMinimum 0
 	 * @default 1
 	 */
 	size?: number;
+	/**
+	 * Markers: the size of the label, as a factor of 16 pixels.
+	 * @exclusiveMinimum 0
+	 * @default 1
+	 */
+	labelSize?: number;
 	/**
 	 * Lines and outlines: the width, in pixels.
 	 * @minimum 0

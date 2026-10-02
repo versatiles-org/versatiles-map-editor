@@ -60,12 +60,26 @@
 		{
 			"type": "marker",
 			"point": [10.0069, 53.5528],
-			"style": { "color": "#000000", "size": 1.3, "symbol": "base:icon-rail", "label": "Hamburg Hbf", "align": 3 }
+			"style": {
+				"color": "#000000",
+				"size": 1.3,
+				"labelSize": 1.3,
+				"symbol": "base:icon-rail",
+				"label": "Hamburg Hbf",
+				"align": 3
+			}
 		},
 		{
 			"type": "marker",
 			"point": [13.3695, 52.5251],
-			"style": { "color": "#000000", "size": 1.3, "symbol": "base:icon-rail", "label": "Berlin Hbf", "align": 3 }
+			"style": {
+				"color": "#000000",
+				"size": 1.3,
+				"labelSize": 1.3,
+				"symbol": "base:icon-rail",
+				"label": "Berlin Hbf",
+				"align": 3
+			}
 		},
 		{
 			"type": "marker",

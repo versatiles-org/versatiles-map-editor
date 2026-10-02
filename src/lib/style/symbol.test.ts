@@ -20,6 +20,7 @@ describe('SymbolStyle', () => {
 			'haloColor',
 			'label',
 			'labelColor',
+			'labelSize',
 			'rotate',
 			'size',
 			'symbol'
@@ -48,6 +49,9 @@ describe('SymbolStyle', () => {
 			opacity: 1,
 			rotate: 0,
 			size: 2,
+			labelSize: 1,
+			// the symbol twice as large as its label: offsets twice as large, in ems of the label
+			labelScale: 2,
 			halo: 1,
 			// as it is: the layer reads it as a property, so "{…}" is not replaced
 			label: 'Price {EUR}',
@@ -57,6 +61,15 @@ describe('SymbolStyle', () => {
 			position: 'auto'
 		});
 		expect(onChange).toHaveBeenCalledTimes(4);
+	});
+
+	it('has a label size of its own, and the offsets of a label without symbol stay', () => {
+		layer.size = 2;
+		layer.labelSize = 0.5;
+		expect(layer.getProperties()).toMatchObject({ size: 2, labelSize: 0.5, labelScale: 4 });
+		expect(layer.getState()).toMatchObject({ size: 2, labelSize: 0.5 });
+		layer.symbol = '';
+		expect(layer.getProperties()).toMatchObject({ labelSize: 0.5, labelScale: 1 });
 	});
 
 	it('gives the opacity of the symbol and text colors on its own, so they fade with their halo', () => {

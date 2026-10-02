@@ -25,6 +25,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -38,6 +39,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -51,6 +53,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rowlands Pharmacy",
@@ -64,6 +67,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Nuchem Pharmacy",
@@ -77,6 +81,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dispensing Chemist",
@@ -90,6 +95,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Well Pharmacy",
@@ -115,6 +121,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Armstrong Pharmacy",
@@ -140,6 +147,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Safedale",
@@ -153,6 +161,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Benjamin Chemist",
@@ -166,6 +175,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "M. Simmonds Pharmacy",
@@ -179,6 +189,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Safedale Pharmacy",
@@ -192,6 +203,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "C+H Chemist",
@@ -205,6 +217,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Wellcare Pharmacy",
@@ -218,6 +231,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Devs Chemist",
@@ -243,6 +257,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Safedale Pharmacy",
@@ -256,6 +271,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Allen Pharmacy",
@@ -269,6 +285,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "DH Roberts Pharmacy",
@@ -282,6 +299,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ritz Pharmacy",
@@ -295,6 +313,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -308,6 +327,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hornsey Road Pharmacy",
@@ -321,6 +341,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "F.A. Strange",
@@ -334,6 +355,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bees Pharmacy",
@@ -347,6 +369,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hampstead Heath Pharmacy",
@@ -360,6 +383,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Eico Pharmacy",
@@ -373,6 +397,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Keats Pharmacy",
@@ -386,6 +411,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "House of Mistry",
@@ -399,6 +425,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Macey Chemist",
@@ -412,6 +439,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lever Medical Centre",
@@ -425,6 +453,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pharmacyrepublic",
@@ -438,6 +467,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "ABC Pharmacy",
@@ -463,6 +493,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Regal Pharmacy",
@@ -476,6 +507,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -489,6 +521,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -502,6 +535,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Silverfields Pharmacy",
@@ -515,6 +549,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Friends Pharmacy",
@@ -528,6 +563,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Safedale Pharmacy",
@@ -541,6 +577,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Revital",
@@ -554,6 +591,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Caledonian Pharmacy",
@@ -567,6 +605,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -580,6 +619,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Mahesh Pharmacy",
@@ -593,6 +633,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Wellcare Pharmacy",
@@ -606,6 +647,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "sandy Pharmacy",
@@ -619,6 +661,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Egerton Pharmacy",
@@ -632,6 +675,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Village Pharmacy",
@@ -645,6 +689,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -658,6 +703,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Central Pharmacy",
@@ -671,6 +717,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Silverfields Pharmacy",
@@ -684,6 +731,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -697,6 +745,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "York Pharmacy",
@@ -710,6 +759,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -723,6 +773,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -736,6 +787,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Edmunds",
@@ -749,6 +801,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -774,6 +827,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Camden Pharmacy",
@@ -787,6 +841,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Carsil Perfumery + Pharmacy",
@@ -800,6 +855,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "A&H Chinese Medicine Acupunture Herbs",
@@ -813,6 +869,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Allchin Pharmacy",
@@ -826,6 +883,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -839,6 +897,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bees Chemist",
@@ -852,6 +911,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rose Pharmacy",
@@ -865,6 +925,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -878,6 +939,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -891,6 +953,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -904,6 +967,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -917,6 +981,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -942,6 +1007,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Primrose Pharmacy",
@@ -955,6 +1021,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kingsland Pharmacy",
@@ -968,6 +1035,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Biotech Pharmacy",
@@ -981,6 +1049,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Apex Pharmacy",
@@ -994,6 +1063,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clan Pharmacy",
@@ -1007,6 +1077,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Osbon Pharmacy",
@@ -1020,6 +1091,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -1033,6 +1105,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sonigra Pharmacy",
@@ -1046,6 +1119,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Savemain Pharmacy",
@@ -1059,6 +1133,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -1072,6 +1147,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1085,6 +1161,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -1098,6 +1175,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "North London Health Centre",
@@ -1111,6 +1189,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1124,6 +1203,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "JP Pharmacy",
@@ -1137,6 +1217,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hodgetts Chemist",
@@ -1150,6 +1231,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clarks Healthcare",
@@ -1163,6 +1245,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Essex Chemist & Opticians",
@@ -1176,6 +1259,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Benzpharm",
@@ -1189,6 +1273,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clockwork Pharmacy",
@@ -1202,6 +1287,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Norlington Chemist",
@@ -1215,6 +1301,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clarks Healthcare",
@@ -1228,6 +1315,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Medicine Box Pharmacy",
@@ -1241,6 +1329,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "St Peter's Pharmacy",
@@ -1266,6 +1355,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Parnell Pharmacy & Perfumery",
@@ -1279,6 +1369,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "St Johns Wood Pharmacy",
@@ -1292,6 +1383,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -1305,6 +1397,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Endo Chemist",
@@ -1318,6 +1411,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sinclairs Pharmacy",
@@ -1331,6 +1425,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1344,6 +1439,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1357,6 +1453,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bell Pharmacy",
@@ -1370,6 +1467,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Courtenay Chemists",
@@ -1383,6 +1481,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Holmes Chemist",
@@ -1396,6 +1495,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1409,6 +1509,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Borno",
@@ -1422,6 +1523,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Vineyard Pharmacy",
@@ -1435,6 +1537,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lord's Pharmacy",
@@ -1448,6 +1551,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Judd's Pharmacy",
@@ -1461,6 +1565,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Evergreen Pharmacy",
@@ -1474,6 +1579,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Massingham Chemists",
@@ -1487,6 +1593,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Baban Pharmacy",
@@ -1500,6 +1607,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "W.C & K. King Chemist",
@@ -1513,6 +1621,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kings Pharmacy",
@@ -1526,6 +1635,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Columbia Pharmacy",
@@ -1539,6 +1649,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Britannia Pharmacy",
@@ -1552,6 +1663,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Well Pharmacy",
@@ -1565,6 +1677,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Browns Chemist",
@@ -1578,6 +1691,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bow Pharmacy",
@@ -1591,6 +1705,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Mayor's Pharmacy",
@@ -1604,6 +1719,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "John Walker Chemist",
@@ -1617,6 +1733,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1630,6 +1747,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Tesco Pharmacy",
@@ -1643,6 +1761,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Old Maids Pharmacy",
@@ -1656,6 +1775,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -1669,6 +1789,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Florida Pharmacy",
@@ -1682,6 +1803,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fairdale Pharmacy",
@@ -1695,6 +1817,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Medicare Pharmacy",
@@ -1708,6 +1831,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Forward Pharmacy",
@@ -1721,6 +1845,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Remedy's Pharmacy",
@@ -1734,6 +1859,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Apex Pharmacy",
@@ -1747,6 +1873,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rowlands Pharmacy",
@@ -1760,6 +1887,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1773,6 +1901,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chrischem Pharmacy",
@@ -1786,6 +1915,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pitchkins & Currans",
@@ -1799,6 +1929,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Prince Chemist",
@@ -1812,6 +1943,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1825,6 +1957,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Grafton Pharmacy",
@@ -1838,6 +1971,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Curie Chemist",
@@ -1851,6 +1985,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Woods Chemist",
@@ -1864,6 +1999,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -1877,6 +2013,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dillons Chemist",
@@ -1890,6 +2027,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1903,6 +2041,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Region Choice Ltd",
@@ -1916,6 +2055,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Gray's Inn Pharmacy",
@@ -1929,6 +2069,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Berkeley Court Pharmacy",
@@ -1942,6 +2083,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -1955,6 +2097,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chauhan S Chemist",
@@ -1968,6 +2111,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Market Chemist",
@@ -1981,6 +2125,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sumer Pharmacy",
@@ -1994,6 +2139,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dales Pharmacy",
@@ -2019,6 +2165,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dr Care Pharmacy",
@@ -2032,6 +2179,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Portmans Pharmacy",
@@ -2045,6 +2193,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chel Pharmacy",
@@ -2058,6 +2207,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Golborne Pharmacy",
@@ -2071,6 +2221,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Zen",
@@ -2084,6 +2235,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Benson Pharmacy",
@@ -2097,6 +2249,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Peter's Pharmacy",
@@ -2110,6 +2263,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2123,6 +2277,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2148,6 +2303,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2161,6 +2317,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Shelly's Pharmacy",
@@ -2174,6 +2331,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Holborn Pharmacy",
@@ -2187,6 +2345,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sherlock Holmes Pharmacy",
@@ -2200,6 +2359,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Meacher Higgins and Thomas",
@@ -2213,6 +2373,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2226,6 +2387,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Madesil Pharmacy",
@@ -2239,6 +2401,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Shanty's Pharmacy",
@@ -2252,6 +2415,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Seymour Pharmacy",
@@ -2265,6 +2429,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Devonshire Pharmacy",
@@ -2278,6 +2443,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Queen Pharmacy",
@@ -2291,6 +2457,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dajani Pharmacy",
@@ -2304,6 +2471,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "My London Pharmacy",
@@ -2317,6 +2485,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ainsworth Homeopathic Pharmacy",
@@ -2330,6 +2499,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2343,6 +2513,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Shiv Pharmacy",
@@ -2356,6 +2527,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -2369,6 +2541,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "N.V.S. Pharmacy",
@@ -2382,6 +2555,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Healthxchange Pharmacy",
@@ -2395,6 +2569,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -2408,6 +2583,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lincoln Pharmacy",
@@ -2421,6 +2597,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2434,6 +2611,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Spivack Chemist",
@@ -2447,6 +2625,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2460,6 +2639,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Safeer Pharmacy",
@@ -2473,6 +2653,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2486,6 +2667,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sinclairs Pharmacy",
@@ -2499,6 +2681,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kerrs",
@@ -2512,6 +2695,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -2525,6 +2709,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pharmacentre",
@@ -2538,6 +2723,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "King's",
@@ -2551,6 +2737,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2564,6 +2751,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Prince Pharmacy",
@@ -2577,6 +2765,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Church Pharmacy",
@@ -2590,6 +2779,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chinese Medicine Centre",
@@ -2603,6 +2793,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chana Chemist",
@@ -2616,6 +2807,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Apek Pharmacy",
@@ -2629,6 +2821,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2642,6 +2835,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bayswater Pharmacy",
@@ -2655,6 +2849,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Shiv",
@@ -2668,6 +2863,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Zen pharmacy & clinic",
@@ -2681,6 +2877,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Wigmore Medical",
@@ -2694,6 +2891,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "John Bell & Croyden",
@@ -2707,6 +2905,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Blenheim Pharmacy",
@@ -2732,6 +2931,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Prince Pharmacy",
@@ -2745,6 +2945,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2758,6 +2959,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kings Pharmacy",
@@ -2771,6 +2973,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bin-Seena Pharmacy",
@@ -2784,6 +2987,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Nashi Pharmacy",
@@ -2797,6 +3001,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Essentials",
@@ -2810,6 +3015,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Al Razi Pharmacy",
@@ -2823,6 +3029,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2836,6 +3043,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Marcus Jones Pharmacy",
@@ -2849,6 +3057,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dr Evans Pharmacy",
@@ -2862,6 +3071,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Al Farabi Pharmacy",
@@ -2875,6 +3085,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Watsons",
@@ -2888,6 +3099,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hogg & Son Pharmacy",
@@ -2901,6 +3113,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Jaypharm Chemists",
@@ -2914,6 +3127,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -2927,6 +3141,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -2940,6 +3155,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -2953,6 +3169,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2966,6 +3183,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -2979,6 +3197,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "DMB Chemist",
@@ -2992,6 +3211,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Westway Pharmacy",
@@ -3005,6 +3225,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Baywood Chemist",
@@ -3018,6 +3239,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "The Organic Pharmacy",
@@ -3031,6 +3253,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lansbury Pharmacy",
@@ -3044,6 +3267,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3057,6 +3281,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3070,6 +3295,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3083,6 +3309,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3096,6 +3323,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Life",
@@ -3109,6 +3337,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Moore's Pharmacy",
@@ -3122,6 +3351,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Britannia Pharmacy",
@@ -3135,6 +3365,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3148,6 +3379,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sai Chemist",
@@ -3161,6 +3393,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Britannia Pharmacy",
@@ -3174,6 +3407,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Nelsons Homeopathic Pharmacy",
@@ -3187,6 +3421,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Gould Pharmacy",
@@ -3200,6 +3435,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "C. W. Andrew",
@@ -3213,6 +3449,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Nash Chemist",
@@ -3226,6 +3463,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3239,6 +3477,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hamlins Pharmacy",
@@ -3252,6 +3491,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3265,6 +3505,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ali's",
@@ -3278,6 +3519,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3291,6 +3533,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3304,6 +3547,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pestle & Mortar Pharmacy",
@@ -3317,6 +3561,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Audley Pharmacy",
@@ -3330,6 +3575,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3343,6 +3589,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Notting Hill Pharmacy",
@@ -3356,6 +3603,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -3369,6 +3617,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3382,6 +3631,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Britannia Pharmacy",
@@ -3395,6 +3645,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Calder Pharmacy",
@@ -3408,6 +3659,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3421,6 +3673,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3434,6 +3687,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "osbon pharmacy",
@@ -3447,6 +3701,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Faro Pharmacy",
@@ -3460,6 +3715,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hillcrest Pharmacy",
@@ -3473,6 +3729,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Jays Pharmacy",
@@ -3486,6 +3743,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pestle & Mortar Pharmacy",
@@ -3499,6 +3757,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bush Pharmacy",
@@ -3512,6 +3771,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "The Pharmacy At Mayfair",
@@ -3525,6 +3785,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Jays Pharmacy",
@@ -3538,6 +3799,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Babylon Health Pharmacy",
@@ -3551,6 +3813,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Green Light Pharmacy",
@@ -3564,6 +3827,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Tower Pharmacy",
@@ -3577,6 +3841,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "City Pharmacy",
@@ -3590,6 +3855,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3603,6 +3869,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -3616,6 +3883,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Towerbridge Wellness Pharmacy",
@@ -3629,6 +3897,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3642,6 +3911,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Windwood Chemists",
@@ -3655,6 +3925,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Caregrange Pharmacy",
@@ -3668,6 +3939,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3681,6 +3953,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3694,6 +3967,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Prince Pharmacy",
@@ -3707,6 +3981,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lime Grove Pharmacy",
@@ -3720,6 +3995,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Prince Pharmacy",
@@ -3733,6 +4009,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fitness Fuel & Pharmacy on Wheels",
@@ -3746,6 +4023,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3759,6 +4037,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3772,6 +4051,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Mangal Pharmacy",
@@ -3785,6 +4065,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Gate Pharmacy",
@@ -3810,6 +4091,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Healthside Pharmacy",
@@ -3823,6 +4105,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "The Pestle & Mortar",
@@ -3836,6 +4119,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Albion Chemist",
@@ -3849,6 +4133,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -3862,6 +4147,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dolphins Pharmacy",
@@ -3875,6 +4161,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "First Care Pharmacy",
@@ -3888,6 +4175,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "A. Moore & Co.",
@@ -3901,6 +4189,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barkantine Pharmacy",
@@ -3914,6 +4203,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Allen's Pharmacy",
@@ -3927,6 +4217,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Alnoor Pharmacy",
@@ -3940,6 +4231,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hayatt Pharmacy",
@@ -3953,6 +4245,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Amadi Pharmacy",
@@ -3966,6 +4259,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Zen Pharmacy & Clinic",
@@ -3979,6 +4273,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Forrest Pharmacy",
@@ -3992,6 +4287,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Life Pharmacy",
@@ -4005,6 +4301,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4018,6 +4315,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Cam Pharmacy",
@@ -4031,6 +4329,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hobbs Pharmacy",
@@ -4044,6 +4343,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4057,6 +4357,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Star Pharmacy",
@@ -4070,6 +4371,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Harfleur Pharmacy",
@@ -4083,6 +4385,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kensington Pharmacy",
@@ -4096,6 +4399,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "H Lloyd Chemist",
@@ -4109,6 +4413,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Keencare Pharmacy",
@@ -4122,6 +4427,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lambeth Pharmacy",
@@ -4135,6 +4441,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "H. Lloyd Chemist",
@@ -4148,6 +4455,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4161,6 +4469,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -4174,6 +4483,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "St George's Pharmacy",
@@ -4187,6 +4497,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4200,6 +4511,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Amal Pharmacy",
@@ -4213,6 +4525,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4226,6 +4539,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4239,6 +4553,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Britannia Pharmacy",
@@ -4252,6 +4567,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Victoria Pharmacy",
@@ -4265,6 +4581,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Vantage Pharmacy Whinchat Chemist",
@@ -4278,6 +4595,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Cambelle Pharmacy",
@@ -4291,6 +4609,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bliss Pharmacy",
@@ -4304,6 +4623,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Walden Chymist",
@@ -4317,6 +4637,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Andrews Pharmacy",
@@ -4330,6 +4651,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Harleys Pharmacy",
@@ -4343,6 +4665,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clinichem Pharmacy",
@@ -4356,6 +4679,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4369,6 +4693,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Royal Arsenal Pharmacy",
@@ -4382,6 +4707,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dajani Pharmacy",
@@ -4395,6 +4721,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4408,6 +4735,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "N S Warwick Ltd",
@@ -4421,6 +4749,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Tesco Pharmacy",
@@ -4434,6 +4763,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Gees Chemist",
@@ -4447,6 +4777,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pyramid Pharmacy",
@@ -4460,6 +4791,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Surdock Chemist",
@@ -4473,6 +4805,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Earls Court Chemist",
@@ -4486,6 +4819,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Warwick Pharmacy",
@@ -4499,6 +4833,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bencrest Chemist",
@@ -4512,6 +4847,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4525,6 +4861,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pyramid Pharmacy",
@@ -4538,6 +4875,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "St James Pharmacy",
@@ -4551,6 +4889,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4564,6 +4903,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -4577,6 +4917,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Docklands Pharmacy",
@@ -4590,6 +4931,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chelsea Green Pharmacy",
@@ -4603,6 +4945,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "AR Chemist",
@@ -4616,6 +4959,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Alpha Chemist",
@@ -4629,6 +4973,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Woolwich Late Night Pharmacy",
@@ -4642,6 +4987,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barons Pharmacy",
@@ -4655,6 +5001,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Portman Pharmacy",
@@ -4668,6 +5015,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pepys Pharmacy",
@@ -4681,6 +5029,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "North End Pharmacy",
@@ -4694,6 +5043,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Zafash",
@@ -4707,6 +5057,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lings Pharmacy",
@@ -4720,6 +5071,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Walworth Pharmacy",
@@ -4733,6 +5085,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4746,6 +5099,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Asda",
@@ -4759,6 +5113,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4772,6 +5127,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Tesco Pharmacy",
@@ -4785,6 +5141,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Cubitt Town Pharmacy",
@@ -4798,6 +5155,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Paxall Pharmacy",
@@ -4811,6 +5169,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ridgway Pharmacy",
@@ -4824,6 +5183,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Simmonds Pharmacy",
@@ -4837,6 +5197,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rowlands Pharmacy",
@@ -4850,6 +5211,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Tesco Pharmacy",
@@ -4863,6 +5225,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bonamy Pharmacy",
@@ -4888,6 +5251,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pyramid Pharmacy",
@@ -4901,6 +5265,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "I.T. Lloyds Chemist",
@@ -4914,6 +5279,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "P.E. Logan Pharmacy",
@@ -4927,6 +5293,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -4940,6 +5307,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4953,6 +5321,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -4966,6 +5335,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Asda",
@@ -4979,6 +5349,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "CW Medicines",
@@ -4992,6 +5363,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "MedipharmacyGroup",
@@ -5005,6 +5377,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lockyer Pharmacy",
@@ -5018,6 +5391,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Medicine Chest",
@@ -5031,6 +5405,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Maddock Pharmacy",
@@ -5044,6 +5419,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Village Pharmacy",
@@ -5057,6 +5433,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Worlds End Pharmacy",
@@ -5070,6 +5447,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rose Pharmacy",
@@ -5083,6 +5461,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Jhoots Pharmacy",
@@ -5096,6 +5475,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Herbert Pharmacy",
@@ -5109,6 +5489,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Vitellow Pharmacy",
@@ -5122,6 +5503,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kevin's Charlton Pharmacy",
@@ -5135,6 +5517,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sheel Pharmacy",
@@ -5148,6 +5531,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Temple Pharmacy",
@@ -5161,6 +5545,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Millennium Pharmacy",
@@ -5174,6 +5559,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Duncan's Pharmacy",
@@ -5187,6 +5573,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Blackheath Standard Pharmacy",
@@ -5200,6 +5587,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Reena's Pharmacy",
@@ -5213,6 +5601,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "New Cross Pharmacy",
@@ -5226,6 +5615,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pyramid Pharmacy",
@@ -5239,6 +5629,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "HealthChem",
@@ -5252,6 +5643,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5265,6 +5657,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fulham Palace Pharmacy",
@@ -5290,6 +5683,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Station Pharmacy",
@@ -5315,6 +5709,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Halls Pharmacy",
@@ -5328,6 +5723,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lloyds Pharmacy",
@@ -5341,6 +5737,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Krisons",
@@ -5354,6 +5751,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kembers & Lawrence",
@@ -5367,6 +5765,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Masters Pharmacy",
@@ -5380,6 +5779,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5393,6 +5793,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hatcham Pharmacy",
@@ -5406,6 +5807,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5419,6 +5821,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5432,6 +5835,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Medibank Pharmacy",
@@ -5445,6 +5849,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -5458,6 +5863,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fourways Pharmacy",
@@ -5471,6 +5877,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Geepharm Chemist",
@@ -5484,6 +5891,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Morrisons Pharmacy",
@@ -5497,6 +5905,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Butterfly Pharmacy",
@@ -5522,6 +5931,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5535,6 +5945,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5548,6 +5959,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Krystal Pharmacy",
@@ -5561,6 +5973,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Jennings Chemist",
@@ -5574,6 +5987,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Harfleur Pharmacy",
@@ -5587,6 +6001,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Osborn Pharmacy",
@@ -5600,6 +6015,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "V E Lettsom Pharmacy",
@@ -5613,6 +6029,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pulse Pharmacy",
@@ -5626,6 +6043,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "King’s Outpatient Pharmacy",
@@ -5639,6 +6057,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Peace Pharmacy",
@@ -5652,6 +6071,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "RoPharm Chemist",
@@ -5665,6 +6085,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barkers (Chemist)",
@@ -5678,6 +6099,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5691,6 +6113,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bellenden Road Pharmacy",
@@ -5704,6 +6127,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kidbrooke Pharmacy",
@@ -5717,6 +6141,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fairlee Pharmacy",
@@ -5730,6 +6155,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Queen's",
@@ -5755,6 +6181,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sogim Pharmacy",
@@ -5768,6 +6195,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "The Olde Pharmacy",
@@ -5781,6 +6209,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Junction Pharmacy",
@@ -5794,6 +6223,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sheel Pharmacy",
@@ -5807,6 +6237,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kamsons Pharmacy",
@@ -5820,6 +6251,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -5833,6 +6265,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sheel Pharmacy",
@@ -5846,6 +6279,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5871,6 +6305,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5884,6 +6319,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pearl Pharmacy",
@@ -5897,6 +6333,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5910,6 +6347,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Kingshield Pharmacy",
@@ -5923,6 +6361,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "R Walji Chemist",
@@ -5936,6 +6375,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -5949,6 +6389,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5962,6 +6403,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Orbis Pharmacy",
@@ -5975,6 +6417,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -5988,6 +6431,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lewis Grove",
@@ -6001,6 +6445,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boss Pharmacy",
@@ -6014,6 +6459,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Chemcare",
@@ -6027,6 +6473,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -6040,6 +6487,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Robards Pharmacy",
@@ -6053,6 +6501,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Vale Pharmacy",
@@ -6078,6 +6527,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Husbands Pharmacy",
@@ -6091,6 +6541,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Goys the Chemist",
@@ -6104,6 +6555,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Clarke Pharmacy",
@@ -6117,6 +6569,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Baum Pharmacy",
@@ -6130,6 +6583,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lewisham Pharmacy",
@@ -6143,6 +6597,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Cheltenham Chemist",
@@ -6156,6 +6611,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dickinsons Chemist",
@@ -6169,6 +6625,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "East Hill Pharmacy",
@@ -6182,6 +6639,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ashburton Pharmacy",
@@ -6195,6 +6653,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sogim pharmacy",
@@ -6208,6 +6667,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sheel",
@@ -6233,6 +6693,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Mansons",
@@ -6246,6 +6707,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Herne Hill Pharmacy",
@@ -6259,6 +6721,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lords Pharmacy",
@@ -6272,6 +6735,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Northcote Pharmacy",
@@ -6285,6 +6749,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -6298,6 +6763,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Ashburton Pharmacy",
@@ -6311,6 +6777,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Baba Chemist",
@@ -6324,6 +6791,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bentley's Chemist",
@@ -6337,6 +6805,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -6350,6 +6819,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Foster & Sons",
@@ -6363,6 +6833,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -6376,6 +6847,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Wandsworth Pharmacy",
@@ -6389,6 +6861,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Wellcare Pharmacy",
@@ -6402,6 +6875,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Crofton Park Pharmacy",
@@ -6415,6 +6889,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Brockwell Park Pharmacy",
@@ -6428,6 +6903,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rains Pharmacy",
@@ -6441,6 +6917,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fourway Pharmacy",
@@ -6454,6 +6931,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rumsey Pharmacy",
@@ -6467,6 +6945,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Widdicombe Pharmacy",
@@ -6480,6 +6959,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Payden's Pharmacy",
@@ -6493,6 +6973,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Woodlands Pharmacy",
@@ -6506,6 +6987,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Well Pharmacy",
@@ -6519,6 +7001,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "East Chemist",
@@ -6532,6 +7015,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rushey Green Pharmacy",
@@ -6545,6 +7029,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Care Chemist",
@@ -6558,6 +7043,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Well Pharmacy",
@@ -6571,6 +7057,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lee Pharmacy",
@@ -6584,6 +7071,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sadler's Pharmacy",
@@ -6597,6 +7085,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Hillrise Pharmacy",
@@ -6610,6 +7099,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barkers Pharmacy",
@@ -6623,6 +7113,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -6636,6 +7127,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Bellevue Pharmacy",
@@ -6649,6 +7141,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -6662,6 +7155,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Well Being Pharmacy",
@@ -6675,6 +7169,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Cooks Pharmacy",
@@ -6688,6 +7183,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -6701,6 +7197,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Pharmalite Pharmacy",
@@ -6714,6 +7211,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Boots",
@@ -6727,6 +7225,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -6740,6 +7239,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Gokul Chemist",
@@ -6753,6 +7253,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Healthchem Pharmacy",
@@ -6766,6 +7267,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dexpharm",
@@ -6779,6 +7281,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Deejay Chemist",
@@ -6792,6 +7295,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Revelstoke Pharmacy",
@@ -6805,6 +7309,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -6818,6 +7323,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Dumlers Pharmacy",
@@ -6831,6 +7337,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Asda",
@@ -6844,6 +7351,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sparkes Pharmacy",
@@ -6857,6 +7365,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Earlsfield Pharmacy",
@@ -6870,6 +7379,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Elmcourt Pharmacy",
@@ -6883,6 +7393,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Rosendale Pharmacy",
@@ -6896,6 +7407,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Adarshi Pharmacy",
@@ -6909,6 +7421,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Nettles Pharmacy",
@@ -6922,6 +7435,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Westbury Chemist",
@@ -6935,6 +7449,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -6960,6 +7475,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Brook Pharmacy",
@@ -6973,6 +7489,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Perfucare Pharmacy",
@@ -6986,6 +7503,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Touchwood Pharmacy",
@@ -6999,6 +7517,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -7012,6 +7531,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barkers Chemist",
@@ -7025,6 +7545,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Vantage Pharmacy",
@@ -7038,6 +7559,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Aukland Rogers Pharmacy",
@@ -7051,6 +7573,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -7064,6 +7587,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis",
@@ -7077,6 +7601,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Touchwood Pharmacy",
@@ -7090,6 +7615,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Lords Pharmacy",
@@ -7103,6 +7629,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Superdrug",
@@ -7116,6 +7643,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Touchwood Pharmacy",
@@ -7129,6 +7657,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Barrons Pharmacy",
@@ -7142,6 +7671,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Day Lewis Pharmacy",
@@ -7155,6 +7685,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "C. Bradbury Chemist",
@@ -7168,6 +7699,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Brownes Pharmacy",
@@ -7193,6 +7725,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Duncan's Chemist",
@@ -7206,6 +7739,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Sefgrove Chemist",
@@ -7219,6 +7753,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Fairoak Pharmacy",
@@ -7232,6 +7767,7 @@
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
+				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
 				"label": "Watts Pharmacy",

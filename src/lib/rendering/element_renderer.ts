@@ -249,6 +249,33 @@ export function labelsLayer(font: string): LayerSpecification {
 /** The layout properties of the labels of markers that each layer of markers has alike. */
 export const LABEL_LAYOUT_KEYS = ['text-font', 'text-field', 'text-overlap', 'text-optional'] as const;
 
+/**
+ * The largest ratio of the size of a symbol to the size of its label (`labelScale`) with exact
+ * label offsets; larger ones have the offsets of this one.
+ */
+const MAX_LABEL_SCALE = 10;
+
+/** The places of a label with their offsets times `factor`. */
+function scaledPlaces(places: (string | [number, number])[], factor: number): (string | [number, number])[] {
+	return places.map((place) => (typeof place === 'string' ? place : [place[0] * factor, place[1] * factor]));
+}
+
+/**
+ * The places of the labels with their offsets, by the name of their label position (see
+ * `LABEL_POSITIONS`). The offsets are in ems of the label, for a symbol as large as its label;
+ * they grow with the size of the symbol relative to its label (`labelScale`), interpolated from 0.
+ */
+function labelOffsets(): ExpressionSpecification {
+	const table = Object.entries(labelPositionTable(allSymbols()));
+	const scaled = (factor: number) =>
+		lookup(
+			'position',
+			table.map(([name, places]) => [name, scaledPlaces(places, factor)]),
+			scaledPlaces(LABEL_POSITIONS.auto, factor)
+		);
+	return ['interpolate', ['linear'], ['get', 'labelScale'], 0, scaled(0), MAX_LABEL_SCALE, scaled(MAX_LABEL_SCALE)];
+}
+
 /** A layer of markers, with the glyph font of their labels. */
 function symbolLayer(font: string, id: string): LayerSpecification {
 	return {
@@ -267,13 +294,9 @@ function symbolLayer(font: string, id: string): LayerSpecification {
 			...labelLayout(DEFAULT_LABEL_OPTIONS),
 			// marker labels use the font of the map labels
 			'text-font': ['literal', [font]],
-			'text-size': ['*', ['get', 'size'], 16],
+			'text-size': ['*', ['get', 'labelSize'], 16],
 			'text-justify': 'left',
-			'text-variable-anchor-offset': lookup(
-				'position',
-				Object.entries(labelPositionTable(allSymbols())),
-				LABEL_POSITIONS.auto
-			)
+			'text-variable-anchor-offset': labelOffsets()
 		},
 		paint: {
 			'icon-color': ['get', 'color'],

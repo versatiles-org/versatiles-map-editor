@@ -819,6 +819,104 @@ test('the text color and the halo color of a label', async ({ page }) => {
 	expect(drawn).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
 });
 
+test('the size of a label apart from the size of its symbol', async ({ page }) => {
+	const center: Point = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				// a blue symbol, a red label to the right of it, no halo: the colors are easy to count
+				elements: [
+					{
+						type: 'marker',
+						point: center,
+						style: { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0, align: 1 }
+					}
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+
+	/** The boxes of the blue and the red pixels around the marker, and how many there are. */
+	async function drawn() {
+		// away from the marker, which a hovered marker would not look alike
+		await page.mouse.move(5, 5);
+		await waitForMapIsIdle(page);
+		const png = await page.screenshot({ clip: { x: x - 100, y: y - 100, width: 300, height: 200 } });
+		return page.evaluate(async (base64) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = document.createElement('canvas');
+			canvas.width = image.width;
+			canvas.height = image.height;
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			const { data, width } = context.getImageData(0, 0, canvas.width, canvas.height);
+			const box = () => ({ count: 0, left: Infinity, right: -Infinity });
+			const blue = box();
+			const red = box();
+			for (let i = 0; i < data.length; i += 4) {
+				const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+				const found = b > 200 && r < 60 && g < 60 ? blue : r > 200 && g < 60 && b < 60 ? red : undefined;
+				if (!found) continue;
+				const px = (i / 4) % width;
+				found.count++;
+				found.left = Math.min(found.left, px);
+				found.right = Math.max(found.right, px);
+			}
+			return { blue, red };
+		}, png.toString('base64'));
+	}
+
+	const before = await drawn();
+	expect(before.blue.count).toBeGreaterThan(20);
+	expect(before.red.count).toBeGreaterThan(20);
+	expect(before.red.left).toBeGreaterThan(before.blue.right);
+
+	// a text twice as large: the label grows, the symbol stays
+	await page.mouse.click(x, y);
+	const textSize = page.getByRole('spinbutton', { name: 'Text size' });
+	await textSize.fill('2');
+	await textSize.press('Enter');
+	await expect.poll(async () => (await storedState(page)).elements[0].style).toMatchObject({ labelSize: 2 });
+	await page.keyboard.press('Escape');
+	const larger = await drawn();
+	expect(larger.red.count).toBeGreaterThan(before.red.count * 2.5);
+	// (the edges of the symbol, since its anti-aliased pixels may differ)
+	expect(Math.abs(larger.blue.left - before.blue.left)).toBeLessThanOrEqual(1);
+	expect(Math.abs(larger.blue.right - before.blue.right)).toBeLessThanOrEqual(1);
+	expect(larger.red.left).toBeGreaterThan(larger.blue.right);
+
+	// a symbol three times as large as its label: the label moves out with its edge
+	await page.mouse.click(x, y);
+	await textSize.fill('1');
+	await textSize.press('Enter');
+	const size = page.getByRole('spinbutton', { name: 'Size', exact: true });
+	await size.fill('3');
+	await size.press('Enter');
+	await page.keyboard.press('Escape');
+	const both = await drawn();
+	expect(both.blue.right - both.blue.left).toBeGreaterThan((larger.blue.right - larger.blue.left) * 2.5);
+	expect(both.red.left).toBeGreaterThan(both.blue.right);
+});
+
+test('a marker without symbol has no color, size or rotation of a symbol', async ({ page }) => {
+	const center: Point = [13.4, 52.5];
+	const state = (symbol?: string): MapState => ({
+		map: { center, radius: 10000 },
+		elements: [{ type: 'marker', point: center, style: { label: 'Text', ...(symbol === undefined ? {} : { symbol }) } }]
+	});
+	await page.goto('/#' + encodeState(state('')));
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+	await page.mouse.click(x, y);
+	await expect(page.getByRole('spinbutton', { name: 'Text size' })).toBeVisible();
+	await expect(page.getByRole('spinbutton', { name: 'Size', exact: true })).toBeHidden();
+	await expect(page.getByRole('spinbutton', { name: 'Rotation' })).toBeHidden();
+});
+
 test('moving elements to the front and to the back', { tag: '@cross-browser' }, async ({ page }) => {
 	// two markers at the same place: B is drawn over A
 	const center: [number, number] = [13.4, 52.5];
