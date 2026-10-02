@@ -121,6 +121,64 @@ test('overlays of the editor are above what they open over', async ({ page }) =>
 	});
 });
 
+test('the groups of the menu open as submenus beside it, by hover, click and keyboard', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Menu' }).click();
+	const menu = page.getByRole('menu', { name: 'Menu' });
+	const importItem = menu.getByRole('menuitem', { name: 'Import', exact: true });
+	const importMenu = page.getByRole('menu', { name: 'Import' });
+	const exportMenu = page.getByRole('menu', { name: 'Export' });
+	const box = async (locator: Locator) => (await locator.boundingBox())!;
+
+	await test.step('hovering a group opens its submenu beside the menu, at its height, in the window', async () => {
+		await importItem.hover();
+		await expect(importMenu).toBeVisible();
+		const [outer, row, sub] = [await box(menu), await box(importItem), await box(importMenu)];
+		expect(sub.x).toBeGreaterThanOrEqual(outer.x + outer.width - 6);
+		expect(Math.abs(sub.y - row.y)).toBeLessThan(12);
+		expect(sub.y + sub.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+		// the menu does not grow
+		expect((await box(menu)).height).toBe(outer.height);
+		await expect(importItem).toHaveAttribute('aria-expanded', 'true');
+	});
+
+	await test.step('another group replaces it, and a plain item closes it', async () => {
+		await menu.getByRole('menuitem', { name: 'Export', exact: true }).hover();
+		await expect(exportMenu).toBeVisible();
+		await expect(importMenu).toBeHidden();
+		await menu.getByRole('menuitem', { name: 'Download…' }).hover();
+		await expect(exportMenu).toBeHidden();
+	});
+
+	await test.step('the keyboard opens it with the focus inside, and goes back', async () => {
+		await importItem.focus();
+		await page.keyboard.press('ArrowRight');
+		await expect(importMenu.getByRole('menuitem').first()).toBeFocused();
+		await page.keyboard.press('ArrowDown');
+		await expect(importMenu.getByRole('menuitem').nth(1)).toBeFocused();
+		await page.keyboard.press('ArrowLeft');
+		await expect(importMenu).toBeHidden();
+		await expect(importItem).toBeFocused();
+		await page.keyboard.press('Enter');
+		await expect(importMenu.getByRole('menuitem').first()).toBeFocused();
+		// Escape closes the submenu first, then the menu
+		await page.keyboard.press('Escape');
+		await expect(importMenu).toBeHidden();
+		await expect(menu).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(menu).toBeHidden();
+	});
+
+	await test.step('a click on an item of a submenu runs it and closes the menu', async () => {
+		await page.getByRole('button', { name: 'Menu' }).click();
+		await importItem.click();
+		await importMenu.getByRole('menuitem', { name: 'Table (CSV/TSV)…' }).click();
+		await expect(menu).toBeHidden();
+		await expect(page.getByRole('dialog')).toBeVisible();
+	});
+});
+
 test('a message is above the drawer and the bars', async ({ page }) => {
 	await page.goto('/#this-is-not-a-valid-state');
 	await waitForMapIsReady(page, { expectedMessages: [/^Invalid map state in URL hash/] });

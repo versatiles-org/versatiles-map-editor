@@ -18,7 +18,7 @@ async function recentMaps(page: Page) {
 	await page.getByRole('button', { name: 'Menu' }).click();
 	await page.getByRole('menu', { name: 'Menu' }).getByRole('menuitem', { name: 'Recent maps', exact: true }).click();
 	return page
-		.getByRole('group', { name: 'Recent maps' })
+		.getByRole('menu', { name: 'Recent maps' })
 		.getByRole('menuitem')
 		.filter({ hasNotText: /^(Delete)?$/ });
 }
@@ -156,7 +156,7 @@ test('the recent maps mark the maps of other tabs, and follow their changes', as
 	const recent = await recentMaps(page);
 	await expect(recent).toHaveText([/^Hamburg\s*Open in another tab$/, /^Berlin\s*This map$/]);
 	await expect(recent.first()).toBeDisabled();
-	await expect(page.getByRole('group', { name: 'Recent maps' }).getByRole('menuitem', { name: /Delete/ })).toHaveCount(
+	await expect(page.getByRole('menu', { name: 'Recent maps' }).getByRole('menuitem', { name: /Delete/ })).toHaveCount(
 		0
 	);
 
@@ -196,5 +196,5 @@ test('without a browser storage, the editor keeps the map in memory and says so'
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(0);
 	await expect(await recentMaps(page)).toHaveCount(0);
-	await expect(page.getByRole('group', { name: 'Recent maps' })).toContainText('No maps yet');
+	await expect(page.getByRole('menu', { name: 'Recent maps' })).toContainText('No maps yet');
 });

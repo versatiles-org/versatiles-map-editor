@@ -102,7 +102,7 @@ test('the examples open from the menu', async ({ page }) => {
 	const titles = EXAMPLES.map(
 		(name) => (JSON.parse(readFileSync(`examples/${name}.mapjson`, 'utf-8')) as MapState).meta!.title!
 	).sort((a, b) => a.localeCompare(b, 'en'));
-	await expect(menu.getByRole('group', { name: 'Examples' }).getByRole('menuitem')).toHaveText(titles);
+	await expect(menu.getByRole('menu', { name: 'Examples' }).getByRole('menuitem')).toHaveText(titles);
 });
 
 // the largest example: 557 markers with 536 labels, more than the 100 that are drawn in order

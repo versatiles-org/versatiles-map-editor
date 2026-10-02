@@ -12,8 +12,9 @@
 
 	/**
 	 * The menu (☰) of the editor: the commands that are used rarely, like files, the recent maps,
-	 * import and export, and the edit commands with their shortcuts. The groups expand in place
-	 * instead of flying out, which also works on touch screens.
+	 * import and export, and the edit commands with their shortcuts. A group opens its items as a
+	 * submenu beside the menu, like the menus of an operating system: on hover, on a click or tap,
+	 * and with the arrow keys.
 	 */
 	const { doc, sync, files }: { doc: MapDocumentInteractive; sync: SessionSync; files: FileCommands } = $props();
 
@@ -42,6 +43,8 @@
 
 	function close(focusButton = true) {
 		open = false;
+		expanded = undefined;
+		clearTimeout(timer);
 		if (focusButton) button?.focus();
 	}
 
@@ -51,15 +54,32 @@
 		void command();
 	}
 
-	/** The items that can be chosen, in their order. */
-	function items(): HTMLElement[] {
-		return [...(menu?.querySelectorAll<HTMLElement>('[role^="menuitem"]') ?? [])].filter(
+	/** The items that can be chosen, in their order: of the menu, or of the submenu of a group. */
+	function items(group?: Group): HTMLElement[] {
+		const container = group ? submenus[group] : menu;
+		const selector = group ? '[role^="menuitem"]' : ':scope > [role^="menuitem"]';
+		return [...(container?.querySelectorAll<HTMLElement>(selector) ?? [])].filter(
 			(item) => !(item as HTMLButtonElement).disabled && item.checkVisibility()
 		);
 	}
 
 	function onKeydown(e: KeyboardEvent) {
-		const list = items();
+		// in a submenu: its items, and back to its group
+		const group = (Object.keys(submenus) as Group[]).find((g) => submenus[g]?.contains(e.target as Node));
+		if (group && (e.key === 'ArrowLeft' || e.key === 'Escape')) {
+			e.preventDefault();
+			e.stopPropagation();
+			closeGroup(true);
+			return;
+		}
+		// on a group: its submenu, with the focus on its first item
+		const trigger = (Object.keys(triggers) as Group[]).find((g) => triggers[g] === e.target);
+		if (trigger && e.key === 'ArrowRight') {
+			e.preventDefault();
+			void openGroup(trigger, true);
+			return;
+		}
+		const list = items(group);
 		const index = list.indexOf(document.activeElement as HTMLElement);
 		let next: number;
 		switch (e.key) {
@@ -96,11 +116,63 @@
 		if (open && !menu?.contains(target) && !button?.contains(target)) close(false);
 	}
 
-	async function toggleGroup(group: Group) {
-		expanded = expanded === group ? undefined : group;
-		if (expanded === 'examples') void loadExamples();
+	// The submenus of the groups, and the items that open them
+	const submenus: Partial<Record<Group, HTMLDivElement>> = $state({});
+	const triggers: Partial<Record<Group, HTMLButtonElement>> = $state({});
+	// where the open submenu is, in the window
+	let place: { left: number; top: number; maxHeight: number } | undefined = $state();
+	// opening and closing on hover waits a little, so the pointer can cross other items on its way
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const later = (action: () => void, ms: number) => {
+		clearTimeout(timer);
+		timer = setTimeout(action, ms);
+	};
+	const HOVER_OPEN = 150;
+	const HOVER_CLOSE = 300;
+
+	/** Open the submenu of a group beside its item; `focus`: with the focus on its first item, e.g. by keyboard. */
+	async function openGroup(group: Group, focus = false) {
+		clearTimeout(timer);
+		expanded = group;
+		if (group === 'examples') void loadExamples();
 		await tick();
+		placeSubmenu();
+		if (focus) items(group)[0]?.focus();
 	}
+
+	/** Close the open submenu; `focusTrigger`: the focus back on the item of its group, e.g. after ArrowLeft. */
+	function closeGroup(focusTrigger = false) {
+		clearTimeout(timer);
+		const group = expanded;
+		expanded = undefined;
+		if (focusTrigger && group) triggers[group]?.focus();
+	}
+
+	/**
+	 * Put the open submenu beside the menu, at the height of its group: on the right, else on the
+	 * left, and within the window, where a long one scrolls.
+	 */
+	function placeSubmenu() {
+		const group = expanded;
+		const trigger = group && triggers[group];
+		const submenu = group && submenus[group];
+		if (!trigger || !submenu || !menu) return;
+		const margin = 8;
+		const outer = menu.getBoundingClientRect();
+		const row = trigger.getBoundingClientRect();
+		const width = submenu.offsetWidth;
+		const maxHeight = innerHeight - 2 * margin;
+		const height = Math.min(submenu.scrollHeight, maxHeight);
+		let left = outer.right - 4;
+		if (left + width > innerWidth - margin) left = Math.max(margin, outer.left - width + 4);
+		const top = Math.max(margin, Math.min(row.top - 6, innerHeight - margin - height));
+		place = { left, top, maxHeight };
+	}
+	// again when its items change, e.g. the examples are loaded or a recent map is deleted
+	$effect(() => {
+		void [examples, recent, expanded];
+		void tick().then(placeSubmenu);
+	});
 
 	// the example maps, loaded when their group opens the first time, since the menu rarely needs them
 	let examples: Example[] | undefined = $state();
@@ -137,7 +209,7 @@
 </script>
 
 <!-- F switches fullscreen on and off -->
-<svelte:window onpointerdown={onWindowPointerdown} onkeydown={fullscreen.onKeydown} />
+<svelte:window onpointerdown={onWindowPointerdown} onkeydown={fullscreen.onKeydown} onresize={placeSubmenu} />
 
 {#snippet item(
 	label: string,
@@ -151,6 +223,11 @@
 		disabled={options.disabled}
 		aria-keyshortcuts={options.keys?.[2]}
 		onclick={() => run(command)}
+		onpointerenter={(e) => {
+			if (e.pointerType === 'mouse' && expanded && !e.currentTarget.closest('.submenu')) {
+				later(() => closeGroup(), HOVER_CLOSE);
+			}
+		}}
 	>
 		<span class="name">{label}</span>
 		{#if options.keys}<kbd aria-hidden="true">{mac ? options.keys[0] : options.keys[1]}</kbd>{/if}
@@ -158,13 +235,19 @@
 {/snippet}
 
 {#snippet group(id: Group, label: string)}
+	<!-- a click or tap opens it, also when the pointer opened it already; by keyboard with the focus in it -->
 	<button
+		bind:this={triggers[id]}
 		class="item"
+		class:open={expanded === id}
 		role="menuitem"
-		aria-haspopup="true"
+		aria-haspopup="menu"
 		aria-expanded={expanded === id}
 		aria-controls="{uid}-{id}"
-		onclick={() => toggleGroup(id)}
+		onclick={(e) => openGroup(id, e.detail === 0)}
+		onpointerenter={(e) => {
+			if (e.pointerType === 'mouse') later(() => openGroup(id), HOVER_OPEN);
+		}}
 	>
 		<span class="name">{label}</span>
 		<span class="chevron"><Icon name="chevron" size={14} /></span>
@@ -191,18 +274,43 @@
 		aria-label="Menu"
 		hidden={!open}
 		onkeydown={onKeydown}
+		onscroll={placeSubmenu}
 		tabindex="-1"
 	>
 		{@render item('New map', () => files.newFile())}
 		{@render item('Open…', () => files.openFile())}
 		{@render group('examples', 'Open example')}
-		<div id="{uid}-examples" class="group" role="group" aria-label="Examples" hidden={expanded !== 'examples'}>
+		<div
+			bind:this={submenus.examples}
+			id="{uid}-examples"
+			class="submenu"
+			role="menu"
+			aria-label="Examples"
+			hidden={expanded !== 'examples'}
+			style:left={place && `${place.left}px`}
+			style:top={place && `${place.top}px`}
+			style:max-height={place && `${place.maxHeight}px`}
+			onpointerenter={() => clearTimeout(timer)}
+			tabindex="-1"
+		>
 			{#each examples ?? [] as example (example.id)}
 				{@render item(example.title, () => files.openExample(example))}
 			{/each}
 		</div>
 		{@render group('recent', 'Recent maps')}
-		<div id="{uid}-recent" class="group" role="group" aria-label="Recent maps" hidden={expanded !== 'recent'}>
+		<div
+			bind:this={submenus.recent}
+			id="{uid}-recent"
+			class="submenu"
+			role="menu"
+			aria-label="Recent maps"
+			hidden={expanded !== 'recent'}
+			style:left={place && `${place.left}px`}
+			style:top={place && `${place.top}px`}
+			style:max-height={place && `${place.maxHeight}px`}
+			onpointerenter={() => clearTimeout(timer)}
+			tabindex="-1"
+		>
 			{#each recent as map (map.id)}
 				<div class="recent">
 					<button
@@ -242,13 +350,37 @@
 		</div>
 		{@render item('Download…', () => files.downloadFile())}
 		{@render group('import', 'Import')}
-		<div id="{uid}-import" class="group" role="group" aria-label="Import" hidden={expanded !== 'import'}>
+		<div
+			bind:this={submenus.import}
+			id="{uid}-import"
+			class="submenu"
+			role="menu"
+			aria-label="Import"
+			hidden={expanded !== 'import'}
+			style:left={place && `${place.left}px`}
+			style:top={place && `${place.top}px`}
+			style:max-height={place && `${place.maxHeight}px`}
+			onpointerenter={() => clearTimeout(timer)}
+			tabindex="-1"
+		>
 			{@render item('GeoJSON…', () => files.importGeoJSON())}
 			{@render item('KML (Google Earth)…', () => files.importKML())}
 			{@render item('Table (CSV/TSV)…', () => dialogImportTable?.open())}
 		</div>
 		{@render group('export', 'Export')}
-		<div id="{uid}-export" class="group" role="group" aria-label="Export" hidden={expanded !== 'export'}>
+		<div
+			bind:this={submenus.export}
+			id="{uid}-export"
+			class="submenu"
+			role="menu"
+			aria-label="Export"
+			hidden={expanded !== 'export'}
+			style:left={place && `${place.left}px`}
+			style:top={place && `${place.top}px`}
+			style:max-height={place && `${place.maxHeight}px`}
+			onpointerenter={() => clearTimeout(timer)}
+			tabindex="-1"
+		>
 			{@render item('GeoJSON', () => files.exportGeoJSON())}
 			{@render item('KML (Google Earth)', () => files.exportKML())}
 		</div>
@@ -399,16 +531,27 @@
 		}
 	}
 
+	/* points to its submenu; the item of the open one keeps the tint of hover */
 	.chevron {
 		display: grid;
-		transition: rotate 0.1s;
 	}
-	[aria-expanded='true'] .chevron {
-		rotate: 90deg;
+	.item.open {
+		background: var(--color-hover);
 	}
 
-	.group .item {
-		padding-left: var(--space-5);
+	/* a popup beside the menu, placed in the window by placeSubmenu, over everything of the menu */
+	.submenu {
+		position: fixed;
+		z-index: 2;
+		min-width: 200px;
+		max-width: 320px;
+		overflow-y: auto;
+		box-sizing: border-box;
+		padding: 5px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg);
+		box-shadow: var(--shadow-lg);
 	}
 
 	.recent {
@@ -449,7 +592,7 @@
 	}
 
 	.empty {
-		margin: 4px 10px 4px 24px;
+		margin: 4px 10px;
 		color: var(--color-text-muted);
 	}
 

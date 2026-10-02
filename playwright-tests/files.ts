@@ -134,7 +134,7 @@ test('a new or opened map is a new map, and the one before is kept in the recent
 	await (await menuItem(page, 'Recent maps', 'Markers')).isVisible();
 	// the maps, without the buttons that delete them (an icon, or "Delete" to confirm)
 	const recent = page
-		.getByRole('group', { name: 'Recent maps' })
+		.getByRole('menu', { name: 'Recent maps' })
 		.getByRole('menuitem')
 		.filter({ hasNotText: /^(Delete)?$/ });
 	await expect(recent).toHaveText([/^1 circle\s*This map$/, /^lines\s*\S/, /^Markers\s*\S/]);
