@@ -866,6 +866,29 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 	await expect.poll(labels).toStrictEqual(['A', 'B']);
 });
 
+test('a marker without symbol is a letter in the color of its label in the list', async ({ page }) => {
+	const center: [number, number] = [13.4, 52.5];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center, radius: 10000 },
+				elements: [
+					{ type: 'marker', point: center, style: { color: '#00ff00', label: 'Pin' } },
+					{ type: 'marker', point: [13.41, 52.5], style: { symbol: '', label: 'Text', labelColor: '#0000ff' } }
+				]
+			})
+	);
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Elements', exact: true }).click();
+	const list = page.getByRole('listbox', { name: 'Elements' });
+	const icon = (name: RegExp) => list.getByRole('option', { name }).locator('.type');
+
+	await expect(icon(/: Text/).locator('svg')).toHaveAttribute('data-icon', 'label');
+	await expect(icon(/: Text/)).toHaveCSS('color', 'rgb(0, 0, 255)');
+	await expect(icon(/: Pin/).locator('svg')).toHaveAttribute('data-icon', 'marker');
+	await expect(icon(/: Pin/)).toHaveCSS('color', 'rgb(0, 255, 0)');
+});
+
 test('Shift-drag on the map zooms to a box', async ({ page }) => {
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);

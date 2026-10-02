@@ -19,7 +19,7 @@
 	import PanelBackground from './PanelBackground.svelte';
 	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementText, typeName } from '$lib/components/element_names.js';
+	import { countTypes, elementIcon, elementText, typeName } from '$lib/components/element_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
@@ -41,7 +41,7 @@
 			const icon = new Set(types).size === 1 ? types[0] : 'layers';
 			return { icon: icon as IconName, title: `${elements.length} elements`, subtitle: countTypes(types) };
 		}
-		return { icon: types[0] as IconName, title: typeName(types[0]), subtitle: elementText(elements[0]) };
+		return { icon: elementIcon(elements[0]).name, title: typeName(types[0]), subtitle: elementText(elements[0]) };
 	});
 
 	/** One font for the labels of all markers, or the one of the background map. */

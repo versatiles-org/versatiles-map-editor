@@ -2,8 +2,8 @@
 	import { tick } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import ElementName from './ElementName.svelte';
-	import { Icon, type IconName, Hint } from '$lib/components/ui/index.js';
-	import { typeName } from '$lib/components/element_names.js';
+	import { Icon, Hint } from '$lib/components/ui/index.js';
+	import { elementIcon, typeName } from '$lib/components/element_names.js';
 	import { isToggleClick, TOGGLE_KEY } from '$lib/interaction/index.js';
 	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
 
@@ -215,6 +215,7 @@
 	onlostpointercapture={endDrag}
 >
 	{#each elements as element, i (element)}
+		{@const icon = elementIcon(element)}
 		<li
 			id="{uid}-{i}"
 			role="option"
@@ -224,9 +225,7 @@
 			class:drop-before={dropIndex === i}
 			class:drop-after={dropIndex === elements.length && i === elements.length - 1}
 		>
-			<span class="type" style:color={element.getColors()[0]}
-				><Icon name={element.getState().type as IconName} size={14} /></span
-			>
+			<span class="type" style:color={icon.color}><Icon name={icon.name} size={14} /></span>
 			<span class="name"><ElementName {element} name={typeName(element.getState().type)} /></span>
 			<!-- to drag with a finger; a mouse drags the whole row -->
 			<span class="grip" aria-hidden="true"><Icon name="grip" size={14} /></span>

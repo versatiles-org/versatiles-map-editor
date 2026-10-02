@@ -27,6 +27,8 @@
 		front: ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14'],
 		// a handle to drag, e.g. a row of a list
 		grip: ['M7 9h10M7 15h10'],
+		// a letter "A": a marker that is only a label, without symbol
+		label: ['M6 19l6-14 6 14', 'M8.5 14h7'],
 		layers: ['M12 4.5l9 5-9 5-9-5z', 'M3 14.5l9 5 9-5'],
 		legend: ['M5 5h3v3H5zM5 16h3v3H5z', 'M11 6.5h8M11 17.5h8'],
 		line: ['M4 18l5-7 5 4 6-9'],
@@ -55,7 +57,7 @@
 	const { name, size = 18 }: { name: IconName; size?: number } = $props();
 </script>
 
-<svg class="icon" width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
+<svg class="icon" data-icon={name} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
 	{#each ICONS[name] as d (d)}<path {d} />{/each}
 </svg>
 
