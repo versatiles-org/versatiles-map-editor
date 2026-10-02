@@ -30,23 +30,20 @@ describe('the coder of the string table', () => {
 	});
 
 	it('codes the strings of the maps in these numbers of bits', () => {
-		// a change of the model or the coder changes them: links written before cannot be read
+		// a change of the model or the coder changes them: links written before cannot be read. Only
+		// the fixtures, which are kept for tests; the examples are edited as showcases.
+		const fixtures = files.filter((file) => file.includes('__fixtures__'));
 		const bits = Object.fromEntries(
-			files.map((file) => [file.replace(/.*\//, ''), encodeStrings(stringsOf(file)).length])
+			fixtures.map((file) => [file.replace(/.*\//, ''), encodeStrings(stringsOf(file)).length])
 		);
 		expect(bits).toMatchInlineSnapshot(`
 			{
-			  "berlin-low-emission-zone.mapjson": 1873,
-			  "chernobyl-exclusion-zone.mapjson": 2398,
 			  "chinese.mapjson": 2078,
 			  "emoji.mapjson": 1953,
 			  "french.mapjson": 3247,
 			  "german.mapjson": 3396,
 			  "greek.mapjson": 2210,
-			  "hamburg-berlin-railway.mapjson": 1737,
 			  "japanese.mapjson": 2557,
-			  "london-pharmacies.mapjson": 16623,
-			  "paris-2024-venues.mapjson": 6202,
 			  "polish.mapjson": 3482,
 			  "russian.mapjson": 2769,
 			}
