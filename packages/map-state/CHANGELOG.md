@@ -21,7 +21,8 @@ The first release.
     order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in alphabetic
     scripts and 12 in Chinese and Japanese, instead of 7–19; the words of the format with a model
     that learned the vocabulary of the format before; the block needs no length, the decoder knows
-    where it ends;
+    where it ends; each string once in its section, at most 2^22 characters, so a short hostile
+    link cannot make the decoder produce millions of strings;
   - style references to similar earlier styles, in an Exp-Golomb code;
   - style fields as 4-bit keys, and keys from 16 after the extended key 14, e.g. `labelSize` (the
     size of a marker's label, apart from `size`, the size of its symbol) and `font` (the glyph font

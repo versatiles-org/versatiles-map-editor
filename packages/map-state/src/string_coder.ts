@@ -20,6 +20,13 @@ const END = -1;
 /** A context with a total above this halves its counts, so `range × total` stays exact. */
 const MAX_TOTAL = 2 ** 16;
 
+/**
+ * The most symbols of a block: code points and END. A likely symbol costs only a fraction of a
+ * bit, so a few bits of a hostile link could otherwise decode to millions of strings or code
+ * points. Far more than a map has (1.7 million code points of 20,000 popups decode in 0.3 s).
+ */
+const MAX_SYMBOLS = 2 ** 22;
+
 /** The bit sizes of the code points of a symbol that no context has seen: 1 of 5 kinds, with END. */
 const NEW_SYMBOL_BITS = [0, 7, 11, 16, 21];
 
@@ -239,15 +246,21 @@ class Decoder {
  * The strings as one block of bits; `decodeStrings` needs their number. The first `formatCount`
  * are words of the format, e.g. the options of the background map as JSON: a model that has
  * learned `STRING_PRIMER` codes them. The others, e.g. labels in any language, get an empty model,
- * which the words of the format would only make worse at text.
+ * which the words of the format would only make worse at text. The decoder refuses a string
+ * twice in its section, which the writer never writes, and more than `MAX_SYMBOLS` symbols.
  */
 export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 	let model = new Model(formatCount > 0 ? STRING_PRIMER : []);
 	const encoder = new Encoder();
+	let symbolCount = 0;
 	for (const [n, string] of strings.entries()) {
 		if (n === formatCount && n > 0) model = new Model();
 		const symbols = [...string].map((char) => char.codePointAt(0)!);
 		symbols.push(END);
+		// what the decoder would refuse
+		symbolCount += symbols.length;
+		if (symbolCount > MAX_SYMBOLS)
+			throw new Error(`The texts of the map are too long: more than ${MAX_SYMBOLS} characters`);
 		let a = END;
 		let b = END;
 		for (const symbol of symbols) {
@@ -306,12 +319,19 @@ export function decodeStringBlock(
 	// the shifts while decoding each string, its bits
 	const stringBits: number[] = [];
 	let shiftsBefore = 0;
+	let symbolCount = 0;
+	// the strings of the section so far: the encoder writes each once (see `StateWriter.writeStringTable`)
+	let seen = new Set<string>();
 	for (let n = 0; n < count; n++) {
-		if (n === formatCount && n > 0) model = new Model();
+		if (n === formatCount && n > 0) {
+			model = new Model();
+			seen = new Set();
+		}
 		const codePoints: number[] = [];
 		let a = END;
 		let b = END;
 		while (true) {
+			if (++symbolCount > MAX_SYMBOLS) throw new Error(`More than ${MAX_SYMBOLS} symbols in the strings`);
 			const excluded = new Set<number>();
 			let symbol: number | undefined;
 			for (const context of model.contexts(a, b)) {
@@ -353,6 +373,8 @@ export function decodeStringBlock(
 		// in chunks: spreading a long array into the arguments overflows the stack
 		let string = '';
 		for (let i = 0; i < codePoints.length; i += 8192) string += String.fromCodePoint(...codePoints.slice(i, i + 8192));
+		if (seen.has(string)) throw new Error(`A string twice in its section: ${JSON.stringify(string.slice(0, 50))}`);
+		seen.add(string);
 		strings.push(string);
 		stringBits.push(decoder.shiftCount - shiftsBefore);
 		shiftsBefore = decoder.shiftCount;

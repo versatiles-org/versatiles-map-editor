@@ -85,8 +85,9 @@ describe('the coder of the string table', () => {
 
 	it('keeps empty strings', () => {
 		expect(roundTrip([''])).toStrictEqual(['']);
-		expect(roundTrip(['', '', ''])).toStrictEqual(['', '', '']);
-		expect(roundTrip(['a', '', 'b', ''])).toStrictEqual(['a', '', 'b', '']);
+		expect(roundTrip(['a', '', 'b'])).toStrictEqual(['a', '', 'b']);
+		// one in each section
+		expect(decodeStrings(encodeStrings(['', 'a', ''], 2), 3, 2)).toStrictEqual(['', 'a', '']);
 	});
 
 	it('keeps code points of every size, emoji and lone surrogates', () => {
@@ -110,9 +111,14 @@ describe('the coder of the string table', () => {
 			return String.fromCodePoint(0x10000 + Math.floor(next() * 0x100000));
 		};
 		for (let round = 0; round < 20; round++) {
-			const strings = Array.from({ length: Math.floor(next() * 30) }, () =>
-				Array.from({ length: Math.floor(next() * 40) }, char).join('')
-			);
+			// each once, as the writer gives them
+			const strings = [
+				...new Set(
+					Array.from({ length: Math.floor(next() * 30) }, () =>
+						Array.from({ length: Math.floor(next() * 40) }, char).join('')
+					)
+				)
+			];
 			expect(roundTrip(strings)).toStrictEqual(strings);
 		}
 	});
@@ -148,9 +154,27 @@ describe('the coder of the string table', () => {
 				const strings = decodeStrings(bits, 3);
 				expect(strings).toHaveLength(3);
 			} catch (error) {
-				expect(String(error)).toMatch(/beyond their block|Invalid code point/);
+				expect(String(error)).toMatch(/beyond their block|Invalid code point|twice in its section/);
 			}
 		}
+	});
+
+	it('refuses a string twice in its section, which the writer never writes', () => {
+		expect(() => decodeStrings(encodeStrings(['ab', 'ab']), 2)).toThrow(/twice in its section/);
+		// e.g. an empty string, which costs almost no bits: a short link would make millions of them
+		expect(() => decodeStrings(encodeStrings(['', '']), 2)).toThrow(/twice in its section/);
+		// once in each section
+		expect(decodeStrings(encodeStrings(['ab', 'ab'], 1), 2, 1)).toStrictEqual(['ab', 'ab']);
+	});
+
+	it('stops at 2^22 symbols, which a hostile link could code in a few bits', () => {
+		const longest = 'a'.repeat(2 ** 22 - 1);
+		const block = encodeStrings([longest]);
+		expect(block.length).toBeLessThan(1000);
+		expect(decodeStrings(block, 1)).toStrictEqual([longest]);
+		// with one END more: a further string after the block
+		expect(() => decodeStrings(block, 2)).toThrow(/More than 4194304 symbols/);
+		expect(() => encodeStrings([longest + 'a'])).toThrow(/too long/);
 	});
 
 	it('is fast enough to encode every edit', () => {
