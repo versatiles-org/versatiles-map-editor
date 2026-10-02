@@ -15,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { parseArgs, styleText } from 'node:util';
 import { encodeState, stateFromMapJSON } from '../dist/index.js';
 import { StateReader } from '../dist/reader.js';
+import { decodeStringBlock } from '../dist/string_coder.js';
 
 const HELP = `Usage: analyse_bits.mjs [options] [files…]
 
@@ -69,7 +70,10 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 		parent.children.push(span);
 		this.stack.push(span);
 		try {
-			return method.apply(this, args);
+			const value = method.apply(this, args);
+			// e.g. the number of strings, for `expandStringTables`
+			if (span.primitive) span.value = value;
+			return value;
 		} catch (error) {
 			// e.g. the type of a next element, in the padding of the last character
 			if (span.primitive) span.name = '(padding)';
@@ -170,10 +174,48 @@ function analyse(state, base64, options) {
 	if (unread > 0)
 		reader.root.children.push({ name: '(padding)', start: reader.offset, end: bits.length, children: [] });
 
+	expandStringTables(reader.root, bits);
+
 	const elements = {};
 	for (const element of state.elements) elements[element.type] = (elements[element.type] ?? 0) + 1;
 	const tree = aggregate(reader.root, options.expand);
 	return { bits: tree.bits, characters: base64.length, elements, kinds: kindsOf(reader.root), tree };
+}
+
+/**
+ * The block of a string table as its 2 sections with their strings, each with its bits: the
+ * table reads the number of strings, the number of words of the format, and the block, which is
+ * decoded again here.
+ */
+function expandStringTables(span, bits) {
+	if (span.name === 'readStringTable') {
+		const [count, formatCount, block] = span.children;
+		if (!block) return;
+		const decoded = decodeStringBlock(bits.slice(block.start), count.value, formatCount.value);
+		let offset = block.start;
+		const section = (name, from, to) => {
+			const start = offset;
+			const children = decoded.strings.slice(from, to).map((string, i) => {
+				const end = offset + decoded.bits[from + i];
+				const child = { name: abbreviate(string), primitive: true, start: offset, end, children: [] };
+				offset = end;
+				return child;
+			});
+			return { name, start, end: offset, children };
+		};
+		block.children = [
+			section('words of the format', 0, formatCount.value),
+			section('other strings', formatCount.value, count.value)
+		].filter((child) => child.children.length > 0);
+		return;
+	}
+	for (const child of span.children) expandStringTables(child, bits);
+}
+
+/** A string as a short name in the tree, in quotes. */
+function abbreviate(string) {
+	const quoted = JSON.stringify(string);
+	return quoted.length > 40 ? quoted.slice(0, 38) + '…"' : quoted;
 }
 
 /** The bits of each kind: those of the leaves, by the innermost classified call above them. */

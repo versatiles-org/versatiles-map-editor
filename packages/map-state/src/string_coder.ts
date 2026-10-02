@@ -228,6 +228,11 @@ class Decoder {
 	get length(): number {
 		return this.shifts + 2;
 	}
+
+	/** The shifts so far, each a bit that the encoder wrote. */
+	get shiftCount(): number {
+		return this.shifts;
+	}
 }
 
 /**
@@ -287,16 +292,20 @@ export function decodeStrings(bits: boolean[], count: number, formatCount = 0): 
 
 /**
  * The strings at the start of `bits` (see `decodeStrings`), and the length of their block, after
- * which the bits go on.
+ * which the bits go on. `bits`: the bits of each string, the last with the 2 of the flush; they add
+ * up to `length`, e.g. to analyse which strings are long.
  */
 export function decodeStringBlock(
 	bits: boolean[],
 	count: number,
 	formatCount = 0
-): { strings: string[]; length: number } {
+): { strings: string[]; length: number; bits: number[] } {
 	let model = new Model(formatCount > 0 ? STRING_PRIMER : []);
 	const decoder = new Decoder(bits);
 	const strings: string[] = [];
+	// the shifts while decoding each string, its bits
+	const stringBits: number[] = [];
+	let shiftsBefore = 0;
 	for (let n = 0; n < count; n++) {
 		if (n === formatCount && n > 0) model = new Model();
 		const codePoints: number[] = [];
@@ -345,6 +354,9 @@ export function decodeStringBlock(
 		let string = '';
 		for (let i = 0; i < codePoints.length; i += 8192) string += String.fromCodePoint(...codePoints.slice(i, i + 8192));
 		strings.push(string);
+		stringBits.push(decoder.shiftCount - shiftsBefore);
+		shiftsBefore = decoder.shiftCount;
 	}
-	return { strings, length: decoder.length };
+	if (stringBits.length > 0) stringBits[stringBits.length - 1] += 2;
+	return { strings, length: decoder.length, bits: stringBits };
 }

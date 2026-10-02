@@ -129,10 +129,12 @@ describe('the coder of the string table', () => {
 			for (const formatCount of [0, 1]) {
 				const block = encodeStrings(strings, formatCount);
 				for (const after of [[], Array<boolean>(64).fill(true), Array.from({ length: 64 }, () => next() < 0.5)]) {
-					expect(decodeStringBlock([...block, ...after], strings.length, formatCount)).toStrictEqual({
-						strings,
-						length: block.length
-					});
+					const decoded = decodeStringBlock([...block, ...after], strings.length, formatCount);
+					expect(decoded.strings).toStrictEqual(strings);
+					expect(decoded.length).toBe(block.length);
+					// the bits of the strings add up to the block
+					expect(decoded.bits).toHaveLength(strings.length);
+					expect(decoded.bits.reduce((sum, bits) => sum + bits, 0)).toBe(block.length);
 				}
 			}
 		}
