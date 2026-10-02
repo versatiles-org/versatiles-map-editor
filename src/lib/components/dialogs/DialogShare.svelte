@@ -168,14 +168,25 @@
 	// shown in the dialog, which is modal: messages of the page would be behind it
 	let copyError = $state('');
 
+	// the ✓ of each button for 2 s after its last copy; the announcement of the last copy
+	const flashes: { link?: ReturnType<typeof setTimeout>; embed?: ReturnType<typeof setTimeout> } = {};
 	function flash(b?: HTMLButtonElement) {
 		if (!b) return;
+		const key = b === btnLink ? 'link' : 'embed';
+		clearTimeout(flashes[key]);
 		b.classList.add('success');
-		copied = b === btnLink ? 'Link copied' : 'Embed code copied';
-		setTimeout(() => {
+		const message = key === 'link' ? 'Link copied' : 'Embed code copied';
+		copied = message;
+		flashes[key] = setTimeout(() => {
 			b.classList.remove('success');
-			copied = '';
+			if (copied === message) copied = '';
 		}, 2000);
+	}
+
+	/** The preview is not loaded again after the dialog is closed, where it stays hidden. */
+	function stopPreview() {
+		if (timeout != null) clearTimeout(timeout);
+		timeout = null;
 	}
 
 	const RATIOS: { value: 'wide' | 'square' | 'tall'; label: string }[] = [
@@ -190,7 +201,7 @@
 	}
 </script>
 
-<Dialog bind:this={dialog} size="fullscreen" title="Share or embed the map">
+<Dialog bind:this={dialog} size="fullscreen" title="Share or embed the map" onclose={stopPreview}>
 	<div class="layout">
 		<div class="preview">
 			<div class="toolbar">

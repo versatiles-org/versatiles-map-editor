@@ -150,6 +150,38 @@ test('precision of a shared map', async ({ page }) => {
 	expect(((await storedState(page)).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
 });
 
+test('a copy shows its check mark for 2 s after the last copy', async ({ page, context, browserName }) => {
+	if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await page.clock.install();
+	await page.goto('/');
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const status = page.getByRole('dialog').getByRole('status');
+	const copyLink = page.getByRole('button', { name: /^Copy link/ });
+	const copyEmbed = page.getByRole('button', { name: /^Copy embed code/ });
+	const checked = (button: typeof copyLink) => button.evaluate((b) => b.classList.contains('success'));
+
+	await copyLink.click();
+	await expect(status).toHaveText('Link copied');
+	await page.clock.runFor(1500);
+	// again: its 2 s start anew
+	await copyLink.click();
+	await page.clock.runFor(1000);
+	expect(await checked(copyLink)).toBe(true);
+	await expect(status).toHaveText('Link copied');
+
+	// the other one: the link keeps its own time, the announcement is of the last copy
+	await copyEmbed.click();
+	await expect(status).toHaveText('Embed code copied');
+	await page.clock.runFor(1100);
+	expect(await checked(copyLink)).toBe(false);
+	expect(await checked(copyEmbed)).toBe(true);
+	await expect(status).toHaveText('Embed code copied');
+	await page.clock.runFor(1000);
+	expect(await checked(copyEmbed)).toBe(false);
+	await expect(status).toHaveText('');
+});
+
 test('precision of a shared map with a single marker follows the view', async ({ page }) => {
 	// a point has no size: the precision is that of the area that the editor shows, about 20 km
 	const point: [number, number] = [13.4, 52.5];
