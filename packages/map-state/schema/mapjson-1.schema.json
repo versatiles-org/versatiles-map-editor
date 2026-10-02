@@ -106,10 +106,6 @@
 					"$ref": "#/definitions/StateViewer",
 					"description": "What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend."
 				},
-				"labelFont": {
-					"type": "string",
-					"description": "The glyph font of the labels of all markers, e.g. \"noto_sans_bold\". Without it, they have the font of the labels of the background map."
-				},
 				"labelOverlap": {
 					"type": "string",
 					"const": "hide",
@@ -271,6 +267,11 @@
 					"type": "string",
 					"description": "The symbol of a marker: the name of its image, e.g. \"icons:anchor\", or \"\" for none."
 				},
+				"font": {
+					"type": "string",
+					"description": "Markers: the glyph font of the label, e.g. \"noto_sans_bold\"; \"\" for the font of the labels of the background map.",
+					"default": ""
+				},
 				"labelColor": {
 					"$ref": "#/definitions/HexColor",
 					"description": "Markers: the color of the text of the label.",
@@ -340,7 +341,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `align`."
+					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `align`."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"

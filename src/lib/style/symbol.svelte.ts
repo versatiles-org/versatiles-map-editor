@@ -110,6 +110,7 @@ export class SymbolStyle extends StylePart {
 	#label: string = $state(SYMBOL_DEFAULTS.label);
 	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
+	#font: string = $state(SYMBOL_DEFAULTS.font);
 	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
 
 	get color(): string {
@@ -189,6 +190,15 @@ export class SymbolStyle extends StylePart {
 		this.#labelColor = value;
 		this.changed();
 	}
+	/** The glyph font of the label, e.g. "noto_sans_bold", or "" for the font of the background map. */
+	get font(): string {
+		return this.#font;
+	}
+	set font(value: string) {
+		if (value === this.#font) return;
+		this.#font = value;
+		this.changed();
+	}
 	/** The color of the halo around the symbol and the label. */
 	get haloColor(): string {
 		return this.#haloColor;
@@ -230,6 +240,8 @@ export class SymbolStyle extends StylePart {
 			label: this.label,
 			labelColor: text.color,
 			labelOpacity: text.opacity,
+			// none: the font of the background map, see `ElementRenderer.applyFonts`
+			...(this.font ? { font: this.font } : {}),
 			haloColor: Color.parse(this.haloColor).asString(),
 			position: this.getPosition()
 		};
@@ -247,6 +259,7 @@ export class SymbolStyle extends StylePart {
 				label: this.label,
 				align: this.labelAlign,
 				labelColor: this.labelColor,
+				font: this.font,
 				haloColor: this.haloColor
 			},
 			SymbolStyle.defaultStyle
@@ -263,6 +276,7 @@ export class SymbolStyle extends StylePart {
 		if (style.label != null) this.label = style.label;
 		if (style.align != null) this.labelAlign = lookupLabelAlign(style.align).index;
 		if (style.labelColor != null) this.labelColor = style.labelColor;
+		if (style.font != null) this.font = style.font;
 		if (style.haloColor != null) this.haloColor = style.haloColor;
 	}
 }

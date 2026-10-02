@@ -17,8 +17,7 @@
 				{ "type": "line", "style": { "color": "#0072b2", "width": 3 }, "label": "Detour of long-distance trains" }
 			]
 		},
-		"title": "Hamburg–Berlin railway renovation",
-		"labelFont": "noto_sans_bold"
+		"title": "Hamburg–Berlin railway renovation"
 	},
 	"elements": [
 		{
@@ -66,7 +65,8 @@
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
 				"label": "Hamburg Hbf",
-				"align": 3
+				"align": 3,
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -78,7 +78,8 @@
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
 				"label": "Berlin Hbf",
-				"align": 3
+				"align": 3,
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -89,7 +90,8 @@
 				"symbol": "base:icon-rail",
 				"label": "Ludwigslust",
 				"align": 1,
-				"labelColor": "#d55e00"
+				"labelColor": "#d55e00",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -100,7 +102,8 @@
 				"symbol": "base:icon-rail",
 				"label": "Wittenberge",
 				"align": 1,
-				"labelColor": "#d55e00"
+				"labelColor": "#d55e00",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -111,7 +114,8 @@
 				"symbol": "base:icon-rail",
 				"label": "Uelzen",
 				"align": 2,
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -122,7 +126,8 @@
 				"symbol": "base:icon-rail",
 				"label": "Stendal",
 				"align": 2,
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		}
 	]

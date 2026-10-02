@@ -24,31 +24,46 @@ describe('MapDocument', () => {
 		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 	});
 
-	it('gives all marker labels a font of their own, or the one of the background map', async () => {
+	it('gives each marker label its own font, or the one of the background map', async () => {
 		await vi.waitFor(() => expect(mockMap.setStyle).toHaveBeenCalled());
 		mockMap.emit('style.load');
 		expect(doc.font).toBe('noto_sans_regular');
-		expect(doc.getState().meta?.labelFont).toBeUndefined();
+		const textFont = () =>
+			mockMap.setLayoutProperty.mock.calls
+				.filter(([id, key]) => id === 'elements_symbol' && key === 'text-font')
+				.at(-1)?.[2];
 
-		// set on the layer of the markers, without a new style, and stored in the map
-		doc.labelFont = 'lato_bold';
-		expect(doc.font).toBe('lato_bold');
-		expect(mockMap.setLayoutProperty).toHaveBeenCalledWith('elements_symbol', 'text-font', ['literal', ['lato_bold']]);
-		expect(doc.getState().meta?.labelFont).toBe('lato_bold');
+		// a marker with a font of its own: the layer lists it, the others have the font of the background map
+		const marker = addElement(doc, 'marker');
+		marker.layer.label = 'A';
+		marker.layer.font = 'lato_bold';
+		doc.view.renderer.flush();
+		expect(textFont()).toStrictEqual([
+			'match',
+			['get', 'font'],
+			'lato_bold',
+			['literal', ['lato_bold']],
+			['literal', ['noto_sans_regular']]
+		]);
+		expect(doc.getState().elements[0].style).toMatchObject({ font: 'lato_bold' });
+		expect(doc.getState().meta).toBeUndefined();
 
-		// a new background keeps it
-		const styles = mockMap.setStyle.mock.calls.length;
+		// a new background: the others follow its font
 		void doc.setBackground({ builder: 'osm', options: { text: { font: 'open_sans_regular' } } });
-		await vi.waitFor(() => expect(mockMap.setStyle.mock.calls.length).toBeGreaterThan(styles));
-		const style = (mockMap.setStyle.mock.calls.at(-1) as unknown[])[0] as { layers: { id: string; layout?: object }[] };
-		expect(style.layers.find((l) => l.id === 'elements_symbol')?.layout).toMatchObject({
-			'text-font': ['literal', ['lato_bold']]
-		});
-		expect(doc.font).toBe('lato_bold');
+		await vi.waitFor(() => expect(doc.font).toBe('open_sans_regular'));
+		mockMap.emit('style.load');
+		expect(textFont()).toStrictEqual([
+			'match',
+			['get', 'font'],
+			'lato_bold',
+			['literal', ['lato_bold']],
+			['literal', ['open_sans_regular']]
+		]);
 
-		// without its own font, the labels follow the background map
-		doc.labelFont = undefined;
-		expect(doc.font).toBe('open_sans_regular');
+		// without fonts of their own, all labels have the font of the background map
+		marker.layer.font = '';
+		doc.view.renderer.flush();
+		expect(textFont()).toStrictEqual(['literal', ['open_sans_regular']]);
 	});
 
 	it('draws the labels of the background map over areas and lines, if set, and stores it', async () => {

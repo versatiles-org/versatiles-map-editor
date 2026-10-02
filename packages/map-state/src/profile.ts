@@ -38,7 +38,17 @@ export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> 
 	width: 2
 };
 export const SYMBOL_DEFAULTS: Defaults<
-	'color' | 'rotate' | 'size' | 'halo' | 'symbol' | 'label' | 'align' | 'labelColor' | 'labelSize' | 'haloColor'
+	| 'color'
+	| 'rotate'
+	| 'size'
+	| 'halo'
+	| 'symbol'
+	| 'label'
+	| 'align'
+	| 'labelColor'
+	| 'labelSize'
+	| 'font'
+	| 'haloColor'
 > = {
 	color: '#ff0000',
 	rotate: 0,
@@ -50,6 +60,8 @@ export const SYMBOL_DEFAULTS: Defaults<
 	label: '',
 	align: 0,
 	labelColor: '#000000',
+	// the font of the labels of the background map
+	font: '',
 	haloColor: '#ffffff'
 };
 
@@ -143,6 +155,7 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
+	set(s, 'font', sanitizeString(v.font));
 	return Object.keys(s).length > 0 ? s : undefined;
 }
 
@@ -234,6 +247,8 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-label-align': nameOf(LABEL_ALIGN_NAMES, s.align),
 		'symbol-label-color': s.labelColor,
 		'symbol-label-size': s.labelSize,
+		// none: the font of the labels of the background map
+		'symbol-label-font': s.font || undefined,
 		'symbol-halo-color': s.haloColor
 	};
 }
@@ -252,6 +267,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		if (labelSize) s.labelSize = labelSize;
 		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
 		set(s, 'symbol', sanitizeSymbol(p['symbol-pattern']));
+		set(s, 'font', sanitizeString(p['symbol-label-font']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);
 }

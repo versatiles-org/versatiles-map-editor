@@ -12,8 +12,11 @@ export function withoutOldOpacity({ opacity, ...style }: OldStyle): StateStyle {
 	return { ...style, color: formatHex({ ...color, alpha: color.alpha * opacity }) };
 }
 
-/** The metadata as older versions wrote it: the search as a flag, and the position in the legend. */
-type OldMetadata = StateMetadata & { search?: boolean; legend?: { position?: string } };
+/**
+ * The metadata as older versions wrote it: the search as a flag, the position in the legend, and
+ * one font for the labels of all markers.
+ */
+export type OldMetadata = StateMetadata & { search?: boolean; legend?: { position?: string }; labelFont?: string };
 
 /** The metadata, with the search and the position of the legend of an older version in the viewer. */
 function withoutOldViewer(meta: OldMetadata | undefined): StateMetadata | undefined {
@@ -49,17 +52,31 @@ function withoutOldLegendEntries(meta: StateMetadata | undefined): StateMetadata
 }
 
 /**
- * A map state of an older version, e.g. of a saved file, as the current version has it: the
- * opacity of a fill becomes the alpha of its color, the search and the position of the legend
- * become settings of the viewer, and the entries of the legend markers or areas.
+ * A map state of an older version, e.g. of a saved file or a link, as the current version has it:
+ * the opacity of a fill becomes the alpha of its color, the search and the position of the legend
+ * become settings of the viewer, the entries of the legend markers or areas, and the label font of
+ * all markers the font of each marker.
  */
 export function upgradeState(state: MapState): MapState {
-	const meta = withoutOldLegendEntries(withoutOldViewer(state.meta as OldMetadata | undefined));
-	return {
+	const old = state.meta as OldMetadata | undefined;
+	const labelFont = old?.labelFont;
+	let meta = withoutOldLegendEntries(withoutOldViewer(old));
+	if (meta && 'labelFont' in meta) {
+		const { labelFont: _labelFont, ...rest } = meta as OldMetadata;
+		meta = rest;
+	}
+	const upgraded: MapState = {
 		...state,
-		...(meta && { meta }),
-		elements: state.elements.map((element) =>
-			'style' in element && element.style ? { ...element, style: withoutOldOpacity(element.style) } : element
-		)
+		elements: state.elements.map((element) => {
+			if (element.style) element = { ...element, style: withoutOldOpacity(element.style) };
+			// the label font of all markers of an older version: of each marker without one
+			if (labelFont && element.type === 'marker' && element.style?.font === undefined) {
+				element = { ...element, style: { ...element.style, font: labelFont } };
+			}
+			return element;
+		})
 	};
+	if (meta && Object.keys(meta).length > 0) upgraded.meta = meta;
+	else delete upgraded.meta;
+	return upgraded;
 }

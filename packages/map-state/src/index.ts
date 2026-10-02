@@ -2,6 +2,7 @@ import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
 import type { MapState } from './types.js';
 import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
+import { upgradeState } from './legacy.js';
 
 export * from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
@@ -60,7 +61,7 @@ export function encodeState(state: MapState, options: { resolution?: number } = 
 
 /** Decode the compact base64 representation back into a map state document. */
 export function decodeState(base64: string): MapState {
-	return StateReader.fromBase64(base64).readRoot();
+	return upgradeState(StateReader.fromBase64(base64).readRoot());
 }
 
 /** Compress a GeoJSON FeatureCollection into the compact base64 representation. */

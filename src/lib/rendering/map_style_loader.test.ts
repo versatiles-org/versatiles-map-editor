@@ -16,7 +16,7 @@ describe('MapStyleLoader', () => {
 			redraw: vi.fn(),
 			onStyleLoad: vi.fn(),
 			setMarkersOnTop: vi.fn(),
-			symbolLayerIds: () => ['elements_symbol']
+			setFont: vi.fn()
 		} as unknown as ElementRenderer;
 		loader = new MapStyleLoader(map as unknown as MaplibreMap, renderer);
 	});

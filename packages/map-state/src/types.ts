@@ -40,7 +40,7 @@ export type StateElement = StateElementMarker | StateElementLine | StateElementP
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
-	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `align`. */
+	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `align`. */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -154,6 +154,12 @@ export interface StateStyle {
 	/** The symbol of a marker: the name of its image, e.g. "icons:anchor", or "" for none. */
 	symbol?: string;
 	/**
+	 * Markers: the glyph font of the label, e.g. "noto_sans_bold"; "" for the font of the labels of
+	 * the background map.
+	 * @default ""
+	 */
+	font?: string;
+	/**
 	 * Markers: the color of the text of the label.
 	 * @default "#000000"
 	 */
@@ -174,11 +180,6 @@ export interface StateMetadata {
 	colorScheme?: string;
 	/** What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend. */
 	viewer?: StateViewer;
-	/**
-	 * The glyph font of the labels of all markers, e.g. "noto_sans_bold". Without it, they have the
-	 * font of the labels of the background map.
-	 */
-	labelFont?: string;
 	/**
 	 * Hide the labels of markers that would overlap other labels ("hide"); their symbols stay.
 	 * Without it, all labels are shown, also on top of each other.

@@ -23,7 +23,7 @@ import {
 	sanitizeLabelMinZoom,
 	VIEWER_CHOICES
 } from './profile.js';
-import { withoutOldOpacity, type OldStyle } from './legacy.js';
+import { withoutOldOpacity, type OldMetadata, type OldStyle } from './legacy.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
@@ -359,7 +359,8 @@ export class StateReader {
 						oldSearch = true;
 						break;
 					case 6:
-						metadata.labelFont = this.readStringRef(true);
+						// older links: the label font of all markers, which `upgradeState` gives to them
+						(metadata as OldMetadata).labelFont = this.readStringRef(true);
 						break;
 					case 7:
 						metadata.mapLabelsOnTop = true;
@@ -656,6 +657,9 @@ export class StateReader {
 					break;
 				case 16:
 					style.labelSize = this.readVarint() / 10;
+					break;
+				case 17:
+					style.font = this.readStringRef(true);
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readStyleKey();

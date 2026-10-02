@@ -154,7 +154,7 @@ describe('ElementRenderer', () => {
 				'elements_top',
 				'selection'
 			]);
-			expect(doc.view.renderer.symbolLayerIds()).toStrictEqual([
+			expect(doc.view.renderer.layerIds('symbol')).toStrictEqual([
 				'elements_symbol',
 				'elements_symbol_1',
 				'elements_symbol_2'
@@ -163,7 +163,7 @@ describe('ElementRenderer', () => {
 
 		it('need fewer layers when labels are removed, and more when one is added', async () => {
 			await markers(['A', '', 'B', '']);
-			expect(doc.view.renderer.symbolLayerIds()).toHaveLength(3);
+			expect(doc.view.renderer.layerIds('symbol')).toHaveLength(3);
 			const [a, , b] = doc.elements as MarkerElement[];
 			b.layer.label = '';
 			await Promise.resolve();
@@ -176,10 +176,10 @@ describe('ElementRenderer', () => {
 			]);
 			a.layer.label = '';
 			await Promise.resolve();
-			expect(doc.view.renderer.symbolLayerIds()).toStrictEqual(['elements_symbol']);
+			expect(doc.view.renderer.layerIds('symbol')).toStrictEqual(['elements_symbol']);
 			b.layer.label = 'B';
 			await Promise.resolve();
-			expect(doc.view.renderer.symbolLayerIds()).toHaveLength(2);
+			expect(doc.view.renderer.layerIds('symbol')).toHaveLength(2);
 		});
 
 		it('share one layer if there are too many, since every layer costs time', async () => {
@@ -197,7 +197,7 @@ describe('ElementRenderer', () => {
 			expect(layout('elements_labels', 'symbol-sort-key')).toStrictEqual(['-', 0, ['get', 'order']]);
 			expect(layout('elements_labels', 'text-overlap')).toBe('never');
 			expect(layout('elements_symbol', 'text-field')).toBe('');
-			expect(doc.view.renderer.symbolLayerIds()).toStrictEqual(['elements_symbol', 'elements_labels']);
+			expect(doc.view.renderer.layerIds('symbol')).toStrictEqual(['elements_symbol', 'elements_labels']);
 		});
 
 		it('get their layers again in a new map style', async () => {

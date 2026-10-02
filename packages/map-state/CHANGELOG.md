@@ -15,8 +15,8 @@ The first release.
   KML.
 - Format version 1 of the base64 string (`CODEC_VERSION`):
   - a color palette, the colors of the built-in color schemes (`COLOR_SCHEMES`) as their index;
-  - a string table: the background as JSON, the color scheme, the label font, the names of the
-    symbols, the title, the labels, the legend labels and the popups stored once, and referenced
+  - a string table: the background as JSON, the color scheme, the names of the symbols and the
+    label fonts, the title, the labels, the legend labels and the popups stored once, and referenced
     with 1 bit for the next new string, else by index; the strings are coded by an adaptive
     order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in alphabetic
     scripts and 12 in Chinese and Japanese, instead of 7–19; the words of the format with a model
@@ -24,7 +24,9 @@ The first release.
     where it ends;
   - style references to similar earlier styles, in an Exp-Golomb code;
   - style fields as 4-bit keys, and keys from 16 after the extended key 14, e.g. `labelSize` (the
-    size of a marker's label, apart from `size`, the size of its symbol);
+    size of a marker's label, apart from `size`, the size of its symbol) and `font` (the glyph font
+    of a marker's label; older links and files with one font for all markers, `meta.labelFont`,
+    are upgraded to it);
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short, in
@@ -46,7 +48,7 @@ The first release.
 - The text color and the halo color of a marker's label: `labelColor` and `haloColor` in the style,
   `symbol-label-color` and `symbol-halo-color` in GeoJSON, and the label color as `LabelStyle` in
   KML. Without them, the text is black and the halo white.
-- The metadata of a map: the background map, a legend, a color scheme, `viewer`, `labelFont` (one glyph font for the labels of all markers), `title` (also the name of the
+- The metadata of a map: the background map, a legend, a color scheme, `viewer`, `title` (also the name of the
   KML document) and `mapLabelsOnTop` (the labels of the background map over the areas and lines of
   the elements).
 - The style vocabulary of the editor: defaults, names of patterns, stroke styles and label

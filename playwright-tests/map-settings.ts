@@ -340,51 +340,69 @@ test('black and white become exactly what is set, on both maps', { tag: '@cross-
 	expect((await channelRange(page))[1]).toBe(255);
 });
 
-test('one font for the labels of all markers, which need not be the one of the background map', async ({ page }) => {
-	const center: [number, number] = [13.4, 52.5];
+test('a font for the label of each marker, else the one of the background map', async ({ page }) => {
+	const a: [number, number] = [13.4, 52.5];
 	await page.goto(
 		'/#' +
 			encodeState({
-				map: { center, radius: 10000 },
+				map: { center: a, radius: 10000 },
 				elements: [
-					{ type: 'marker', point: center, style: { label: 'A' } },
+					{ type: 'marker', point: a, style: { label: 'A' } },
 					{ type: 'marker', point: [13.45, 52.5], style: { label: 'B' } }
 				]
 			})
 	);
 	await waitForMapIsReady(page);
+	const glyphs: string[] = [];
+	page.on('request', (request) => {
+		const match = /glyphs\/([^/]+)\//.exec(decodeURIComponent(request.url()));
+		if (match) glyphs.push(match[1]);
+	});
 	const symbolFont = () =>
 		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
-	const labels = page.getByRole('region', { name: 'Marker labels' });
+	const fonts = async () => (await storedState(page)).elements.map((e) => e.style?.font);
+	const label = page.getByRole('region', { name: 'Label', exact: true });
 	const background = page.getByRole('region', { name: 'Background labels' });
+	const [x, y] = await project(page, a);
+	await page.mouse.click(x + 6, y - 8);
 
 	// like the background map, at first
-	await expect(labels.getByRole('combobox', { name: 'Font' })).toHaveValue('');
-	await expect(labels.getByRole('combobox', { name: 'Style' })).toHaveCount(0);
+	await expect(label.getByRole('combobox', { name: 'Font' })).toHaveValue('');
+	await expect(label.getByRole('combobox', { name: 'Style' })).toHaveCount(0);
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['noto_sans_regular']]);
 
-	// a font of their own, in all labels
-	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Lato');
-	await labels.getByRole('combobox', { name: 'Style' }).selectOption('Bold');
-	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
-	await expect.poll(async () => (await storedState(page)).meta?.labelFont).toBe('lato_bold');
+	// a font of its own, for this label only
+	await label.getByRole('combobox', { name: 'Font' }).selectOption('Lato');
+	await label.getByRole('combobox', { name: 'Style' }).selectOption('Bold');
+	await expect.poll(fonts).toStrictEqual(['lato_bold', undefined]);
+	const own = (fallback: string) => [
+		'match',
+		['get', 'font'],
+		'lato_bold',
+		['literal', ['lato_bold']],
+		['literal', [fallback]]
+	];
+	await expect.poll(symbolFont).toStrictEqual(own('noto_sans_regular'));
+	await expect.poll(() => glyphs.includes('lato_bold')).toBe(true);
 
-	// which the font of the background map does not change
+	// the other label follows the font of the background map
+	await page.keyboard.press('Escape');
 	await background.getByRole('combobox', { name: 'Font' }).selectOption('Open Sans');
 	await expect
 		.poll(async () => (await storedState(page)).meta?.background?.options)
 		.toMatchObject({ text: { font: 'open_sans_regular' } });
-	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
+	await expect.poll(symbolFont).toStrictEqual(own('open_sans_regular'));
 
 	// kept in the map, e.g. when it is opened again
 	await page.reload();
 	await waitForMapIsReady(page);
-	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
+	await expect.poll(symbolFont).toStrictEqual(own('open_sans_regular'));
 
 	// like the background map again
-	await labels.getByRole('combobox', { name: 'Font' }).selectOption('Like the background map');
+	await page.mouse.click(x + 6, y - 8);
+	await label.getByRole('combobox', { name: 'Font' }).selectOption('Like the background map');
+	await expect.poll(fonts).toStrictEqual([undefined, undefined]);
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['open_sans_regular']]);
-	await expect.poll(async () => (await storedState(page)).meta?.labelFont).toBeUndefined();
 });
 
 test('the labels of the background map over areas and lines, those of markers always on top', async ({ page }) => {

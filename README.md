@@ -164,7 +164,7 @@ An organisation running the editor can offer its own color schemes and fonts, e.
 ```
 
 - `colorSchemes` are offered in the color picker before the predefined schemes. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
-- The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and its markers. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.
+- The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and of each marker. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.
 
 A missing or invalid file leaves the defaults. The legend uses a generic font (sans-serif, serif or monospace) instead, since the map's glyph fonts are usually not available as web fonts.
 

@@ -341,6 +341,10 @@ export class ElementRenderer {
 	private present = new Set<string>(Object.values(ELEMENT_LAYERS));
 	/** How the labels of markers are shown, see `LabelOptions`. */
 	private labels: LabelOptions = DEFAULT_LABEL_OPTIONS;
+	/** The glyph font of the labels of markers without one of their own: the one of the background map. */
+	private font = 'noto_sans_regular';
+	/** The fonts of their own that markers have, sorted, which `text-font` lists. */
+	private fonts: string[] = [];
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -438,9 +442,42 @@ export class ElementRenderer {
 		}
 	}
 
-	/** The ids of the layers of the markers, e.g. to set the font of their labels. */
-	public symbolLayerIds(): string[] {
-		return this.layerIds('symbol');
+	/** The glyph font of the labels of markers without a font of their own, e.g. of the background map. */
+	public setFont(font: string) {
+		this.font = font;
+		this.applyFonts();
+	}
+
+	/**
+	 * The fonts of the labels on the layers of the markers: each marker's own (the feature property
+	 * `font`), else the font of the background map. `text-font` needs a list of fonts, which a
+	 * feature property cannot be, so it lists the fonts that the markers have.
+	 */
+	private applyFonts() {
+		const map = this.map;
+		if (!map.style || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
+		const fallback = ['literal', [this.font]];
+		const font = (
+			this.fonts.length === 0
+				? fallback
+				: ['match', ['get', 'font'], ...this.fonts.flatMap((font) => [font, ['literal', [font]]]), fallback]
+		) as ExpressionSpecification;
+		for (const id of this.layerIds('symbol')) {
+			if (map.getLayer(id)) map.setLayoutProperty(id, 'text-font', font);
+		}
+	}
+
+	/** Update the fonts of the labels if the markers have other fonts of their own; `force`, e.g. for new layers. */
+	private updateFonts(force: boolean) {
+		const fonts = new Set<string>();
+		for (const element of this.elements) {
+			const font = element.getStyleLayers().symbol?.font;
+			if (font) fonts.add(font);
+		}
+		const sorted = [...fonts].sort();
+		if (!force && sorted.join() === this.fonts.join()) return;
+		this.fonts = sorted;
+		this.applyFonts();
 	}
 
 	/** A new map style has only the first layer of each role: the others are added again. */
@@ -523,6 +560,7 @@ export class ElementRenderer {
 		this.scheduled = false;
 		if (this.all) {
 			this.syncLayers();
+			this.updateFonts(true);
 			for (const role of ROLES) {
 				const features = this.elements.flatMap((element) => this.featureOf(element, role) ?? []);
 				this.source(role)?.setData({ type: 'FeatureCollection', features });
@@ -538,6 +576,7 @@ export class ElementRenderer {
 					add: elements.flatMap((element) => this.featureOf(element, role) ?? [])
 				});
 			}
+			this.updateFonts(false);
 		}
 		this.all = false;
 		this.changed.clear();

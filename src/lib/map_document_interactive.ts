@@ -125,7 +125,6 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.viewer) meta.viewer = this.viewer;
 		const title = this.title.trim();
 		if (title) meta.title = title;
-		if (this.labelFont) meta.labelFont = this.labelFont;
 		if (this.labelOverlap === 'hide') meta.labelOverlap = 'hide';
 		if (this.labelMinZoom > 0) meta.labelMinZoom = this.labelMinZoom;
 		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
@@ -155,7 +154,6 @@ export class MapDocumentInteractive extends MapDocument {
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.viewer) this.viewer = { ...this.viewer, ...meta.viewer };
 		if (meta.title) this.title = meta.title;
-		if (meta.labelFont) this.labelFont = meta.labelFont;
 		if (meta.labelOverlap) this.labelOverlap = meta.labelOverlap;
 		if (meta.labelMinZoom) this.labelMinZoom = meta.labelMinZoom;
 		if (meta.mapLabelsOnTop) this.mapLabelsOnTop = true;

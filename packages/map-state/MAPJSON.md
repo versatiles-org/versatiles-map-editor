@@ -114,21 +114,22 @@ breaks and links (`[label](https://…)` or a bare URL).
 A style is an object of these fields; which ones count depends on what it styles. All are
 optional.
 
-| Field        | Markers                                                                     | Lines and outlines                             | Areas                                                         |
-| ------------ | --------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
-| `color`      | the symbol, default `"#ff0000"`                                             | the line, default `"#ff0000"`                  | the area with its opacity, default `"#ff0000"`                |
-| `symbol`     | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a flag | –                                              | –                                                             |
-| `size`       | a factor of the symbol, default `1`                                         | –                                              | –                                                             |
-| `rotate`     | the symbol, in degrees clockwise, −180 to 180, default `0`                  | –                                              | –                                                             |
-| `halo`       | around the symbol and the label, in pixels, default `1`                     | –                                              | –                                                             |
-| `haloColor`  | default `"#ffffff"`                                                         | –                                              | –                                                             |
-| `label`      | the text next to the symbol, default `""` (none)                            | –                                              | –                                                             |
-| `labelColor` | default `"#000000"`                                                         | –                                              | –                                                             |
-| `labelSize`  | a factor of the label (16 pixels), default `1`                              | –                                              | –                                                             |
-| `align`      | the place of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom       | –                                              | –                                                             |
-| `width`      | –                                                                           | in pixels, default `2`                         | –                                                             |
-| `pattern`    | –                                                                           | 0 solid, 1 dashed, 2 dotted; default `0`       | 0 solid, 1 diagonal lines, 2 thin diagonal lines; default `0` |
-| `visible`    | –                                                                           | outlines: whether one is drawn, default `true` | –                                                             |
+| Field        | Markers                                                                                            | Lines and outlines                             | Areas                                                         |
+| ------------ | -------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------- |
+| `color`      | the symbol, default `"#ff0000"`                                                                    | the line, default `"#ff0000"`                  | the area with its opacity, default `"#ff0000"`                |
+| `symbol`     | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a flag                        | –                                              | –                                                             |
+| `size`       | a factor of the symbol, default `1`                                                                | –                                              | –                                                             |
+| `rotate`     | the symbol, in degrees clockwise, −180 to 180, default `0`                                         | –                                              | –                                                             |
+| `halo`       | around the symbol and the label, in pixels, default `1`                                            | –                                              | –                                                             |
+| `haloColor`  | default `"#ffffff"`                                                                                | –                                              | –                                                             |
+| `label`      | the text next to the symbol, default `""` (none)                                                   | –                                              | –                                                             |
+| `labelColor` | default `"#000000"`                                                                                | –                                              | –                                                             |
+| `labelSize`  | a factor of the label (16 pixels), default `1`                                                     | –                                              | –                                                             |
+| `font`       | the glyph font of the label, e.g. `"noto_sans_bold"`; default `""`, the font of the background map | –                                              | –                                                             |
+| `align`      | the place of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom                              | –                                              | –                                                             |
+| `width`      | –                                                                                                  | in pixels, default `2`                         | –                                                             |
+| `pattern`    | –                                                                                                  | 0 solid, 1 dashed, 2 dotted; default `0`       | 0 solid, 1 diagonal lines, 2 thin diagonal lines; default `0` |
+| `visible`    | –                                                                                                  | outlines: whether one is drawn, default `true` | –                                                             |
 
 **Symbols** are named by the sprite sheet of the [VersaTiles tile server](https://tiles.versatiles.org)
 and the name of the image in it, as `sheet:name`: e.g. `icons:anchor`, `base:icon-cafe`,
@@ -146,7 +147,6 @@ and their images at `…/sprites/<sheet>.json`. An unknown name is drawn as noth
 | `legend`         | A legend, see below.                                                                                                                                   |
 | `viewer`         | What shared and embedded maps show over the map, and where, see below.                                                                                 |
 | `colorScheme`    | The id of the color palette that the editor offers for this map, e.g. `"dark2"`. Only for editing.                                                     |
-| `labelFont`      | The font of the labels of all markers, as named by the tile server, e.g. `"noto_sans_bold"`. Without it, the font of the background map.               |
 | `labelOverlap`   | `"hide"`: labels of markers that would overlap other labels are hidden (their symbols stay). Without it, all are shown.                                |
 | `labelMinZoom`   | The zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`. Without it, at every zoom level. |
 | `mapLabelsOnTop` | `true`: the labels of the background map are drawn over the areas and lines of the elements (markers stay on top). Without it, under them.             |

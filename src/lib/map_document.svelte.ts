@@ -42,10 +42,8 @@ export class MapDocument {
 	public title = $state('');
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	#background: StateBackground | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of all markers, if it is not the one of the background map. */
-	#labelFont: string | undefined = $state.raw(undefined);
-	/** The glyph font of the labels of the markers: their own, or the one of the background map. */
-	public readonly font: string = $derived(this.#labelFont ?? getSettings(this.#background).font);
+	/** The glyph font of the labels of markers without a font of their own: the one of the background map. */
+	public readonly font: string = $derived(getSettings(this.#background).font);
 	/** Whether the labels of the background map are drawn over the areas and lines of the elements. */
 	#mapLabelsOnTop = $state(false);
 	/**
@@ -98,16 +96,6 @@ export class MapDocument {
 	/** Whether a state is being loaded, e.g. to show a loading indicator. */
 	public get loading(): boolean {
 		return this.#loading;
-	}
-
-	/** The font of the labels of all markers, or undefined for the font of the background map. */
-	public get labelFont(): string | undefined {
-		return this.#labelFont;
-	}
-	public set labelFont(font: string | undefined) {
-		if (font === this.#labelFont) return;
-		this.#labelFont = font;
-		this.view.style.setFont(this.font);
 	}
 
 	/** Whether the labels of markers that would overlap other labels are hidden; their symbols stay. */
@@ -329,7 +317,6 @@ export class MapDocument {
 		this.legend = meta?.legend;
 		this.viewer = meta?.viewer;
 		this.title = meta?.title ?? '';
-		this.labelFont = meta?.labelFont;
 		this.labelOverlap = meta?.labelOverlap === 'hide' ? 'hide' : 'show';
 		this.labelMinZoom = meta?.labelMinZoom ?? 0;
 		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;

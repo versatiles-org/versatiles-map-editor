@@ -27,8 +27,7 @@
 			]
 		},
 		"viewer": { "legend": "top-left" },
-		"title": "Chernobyl exclusion zone",
-		"labelFont": "noto_sans_bold"
+		"title": "Chernobyl exclusion zone"
 	},
 	"elements": [
 		{
@@ -58,7 +57,8 @@
 				"label": "Nuclear power plant",
 				"align": 4,
 				"labelColor": "#ff4019",
-				"haloColor": "#000000"
+				"haloColor": "#000000",
+				"font": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "**Nuclear power plant**\nChernobyl Nuclear Power Plant. Reactor 4 exploded on 26 April 1986."
@@ -74,7 +74,8 @@
 				"label": "Pripyat",
 				"align": 2,
 				"labelColor": "#ffffff",
-				"haloColor": "#000000"
+				"haloColor": "#000000",
+				"font": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "**Pripyat**\nBuilt for the workers of the plant. Its about 49,000 inhabitants were evacuated on 27 April 1986."
@@ -89,7 +90,8 @@
 				"symbol": "base:icon-town_hall",
 				"label": "Chernobyl",
 				"labelColor": "#ffffff",
-				"haloColor": "#000000"
+				"haloColor": "#000000",
+				"font": "noto_sans_bold"
 			},
 			"popup": { "text": "**Chernobyl**\nThe town that gave the plant its name, evacuated in May 1986." }
 		},
@@ -102,7 +104,8 @@
 				"symbol": "base:icon-town_hall",
 				"label": "Slavutych",
 				"labelColor": "#ffffff",
-				"haloColor": "#000000"
+				"haloColor": "#000000",
+				"font": "noto_sans_bold"
 			},
 			"popup": { "text": "**Slavutych**\nBuilt after the disaster for the workers of the plant and their families." }
 		}

@@ -4,7 +4,7 @@ import { decodeState, encodeState, stateFromGeoJSON, stateFromKML, stateToGeoJSO
 
 // the labels of the background map over the areas and lines of the elements
 const state: MapState = {
-	meta: { labelFont: 'noto_sans_bold', mapLabelsOnTop: true },
+	meta: { mapLabelsOnTop: true },
 	elements: [
 		{
 			type: 'polygon',

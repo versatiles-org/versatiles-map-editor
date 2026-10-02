@@ -21,7 +21,8 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 11, name: 'labelColor', encoded: (v: string) => colorKey(v) },
 	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) },
 	{ key: 13, name: 'symbol', encoded: (v: string) => v },
-	{ key: 16, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) }
+	{ key: 16, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 17, name: 'font', encoded: (v: string) => v }
 ];
 
 /** The key of the opacity of fills in older strings, which the reader turns into the alpha of the color. */

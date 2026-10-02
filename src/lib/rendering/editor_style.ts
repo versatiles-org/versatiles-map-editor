@@ -41,7 +41,7 @@ export const LAYERS_UNDER_MAP_LABELS = [
  */
 export function buildStyle(
 	background: StateBackground | undefined,
-	labelFont?: string,
+	font?: string,
 	mapLabelsOnTop = false,
 	editorColor = EDITOR_COLOR
 ): StyleSpecification {
@@ -51,7 +51,7 @@ export function buildStyle(
 	const coarse = hasCoarsePointer();
 	const parts = [
 		highlightLayers(),
-		elementStyle(labelFont ?? getSettings(background).font),
+		elementStyle(font ?? getSettings(background).font),
 		selectionLayers(coarse),
 		visibleAreaLayers(coarse, editorColor),
 		drawingLayers(coarse, editorColor)

@@ -35,7 +35,6 @@ describe('the string table', () => {
 		const meta: MapState['meta'] = {
 			background: { builder: 'osm', options: { theme: 'gray' } },
 			colorScheme: 'okabe-ito',
-			labelFont: 'noto_sans_bold',
 			title: 'Pharmacies'
 		};
 		const withMeta: MapState = { ...state, meta: { ...state.meta, ...meta } };
@@ -45,7 +44,6 @@ describe('the string table', () => {
 		expect(reader.readStringTable()).toStrictEqual([
 			'{"builder":"osm","options":{"theme":"gray"}}',
 			'okabe-ito',
-			'noto_sans_bold',
 			'Pharmacy',
 			'Pharmacies',
 			'Boots',

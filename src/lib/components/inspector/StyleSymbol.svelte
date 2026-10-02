@@ -4,7 +4,7 @@
 	import { labelPositions, SymbolStyle } from '$lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider, TextField } from '$lib/components/ui/index.js';
-	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
+	import { ColorPicker, FontSelect, SymbolSelector } from '$lib/components/pickers/index.js';
 
 	/** The symbol layers of all selected markers, which are edited together. */
 	const { layers, doc }: { layers: SymbolStyle[]; doc: MapDocumentInteractive } = $props();
@@ -20,6 +20,7 @@
 	const haloColor = $derived(group(layers, 'haloColor'));
 	const size = $derived(group(layers, 'size'));
 	const labelSize = $derived(group(layers, 'labelSize'));
+	const font = $derived(group(layers, 'font'));
 	// color, size and rotation do nothing without a symbol (e.g. a marker that is only a label)
 	const hasSymbol = $derived(symbol.mixed || symbol.value !== '');
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
@@ -82,6 +83,19 @@
 	<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
 		<ColorPicker id="{uid}-labelColor" bind:value={labelColor.value} onchange={log} palette={doc.colors} />
 	</InputRow>
+
+	<!-- "" (no font of its own) is the font of the background map -->
+	<FontSelect
+		id="{uid}-font"
+		value={font.value || undefined}
+		mixed={font.mixed}
+		inherit="Like the background map"
+		inherited={doc.font}
+		onchange={(value) => {
+			font.value = value ?? '';
+			log();
+		}}
+	/>
 
 	<InputRow id="{uid}-labelSize" label="Text size" mixed={labelSize.mixed}>
 		<Slider id="{uid}-labelSize" min={0.5} max={3} step={0.1} bind:value={labelSize.value} onchange={log} unit="×" />

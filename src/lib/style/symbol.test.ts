@@ -16,6 +16,7 @@ describe('SymbolStyle', () => {
 		expect(keys).toStrictEqual([
 			'align',
 			'color',
+			'font',
 			'halo',
 			'haloColor',
 			'label',

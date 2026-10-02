@@ -12,7 +12,8 @@
 		value,
 		onchange,
 		inherit,
-		inherited
+		inherited,
+		mixed = false
 	}: {
 		id: string;
 		/** A glyph name, e.g. "noto_sans_bold". */
@@ -20,6 +21,8 @@
 		onchange: (font: string | undefined) => void;
 		inherit?: string;
 		inherited?: string;
+		/** The selected elements have different fonts, and the lists show the first one. */
+		mixed?: boolean;
 	} = $props();
 
 	// the font faces of this editor instance
@@ -40,7 +43,7 @@
 	}
 </script>
 
-<InputRow id="{id}-font" label="Font">
+<InputRow id="{id}-font" label="Font" {mixed}>
 	<Select id="{id}-font" value={font?.family ?? ''} onchange={(e) => onFamily(e.currentTarget.value)}>
 		{#if inherit}<option value="">{inherit}</option>{/if}
 		{#each families as family (family)}
@@ -50,7 +53,7 @@
 </InputRow>
 
 {#if font}
-	<InputRow id="{id}-face" label="Style">
+	<InputRow id="{id}-face" label="Style" {mixed}>
 		<Select id="{id}-face" value={font.id} onchange={(e) => onchange(e.currentTarget.value)}>
 			{#each faces as { id: glyphs, face } (glyphs)}
 				<option value={glyphs}>{face}</option>

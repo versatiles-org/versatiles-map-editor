@@ -29,8 +29,7 @@
 			]
 		},
 		"viewer": { "legend": "top-left" },
-		"title": "Paris 2024 Olympic venues",
-		"labelFont": "noto_sans_bold"
+		"title": "Paris 2024 Olympic venues"
 	},
 	"elements": [
 		{
@@ -42,7 +41,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Stade de France",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -54,7 +54,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Aquatics Centre",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -66,7 +67,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "La Défense Arena",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -78,7 +80,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Bercy Arena",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -90,7 +93,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Porte de La Chapelle Arena",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -102,7 +106,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "South Paris Arena",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -114,7 +119,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "North Paris Arena",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -126,7 +132,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Parc des Princes",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -138,7 +145,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Roland-Garros",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -150,7 +158,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Yves-du-Manoir Stadium",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -162,7 +171,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Le Bourget Climbing Venue",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -174,7 +184,8 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Velodrome",
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		},
 		{ "type": "marker", "point": [2.2976, 48.8552], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
@@ -191,7 +202,8 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-monument",
 				"label": "Château de Versailles",
-				"labelColor": "#b33c00"
+				"labelColor": "#b33c00",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
@@ -201,18 +213,31 @@
 				"color": "#009e73",
 				"symbol": "base:icon-outdoor",
 				"label": "Vaires-sur-Marne Nautical Stadium",
-				"labelColor": "#009e73"
+				"labelColor": "#009e73",
+				"font": "noto_sans_bold"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [1.9588, 48.7822],
-			"style": { "color": "#009e73", "symbol": "base:icon-outdoor", "label": "Élancourt Hill", "labelColor": "#009e73" }
+			"style": {
+				"color": "#009e73",
+				"symbol": "base:icon-outdoor",
+				"label": "Élancourt Hill",
+				"labelColor": "#009e73",
+				"font": "noto_sans_bold"
+			}
 		},
 		{
 			"type": "marker",
 			"point": [2.0745, 48.7543],
-			"style": { "color": "#009e73", "symbol": "base:icon-golf", "label": "Le Golf National", "labelColor": "#009e73" }
+			"style": {
+				"color": "#009e73",
+				"symbol": "base:icon-golf",
+				"label": "Le Golf National",
+				"labelColor": "#009e73",
+				"font": "noto_sans_bold"
+			}
 		},
 		{
 			"type": "marker",
@@ -224,7 +249,8 @@
 				"halo": 2,
 				"symbol": "base:icon-stadium",
 				"label": "Olympic Village",
-				"labelColor": "#cc9900"
+				"labelColor": "#cc9900",
+				"font": "noto_sans_bold"
 			}
 		}
 	]

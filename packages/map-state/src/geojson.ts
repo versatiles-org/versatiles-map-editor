@@ -26,6 +26,7 @@ import {
 	symbolPropsFromStyle,
 	symbolStyleFromProps
 } from './profile.js';
+import { upgradeState, type OldMetadata } from './legacy.js';
 
 /**
  * A GeoJSON FeatureCollection extended with the editor's `map` camera (`center` + `radius` in
@@ -120,7 +121,6 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
 	const viewer = removeViewerDefaults(state.meta?.viewer);
 	if (viewer) meta.viewer = viewer;
-	if (state.meta?.labelFont) meta.labelFont = state.meta.labelFont;
 	if (state.meta?.labelOverlap === 'hide') meta.labelOverlap = 'hide';
 	const labelMinZoom = sanitizeLabelMinZoom(state.meta?.labelMinZoom);
 	if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
@@ -295,8 +295,9 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 			...(typeof doc.meta.viewer === 'object' && doc.meta.viewer)
 		});
 		if (viewer) meta.viewer = viewer;
-		const labelFont = sanitizeString(doc.meta.labelFont);
-		if (labelFont) meta.labelFont = labelFont;
+		// older files: the label font of all markers, which `upgradeState` gives to them
+		const labelFont = sanitizeString((doc.meta as OldMetadata).labelFont);
+		if (labelFont) (meta as OldMetadata).labelFont = labelFont;
 		if (doc.meta.labelOverlap === 'hide') meta.labelOverlap = 'hide';
 		const labelMinZoom = sanitizeLabelMinZoom(doc.meta.labelMinZoom);
 		if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
@@ -305,5 +306,5 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		if (title) meta.title = title;
 		if (Object.keys(meta).length > 0) state.meta = meta;
 	}
-	return state;
+	return upgradeState(state);
 }

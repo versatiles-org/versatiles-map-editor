@@ -14,10 +14,8 @@
 		Slider,
 		TextField
 	} from '$lib/components/ui/index.js';
-	import { FontSelect } from '$lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
-	import { getSettings } from '$lib/background/index.js';
 	import PanelLegend from './PanelLegend.svelte';
 	import { countTypes, elementIcon, elementText, typeName } from '$lib/components/element_names.js';
 
@@ -44,7 +42,7 @@
 		return { icon: elementIcon(elements[0]).name, title: typeName(types[0]), subtitle: elementText(elements[0]) };
 	});
 
-	/** One font for the labels of all markers, or the one of the background map. */
+	/** The labels of markers that would overlap others: shown, or hidden. */
 	const OVERLAPS: { value: 'show' | 'hide'; label: string }[] = [
 		{ value: 'show', label: 'Show all' },
 		{ value: 'hide', label: 'Hide' }
@@ -79,11 +77,6 @@
 		setLabelMinZoom(Math.min(MAX_LABEL_ZOOM, Math.max(0.1, Math.floor(zoom * 10) / 10)));
 	}
 	const MAX_LABEL_ZOOM = 22;
-
-	function setLabelFont(font: string | undefined) {
-		doc.labelFont = font;
-		doc.state.log();
-	}
 
 	function addLegend() {
 		addLegendEntry(doc);
@@ -137,13 +130,6 @@
 		<!-- its sections: the background map, its colors and its labels -->
 		<PanelBackground {doc} />
 		<InspectorSection title="Marker labels">
-			<FontSelect
-				id="{uid}-labels"
-				value={doc.labelFont}
-				inherit="Like the background map"
-				inherited={getSettings(doc.background).font}
-				onchange={setLabelFont}
-			/>
 			<!-- e.g. for many markers: labels that would overlap hidden, or shown only when zoomed in -->
 			<InputRow id="{uid}-overlap" label="Overlapping" group>
 				<ChoiceGroup

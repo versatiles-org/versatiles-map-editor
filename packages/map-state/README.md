@@ -113,8 +113,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
   `meta.viewer`: what the read-only viewer shows over the map, and where;
-  `meta.title`: the title of the map; `meta.labelFont`: one glyph font for the labels of all
-  markers; `meta.mapLabelsOnTop`: the labels of the background map over the areas and lines)
+  `meta.title`: the title of the map; `meta.mapLabelsOnTop`: the labels of the background map
+  over the areas and lines)
 
 The opacity of every color is its alpha (`#rrggbbaa`), also of a fill. GeoJSON has the fill's
 apart, as simplestyle does: `fill-color` without alpha and `fill-opacity`; on import, `fill-opacity`
@@ -166,8 +166,8 @@ To keep hashes short:
   and referenced by index (#5); a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
   or white as its index there in 6 bits instead of 24;
 - the strings are stored once in a string table of 2 sections, each in the order they are written:
-  the words of the format (the background as JSON, the color scheme, the label font, the names of
-  the symbols), then the others (the title, the labels, the legend labels, the popups). A field
+  the words of the format (the background as JSON, the color scheme, the names of the symbols and
+  the label fonts), then the others (the title, the labels, the legend labels, the popups). A field
   refers to a string of its section by 1 bit for the next new one, else by its index. The table is
   one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
   adaptive model predicts each character from the two before it (PPM of order 2 over code points),

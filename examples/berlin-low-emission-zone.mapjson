@@ -18,7 +18,6 @@
 			}
 		},
 		"title": "Berlin low-emission zone",
-		"labelFont": "noto_sans_bold",
 		"mapLabelsOnTop": true
 	},
 	"elements": [
@@ -134,7 +133,8 @@
 				"symbol": "",
 				"label": "Low-emission zone",
 				"align": 4,
-				"labelColor": "#0072b2"
+				"labelColor": "#0072b2",
+				"font": "noto_sans_bold"
 			}
 		}
 	]

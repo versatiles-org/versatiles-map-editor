@@ -345,7 +345,6 @@ export class StateWriter {
 				metadata.legend ||
 				metadata.colorScheme ||
 				removeViewerDefaults(metadata.viewer) ||
-				metadata.labelFont ||
 				metadata.labelOverlap === 'hide' ||
 				sanitizeLabelMinZoom(metadata.labelMinZoom) !== undefined ||
 				metadata.mapLabelsOnTop ||
@@ -366,10 +365,7 @@ export class StateWriter {
 			this.writeInteger(4, 6);
 			this.writeStringRef(metadata.colorScheme, true);
 		}
-		if (metadata.labelFont) {
-			this.writeInteger(6, 6);
-			this.writeStringRef(metadata.labelFont, true);
-		}
+		// key 6 was the label font of all markers, which the reader gives to the markers
 		if (metadata.legend) {
 			this.writeInteger(3, 6);
 			this.writeLegend(metadata.legend);
@@ -558,6 +554,8 @@ export class StateWriter {
 				return this.writeStringRef(style.label!);
 			case 'symbol':
 				return this.writeStringRef(style.symbol!, true);
+			case 'font':
+				return this.writeStringRef(style.font!, true);
 			case 'visible':
 				// the key alone means "false"
 				return;
@@ -678,12 +676,16 @@ function allStyles(root: MapState): StateStyle[] {
  */
 export function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
-	const strings = [meta?.background && JSON.stringify(meta.background), meta?.colorScheme, meta?.labelFont].filter(
+	const strings = [meta?.background && JSON.stringify(meta.background), meta?.colorScheme].filter(
 		(value): value is string => !!value
 	);
 	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
 		const styles = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
-		for (const style of styles) if (style?.symbol != null) strings.push(style.symbol);
+		for (const style of styles) {
+			// in the order of the keys of the style
+			if (style?.symbol != null) strings.push(style.symbol);
+			if (style?.font != null) strings.push(style.font);
+		}
 	}
 	return strings;
 }

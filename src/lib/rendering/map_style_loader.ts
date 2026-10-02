@@ -41,13 +41,6 @@ export class MapStyleLoader {
 		void this.#load(undefined);
 	}
 
-	/** Show the glyph font on the labels of the markers, without a new style; the next style has it too. */
-	public setFont(font: string) {
-		if (font === this.#font) return;
-		this.#font = font;
-		this.#applyFont();
-	}
-
 	/** Draw the labels of the background map over the areas and lines of the elements, or under them. */
 	public setMapLabelsOnTop(onTop: boolean) {
 		if (onTop === this.#mapLabelsOnTop) return;
@@ -90,12 +83,10 @@ export class MapStyleLoader {
 		this.#renderer.setLabelOptions(options);
 	}
 
-	/** Set the font on the layers of the markers, once the style has them. */
+	/** The font of the labels of markers without one of their own, once the style has their layers. */
 	#applyFont() {
 		if (!this.#font || !this.#loaded) return;
-		for (const id of this.#renderer.symbolLayerIds()) {
-			if (this.#map.getLayer(id)) this.#map.setLayoutProperty(id, 'text-font', ['literal', [this.#font]]);
-		}
+		this.#renderer.setFont(this.#font);
 	}
 
 	/**
@@ -157,6 +148,8 @@ export class MapStyleLoader {
 		if (previousStyle && map.style === previousStyle) {
 			map.off('style.load', onLoad);
 			this.#loaded = true;
+			// the kept layers of the markers, e.g. with the font of the new background map
+			this.#applyFont();
 			return;
 		}
 		await loaded;
