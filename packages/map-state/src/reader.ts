@@ -28,7 +28,7 @@ import {
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
-import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
+import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -464,6 +464,10 @@ export class StateReader {
 						break;
 					case 6:
 						legend.italic = true;
+						break;
+					case 7:
+						legend.theme = LEGEND_THEMES[this.readVarint()];
+						if (!legend.theme) throw new Error('Invalid legend theme');
 						break;
 					default:
 						throw new Error(`Invalid legend key: ${key}`);

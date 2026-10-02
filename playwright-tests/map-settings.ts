@@ -571,6 +571,47 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 	await expect.poll(order).toStrictEqual(['B', 'A', 'C']);
 });
 
+test('the theme of the legend: light, dark or a glass over the map', { tag: '@cross-browser' }, async ({ page }) => {
+	const entries = [
+		{ type: 'polygon' as const, style: { color: '#0072b2' }, strokeStyle: { visible: false }, label: 'A' }
+	];
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+	);
+	await waitForMapIsReady(page);
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const themes = page.getByRole('radiogroup', { name: 'Theme' });
+	const overlay = page.getByRole('list', { name: 'Legend' });
+	const theme = async () => (await storedState(page)).meta?.legend?.theme;
+	const look = () =>
+		overlay.evaluate((legend) => {
+			const style = getComputedStyle(legend);
+			const text = getComputedStyle(legend.querySelector('.text')!);
+			return { background: style.backgroundColor, blur: style.backdropFilter, text: text.color };
+		});
+
+	await expect(themes.getByRole('radio', { name: 'Light' })).toBeChecked();
+	const light = await look();
+	expect(light.background).toMatch(/^(rgba?\(255, 255, 255|color\(srgb 1 1 1)/);
+	expect(light.text).toBe('rgb(0, 114, 178)');
+
+	// dark, with the text lighter
+	await themes.getByRole('radio', { name: 'Dark' }).check();
+	await expect.poll(theme).toBe('dark');
+	await expect.poll(async () => (await look()).background).toBe('rgba(0, 0, 0, 0.75)');
+	expect((await look()).text).not.toBe(light.text);
+
+	// a glass, which blurs the map under it
+	await themes.getByRole('radio', { name: 'Glass' }).check();
+	await expect.poll(theme).toBe('glass');
+	await expect.poll(async () => (await look()).blur).toContain('blur');
+	expect((await look()).text).toBe(light.text);
+
+	// light again: not stored, as the default
+	await themes.getByRole('radio', { name: 'Light' }).check();
+	await expect.poll(theme).toBeUndefined();
+});
+
 test('the entries of the legend are closed, and open to edit them', async ({ page }) => {
 	const entries = ['A', 'B'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(

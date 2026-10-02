@@ -26,7 +26,10 @@ describe('Legend', () => {
 			context: symbolLibraryContext(library)
 		});
 		flushSync();
-		const colors = [...document.querySelectorAll<HTMLElement>('.text')].map((text) => text.style.color);
+		// as a variable, which the theme uses, e.g. lighter on the dark background
+		const colors = [...document.querySelectorAll<HTMLElement>('.text')].map((text) =>
+			text.style.getPropertyValue('--entry-color')
+		);
 		expect(colors).toStrictEqual(entries.map((entry) => entry.style.color));
 	});
 

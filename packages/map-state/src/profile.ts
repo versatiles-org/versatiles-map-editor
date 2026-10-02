@@ -5,6 +5,7 @@ import {
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
+	LEGEND_THEMES,
 	LEGEND_POSITIONS,
 	NAVIGATION_POSITIONS,
 	SEARCH_POSITIONS
@@ -312,7 +313,8 @@ export const LEGEND_DEFAULTS = {
 	layout: 'vertical',
 	font: 'sans-serif',
 	bold: false,
-	italic: false
+	italic: false,
+	theme: 'light'
 } as const;
 
 /**
@@ -330,7 +332,7 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 /** A valid legend, or undefined. Invalid entries (e.g. without a type or a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const { layout, font, bold, italic, entries } = value as Record<string, unknown>;
+	const { layout, font, bold, italic, theme, entries } = value as Record<string, unknown>;
 	if (!Array.isArray(entries)) return undefined;
 
 	const legend: StateLegend = { entries: [] };
@@ -342,6 +344,9 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	}
 	if (bold === true) legend.bold = true;
 	if (italic === true) legend.italic = true;
+	if (LEGEND_THEMES.includes(theme as StateLegend['theme'] & string)) {
+		legend.theme = theme as StateLegend['theme'];
+	}
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;

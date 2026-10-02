@@ -65,3 +65,25 @@ describe('bold and italic texts of a legend', () => {
 		});
 	});
 });
+
+describe('the theme of a legend', () => {
+	const entries = [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }];
+
+	it('is kept by a link and by GeoJSON', () => {
+		for (const theme of ['dark', 'glass'] as const) {
+			const state = { elements: [], meta: { legend: { theme, entries } } };
+			expect(decodeState(encodeState(state)).meta?.legend).toStrictEqual({ theme, entries });
+			const geojson = JSON.parse(JSON.stringify(stateToGeoJSON(state)));
+			expect(stateFromGeoJSON(geojson).meta?.legend).toStrictEqual({ theme, entries });
+		}
+	});
+
+	it('adds nothing to a link when it is the default, and is only a known theme in GeoJSON', () => {
+		const plain = encodeState({ elements: [], meta: { legend: { entries } } });
+		expect(encodeState({ elements: [], meta: { legend: { theme: 'light', entries } } })).toBe(plain);
+		const meta = { legend: { theme: 'neon', entries } };
+		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [], meta }).meta?.legend).toStrictEqual({
+			entries
+		});
+	});
+});

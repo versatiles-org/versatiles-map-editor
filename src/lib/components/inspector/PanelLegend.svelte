@@ -48,6 +48,12 @@
 		{ value: 'horizontal', label: 'Horizontal' },
 		{ value: 'inline', label: 'Inline' }
 	];
+	// the background and the border
+	const themes: { value: NonNullable<StateLegend['theme']>; label: string }[] = [
+		{ value: 'light', label: 'Light' },
+		{ value: 'dark', label: 'Dark' },
+		{ value: 'glass', label: 'Glass' }
+	];
 	const fonts: { value: NonNullable<StateLegend['font']>; label: string }[] = [
 		{ value: 'sans-serif', label: 'Sans' },
 		{ value: 'serif', label: 'Serif' },
@@ -317,6 +323,14 @@
 
 	<!-- how all entries look -->
 	<InspectorSection title="Legend style">
+		<InputRow id="{uid}-theme" label="Theme" group>
+			<ChoiceGroup
+				labelledby="{uid}-theme-label"
+				value={legend.theme ?? 'light'}
+				onchange={(theme) => change({ theme })}
+				options={themes}
+			/>
+		</InputRow>
 		<InputRow id="{uid}-layout" label="Layout" group>
 			<ChoiceGroup
 				labelledby="{uid}-layout-label"

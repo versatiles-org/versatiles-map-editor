@@ -83,7 +83,7 @@
 		width: 14px;
 		height: 14px;
 		border-radius: 2px;
-		box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
+		box-shadow: inset 0 0 0 1px var(--swatch-outline, rgb(0 0 0 / 20%));
 	}
 
 	.symbol {

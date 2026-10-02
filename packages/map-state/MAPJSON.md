@@ -162,19 +162,20 @@ does not offer itself.
 
 ### Legend
 
-`{ "entries": [ … ], "layout", "font", "bold", "italic" }`. Each of its `entries` is a small copy
+`{ "entries": [ … ], "layout", "font", "bold", "italic", "theme" }`. Each of its `entries` is a small copy
 of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `type` is `"marker"`,
 `"line"` or `"polygon"` (an area, also for circles), and `style` and `strokeStyle` are styles like
 those of an element of that type (see [Styles](#styles)), with the same defaults: e.g. a marker
 entry without a style is a red flag. Only polygons have a `strokeStyle`, for their outline. The
 `label` of a marker style is not shown; the entry's `label` is its text.
 
-| Field    | Values                                                     | Default        |
-| -------- | ---------------------------------------------------------- | -------------- |
-| `layout` | `"vertical"`, `"horizontal"`, `"inline"` (flows like text) | `"vertical"`   |
-| `font`   | `"sans-serif"`, `"serif"`, `"monospace"`                   | `"sans-serif"` |
-| `bold`   | `true` for bold texts                                      | `false`        |
-| `italic` | `true` for italic texts                                    | `false`        |
+| Field    | Values                                                                           | Default        |
+| -------- | -------------------------------------------------------------------------------- | -------------- |
+| `layout` | `"vertical"`, `"horizontal"`, `"inline"` (flows like text)                       | `"vertical"`   |
+| `font`   | `"sans-serif"`, `"serif"`, `"monospace"`                                         | `"sans-serif"` |
+| `bold`   | `true` for bold texts                                                            | `false`        |
+| `italic` | `true` for italic texts                                                          | `false`        |
+| `theme`  | the background and border: `"light"`, `"dark"`, `"glass"` (blurred over the map) | `"light"`      |
 
 Where shared maps show the legend is a setting of the viewer.
 

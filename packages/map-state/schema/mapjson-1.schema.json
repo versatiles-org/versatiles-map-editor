@@ -166,6 +166,11 @@
 					"type": "boolean",
 					"description": "The texts of all entries in italic. Default: false."
 				},
+				"theme": {
+					"type": "string",
+					"enum": ["light", "dark", "glass"],
+					"description": "The background and the border of the legend. Default: \"light\"."
+				},
 				"entries": {
 					"type": "array",
 					"items": {

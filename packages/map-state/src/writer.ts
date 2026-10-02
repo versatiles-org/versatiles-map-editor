@@ -11,7 +11,7 @@ import {
 } from './profile.js';
 import { StateReader } from './reader.js';
 import { encodeStrings } from './string_coder.js';
-import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
+import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
 import {
 	canonical,
@@ -451,6 +451,10 @@ export class StateWriter {
 		// only the key: they are false without it
 		if (legend.bold) this.writeInteger(5, 4);
 		if (legend.italic) this.writeInteger(6, 4);
+		if (legend.theme && legend.theme !== LEGEND_DEFAULTS.theme) {
+			this.writeInteger(7, 4);
+			this.writeVarint(LEGEND_THEMES.indexOf(legend.theme));
+		}
 		this.writeInteger(3, 4);
 		this.writeArray(legend.entries, (entry) => {
 			const type = LEGEND_ENTRY_TYPES.indexOf(entry.type);

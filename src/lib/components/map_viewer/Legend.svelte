@@ -95,7 +95,7 @@
 	<!-- a click selects it in the editor; with the keyboard, "Edit legend" of the inspector does -->
 	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 	<div
-		class="legend position-{position} layout-{legend.layout ?? 'vertical'}"
+		class="legend position-{position} layout-{legend.layout ?? 'vertical'} theme-{legend.theme ?? 'light'}"
 		class:selectable={onselect !== undefined}
 		class:in-corner={inCorner}
 		style:--max-width={maxWidth === undefined ? undefined : `${maxWidth}px`}
@@ -123,7 +123,7 @@
 				<!-- a small copy of the element: its symbol, its line or its area -->
 				<LegendMark {entry} />
 				<!-- the text in the color of its symbol, line or area -->
-				<span class="text" style:color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}
+				<span class="text" style:--entry-color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}
 					>{entry.label}</span
 				>
 			</div>
@@ -144,12 +144,44 @@
 		max-height: var(--max-height, calc(100% - 2 * var(--margin) - var(--top) - var(--bottom)));
 		overflow: auto;
 		padding: 6px 10px;
+		/* the border inside, so the themes have the same size */
+		outline: 1px solid var(--legend-border);
+		outline-offset: -1px;
 		border-radius: 6px;
-		background: color-mix(in srgb, #fff 85%, transparent);
+		background: var(--legend-background);
 		box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
-		color: #000;
+		color: var(--legend-text);
 		font-size: 12px;
 		line-height: 1.3;
+	}
+
+	/* the themes: white, black, or a blurred glass over the map */
+	.theme-light {
+		--legend-background: color-mix(in srgb, #fff 85%, transparent);
+		--legend-border: transparent;
+		--legend-text: #000;
+	}
+	.theme-dark {
+		--legend-background: rgb(0 0 0 / 75%);
+		--legend-border: rgb(255 255 255 / 15%);
+		--legend-text: #fff;
+		/* the outline of a marker without symbol, on the dark background */
+		--swatch-outline: rgb(255 255 255 / 30%);
+	}
+	.theme-glass {
+		--legend-background: rgb(255 255 255 / 60%);
+		--legend-border: rgb(255 255 255 / 60%);
+		--legend-text: #000;
+		backdrop-filter: blur(12px) saturate(1.2);
+	}
+
+	/* the text in the color of its entry; on the dark background lighter, so it stays readable */
+	.text {
+		color: var(--entry-color);
+
+		.theme-dark & {
+			color: color-mix(in oklab, var(--entry-color) 55%, #fff);
+		}
 	}
 
 	/* stacked with the other controls of its corner, which places it */

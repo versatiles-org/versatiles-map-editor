@@ -214,6 +214,8 @@ export const LEGEND_POSITIONS = [
 	'left'
 ] as const;
 export const LEGEND_LAYOUTS = ['vertical', 'horizontal', 'inline'] as const;
+/** The background and the border of the legend: white, black, or a blurred glass over the map. */
+export const LEGEND_THEMES = ['light', 'dark', 'glass'] as const;
 /** Generic CSS font families, which every browser has, unlike the glyph fonts of the map. */
 export const LEGEND_FONTS = ['sans-serif', 'serif', 'monospace'] as const;
 
@@ -244,6 +246,8 @@ export interface StateLegend {
 	bold?: boolean;
 	/** The texts of all entries in italic. Default: false. */
 	italic?: boolean;
+	/** The background and the border of the legend. Default: "light". */
+	theme?: (typeof LEGEND_THEMES)[number];
 	entries: StateLegendEntry[];
 }
 
