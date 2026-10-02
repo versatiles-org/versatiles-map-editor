@@ -325,6 +325,41 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
 });
 
+test('the place of the legend is set in its panel and in Share alike', async ({ page }) => {
+	const legend = { entries: [{ color: '#ff0000', label: 'Park' }] };
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
+	await waitForMapIsReady(page);
+	const viewer = async () => (await storedState(page)).meta?.viewer;
+	// the legend panel
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	const panel = page.locator('.sidebar');
+	const shown = panel.getByRole('checkbox', { name: 'Shown' });
+	await expect(shown).toBeChecked();
+	await expect(panel.getByRole('radio', { name: 'Bottom left' })).toBeChecked();
+
+	// set in the panel, shown in Share
+	await panel.getByRole('radio', { name: 'Top right' }).check();
+	await expect.poll(viewer).toStrictEqual({ legend: 'top-right' });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog.getByRole('radio', { name: 'Top right' }).last()).toBeChecked();
+
+	// set in Share, shown in the panel
+	await dialog.getByRole('radio', { name: 'Bottom', exact: true }).check();
+	await page.keyboard.press('Escape');
+	await expect(panel.getByRole('radio', { name: 'Bottom', exact: true })).toBeChecked();
+
+	// hidden in shared maps, as an undo step
+	await shown.uncheck();
+	await expect.poll(viewer).toStrictEqual({ legend: 'none' });
+	await expect(panel.getByRole('radio', { name: 'Bottom', exact: true })).toHaveCount(0);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(viewer).toStrictEqual({ legend: 'bottom' });
+	await page.getByRole('button', { name: 'Edit legend' }).click();
+	await expect(shown).toBeChecked();
+	await expect(panel.getByRole('radio', { name: 'Bottom', exact: true })).toBeChecked();
+});
+
 test('the preview shows the map as visitors see it, over the editor', { tag: '@cross-browser' }, async ({ page }) => {
 	const point: [number, number] = [13.4, 52.5];
 	await page.goto(

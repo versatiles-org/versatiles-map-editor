@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { StateLegend, StateLegendEntry } from '@versatiles/map-state';
+	import type { StateLegend, StateLegendEntry, StateViewer } from '@versatiles/map-state';
 	import { InputRow, ChoiceGroup, Button, ButtonGroup, Checkbox, Hint, TextField } from '$lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
 	import { addLegendEntry } from '$lib/components/commands.js';
+	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import InspectorSection from './InspectorSection.svelte';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
@@ -35,6 +36,13 @@
 		log();
 	}
 
+	// where shared maps show the legend, or "none"; the same setting as in "Share"
+	const place = $derived(doc.controls.legend);
+	function setPlace(legend: NonNullable<StateViewer['legend']>) {
+		doc.viewer = { ...doc.viewer, legend };
+		log();
+	}
+
 	function updateEntry(index: number, change: Partial<StateLegendEntry>) {
 		update({ entries: legend.entries.map((entry, i) => (i === index ? { ...entry, ...change } : entry)) });
 	}
@@ -46,10 +54,31 @@
 </script>
 
 {#if legend.entries.length > 0}
+	<!-- where shared maps show it; the same setting as in "Share" -->
+	<InspectorSection title="In shared maps">
+		<InputRow id="{uid}-shown" label="Shown">
+			<Checkbox
+				id="{uid}-shown"
+				checked={place !== 'none'}
+				onchange={(e) => setPlace(e.currentTarget.checked ? defaultPlace('legend') : 'none')}
+			/>
+		</InputRow>
+		{#if place !== 'none'}
+			<InputRow id="{uid}-place" label="Place" group>
+				<ChoiceGroup
+					layout="grid"
+					labelledby="{uid}-place-label"
+					value={place}
+					onchange={setPlace}
+					options={PLACES.legend}
+				/>
+			</InputRow>
+		{/if}
+		<Hint>Also set in “Share”, with the other controls of shared maps.</Hint>
+	</InspectorSection>
+
 	<!-- how all entries look -->
 	<InspectorSection title="Legend style">
-		<Hint>Where shared maps show the legend, or whether they show it, is set in “Share”.</Hint>
-
 		<InputRow id="{uid}-layout" label="Layout" group>
 			<ChoiceGroup
 				labelledby="{uid}-layout-label"

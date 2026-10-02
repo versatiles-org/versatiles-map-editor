@@ -12,7 +12,7 @@
 	} from '$lib/components/ui/index.js';
 	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
 	import { formatLength } from '$lib/components/format.js';
-	import { defaultPlace, PLACES } from './viewer_controls.js';
+	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import type { StateViewer } from '@versatiles/map-state';
 
 	const { state: stateManager }: { state: StateManager } = $props();
