@@ -14,7 +14,8 @@ import {
 const EXAMPLES: Record<string, { types: Record<string, number>; legend: number; builder: 'osm' | 'satellite' }> = {
 	'paris-2024-venues': { types: { marker: 24 }, legend: 4, builder: 'osm' },
 	'hamburg-berlin-railway': { types: { line: 2, marker: 6 }, legend: 2, builder: 'osm' },
-	'berlin-low-emission-zone': { types: { polygon: 3 }, legend: 2, builder: 'osm' },
+	// without a legend: a label on the map names the zone
+	'berlin-low-emission-zone': { types: { polygon: 3, marker: 1 }, legend: 0, builder: 'osm' },
 	'chernobyl-exclusion-zone': { types: { circle: 2, marker: 4 }, legend: 2, builder: 'satellite' },
 	'london-pharmacies': { types: { marker: 557 }, legend: 1, builder: 'osm' }
 };
@@ -30,7 +31,7 @@ describe('example maps', () => {
 				const types: Record<string, number> = {};
 				for (const element of state.elements) types[element.type] = (types[element.type] ?? 0) + 1;
 				expect(types).toStrictEqual(expected.types);
-				expect(state.meta?.legend?.entries).toHaveLength(expected.legend);
+				expect(state.meta?.legend?.entries ?? []).toHaveLength(expected.legend);
 				expect(state.meta?.background?.builder).toBe(expected.builder);
 				expect(state.map).toBeDefined();
 			});

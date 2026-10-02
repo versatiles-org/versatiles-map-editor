@@ -23,7 +23,8 @@ for (const name of EXAMPLES) {
 	const file = `examples/${name}.mapjson`;
 	const state: MapState = JSON.parse(readFileSync(file, 'utf-8'));
 	const types = state.elements.map((e) => e.type);
-	const legend = state.meta!.legend!.entries.map((e) => e.label);
+	// none, e.g. where a label on the map explains it
+	const legend = state.meta?.legend?.entries.map((e) => e.label) ?? [];
 
 	test.describe(name, () => {
 		test('opened in the editor, and downloaded again', async ({ page }) => {
@@ -38,7 +39,8 @@ for (const name of EXAMPLES) {
 			await expect.poll(async () => (await storedState(page)).elements.map((e) => e.type)).toStrictEqual(types);
 			await expect.poll(async () => (await storedState(page)).meta?.background).toStrictEqual(state.meta?.background);
 			const overlay = page.getByRole('list', { name: 'Legend' });
-			await expect(overlay.getByRole('listitem')).toHaveText(legend);
+			if (legend.length > 0) await expect(overlay.getByRole('listitem')).toHaveText(legend);
+			else await expect(overlay).toHaveCount(0);
 			await waitForMapIsIdle(page);
 			// the background of the example, e.g. the satellite imagery
 			const sources = await page.evaluate(() =>
@@ -48,7 +50,7 @@ for (const name of EXAMPLES) {
 				state.meta?.background?.builder === 'satellite' ? 'satellite' : 'versatiles-shortbread'
 			);
 			// nothing of the editor covers the legend
-			expect(await coveredPoints(overlay)).toStrictEqual([]);
+			if (legend.length > 0) expect(await coveredPoints(overlay)).toStrictEqual([]);
 			expect(pageErrors).toStrictEqual([]);
 
 			// the file is what the editor writes, except for the view, which depends on the window
