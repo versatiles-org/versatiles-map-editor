@@ -557,7 +557,7 @@ describe('popups', () => {
 	it('reject unknown popup fields', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(15, 4);
-		expect(() => new StateReader(writer.bits).readPopup()).toThrow('Error reading popup');
+		expect(() => new StateReader([true, ...writer.bits]).readPopup()).toThrow('Error reading popup');
 	});
 });
 

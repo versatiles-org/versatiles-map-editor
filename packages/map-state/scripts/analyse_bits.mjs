@@ -66,7 +66,12 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 		const parent = this.stack.at(-1);
 		// the reads inside a primitive belong to it
 		if (parent.primitive) return method.apply(this, args);
-		const span = { name: label(name, args), primitive: PRIMITIVES.has(name), start: this.offset, children: [] };
+		const span = {
+			name: label(name, args, parent.name),
+			primitive: PRIMITIVES.has(name),
+			start: this.offset,
+			children: []
+		};
 		parent.children.push(span);
 		this.stack.push(span);
 		try {
@@ -85,13 +90,26 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 	};
 }
 
-/** The name of a call in the tree: primitives with their arguments, e.g. `int(4)` or `varint±`. */
-function label(name, args) {
+// the read methods of key/value pairs, whose integers are their keys
+const KEY_VALUE_READS = new Set([
+	'readMetadata',
+	'readLegend',
+	'readLegendEntry',
+	'readPopup',
+	'readViewer',
+	'readStylePatch'
+]);
+
+/**
+ * The name of a call in the tree: primitives with their arguments, e.g. `int(4)` or `varint±`, and
+ * the integers of key/value pairs as `key(4)`.
+ */
+function label(name, args, parent) {
 	switch (name) {
 		case 'readBit':
 			return 'bit';
 		case 'readInteger':
-			return `int(${args[0]})`;
+			return KEY_VALUE_READS.has(parent) ? `key(${args[0]})` : `int(${args[0]})`;
 		case 'readVarint':
 			return args[0] ? 'varint±' : 'varint';
 		case 'readExpGolomb':

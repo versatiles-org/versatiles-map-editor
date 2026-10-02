@@ -205,8 +205,7 @@ export class StateReader {
 		try {
 			const root: MapState = { elements: [] };
 
-			const version = this.readInteger(3);
-			if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+			this.readVersion();
 			this.readPalette();
 			this.readStringTable();
 			this.styleHistory = new StyleHistory();
@@ -215,14 +214,7 @@ export class StateReader {
 			root.map = this.readMap();
 			if (!root.map) delete root.map;
 
-			// the step of the coordinates: 0.00001° × 2^exponent, each of the 16 values valid
-			const exponent = this.readInteger(4);
-			// the origin of the coordinates of the frame and the elements
-			const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
-			this.grid = new LocalGrid(origin, exponent);
-			this.coordinateOrder = this.readInteger(5);
-			this.relativePoints = this.readBit();
-			this.lastPoint = [0, 0];
+			this.readGrid();
 
 			const frame = this.readFrame();
 			if (frame) root.frame = frame;
@@ -231,18 +223,10 @@ export class StateReader {
 			root.meta = this.readMetadata();
 			if (!root.meta) delete root.meta;
 
-			// Read the elements: each after the first with 1 bit whether it repeats the type and the
-			// styles of the one before
+			// Read the elements
 			let previous: StateElement | undefined;
 			while (true) {
-				let key: number;
-				let repeat = false;
-				try {
-					if (previous) repeat = this.readBit();
-					key = repeat ? ELEMENT_KEYS[previous!.type] : this.readInteger(3);
-				} catch (_) {
-					key = 0;
-				}
+				const { key, repeat } = this.readElementType(previous);
 				const before = repeat ? previous : undefined;
 				switch (key) {
 					case 0:
@@ -267,6 +251,37 @@ export class StateReader {
 			}
 		} catch (cause) {
 			throw new Error(`Error reading root`, { cause });
+		}
+	}
+
+	/** The version of the format, of which only `CODEC_VERSION` is read. */
+	readVersion() {
+		const version = this.readInteger(3);
+		if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
+	}
+
+	/** See `StateWriter.writeGrid`. */
+	readGrid() {
+		// the step of the coordinates: 0.00001° × 2^exponent, each of the 16 values valid
+		const exponent = this.readInteger(4);
+		// the origin of the coordinates of the frame and the elements
+		const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
+		this.grid = new LocalGrid(origin, exponent);
+		this.coordinateOrder = this.readInteger(5);
+		this.relativePoints = this.readBit();
+		this.lastPoint = [0, 0];
+	}
+
+	/**
+	 * See `StateWriter.writeElementType`: the key of the type (0: no more elements, also at the
+	 * end of the bits), and whether the element repeats the type and the styles of `previous`.
+	 */
+	readElementType(previous: StateElement | undefined): { key: number; repeat: boolean } {
+		try {
+			const repeat = previous ? this.readBit() : false;
+			return { key: repeat ? ELEMENT_KEYS[previous!.type] : this.readInteger(3), repeat };
+		} catch (_) {
+			return { key: 0, repeat: false };
 		}
 	}
 
@@ -376,7 +391,8 @@ export class StateReader {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
-			if (this.readBit()) element.popup = this.readPopup();
+			const popup = this.readPopup();
+			if (popup) element.popup = popup;
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading marker element`, { cause });
@@ -388,7 +404,8 @@ export class StateReader {
 			const element: StateElementLine = { type: 'line', points: this.readElementPoints() };
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
-			if (this.readBit()) element.popup = this.readPopup();
+			const popup = this.readPopup();
+			if (popup) element.popup = popup;
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading line element`, { cause });
@@ -400,7 +417,8 @@ export class StateReader {
 			const element: StateElementPolygon = { type: 'polygon', points: this.readElementPoints() };
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
-			if (this.readBit()) element.popup = this.readPopup();
+			const popup = this.readPopup();
+			if (popup) element.popup = popup;
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading polygon element`, { cause });
@@ -414,7 +432,8 @@ export class StateReader {
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
-			if (this.readBit()) element.popup = this.readPopup();
+			const popup = this.readPopup();
+			if (popup) element.popup = popup;
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading circle element`, { cause });
@@ -545,8 +564,10 @@ export class StateReader {
 		}
 	}
 
-	readPopup(): StatePopup {
+	/** See `StateWriter.writePopup`: 1 bit whether there is one, then its key/value pairs. */
+	readPopup(): StatePopup | undefined {
 		try {
+			if (!this.readBit()) return undefined;
 			const popup: StatePopup = { text: '' };
 			while (true) {
 				const key = this.readInteger(4);

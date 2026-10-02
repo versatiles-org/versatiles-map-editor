@@ -137,13 +137,45 @@ export class StateWriter {
 
 		// the camera, with its own center
 		this.writeMap(root.map);
+		const frame = sanitizeFrame(root.frame);
+		this.writeGrid(root, frame);
+		this.writeFrame(frame);
+		this.writeMetadata(root.meta);
+
+		let previous: string | undefined;
+		root.elements.forEach((element, index) => {
+			const key = repeatKey(element);
+			const repeat = key === previous;
+			previous = key;
+			this.writeElementType(element, repeat, index === 0);
+			switch (element.type) {
+				case 'marker':
+					this.writeElementMarker(element, repeat);
+					break;
+				case 'line':
+					this.writeElementLine(element, repeat);
+					break;
+				case 'polygon':
+					this.writeElementPolygon(element, repeat);
+					break;
+				case 'circle':
+					this.writeElementCircle(element, repeat);
+					break;
+			}
+		});
+	}
+
+	/**
+	 * The grid of the coordinates of the frame and the elements: its step, its origin, and how the
+	 * coordinates of the elements are coded.
+	 */
+	private writeGrid(root: MapState, frame: Bounds | undefined) {
 		// the step of the coordinates: 0.00001° × 2^exponent
 		const exponent = exponentForResolution(this.resolution);
 		this.writeInteger(exponent, 4);
 
 		// The coordinates of the frame and the elements are steps from an origin near them, so the
 		// numbers stay small: the center of the frame, else of the camera, else of the elements
-		const frame = sanitizeFrame(root.frame);
 		const near = (frame && centerOf(frame)) ?? root.map?.center ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
 		const origin: [number, number] = [Math.round(near[0] * ORIGIN_SCALE), Math.round(near[1] * ORIGIN_SCALE)];
 		this.writeVarint(origin[0], true);
@@ -163,36 +195,15 @@ export class StateWriter {
 		this.lastPoint = [0, 0];
 		this.writeInteger(this.coordinateOrder, 5);
 		this.writeBit(this.relativePoints);
+	}
 
-		this.writeFrame(frame);
-		this.writeMetadata(root.meta);
-
-		// each element after the first: 1 bit whether it repeats the type and the styles of the one before
-		let previous: string | undefined;
-		root.elements.forEach((element) => {
-			const key = repeatKey(element);
-			const repeat = key === previous;
-			if (previous !== undefined) this.writeBit(repeat);
-			previous = key;
-			switch (element.type) {
-				case 'marker':
-					if (!repeat) this.writeInteger(1, 3);
-					this.writeElementMarker(element, repeat);
-					break;
-				case 'line':
-					if (!repeat) this.writeInteger(2, 3);
-					this.writeElementLine(element, repeat);
-					break;
-				case 'polygon':
-					if (!repeat) this.writeInteger(3, 3);
-					this.writeElementPolygon(element, repeat);
-					break;
-				case 'circle':
-					if (!repeat) this.writeInteger(4, 3);
-					this.writeElementCircle(element, repeat);
-					break;
-			}
-		});
+	/**
+	 * The type of an element: after the first, 1 bit whether it repeats the type and the styles of
+	 * the element before; unless it does, its type in 3 bits.
+	 */
+	private writeElementType(element: StateElement, repeat: boolean, first: boolean) {
+		if (!first) this.writeBit(repeat);
+		if (!repeat) this.writeInteger(ELEMENT_KEYS[element.type], 3);
 	}
 
 	/**
@@ -722,6 +733,9 @@ export function bestExpGolombOrder(values: number[]): number {
 	}
 	return best;
 }
+
+/** The keys of the element types. */
+const ELEMENT_KEYS: Record<StateElement['type'], number> = { marker: 1, line: 2, polygon: 3, circle: 4 };
 
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
 function repeatKey(element: StateElement): string {
