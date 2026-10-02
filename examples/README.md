@@ -4,7 +4,8 @@ Maps for showcases and tests, in the file format of the editor (`.mapjson`): the
 visible area (`frame`), which shared and embedded maps show completely, the title, the background
 map and the legend (`meta`), and the elements with their styles. It is what the editor downloads
 with ☰ → Download…, except for the view, which is the one of the browser window there.
-To open one, use ☰ → Open… in the editor. The format is explained in
+The editor offers them in ☰ → Open example, as links without their view, so each shows its
+visible area; the editor encodes them when it is built. A file can also be opened with ☰ → Open…. The format is explained in
 [`packages/map-state/MAPJSON.md`](../packages/map-state/MAPJSON.md).
 
 The stories are real, the geometry is drawn by hand and only approximate: positions of venues and

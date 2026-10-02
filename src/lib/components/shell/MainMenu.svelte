@@ -7,6 +7,7 @@
 	import { Icon, IconButton } from '$lib/components/ui/index.js';
 	import type { FileCommands } from '$lib/files/file_commands.js';
 	import type { RecentMap, SessionSync } from '$lib/session_sync.svelte.js';
+	import type { Example } from 'virtual:examples';
 	import { fullscreen } from './fullscreen.svelte.js';
 
 	/**
@@ -18,7 +19,7 @@
 
 	const uid = $props.id();
 	let open = $state(false);
-	type Group = 'recent' | 'import' | 'export';
+	type Group = 'examples' | 'recent' | 'import' | 'export';
 	let expanded: Group | undefined = $state();
 	let button: HTMLButtonElement | undefined = $state();
 	let menu: HTMLDivElement | undefined = $state();
@@ -97,7 +98,14 @@
 
 	async function toggleGroup(group: Group) {
 		expanded = expanded === group ? undefined : group;
+		if (expanded === 'examples') void loadExamples();
 		await tick();
+	}
+
+	// the example maps, loaded when their group opens the first time, since the menu rarely needs them
+	let examples: Example[] | undefined = $state();
+	async function loadExamples() {
+		examples ??= (await import('virtual:examples')).examples;
 	}
 
 	// the recent maps, while the menu is open, also after changes in other tabs
@@ -187,6 +195,12 @@
 	>
 		{@render item('New map', () => files.newFile())}
 		{@render item('Open…', () => files.openFile())}
+		{@render group('examples', 'Open example')}
+		<div id="{uid}-examples" class="group" role="group" aria-label="Examples" hidden={expanded !== 'examples'}>
+			{#each examples ?? [] as example (example.id)}
+				{@render item(example.title, () => files.openExample(example))}
+			{/each}
+		</div>
 		{@render group('recent', 'Recent maps')}
 		<div id="{uid}-recent" class="group" role="group" aria-label="Recent maps" hidden={expanded !== 'recent'}>
 			{#each recent as map (map.id)}

@@ -78,6 +78,33 @@ for (const name of EXAMPLES) {
 	});
 }
 
+// the examples in the menu, as links without their view, so they show all of it
+test('the examples open from the menu', async ({ page }) => {
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	const menu = page.getByRole('menu', { name: 'Menu' });
+	await (await menuItem(page, 'Open example', 'Paris 2024 Olympic venues')).click();
+	const state: MapState = JSON.parse(readFileSync('examples/paris-2024-venues.mapjson', 'utf-8'));
+	await expect.poll(async () => (await storedState(page)).elements).toStrictEqual(state.elements);
+	expect((await storedState(page)).meta).toStrictEqual(state.meta);
+	await expect(menu).toBeHidden();
+	// the visible area of the example, whatever the window
+	const [west, south, east, north] = state.frame!;
+	const bounds = await page.evaluate(() => (window as unknown as MapWindow).map.getBounds().toArray().flat());
+	expect(bounds[0]).toBeLessThanOrEqual(west);
+	expect(bounds[1]).toBeLessThanOrEqual(south);
+	expect(bounds[2]).toBeGreaterThanOrEqual(east);
+	expect(bounds[3]).toBeGreaterThanOrEqual(north);
+
+	// all examples, by their titles
+	await page.getByRole('button', { name: 'Menu' }).click();
+	await menu.getByRole('menuitem', { name: 'Open example', exact: true }).click();
+	const titles = EXAMPLES.map(
+		(name) => (JSON.parse(readFileSync(`examples/${name}.mapjson`, 'utf-8')) as MapState).meta!.title!
+	).sort((a, b) => a.localeCompare(b, 'en'));
+	await expect(menu.getByRole('group', { name: 'Examples' }).getByRole('menuitem')).toHaveText(titles);
+});
+
 // the largest example: 557 markers with 536 labels, more than the 100 that are drawn in order
 test('the map with many markers opens within a few seconds, in the editor and in the viewer', async ({ page }) => {
 	const state: MapState = JSON.parse(readFileSync('examples/london-pharmacies.mapjson', 'utf-8'));

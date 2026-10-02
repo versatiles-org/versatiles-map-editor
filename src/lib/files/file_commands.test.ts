@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MAPJSON_SCHEMA_URL, type MapState } from '@versatiles/map-state';
+import { encodeState, MAPJSON_SCHEMA_URL, type MapState } from '@versatiles/map-state';
 import { FileCommands, fileBaseName, type FileQuestions, type MapList } from './file_commands.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
@@ -45,6 +45,21 @@ describe('FileCommands', () => {
 		await files.newFile();
 		expect(maps.newMap).toHaveBeenCalledTimes(1);
 		expect(files.filename).toBe('map.mapjson');
+	});
+
+	describe('openExample', () => {
+		it('opens an example as a new map, and suggests its file name for the next download', async () => {
+			const example: MapState = { meta: { title: 'Cafés' }, elements: [{ type: 'marker', point: [1, 2] }] };
+			await files.openExample({ id: 'cafes', hash: encodeState(example) });
+			expect(maps.openMap).toHaveBeenCalledWith(example);
+			expect(files.filename).toBe('cafes.mapjson');
+		});
+
+		it('tells the user about an example that cannot be read', async () => {
+			await files.openExample({ id: 'broken', hash: 'not a map' });
+			expect(notify).toHaveBeenLastCalledWith('Failed to open the example.');
+			expect(maps.openMap).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('openFile', () => {

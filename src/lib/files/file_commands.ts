@@ -1,4 +1,5 @@
 import {
+	decodeState,
 	MapJSONVersionError,
 	stateFromKML,
 	stateFromMapJSON,
@@ -93,6 +94,17 @@ export class FileCommands {
 			else if (error instanceof MapJSONVersionError) {
 				notify('The map was saved by a newer version of the editor. Please reload the page and try again.');
 			} else notify('Failed to open the map. Please check the file format.');
+		}
+	}
+
+	/** Open an example map (see `virtual:examples`) as a new map, which shows all of it; its file name is that of the example. */
+	public async openExample(example: { id: string; hash: string }): Promise<void> {
+		try {
+			await this.#maps.openMap(decodeState(example.hash));
+			this.#filename = `${example.id}.mapjson`;
+		} catch (error) {
+			console.error(error);
+			notify('Failed to open the example.');
 		}
 	}
 

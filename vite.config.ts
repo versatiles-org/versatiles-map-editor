@@ -1,7 +1,10 @@
 import { sveltekit } from '@sveltejs/kit/vite';
+import { readdirSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
+import { join, resolve } from 'path';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
+import { encodeState, stateFromMapJSON } from './packages/map-state/src/index.js';
 
 /**
  * Provides the URL of maplibre-gl's worker as `virtual:maplibre-worker-url`.
@@ -37,6 +40,40 @@ function maplibreWorker(): Plugin {
 			if (!isBuild || options?.ssr) return `export default ${JSON.stringify(base + '@fs' + workerPath)};`;
 			const ref = this.emitFile({ type: 'chunk', id: workerPath, name: 'maplibre-gl-worker' });
 			return `export default import.meta.ROLLUP_FILE_URL_${ref};`;
+		}
+	};
+}
+
+/**
+ * Provides the example maps of /examples as `virtual:examples`, for the menu of the editor: each
+ * with its id (the file name), its title, and the map as a link (`hash`), which is much smaller
+ * than the file. Without the view, so that an example shows its visible area, else all its
+ * elements. Encoded by the codec of the same build, so the links always fit the format.
+ */
+function examples(): Plugin {
+	const id = 'virtual:examples';
+	const resolvedId = '\0' + id;
+	const folder = resolve('examples');
+	return {
+		name: 'examples',
+		resolveId(source) {
+			if (source === id) return resolvedId;
+		},
+		load(loadId) {
+			if (loadId !== resolvedId) return;
+			const list = readdirSync(folder)
+				.filter((name) => name.endsWith('.mapjson'))
+				.map((name) => {
+					const file = join(folder, name);
+					// e.g. the dev server builds the module again when an example changes
+					this.addWatchFile(file);
+					const state = stateFromMapJSON(JSON.parse(readFileSync(file, 'utf-8')));
+					delete state.map;
+					const id = name.replace(/\.mapjson$/, '');
+					return { id, title: state.meta?.title ?? id, hash: encodeState(state) };
+				})
+				.sort((a, b) => a.title.localeCompare(b.title, 'en'));
+			return `export const examples = ${JSON.stringify(list)};`;
 		}
 	};
 }
@@ -81,7 +118,7 @@ function docBundle(page: string | undefined): { plugin?: Plugin; manualChunks?: 
 const doc = docBundle(process.env.DOC_BUNDLE);
 
 export default defineConfig({
-	plugins: [maplibreWorker(), sveltekit(), doc.plugin],
+	plugins: [maplibreWorker(), examples(), sveltekit(), doc.plugin],
 	// Component tests need Svelte's client build, which is only resolved with the browser condition
 	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
 	test: {
