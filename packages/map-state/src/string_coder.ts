@@ -2,7 +2,8 @@
  * The strings of the string table as one block of bits: an adaptive model predicts each character
  * from the two before it, and an arithmetic coder spends fewer bits on the likelier characters.
  * The model starts empty and learns the strings while they are coded, so text in any language and
- * script gets shorter, and repeated words and names cost little.
+ * script gets shorter, and repeated words and names cost little. Only the words of the format, e.g.
+ * the options of the background map, have a model that learned them before (`STRING_PRIMER`).
  *
  * The model is PPM (prediction by partial matching) of order 2 with escape method C and with
  * exclusion: a symbol is coded in the context of the two symbols before it; if it was never seen
@@ -10,6 +11,8 @@
  * symbol itself. The coder is the integer arithmetic coder of Witten, Neal and Cleary, with 32-bit
  * bounds. Everything is exact integer arithmetic below 2^53, so every browser decodes the same.
  */
+
+import { STRING_PRIMER } from './string_primer.js';
 
 /** The symbols are the code points of the strings, and this one after each string. */
 const END = -1;
@@ -57,6 +60,21 @@ class Model {
 	private order2 = new Map<string, Context>();
 	private order1 = new Map<number, Context>();
 	private order0 = new Context();
+
+	/** A model that has learned `primer`, as if it were coded before (see `STRING_PRIMER`). */
+	constructor(primer: readonly string[] = []) {
+		for (const string of primer) {
+			let a = END;
+			let b = END;
+			for (const char of string) {
+				const symbol = char.codePointAt(0)!;
+				this.update(a, b, symbol);
+				a = b;
+				b = symbol;
+			}
+			this.update(a, b, END);
+		}
+	}
 
 	/** The contexts of a symbol after `a` and `b`, the longest first; those not seen so far are missing. */
 	contexts(a: number, b: number): Context[] {
@@ -198,11 +216,17 @@ class Decoder {
 	}
 }
 
-/** The strings as one block of bits; `decodeStrings` needs their number. */
-export function encodeStrings(strings: string[]): boolean[] {
-	const model = new Model();
+/**
+ * The strings as one block of bits; `decodeStrings` needs their number. The first `formatCount`
+ * are words of the format, e.g. the options of the background map as JSON: a model that has
+ * learned `STRING_PRIMER` codes them. The others, e.g. labels in any language, get an empty model,
+ * which the words of the format would only make worse at text.
+ */
+export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
+	let model = new Model(formatCount > 0 ? STRING_PRIMER : []);
 	const encoder = new Encoder();
-	for (const string of strings) {
+	for (const [n, string] of strings.entries()) {
+		if (n === formatCount && n > 0) model = new Model();
 		const symbols = [...string].map((char) => char.codePointAt(0)!);
 		symbols.push(END);
 		let a = END;
@@ -242,12 +266,13 @@ export function encodeStrings(strings: string[]): boolean[] {
 	return encoder.finish();
 }
 
-/** The `count` strings of a block of `encodeStrings`. */
-export function decodeStrings(bits: boolean[], count: number): string[] {
-	const model = new Model();
+/** The `count` strings of a block of `encodeStrings`, the first `formatCount` words of the format. */
+export function decodeStrings(bits: boolean[], count: number, formatCount = 0): string[] {
+	let model = new Model(formatCount > 0 ? STRING_PRIMER : []);
 	const decoder = new Decoder(bits);
 	const strings: string[] = [];
 	for (let n = 0; n < count; n++) {
+		if (n === formatCount && n > 0) model = new Model();
 		const codePoints: number[] = [];
 		let a = END;
 		let b = END;

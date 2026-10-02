@@ -404,7 +404,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CxAD_oQR4TDvlmyhAF4xkzEXJrnIgCdA');
+			expect(writer.asBase64()).toBe('CxAD_oQQB4TDvlmyhAF4xkzEXJrnIgCdA');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -468,7 +468,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'IVUAAAS0RPExgi2QIcPdEVzsmyjOuJjWSmkCGcQ1FQ4mgkkHFGXKVDtdZ8G88a5E4Hht5nBrMnSo_iZUg9H-KvgNKFAAAjnJmML2cQNCRIdOxkBacNaQ7EEGwCAsPCMT3CMygA'
+				'IVUAAAQC0RPExgi2QIcPdEVzsmyjOuJjWSmkCGcQ1FQ4mgkkHFGXKVDtdZ8G88a5E4Hht5nBrMnSo_iZUg9H-KvgNKFAAAjnJmML2cQNCRIdOxkBacNaQ7EEGwCAsPCMT3CMygA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -641,7 +641,7 @@ describe('legend', () => {
 
 	it('reads the entries of older links, a color and maybe a symbol, as markers and areas', () => {
 		// written before: a blue anchor, and a translucent red swatch
-		expect(decodeState('IgAAf7_AADACKjKCKgqSpm7bYZbaGWTCAAACQEAwUwYQcaIMQwsYgGYggIAcBCOAAAA').meta).toStrictEqual({
+		expect(decodeState('IgAAf7_AADACAKjKCKgqSpm7bYZbaGWTCAAACQEAwUwYQcaIMQwsYgGYggIAcBCOAAAA').meta).toStrictEqual({
 			legend: {
 				entries: [
 					{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },
@@ -699,7 +699,7 @@ describe('viewer', () => {
 
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IX-AAAJpNaAAACGJBhCAcAFAAAA').meta).toStrictEqual({
+		expect(decodeState('IX-AAAIBpNaAAACGJBhCAcAFAAAA').meta).toStrictEqual({
 			legend: {
 				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
 			},

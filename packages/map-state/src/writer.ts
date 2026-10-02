@@ -127,7 +127,7 @@ export class StateWriter {
 	writeRoot(root: MapState) {
 		this.writeInteger(CODEC_VERSION, 3);
 		this.writePalette(collectColors(root));
-		this.writeStringTable(collectStrings(root));
+		this.writeStringTable(collectStrings(root), collectFormatStrings(root));
 		this.styleHistory = new StyleHistory();
 
 		// the camera, with its own center
@@ -311,14 +311,11 @@ export class StateWriter {
 		//	this.writeInteger(1, 6);
 		//	this.writeString(metadata.heading);
 		//}
+		// first the words of the format, as they are first in the string table
 		if (metadata.background) {
 			this.writeInteger(2, 6);
 			// as JSON, so any option of @versatiles/style can be stored
 			this.writeStringRef(JSON.stringify(metadata.background));
-		}
-		if (metadata.legend) {
-			this.writeInteger(3, 6);
-			this.writeLegend(metadata.legend);
 		}
 		if (metadata.colorScheme) {
 			this.writeInteger(4, 6);
@@ -327,6 +324,10 @@ export class StateWriter {
 		if (metadata.labelFont) {
 			this.writeInteger(6, 6);
 			this.writeStringRef(metadata.labelFont);
+		}
+		if (metadata.legend) {
+			this.writeInteger(3, 6);
+			this.writeLegend(metadata.legend);
 		}
 		if (metadata.mapLabelsOnTop) {
 			// a flag: the key alone
@@ -558,15 +559,19 @@ export class StateWriter {
 	}
 
 	/**
-	 * The strings of the metadata, the labels and the popups, each once, in the order they are written, and
-	 * afterwards only a reference (see `writeStringRef`): their number, and unless 0, the length of
-	 * their block in bits and the block (see `encodeStrings`).
+	 * The strings of the metadata, the labels and the popups, each once, in the order they are
+	 * written, and afterwards only a reference (see `writeStringRef`): the words of the format
+	 * first (`formatStrings`, e.g. the background as JSON), then the others. Their number, and unless
+	 * 0, the number of words of the format, the length of the block in bits and the block (see
+	 * `encodeStrings`).
 	 */
-	writeStringTable(strings: string[]) {
-		const unique = [...new Set(strings)];
+	writeStringTable(strings: string[], formatStrings: string[] = []) {
+		const format = [...new Set(formatStrings)];
+		const unique = [...new Set([...format, ...strings])];
 		this.writeVarint(unique.length);
 		if (unique.length > 0) {
-			const block = encodeStrings(unique);
+			this.writeVarint(format.length);
+			const block = encodeStrings(unique, format.length);
 			this.writeVarint(block.length);
 			// not with a spread: the block can have many bits
 			for (const bit of block) this.bits.push(bit);
@@ -631,8 +636,19 @@ function allStyles(root: MapState): StateStyle[] {
 }
 
 /**
- * The strings of the string table, in the order the writer writes them: of the metadata (the
- * background as JSON, the legend, the color scheme, the label font, the title) and of each element.
+ * The words of the format in the string table, in the order the writer writes them: the
+ * background as JSON, the color scheme, the label font.
+ */
+export function collectFormatStrings(root: MapState): string[] {
+	const meta = root.meta;
+	return [meta?.background && JSON.stringify(meta.background), meta?.colorScheme, meta?.labelFont].filter(
+		(value): value is string => !!value
+	);
+}
+
+/**
+ * The other strings of the string table, in the order the writer writes them: of the legend, the
+ * title, and of each element.
  */
 export function collectStrings(root: MapState): string[] {
 	const strings: string[] = [];
@@ -640,13 +656,10 @@ export function collectStrings(root: MapState): string[] {
 		for (const style of [item.style, item.strokeStyle]) if (style?.label != null) strings.push(style.label);
 	};
 	const meta = root.meta;
-	if (meta?.background) strings.push(JSON.stringify(meta.background));
 	for (const entry of meta?.legend?.entries ?? []) {
 		ofStyles(entry);
 		if (entry.label) strings.push(entry.label);
 	}
-	if (meta?.colorScheme) strings.push(meta.colorScheme);
-	if (meta?.labelFont) strings.push(meta.labelFont);
 	if (meta?.title) strings.push(meta.title);
 	for (const element of root.elements) {
 		// the label of the outline is written inside it, before the label of the element

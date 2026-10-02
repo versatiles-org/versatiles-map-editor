@@ -656,7 +656,13 @@ export class StateReader {
 	readStringTable(): string[] {
 		try {
 			const count = this.readVarint();
-			this.strings = count > 0 ? decodeStrings(this.readBlock(this.readVarint()), count) : [];
+			this.strings = [];
+			if (count > 0) {
+				// the first are words of the format
+				const formatCount = this.readVarint();
+				if (formatCount > count) throw new Error(`Invalid number of words of the format: ${formatCount}`);
+				this.strings = decodeStrings(this.readBlock(this.readVarint()), count, formatCount);
+			}
 			this.nextString = 0;
 			return this.strings;
 		} catch (cause) {

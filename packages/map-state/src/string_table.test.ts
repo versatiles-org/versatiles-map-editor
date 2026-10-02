@@ -31,7 +31,7 @@ describe('the string table', () => {
 		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', '', 'Open 24 h']);
 	});
 
-	it('has the strings of the metadata first, in the order they are written', () => {
+	it('has the words of the format first, then the other strings in the order they are written', () => {
 		const meta: MapState['meta'] = {
 			background: { builder: 'osm', options: { theme: 'gray' } },
 			colorScheme: 'okabe-ito',
@@ -44,9 +44,9 @@ describe('the string table', () => {
 		reader.readPalette();
 		expect(reader.readStringTable()).toStrictEqual([
 			'{"builder":"osm","options":{"theme":"gray"}}',
-			'Pharmacy',
 			'okabe-ito',
 			'noto_sans_bold',
+			'Pharmacy',
 			'Pharmacies',
 			'Boots',
 			'',
@@ -101,6 +101,17 @@ describe('the string table', () => {
 		const reader = new StateReader(writer.bits);
 		reader.readStringTable();
 		expect(() => reader.readStringRef()).toThrow('Invalid string index: 5');
+	});
+
+	it('rejects more words of the format than strings', () => {
+		const writer = new StateWriter();
+		writer.writeVarint(1);
+		writer.writeVarint(2);
+		expect(() => new StateReader(writer.bits).readStringTable()).toThrow(
+			expect.objectContaining({
+				cause: expect.objectContaining({ message: 'Invalid number of words of the format: 2' })
+			})
+		);
 	});
 
 	it('rejects the next new string after the last one', () => {

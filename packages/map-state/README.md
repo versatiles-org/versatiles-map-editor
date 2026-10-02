@@ -167,7 +167,9 @@ hashes short:
   table is one block of bits (`string_coder.ts`): an adaptive model predicts each character from
   the two before it (PPM of order 2 over code points), and an arithmetic coder spends fewer bits
   on likelier characters. The model starts empty and learns the strings of the map, so text in
-  any script gets shorter, and repeated words cost little;
+  any script gets shorter, and repeated words cost little. Only the words of the format (the
+  background as JSON, the color scheme, the label font) come first in the table and have a model
+  that learned the format's vocabulary before (`string_primer.ts`);
 - the names of the symbols of all styles and of the legend are stored once in the metadata,
   sorted, each with the length of the beginning it shares with the previous name (e.g.
   `base:icon-`) and the rest, and referenced by index;

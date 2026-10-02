@@ -162,7 +162,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IATYSqJMAdkk20LQSiEBEyFigWMjgHGoAIAY');
+			expect(hash).toBe('IAQDYSqJMAdkk20LQSiEBEyFigWMjgHGoAIAY');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;

@@ -57,6 +57,32 @@ describe('the coder of the string table', () => {
 		expect(bits).toMatchInlineSnapshot(`"010110100100010101010010000"`);
 	});
 
+	it('codes the words of the format with a model that learned them before', () => {
+		const background =
+			'{"builder":"satellite","options":{"raster":{"brightnessMin":0.2},"osmOverlay":{"theme":"gray"}}}';
+		const primed = encodeStrings([background, 'noto_sans_bold'], 2).length;
+		const empty = encodeStrings([background, 'noto_sans_bold']).length;
+		expect(primed).toBeLessThan(empty / 2);
+		// a change of the primer changes these bits: links written before cannot be read
+		expect(primed).toMatchInlineSnapshot(`170`);
+	});
+
+	it('keeps the words of the format and the other strings', () => {
+		const strings = ['{"builder":"osm","options":{}}', 'okabe-ito', 'Москва 🧸', '', 'noto_sans_bold'];
+		for (const formatCount of [0, 1, 2, 5]) {
+			expect(decodeStrings(encodeStrings(strings, formatCount), strings.length, formatCount)).toStrictEqual(strings);
+		}
+	});
+
+	it('codes the other strings with an empty model, which the words of the format do not make worse', () => {
+		const text = ['Площадь Революции', 'Маяковская'];
+		const alone = encodeStrings(text).length;
+		const after = encodeStrings(['{"builder":"osm","options":{"theme":"gray"}}', ...text], 1).length;
+		const format = encodeStrings(['{"builder":"osm","options":{"theme":"gray"}}'], 1).length;
+		// the bits of both parts, give or take the few of the end of the coder
+		expect(Math.abs(after - format - alone)).toBeLessThanOrEqual(3);
+	});
+
 	it('keeps empty strings', () => {
 		expect(roundTrip([''])).toStrictEqual(['']);
 		expect(roundTrip(['', '', ''])).toStrictEqual(['', '', '']);
