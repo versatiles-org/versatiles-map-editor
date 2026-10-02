@@ -13,8 +13,8 @@
 	} from '$lib/components/ui/index.js';
 	import {
 		boundsOf,
+		coarsestResolutionForArea,
 		exponentForResolution,
-		MAX_EXPONENT,
 		resolutionForArea,
 		resolutionOfExponent
 	} from '@versatiles/map-state';
@@ -47,16 +47,23 @@
 	}
 
 	// The precision of the shared map: automatic (from what it shows), or the exponent of the step
-	// of the coordinates, 0.00001° × 2^exponent: about 1 m, 2 m, 4 m, … 36 km
+	// of the coordinates, 0.00001° × 2^exponent: about 1 m, 2 m, 4 m, … up to `maxExponent`
 	let precision: 'auto' | number = $state('auto');
 	let autoExponent = $state(0);
+	let maxExponent = $state(0);
+	const exponent = $derived(precision === 'auto' ? autoExponent : Math.min(precision, maxExponent));
 
-	/** Fine enough for what the shared map shows, its frame or else its elements (see `resolutionForArea`). */
-	function updateAutoExponent() {
+	/**
+	 * Fine enough for what the shared map shows, its frame or else its elements, and the coarsest
+	 * step that still makes sense for it (see `resolutionForArea`). A single point or an empty map
+	 * shows the area around it, like the view of the editor.
+	 */
+	function updateExponents() {
 		const doc = stateManager.mapDocument;
-		const area = doc.frame ?? doc.getBounds();
-		const resolution = area && resolutionForArea(area);
-		autoExponent = resolution ? exponentForResolution(resolution) : 0;
+		let area = doc.frame ?? doc.getBounds();
+		if (!area || resolutionForArea(area) === 0) area = doc.view.viewBounds();
+		autoExponent = exponentForResolution(resolutionForArea(area));
+		maxExponent = Math.max(autoExponent, exponentForResolution(coarsestResolutionForArea(area)));
 	}
 
 	// What visitors may miss: elements outside the frame, or an empty map without one
@@ -111,7 +118,6 @@
 	];
 
 	function getLinkCode() {
-		const exponent = precision === 'auto' ? autoExponent : precision;
 		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent), camera: false })}`;
 	}
 
@@ -121,7 +127,7 @@
 
 	function update(delay: number = 500) {
 		if (!dialog?.isOpen()) return;
-		updateAutoExponent();
+		updateExponents();
 		updateNotice();
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
@@ -283,21 +289,21 @@
 
 			<section aria-labelledby="{uid}-options">
 				<h3 id="{uid}-options">Options</h3>
-				<!-- from 1 m to 36 km, each step twice the one before; moving it ends "Automatic" -->
+				<!-- from 1 m to a hundredth of the shared area, each step twice the one before; moving it ends "Automatic" -->
 				<InputRow id="share-precision" label="Precision">
 					<Slider
 						id="share-precision"
 						min={0}
-						max={MAX_EXPONENT}
+						max={maxExponent}
 						step={1}
 						bind:value={
-							() => (precision === 'auto' ? autoExponent : precision),
-							(exponent) => {
-								precision = exponent;
+							() => exponent,
+							(value) => {
+								precision = value;
 								update(0);
 							}
 						}
-						format={(exponent) => formatPrecision(resolutionOfExponent(exponent))}
+						format={(value) => formatPrecision(resolutionOfExponent(value))}
 					/>
 				</InputRow>
 				<Checkbox

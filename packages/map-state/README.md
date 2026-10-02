@@ -54,7 +54,8 @@ stateFromMapJSON(json: unknown): MapState // upgrades older files, refuses newer
   (n from 0 to `MAX_EXPONENT`, 15): about 1 m, 2 m, 4 m, … 36 km. The default of 1 m keeps 5
   decimal places; coarser values make shorter strings, e.g. for sharing. `exponentForResolution`
   and `resolutionOfExponent` convert between meters and n; `resolutionForArea` is the precision
-  that the share dialog uses for an area: fine enough for it, a thousandth of its size.
+  that the share dialog uses for an area: fine enough for it, a thousandth of its larger side;
+  `coarsestResolutionForArea`, a hundredth, is the coarsest one it offers.
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.

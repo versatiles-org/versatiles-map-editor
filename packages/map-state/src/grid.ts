@@ -19,14 +19,28 @@ export function exponentForResolution(meters: number): number {
 	return Math.min(MAX_EXPONENT, Math.max(0, exponent));
 }
 
+/** The larger side of an area in meters: its height, or its width at its middle latitude. */
+function largerSide([west, south, east, north]: Bounds): number {
+	const width = (east - west) * METERS_PER_DEGREE * Math.cos((((south + north) / 2) * Math.PI) / 180);
+	return Math.max(width, (north - south) * METERS_PER_DEGREE);
+}
+
 /**
  * A resolution in meters fine enough for what a map shows (its frame, else the bounds of its
- * elements), e.g. for sharing: a thousandth of half the larger side of the area, below a pixel of a
- * typical embed.
+ * elements), e.g. for sharing: a thousandth of the larger side of the area, about a pixel of an
+ * embed 1000 pixels wide.
  */
-export function resolutionForArea([west, south, east, north]: Bounds): number {
-	const width = (east - west) * METERS_PER_DEGREE * Math.cos((((south + north) / 2) * Math.PI) / 180);
-	return Math.max(width, (north - south) * METERS_PER_DEGREE) / 2 / 1000;
+export function resolutionForArea(bounds: Bounds): number {
+	return largerSide(bounds) / 1000;
+}
+
+/**
+ * The coarsest resolution in meters that is still sensible for what a map shows, e.g. the end of
+ * the slider of the share dialog: a hundredth of the larger side of the area, about 10 pixels of an
+ * embed 1000 pixels wide.
+ */
+export function coarsestResolutionForArea(bounds: Bounds): number {
+	return largerSide(bounds) / 100;
 }
 
 /** The resolution in meters of a step with this exponent (in latitude). */

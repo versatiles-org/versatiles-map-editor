@@ -28,7 +28,8 @@ The first release.
   - coordinates as whole steps from an origin near them, so a link without a camera stays short, in
     steps of 0.00001° × 2^n (n from 0 to 15, in 4 bits: about 1 m to 36 km), which decode to at most
     5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`,
-    `resolutionForArea` (the precision for sharing an area); those of the elements in an Exp-Golomb
+    `resolutionForArea` (the precision for sharing an area) and `coarsestResolutionForArea` (the
+    coarsest one that is sensible for it); those of the elements in an Exp-Golomb
     code with the parameter that makes them shortest, the points of markers and circles as
     differences to the point before if that is shorter, and a parameter for longitude and one for
     latitude if that is shorter;

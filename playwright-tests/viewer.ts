@@ -95,6 +95,9 @@ test.describe('viewer', () => {
 
 test('precision of a shared map', async ({ page }) => {
 	const point: [number, number] = [13.412341, 52.512341];
+	// the point in steps of 0.00008° (automatic) and of 0.00064°
+	const AUTO_POINT = [13.41232, 52.51232];
+	const COARSE_POINT = [13.41248, 52.51264];
 	await page.goto(
 		'/#' +
 			encodeState({
@@ -116,34 +119,48 @@ test('precision of a shared map', async ({ page }) => {
 		return { point: element.point, length: link.length };
 	};
 
-	// automatic: about a thousandth of the size of the visible area, in steps of 0.00001° × 2^n:
-	// 0.00004°, about 4 m; the coordinates keep at most 5 decimal places
+	// automatic: about a thousandth of the larger side of the visible area, in steps of
+	// 0.00001° × 2^n: 0.00008°, about 9 m; the coordinates keep at most 5 decimal places
 	await expect(automatic).toBeChecked();
-	await expect(precision).toHaveAttribute('aria-valuetext', '4 m');
-	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41236, 52.51236]);
+	await expect(precision).toHaveAttribute('aria-valuetext', '9 m');
+	await expect.poll(async () => (await shared()).point).toStrictEqual(AUTO_POINT);
 	const auto = await shared();
 
-	// 16 steps, from 1 m to 36 km; moving the slider ends "Automatic"
+	// from 1 m to about a hundredth of the larger side: 0.00128°, about 140 m; moving the slider
+	// ends "Automatic"
 	await precision.focus();
 	await page.keyboard.press('End');
-	await expect(precision).toHaveAttribute('aria-valuetext', '36 km');
+	await expect(precision).toHaveAttribute('aria-valuetext', '140 m');
 	await expect(automatic).not.toBeChecked();
 	await page.keyboard.press('Home');
 	await expect(precision).toHaveAttribute('aria-valuetext', '1 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
-	// 0.01024°
-	await precision.fill('10');
-	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('1.1 km');
-	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4144, 52.51072]);
+	// 0.00064°
+	await precision.fill('6');
+	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('71 m');
+	await expect.poll(async () => (await shared()).point).toStrictEqual(COARSE_POINT);
 	expect((await shared()).length).toBeLessThan(auto.length);
 
 	// automatic again
 	await automatic.check();
-	await expect(precision).toHaveAttribute('aria-valuetext', '4 m');
-	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41236, 52.51236]);
+	await expect(precision).toHaveAttribute('aria-valuetext', '9 m');
+	await expect.poll(async () => (await shared()).point).toStrictEqual(AUTO_POINT);
 
 	// the map in the editor keeps its precision
 	expect(((await storedState(page)).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
+});
+
+test('precision of a shared map with a single marker follows the view', async ({ page }) => {
+	// a point has no size: the precision is that of the area that the editor shows, about 20 km
+	const point: [number, number] = [13.4, 52.5];
+	await page.goto('/#' + encodeState({ map: { center: point, radius: 10000 }, elements: [{ type: 'marker', point }] }));
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const precision = page.getByRole('slider', { name: 'Precision' });
+	await expect.poll(async () => Number(await precision.inputValue())).toBeGreaterThan(2);
+	const max = Number(await precision.getAttribute('max'));
+	expect(max).toBeGreaterThan(5);
+	expect(max).toBeLessThan(15);
 });
 
 test.describe('overlays of the viewer on a phone', () => {

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { exponentForResolution, LocalGrid, MAX_EXPONENT, resolutionForArea, resolutionOfExponent } from './grid.js';
+import {
+	coarsestResolutionForArea,
+	exponentForResolution,
+	LocalGrid,
+	MAX_EXPONENT,
+	resolutionForArea,
+	resolutionOfExponent
+} from './grid.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
@@ -99,17 +106,31 @@ describe('coordinates relative to the map center', () => {
 });
 
 describe('resolutionForArea', () => {
-	it('is a thousandth of half the larger side, in meters', () => {
-		// 0.2° of latitude: 22,264 m, half of it 11,132 m
-		expect(resolutionForArea([13.3, 52.4, 13.4, 52.6])).toBeCloseTo(11.132, 3);
+	it('is a thousandth of the larger side, in meters', () => {
+		// 0.2° of latitude: 22,264 m
+		expect(resolutionForArea([13.3, 52.4, 13.4, 52.6])).toBeCloseTo(22.264, 3);
 		// 1° of longitude at the equator is the larger side
-		expect(resolutionForArea([0, -0.1, 1, 0.1])).toBeCloseTo(55.66, 2);
+		expect(resolutionForArea([0, -0.1, 1, 0.1])).toBeCloseTo(111.32, 2);
 		// a point
 		expect(resolutionForArea([13, 52, 13, 52])).toBe(0);
 	});
 
 	it('gives the step of the share dialog', () => {
-		// Inner London: about 24 km wide, a step of 0.00008°, about 8.9 m
-		expect(exponentForResolution(resolutionForArea([-0.25, 51.42, 0.09, 51.58]))).toBe(3);
+		// Inner London: about 24 km wide, a step of 0.00016°, about 17.8 m
+		expect(exponentForResolution(resolutionForArea([-0.25, 51.42, 0.09, 51.58]))).toBe(4);
+	});
+});
+
+describe('coarsestResolutionForArea', () => {
+	it('is a hundredth of the larger side, in meters', () => {
+		expect(coarsestResolutionForArea([13.3, 52.4, 13.4, 52.6])).toBeCloseTo(222.64, 2);
+		expect(coarsestResolutionForArea([13, 52, 13, 52])).toBe(0);
+	});
+
+	it('gives the end of the slider of the share dialog', () => {
+		// Inner London: 236 m, the nearest step 0.00256°, about 285 m
+		expect(exponentForResolution(coarsestResolutionForArea([-0.25, 51.42, 0.09, 51.58]))).toBe(8);
+		// the whole world: the coarsest step
+		expect(exponentForResolution(coarsestResolutionForArea([-180, -85, 180, 85]))).toBe(MAX_EXPONENT);
 	});
 });
