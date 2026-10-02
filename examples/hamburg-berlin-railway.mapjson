@@ -1,13 +1,12 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [10.861904352344993, 53.16245269688628], "radius": 174620.48846535414 },
+	"map": { "center": [10.861904352344993, 53.19113723673652], "radius": 192440.7112769086 },
 	"frame": [9.653, 52.422, 14.05, 53.656],
 	"meta": {
 		"background": {
 			"builder": "osm",
 			"options": { "theme": "gray", "recolor": { "brightness": 0.175, "contrast": 0.65 } }
 		},
-		"viewer": { "legend": "bottom-right" },
 		"legend": {
 			"entries": [
 				{
@@ -97,7 +96,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Uelzen",
-				"align": 4,
+				"align": 2,
 				"labelColor": "#0072b2"
 			}
 		},
@@ -108,7 +107,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Stendal",
-				"align": 4,
+				"align": 2,
 				"labelColor": "#0072b2"
 			}
 		}

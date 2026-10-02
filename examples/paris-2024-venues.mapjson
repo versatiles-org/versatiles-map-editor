@@ -1,11 +1,16 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [2.230654094568223, 48.871910743843245], "radius": 40051.18375802485 },
+	"map": { "center": [2.230654094568223, 48.87320448419143], "radius": 44164.21924450145 },
 	"frame": [1.8, 48.732, 2.83, 48.995],
 	"meta": {
-		"background": { "builder": "osm", "options": { "theme": "gray" } },
+		"background": { "builder": "osm", "options": { "theme": "gray", "layers": { "labels": false } } },
 		"legend": {
 			"entries": [
+				{
+					"type": "marker",
+					"style": { "color": "#cc9900", "symbol": "base:icon-stadium" },
+					"label": "Olympic Village"
+				},
 				{
 					"type": "marker",
 					"style": { "color": "#0072b2", "symbol": "base:icon-stadium" },
@@ -20,32 +25,20 @@
 					"type": "marker",
 					"style": { "color": "#009e73", "symbol": "base:icon-outdoor" },
 					"label": "Venues in nature"
-				},
-				{ "type": "marker", "style": { "color": "#cc9900", "symbol": "base:icon-stadium" }, "label": "Olympic Village" }
+				}
 			]
 		},
-		"viewer": { "legend": "top-right" },
+		"viewer": { "legend": "top-left" },
 		"title": "Paris 2024 Olympic venues",
 		"labelFont": "noto_sans_bold"
 	},
 	"elements": [
 		{
 			"type": "marker",
-			"point": [2.331, 48.9115],
-			"style": {
-				"color": "#cc9900",
-				"size": 2,
-				"symbol": "base:icon-stadium",
-				"label": "Olympic Village",
-				"labelColor": "#cc9900"
-			},
-			"popup": { "text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis" }
-		},
-		{
-			"type": "marker",
 			"point": [2.3601, 48.9244],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Stade de France",
 				"align": 3,
@@ -58,6 +51,7 @@
 			"point": [2.3542, 48.9204],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Aquatics Centre",
 				"align": 1,
@@ -70,6 +64,7 @@
 			"point": [2.229, 48.8955],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "La Défense Arena",
 				"labelColor": "#0072b2"
@@ -79,7 +74,13 @@
 		{
 			"type": "marker",
 			"point": [2.3786, 48.8387],
-			"style": { "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Bercy Arena", "labelColor": "#0072b2" },
+			"style": {
+				"color": "#0072b2",
+				"size": 0.8,
+				"symbol": "base:icon-stadium",
+				"label": "Bercy Arena",
+				"labelColor": "#0072b2"
+			},
 			"popup": { "text": "**Bercy Arena**\nArtistic gymnastics, trampoline, basketball" }
 		},
 		{
@@ -87,6 +88,7 @@
 			"point": [2.3599, 48.8995],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Porte de La Chapelle Arena",
 				"align": 1,
@@ -99,6 +101,7 @@
 			"point": [2.2873, 48.8319],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "South Paris Arena",
 				"align": 4,
@@ -111,6 +114,7 @@
 			"point": [2.5155, 48.9727],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "North Paris Arena",
 				"labelColor": "#0072b2"
@@ -122,6 +126,7 @@
 			"point": [2.253, 48.8414],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Parc des Princes",
 				"align": 2,
@@ -134,6 +139,7 @@
 			"point": [2.2481, 48.847],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Roland-Garros",
 				"align": 3,
@@ -146,6 +152,7 @@
 			"point": [2.2476, 48.929],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Yves-du-Manoir Stadium",
 				"align": 2,
@@ -158,6 +165,7 @@
 			"point": [2.4271, 48.9361],
 			"style": {
 				"color": "#0072b2",
+				"size": 0.8,
 				"symbol": "base:icon-stadium",
 				"label": "Le Bourget Climbing Venue",
 				"labelColor": "#0072b2"
@@ -167,7 +175,13 @@
 		{
 			"type": "marker",
 			"point": [2.0374, 48.7883],
-			"style": { "color": "#0072b2", "symbol": "base:icon-stadium", "label": "Velodrome", "labelColor": "#0072b2" },
+			"style": {
+				"color": "#0072b2",
+				"size": 0.8,
+				"symbol": "base:icon-stadium",
+				"label": "Velodrome",
+				"labelColor": "#0072b2"
+			},
 			"popup": { "text": "**Velodrome**\nTrack cycling, BMX racing, in Saint-Quentin-en-Yvelines" }
 		},
 		{
@@ -251,6 +265,19 @@
 			"point": [2.0745, 48.7543],
 			"style": { "color": "#009e73", "symbol": "base:icon-golf", "label": "Le Golf National", "labelColor": "#009e73" },
 			"popup": { "text": "**Le Golf National**\nGolf" }
+		},
+		{
+			"type": "marker",
+			"point": [2.331, 48.9115],
+			"style": {
+				"color": "#cc9900",
+				"size": 2,
+				"halo": 2,
+				"symbol": "base:icon-stadium",
+				"label": "Olympic Village",
+				"labelColor": "#cc9900"
+			},
+			"popup": { "text": "**Olympic Village**\nHome of the athletes, in Saint-Denis, Saint-Ouen and L’Île-Saint-Denis" }
 		}
 	]
 }

@@ -1,22 +1,21 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [30.175189454575417, 51.39166926981753], "radius": 47169.86443603064 },
-	"frame": [29.558, 51.066, 31.0, 51.712],
+	"map": { "center": [29.932590844910095, 51.37903861146316], "radius": 43021.41670170297 },
+	"frame": [29.558, 51.066, 31, 51.712],
 	"meta": {
 		"background": {
 			"builder": "satellite",
 			"options": {
-				"raster": { "brightnessMin": 0.1 },
-				"osmOverlay": { "recolor": { "brightness": 0.05, "contrast": 0.9 } }
+				"raster": { "brightnessMax": 0.8, "contrast": 0.3333 },
+				"osmOverlay": { "recolor": { "brightness": -0.1, "contrast": 1.2 } }
 			}
 		},
-		"viewer": { "legend": "top-left" },
 		"legend": {
 			"entries": [
 				{
 					"type": "polygon",
-					"style": { "color": "#d55e0040" },
-					"strokeStyle": { "color": "#d55e00", "width": 2.5 },
+					"style": { "color": "#ff710040" },
+					"strokeStyle": { "color": "#ff7100", "width": 2.5 },
 					"label": "10 km zone"
 				},
 				{
@@ -27,6 +26,7 @@
 				}
 			]
 		},
+		"viewer": { "legend": "top-left" },
 		"title": "Chernobyl exclusion zone",
 		"labelFont": "noto_sans_bold"
 	},
@@ -43,20 +43,20 @@
 			"type": "circle",
 			"point": [30.099, 51.389],
 			"radius": 10000,
-			"style": { "color": "#d55e0040" },
-			"strokeStyle": { "color": "#d55e00", "width": 2.5 },
+			"style": { "color": "#ff710040" },
+			"strokeStyle": { "color": "#ff7100", "width": 2.5 },
 			"popup": { "text": "**10 km zone**\nThe most contaminated area around the plant." }
 		},
 		{
 			"type": "marker",
 			"point": [30.099, 51.389],
 			"style": {
-				"color": "#be5400",
+				"color": "#ff4019",
 				"size": 1.3,
 				"symbol": "icons:nuclear",
 				"label": "Nuclear power plant",
 				"align": 4,
-				"labelColor": "#be5400",
+				"labelColor": "#ff4019",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -71,6 +71,7 @@
 				"halo": 0.5,
 				"symbol": "base:icon-town_hall",
 				"label": "Pripyat",
+				"align": 2,
 				"labelColor": "#ffffff",
 				"haloColor": "#000000"
 			},
