@@ -8,6 +8,9 @@ const PREFIX = 'versatiles-map-editor:session:';
 export class SessionLocks {
 	// the function that releases the lock of each held session
 	readonly #held = new Map<string, () => void>();
+	// the sessions whose lock is requested but not granted yet, and those of them released meanwhile
+	readonly #pending = new Set<string>();
+	readonly #releasedEarly = new Set<string>();
 
 	get #locks(): LockManager | undefined {
 		return typeof navigator === 'undefined' ? undefined : navigator.locks;
@@ -22,10 +25,14 @@ export class SessionLocks {
 		const locks = this.#locks;
 		if (!locks) return true;
 		const options: LockOptions = wait > 0 ? { signal: AbortSignal.timeout(wait) } : { ifAvailable: true };
+		this.#pending.add(id);
 		return new Promise<boolean>((resolve) => {
 			locks
 				.request(PREFIX + id, options, (lock) => {
-					if (!lock) {
+					this.#pending.delete(id);
+					// released before the browser granted it: let go at once
+					const releasedEarly = this.#releasedEarly.delete(id);
+					if (!lock || releasedEarly) {
 						resolve(false);
 						return;
 					}
@@ -34,7 +41,11 @@ export class SessionLocks {
 					return new Promise<void>((release) => this.#held.set(id, release));
 				})
 				// e.g. the wait timed out
-				.catch(() => resolve(false));
+				.catch(() => {
+					this.#pending.delete(id);
+					this.#releasedEarly.delete(id);
+					resolve(false);
+				});
 		});
 	}
 
@@ -42,11 +53,12 @@ export class SessionLocks {
 	public release(id: string) {
 		this.#held.get(id)?.();
 		this.#held.delete(id);
+		if (this.#pending.has(id)) this.#releasedEarly.add(id);
 	}
 
 	/** Release all locks, e.g. when the editor is removed. */
 	public releaseAll() {
-		for (const id of [...this.#held.keys()]) this.release(id);
+		for (const id of [...this.#held.keys(), ...this.#pending]) this.release(id);
 	}
 
 	/** The ids of the sessions that other tabs have open. */
