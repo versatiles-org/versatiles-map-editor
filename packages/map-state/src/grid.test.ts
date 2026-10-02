@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { digitsForResolution, LocalGrid, resolutionOfDigits } from './grid.js';
+import { exponentForResolution, LocalGrid, MAX_EXPONENT, resolutionOfExponent } from './grid.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
@@ -12,18 +12,40 @@ function encode(state: MapState, resolution?: number): string {
 const decode = (base64: string) => StateReader.fromBase64(base64).readRoot();
 
 describe('resolution', () => {
-	it('is rounded to decimal places of degrees', () => {
-		expect([0.001, 1, 10, 100, 1000, 1e7].map(digitsForResolution)).toStrictEqual([8, 5, 4, 3, 2, 0]);
-		expect(resolutionOfDigits(5)).toBeCloseTo(1.1132);
+	it('is a step of 0.00001° times a power of 2, from about 1 m to 36 km', () => {
+		expect([0.001, 1, 2.2, 100, 1000, 36000, 1e7].map(exponentForResolution)).toStrictEqual([0, 0, 1, 6, 10, 15, 15]);
+		expect(resolutionOfExponent(0)).toBeCloseTo(1.1132);
+		expect(resolutionOfExponent(MAX_EXPONENT)).toBeCloseTo(36477, 0);
 	});
 });
 
+/** Whether a number has at most 5 decimal places, e.g. 13.41236 but not 13.400024414. */
+const fiveDecimals = (value: number) => Number(value.toFixed(5)) === value;
+
 describe('LocalGrid', () => {
 	it('counts steps from the center, and returns exact decimals', () => {
-		const grid = new LocalGrid([13.40001, 52.49999], 4);
-		expect(grid.toGrid([13.4123, 52.5])).toStrictEqual([123, 0]);
-		expect(grid.fromGrid([123, 0])).toStrictEqual([13.4123, 52.5]);
-		expect(grid.fromGrid(grid.toGrid([13.41234, 52.50006]))).toStrictEqual([13.4123, 52.5001]);
+		// steps of 0.00004°
+		const grid = new LocalGrid([13.4, 52.5], 2);
+		expect(grid.toGrid([13.41236, 52.5])).toStrictEqual([309, 0]);
+		expect(grid.fromGrid([309, 0])).toStrictEqual([13.41236, 52.5]);
+		expect(grid.fromGrid(grid.toGrid([13.41237, 52.50001]))).toStrictEqual([13.41236, 52.5]);
+	});
+
+	it('has coordinates with at most 5 decimal places, within half a step, at every exponent', () => {
+		for (let exponent = 0; exponent <= MAX_EXPONENT; exponent++) {
+			const grid = new LocalGrid([13.4, 52.5], exponent);
+			const step = 0.00001 * 2 ** exponent;
+			for (const point of [
+				[13.41234, 52.51234],
+				[-70.12345, -33.45678]
+			] as [number, number][]) {
+				const rounded = grid.fromGrid(grid.toGrid(point));
+				expect(rounded.every(fiveDecimals), `${exponent}`).toBe(true);
+				rounded.forEach((value, i) => expect(Math.abs(value - point[i])).toBeLessThanOrEqual(step / 2 + 1e-9));
+				// once rounded, it stays
+				expect(grid.fromGrid(grid.toGrid(rounded))).toStrictEqual(rounded);
+			}
+		}
 	});
 });
 
@@ -51,9 +73,10 @@ describe('coordinates relative to the map center', () => {
 	});
 
 	it('can be coarser, which is shorter', () => {
+		// about 70 m: steps of 0.00064°
 		const coarse = encode(berlin, 100);
 		expect(coarse.length).toBeLessThan(encode(berlin).length);
-		expect(decode(coarse).elements[0]).toStrictEqual({ type: 'marker', point: [13.412, 52.512] });
+		expect(decode(coarse).elements[0]).toStrictEqual({ type: 'marker', point: [13.41248, 52.51264] });
 	});
 
 	it('work without a map viewport', () => {
@@ -63,11 +86,14 @@ describe('coordinates relative to the map center', () => {
 
 	it('reject invalid resolutions', () => {
 		expect(() => new StateWriter({ resolution: 0 })).toThrow('Invalid resolution');
-		const writer = new StateWriter();
-		writer.writeInteger(1, 3); // version
-		writer.writeArray([], () => {}); // palette
-		writer.writeBit(false); // no map
-		writer.writeVarint(12); // too many decimal places
-		expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+	});
+
+	it('take 4 bits for the step, at every resolution', () => {
+		const lengths = [1, 1000, 36000].map((resolution) => {
+			const writer = new StateWriter({ resolution });
+			writer.writeRoot({ elements: [] });
+			return writer.bits.length;
+		});
+		expect(new Set(lengths).size).toBe(1);
 	});
 });

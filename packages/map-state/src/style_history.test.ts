@@ -92,7 +92,7 @@ describe('style references', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
 		writer.writeBit(false); // no map
-		writer.writeVarint(5); // resolution: decimal places
+		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
 		writer.writePoint([0, 0]);

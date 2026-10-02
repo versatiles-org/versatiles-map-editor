@@ -1,6 +1,6 @@
 <script lang="ts">
 	const src =
-		'/view#IVUAACyiuKaohLoZKQqGcQ1FQTRJYlNIV6FcF8ox5wYnIUYzoU5AQY14WQYjISYkog4WI2SJkenoz8UBpQoAAc6wo6oXs4kjPhEKAMpIjtoUKSthBkBAMh20SmMI5FBtgAMg9CMYnsEhlASkyUp1KIVhhBE9gA';
+		'/view#IVUAACyiuKaohLoZKQIZxDUVBNEliU0hXoVwXyjHnBichRjOhTkBBjXhZBiMhJiSiDhYjZImR6ejPxQGlCgABzrCjqheziSM-EQoAykiO2hQpK2EGQEAyHbRKYwjkUG2AAyD0IxiewSGUBKTJSnUohWGEET2AA';
 </script>
 
 <table>

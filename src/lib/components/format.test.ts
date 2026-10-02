@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { formatArea, formatCount, formatLength, measurementText } from './format.js';
+import { formatArea, formatCount, formatLength, formatPrecision, measurementText } from './format.js';
+import { MAX_EXPONENT, resolutionOfExponent } from '@versatiles/map-state';
 
 describe('formatLength', () => {
 	it('should format short lengths in meters', () => {
@@ -70,5 +71,29 @@ describe('measurementText', () => {
 			label: 'Area',
 			value: '12,400 km²'
 		});
+	});
+});
+
+describe('formatPrecision', () => {
+	it('names the steps of the coordinates roughly, from 1 m to 36 km', () => {
+		const steps = Array.from({ length: MAX_EXPONENT + 1 }, (_, e) => formatPrecision(resolutionOfExponent(e), 'en-US'));
+		expect(steps).toStrictEqual([
+			'1 m',
+			'2 m',
+			'4 m',
+			'9 m',
+			'18 m',
+			'36 m',
+			'71 m',
+			'140 m',
+			'280 m',
+			'570 m',
+			'1.1 km',
+			'2.3 km',
+			'4.6 km',
+			'9.1 km',
+			'18 km',
+			'36 km'
+		]);
 	});
 });

@@ -11,6 +11,14 @@ export function formatLength(meters: number, locale?: string): string {
 	return formatNumber(meters / 1000, locale) + ' km';
 }
 
+/**
+ * A precision, roughly: whole meters below 10 m, else 2 significant digits, e.g. "4 m", "140 m",
+ * "1.1 km" or "36 km".
+ */
+export function formatPrecision(meters: number, locale?: string): string {
+	return formatLength(meters < 10 ? Math.round(meters) : Number(meters.toPrecision(2)), locale);
+}
+
 // Formats an area in square meters, e.g. "850 m²", "12.3 ha" or "4.5 km²"
 export function formatArea(squareMeters: number, locale?: string): string {
 	if (squareMeters < 1e4) return formatNumber(Math.round(squareMeters), locale) + ' m²';

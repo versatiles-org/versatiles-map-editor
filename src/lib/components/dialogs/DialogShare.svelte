@@ -10,8 +10,14 @@
 		TextArea,
 		TextField
 	} from '$lib/components/ui/index.js';
-	import { boundsOf, digitsForResolution, resolutionOfDigits, type Bounds } from '@versatiles/map-state';
-	import { formatLength } from '$lib/components/format.js';
+	import {
+		boundsOf,
+		exponentForResolution,
+		MAX_EXPONENT,
+		resolutionOfExponent,
+		type Bounds
+	} from '@versatiles/map-state';
+	import { formatPrecision } from '$lib/components/format.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import type { StateViewer } from '@versatiles/map-state';
 
@@ -39,9 +45,11 @@
 		update(1);
 	}
 
-	// The precision of the shared map: automatic (from what it shows) or decimal places of degrees
+	// The precision of the shared map: automatic (from what it shows), or the exponent of the step
+	// of the coordinates, 0.00001° × 2^exponent: about 1 m, 2 m, 4 m, … 36 km
 	let precision: 'auto' | number = $state('auto');
-	let autoDigits = $state(5);
+	let autoExponent = $state(0);
+	const EXPONENTS = Array.from({ length: MAX_EXPONENT + 1 }, (_, exponent) => exponent);
 
 	/** The half of the larger side of an area, in meters. */
 	function radiusOf([west, south, east, north]: Bounds): number {
@@ -54,11 +62,11 @@
 	 * Fine enough for what the shared map shows, its frame or else its elements: a thousandth of
 	 * their size, below a pixel of a typical embed.
 	 */
-	function updateAutoDigits() {
+	function updateAutoExponent() {
 		const doc = stateManager.mapDocument;
 		const area = doc.frame ?? doc.getBounds();
 		const radius = area && radiusOf(area);
-		autoDigits = radius ? digitsForResolution(radius / 1000) : 5;
+		autoExponent = radius ? exponentForResolution(radius / 1000) : 0;
 	}
 
 	// What visitors may miss: elements outside the frame, or an empty map without one
@@ -113,8 +121,8 @@
 	];
 
 	function getLinkCode() {
-		const digits = precision === 'auto' ? autoDigits : precision;
-		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfDigits(digits), camera: false })}`;
+		const exponent = precision === 'auto' ? autoExponent : precision;
+		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent), camera: false })}`;
 	}
 
 	function getEmbedCode() {
@@ -123,7 +131,7 @@
 
 	function update(delay: number = 500) {
 		if (!dialog?.isOpen()) return;
-		updateAutoDigits();
+		updateAutoExponent();
 		updateNotice();
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
@@ -296,9 +304,9 @@
 							update(0);
 						}}
 					>
-						<option value="auto">Automatic (about {formatLength(resolutionOfDigits(autoDigits))})</option>
-						{#each [5, 4, 3, 2] as digits (digits)}
-							<option value={String(digits)}>About {formatLength(resolutionOfDigits(digits))}</option>
+						<option value="auto">Automatic ({formatPrecision(resolutionOfExponent(autoExponent))})</option>
+						{#each EXPONENTS as exponent (exponent)}
+							<option value={String(exponent)}>{formatPrecision(resolutionOfExponent(exponent))}</option>
 						{/each}
 					</Select>
 				</div>

@@ -58,7 +58,7 @@ describe('color palette', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeArray(['#ff0000'], (c) => writer.writeColor(c));
 		writer.writeBit(false); // no camera
-		writer.writeVarint(5); // resolution: decimal places
+		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
 		writer.writeBit(false); // no frame

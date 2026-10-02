@@ -58,7 +58,7 @@ describe('StateManager', () => {
 			mapDocument.setState(state1);
 			const hash = stateManager.getHash();
 			expect(mapDocument.getState).toHaveBeenCalled();
-			expect(hash).toBe('IG2haCUQhSJkLAQaTWAaTWIEkCBHCA');
+			expect(hash).toBe('IG2haCUQgImQsBBpNYBpNYgSQIEcIA');
 		});
 	});
 

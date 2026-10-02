@@ -87,7 +87,7 @@ describe('symbols', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeVarint(0); // no colors
 		writer.writeBit(false); // no map
-		writer.writeVarint(5); // resolution: decimal places
+		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeBit(false); // no metadata, so no symbols
 		writer.writeInteger(1, 3); // marker
 		writer.writeVarint(0, true);

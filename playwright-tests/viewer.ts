@@ -115,15 +115,20 @@ test('precision of a shared map', async ({ page }) => {
 		return { point: element.point, length: link.length };
 	};
 
-	// automatic: a thousandth of the size of the visible area, about 11 m
-	await expect(precision.getByRole('option').first()).toHaveText('Automatic (about 11 m)');
-	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4123, 52.5123]);
+	// automatic: about a thousandth of the size of the visible area, in steps of 0.00001° × 2^n:
+	// 0.00004°, about 4 m; the coordinates keep at most 5 decimal places
+	await expect(precision.getByRole('option').first()).toHaveText('Automatic (4 m)');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41236, 52.51236]);
 	const automatic = await shared();
 
-	await precision.selectOption('About 1 m');
+	// all 16 steps, from 1 m to 36 km
+	await expect(precision.getByRole('option')).toHaveCount(17);
+	await expect(precision.getByRole('option').last()).toHaveText('36 km');
+	await precision.selectOption('1 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
-	await precision.selectOption('About 1.11 km');
-	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41, 52.51]);
+	// 0.01024°
+	await precision.selectOption('1.1 km');
+	await expect.poll(async () => (await shared()).point).toStrictEqual([13.4144, 52.51072]);
 	expect((await shared()).length).toBeLessThan(automatic.length);
 
 	// the map in the editor keeps its precision

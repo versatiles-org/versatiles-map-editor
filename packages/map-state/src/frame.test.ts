@@ -30,11 +30,12 @@ const state: MapState = {
 describe('frame', () => {
 	it('is kept in a link, at the resolution of the coordinates', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
-		// about 1 km: two decimal places
+		// about 1 km: steps of 0.01024°, within half a step
 		const coarse = decodeState(
 			encodeState({ ...state, frame: [13.30004, 52.45004, 13.50004, 52.55004] }, { resolution: 1000 })
 		);
-		expect(coarse.frame).toStrictEqual(frame);
+		coarse.frame!.forEach((value, i) => expect(Math.abs(value - frame[i])).toBeLessThanOrEqual(0.00512 + 1e-4));
+		expect(coarse.frame!.every((value) => Number(value.toFixed(5)) === value)).toBe(true);
 	});
 
 	it('is kept next to the camera, which has a center of its own', () => {

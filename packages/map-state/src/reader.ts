@@ -23,7 +23,7 @@ import {
 	VIEWER_CHOICES
 } from './profile.js';
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
-import { LocalGrid, MAX_DIGITS } from './grid.js';
+import { LocalGrid } from './grid.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
@@ -173,11 +173,11 @@ export class StateReader {
 			root.map = this.readMap();
 			if (!root.map) delete root.map;
 
-			const digits = this.readVarint();
-			if (digits > MAX_DIGITS) throw new Error(`Invalid resolution: ${digits}`);
+			// the step of the coordinates: 0.00001° × 2^exponent, each of the 16 values valid
+			const exponent = this.readInteger(4);
 			// the origin of the coordinates of the frame and the elements
 			const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
-			this.grid = new LocalGrid(origin, digits);
+			this.grid = new LocalGrid(origin, exponent);
 
 			const frame = this.readFrame();
 			if (frame) root.frame = frame;

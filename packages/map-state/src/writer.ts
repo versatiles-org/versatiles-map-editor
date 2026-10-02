@@ -10,7 +10,7 @@ import {
 } from './profile.js';
 import { StateReader } from './reader.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
-import { digitsForResolution, LocalGrid } from './grid.js';
+import { exponentForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import type {
 	Bounds,
@@ -115,8 +115,9 @@ export class StateWriter {
 
 		// the camera, with its own center
 		this.writeMap(root.map);
-		const digits = digitsForResolution(this.resolution);
-		this.writeVarint(digits);
+		// the step of the coordinates: 0.00001° × 2^exponent
+		const exponent = exponentForResolution(this.resolution);
+		this.writeInteger(exponent, 4);
 
 		// The coordinates of the frame and the elements are steps from an origin near them, so the
 		// numbers stay small: the center of the frame, else of the camera, else of the elements
@@ -125,7 +126,7 @@ export class StateWriter {
 		const origin: [number, number] = [Math.round(near[0] * ORIGIN_SCALE), Math.round(near[1] * ORIGIN_SCALE)];
 		this.writeVarint(origin[0], true);
 		this.writeVarint(origin[1], true);
-		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], digits);
+		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], exponent);
 
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta, collectSymbols(root));

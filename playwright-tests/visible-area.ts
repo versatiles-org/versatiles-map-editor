@@ -180,7 +180,7 @@ test('the share dialog warns about elements outside the visible area, and edits 
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	await expect(dialog).toContainText('1 element is outside the visible area.');
 	// the precision follows the size of the frame (about 14 × 11 km), not the camera
-	await expect(dialog.getByRole('combobox', { name: 'Precision' })).toContainText('Automatic (about 11 m)');
+	await expect(dialog.getByRole('combobox', { name: 'Precision' })).toContainText('Automatic (9 m)');
 
 	// editing the visible area, and back with Done
 	await dialog.getByRole('button', { name: 'Edit visible area' }).click();

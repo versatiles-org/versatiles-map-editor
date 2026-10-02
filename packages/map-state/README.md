@@ -50,9 +50,10 @@ stateToMapJSON(state: MapState): MapJSON // the content of a .mapjson file, with
 stateFromMapJSON(json: unknown): MapState // upgrades older files, refuses newer ones
 ```
 
-- `resolution`: the precision of the coordinates in meters, rounded to decimal places of degrees.
-  The default of 1 m keeps all detail; coarser values make shorter strings, e.g. for sharing.
-  `digitsForResolution` and `resolutionOfDigits` convert between meters and decimal places.
+- `resolution`: the precision of the coordinates in meters, rounded to a step of 0.00001° × 2^n
+  (n from 0 to `MAX_EXPONENT`, 15): about 1 m, 2 m, 4 m, … 36 km. The default of 1 m keeps 5
+  decimal places; coarser values make shorter strings, e.g. for sharing. `exponentForResolution`
+  and `resolutionOfExponent` convert between meters and n.
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
@@ -166,7 +167,9 @@ hashes short:
   or that it does not have (#4, `style_history.ts`);
 - the coordinates of the frame and the elements are whole steps from an origin near them (the
   center of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a
-  global resolution in decimal places of degrees (#3, `grid.ts`). `encodeState(state, {
+  global step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each
+  zoom level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples
+  of 0.00001°, decoded coordinates have at most 5 decimal places. `encodeState(state, {
 resolution })` takes it in meters: the default is 1 m; coarser values make shorter hashes, e.g.
   for sharing.
 
