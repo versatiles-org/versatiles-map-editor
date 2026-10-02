@@ -19,8 +19,18 @@
 		},
 		"legend": {
 			"entries": [
-				{ "color": "#0072b2", "label": "Low-emission zone, inside the S-Bahn ring" },
-				{ "color": "#009e73", "label": "Large parks" }
+				{
+					"type": "polygon",
+					"style": { "color": "#0072b24d", "pattern": 2 },
+					"strokeStyle": { "color": "#0072b2", "width": 2.5 },
+					"label": "Low-emission zone, inside the S-Bahn ring"
+				},
+				{
+					"type": "polygon",
+					"style": { "color": "#009e7380" },
+					"strokeStyle": { "color": "#009e73" },
+					"label": "Large parks"
+				}
 			]
 		},
 		"title": "Berlin low-emission zone",
