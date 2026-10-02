@@ -19,6 +19,7 @@ import {
 	encodedValue,
 	STYLE_FIELDS,
 	STYLE_REMOVE_KEY,
+	STYLE_REFERENCE_ORDER,
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
@@ -470,7 +471,7 @@ export class StateWriter {
 		let best: StateWriter | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
 			const writer = this.fork();
-			writer.writeVarint(ref);
+			writer.writeExpGolomb(ref, STYLE_REFERENCE_ORDER);
 			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
 			if (!best || writer.bits.length < best.bits.length) best = writer;
 		}

@@ -173,7 +173,8 @@ To keep hashes short:
   vocabulary before (`string_primer.ts`). For the others, it starts empty and learns the strings
   of the map, so text in any script gets shorter, and repeated words cost little;
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
-  or that it does not have (#4, `style_history.ts`);
+  or that it does not have (#4, `style_history.ts`); the reference is an Exp-Golomb code, 1 bit
+  for none and 3 bits for the latest style;
 - an element that has the type and the styles of the element before costs 1 bit for them; the
   label of an element's style is stored as a field of the element, so elements that differ only
   in their labels still repeat their style;

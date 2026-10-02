@@ -102,7 +102,7 @@ describe('symbols', () => {
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
-		writer.writeVarint(0); // no reference
+		writer.writeExpGolomb(0, 0); // no reference
 		writer.writeInteger(13, 4); // symbol
 		// not the next string, but the one with index 5
 		writer.writeBit(false);

@@ -22,7 +22,7 @@ The first release.
     scripts and 12 in Chinese and Japanese, instead of 7–19; the words of the format with a model
     that learned the vocabulary of the format before; the block needs no length, the decoder knows
     where it ends;
-  - style references to similar earlier styles;
+  - style references to similar earlier styles, in an Exp-Golomb code;
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short,

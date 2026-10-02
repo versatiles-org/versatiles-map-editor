@@ -27,7 +27,14 @@ import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
-import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory, withoutLabel } from './style_history.js';
+import {
+	OLD_OPACITY_KEY,
+	STYLE_FIELDS,
+	STYLE_REFERENCE_ORDER,
+	STYLE_REMOVE_KEY,
+	StyleHistory,
+	withoutLabel
+} from './style_history.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
 export class StateReader {
@@ -565,7 +572,7 @@ export class StateReader {
 	 */
 	readStyle(): StateStyle {
 		try {
-			const ref = this.readVarint();
+			const ref = this.readExpGolomb(STYLE_REFERENCE_ORDER);
 			const base = this.styleHistory.get(ref);
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch({ ...base });

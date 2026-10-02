@@ -168,7 +168,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLEweGoDhqAgC8qEAAEIoagChqAcNQHDUBCgIAxiBqACBqAOGoDhqA4agOGoCFAgQoGAQyuYAyuYCKAYQQGEA'
+			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLEweGoDhqAxeVCAACEUNQBQ1AOGoDhqAqAgDGIGoAIGoA4agOGoDhqA4agKgQKgYBDK5gDK5gIswg2EA'
 		);
 	});
 
@@ -201,7 +201,7 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('Cf4AAAgGHfLNlCALxjJmIuTXORAE6A');
+		expect(writer.asBase64()).toBe('Cf4AAAgGHfLNlDF4xkzEXJrnIgCdA');
 	});
 
 	it('should write a RGB color correctly', () => {

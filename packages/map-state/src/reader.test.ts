@@ -356,7 +356,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAgCwooUAAEIABhrAAAYawAAMNgAAMNgANoAAlwVIAAJor-mNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisYAvMhAQQoEAQABhqgAAGGqAzDYgQMECCAA'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAxYUUKAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWOLzIQEFQIAgADDVAAAMNUBmGxwMHBAA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -368,7 +368,7 @@ describe('StateReader', () => {
 		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
 		// the outline of a polygon, the outline referring to the style of the fill
 		const state = StateReader.fromBase64(
-			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAgCwVKkAAEIABhrAAAYawAAMNgAAMNgANoAAlwVIAAJor-mNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisYAvFCJAQQoEAQABhqgAAGGqAzDYgQMECCAAA'
+			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAxYKlSAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWOLxQiQEFQIAgADDVAAAMNUBmGxwMHBAAAA'
 		).readRoot();
 		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
 		// at most opaque
@@ -380,8 +380,8 @@ describe('StateReader', () => {
 
 	describe('readStyle', () => {
 		it('should read a style object', () => {
-			// no reference to an earlier style, then the halo
-			const reader = StateReader.fromBitString('00000000010000100000');
+			// no reference to an earlier style (Exp-Golomb: 1), then the halo (key 1, 0.1 as 1) and the end
+			const reader = StateReader.fromBitString('1' + '0001' + '000010' + '0000');
 			const style = reader.readStyle();
 			expect(style).toStrictEqual({ halo: 0.1 });
 			expect(reader.ended()).toBe(true);
@@ -405,7 +405,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQgC8YyZiLk1zkQBOg');
+			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQxeMZMxFya5yIAnQA');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -447,7 +447,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir4DShQAAI5yZjC9nEDQkSHTsZAWnDWkOxBBsAgLDwjE9wjMoAAA'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir9pQoAAEc5Mxr2cQNCRIdOxkBacNaQ7EEGwCAsPRie4SMoAAA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [

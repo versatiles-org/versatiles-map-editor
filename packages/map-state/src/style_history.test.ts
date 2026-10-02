@@ -87,6 +87,17 @@ describe('style references', () => {
 		expect(decode(encode(state))).toStrictEqual(state);
 	});
 
+	it('cost 1 bit for none and 3 bits for the latest style', () => {
+		const writer = new StateWriter();
+		writer.writeStyle({ halo: 1 });
+		// no reference, the halo, the end
+		expect(writer.asBitString()).toBe('1' + '0001' + '010100' + '0000');
+		const start = writer.bits.length;
+		writer.writeStyle({ halo: 1 });
+		// the latest style, the end
+		expect(writer.asBitString().slice(start)).toBe('010' + '0000');
+	});
+
 	it('reject an invalid reference', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
@@ -104,7 +115,7 @@ describe('style references', () => {
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
-		writer.writeVarint(3); // reference to a style that does not exist
+		writer.writeExpGolomb(3, 0); // reference to a style that does not exist
 		writer.writeInteger(0, 4);
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(

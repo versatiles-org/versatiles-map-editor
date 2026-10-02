@@ -70,7 +70,7 @@ describe('color palette', () => {
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
-		writer.writeVarint(0); // no reference
+		writer.writeExpGolomb(0, 0); // no reference
 		writer.writeInteger(8, 4); // color
 		writer.writeVarint(5);
 		writer.writeInteger(0, 4);
