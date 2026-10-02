@@ -2,7 +2,7 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import type { StyleSpecification } from '@versatiles/style';
 import { getMapStyle, getSettings } from '../background/index.js';
-import { ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
+import { AREAS_TOP, ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
 
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */
 function hasCoarsePointer(): boolean {
@@ -22,13 +22,15 @@ function emptySource(): SourceSpecification {
 
 /**
  * The layers that are drawn under the labels of the background map if they are on top: the areas
- * and lines of the elements, and the highlight under them. The markers are always on top.
+ * and lines of the elements, and the highlight under them. The markers are always on top. The
+ * renderer puts the other layers of areas and lines under `AREAS_TOP`.
  */
 export const LAYERS_UNDER_MAP_LABELS = [
 	'highlight_line',
 	'highlight_point',
 	ELEMENT_LAYERS.fill,
-	ELEMENT_LAYERS.stroke
+	ELEMENT_LAYERS.stroke,
+	AREAS_TOP
 ];
 
 /**

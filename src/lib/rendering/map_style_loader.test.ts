@@ -107,7 +107,7 @@ describe('MapStyleLoader', () => {
 	});
 
 	describe('labels of the background map on top', () => {
-		const under = ['highlight_line', 'highlight_point', 'elements_fill', 'elements_stroke'];
+		const under = ['highlight_line', 'highlight_point', 'elements_fill', 'elements_stroke', 'elements_areas_top'];
 
 		beforeEach(async () => {
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));

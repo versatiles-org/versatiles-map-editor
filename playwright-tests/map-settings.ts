@@ -1,5 +1,6 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
+import type { GeoJSONSource } from 'maplibre-gl';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	drawElement,
@@ -400,6 +401,82 @@ test('the labels of the background map over areas and lines, those of markers al
 	await checkbox.uncheck();
 	await expect.poll(order).toStrictEqual({ fill: 1, stroke: 1, symbol: 1 });
 	await expect.poll(async () => (await storedState(page)).meta?.mapLabelsOnTop).toBeUndefined();
+});
+
+/**
+ * What the layers of the elements draw, from the bottom up, e.g. "3 fill", "4 symbol", "4 label":
+ * the parts of the elements by their index, read from the layers of the map and their features.
+ * The layers of markers draw all their symbols before all their labels.
+ */
+function drawnParts(page: Page): Promise<string[]> {
+	return page.evaluate(async () => {
+		const map = (window as unknown as MapWindow).map;
+		const features = async (source: string) =>
+			((await map.getSource<GeoJSONSource>(source)!.getData()) as GeoJSON.FeatureCollection).features;
+		const sources = {
+			fill: await features('elements_fill'),
+			stroke: await features('elements_stroke'),
+			symbol: await features('elements_symbol')
+		};
+		const parts: string[] = [];
+		for (const id of map.getLayersOrder()) {
+			const role = /^elements_(fill|stroke|symbol)(_\d+)?$/.exec(id)?.[1] as keyof typeof sources | undefined;
+			const drawn = (
+				role ? sources[role].filter((f) => f.properties?.layer === id) : id === 'elements_labels' ? sources.symbol : []
+			)
+				.map((f) => f.properties!)
+				.sort((a, b) => a.order - b.order);
+			if (role && role !== 'symbol') parts.push(...drawn.map((p) => `${p.order} ${role}`));
+			if (role === 'symbol') parts.push(...drawn.map((p) => `${p.order} symbol`));
+			// the labels, unless the layer draws none
+			if (map.getLayer(id)?.type === 'symbol' && map.getLayoutProperty(id, 'text-field') !== '') {
+				parts.push(...drawn.filter((p) => p.label).map((p) => `${p.order} label`));
+			}
+		}
+		return parts;
+	});
+}
+
+// The layers of the elements draw exactly what one layer per element would, in the same order
+test('the layers of the elements draw them in their order', async ({ page }) => {
+	// a random map of all kinds of elements, overlapping, the same each run
+	let seed = 7;
+	const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+	const at = (): [number, number] => [13.39 + random() * 0.02, 52.495 + random() * 0.01];
+	const kinds: (() => MapState['elements'][number])[] = [
+		() => ({ type: 'marker', point: at() }),
+		() => ({ type: 'marker', point: at(), style: { label: 'Label' } }),
+		() => ({ type: 'polygon', points: [at(), at(), at()] }),
+		() => ({ type: 'polygon', points: [at(), at(), at()], strokeStyle: { visible: false } }),
+		() => ({ type: 'circle', point: at(), radius: 200 }),
+		() => ({ type: 'line', points: [at(), at()] })
+	];
+	const elements = Array.from({ length: 40 }, () => kinds[Math.floor(random() * kinds.length)]());
+	/** What one layer per element draws: each one's area, outline or line, symbol, label. */
+	const reference = (markersOnTop: boolean) => {
+		const parts = (e: MapState['elements'][number], i: number) =>
+			e.type === 'marker'
+				? [`${i} symbol`, ...(e.style?.label ? [`${i} label`] : [])]
+				: [
+						...(e.type === 'line' ? [] : [`${i} fill`]),
+						...('strokeStyle' in e && e.strokeStyle?.visible === false ? [] : [`${i} stroke`])
+					];
+		if (!markersOnTop) return elements.flatMap(parts);
+		return [
+			...elements.flatMap((e, i) => (e.type === 'marker' ? [] : parts(e, i))),
+			...elements.flatMap((e, i) => (e.type === 'marker' ? parts(e, i) : []))
+		];
+	};
+	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 2000 }, elements }));
+	await waitForMapIsReady(page);
+	expect(await drawnParts(page)).toStrictEqual(reference(false));
+
+	// with the labels of the background map over areas and lines: the markers over all of them
+	const checkbox = page.getByRole('checkbox', { name: 'Over areas and lines' });
+	await checkbox.check();
+	await expect.poll(() => drawnParts(page)).toStrictEqual(reference(true));
+	await checkbox.uncheck();
+	await expect.poll(() => drawnParts(page)).toStrictEqual(reference(false));
 });
 
 test('editing the legend', async ({ page }) => {

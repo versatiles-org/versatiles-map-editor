@@ -102,7 +102,7 @@ export class MapView {
 				[x - tolerance, y - tolerance],
 				[x + tolerance, y + tolerance]
 			],
-			// each role is drawn by several layers, see groupElements
+			// each role is drawn by several layers, see planLayers
 			{ layers: layerIds.flatMap((id) => this.renderer.layerIds(roleOf(id))) }
 		);
 		// the topmost first; the element layers share the element ids as feature ids

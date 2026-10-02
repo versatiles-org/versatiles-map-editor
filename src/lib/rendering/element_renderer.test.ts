@@ -4,11 +4,12 @@ import { MapDocument } from '../map_document.svelte.js';
 import {
 	ELEMENT_LAYERS,
 	elementStyle,
-	groupElements,
 	labelLayout,
 	layerIdsOf,
-	MAX_GROUPS,
-	type Drawn
+	MAX_LAYERS,
+	planLayers,
+	type Drawn,
+	type LayerPlan
 } from './element_renderer.js';
 import type { PolygonElement } from '../element/polygon.js';
 import type { MarkerElement } from '../element/marker.js';
@@ -20,9 +21,21 @@ describe('ElementRenderer', () => {
 	let doc: MapDocument;
 	let sources: Record<string, Source>;
 
+	// the layers of the map, also those that are added, moved and removed
+	let order: string[];
+
 	beforeEach(async () => {
 		map = new MockMap();
 		sources = {};
+		order = ['elements_fill', 'elements_stroke', 'elements_areas_top', 'elements_symbol', 'elements_top', 'selection'];
+		map.getLayersOrder.mockImplementation(() => [...order]);
+		const place = (id: string, before: string) => {
+			if (order.includes(id)) order.splice(order.indexOf(id), 1);
+			order.splice(order.indexOf(before), 0, id);
+		};
+		map.addLayer.mockImplementation((layer: { id: string }, before: string) => place(layer.id, before));
+		map.moveLayer.mockImplementation(place);
+		map.removeLayer.mockImplementation((id: string) => order.splice(order.indexOf(id), 1));
 		// one source object per id, like MapLibre
 		map.getSource.mockImplementation(
 			(id: string) => (sources[id] ??= { setData: vi.fn(), updateData: vi.fn() }) as never
@@ -96,9 +109,15 @@ describe('ElementRenderer', () => {
 	it('gives every map style the element layers, with the font of the map', () => {
 		const { sources, layers } = elementStyle('lato_bold');
 		expect(Object.keys(sources)).toStrictEqual(['elements_fill', 'elements_stroke', 'elements_symbol']);
-		// areas at the bottom, markers on top
-		expect(layers.map((l) => l.id)).toStrictEqual(['elements_fill', 'elements_stroke', 'elements_symbol']);
-		const symbol = layers[2] as { layout: Record<string, unknown> };
+		// areas at the bottom, markers on top, and the invisible marks of the tops
+		expect(layers.map((l) => l.id)).toStrictEqual([
+			'elements_fill',
+			'elements_stroke',
+			'elements_areas_top',
+			'elements_symbol',
+			'elements_top'
+		]);
+		const symbol = layers[3] as { layout: Record<string, unknown> };
 		expect(symbol.layout['text-font']).toStrictEqual(['literal', ['lato_bold']]);
 	});
 
@@ -110,31 +129,31 @@ describe('ElementRenderer', () => {
 			});
 			doc.view.renderer.flush();
 		}
-		const groups = () => lastFeatures('symbol').map((f) => [f.properties?.label, f.properties?.group]);
+		const groups = () => lastFeatures('symbol').map((f) => [f.properties?.label, f.properties?.layer]);
 		const addedLayers = () => map.addLayer.mock.calls.map(([layer]) => [layer.id, layer.filter]);
 
-		it('are drawn in groups by layers from the back to the front, each group ending with a label', async () => {
-			// the layers of the map, also those that are added
-			const order = ['elements_symbol', 'selection'];
-			map.getLayersOrder.mockImplementation(() => [...order]);
-			map.addLayer.mockImplementation((layer: { id: string }, before?: string) => {
-				order.splice(before ? order.indexOf(before) : order.length, 0, layer.id);
-			});
+		it('are drawn by layers from the back to the front, each ending with a label', async () => {
 			await markers(['A', '', 'B', '', '']);
 			// MapLibre draws the labels of a layer over all its symbols
 			expect(groups()).toStrictEqual([
-				['A', 0],
-				['', 1],
-				['B', 1],
-				['', 2],
-				['', 2]
+				['A', 'elements_symbol'],
+				['', 'elements_symbol_1'],
+				['B', 'elements_symbol_1'],
+				['', 'elements_symbol_2'],
+				['', 'elements_symbol_2']
 			]);
 			expect(addedLayers()).toStrictEqual([
-				['elements_symbol_1', ['==', ['get', 'group'], 1]],
-				['elements_symbol_2', ['==', ['get', 'group'], 2]]
+				['elements_symbol_1', ['==', ['get', 'layer'], 'elements_symbol_1']],
+				['elements_symbol_2', ['==', ['get', 'layer'], 'elements_symbol_2']]
 			]);
-			// above the first layer of the markers, under the layers that follow it
-			expect(map.addLayer.mock.calls.map(([, before]) => before)).toStrictEqual(['selection', 'selection']);
+			// in their order, under the top of the elements, e.g. under the selection
+			expect(order.slice(order.indexOf('elements_symbol'))).toStrictEqual([
+				'elements_symbol',
+				'elements_symbol_1',
+				'elements_symbol_2',
+				'elements_top',
+				'selection'
+			]);
 			expect(doc.view.renderer.symbolLayerIds()).toStrictEqual([
 				'elements_symbol',
 				'elements_symbol_1',
@@ -150,10 +169,10 @@ describe('ElementRenderer', () => {
 			await Promise.resolve();
 			expect(map.removeLayer).toHaveBeenCalledWith('elements_symbol_2');
 			expect(groups()).toStrictEqual([
-				['A', 0],
-				['', 1],
-				['', 1],
-				['', 1]
+				['A', 'elements_symbol'],
+				['', 'elements_symbol_1'],
+				['', 'elements_symbol_1'],
+				['', 'elements_symbol_1']
 			]);
 			a.layer.label = '';
 			await Promise.resolve();
@@ -164,8 +183,8 @@ describe('ElementRenderer', () => {
 		});
 
 		it('share one layer if there are too many, since every layer costs time', async () => {
-			await markers(Array.from({ length: MAX_GROUPS + 1 }, (_, i) => `Label ${i}`));
-			expect(new Set(groups().map(([, group]) => group))).toStrictEqual(new Set([0]));
+			await markers(Array.from({ length: MAX_LAYERS + 1 }, (_, i) => `Label ${i}`));
+			expect(new Set(groups().map(([, layer]) => layer))).toStrictEqual(new Set(['elements_symbol']));
 			// only a layer for their labels, above the markers, which draw none
 			expect(addedLayers().map(([id]) => id)).toStrictEqual(['elements_labels']);
 			const layout = (id: string, key: string) =>
@@ -191,7 +210,7 @@ describe('ElementRenderer', () => {
 		});
 	});
 
-	it('draws a polygon over a marker in front of it with layers of another group', async () => {
+	it('draws a polygon over a marker in front of it with layers of its own', async () => {
 		map.addLayer.mockClear();
 		await doc.setState({
 			elements: [
@@ -207,56 +226,136 @@ describe('ElementRenderer', () => {
 			]
 		});
 		doc.view.renderer.flush();
-		// the polygon's area and outline above the marker
-		expect(map.addLayer.mock.calls.map(([layer]) => layer.id)).toStrictEqual(['elements_fill_1', 'elements_stroke_1']);
-		expect(doc.view.renderer.layerIds('fill')).toStrictEqual(['elements_fill', 'elements_fill_1']);
-		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([1]);
-		expect(lastFeatures('symbol').map((f) => f.properties?.group)).toStrictEqual([0]);
+		// the polygon's area and outline above the marker; the first layers of the roles draw them
+		expect(map.addLayer).not.toHaveBeenCalled();
+		const elementLayers = () => order.filter((id) => id.startsWith('elements'));
+		expect(elementLayers()).toStrictEqual([
+			'elements_areas_top',
+			'elements_symbol',
+			'elements_fill',
+			'elements_stroke',
+			'elements_top'
+		]);
+		expect(lastFeatures('fill').map((f) => f.properties?.layer)).toStrictEqual(['elements_fill']);
 
-		// with the markers on top (e.g. with the labels of the background map over areas and lines):
-		// the polygon is the first of the areas and lines, so one group
+		// with the markers on top (e.g. with the labels of the background map over areas and lines),
+		// the areas and lines under their own top
 		doc.view.renderer.setMarkersOnTop(true);
 		doc.view.renderer.flush();
-		expect(map.removeLayer.mock.calls.map(([id]) => id)).toStrictEqual(['elements_stroke_1', 'elements_fill_1']);
-		expect(lastFeatures('fill').map((f) => f.properties?.group)).toStrictEqual([0]);
+		expect(elementLayers()).toStrictEqual([
+			'elements_fill',
+			'elements_stroke',
+			'elements_areas_top',
+			'elements_symbol',
+			'elements_top'
+		]);
+		expect(map.removeLayer).not.toHaveBeenCalled();
 	});
 });
 
-describe('groupElements', () => {
+describe('planLayers', () => {
 	const marker: Drawn = { roles: ['symbol'], label: false };
 	const labeled: Drawn = { roles: ['symbol'], label: true };
 	const polygon: Drawn = { roles: ['fill', 'stroke'], label: false };
 	const area: Drawn = { roles: ['fill'], label: false };
 	const line: Drawn = { roles: ['stroke'], label: false };
+	const layers = (plan: LayerPlan) => plan.layers.map(({ role, elements }) => `${role} ${elements.join()}`);
 
-	it('keeps elements in one group while nothing of them is drawn under something before them', () => {
-		const groups = (elements: Drawn[], markersOnTop?: boolean) => groupElements(elements, markersOnTop).groups;
-		expect(groups([area, area, line, line, marker, marker])).toStrictEqual([0, 0, 0, 0, 0, 0]);
-		// an area over an outline, a line over a marker, a marker over a label: a new group
-		expect(groups([polygon, polygon])).toStrictEqual([0, 1]);
-		expect(groups([marker, line])).toStrictEqual([0, 1]);
-		expect(groups([labeled, marker, labeled, marker])).toStrictEqual([0, 1, 1, 2]);
-		// a marker under a polygon, and another marker over it
-		expect(groups([marker, polygon, marker])).toStrictEqual([0, 1, 1]);
-		expect(groupElements([marker, polygon]).markersOnTop).toBe(false);
+	/**
+	 * What the layers draw, in this order: the parts of the elements, e.g. "2 label". A layer of
+	 * markers draws all its symbols before all its labels; the labels of the markers in a layer
+	 * of their own (`sharedLabels`) come last.
+	 */
+	function drawn(plan: LayerPlan, elements: Drawn[]): string[] {
+		const parts = plan.layers.flatMap(({ role, elements: indices }) => {
+			if (role !== 'symbol') return indices.map((i) => `${i} ${role}`);
+			const labels = plan.sharedLabels ? [] : indices.filter((i) => elements[i].label).map((i) => `${i} label`);
+			return [...indices.map((i) => `${i} symbol`), ...labels];
+		});
+		const labels = elements.flatMap((e, i) => (e.label ? [`${i} label`] : []));
+		return plan.sharedLabels ? [...parts, ...labels] : parts;
+	}
+
+	/** What one layer per element draws: each element's area, outline or line, symbol, label. */
+	function reference(elements: Drawn[], markersOnTop = false): string[] {
+		const parts = (e: Drawn, i: number) => [
+			...e.roles.map((role) => `${i} ${role}`),
+			...(e.label ? [`${i} label`] : [])
+		];
+		if (!markersOnTop) return elements.flatMap(parts);
+		const isMarker = (e: Drawn) => e.roles.includes('symbol');
+		return [
+			...elements.flatMap((e, i) => (isMarker(e) ? [] : parts(e, i))),
+			...elements.flatMap((e, i) => (isMarker(e) ? parts(e, i) : []))
+		];
+	}
+
+	it('merges layers in a row that draw the same', () => {
+		expect(layers(planLayers([area, area, line, line, marker, marker]))).toStrictEqual([
+			'fill 0,1',
+			'stroke 2,3',
+			'symbol 4,5'
+		]);
+		// two polygons: area, outline, area, outline
+		expect(layers(planLayers([polygon, polygon]))).toStrictEqual(['fill 0', 'stroke 0', 'fill 1', 'stroke 1']);
+		// a marker after a label: in a layer of its own
+		expect(layers(planLayers([labeled, marker, labeled, marker]))).toStrictEqual([
+			'symbol 0',
+			'symbol 1,2',
+			'symbol 3'
+		]);
+		expect(layers(planLayers([marker, polygon, marker]))).toStrictEqual(['symbol 0', 'fill 1', 'stroke 1', 'symbol 2']);
 	});
 
-	it('keeps the order of areas and lines, and of markers, with the markers on top', () => {
-		// the markers over the polygon, but each polygon over the one before, also its outline
-		expect(groupElements([marker, polygon, labeled, marker, polygon], true)).toStrictEqual({
-			groups: [0, 0, 0, 1, 1],
-			markersOnTop: true
-		});
-		// with too many groups: also with the markers on top
-		const many = Array.from({ length: MAX_GROUPS + 1 }, () => polygon);
-		expect(groupElements([...many, labeled, marker])).toStrictEqual({
-			groups: [...many.map(() => 0), 0, 1],
-			markersOnTop: true
-		});
-		// up to the limit, each in a group of its own
-		expect(groupElements(many.slice(1))).toStrictEqual({ groups: many.slice(1).map((_, i) => i), markersOnTop: false });
-		const lines = Array.from({ length: MAX_GROUPS }, () => line);
-		expect(groupElements([...many.slice(1), marker, ...lines], true).groups.slice(-2)).toStrictEqual([99, 99]);
+	it('puts the markers over all areas and lines on demand', () => {
+		const plan = planLayers([marker, polygon, labeled, marker, polygon], true);
+		expect(layers(plan)).toStrictEqual(['fill 1', 'stroke 1', 'fill 4', 'stroke 4', 'symbol 0,2', 'symbol 3']);
+		expect(plan.markersOnTop).toBe(true);
+	});
+
+	it('draws exactly like one layer per element', () => {
+		// random maps of all kinds of elements, the same each run
+		let seed = 1;
+		const random = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+		const kinds = [marker, labeled, polygon, area, line];
+		for (let run = 0; run < 500; run++) {
+			const elements = Array.from(
+				{ length: Math.floor(random() * 30) },
+				() => kinds[Math.floor(random() * kinds.length)]
+			);
+			for (const markersOnTop of [false, true]) {
+				const plan = planLayers(elements, markersOnTop);
+				expect(plan.sharedLabels).toBe(false);
+				expect(drawn(plan, elements)).toStrictEqual(reference(elements, markersOnTop));
+				// and no two layers in a row could be one
+				plan.layers.slice(1).forEach(({ role, elements: [first] }, i) => {
+					const before = plan.layers[i];
+					const label = before.elements.some((e) => elements[e].label);
+					expect(role === before.role && !(role === 'symbol' && label), `${first}`).toBe(false);
+				});
+			}
+		}
+	});
+
+	it('draws with fewer layers if there are too many, step by step', () => {
+		// 1. the labels of all markers in a layer of their own, over all markers
+		const labels = Array.from({ length: MAX_LAYERS + 1 }, () => labeled);
+		const shared = planLayers([polygon, ...labels]);
+		expect(layers(shared)).toStrictEqual(['fill 0', 'stroke 0', `symbol ${labels.map((_, i) => i + 1).join()}`]);
+		expect(shared).toMatchObject({ sharedLabels: true, markersOnTop: false });
+
+		// 2. the markers over all areas and lines, which keep their order
+		const mixed = Array.from({ length: MAX_LAYERS + 1 }, (_, i) => (i % 2 ? marker : line));
+		const onTop = planLayers(mixed);
+		expect(onTop).toMatchObject({ sharedLabels: true, markersOnTop: true });
+		expect(onTop.layers).toHaveLength(2);
+		expect(drawn(onTop, mixed)).toStrictEqual(reference(mixed, true));
+
+		// 3. all areas under all lines and outlines
+		const polygons = Array.from({ length: MAX_LAYERS / 2 + 1 }, () => polygon);
+		expect(planLayers(polygons).layers.map(({ role }) => role)).toStrictEqual(['fill', 'stroke']);
+		// up to the limit, each in layers of its own
+		expect(planLayers(polygons.slice(1)).layers).toHaveLength(MAX_LAYERS);
 	});
 });
 

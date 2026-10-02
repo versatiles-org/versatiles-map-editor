@@ -536,10 +536,8 @@ describe('MapDocument', () => {
 			expect(destroyLine).toHaveBeenCalled();
 
 			// [marker] becomes [line, circle]: a new line and a new circle
-			mockMap.moveLayer.mockClear();
 			await doc.state.redo();
 			expect(doc.elements.map((e) => e.constructor)).toStrictEqual([LineElement, CircleElement]);
-			expect(mockMap.moveLayer).not.toHaveBeenCalled();
 		});
 	});
 

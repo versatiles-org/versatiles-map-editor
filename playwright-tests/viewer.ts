@@ -492,13 +492,14 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 	expect((await colors([marker, area, behind])).blue).toBeGreaterThan(50);
 });
 
-// More than 100 labels share one layer of markers; with overlapping labels hidden, the labels are
-// placed from the front in a layer of their own, so the marker in front keeps its label
+// With more than 200 layers (here: labeled markers), the labels of the markers get one layer of
+// their own; with overlapping labels hidden, they are placed from the front, so the marker in front
+// keeps its label
 test('with many labels, the marker in front keeps its label where labels overlap', async ({ page }) => {
 	const point: [number, number] = [13.4, 52.5];
-	const many = Array.from({ length: 120 }, (_, i) => ({
+	const many = Array.from({ length: 220 }, (_, i) => ({
 		type: 'marker' as const,
-		point: [13.3 + (i % 12) * 0.002, 52.45 + Math.floor(i / 12) * 0.002] as [number, number],
+		point: [13.3 + (i % 20) * 0.002, 52.45 + Math.floor(i / 20) * 0.002] as [number, number],
 		style: { label: `L${i}` }
 	}));
 	const state: MapState = {

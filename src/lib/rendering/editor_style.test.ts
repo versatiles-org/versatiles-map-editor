@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type * as maplibregl from 'maplibre-gl';
 import { buildStyle, keepElements } from './editor_style.js';
-import { ELEMENT_LAYERS } from './element_renderer.js';
+import { AREAS_TOP, ELEMENT_LAYERS, ELEMENTS_TOP } from './element_renderer.js';
 
 describe('buildStyle', () => {
 	it('puts the layers of the editor over the background map, in their order', () => {
@@ -13,7 +13,9 @@ describe('buildStyle', () => {
 			'highlight_point',
 			ELEMENT_LAYERS.fill,
 			ELEMENT_LAYERS.stroke,
+			AREAS_TOP,
 			ELEMENT_LAYERS.symbol,
+			ELEMENTS_TOP,
 			'selection_marks',
 			'selection_nodes',
 			'visible_area_veil',
@@ -28,8 +30,10 @@ describe('buildStyle', () => {
 		expect(ids.slice(-own.length)).toStrictEqual(own);
 		expect(index('highlight_line')).toBeGreaterThan(0);
 		for (const id of own) {
-			const source = style.layers[index(id)] as { source: string };
-			expect(style.sources[source.source], id).toBeDefined();
+			const layer = style.layers[index(id)];
+			// all but the invisible marks of places
+			if (layer.type === 'background') continue;
+			expect(style.sources[(layer as { source: string }).source], id).toBeDefined();
 		}
 		// changes of the background map are not animated
 		expect(style.transition).toStrictEqual({ duration: 0, delay: 0 });
@@ -41,11 +45,12 @@ describe('buildStyle', () => {
 		const firstLabel = style.layers.findIndex((layer) => layer.type === 'symbol');
 		expect(firstLabel).toBeGreaterThan(0);
 		expect(style.layers[firstLabel].id).not.toBe(ELEMENT_LAYERS.symbol);
-		const under = ['highlight_line', 'highlight_point', ELEMENT_LAYERS.fill, ELEMENT_LAYERS.stroke];
+		const under = ['highlight_line', 'highlight_point', ELEMENT_LAYERS.fill, ELEMENT_LAYERS.stroke, AREAS_TOP];
 		expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
 		// the markers, the selection, the visible area and the drawing stay on top
-		expect(ids.slice(-10)).toStrictEqual([
+		expect(ids.slice(-11)).toStrictEqual([
 			ELEMENT_LAYERS.symbol,
+			ELEMENTS_TOP,
 			'selection_marks',
 			'selection_nodes',
 			'visible_area_veil',

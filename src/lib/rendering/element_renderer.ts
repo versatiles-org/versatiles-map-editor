@@ -9,8 +9,8 @@ import { allSymbols } from '../symbols_catalog.js';
 export type Role = keyof StyleLayers;
 
 /**
- * The source of each role, and the layer of its first group, see `groupElements`. Within a layer,
- * the elements keep their order (the "order" property).
+ * The source of each role, and its first layer, see `planLayers`. Within a layer, the elements keep
+ * their order (the "order" property).
  */
 export const ELEMENT_LAYERS: Record<Role, string> = {
 	fill: 'elements_fill',
@@ -20,74 +20,96 @@ export const ELEMENT_LAYERS: Record<Role, string> = {
 const ROLES = Object.keys(ELEMENT_LAYERS) as Role[];
 
 /**
- * The most groups of layers of a kind, see `groupElements`: every layer costs time, so with more,
- * the markers are drawn over all areas and lines, or a kind is drawn in one group.
+ * Invisible layers that mark places in the map style: the top of the areas and lines while the
+ * markers are drawn over them (e.g. under the labels of the background map), and the top of all
+ * layers of the elements (under e.g. the selection).
  */
-export const MAX_GROUPS = 100;
+export const AREAS_TOP = 'elements_areas_top';
+export const ELEMENTS_TOP = 'elements_top';
 
-/** The layer of a role in a group: the first group has `elements_fill` etc., the next ones are above it. */
-export function layerId(role: Role, group: number): string {
-	return group === 0 ? ELEMENT_LAYERS[role] : `${ELEMENT_LAYERS[role]}_${group}`;
-}
+/**
+ * The most layers for the elements: every layer costs time (a map with 559 layers took ten times as
+ * long to load as with 4), so with more, they are drawn with fewer layers, see `planLayers`.
+ */
+export const MAX_LAYERS = 200;
 
-/** The layer of a group of markers. */
-export function symbolLayerId(group: number): string {
-	return layerId('symbol', group);
-}
-
-/** What an element draws, for its group: the roles of its style, and whether it has a label. */
+/** What an element draws: the roles of its style, and whether it has a label. */
 export interface Drawn {
 	roles: Role[];
 	label: boolean;
 }
 
-/**
- * The group of each element, in drawing order, and whether the markers are drawn over all areas
- * and lines. The elements of a group are drawn by one layer per role: its areas, then its lines
- * and outlines, then its markers; MapLibre draws the symbols of a layer before all its labels
- * (maplibre-gl-js issue #49). So an element joins the group of the one before it, unless something
- * of it would be drawn under something earlier in the group: its area under a line or a marker,
- * its line under a marker, its marker under a label. This looks the same as one layer per
- * element, with far fewer layers.
- *
- * With `markersOnTop` (e.g. while the labels of the background map are between the areas and lines
- * and the markers), or with more than `MAX_GROUPS` groups, the markers are drawn over all areas and
- * lines: the areas and lines are grouped among themselves, and the markers among themselves, so
- * each keeps its place among the others of its kind. If that gives more than `MAX_GROUPS` groups
- * of a kind, all of it is in the first group: areas under all lines, markers under all labels.
- */
-export function groupElements(elements: Drawn[], markersOnTop = false): { groups: number[]; markersOnTop: boolean } {
-	if (!markersOnTop) {
-		const groups = chain(elements);
-		if (Math.max(0, ...groups) < MAX_GROUPS) return { groups, markersOnTop: false };
-	}
-	const groups = new Array<number>(elements.length);
-	for (const markers of [false, true]) {
-		const indices = elements.flatMap((e, i) => (e.roles.includes('symbol') === markers ? [i] : []));
-		const kind = chain(indices.map((i) => elements[i]));
-		const separate = Math.max(0, ...kind) < MAX_GROUPS;
-		indices.forEach((i, j) => (groups[i] = separate ? kind[j] : 0));
-	}
-	return { groups, markersOnTop: true };
+/** The layers that draw the elements, in drawing order, see `planLayers`. */
+export interface LayerPlan {
+	/** Each layer with the elements (their indices) that it draws. */
+	layers: { role: Role; elements: number[] }[];
+	/** Whether the markers are drawn over all areas and lines. */
+	markersOnTop: boolean;
+	/** Whether the labels of all markers are drawn by one layer over all markers, see `LABELS_LAYER`. */
+	sharedLabels: boolean;
 }
 
-/** The groups of elements in one order, see `groupElements`. */
-function chain(elements: Drawn[]): number[] {
-	let group = 0;
-	let stroke = false;
-	let symbol = false;
-	let label = false;
-	return elements.map(({ roles, label: hasLabel }) => {
-		const has = (role: Role) => roles.includes(role);
-		if ((has('fill') && (stroke || symbol)) || (has('stroke') && symbol) || (has('symbol') && label)) {
-			group++;
-			stroke = symbol = label = false;
+/**
+ * The layers that draw the elements (in drawing order). It starts with the layers of each element:
+ * its area, its outline or line, its marker. Then it merges each layer into the one before it if
+ * they draw the same, e.g. two lines in a row: within a layer, the elements keep their order, so
+ * this draws exactly the same with fewer layers. Only a marker after a label stays apart: MapLibre
+ * draws the symbols of a layer before all its labels (maplibre-gl-js issue #49).
+ *
+ * With `markersOnTop` (e.g. while the labels of the background map are between the areas and lines
+ * and the markers), the layers of the markers come after those of all areas and lines.
+ *
+ * With more than `MAX_LAYERS` layers, the drawing differs, step by step until they are few enough:
+ * 1. the labels of all markers in one layer over all markers (see `LABELS_LAYER`);
+ * 2. the markers over all areas and lines;
+ * 3. all areas under all lines and outlines.
+ */
+export function planLayers(elements: Drawn[], markersOnTop = false): LayerPlan {
+	const steps = [
+		{ markersOnTop, sharedLabels: false, mergeAreas: false },
+		{ markersOnTop, sharedLabels: true, mergeAreas: false },
+		{ markersOnTop: true, sharedLabels: true, mergeAreas: false },
+		{ markersOnTop: true, sharedLabels: true, mergeAreas: true }
+	];
+	let plan: LayerPlan | undefined;
+	for (const step of steps) {
+		plan = mergeLayers(elements, step);
+		if (plan.layers.length <= MAX_LAYERS) break;
+	}
+	return plan!;
+}
+
+/** The layers of the elements, merged where they draw the same, see `planLayers`. */
+function mergeLayers(
+	elements: Drawn[],
+	{ markersOnTop, sharedLabels, mergeAreas }: { markersOnTop: boolean; sharedLabels: boolean; mergeAreas: boolean }
+): LayerPlan {
+	// one layer per element and role
+	let single = elements.flatMap((drawn, element) =>
+		ROLES.filter((role) => drawn.roles.includes(role)).map((role) => ({
+			role,
+			element,
+			label: role === 'symbol' && drawn.label && !sharedLabels
+		}))
+	);
+	const markers = single.filter((layer) => layer.role === 'symbol');
+	if (markersOnTop) single = [...single.filter((layer) => layer.role !== 'symbol'), ...markers];
+	if (mergeAreas) single = [...ROLES.flatMap((role) => single.filter((layer) => layer.role === role))];
+	const merged: { role: Role; elements: number[]; label: boolean }[] = [];
+	for (const { role, element, label } of single) {
+		const last = merged.at(-1);
+		if (last && last.role === role && !last.label) {
+			last.elements.push(element);
+			last.label = label;
+		} else {
+			merged.push({ role, elements: [element], label });
 		}
-		stroke ||= has('stroke');
-		symbol ||= has('symbol');
-		label ||= hasLabel;
-		return group;
-	});
+	}
+	return {
+		layers: merged.map(({ role, elements }) => ({ role, elements })),
+		markersOnTop: markersOnTop || mergeAreas,
+		sharedLabels
+	};
 }
 
 /** The ids of the layers that draw the element: one per role of its style, shared with the other elements. */
@@ -125,17 +147,31 @@ export function elementStyle(font: string): {
 	const empty = (): SourceSpecification => ({ type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 	return {
 		sources: Object.fromEntries(ROLES.map((role) => [ELEMENT_LAYERS[role], empty()])),
-		layers: [elementLayer('fill', 0, font), elementLayer('stroke', 0, font), elementLayer('symbol', 0, font)]
+		layers: [
+			elementLayer('fill', ELEMENT_LAYERS.fill, font),
+			elementLayer('stroke', ELEMENT_LAYERS.stroke, font),
+			anchorLayer(AREAS_TOP),
+			elementLayer('symbol', ELEMENT_LAYERS.symbol, font),
+			anchorLayer(ELEMENTS_TOP)
+		]
 	};
 }
 
-/** The layer of a role in a group, see `groupElements`; markers with the glyph font of their labels. */
-export function elementLayer(role: Role, group: number, font: string): LayerSpecification {
-	const filter: ExpressionSpecification = ['==', ['get', 'group'], group];
+/** An invisible layer that marks a place in the map style, see `AREAS_TOP`. */
+function anchorLayer(id: string): LayerSpecification {
+	return { id, type: 'background', layout: { visibility: 'none' } };
+}
+
+/**
+ * A layer of a role, see `planLayers`: it draws the features that name it. Markers with the glyph
+ * font of their labels.
+ */
+export function elementLayer(role: Role, id: string, font: string): LayerSpecification {
+	const filter: ExpressionSpecification = ['==', ['get', 'layer'], id];
 	switch (role) {
 		case 'fill':
 			return {
-				id: layerId('fill', group),
+				id,
 				source: ELEMENT_LAYERS.fill,
 				type: 'fill',
 				filter,
@@ -144,7 +180,7 @@ export function elementLayer(role: Role, group: number, font: string): LayerSpec
 			};
 		case 'stroke':
 			return {
-				id: layerId('stroke', group),
+				id,
 				source: ELEMENT_LAYERS.stroke,
 				type: 'line',
 				filter,
@@ -156,7 +192,7 @@ export function elementLayer(role: Role, group: number, font: string): LayerSpec
 				}
 			};
 		case 'symbol':
-			return symbolLayer(font, group);
+			return symbolLayer(font, id);
 	}
 }
 
@@ -185,8 +221,8 @@ export function labelLayout({ overlap, minZoom }: LabelOptions) {
 }
 
 /**
- * The layer of the labels of markers when more than `MAX_GROUPS` markers have labels: they share
- * one layer of symbols, whose labels would be placed from the back, so the marker behind keeps its
+ * The layer of the labels of markers when there would be too many layers otherwise (see
+ * `planLayers`): the markers share layers of symbols, whose labels would be placed from the back, so the marker behind keeps its
  * label where two overlap. This layer draws them all, placed from the front, above the markers.
  * (Under them, each label would collide with the symbol of its own marker and be hidden.) Labels
  * hidden where they overlap still avoid each other, but may cover the symbols of other markers.
@@ -195,7 +231,10 @@ export const LABELS_LAYER = 'elements_labels';
 
 /** The layer of the labels of the markers, see `LABELS_LAYER`: their texts without the symbols. */
 export function labelsLayer(font: string): LayerSpecification {
-	const markers = symbolLayer(font, 0) as { layout: Record<string, unknown>; paint: Record<string, unknown> };
+	const markers = symbolLayer(font, LABELS_LAYER) as {
+		layout: Record<string, unknown>;
+		paint: Record<string, unknown>;
+	};
 	const text = (properties: Record<string, unknown>) =>
 		Object.fromEntries(Object.entries(properties).filter(([key]) => key.startsWith('text-')));
 	return {
@@ -210,13 +249,13 @@ export function labelsLayer(font: string): LayerSpecification {
 /** The layout properties of the labels of markers that each layer of markers has alike. */
 export const LABEL_LAYOUT_KEYS = ['text-font', 'text-field', 'text-overlap', 'text-optional'] as const;
 
-/** The layer of the markers of a group, with the glyph font of their labels. */
-function symbolLayer(font: string, group: number): LayerSpecification {
+/** A layer of markers, with the glyph font of their labels. */
+function symbolLayer(font: string, id: string): LayerSpecification {
 	return {
-		id: symbolLayerId(group),
+		id,
 		source: ELEMENT_LAYERS.symbol,
 		type: 'symbol',
-		filter: ['==', ['get', 'group'], group],
+		filter: ['==', ['get', 'layer'], id],
 		layout: {
 			'symbol-sort-key': ['get', 'order'],
 			'icon-image': ['get', 'icon'],
@@ -253,9 +292,10 @@ function symbolLayer(font: string, group: number): LayerSpecification {
 }
 
 /**
- * Draws all elements with one source per role and groups of layers (see `groupElements`), instead
- * of a source and layers per element, so maps with many elements (e.g. a table import) stay fast. The elements are features
- * with their element id; their styles are feature properties that the layers read.
+ * Draws all elements with one source per role and few layers (see `planLayers`), instead of a
+ * source and layers per element, so maps with many elements (e.g. a table import) stay fast. The
+ * elements are features with their element id; their styles are feature properties that the
+ * layers read, and the id of the layer that draws them.
  *
  * Changes are collected and written once per microtask: a change of the element list replaces
  * all features, a change of single elements only their features.
@@ -267,21 +307,17 @@ export class ElementRenderer {
 	private changed = new Set<AbstractElement>();
 	private all = false;
 	private scheduled = false;
-	/** The group of each element, see `groupElements`, and what each draws, to notice a change. */
-	private groups = new Map<AbstractElement, number>();
+	/** The layer of each element and role, see `planLayers`, and what each draws, to notice a change. */
+	private layerOf = new Map<AbstractElement, Partial<Record<Role, string>>>();
 	private drawn = new Map<AbstractElement, string>();
-	/** Whether the markers must be drawn over all areas and lines, see `groupElements`. */
+	/** Whether the markers must be drawn over all areas and lines, see `planLayers`. */
 	private markersOnTop = false;
-	/** Whether they are, also because there are too many groups otherwise. */
-	private grouped: ReturnType<typeof groupElements> = { groups: [], markersOnTop: false };
-	/** The layers of the groups after the first, which the map style has, in drawing order. */
-	private extraLayers: string[] = [];
-	/** Whether they were placed with the markers on top, see `syncLayers`. */
-	private extraOnTop = false;
+	/** The layers of the areas and lines that have a place of their own (with the markers on top), and the others, in drawing order. */
+	private planned: { areas: string[]; others: string[] } = { areas: [], others: [...Object.values(ELEMENT_LAYERS)] };
+	/** The layers of the elements that the map style has. */
+	private present = new Set<string>(Object.values(ELEMENT_LAYERS));
 	/** How the labels of markers are shown, see `LabelOptions`. */
 	private labels: LabelOptions = DEFAULT_LABEL_OPTIONS;
-	/** Whether the labels of the markers have a layer of their own, see `LABELS_LAYER`. */
-	private sharedLabels = false;
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -291,11 +327,11 @@ export class ElementRenderer {
 	public setElements(elements: AbstractElement[]) {
 		this.elements = elements;
 		this.order = new Map(elements.map((element, i) => [element, i]));
-		this.regroup();
+		this.plan();
 		this.redraw();
 	}
 
-	/** What the element draws, for its group. */
+	/** What the element draws, for the layers. */
 	private static drawnOf(element: AbstractElement): Drawn {
 		const layers = element.getStyleLayers();
 		const label = layers.symbol?.getProperties().label;
@@ -306,14 +342,29 @@ export class ElementRenderer {
 		return `${roles.join()}${label ? ' label' : ''}`;
 	}
 
-	/** The groups of the elements, see `groupElements`. */
-	private regroup() {
+	/**
+	 * The layers of the elements, see `planLayers`: the first one of each role has the id of the
+	 * role (e.g. `elements_fill`), the others a number (e.g. `elements_fill_1`).
+	 */
+	private plan() {
 		const drawn = this.elements.map((element) => ElementRenderer.drawnOf(element));
-		this.grouped = groupElements(drawn, this.markersOnTop);
-		const { groups } = this.grouped;
-		this.groups = new Map(this.elements.map((element, i) => [element, groups[i]]));
+		const plan = planLayers(drawn, this.markersOnTop);
+		const count: Partial<Record<Role, number>> = {};
+		this.layerOf = new Map(this.elements.map((element) => [element, {}]));
+		const ids = plan.layers.map(({ role, elements }) => {
+			const n = (count[role] = (count[role] ?? -1) + 1);
+			const id = n === 0 ? ELEMENT_LAYERS[role] : `${ELEMENT_LAYERS[role]}_${n}`;
+			for (const i of elements) this.layerOf.get(this.elements[i])![role] = id;
+			return id;
+		});
+		// every map style has the first layer of each role, also if it draws nothing
+		const all = [...ROLES.filter((role) => count[role] === undefined).map((role) => ELEMENT_LAYERS[role]), ...ids];
+		const isArea = (id: string) => plan.markersOnTop && !id.startsWith(ELEMENT_LAYERS.symbol);
+		this.planned = {
+			areas: all.filter(isArea),
+			others: [...all.filter((id) => !isArea(id)), ...(plan.sharedLabels ? [LABELS_LAYER] : [])]
+		};
 		this.drawn = new Map(this.elements.map((element, i) => [element, ElementRenderer.key(drawn[i])]));
-		this.sharedLabels = drawn.filter((d) => d.label).length > MAX_GROUPS;
 	}
 
 	/**
@@ -323,18 +374,16 @@ export class ElementRenderer {
 	public setMarkersOnTop(onTop: boolean) {
 		if (onTop === this.markersOnTop) return;
 		this.markersOnTop = onTop;
-		// the layers of the groups are in other places now: all are added again
-		if (this.map.style) for (const id of [...this.extraLayers].reverse()) this.map.removeLayer(id);
-		this.extraLayers = [];
-		this.regroup();
+		this.plan();
 		this.redraw();
 	}
 
 	/** The ids of the layers of a role, e.g. to find an element under the mouse. */
 	public layerIds(role: Role): string[] {
-		const ids = [ELEMENT_LAYERS[role], ...this.extraLayers.filter((id) => id.startsWith(`${ELEMENT_LAYERS[role]}_`))];
+		const ids = [...this.planned.areas, ...this.planned.others];
+		const own = ids.filter((id) => id === ELEMENT_LAYERS[role] || id.startsWith(`${ELEMENT_LAYERS[role]}_`));
 		// the labels of the markers, if they have a layer of their own
-		return role === 'symbol' && this.extraLayers.includes(LABELS_LAYER) ? [...ids, LABELS_LAYER] : ids;
+		return role === 'symbol' && ids.includes(LABELS_LAYER) ? [...own, LABELS_LAYER] : own;
 	}
 
 	/** Show the labels of the markers all, or without those that overlap, and from a zoom level. */
@@ -352,7 +401,7 @@ export class ElementRenderer {
 		const map = this.map;
 		if (!map.style || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
 		const layout = labelLayout(this.labels);
-		const own = this.extraLayers.includes(LABELS_LAYER);
+		const own = this.present.has(LABELS_LAYER);
 		for (const id of this.layerIds('symbol')) {
 			for (const [key, value] of Object.entries(layout)) {
 				const label = id === LABELS_LAYER || !own;
@@ -371,63 +420,53 @@ export class ElementRenderer {
 		return this.layerIds('symbol');
 	}
 
-	/** A new map style has only the layers of the first group: the others are added again. */
+	/** A new map style has only the first layer of each role: the others are added again. */
 	public onStyleLoad() {
-		this.extraLayers = [];
+		this.present = new Set(Object.values(ELEMENT_LAYERS));
 		this.redraw();
 	}
 
 	/**
-	 * Add or remove the layers of the groups after the first, one per role that the group has, above
-	 * the layers of the first group: only those after the first difference. With the markers on top,
-	 * the layers of the areas and lines are above those of the first group of areas and lines (e.g.
-	 * under the labels of the background map), and those of the markers above the first one of
-	 * markers. Markers get the label font of the first layer of markers.
+	 * Make the layers of the map style those of the plan, in its order: remove the others, add the
+	 * missing ones, and move them into place, under `AREAS_TOP` (the areas and lines with the
+	 * markers on top) and under `ELEMENTS_TOP` (all others). New layers of markers get the label
+	 * font of the first one.
 	 */
 	private syncLayers() {
 		const map = this.map;
 		if (!map.style || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
-		const roles: Set<Role>[] = [];
-		for (const [element, group] of this.groups) {
-			roles[group] ??= new Set();
-			for (const role of ElementRenderer.drawnOf(element).roles) roles[group].add(role);
+		const { areas, others } = this.planned;
+		const wanted = new Set([...areas, ...others]);
+		for (const id of this.present) {
+			if (!wanted.has(id)) map.removeLayer(id);
 		}
-		const layersOf = (kinds: Role[]) =>
-			roles.flatMap((has, group) =>
-				group === 0 ? [] : kinds.filter((role) => has?.has(role)).map((role) => layerId(role, group))
-			);
-		const onTop = this.grouped.markersOnTop;
-		const wanted = onTop ? [...layersOf(['fill', 'stroke']), ...layersOf(['symbol'])] : layersOf(ROLES);
-		if (this.sharedLabels) wanted.push(LABELS_LAYER);
-		let same = 0;
-		// placed otherwise before: all are added again
-		while (onTop === this.extraOnTop && same < wanted.length && wanted[same] === this.extraLayers[same]) same++;
-		for (const id of this.extraLayers.slice(same).reverse()) map.removeLayer(id);
-		const roleOf = (id: string) => /^elements_(fill|stroke|symbol)_\d+$/.exec(id)?.[1] ?? 'symbol';
-		const isArea = (id: string) => onTop && roleOf(id) !== 'symbol';
-		for (const [i, id] of wanted.entries()) {
-			if (i < same) continue;
-			// above the layer before it of its kind, or the first one of its kind; under e.g. the selection
-			const previous = wanted.slice(0, i).findLast((other) => isArea(other) === isArea(id));
-			const after = previous ?? (isArea(id) ? ELEMENT_LAYERS.stroke : ELEMENT_LAYERS.symbol);
-			const order = map.getLayersOrder();
-			const before = order[order.indexOf(after) + 1];
-			const [, role, group] = /^elements_(fill|stroke|symbol)_(\d+)$/.exec(id) ?? [id, 'labels', '0'];
+		for (const id of wanted) {
+			if (this.present.has(id)) continue;
+			const role = ROLES.find((role) => id.startsWith(ELEMENT_LAYERS[role]))!;
 			map.addLayer(
-				role === 'labels'
-					? labelsLayer('noto_sans_regular')
-					: elementLayer(role as Role, Number(group), 'noto_sans_regular'),
-				before
+				id === LABELS_LAYER ? labelsLayer('noto_sans_regular') : elementLayer(role, id, 'noto_sans_regular'),
+				ELEMENTS_TOP
 			);
 			// the font like that of the first layer of markers
-			if (role === 'fill' || role === 'stroke') continue;
+			if (id !== LABELS_LAYER && role !== 'symbol') continue;
 			for (const key of LABEL_LAYOUT_KEYS) {
 				const value = map.getLayoutProperty(ELEMENT_LAYERS.symbol, key);
 				if (value !== undefined) map.setLayoutProperty(id, key, value);
 			}
 		}
-		this.extraLayers = wanted;
-		this.extraOnTop = onTop;
+		this.present = wanted;
+		// from the top down, each right under the one above it
+		for (const [ids, top] of [
+			[areas, AREAS_TOP],
+			[others, ELEMENTS_TOP]
+		] as const) {
+			let above: string = top;
+			for (const id of [...ids].reverse()) {
+				const order = map.getLayersOrder();
+				if (order[order.indexOf(above) - 1] !== id) map.moveLayer(id, above);
+				above = id;
+			}
+		}
 		this.applyLabels();
 	}
 
@@ -435,9 +474,9 @@ export class ElementRenderer {
 	public update(element: AbstractElement) {
 		// an element that is not (yet) on the map is drawn when it is added
 		if (!this.order.has(element)) return;
-		// e.g. a label or an outline added or removed can change the groups
+		// e.g. a label or an outline added or removed can change the layers
 		if (ElementRenderer.key(ElementRenderer.drawnOf(element)) !== this.drawn.get(element)) {
-			this.regroup();
+			this.plan();
 			return this.redraw();
 		}
 		this.changed.add(element);
@@ -494,7 +533,7 @@ export class ElementRenderer {
 			type: 'Feature',
 			id: element.id,
 			geometry,
-			properties: { ...properties, order: this.order.get(element), group: this.groups.get(element) ?? 0 }
+			properties: { ...properties, order: this.order.get(element), layer: this.layerOf.get(element)?.[role] }
 		};
 	}
 }
