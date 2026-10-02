@@ -198,10 +198,15 @@
 			return;
 		}
 		confirmingDelete = undefined;
+		const index = recent.findIndex(({ id }) => id === map.id);
 		await sync.deleteRecent(map.id);
-		// the menu keeps the focus
+		recent = await sync.recent();
+		// the submenu keeps the focus: on the map now at its place, else on the group
 		await tick();
-		items()[0]?.focus();
+		const rows = [...(submenus.recent?.querySelectorAll<HTMLElement>('.recent') ?? [])];
+		const row = rows[Math.min(index, rows.length - 1)];
+		const own = [...(row?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [])].find((b) => !b.disabled);
+		(own ?? items('recent')[0] ?? triggers.recent)?.focus();
 	}
 	$effect(() => {
 		if (!open) confirmingDelete = undefined;

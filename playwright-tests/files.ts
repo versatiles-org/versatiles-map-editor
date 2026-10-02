@@ -150,6 +150,10 @@ test('a new or opened map is a new map, and the one before is kept in the recent
 	await page.getByRole('menuitem', { name: 'Really delete lines' }).click();
 	await expect(recent.filter({ hasText: 'lines' })).toHaveCount(0);
 	await expect(recent).toHaveCount(2);
+	// the focus stays in the submenu, which stays open: on the map now at the place of the deleted one
+	const focused = page.getByRole('menu', { name: 'Recent maps' }).locator(':focus');
+	await expect(focused).toHaveCount(1);
+	await expect(focused).toContainText(/1 circle|Markers/);
 });
 
 test('the status line tells whether the map is saved, and downloads it', async ({ page }) => {
