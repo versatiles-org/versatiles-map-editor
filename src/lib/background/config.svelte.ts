@@ -11,7 +11,10 @@ export const CONFIG_URL = 'map-editor.config.json';
 
 /** The content of the configuration file. Every field is optional. */
 export interface ConfigFile {
-	/** Color schemes offered in the color picker, before the predefined ones. */
+	/**
+	 * Color schemes offered in the color picker, before the predefined ones. Each `id` once; one of
+	 * a predefined scheme replaces it. A color twice in a scheme is offered once.
+	 */
 	colorSchemes?: { id: string; name: string; colors: string[] }[];
 	/** Offer only the configured color schemes. */
 	replaceDefaultSchemes?: boolean;
@@ -92,7 +95,11 @@ export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
 		if (!Array.isArray(colors) || colors.length === 0 || !colors.every(isHexColor)) {
 			throw new Error(`colorSchemes[${i}].colors must be a list of colors like "#1a2b3c"`);
 		}
-		return { id, name, colors: colors.map((c) => c.toLowerCase()) };
+		if (colorSchemes.slice(0, i).some((before) => before?.id === id)) {
+			throw new Error(`colorSchemes[${i}].id "${id}" is used twice`);
+		}
+		// each once, as the picker shows them
+		return { id, name, colors: [...new Set(colors.map((c) => c.toLowerCase()))] };
 	});
 
 	if (!Array.isArray(configuredFonts) || !configuredFonts.every((f) => typeof f === 'string')) {
@@ -100,7 +107,10 @@ export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
 	}
 
 	return {
-		colorSchemes: replaceDefaultSchemes && schemes.length > 0 ? schemes : [...schemes, ...COLOR_SCHEMES],
+		colorSchemes:
+			replaceDefaultSchemes && schemes.length > 0
+				? schemes
+				: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))],
 		fonts: resolveFonts(configuredFonts, replaceDefaultFonts === true, fonts)
 	};
 }
@@ -118,6 +128,8 @@ function resolveFonts(ids: string[], replace: boolean, server?: FontFace[]): Fon
 			console.warn(`The font "${id}" is not available as map glyphs and is not offered`);
 			continue;
 		}
+		// e.g. listed twice
+		if (configured.some((f) => f.id === id)) continue;
 		configured.push(face ?? unknownFace(id));
 	}
 	if (replace && configured.length > 0) return configured;

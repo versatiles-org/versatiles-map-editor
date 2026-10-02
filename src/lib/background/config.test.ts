@@ -39,6 +39,23 @@ describe('resolveConfig', () => {
 		expect(resolveConfig({ colorSchemes: [ci], replaceDefaultSchemes: true }).colorSchemes).toStrictEqual([scheme]);
 	});
 
+	it('offers each color, scheme and face once, which the pickers need', () => {
+		const repeated = { ...ci, colors: ['#003366', '#E30613', '#003366', '#e30613'] };
+		expect(resolveConfig({ colorSchemes: [repeated] }).colorSchemes[0].colors).toStrictEqual(['#003366', '#e30613']);
+		// two schemes with one id: invalid
+		expect(() => resolveConfig({ colorSchemes: [ci, { ...ci, name: 'Other' }] })).toThrow('is used twice');
+		// one with the id of a predefined scheme replaces it
+		const own = { id: COLOR_SCHEMES[0].id, name: 'Own', colors: ['#000000'] };
+		const schemes = resolveConfig({ colorSchemes: [own] }).colorSchemes;
+		expect(schemes.filter(({ id }) => id === own.id)).toStrictEqual([own]);
+		expect(schemes).toHaveLength(COLOR_SCHEMES.length);
+		// a face listed twice
+		const fonts = resolveConfig({ fonts: ['lato_bold', 'lato_bold'], replaceDefaultFonts: true }, server).fonts;
+		expect(fonts.map((f) => f.id)).toStrictEqual(['lato_bold']);
+		const unchecked = resolveConfig({ fonts: ['my_font', 'my_font'], replaceDefaultFonts: true }).fonts;
+		expect(unchecked).toStrictEqual([unknownFace('my_font')]);
+	});
+
 	it('offers the configured faces that exist as map glyphs first, or only them', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const only = resolveConfig({ fonts: ['lato_bold', 'comic_sans'], replaceDefaultFonts: true }, server).fonts;
