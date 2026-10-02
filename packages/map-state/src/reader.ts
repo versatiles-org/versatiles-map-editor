@@ -44,6 +44,8 @@ export class StateReader {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
+	// the order of the Exp-Golomb code of the coordinates of the elements (see `readExpGolomb`)
+	private coordinateOrder = 0;
 
 	constructor(bits: boolean[]) {
 		this.bits = bits;
@@ -117,6 +119,24 @@ export class StateReader {
 		}
 	}
 
+	/** See `StateWriter.writeExpGolomb`. */
+	readExpGolomb(order: number, signed?: true): number {
+		try {
+			let zeros = 0;
+			while (!this.readBit()) zeros++;
+			// beyond the safe integers
+			if (zeros + order > 52) throw new Error('Exp-Golomb code too long');
+			// after the leading 1
+			let code = 1;
+			for (let i = 0; i < zeros + order; i++) code = 2 * code + (this.readBit() ? 1 : 0);
+			const value = code - 2 ** order;
+			if (!signed) return value;
+			return value % 2 === 1 ? -(value + 1) / 2 : value / 2;
+		} catch (cause) {
+			throw new Error(`Error reading Exp-Golomb code`, { cause });
+		}
+	}
+
 	readArray<T>(cb: () => T): T[] {
 		try {
 			const length = this.readVarint();
@@ -147,7 +167,8 @@ export class StateReader {
 
 	/** A point of an element, on the grid. */
 	readElementPoint(): [number, number] {
-		return this.elementGrid.fromGrid([this.readVarint(true), this.readVarint(true)]);
+		const order = this.coordinateOrder;
+		return this.elementGrid.fromGrid([this.readExpGolomb(order, true), this.readExpGolomb(order, true)]);
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
@@ -158,8 +179,8 @@ export class StateReader {
 		let x = 0;
 		let y = 0;
 		for (let i = 0; i < length; i++) {
-			x += this.readVarint(true);
-			y += this.readVarint(true);
+			x += this.readExpGolomb(this.coordinateOrder, true);
+			y += this.readExpGolomb(this.coordinateOrder, true);
 			points.push(grid.fromGrid([x, y]));
 		}
 		return points;
@@ -185,6 +206,7 @@ export class StateReader {
 			// the origin of the coordinates of the frame and the elements
 			const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
 			this.grid = new LocalGrid(origin, exponent);
+			this.coordinateOrder = this.readInteger(5);
 
 			const frame = this.readFrame();
 			if (frame) root.frame = frame;

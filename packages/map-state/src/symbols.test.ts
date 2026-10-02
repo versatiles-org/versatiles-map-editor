@@ -91,17 +91,24 @@ describe('symbols', () => {
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
+		writer.writeInteger(0, 5); // the order of the code of the coordinates
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata, so no symbols
 		writer.writeInteger(1, 3); // marker
-		writer.writeVarint(0, true);
-		writer.writeVarint(0, true);
+		writer.writeExpGolomb(0, 0, true); // the point
+		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeVarint(0); // no reference
 		writer.writeInteger(13, 4); // symbol
+		// the name instead of its index: its length, 12, is read as the index
 		writer.writeString('icons:anchor');
+		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
-			expect.objectContaining({ cause: expect.objectContaining({ message: 'Error reading marker element' }) })
+			expect.objectContaining({
+				cause: expect.objectContaining({
+					cause: expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid symbol index: 12' }) })
+				})
+			})
 		);
 	});
 

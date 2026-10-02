@@ -50,6 +50,8 @@ export class StateWriter {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
+	// the order of the Exp-Golomb code of the coordinates of the elements (see `writeExpGolomb`)
+	private coordinateOrder = 0;
 	private readonly resolution: number;
 
 	/**
@@ -142,6 +144,9 @@ export class StateWriter {
 		this.writeVarint(origin[0], true);
 		this.writeVarint(origin[1], true);
 		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], exponent);
+		// the order of the code of the element coordinates that makes them shortest
+		this.coordinateOrder = bestExpGolombOrder(this.coordinateSteps(root.elements));
+		this.writeInteger(this.coordinateOrder, 5);
 
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta, collectSymbols(root));
@@ -240,24 +245,37 @@ export class StateWriter {
 
 	/** A point of an element, on the grid. */
 	writeElementPoint(point: [number, number]) {
-		const [x, y] = this.elementGrid.toGrid(point);
-		this.writeVarint(x, true);
-		this.writeVarint(y, true);
+		for (const step of this.elementGrid.toGrid(point)) this.writeExpGolomb(step, this.coordinateOrder, true);
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
 	writeElementPoints(points: [number, number][]) {
-		const grid = this.elementGrid;
 		this.writeVarint(points.length);
-		let px = 0;
-		let py = 0;
-		for (const point of points) {
-			const [x, y] = grid.toGrid(point);
-			this.writeVarint(x - px, true);
-			this.writeVarint(y - py, true);
-			px = x;
-			py = y;
-		}
+		for (const step of pointSteps(this.elementGrid, points)) this.writeExpGolomb(step, this.coordinateOrder, true);
+	}
+
+	/** The numbers that `writeElementPoint` and `writeElementPoints` write for the elements, zigzag encoded. */
+	private coordinateSteps(elements: StateElement[]): number[] {
+		const grid = this.elementGrid;
+		return elements
+			.flatMap((element) => ('point' in element ? grid.toGrid(element.point) : pointSteps(grid, element.points)))
+			.map(zigzag);
+	}
+
+	/**
+	 * An integer as an Exp-Golomb code of order `order`: `value + 2^order` in binary, after as many
+	 * zeros as it has bits beyond `order + 1`. Values below about 2^order cost `order + 1` bits, and
+	 * each doubling 2 bits more. Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic
+	 * instead of bit operators, which would cut the values to 32 bits.
+	 */
+	writeExpGolomb(value: number, order: number, signed?: true) {
+		if (!Number.isSafeInteger(value)) throw new Error(`value must be a safe integer: ${value}`);
+		if (signed) value = zigzag(value);
+		else if (value < 0) throw new Error('Unsigned Exp-Golomb code cannot be negative');
+		const code = value + 2 ** order;
+		const length = bitLength(code);
+		for (let i = length - order - 1; i > 0; i--) this.writeBit(false);
+		for (let i = length - 1; i >= 0; i--) this.writeBit(Math.floor(code / 2 ** i) % 2 === 1);
 	}
 
 	/**
@@ -637,6 +655,49 @@ export function collectStrings(root: MapState): string[] {
 		if (element.popup?.text) strings.push(element.popup.text);
 	}
 	return strings;
+}
+
+/** The steps of points on the grid: the first from the origin, each other from the one before. */
+function pointSteps(grid: LocalGrid, points: [number, number][]): number[] {
+	const steps: number[] = [];
+	let px = 0;
+	let py = 0;
+	for (const point of points) {
+		const [x, y] = grid.toGrid(point);
+		steps.push(x - px, y - py);
+		px = x;
+		py = y;
+	}
+	return steps;
+}
+
+/** 0, -1, 1, -2, … as 0, 1, 2, 3, … */
+function zigzag(value: number): number {
+	const result = value < 0 ? -2 * value - 1 : 2 * value;
+	if (!Number.isSafeInteger(result)) throw new Error(`value too large: ${value}`);
+	return result;
+}
+
+/** The number of bits of a positive integer. */
+function bitLength(value: number): number {
+	let length = 0;
+	for (; value >= 1; value = Math.floor(value / 2)) length++;
+	return length;
+}
+
+/** The order of the Exp-Golomb code (0 to 31) that codes these unsigned values in the fewest bits. */
+export function bestExpGolombOrder(values: number[]): number {
+	let best = 0;
+	let bestBits = Infinity;
+	for (let order = 0; order < 32; order++) {
+		let bits = 0;
+		for (const value of values) bits += 2 * bitLength(value + 2 ** order) - order - 1;
+		if (bits < bestBits) {
+			best = order;
+			bestBits = bits;
+		}
+	}
+	return best;
 }
 
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */

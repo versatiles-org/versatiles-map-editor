@@ -62,15 +62,25 @@ describe('color palette', () => {
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
+		writer.writeInteger(0, 5); // the order of the code of the coordinates
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
-		writer.writePoint([0, 0]);
+		writer.writeExpGolomb(0, 0, true); // the point
+		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
+		writer.writeVarint(0); // no reference
 		writer.writeInteger(8, 4); // color
 		writer.writeVarint(5);
 		writer.writeInteger(0, 4);
-		expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+		// root, marker, style
+		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
+			expect.objectContaining({
+				cause: expect.objectContaining({
+					cause: expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid palette index: 5' }) })
+				})
+			})
+		);
 	});
 });
 

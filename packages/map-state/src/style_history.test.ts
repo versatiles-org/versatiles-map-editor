@@ -91,15 +91,28 @@ describe('style references', () => {
 		const writer = new StateWriter();
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
+		writer.writeVarint(0); // no strings
 		writer.writeBit(false); // no map
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
+		writer.writeVarint(0, true); // the origin
+		writer.writeVarint(0, true);
+		writer.writeInteger(0, 5); // the order of the code of the coordinates
+		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeInteger(1, 3); // marker
-		writer.writePoint([0, 0]);
+		writer.writeExpGolomb(0, 0, true); // the point
+		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeVarint(3); // reference to a style that does not exist
 		writer.writeInteger(0, 4);
-		expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+		// root, marker, style
+		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
+			expect.objectContaining({
+				cause: expect.objectContaining({
+					cause: expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid style reference: 3' }) })
+				})
+			})
+		);
 	});
 });
 

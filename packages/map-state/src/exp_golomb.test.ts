@@ -1,0 +1,84 @@
+import { describe, expect, it } from 'vitest';
+import { StateReader } from './reader.js';
+import { bestExpGolombOrder, StateWriter } from './writer.js';
+import { decodeState, encodeState } from './index.js';
+import type { StateElement } from './types.js';
+
+function bits(value: number, order: number, signed?: true): string {
+	const writer = new StateWriter();
+	writer.writeExpGolomb(value, order, signed);
+	return writer.asBitString();
+}
+
+describe('the Exp-Golomb code', () => {
+	it('writes the code of order 0 and 2', () => {
+		expect([0, 1, 2, 3, 4].map((value) => bits(value, 0))).toStrictEqual(['1', '010', '011', '00100', '00101']);
+		expect([0, 3, 4, 11, 12].map((value) => bits(value, 2))).toStrictEqual(['100', '111', '01000', '01111', '0010000']);
+	});
+
+	it('writes signed values zigzag encoded', () => {
+		expect([0, -1, 1, -2].map((value) => bits(value, 0, true))).toStrictEqual(['1', '010', '011', '00100']);
+	});
+
+	it('reads what it writes, up to the largest safe integers', () => {
+		const values = [0, 1, -1, 1000, -123456, 2 ** 31, -(2 ** 31) - 1, 2 ** 51, -(2 ** 51)];
+		for (const order of [0, 5, 17, 31]) {
+			const writer = new StateWriter();
+			for (const value of values) writer.writeExpGolomb(value, order, true);
+			writer.writeExpGolomb(2 ** 52, order);
+			const reader = new StateReader(writer.bits);
+			expect(values.map(() => reader.readExpGolomb(order, true))).toStrictEqual(values);
+			expect(reader.readExpGolomb(order)).toBe(2 ** 52);
+			expect(reader.ended()).toBe(true);
+		}
+	});
+
+	it('refuses negative unsigned values and unsafe integers', () => {
+		const writer = new StateWriter();
+		expect(() => writer.writeExpGolomb(-1, 0)).toThrow('cannot be negative');
+		expect(() => writer.writeExpGolomb(2 ** 53, 0)).toThrow('safe integer');
+	});
+
+	it('rejects a code beyond the safe integers', () => {
+		const reader = StateReader.fromBitString('0'.repeat(53) + '1' + '0'.repeat(53));
+		expect(() => reader.readExpGolomb(0)).toThrow(
+			expect.objectContaining({ cause: expect.objectContaining({ message: 'Exp-Golomb code too long' }) })
+		);
+	});
+
+	it('has the order that codes the values in the fewest bits', () => {
+		expect(bestExpGolombOrder([])).toBe(0);
+		expect(bestExpGolombOrder([0, 1, 0, 2])).toBe(0);
+		// order 10: 11 bits each; order 9 and 11: 12 bits each
+		expect(bestExpGolombOrder([600, 700, 900, 1000])).toBe(10);
+	});
+});
+
+describe('the coordinates of elements', () => {
+	it('are kept near and far from the origin', () => {
+		const elements: StateElement[] = [
+			{ type: 'marker', point: [13.4, 52.5] },
+			{ type: 'marker', point: [-179.99999, -85] },
+			{ type: 'circle', point: [179.99999, 85], radius: 10 },
+			{
+				type: 'line',
+				points: [
+					[13.4, 52.5],
+					[13.40001, 52.5],
+					[-170, 10]
+				]
+			}
+		];
+		expect(decodeState(encodeState({ map: { center: [13.4, 52.5], radius: 1000 }, elements })).elements).toStrictEqual(
+			elements
+		);
+	});
+
+	it('cost 1 bit each at the origin', () => {
+		const marker = (lng: number): StateElement => ({ type: 'marker', point: [lng, 0] });
+		const length = (count: number) => encodeState({ elements: Array.from({ length: count }, () => marker(0)) }).length;
+		// each marker: the repeat bit, 2 coordinates, the label and popup flags: 5 bits
+		expect((length(61) - length(1)) * 6).toBeGreaterThanOrEqual(5 * 60);
+		expect((length(61) - length(1)) * 6).toBeLessThan(5 * 60 + 6);
+	});
+});
