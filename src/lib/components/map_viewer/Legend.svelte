@@ -169,9 +169,9 @@
 		--swatch-outline: rgb(255 255 255 / 30%);
 	}
 	.theme-glass {
-		--legend-background: rgb(255 255 255 / 60%);
-		--legend-border: rgb(255 255 255 / 60%);
-		--legend-text: #000;
+		--legend-background: rgb(0 0 0 / 20%);
+		--legend-border: rgb(255 255 255 / 20%);
+		--legend-text: #fff;
 		backdrop-filter: blur(12px) saturate(1.2);
 	}
 
