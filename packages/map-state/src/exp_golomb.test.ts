@@ -107,6 +107,35 @@ describe('the coordinates of elements', () => {
 		expect(decodeState(encodeState({ map, elements })).elements).toStrictEqual(elements);
 	});
 
+	it('have an order per axis if that is shorter, e.g. for points sorted by latitude', () => {
+		/** Whether the link stores an order per axis: the bit after the origin. */
+		function perAxis(elements: StateElement[]): boolean {
+			const reader = StateReader.fromBase64(encodeState({ elements }));
+			reader.readVersion();
+			reader.readPalette();
+			reader.readStringTable();
+			reader.readMap();
+			reader.readInteger(4); // the step of the coordinates
+			reader.readVarint(true); // the origin
+			reader.readVarint(true);
+			return reader.readBit();
+		}
+		// north to south, each about 1 km apart in longitude
+		const sorted: StateElement[] = Array.from({ length: 60 }, (_, i) => ({
+			type: 'marker',
+			point: [(1300 + ((i * 37) % 60)) / 100, (526000 - i) / 10000]
+		}));
+		expect(perAxis(sorted)).toBe(true);
+		expect(decodeState(encodeState({ elements: sorted })).elements).toStrictEqual(sorted);
+		// spread alike in both directions
+		const spread: StateElement[] = sorted.map((_, i) => ({
+			type: 'marker',
+			point: [(1300 + ((i * 37) % 60)) / 100, (5200 + ((i * 23) % 60)) / 100]
+		}));
+		expect(perAxis(spread)).toBe(false);
+		expect(decodeState(encodeState({ elements: spread })).elements).toStrictEqual(spread);
+	});
+
 	it('cost 1 bit each at the origin', () => {
 		const marker = (lng: number): StateElement => ({ type: 'marker', point: [lng, 0] });
 		const length = (count: number) => encodeState({ elements: Array.from({ length: count }, () => marker(0)) }).length;

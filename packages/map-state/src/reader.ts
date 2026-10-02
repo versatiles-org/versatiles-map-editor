@@ -51,8 +51,9 @@ export class StateReader {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
-	// the order of the Exp-Golomb code of the coordinates of the elements (see `readExpGolomb`)
-	private coordinateOrder = 0;
+	// the orders of the Exp-Golomb code of the coordinates of the elements, of longitude and of
+	// latitude (see `readExpGolomb`)
+	private coordinateOrders: [number, number] = [0, 0];
 	// whether the point of a marker or circle is a difference to the one before, else to the origin
 	private relativePoints = false;
 	// the point of the marker or circle before, on the grid
@@ -178,10 +179,9 @@ export class StateReader {
 
 	/** See `StateWriter.writeElementPoint`. */
 	readElementPoint(): [number, number] {
-		const order = this.coordinateOrder;
 		const [px, py] = this.relativePoints ? this.lastPoint : [0, 0];
-		const x = px + this.readExpGolomb(order, true);
-		const y = py + this.readExpGolomb(order, true);
+		const x = px + this.readExpGolomb(this.coordinateOrders[0], true);
+		const y = py + this.readExpGolomb(this.coordinateOrders[1], true);
 		this.lastPoint = [x, y];
 		return this.elementGrid.fromGrid([x, y]);
 	}
@@ -194,8 +194,8 @@ export class StateReader {
 		let x = 0;
 		let y = 0;
 		for (let i = 0; i < length; i++) {
-			x += this.readExpGolomb(this.coordinateOrder, true);
-			y += this.readExpGolomb(this.coordinateOrder, true);
+			x += this.readExpGolomb(this.coordinateOrders[0], true);
+			y += this.readExpGolomb(this.coordinateOrders[1], true);
 			points.push(grid.fromGrid([x, y]));
 		}
 		return points;
@@ -267,7 +267,10 @@ export class StateReader {
 		// the origin of the coordinates of the frame and the elements
 		const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
 		this.grid = new LocalGrid(origin, exponent);
-		this.coordinateOrder = this.readInteger(5);
+		// whether longitude and latitude have orders of their own
+		const perAxis = this.readBit();
+		const order = this.readInteger(5);
+		this.coordinateOrders = [order, perAxis ? this.readInteger(5) : order];
 		this.relativePoints = this.readBit();
 		this.lastPoint = [0, 0];
 	}

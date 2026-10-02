@@ -30,7 +30,8 @@ The first release.
     at most 5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`,
     `resolutionForArea` (the precision for sharing an area);
     those of the elements in an Exp-Golomb code of the order that makes them shortest, the points
-    of markers and circles as differences to the point before if that is shorter;
+    of markers and circles as differences to the point before if that is shorter, and an order for
+    longitude and one for latitude if that is shorter;
 - `frame` in the map state: the visible area (`[west, south, east, north]`, the type `Bounds`),
   which a shared or embedded map shows completely, whatever the size of its window. It is kept in
   the base64 string, in GeoJSON (a member `frame` of the FeatureCollection) and in KML (whose

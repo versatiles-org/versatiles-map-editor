@@ -272,6 +272,7 @@ describe('StateReader', () => {
 			writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 			writer.writeVarint(0, true); // the origin
 			writer.writeVarint(0, true);
+			writer.writeBit(false); // one order for longitude and latitude
 			writer.writeInteger(0, 5); // the order of the code of the coordinates
 			writer.writeBit(false); // the points of markers and circles from the origin
 			writer.writeBit(false); // no frame
@@ -286,10 +287,10 @@ describe('StateReader', () => {
 		});
 
 		it('should read a root state', () => {
-			// version 1, no colors, no strings, no camera, the resolution, the origin, the order of the
+			// version 1, no colors, no strings, no camera, the resolution, the origin, one order of the
 			// code of the coordinates, points from the origin, no frame, no metadata, no elements
 			const reader = StateReader.fromBitString(
-				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '00000' + '0' + '0' + '0'
+				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0'
 			);
 			const root = reader.readRoot();
 			expect(root).toStrictEqual({ elements: [] });
@@ -312,7 +313,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBitString()).toBe(
-				'0010000000000001100000100011110111010110111011100110101101111100001000000010001001100100001011000100110000011110000110101000000011100001101010000000000'
+				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000100110000011110000110101000000011100001101010000000000'
 			);
 
 			const reader = new StateReader(writer.bits);
@@ -356,7 +357,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAxYUUKAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWOLzIQEFQIAgADDVAAAMNUBmGxwMHBAA'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AYsKKFAABCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrHF5kICCoEAQABhqgAAGGqAzDY4GDggA'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -368,7 +369,7 @@ describe('StateReader', () => {
 		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
 		// the outline of a polygon, the outline referring to the style of the fill
 		const state = StateReader.fromBase64(
-			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsHBABhsAABhsAxYKlSAACEAAw1gAAMNYAAGGwAAGGwAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWOLxQiQEFQIAgADDVAAAMNUBmGxwMHBAAAA'
+			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AYsFSpAABCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrHF4oRICCoEAQABhqgAAGGqAzDY4GDggAAAA'
 		).readRoot();
 		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
 		// at most opaque
@@ -447,7 +448,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaiocJoJJBxRlylQ7XWfBvPGuROB4beZwazJ0qP4mVIPR_ir9pQoAAEc5Mxr2cQNCRIdOxkBacNaQ7EEGwCAsPRie4SMoAAA'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV-0oUAACOcmY17OIGhIkOnYyAtOGtIdiCDYBAWHoxPcJGUAAAA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -639,6 +640,7 @@ describe('legend', () => {
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);
+		writer.writeBit(false); // one order for longitude and latitude
 		writer.writeInteger(0, 5); // the order of the code of the coordinates
 		writer.writeBit(false); // the points of markers and circles from the origin
 		writer.writeBit(false); // no frame
@@ -718,7 +720,7 @@ describe('viewer', () => {
 
 	it('reads the search and the position of the legend of older links', () => {
 		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IT_AAAEAmtAAAAhiQYQgHABQAAAAA').meta).toStrictEqual({
+		expect(decodeState('IT_AAAEAmtAAAAQxIMIQDgAoAAAAAA').meta).toStrictEqual({
 			legend: {
 				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
 			},

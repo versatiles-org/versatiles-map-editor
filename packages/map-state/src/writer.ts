@@ -51,8 +51,9 @@ export class StateWriter {
 	private styleHistory = new StyleHistory();
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
-	// the order of the Exp-Golomb code of the coordinates of the elements (see `writeExpGolomb`)
-	private coordinateOrder = 0;
+	// the orders of the Exp-Golomb code of the coordinates of the elements, of longitude and of
+	// latitude (see `writeExpGolomb`)
+	private coordinateOrders: [number, number] = [0, 0];
 	// whether the point of a marker or circle is a difference to the one before, else to the origin
 	private relativePoints = false;
 	// the point of the marker or circle before, on the grid
@@ -181,19 +182,32 @@ export class StateWriter {
 		this.writeVarint(origin[0], true);
 		this.writeVarint(origin[1], true);
 		this.grid = new LocalGrid([origin[0] / ORIGIN_SCALE, origin[1] / ORIGIN_SCALE], exponent);
-		// the order of the code of the element coordinates that makes them shortest, and whether the
-		// points of markers and circles are shorter as differences to the point before, e.g. if
-		// they are sorted by place
-		const [absolute, relative] = [false, true].map((relative) => {
+		// the coding of the element coordinates that makes them shortest: whether the points of
+		// markers and circles are differences to the point before, e.g. if they are sorted by place,
+		// and whether longitude and latitude have orders of their own, e.g. if they are sorted by
+		// latitude, so its steps are small and those of longitude large
+		const codings = [false, true].flatMap((relative) => {
 			const steps = this.coordinateSteps(root.elements, relative);
 			const order = bestExpGolombOrder(steps);
-			return { relative, order, bits: expGolombBits(steps, order) };
+			const axes = [0, 1].map((axis) => steps.filter((_, i) => i % 2 === axis));
+			const orders = axes.map(bestExpGolombOrder) as [number, number];
+			return [
+				{ relative, perAxis: false, orders: [order, order], bits: expGolombBits(steps, order) },
+				{
+					relative,
+					perAxis: true,
+					orders,
+					bits: expGolombBits(axes[0], orders[0]) + expGolombBits(axes[1], orders[1]) + 5
+				}
+			];
 		});
-		const coding = relative.bits < absolute.bits ? relative : absolute;
-		this.coordinateOrder = coding.order;
+		const coding = codings.reduce((best, coding) => (coding.bits < best.bits ? coding : best));
+		this.coordinateOrders = coding.orders as [number, number];
 		this.relativePoints = coding.relative;
 		this.lastPoint = [0, 0];
-		this.writeInteger(this.coordinateOrder, 5);
+		this.writeBit(coding.perAxis);
+		this.writeInteger(this.coordinateOrders[0], 5);
+		if (coding.perAxis) this.writeInteger(this.coordinateOrders[1], 5);
 		this.writeBit(this.relativePoints);
 	}
 
@@ -274,20 +288,23 @@ export class StateWriter {
 	writeElementPoint(point: [number, number]) {
 		const [x, y] = this.elementGrid.toGrid(point);
 		const [px, py] = this.relativePoints ? this.lastPoint : [0, 0];
-		this.writeExpGolomb(x - px, this.coordinateOrder, true);
-		this.writeExpGolomb(y - py, this.coordinateOrder, true);
+		this.writeExpGolomb(x - px, this.coordinateOrders[0], true);
+		this.writeExpGolomb(y - py, this.coordinateOrders[1], true);
 		this.lastPoint = [x, y];
 	}
 
 	/** The points of an element: each as the difference to the previous one. */
 	writeElementPoints(points: [number, number][]) {
 		this.writeVarint(points.length);
-		for (const step of pointSteps(this.elementGrid, points)) this.writeExpGolomb(step, this.coordinateOrder, true);
+		pointSteps(this.elementGrid, points).forEach((step, i) =>
+			this.writeExpGolomb(step, this.coordinateOrders[i % 2], true)
+		);
 	}
 
 	/**
 	 * The numbers that `writeElementPoint` and `writeElementPoints` write for the elements, zigzag
-	 * encoded. `relative`: the points of markers and circles as differences to the point before.
+	 * encoded, longitude and latitude in turns. `relative`: the points of markers and circles as
+	 * differences to the point before.
 	 */
 	private coordinateSteps(elements: StateElement[], relative: boolean): number[] {
 		const grid = this.elementGrid;

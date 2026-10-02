@@ -189,7 +189,9 @@ To keep hashes short:
   steps of the elements are an Exp-Golomb code, whose order (5 bits) the writer chooses per map so
   they are shortest: a step up to about 2^order costs order + 1 bits, and each doubling 2 bits more.
   The points of markers and circles are differences to the point of the marker or circle before, if
-  that is shorter (1 bit), e.g. for points sorted by place;
+  that is shorter (1 bit), e.g. for points sorted by place. Longitude and latitude can have an order
+  each (1 bit), e.g. for points sorted by latitude, whose latitude steps are small and longitude
+  steps large. The order of the elements is never changed;
 
 The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
 round-trips are lossy at the resolution by design.
