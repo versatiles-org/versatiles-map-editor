@@ -157,8 +157,19 @@
 		button?.focus();
 	}
 
+	/**
+	 * Escape closes the picker with the focus in it or on its button, and goes no further, e.g. to
+	 * deselect the element. With the focus elsewhere, e.g. in another field, the Escape is that one's.
+	 */
+	function onOwnKeyDown(e: KeyboardEvent) {
+		if (!open || e.key !== 'Escape') return;
+		e.stopPropagation();
+		close();
+	}
+
+	// without a focus, e.g. after a click into the picker beside its controls
 	function onWindowKeyDown(e: KeyboardEvent) {
-		if (open && e.key === 'Escape') close();
+		if (open && e.key === 'Escape' && e.target === document.body) close();
 	}
 
 	/** A typed color, with its opacity: also hex digits without "#", or a CSS color. */
@@ -291,6 +302,7 @@
 	aria-expanded={open}
 	aria-controls="{id}-panel"
 	onclick={toggle}
+	onkeydown={onOwnKeyDown}
 >
 	<span class="swatch" style:--swatch-color={shown}></span>
 	{shown}
@@ -304,6 +316,8 @@
 		use:popup
 		popover="manual"
 		role="dialog"
+		tabindex="-1"
+		onkeydown={onOwnKeyDown}
 		aria-labelledby="{id}-label"
 		style:left="{position.x}px"
 		style:top="{position.y}px"

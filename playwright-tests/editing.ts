@@ -787,6 +787,48 @@ test(
 	}
 );
 
+test('Escape closes the color picker only from within it, and the element stays selected', async ({ page }) => {
+	const state: MapState = {
+		map: { center: [13.4, 52.5], radius: 10000 },
+		elements: [
+			{
+				type: 'polygon',
+				points: [
+					[13.35, 52.48],
+					[13.45, 52.48],
+					[13.4, 52.52]
+				]
+			}
+		]
+	};
+	await page.goto('/#' + encodeState(state));
+	await waitForMapIsReady(page);
+	await page.mouse.click(...(await project(page, [13.4, 52.49])));
+	const [fillColor, strokeColor] = await page.getByRole('button', { name: /^Color/ }).all();
+	const popup = page.getByRole('dialog', { name: 'Color' });
+
+	// on its button, and in it: closed, with the focus on its button
+	await fillColor.click();
+	await expect(popup).toBeVisible();
+	await fillColor.focus();
+	await page.keyboard.press('Escape');
+	await expect(popup).toBeHidden();
+	await fillColor.click();
+	await popup.getByRole('textbox').first().focus();
+	await page.keyboard.press('Escape');
+	await expect(popup).toBeHidden();
+	await expect(fillColor).toBeFocused();
+	// the area is still selected
+	await expect(fillColor).toBeVisible();
+
+	// in another control, the Escape is that one's
+	await fillColor.click();
+	await strokeColor.focus();
+	await page.keyboard.press('Escape');
+	await expect(popup).toBeVisible();
+	await expect(strokeColor).toBeFocused();
+});
+
 test('the text color and the halo color of a label', async ({ page }) => {
 	const center: Point = [13.4, 52.5];
 	await page.goto(
