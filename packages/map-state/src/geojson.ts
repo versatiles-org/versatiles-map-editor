@@ -26,7 +26,6 @@ import {
 	symbolPropsFromStyle,
 	symbolStyleFromProps
 } from './profile.js';
-import { upgradeState, type OldMetadata } from './legacy.js';
 
 /**
  * A GeoJSON FeatureCollection extended with the editor's `map` camera (`center` + `radius` in
@@ -287,17 +286,8 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		if (legend) meta.legend = legend;
 		const colorScheme = sanitizeString(doc.meta.colorScheme);
 		if (colorScheme) meta.colorScheme = colorScheme;
-		// older files: the search as a flag, and the position in the legend
-		const old = doc.meta as { search?: unknown; legend?: { position?: unknown } };
-		const viewer = sanitizeViewer({
-			...(old.search === true && { search: 'top-left' }),
-			...(typeof old.legend === 'object' && old.legend !== null && { legend: old.legend.position }),
-			...(typeof doc.meta.viewer === 'object' && doc.meta.viewer)
-		});
+		const viewer = sanitizeViewer(doc.meta.viewer);
 		if (viewer) meta.viewer = viewer;
-		// older files: the label font of all markers, which `upgradeState` gives to them
-		const labelFont = sanitizeString((doc.meta as OldMetadata).labelFont);
-		if (labelFont) (meta as OldMetadata).labelFont = labelFont;
 		if (doc.meta.labelOverlap === 'hide') meta.labelOverlap = 'hide';
 		const labelMinZoom = sanitizeLabelMinZoom(doc.meta.labelMinZoom);
 		if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
@@ -306,5 +296,5 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 		if (title) meta.title = title;
 		if (Object.keys(meta).length > 0) state.meta = meta;
 	}
-	return upgradeState(state);
+	return state;
 }

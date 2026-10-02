@@ -1,14 +1,6 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
-import type {
-	StateBackground,
-	StateLegend,
-	StateLegendEntry,
-	StatePopup,
-	StateStyle,
-	StateViewer,
-	Bounds
-} from './types.js';
+import type { StateBackground, StateLegend, StatePopup, StateStyle, StateViewer, Bounds } from './types.js';
 import {
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
@@ -335,16 +327,6 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 	return result;
 }
 
-/**
- * An entry of the legend as older versions have it: a color and maybe a symbol. With a symbol, it
- * is a marker; else an area of the color without an outline, as its swatch was.
- */
-export function oldLegendEntry(color: string, symbol: string | undefined, label: string): StateLegendEntry {
-	return symbol
-		? { type: 'marker', style: { color, symbol }, label }
-		: { type: 'polygon', style: { color }, strokeStyle: { visible: false }, label };
-}
-
 /** A valid legend, or undefined. Invalid entries (e.g. without a type or a color) are skipped. */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
@@ -364,12 +346,6 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;
 		const label = sanitizeString(e.label) ?? '';
-		if (e.type === undefined) {
-			// of an older version
-			const color = sanitizeColor(e.color);
-			if (color) legend.entries.push(oldLegendEntry(color, sanitizeSymbol(e.symbol), label));
-			continue;
-		}
 		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
 		if (!type) continue;
 		const style = sanitizeStyle(e.style);

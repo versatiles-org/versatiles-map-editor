@@ -1,4 +1,3 @@
-import { upgradeState } from './legacy.js';
 import type { MapState } from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
@@ -27,8 +26,7 @@ export function stateToMapJSON(state: MapState): MapJSON {
 }
 
 /**
- * The map state of the content of a .mapjson file. A file without `$schema` is of an older
- * version of the editor and is upgraded (see `upgradeState`); one of a newer version throws a
+ * The map state of the content of a .mapjson file. One of a newer version (see `$schema`) throws a
  * `MapJSONVersionError`, and one without elements an error.
  */
 export function stateFromMapJSON(json: unknown): MapState {
@@ -37,5 +35,5 @@ export function stateFromMapJSON(json: unknown): MapState {
 	const version = typeof $schema === 'string' ? /mapjson-(\d+)\.schema\.json$/.exec($schema)?.[1] : undefined;
 	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
 	if (!Array.isArray(state.elements)) throw new Error('The file contains no map elements');
-	return upgradeState(state as MapState);
+	return state as MapState;
 }

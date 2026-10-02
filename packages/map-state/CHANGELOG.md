@@ -25,8 +25,7 @@ The first release.
   - style references to similar earlier styles, in an Exp-Golomb code;
   - style fields as 4-bit keys, and keys from 16 after the extended key 14, e.g. `labelSize` (the
     size of a marker's label, apart from `size`, the size of its symbol) and `font` (the glyph font
-    of a marker's label; older links and files with one font for all markers, `meta.labelFont`,
-    are upgraded to it);
+    of a marker's label);
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short, in
@@ -58,21 +57,17 @@ The first release.
   search (`SEARCH_POSITIONS` or "none"), the buttons for zooming (`NAVIGATION_POSITIONS` or "none")
   and the legend (`LEGEND_POSITIONS` or "none"). `VIEWER_DEFAULTS` (no search, the buttons at the
   top right, the legend at the bottom left), `VIEWER_CHOICES`, `removeViewerDefaults` and
-  `sanitizeViewer`. The search and the position of the legend of older links, GeoJSON files and
-  map states (`upgradeState`) are read into it.
+  `sanitizeViewer`.
 - The `.mapjson` file format, with its version: `stateToMapJSON` writes a map state with
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
-  one, upgrades files of older versions without `$schema`, and throws a `MapJSONVersionError` for a
-  newer version.
+  one, and throws a `MapJSONVersionError` for a newer version.
 - The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package),
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
-  styles are written like those of elements, which can refer to them. Entries of older links and
-  files (a `color` and maybe a `symbol`) are read as markers with that symbol, or else as areas of
-  that color without an outline.
+  styles are written like those of elements, which can refer to them.
 - `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
   `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata;
   `sanitizeLabelMinZoom`.
@@ -80,9 +75,7 @@ The first release.
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).
 - The opacity of every color is its alpha, also of a fill: styles have no `opacity`. GeoJSON has
-  a fill's as `fill-color` without alpha and `fill-opacity`, as simplestyle does. Older base64
-  strings, whose fills had an opacity of their own, are read with it as the alpha of the color;
-  `upgradeState` does the same for a `MapState` of an older version, e.g. of a saved file.
+  a fill's as `fill-color` without alpha and `fill-opacity`, as simplestyle does.
 - Features that cannot be mapped are skipped on import, e.g. circles without a positive radius, and
   deeply nested KML is read without a stack overflow.
 - Metadata is stored only if one of its fields has a value, so the same map always gives the same

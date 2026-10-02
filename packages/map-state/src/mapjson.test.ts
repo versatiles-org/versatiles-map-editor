@@ -12,11 +12,6 @@ describe('.mapjson files', () => {
 		expect(stateFromMapJSON(JSON.parse(JSON.stringify(json)))).toStrictEqual(state);
 	});
 
-	it('of older versions, without a schema, are upgraded', () => {
-		const old = { meta: { search: true }, elements: [] };
-		expect(stateFromMapJSON(old)).toStrictEqual({ meta: { viewer: { search: 'top-left' } }, elements: [] });
-	});
-
 	it('of a newer version are refused with the version', () => {
 		const newer = { $schema: MAPJSON_SCHEMA_URL.replace('mapjson-1', 'mapjson-2'), elements: [] };
 		expect(() => stateFromMapJSON(newer)).toThrow(MapJSONVersionError);

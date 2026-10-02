@@ -200,22 +200,15 @@ In code, [`@versatiles/map-state`](README.md) reads and writes files:
 ```js
 import { stateFromMapJSON, stateToMapJSON } from '@versatiles/map-state';
 
-const state = stateFromMapJSON(JSON.parse(text)); // upgrades older files, refuses newer ones
+const state = stateFromMapJSON(JSON.parse(text)); // refuses files of newer versions
 const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this version
 ```
 
 ## Versions
 
 The version of the format is in the name of the schema in `$schema`: `mapjson-1.schema.json` is
-version 1. A new version is only made for changes that older readers cannot handle; then the
-editor reads older versions and upgrades them.
-
-Files without `$schema` were written by the editor before the format had versions. They are read
-as version 1 and upgraded: a fill `opacity` becomes the alpha of its color, a `search: true` in
-`meta` becomes `viewer.search`, the `position` of the legend becomes `viewer.legend`, and a legend
-entry of a `color` and maybe a `symbol` becomes a marker with that symbol, or else an area of
-that color without an outline. A file of
-a newer version than the editor knows is refused, instead of being read wrongly.
+version 1. A file without `$schema` is read as version 1. A file of a newer version than the editor
+knows is refused, instead of being read wrongly.
 
 ## Other forms
 

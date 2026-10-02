@@ -290,9 +290,8 @@ describe('legend', () => {
 						{ type: 'marker', style: { symbol: 'flag' }, strokeStyle: { color: '#000' }, label: 'y' },
 						{ type: 'polygon', style: 'red', strokeStyle: { visible: false }, label: 'z' },
 						{ type: 'circle', style: { color: '#0F0' }, label: 'x' },
-						// of an older version: a color, and maybe a symbol
-						{ color: '#0F0', label: 'old', symbol: 'icons:anchor' },
-						{ color: 'nope', label: 'x' },
+						// without a type
+						{ color: '#0F0', label: 'x', symbol: 'icons:anchor' },
 						'x'
 					]
 				}
@@ -306,8 +305,7 @@ describe('legend', () => {
 					// only valid fields; a symbol is the name of its image, e.g. no short name
 					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '5' },
 					{ type: 'marker', label: 'y' },
-					{ type: 'polygon', strokeStyle: { visible: false }, label: 'z' },
-					{ type: 'marker', style: { color: '#00ff00', symbol: 'icons:anchor' }, label: 'old' }
+					{ type: 'polygon', strokeStyle: { visible: false }, label: 'z' }
 				]
 			}
 		});
@@ -331,16 +329,6 @@ describe('viewer', () => {
 		const foreign = { search: 'bottom', navigation: 'top-right', legend: 'right', zoom: true };
 		expect(stateFromGeoJSON({ ...doc, meta: { viewer: foreign } } as unknown as GeoJSONDocument).meta).toStrictEqual({
 			viewer: { legend: 'right' }
-		});
-	});
-
-	it('reads the search and the position of the legend of older files', () => {
-		const old = { search: true, legend: { position: 'top', entries: [{ color: '#ff0000', label: 'A' }] } };
-		expect(stateFromGeoJSON({ type: 'FeatureCollection', features: [], meta: old } as never).meta).toStrictEqual({
-			legend: {
-				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
-			},
-			viewer: { search: 'top-left', legend: 'top' }
 		});
 	});
 });

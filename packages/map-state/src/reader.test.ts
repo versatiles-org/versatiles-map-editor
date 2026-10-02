@@ -254,12 +254,6 @@ describe('StateReader', () => {
 		it('should read empty metadata correctly', () => {
 			test({}, 'A');
 		});
-		it('should read metadata that was stored empty as none, like older hashes', () => {
-			const writer = new StateWriter();
-			writer.writeBit(true);
-			writer.writeInteger(0, 6);
-			expect(new StateReader(writer.bits).readMetadata()).toBeUndefined();
-		});
 	});
 
 	describe('readRoot', () => {
@@ -363,20 +357,6 @@ describe('StateReader', () => {
 			expect(reader.readRoot()).toStrictEqual(root);
 			expect(reader.ended()).toBe(true);
 		});
-	});
-
-	it('reads the opacity of fills in older strings as the alpha of their color', () => {
-		// written when fills had an opacity of their own: 3.4 for a marker, 0.8 for the fill and
-		// the outline of a polygon, the outline referring to the style of the fill
-		const state = StateReader.fromBase64(
-			'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AYsFSpAABCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrHF4oRICCoEAQABhqgAAGGqAzDY4GDggAAAA'
-		).readRoot();
-		const [marker, , polygon] = state.elements as { style?: StateStyle; strokeStyle?: StateStyle }[];
-		// at most opaque
-		expect(marker.style).toStrictEqual({ halo: 1.2, color: '#ff0000' });
-		// 0x64 × 0.8 = 0x50
-		expect(polygon.style).toStrictEqual({ halo: 1.5, color: '#0000ff50' });
-		expect(polygon.strokeStyle).toStrictEqual({ halo: 1.5, color: '#ffff00cc' });
 	});
 
 	describe('readStyle', () => {
@@ -630,48 +610,6 @@ describe('legend', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('reads the entries of older links, a color and maybe a symbol, as markers and areas', () => {
-		// as written before: a blue anchor, and a translucent red swatch
-		const writer = new StateWriter();
-		writer.writeInteger(1, 3); // version
-		writer.writePalette(['#0000ff', '#ff000080']);
-		writer.writeStringTable(['Harbour', 'Area'], ['icons:anchor']);
-		writer.writeBit(false); // no camera
-		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
-		writer.writeVarint(0, true); // the origin
-		writer.writeVarint(0, true);
-		writer.writeBit(false); // one parameter for longitude and latitude
-		writer.writeInteger(0, 5); // the parameter of the code of the coordinates
-		writer.writeBit(false); // the points of markers and circles from the origin
-		writer.writeBit(false); // no frame
-		writer.writeBit(true); // metadata
-		writer.writeInteger(3, 6); // the legend
-		writer.writeInteger(3, 4); // its entries
-		writer.writeVarint(2);
-		writer.writeInteger(1, 4); // the color of older entries
-		writer.writeColorValue('#0000ff');
-		writer.writeInteger(4, 4); // the symbol of older entries
-		writer.writeStringRef('icons:anchor', true);
-		writer.writeInteger(3, 4); // the label
-		writer.writeStringRef('Harbour');
-		writer.writeInteger(0, 4);
-		writer.writeInteger(1, 4); // the color of older entries
-		writer.writeColorValue('#ff000080');
-		writer.writeInteger(3, 4); // the label
-		writer.writeStringRef('Area');
-		writer.writeInteger(0, 4);
-		writer.writeInteger(0, 4); // the end of the legend
-		writer.writeInteger(0, 6); // the end of the metadata
-		expect(decodeState(writer.asBase64()).meta).toStrictEqual({
-			legend: {
-				entries: [
-					{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor' }, label: 'Harbour' },
-					{ type: 'polygon', style: { color: '#ff000080' }, strokeStyle: { visible: false }, label: 'Area' }
-				]
-			}
-		});
-	});
-
 	it('refuses an entry without a valid type', () => {
 		const legend = { entries: [{ color: '#ff0000', label: 'A' }] } as unknown as StateLegend;
 		expect(() => encodeState({ meta: { legend }, elements: [] })).toThrow('Invalid legend entry type');
@@ -716,15 +654,5 @@ describe('viewer', () => {
 		expect(
 			decodeState(encodeState({ meta: { viewer: { search: 'top-left', legend: 'bottom-left' } }, elements: [] }))
 		).toStrictEqual({ meta: { viewer: { search: 'top-left' } }, elements: [] });
-	});
-
-	it('reads the search and the position of the legend of older links', () => {
-		// written before: the search as a flag, the legend at the top right
-		expect(decodeState('IT_AAAEAmtAAAAQxIMIQDgAoAAAAAA').meta).toStrictEqual({
-			legend: {
-				entries: [{ type: 'polygon', style: { color: '#ff0000' }, strokeStyle: { visible: false }, label: 'A' }]
-			},
-			viewer: { search: 'top-left', legend: 'top-right' }
-		});
 	});
 });

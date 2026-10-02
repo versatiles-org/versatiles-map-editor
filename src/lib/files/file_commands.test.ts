@@ -58,23 +58,10 @@ describe('FileCommands', () => {
 			expect(files.filename).toBe('trip.mapjson');
 		});
 
-		it('keeps the title of the map in the file, and the search of an older version in the viewer', async () => {
-			choose('trip.mapjson', JSON.stringify({ ...map, meta: { title: 'Holidays', search: true } }));
+		it('keeps the title of the map in the file', async () => {
+			choose('trip.mapjson', JSON.stringify({ ...map, meta: { title: 'Holidays' } }));
 			await files.openFile();
-			expect(maps.openMap).toHaveBeenCalledWith({
-				...map,
-				meta: { title: 'Holidays', viewer: { search: 'top-left' } }
-			});
-		});
-
-		it('opens a file of an older version, whose fills have an opacity of their own', async () => {
-			const polygon = { type: 'polygon', points: [], style: { color: '#0000ff', opacity: 0.5 } };
-			choose('trip.mapjson', JSON.stringify({ elements: [polygon] }));
-			await files.openFile();
-			expect(maps.openMap).toHaveBeenCalledWith({
-				elements: [{ type: 'polygon', points: [], style: { color: '#0000ff80' } }],
-				meta: { title: 'trip' }
-			});
+			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'Holidays' } });
 		});
 
 		it('tells the user about a file of a newer version of the editor', async () => {

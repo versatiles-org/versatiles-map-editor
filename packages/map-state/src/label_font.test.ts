@@ -35,46 +35,6 @@ describe('label font', () => {
 		expect(stateFromKML(stateToKML(state)).elements).toStrictEqual(state.elements);
 	});
 
-	it('of all markers in older links and files becomes the font of each marker without one', () => {
-		const old = {
-			meta: { labelFont: 'noto_sans_bold', title: 'T' },
-			elements: [
-				{ type: 'marker', point: [13.4, 52.5], style: { label: 'A' } },
-				{ type: 'marker', point: [13.5, 52.5] },
-				{ type: 'marker', point: [13.6, 52.5], style: { label: 'C', font: 'lato_italic' } },
-				{
-					type: 'line',
-					points: [
-						[13.4, 52.5],
-						[13.5, 52.6]
-					]
-				}
-			]
-		};
-		const upgraded: MapState = {
-			meta: { title: 'T' },
-			elements: [
-				{ type: 'marker', point: [13.4, 52.5], style: { label: 'A', font: 'noto_sans_bold' } },
-				{ type: 'marker', point: [13.5, 52.5], style: { font: 'noto_sans_bold' } },
-				{ type: 'marker', point: [13.6, 52.5], style: { label: 'C', font: 'lato_italic' } },
-				{
-					type: 'line',
-					points: [
-						[13.4, 52.5],
-						[13.5, 52.6]
-					]
-				}
-			]
-		};
-		expect(stateFromMapJSON(old)).toStrictEqual(upgraded);
-		// GeoJSON with the label font as metadata
-		expect(stateFromGeoJSON({ ...stateToGeoJSON(upgraded), meta: old.meta })).toStrictEqual(upgraded);
-		// a link with the label font as metadata (key 6), written by an older version
-		expect(decodeState('IAgRjoGxHgxnEJRUAI0A-G')).toStrictEqual({
-			elements: [{ type: 'marker', point: [13.4, 52.5], style: { label: 'A', font: 'noto_sans_bold' } }]
-		});
-	});
-
 	it('is not written as metadata any more', () => {
 		expect(stateToGeoJSON(state).meta).not.toHaveProperty('labelFont');
 		const writer = new StateWriter();

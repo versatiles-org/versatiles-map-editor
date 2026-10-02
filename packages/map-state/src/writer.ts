@@ -354,7 +354,6 @@ export class StateWriter {
 		}
 
 		this.writeBit(true);
-		// key 1 was the heading of older links
 		// first the words of the format, as they are first in the string table
 		if (metadata.background) {
 			this.writeInteger(2, 6);
@@ -365,7 +364,6 @@ export class StateWriter {
 			this.writeInteger(4, 6);
 			this.writeStringRef(metadata.colorScheme, true);
 		}
-		// key 6 was the label font of all markers, which the reader gives to the markers
 		if (metadata.legend) {
 			this.writeInteger(3, 6);
 			this.writeLegend(metadata.legend);
@@ -388,7 +386,6 @@ export class StateWriter {
 			// in tenths of a zoom level
 			this.writeVarint(Math.round(labelMinZoom * 10));
 		}
-		// key 5 was the search of older links, as a flag
 		const viewer = removeViewerDefaults(metadata.viewer);
 		if (viewer) {
 			this.writeInteger(10, 6);
@@ -441,7 +438,7 @@ export class StateWriter {
 		this.writeInteger(0, 4);
 	}
 
-	// key/value pairs like a style, so fields can be added later; key 1 was the position of older links
+	// key/value pairs like a style, so fields can be added later
 	writeLegend(legend: StateLegend) {
 		if (legend.layout && legend.layout !== LEGEND_DEFAULTS.layout) {
 			this.writeInteger(2, 4);
@@ -455,7 +452,6 @@ export class StateWriter {
 		if (legend.bold) this.writeInteger(5, 4);
 		if (legend.italic) this.writeInteger(6, 4);
 		this.writeInteger(3, 4);
-		// keys 1 and 4 were the color and the symbol of older links, key 2 is not used
 		this.writeArray(legend.entries, (entry) => {
 			const type = LEGEND_ENTRY_TYPES.indexOf(entry.type);
 			if (type < 0) throw new Error(`Invalid legend entry type: ${entry.type}`);

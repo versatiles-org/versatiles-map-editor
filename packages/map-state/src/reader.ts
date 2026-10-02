@@ -16,19 +16,11 @@ import type {
 	StateViewer
 } from './types.js';
 import { BASE64_CODE2BITS, CODEC_VERSION, ORIGIN_SCALE } from './constants.js';
-import {
-	oldLegendEntry,
-	removeViewerDefaults,
-	sanitizeBackground,
-	sanitizeLabelMinZoom,
-	VIEWER_CHOICES
-} from './profile.js';
-import { withoutOldOpacity, type OldMetadata, type OldStyle } from './legacy.js';
+import { sanitizeBackground, sanitizeLabelMinZoom, VIEWER_CHOICES } from './profile.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import {
-	OLD_OPACITY_KEY,
 	STYLE_FIELDS,
 	STYLE_REFERENCE_PARAMETER,
 	STYLE_EXTENDED_KEY,
@@ -36,7 +28,7 @@ import {
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
-import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
+import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];
@@ -327,24 +319,11 @@ export class StateReader {
 			if (!this.readBit()) return undefined;
 
 			const metadata: StateMetadata = {};
-			// of older links: the search as a flag, and the position in the legend
-			let oldSearch = false;
-			this.oldLegendPosition = undefined;
 			while (true) {
 				const key = this.readInteger(6);
 				switch (key) {
-					case 0: {
-						if (!metadata.viewer && (oldSearch || this.oldLegendPosition)) {
-							const viewer = removeViewerDefaults({
-								search: oldSearch ? 'top-left' : undefined,
-								legend: this.oldLegendPosition
-							});
-							if (viewer) metadata.viewer = viewer;
-						}
-						// no metadata, like the writer does now (older hashes could store it empty)
-						return Object.keys(metadata).length > 0 ? metadata : undefined;
-					}
-					// key 1 was the heading of older links
+					case 0:
+						return metadata;
 					case 2:
 						metadata.background = parseBackground(this.readStringRef(true));
 						break;
@@ -353,14 +332,6 @@ export class StateReader {
 						break;
 					case 4:
 						metadata.colorScheme = this.readStringRef(true);
-						break;
-					case 5:
-						// older links: the address search, as a flag
-						oldSearch = true;
-						break;
-					case 6:
-						// older links: the label font of all markers, which `upgradeState` gives to them
-						(metadata as OldMetadata).labelFont = this.readStringRef(true);
 						break;
 					case 7:
 						metadata.mapLabelsOnTop = true;
@@ -477,11 +448,6 @@ export class StateReader {
 				switch (key) {
 					case 0:
 						return legend;
-					case 1:
-						// older links: the position of the legend, which is one of the viewer now
-						this.oldLegendPosition = LEGEND_POSITIONS[this.readVarint()];
-						if (!this.oldLegendPosition) throw new Error('Invalid legend position');
-						break;
 					case 2:
 						legend.layout = LEGEND_LAYOUTS[this.readVarint()];
 						if (!legend.layout) throw new Error('Invalid legend layout');
@@ -508,9 +474,6 @@ export class StateReader {
 		}
 	}
 
-	/** The position of the legend in an older link, kept for the viewer settings. */
-	private oldLegendPosition: (typeof LEGEND_POSITIONS)[number] | undefined;
-
 	/** The settings of the viewer: a choice per control, by its index in `VIEWER_CHOICES`. */
 	readViewer(): StateViewer {
 		try {
@@ -530,28 +493,20 @@ export class StateReader {
 		}
 	}
 
-	/** An entry of the legend. Older links have a color and maybe a symbol instead (see `oldLegendEntry`). */
+	/** An entry of the legend. */
 	readLegendEntry(): StateLegendEntry {
 		let type: StateLegendEntry['type'] | undefined;
 		let style: StateStyle | undefined;
 		let strokeStyle: StateStyle | undefined;
 		let label = '';
-		let old: { color?: string; symbol?: string } = {};
 		while (true) {
 			const key = this.readInteger(4);
 			switch (key) {
-				case 0: {
-					if (type) return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label };
-					return oldLegendEntry(old.color ?? '#000000', old.symbol, label);
-				}
-				case 1:
-					old = { ...old, color: this.readColorValue() };
-					break;
+				case 0:
+					if (!type) throw new Error('Legend entry without type');
+					return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label };
 				case 3:
 					label = this.readStringRef();
-					break;
-				case 4:
-					old = { ...old, symbol: this.readStringRef(true) };
 					break;
 				case 5:
 					type = LEGEND_ENTRY_TYPES[this.readVarint()];
@@ -591,11 +546,7 @@ export class StateReader {
 		}
 	}
 
-	/**
-	 * A style: a reference to an earlier style (0: none) and the differences to it. The opacity of
-	 * a fill in an older string becomes the alpha of its color; the style history keeps the style
-	 * as it was written, since later styles of the string refer to it.
-	 */
+	/** A style: a reference to an earlier style (0: none) and the differences to it. */
 	readStyle(): StateStyle {
 		try {
 			const ref = this.readExpGolomb(STYLE_REFERENCE_PARAMETER);
@@ -603,14 +554,14 @@ export class StateReader {
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch({ ...base });
 			this.styleHistory.remember(style);
-			return withoutOldOpacity(style);
+			return style;
 		} catch (cause) {
 			throw new Error(`Error reading style`, { cause });
 		}
 	}
 
-	/** Apply the changed and removed fields to `style`, also the opacity of older strings. */
-	readStylePatch(style: OldStyle): OldStyle {
+	/** Apply the changed and removed fields to `style`. */
+	readStylePatch(style: StateStyle): StateStyle {
 		while (true) {
 			const key = this.readStyleKey();
 			switch (key) {
@@ -618,9 +569,6 @@ export class StateReader {
 					return style;
 				case 1:
 					style.halo = this.readVarint() / 10;
-					break;
-				case OLD_OPACITY_KEY:
-					style.opacity = this.readVarint() / 100;
 					break;
 				case 3:
 					style.pattern = this.readVarint();
@@ -663,10 +611,6 @@ export class StateReader {
 					break;
 				case STYLE_REMOVE_KEY: {
 					const removed = this.readStyleKey();
-					if (removed === OLD_OPACITY_KEY) {
-						delete style.opacity;
-						break;
-					}
 					const field = STYLE_FIELDS.find((f) => f.key === removed);
 					if (!field) throw new Error(`Invalid state key: ${removed}`);
 					delete style[field.name];
