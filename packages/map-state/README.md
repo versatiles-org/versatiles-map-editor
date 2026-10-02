@@ -105,7 +105,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - visible area → `frame: [west, south, east, north]`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
-  minimized options, stored as JSON in base64, so any current or future option fits;
+  minimized options, stored as JSON in the string table of the base64, so any current or future
+  option fits;
   `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
@@ -160,7 +161,8 @@ hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
-- the title, the labels, the legend labels and the popups are stored once in a string table, in
+- the strings (the background as JSON, the color scheme, the label font, the title, the labels,
+  the legend labels and the popups) are stored once in a string table, in
   the order they are written, and referenced by 1 bit for the next new string, else by index. The
   table is one block of bits (`string_coder.ts`): an adaptive model predicts each character from
   the two before it (PPM of order 2 over code points), and an arithmetic coder spends fewer bits

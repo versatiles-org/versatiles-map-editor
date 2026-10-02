@@ -291,20 +291,20 @@ export class StateReader {
 					//	metadata.heading = this.readString();
 					//	break;
 					case 2:
-						metadata.background = parseBackground(this.readString());
+						metadata.background = parseBackground(this.readStringRef());
 						break;
 					case 3:
 						metadata.legend = this.readLegend();
 						break;
 					case 4:
-						metadata.colorScheme = this.readString();
+						metadata.colorScheme = this.readStringRef();
 						break;
 					case 5:
 						// older links: the address search, as a flag
 						oldSearch = true;
 						break;
 					case 6:
-						metadata.labelFont = this.readString();
+						metadata.labelFont = this.readStringRef();
 						break;
 					case 7:
 						metadata.mapLabelsOnTop = true;
@@ -630,7 +630,7 @@ export class StateReader {
 		});
 	}
 
-	/** The title, the labels and the popups, each once, which are referenced afterwards. */
+	/** The strings of the metadata, the labels and the popups, each once, which are referenced afterwards. */
 	readStringTable(): string[] {
 		try {
 			const count = this.readVarint();

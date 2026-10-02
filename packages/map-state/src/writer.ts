@@ -296,7 +296,7 @@ export class StateWriter {
 		if (metadata.background) {
 			this.writeInteger(2, 6);
 			// as JSON, so any option of @versatiles/style can be stored
-			this.writeString(JSON.stringify(metadata.background));
+			this.writeStringRef(JSON.stringify(metadata.background));
 		}
 		if (metadata.legend) {
 			this.writeInteger(3, 6);
@@ -304,11 +304,11 @@ export class StateWriter {
 		}
 		if (metadata.colorScheme) {
 			this.writeInteger(4, 6);
-			this.writeString(metadata.colorScheme);
+			this.writeStringRef(metadata.colorScheme);
 		}
 		if (metadata.labelFont) {
 			this.writeInteger(6, 6);
-			this.writeString(metadata.labelFont);
+			this.writeStringRef(metadata.labelFont);
 		}
 		if (metadata.mapLabelsOnTop) {
 			// a flag: the key alone
@@ -540,7 +540,7 @@ export class StateWriter {
 	}
 
 	/**
-	 * The title, the labels and the popups, each once, in the order they are written, and
+	 * The strings of the metadata, the labels and the popups, each once, in the order they are written, and
 	 * afterwards only a reference (see `writeStringRef`): their number, and unless 0, the length of
 	 * their block in bits and the block (see `encodeStrings`).
 	 */
@@ -613,19 +613,23 @@ function allStyles(root: MapState): StateStyle[] {
 }
 
 /**
- * The strings of the string table, in the order the writer writes them: of the legend, the title,
- * and of each element.
+ * The strings of the string table, in the order the writer writes them: of the metadata (the
+ * background as JSON, the legend, the color scheme, the label font, the title) and of each element.
  */
 export function collectStrings(root: MapState): string[] {
 	const strings: string[] = [];
 	const ofStyles = (item: { style?: StateStyle; strokeStyle?: StateStyle }) => {
 		for (const style of [item.style, item.strokeStyle]) if (style?.label != null) strings.push(style.label);
 	};
-	for (const entry of root.meta?.legend?.entries ?? []) {
+	const meta = root.meta;
+	if (meta?.background) strings.push(JSON.stringify(meta.background));
+	for (const entry of meta?.legend?.entries ?? []) {
 		ofStyles(entry);
 		if (entry.label) strings.push(entry.label);
 	}
-	if (root.meta?.title) strings.push(root.meta.title);
+	if (meta?.colorScheme) strings.push(meta.colorScheme);
+	if (meta?.labelFont) strings.push(meta.labelFont);
+	if (meta?.title) strings.push(meta.title);
 	for (const element of root.elements) {
 		// the label of the outline is written inside it, before the label of the element
 		if ('strokeStyle' in element && element.strokeStyle?.label != null) strings.push(element.strokeStyle.label);

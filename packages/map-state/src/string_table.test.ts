@@ -31,6 +31,30 @@ describe('the string table', () => {
 		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', '', 'Open 24 h']);
 	});
 
+	it('has the strings of the metadata first, in the order they are written', () => {
+		const meta: MapState['meta'] = {
+			background: { builder: 'osm', options: { theme: 'gray' } },
+			colorScheme: 'okabe-ito',
+			labelFont: 'noto_sans_bold',
+			title: 'Pharmacies'
+		};
+		const withMeta: MapState = { ...state, meta: { ...state.meta, ...meta } };
+		const reader = StateReader.fromBase64(encodeState(withMeta));
+		reader.readInteger(3);
+		reader.readPalette();
+		expect(reader.readStringTable()).toStrictEqual([
+			'{"builder":"osm","options":{"theme":"gray"}}',
+			'Pharmacy',
+			'okabe-ito',
+			'noto_sans_bold',
+			'Pharmacies',
+			'Boots',
+			'',
+			'Open 24 h'
+		]);
+		expect(decodeState(encodeState(withMeta))).toStrictEqual(withMeta);
+	});
+
 	it('keeps the strings in a link', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
