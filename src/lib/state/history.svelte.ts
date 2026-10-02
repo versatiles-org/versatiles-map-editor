@@ -50,6 +50,11 @@ export class StateHistory {
 		this.updateButtons();
 	}
 
+	/** The current state, without the viewport, e.g. to compare an edit with it. */
+	public get current(): MapState {
+		return JSON.parse(jsonOf(this.history[this.index]));
+	}
+
 	/** The number of undone steps, which redo would restore. */
 	public get undone(): number {
 		return this.index;

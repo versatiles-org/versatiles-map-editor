@@ -2,6 +2,8 @@ import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { encodeState, type MapState } from '@versatiles/map-state';
 import { StateHistory } from './history.svelte.js';
 import { EventHandler } from '../event_handler.js';
+import { followStyleChanges } from '../legend_looks.js';
+import { notify } from '../notify.svelte.js';
 
 export class StateManager {
 	public mapDocument: MapDocumentInteractive;
@@ -29,10 +31,35 @@ export class StateManager {
 	}
 
 	public log() {
+		this.followLegend();
 		const state = this.mapDocument.getState();
 		if (!this.history.push(state)) return;
 		this.events.emit('log', state);
 		this.events.emit('change');
+	}
+
+	/**
+	 * Entries of the legend that showed the old style of changed elements get their new style, in
+	 * the same step, so that a change of the elements' style is not forgotten in the legend. See
+	 * `followStyleChanges`.
+	 */
+	private followLegend() {
+		const legend = this.mapDocument.legend;
+		if (!legend) return;
+		const before = this.history.current.elements;
+		const after = this.mapDocument.getState().elements;
+		const followed = followStyleChanges(before, after, legend.entries);
+		if (!followed) return;
+		this.mapDocument.legend = { ...legend, entries: followed.entries };
+		const [first] = followed.changed;
+		notify(
+			followed.changed.length > 1
+				? `${followed.changed.length} legend entries have the new style too.`
+				: first.label.trim()
+					? `The legend entry “${first.label.trim()}” has the new style too.`
+					: 'The legend entry has the new style too.',
+			'info'
+		);
 	}
 
 	/** Go back one step. Without a step, nothing happens: the map is not loaded again. */

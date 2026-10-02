@@ -710,6 +710,82 @@ test(
 	}
 );
 
+test('a legend entry follows the style of its elements', async ({ page }) => {
+	const area = (west: number): MapState['elements'][number] => ({
+		type: 'polygon',
+		points: [
+			[west, 52.49],
+			[west + 0.01, 52.49],
+			[west + 0.005, 52.5]
+		],
+		style: { color: '#00aa00' },
+		strokeStyle: { visible: false },
+		popup: { text: 'Parks' }
+	});
+	// "Lakes" shows a color that no area has
+	const entries = [
+		{ type: 'polygon' as const, style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Parks' },
+		{ type: 'polygon' as const, style: { color: '#00ffff' }, strokeStyle: { visible: false }, label: 'Lakes' }
+	];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center: [13.4, 52.5], radius: 3000 },
+				meta: { legend: { entries } },
+				elements: [area(13.38), area(13.41)]
+			})
+	);
+	await waitForMapIsReady(page);
+	const entry = async () => (await storedState(page)).meta?.legend?.entries[0].style;
+	const colors = async () => (await storedState(page)).elements.map((e) => e.style?.color);
+	const setColor = async (hex: string) => {
+		await page.getByRole('button', { name: /^Color/ }).click();
+		await page.getByLabel('Hex').fill(hex);
+		await page.getByLabel('Hex').press('Enter');
+		await page.locator('body').press('Escape');
+	};
+	const [x1, y1] = await project(page, [13.385, 52.493]);
+	const [x2, y2] = await project(page, [13.415, 52.493]);
+
+	await test.step('both areas get a new color: the entry follows, in the same undo step', async () => {
+		await page.mouse.click(x1, y1);
+		await page.keyboard.down('ControlOrMeta');
+		await page.mouse.click(x2, y2);
+		await page.keyboard.up('ControlOrMeta');
+		await setColor('#008800');
+		await expect.poll(colors).toStrictEqual(['#008800', '#008800']);
+		await expect.poll(entry).toStrictEqual({ color: '#008800' });
+		await expect(page.getByText('The legend entry “Parks” has the new style too.')).toBeVisible();
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(colors).toStrictEqual(['#00aa00', '#00aa00']);
+		await expect.poll(entry).toStrictEqual({ color: '#00aa00' });
+	});
+
+	await test.step('one area gets a new color: the entry stays, and the inspector tells', async () => {
+		await page.locator('body').press('Escape');
+		await page.mouse.click(x1, y1);
+		await setColor('#0000ff');
+		await expect.poll(colors).toStrictEqual(['#0000ff', '#00aa00']);
+		await expect.poll(entry).toStrictEqual({ color: '#00aa00' });
+		await expect(page.getByText('The legend shows “Parks” with a different style.')).toBeVisible();
+	});
+
+	await test.step('the last area with the old color gets a new one: the entry follows', async () => {
+		await page.locator('body').press('Escape');
+		await page.mouse.click(x2, y2);
+		await setColor('#ff00ff');
+		await expect.poll(entry).toStrictEqual({ color: '#ff00ff' });
+	});
+
+	await test.step('an entry whose style no element has is marked in the legend', async () => {
+		// nothing selected: a click beside the areas
+		await page.mouse.click(...(await project(page, [13.4, 52.51])));
+		await page.getByRole('button', { name: 'Edit legend' }).click();
+		await expect(page.getByRole('group', { name: 'Entry 1' })).not.toContainText('No element has this style.');
+		await expect(page.getByRole('group', { name: 'Entry 2' })).toContainText('No element has this style.');
+	});
+});
+
 test('adding the look of an element to the legend', async ({ page }) => {
 	const route = {
 		type: 'line' as const,

@@ -33,6 +33,7 @@
 	} from '$lib/components/commands.js';
 	import { defaultPlace, PLACES } from '$lib/components/viewer_controls.js';
 	import { LegendMark } from '$lib/components/map_viewer/index.js';
+	import { unusedEntries } from '$lib/legend_looks.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
@@ -42,6 +43,15 @@
 	const uid = $props.id();
 	const legend: StateLegend = $derived(doc.legend ?? { entries: [] });
 	const log = () => doc.state.log();
+	// entries whose style no element has, e.g. after some elements got another style; not on a map without elements
+	const unused = $derived(
+		doc.elements.length === 0
+			? new Set<number>()
+			: unusedEntries(
+					doc.elements.map((element) => element.getState()),
+					legend.entries
+				)
+	);
 
 	const layouts: { value: NonNullable<StateLegend['layout']>; label: string }[] = [
 		{ value: 'vertical', label: 'Vertical' },
@@ -410,6 +420,9 @@
 								onclick={() => toggle(i)}
 							/>
 						</div>
+						{#if unused.has(i)}
+							<Hint>No element has this style.</Hint>
+						{/if}
 						{#if open[i]}
 							<div class="details" id="{uid}-{i}-details">
 								<!-- to rearrange the entries with the buttons, e.g. with the keyboard -->

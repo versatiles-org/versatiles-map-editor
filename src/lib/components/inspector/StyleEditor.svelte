@@ -10,6 +10,8 @@
 	import type { CircleElement } from '$lib/element/circle.js';
 	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
 	import { addToLegend } from '$lib/components/commands.js';
+	import { elementText } from '$lib/components/element_names.js';
+	import { legendShows } from '$lib/legend_looks.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
 
@@ -34,6 +36,14 @@
 	// lines and the outlines of polygons and circles
 	const strokeLayers = $derived(layersOfRole('stroke'));
 	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
+
+	// an entry of the legend with the text of the element, but another style: maybe one that was forgotten
+	const differentEntry = $derived.by(() => {
+		if (!single) return undefined;
+		const text = elementText(single).trim();
+		const entries = doc.legend?.entries ?? [];
+		return legendShows(single.getState(), text, entries) === 'different' ? text : undefined;
+	});
 
 	// what "Add to legend" did, until another selection
 	let added: number | undefined = $state();
@@ -105,6 +115,9 @@
 				{/if}
 			</Hint>
 		</div>
+		{#if differentEntry && added === undefined}
+			<Hint>The legend shows “{differentEntry}” with a different style.</Hint>
+		{/if}
 	</InspectorSection>
 	<!-- the length of a line, the area of a polygon; circles have their size above -->
 	{#if single?.getStyleLayers().stroke && circles.length === 0}
