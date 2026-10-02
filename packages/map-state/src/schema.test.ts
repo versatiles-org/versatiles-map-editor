@@ -1,4 +1,6 @@
 import { globSync, readFileSync } from 'fs';
+import { createRequire } from 'module';
+import { resolve } from 'path';
 import { describe, expect, it } from 'vitest';
 import { Ajv } from 'ajv';
 // @ts-expect-error a script without types
@@ -16,6 +18,11 @@ describe('the JSON Schema of .mapjson files', () => {
 
 	it('is the one that the files name', () => {
 		expect(committed.$id).toBe(MAPJSON_SCHEMA_URL);
+	});
+
+	it('can be imported from the package, as Node resolves it', () => {
+		const require = createRequire(import.meta.url);
+		expect(require.resolve('@versatiles/map-state/schema/mapjson-1.schema.json')).toBe(resolve(SCHEMA_FILE));
 	});
 
 	it('fits the example maps', () => {

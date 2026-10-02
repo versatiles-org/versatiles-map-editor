@@ -67,7 +67,8 @@ The first release.
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
   one, and throws a `MapJSONVersionError` for a newer version; it keeps only the valid parts of a
   file, like the GeoJSON import: elements that cannot be drawn and invalid values are left out.
-- The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package),
+- The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package, as
+  `@versatiles/map-state/schema/mapjson-1.schema.json`),
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.

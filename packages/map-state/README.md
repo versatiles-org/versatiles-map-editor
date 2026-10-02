@@ -63,7 +63,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) name the JSON Schema of their format version in
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION`); `stateFromMapJSON` throws a
   `MapJSONVersionError` for a file of a newer version. The schema is in the package, at
-  `schema/mapjson-1.schema.json`.
+  `schema/mapjson-1.schema.json`, e.g. to validate files:
+  `import schema from '@versatiles/map-state/schema/mapjson-1.schema.json' with { type: 'json' }`.
 - `frame` in the state is the visible area of a shared map, `[west, south, east, north]` (the type
   `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
