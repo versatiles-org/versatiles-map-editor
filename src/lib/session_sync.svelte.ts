@@ -143,9 +143,15 @@ export class SessionSync {
 		}
 		const encoded = encodeStep(state);
 		// a session with this map that no other tab has open
-		const stored = await this.#findSession(
-			async (stored) => stored.states[stored.position] === encoded && (await this.#locks.acquire(stored.session.id))
-		);
+		let stored: StoredSession | undefined;
+		try {
+			stored = await this.#findSession(
+				async (stored) => stored.states[stored.position] === encoded && (await this.#locks.acquire(stored.session.id))
+			);
+		} catch (error) {
+			// e.g. a closed storage: the map of the link opens as a new map
+			console.warn('Failed to look for the map of the link in the storage', error);
+		}
 		if (stored) return { kind: 'session', stored, camera: state.map ?? stored.session.camera };
 		return { kind: 'link', state, encoded, camera: state.map };
 	}
@@ -361,11 +367,17 @@ export class SessionSync {
 	#onHashChange = () => {
 		const hash = location.hash.slice(1);
 		if (!hash) return;
-		this.#hashChanges = this.#hashChanges.then(async () => {
-			// the current map stays open if the link has none
-			const opening = await this.#fromLink(hash);
-			if (opening) await this.#open(opening);
-		});
+		this.#hashChanges = this.#hashChanges
+			.then(async () => {
+				// the current map stays open if the link has none
+				const opening = await this.#fromLink(hash);
+				if (opening) await this.#open(opening);
+			})
+			// not rejected: the links after it still open
+			.catch((error) => {
+				console.error('Failed to open the map of the link', error);
+				notify('The map in the link could not be opened.');
+			});
 	};
 
 	/** The most recently changed of the recent sessions that `match`. */

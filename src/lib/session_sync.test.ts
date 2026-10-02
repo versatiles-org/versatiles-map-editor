@@ -151,6 +151,30 @@ describe('SessionSync', () => {
 		location.hash = '';
 	});
 
+	it('opens the links in the address bar also after one failed', async () => {
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		await sync.attach(doc, await sync.prepare(''));
+		const open = async (lngs: number[]) => {
+			location.hash = encodeState({ map: camera, elements: lngs.map(marker) });
+			dispatchEvent(new HashChangeEvent('hashchange'));
+			await vi.waitFor(() => expect(doc.elements).toHaveLength(lngs.length));
+		};
+
+		// the storage fails while looking for the map: it opens as a new map
+		vi.spyOn(store, 'list').mockRejectedValueOnce(new Error('closed'));
+		await open([1]);
+		// something else fails, e.g. removing the link from the URL
+		removeHash.mockImplementationOnce(() => {
+			throw new Error('blocked');
+		});
+		location.hash = encodeState({ map: camera, elements: [marker(2)] });
+		dispatchEvent(new HashChangeEvent('hashchange'));
+		await vi.waitFor(() => expect(notify).toHaveBeenCalledWith('The map in the link could not be opened.'));
+
+		await open([3, 4]);
+		location.hash = '';
+	});
+
 	it('skips maps that it cannot read, e.g. of an older format, but lists them to delete them', async () => {
 		const now = vi.spyOn(Date, 'now');
 		now.mockReturnValue(1000);
