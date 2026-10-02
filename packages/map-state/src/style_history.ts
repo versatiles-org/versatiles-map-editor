@@ -8,11 +8,11 @@ import type { StateStyle } from './types.js';
  */
 export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (value: never) => unknown }[] = [
 	{ key: 1, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 3, name: 'pattern', encoded: (v: number) => v },
-	{ key: 4, name: 'rotate', encoded: (v: number) => v },
+	{ key: 3, name: 'pattern', encoded: (v: number) => Math.round(v) },
+	{ key: 4, name: 'rotate', encoded: (v: number) => Math.round(v) },
 	{ key: 5, name: 'size', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 6, name: 'width', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 7, name: 'align', encoded: (v: number) => v },
+	{ key: 7, name: 'align', encoded: (v: number) => Math.round(v) },
 	{ key: 8, name: 'color', encoded: (v: string) => colorKey(v) },
 	{ key: 9, name: 'label', encoded: (v: string) => v },
 	// only "false" is stored, "true" is the default

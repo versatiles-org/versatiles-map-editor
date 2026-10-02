@@ -222,8 +222,8 @@
 					"default": 0
 				},
 				"rotate": {
-					"type": "number",
-					"description": "Markers: the rotation of the symbol, in degrees clockwise.",
+					"type": "integer",
+					"description": "Markers: the rotation of the symbol, in whole degrees clockwise.",
 					"minimum": -180,
 					"maximum": 180,
 					"default": 0

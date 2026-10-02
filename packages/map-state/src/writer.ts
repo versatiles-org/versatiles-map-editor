@@ -535,9 +535,9 @@ export class StateWriter {
 			case 'halo':
 				return this.writeVarint(Math.round(style.halo! * 10));
 			case 'pattern':
-				return this.writeVarint(style.pattern!);
+				return this.writeVarint(Math.round(style.pattern!));
 			case 'rotate':
-				return this.writeVarint(style.rotate!, true);
+				return this.writeVarint(Math.round(style.rotate!), true);
 			case 'size':
 				return this.writeVarint(Math.round(style.size! * 10));
 			case 'labelSize':
@@ -545,7 +545,7 @@ export class StateWriter {
 			case 'width':
 				return this.writeVarint(Math.round(style.width! * 10));
 			case 'align':
-				return this.writeVarint(style.align!);
+				return this.writeVarint(Math.round(style.align!));
 			case 'color':
 			case 'labelColor':
 			case 'haloColor':

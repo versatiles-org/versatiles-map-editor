@@ -104,7 +104,8 @@ export interface StateStyle {
 	 */
 	pattern?: number;
 	/**
-	 * Markers: the rotation of the symbol, in degrees clockwise.
+	 * Markers: the rotation of the symbol, in whole degrees clockwise.
+	 * @asType integer
 	 * @minimum -180
 	 * @maximum 180
 	 * @default 0
