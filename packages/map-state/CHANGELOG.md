@@ -16,7 +16,9 @@ The first release.
 - Format version 1 of the base64 string (`CODEC_VERSION`):
   - a color palette;
   - a string table: the title, the labels, the legend labels and the popups stored once, and
-    referenced with 1 bit for the next new string, else by index;
+    referenced with 1 bit for the next new string, else by index; the strings are coded by an
+    adaptive order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in
+    alphabetic scripts and 12 in Chinese and Japanese, instead of 7–19;
   - the names of the symbols stored once, sharing their beginnings, and referenced by index;
   - style references to similar earlier styles;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short,

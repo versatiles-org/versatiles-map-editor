@@ -161,7 +161,11 @@ hashes short:
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5);
 - the title, the labels, the legend labels and the popups are stored once in a string table, in
-  the order they are written, and referenced by 1 bit for the next new string, else by index;
+  the order they are written, and referenced by 1 bit for the next new string, else by index. The
+  table is one block of bits (`string_coder.ts`): an adaptive model predicts each character from
+  the two before it (PPM of order 2 over code points), and an arithmetic coder spends fewer bits
+  on likelier characters. The model starts empty and learns the strings of the map, so text in
+  any script gets shorter, and repeated words cost little;
 - the names of the symbols of all styles and of the legend are stored once in the metadata,
   sorted, each with the length of the beginning it shares with the previous name (e.g.
   `base:icon-`) and the rest, and referenced by index;

@@ -28,13 +28,7 @@ describe('the string table', () => {
 		const reader = StateReader.fromBase64(encodeState(state));
 		reader.readInteger(3);
 		reader.readPalette();
-		expect(reader.readArray(() => reader.readString())).toStrictEqual([
-			'Pharmacy',
-			'Pharmacies',
-			'Boots',
-			'',
-			'Open 24 h'
-		]);
+		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', '', 'Open 24 h']);
 	});
 
 	it('keeps the strings in a link', () => {

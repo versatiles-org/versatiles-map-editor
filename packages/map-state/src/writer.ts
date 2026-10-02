@@ -9,6 +9,7 @@ import {
 	VIEWER_CHOICES
 } from './profile.js';
 import { StateReader } from './reader.js';
+import { encodeStrings } from './string_coder.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS } from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
 import { colorKey, encodedValue, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
@@ -535,11 +536,18 @@ export class StateWriter {
 
 	/**
 	 * The title, the labels and the popups, each once, in the order they are written, and
-	 * afterwards only a reference (see `writeStringRef`).
+	 * afterwards only a reference (see `writeStringRef`): their number, and unless 0, the length of
+	 * their block in bits and the block (see `encodeStrings`).
 	 */
 	writeStringTable(strings: string[]) {
 		const unique = [...new Set(strings)];
-		this.writeArray(unique, (value) => this.writeString(value));
+		this.writeVarint(unique.length);
+		if (unique.length > 0) {
+			const block = encodeStrings(unique);
+			this.writeVarint(block.length);
+			// not with a spread: the block can have many bits
+			for (const bit of block) this.bits.push(bit);
+		}
 		this.strings = new Map(unique.map((value, index) => [value, index]));
 		this.nextString = 0;
 	}

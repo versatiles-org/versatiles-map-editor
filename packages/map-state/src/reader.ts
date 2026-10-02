@@ -24,6 +24,7 @@ import {
 } from './profile.js';
 import { withoutOldOpacity, type OldStyle } from './legacy.js';
 import { LocalGrid } from './grid.js';
+import { decodeStrings } from './string_coder.js';
 import { OLD_OPACITY_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY, StyleHistory } from './style_history.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_POSITIONS } from './types.js';
 
@@ -597,9 +598,23 @@ export class StateReader {
 	}
 
 	/** The title, the labels and the popups, each once, which are referenced afterwards. */
-	readStringTable() {
-		this.strings = this.readArray(() => this.readString());
-		this.nextString = 0;
+	readStringTable(): string[] {
+		try {
+			const count = this.readVarint();
+			this.strings = count > 0 ? decodeStrings(this.readBlock(this.readVarint()), count) : [];
+			this.nextString = 0;
+			return this.strings;
+		} catch (cause) {
+			throw new Error(`Error reading string table`, { cause });
+		}
+	}
+
+	/** The next `length` bits, e.g. a block that is decoded by itself. */
+	readBlock(length: number): boolean[] {
+		if (this.offset + length > this.bits.length) throw new Error('Block beyond the end of bits');
+		const block = this.bits.slice(this.offset, this.offset + length);
+		this.offset += length;
+		return block;
 	}
 
 	/** See `StateWriter.writeStringRef`. */

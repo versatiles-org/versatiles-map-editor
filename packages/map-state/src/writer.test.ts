@@ -201,7 +201,7 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('C_wAABECBHCAC8YyZiLk1zkQBOg');
+		expect(writer.asBase64()).toBe('C_wAABHhMO-WbKEAXjGTMRcmuciAJ0A');
 	});
 
 	it('should write a RGB color correctly', () => {

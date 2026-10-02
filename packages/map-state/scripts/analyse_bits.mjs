@@ -26,7 +26,7 @@ Options:
   --help               this text`;
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
-const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'read6pack']);
+const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'read6pack', 'readBlock']);
 
 /** A reader that records each call of a read method: its name, and the bits it consumed. */
 class TracingReader extends StateReader {
@@ -71,6 +71,8 @@ function label(name, args) {
 			return `int(${args[0]})`;
 		case 'readVarint':
 			return args[0] ? 'varint±' : 'varint';
+		case 'readBlock':
+			return 'block';
 		default:
 			return name;
 	}
