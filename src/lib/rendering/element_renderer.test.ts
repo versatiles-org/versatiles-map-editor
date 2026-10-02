@@ -60,6 +60,25 @@ describe('ElementRenderer', () => {
 		doc.view.renderer.flush();
 	});
 
+	it('plans the layers once for many elements whose labels change, e.g. on undo', async () => {
+		const markers = (label?: string) => ({
+			elements: Array.from({ length: 50 }, (_, i) => ({
+				type: 'marker' as const,
+				point: [i, 2] as [number, number],
+				style: label ? { label: `${label} ${i}`, color: '#ff0000' } : { color: '#0000ff' }
+			}))
+		});
+		await doc.setState(markers('A'));
+		doc.view.renderer.flush();
+		const plan = vi.spyOn(doc.view.renderer as unknown as { plan: () => void }, 'plan');
+
+		await doc.setState(markers());
+		doc.view.renderer.flush();
+		// not once per marker
+		expect(plan.mock.calls.length).toBeLessThanOrEqual(2);
+		expect(layerIdsOf(doc.elements[0] as MarkerElement)).toStrictEqual(['elements_symbol']);
+	});
+
 	it('draws each element with the layers of the roles of its style', () => {
 		const [polygon, marker] = doc.elements;
 		expect(layerIdsOf(polygon)).toStrictEqual(['elements_fill', 'elements_stroke']);

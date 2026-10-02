@@ -329,6 +329,8 @@ export class ElementRenderer {
 	private order = new Map<AbstractElement, number>();
 	private changed = new Set<AbstractElement>();
 	private all = false;
+	/** Whether the layers must be planned again before the next flush, e.g. after labels were added. */
+	private replan = false;
 	private scheduled = false;
 	/** The layer of each element and role, see `planLayers`, and what each draws, to notice a change. */
 	private layerOf = new Map<AbstractElement, Partial<Record<Role, string>>>();
@@ -534,9 +536,10 @@ export class ElementRenderer {
 	public update(element: AbstractElement) {
 		// an element that is not (yet) on the map is drawn when it is added
 		if (!this.order.has(element)) return;
-		// e.g. a label or an outline added or removed can change the layers
+		// e.g. a label or an outline added or removed can change the layers: planned once for all
+		// changed elements, e.g. when undo takes the labels of many markers
 		if (ElementRenderer.key(ElementRenderer.drawnOf(element)) !== this.drawn.get(element)) {
-			this.plan();
+			this.replan = true;
 			return this.redraw();
 		}
 		this.changed.add(element);
@@ -558,6 +561,10 @@ export class ElementRenderer {
 	/** Write the pending changes to the map now. */
 	public flush() {
 		this.scheduled = false;
+		if (this.replan) {
+			this.replan = false;
+			this.plan();
+		}
 		if (this.all) {
 			this.syncLayers();
 			this.updateFonts(true);
