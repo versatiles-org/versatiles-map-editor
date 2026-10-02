@@ -2,6 +2,7 @@ import { expect, test } from './lib/test.js';
 import type { Locator, Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
+	blueAndRedAround,
 	drawElement,
 	project,
 	storedState,
@@ -700,7 +701,7 @@ test(
 		await page.mouse.click(x + 6, y - 8);
 		const positions = page.getByRole('radiogroup', { name: 'Label position' });
 		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
-		await positions.getByRole('radio', { name: 'Above' }).check();
+		await positions.getByRole('radio', { name: 'Above', exact: true }).check();
 		await expect
 			.poll(async () => ((await storedState(page)).elements[1] as { style?: { align?: number } }).style?.align)
 			.toBe(3);
@@ -838,37 +839,7 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
 
-	/** The boxes of the blue and the red pixels around the marker, and how many there are. */
-	async function drawn() {
-		// away from the marker, which a hovered marker would not look alike
-		await page.mouse.move(5, 5);
-		await waitForMapIsIdle(page);
-		const png = await page.screenshot({ clip: { x: x - 100, y: y - 100, width: 300, height: 200 } });
-		return page.evaluate(async (base64) => {
-			const image = new Image();
-			image.src = 'data:image/png;base64,' + base64;
-			await image.decode();
-			const canvas = document.createElement('canvas');
-			canvas.width = image.width;
-			canvas.height = image.height;
-			const context = canvas.getContext('2d')!;
-			context.drawImage(image, 0, 0);
-			const { data, width } = context.getImageData(0, 0, canvas.width, canvas.height);
-			const box = () => ({ count: 0, left: Infinity, right: -Infinity });
-			const blue = box();
-			const red = box();
-			for (let i = 0; i < data.length; i += 4) {
-				const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
-				const found = b > 200 && r < 60 && g < 60 ? blue : r > 200 && g < 60 && b < 60 ? red : undefined;
-				if (!found) continue;
-				const px = (i / 4) % width;
-				found.count++;
-				found.left = Math.min(found.left, px);
-				found.right = Math.max(found.right, px);
-			}
-			return { blue, red };
-		}, png.toString('base64'));
-	}
+	const drawn = () => blueAndRedAround(page, [x, y]);
 
 	const before = await drawn();
 	expect(before.blue.count).toBeGreaterThan(20);
@@ -900,6 +871,56 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 	const both = await drawn();
 	expect(both.blue.right - both.blue.left).toBeGreaterThan((larger.blue.right - larger.blue.left) * 2.5);
 	expect(both.red.left).toBeGreaterThan(both.blue.right);
+});
+
+test('a label at a corner of its symbol, and a label without symbol on the point', async ({ page }) => {
+	const center: Point = [13.4, 52.5];
+	const style = { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0 };
+	await page.goto(
+		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center, style }] })
+	);
+	await waitForMapIsReady(page);
+	const [x, y] = await project(page, center);
+	const positions = page.getByRole('radiogroup', { name: 'Label position' });
+	const align = async () => (await storedState(page)).elements[0].style?.align;
+	const middle = (box: { left: number; right: number; top: number; bottom: number }) => ({
+		x: (box.left + box.right) / 2,
+		y: (box.top + box.bottom) / 2
+	});
+
+	await test.step('above right and below left of the symbol', async () => {
+		await page.mouse.click(x, y);
+		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
+		await positions.getByRole('radio', { name: 'Above right' }).check();
+		await expect.poll(align).toBe(5);
+		let { blue, red } = await blueAndRedAround(page, [x, y]);
+		// beside the symbol, the bottom left corner of the label at its top right corner
+		expect(red.left).toBeGreaterThan(middle(blue).x);
+		expect(red.bottom).toBeLessThan(middle(blue).y);
+		expect(red.left).toBeGreaterThanOrEqual(blue.right - 3);
+		expect(red.bottom).toBeLessThanOrEqual(blue.top + 3);
+
+		await page.mouse.click(x, y);
+		await positions.getByRole('radio', { name: 'Below left' }).check();
+		await expect.poll(align).toBe(8);
+		({ blue, red } = await blueAndRedAround(page, [x, y]));
+		expect(red.right).toBeLessThan(middle(blue).x);
+		expect(red.top).toBeGreaterThan(middle(blue).y);
+	});
+
+	await test.step('without symbol: "Center", on the point', async () => {
+		await page.mouse.click(x, y);
+		await positions.getByRole('radio', { name: 'Automatic' }).check();
+		await page.getByRole('button', { name: /^Symbol/ }).click();
+		await page.getByRole('button', { name: 'No symbol', exact: true }).click();
+		await expect.poll(async () => (await storedState(page)).elements[0].style).toMatchObject({ symbol: '' });
+		await expect(positions.getByRole('radio', { name: 'On the point' })).toBeChecked();
+		await expect(positions.getByText('Center')).toBeVisible();
+		const { blue, red } = await blueAndRedAround(page, [x, y]);
+		expect(blue.count).toBe(0);
+		expect(Math.abs(middle(red).x)).toBeLessThan(3);
+		expect(Math.abs(middle(red).y)).toBeLessThan(3);
+	});
 });
 
 test('a marker without symbol has no color, size or rotation of a symbol', async ({ page }) => {

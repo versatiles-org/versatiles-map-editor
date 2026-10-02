@@ -178,12 +178,14 @@
 	/* the cells of a grid, e.g. 3×3 positions */
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(var(--columns), 30px);
+		/* as wide as a text in a column, e.g. "Auto" */
+		grid-template-columns: repeat(var(--columns), minmax(30px, max-content));
 		grid-template-rows: repeat(var(--rows), var(--size-xs));
 		width: max-content;
 
 		/* empty cells, which are seen as fields */
 		.choice {
+			padding: 0 var(--space-1);
 			background: var(--color-field);
 			font-size: var(--font-size-xs);
 

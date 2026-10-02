@@ -68,7 +68,17 @@ export const SYMBOL_DEFAULTS: Defaults<
 // index -> name enum tables (the numeric index lives in State, the name in GeoJSON)
 export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'];
 export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'];
-export const LABEL_ALIGN_NAMES = ['auto', 'right', 'left', 'top', 'bottom'];
+export const LABEL_ALIGN_NAMES = [
+	'auto',
+	'right',
+	'left',
+	'top',
+	'bottom',
+	'top-right',
+	'top-left',
+	'bottom-right',
+	'bottom-left'
+];
 
 function nameOf(table: string[], index: number | undefined): string | undefined {
 	if (index == null) return undefined;
@@ -151,7 +161,7 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	const labelSize = sanitizeNumber(v.labelSize, 0);
 	if (labelSize) s.labelSize = labelSize;
 	set(s, 'width', sanitizeNumber(v.width, 0));
-	set(s, 'align', sanitizeIndex(v.align, 0, 4));
+	set(s, 'align', sanitizeIndex(v.align, 0, LABEL_ALIGN_NAMES.length - 1));
 	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
 	set(s, 'symbol', sanitizeSymbol(v.symbol));

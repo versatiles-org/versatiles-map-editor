@@ -4,10 +4,13 @@ import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultField
 import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
 import { splitOpacity } from './opacity.js';
 
-type TextAnchor = 'center' | 'left' | 'right' | 'bottom' | 'top';
+type TextAnchor =
+	'center' | 'left' | 'right' | 'bottom' | 'top' | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
 
 // The distance of the label from the center of a symbol of 32×32 pixels, in ems, in the direction of its anchor
 const LABEL_OFFSET = 0.7;
+// The same distance to a corner of the label, on the diagonal
+const CORNER_OFFSET = LABEL_OFFSET * Math.SQRT1_2;
 // The pixels of an image per em of its label, which have the same scale (`size`)
 const EM = 16;
 
@@ -40,21 +43,27 @@ function positionsAround([dx, dy, ex, ey]: IconBox): Record<string, (TextAnchor 
 		left: [dx + LABEL_OFFSET + ex, dy],
 		right: [dx - LABEL_OFFSET - ex, dy],
 		top: [dx, dy + LABEL_OFFSET + ey],
-		bottom: [dx, dy - LABEL_OFFSET - ey]
+		bottom: [dx, dy - LABEL_OFFSET - ey],
+		// the corner of the label at the corner of the image, e.g. its bottom left corner above right of it
+		'bottom-left': [dx + CORNER_OFFSET + ex, dy - CORNER_OFFSET - ey],
+		'bottom-right': [dx - CORNER_OFFSET - ex, dy - CORNER_OFFSET - ey],
+		'top-left': [dx + CORNER_OFFSET + ex, dy + CORNER_OFFSET + ey],
+		'top-right': [dx - CORNER_OFFSET - ex, dy + CORNER_OFFSET + ey]
 	};
 	const withOffsets = (anchors: TextAnchor[]) => anchors.flatMap((anchor) => [anchor, offsets[anchor]]);
+	const sides = ['left', 'right', 'top', 'bottom'] as const;
+	const corners = ['bottom-left', 'top-left', 'bottom-right', 'top-right'] as const;
 	return {
-		auto: withOffsets(['left', 'right', 'top', 'bottom']),
-		'auto-center': withOffsets(['center', 'left', 'right', 'top', 'bottom']),
-		...Object.fromEntries(
-			(['left', 'right', 'top', 'bottom'] as const).map((anchor) => [anchor, withOffsets([anchor])])
-		)
+		// the sides first, then the corners
+		auto: withOffsets([...sides, ...corners]),
+		center: withOffsets(['center']),
+		...Object.fromEntries([...sides, ...corners].map((anchor) => [anchor, withOffsets([anchor])]))
 	};
 }
 
 /**
  * The possible places of a label with their offsets, by the name of the label position:
- * the chosen side, or the first side that fits ("auto"; "auto-center" also on the point, for
+ * the chosen side or corner, the first one that fits ("auto"), or on the point ("center", for
  * markers without image). The layer looks them up, since features cannot have array properties.
  * These are for images of 32×32 pixels on the point; `labelPositionTable` adds the others.
  */
@@ -88,7 +97,11 @@ const anchors: (TextAnchor | undefined)[] = [
 	'left', // right
 	'right', // left
 	'bottom', // top
-	'top' // bottom
+	'top', // bottom
+	'bottom-left', // top right
+	'bottom-right', // top left
+	'top-left', // bottom right
+	'top-right' // bottom left
 ];
 
 export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) => ({
@@ -216,7 +229,8 @@ export class SymbolStyle extends StylePart {
 		const anchor = lookupLabelAlign(this.labelAlign).anchor;
 		const suffix = boxSuffix(iconBox(this.symbolInfo));
 		if (anchor) return anchor + suffix;
-		return this.symbolInfo == null ? 'auto-center' : 'auto' + suffix;
+		// a label without symbol is on the point
+		return this.symbolInfo == null ? 'center' : 'auto' + suffix;
 	}
 
 	/**

@@ -129,10 +129,11 @@ export interface StateStyle {
 	 */
 	width?: number;
 	/**
-	 * Markers: the position of the label: 0 automatic, 1 right, 2 left, 3 top, 4 bottom.
+	 * Markers: the position of the label: 0 automatic (on the point, without a symbol), 1 right,
+	 * 2 left, 3 top, 4 bottom, 5 top right, 6 top left, 7 bottom right, 8 bottom left.
 	 * @asType integer
 	 * @minimum 0
-	 * @maximum 4
+	 * @maximum 8
 	 * @default 0
 	 */
 	align?: number;

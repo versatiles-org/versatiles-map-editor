@@ -29,21 +29,39 @@
 		right: [2, 3],
 		left: [2, 1],
 		top: [1, 2],
-		bottom: [3, 2]
+		bottom: [3, 2],
+		'top-right': [1, 3],
+		'top-left': [1, 1],
+		'bottom-right': [3, 3],
+		'bottom-left': [3, 1]
 	};
 	const NAMES: Record<string, string> = {
-		auto: 'Automatic',
 		right: 'Right',
 		left: 'Left',
 		top: 'Above',
-		bottom: 'Below'
+		bottom: 'Below',
+		'top-right': 'Above right',
+		'top-left': 'Above left',
+		'bottom-right': 'Below right',
+		'bottom-left': 'Below left'
 	};
-	const alignments = labelPositions.map(({ index, name }) => ({
-		value: index,
-		label: NAMES[name] ?? name,
-		cell: CELLS[name],
-		short: name === 'auto' ? 'Auto' : undefined
-	}));
+	// "auto" puts the label beside a symbol where it fits, and the label of a marker without symbol on the point
+	const symbols = $derived(layers.map((layer) => layer.symbol !== ''));
+	const center = $derived(
+		symbols.every(Boolean)
+			? { label: 'Automatic', short: 'Auto' }
+			: symbols.some(Boolean)
+				? { label: 'Automatic, or on the point without symbol', short: 'Auto/Center' }
+				: { label: 'On the point', short: 'Center' }
+	);
+	const alignments = $derived(
+		labelPositions.map(({ index, name }) => ({
+			value: index,
+			label: name === 'auto' ? center.label : (NAMES[name] ?? name),
+			cell: CELLS[name],
+			short: name === 'auto' ? center.short : undefined
+		}))
+	);
 </script>
 
 <InspectorSection title="Symbol">

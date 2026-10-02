@@ -116,6 +116,59 @@ export async function drawnElements(page: Page): Promise<Record<'fill' | 'stroke
 	});
 }
 
+/** Where pixels of a color are: how many, and their box, in pixels from a point. */
+export interface ColorBox {
+	count: number;
+	left: number;
+	right: number;
+	top: number;
+	bottom: number;
+}
+
+/**
+ * The blue and the red pixels around a point of the map, e.g. of a blue symbol and its red label
+ * without halo, in pixels from the point (right and down are positive). The mouse moves away
+ * first, since a hovered marker does not look alike.
+ */
+export async function blueAndRedAround(page: Page, [x, y]: Point): Promise<{ blue: ColorBox; red: ColorBox }> {
+	await page.mouse.move(5, 5);
+	await waitForMapIsIdle(page);
+	const [width, height] = [300, 240];
+	const png = await page.screenshot({ clip: { x: x - width / 2, y: y - height / 2, width, height } });
+	return page.evaluate(
+		async ({ base64, width, height }) => {
+			const image = new Image();
+			image.src = 'data:image/png;base64,' + base64;
+			await image.decode();
+			const canvas = document.createElement('canvas');
+			canvas.width = image.width;
+			canvas.height = image.height;
+			const context = canvas.getContext('2d')!;
+			context.drawImage(image, 0, 0);
+			const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+			// the screenshot may have more pixels than CSS pixels, e.g. on a retina display
+			const scale = image.width / width;
+			const box = () => ({ count: 0, left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity });
+			const blue = box();
+			const red = box();
+			for (let i = 0; i < data.length; i += 4) {
+				const [r, g, b] = [data[i], data[i + 1], data[i + 2]];
+				const found = b > 200 && r < 60 && g < 60 ? blue : r > 200 && g < 60 && b < 60 ? red : undefined;
+				if (!found) continue;
+				const px = ((i / 4) % image.width) / scale - width / 2;
+				const py = Math.floor(i / 4 / image.width) / scale - height / 2;
+				found.count++;
+				found.left = Math.min(found.left, px);
+				found.right = Math.max(found.right, px);
+				found.top = Math.min(found.top, py);
+				found.bottom = Math.max(found.bottom, py);
+			}
+			return { blue, red };
+		},
+		{ base64: png.toString('base64'), width, height }
+	);
+}
+
 type Box = { x: number; y: number; width: number; height: number };
 
 /** Whether two bounding boxes overlap. */

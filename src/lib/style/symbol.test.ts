@@ -99,20 +99,32 @@ describe('SymbolStyle', () => {
 		expect([copy.labelColor, copy.haloColor]).toStrictEqual(['#123456', '#fedcba']);
 	});
 
-	it('places the label at the chosen side, or also on a symbol without image', () => {
+	it('places the label at the chosen side or corner, the first one that fits, or on the point without image', () => {
 		layer.labelAlign = 3; // top
 		expect(layer.getProperties().position).toBe('bottom');
 		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
-		layer.labelAlign = 0; // auto
-		layer.symbol = ''; // no image
-		expect(layer.getProperties().position).toBe('auto-center');
-		expect(LABEL_POSITIONS['auto-center'].filter((a) => typeof a === 'string')).toStrictEqual([
-			'center',
+		layer.labelAlign = 5; // top right: the bottom left corner of the label at the top right of the symbol
+		expect(layer.getProperties().position).toBe('bottom-left');
+		const near = (x: number, y: number) => [expect.closeTo(x), expect.closeTo(y)];
+		expect(LABEL_POSITIONS['bottom-left']).toStrictEqual(['bottom-left', near(0.495, -0.495)]);
+		layer.labelAlign = 8; // bottom left
+		expect(layer.getProperties().position).toBe('top-right');
+		// automatic: the sides first, then the corners
+		layer.labelAlign = 0;
+		expect(LABEL_POSITIONS.auto.filter((a) => typeof a === 'string')).toStrictEqual([
 			'left',
 			'right',
 			'top',
-			'bottom'
+			'bottom',
+			'bottom-left',
+			'top-left',
+			'bottom-right',
+			'top-right'
 		]);
+		// without image, on the point, and nowhere else
+		layer.symbol = '';
+		expect(layer.getProperties().position).toBe('center');
+		expect(LABEL_POSITIONS.center).toStrictEqual(['center', [0, 0]]);
 	});
 
 	it('places the label around the image, e.g. beside the head of a pin on the point', () => {
@@ -132,6 +144,8 @@ describe('SymbolStyle', () => {
 		expect(table['left' + suffix]).toStrictEqual(['left', near(0.7, -1.1875)]);
 		expect(table['bottom' + suffix]).toStrictEqual(['bottom', near(0, -2.075)]);
 		expect(table['top' + suffix]).toStrictEqual(['top', near(0, -0.3)]);
+		// above right of the head: the corner of the box of the pin, which is higher
+		expect(table['bottom-left' + suffix]).toStrictEqual(['bottom-left', near(0.495, -1.8701)]);
 	});
 
 	it('names the label position by the box of the image', () => {
