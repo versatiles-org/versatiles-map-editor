@@ -207,6 +207,8 @@ export class SessionSync {
 	public async newMap() {
 		const doc = this.#doc;
 		if (!doc) return;
+		// before loading, which moves the map: the camera of the map before stays
+		this.#setSession(undefined);
 		await doc.loadState({ elements: [] });
 		await this.#open({ kind: 'new' });
 	}
@@ -254,10 +256,11 @@ export class SessionSync {
 				case 'session': {
 					const { stored, camera } = opening;
 					const state = decodeState(stored.states[stored.position]);
-					await doc.loadState({ ...state, map: camera });
-					doc.state.history.restore(stored.states, stored.position);
+					// before loading, which moves the map: its camera belongs to this session
 					this.#setSession(stored.session.id);
 					this.#title = stored.session.title;
+					await doc.loadState({ ...state, map: camera });
+					doc.state.history.restore(stored.states, stored.position);
 					break;
 				}
 				case 'link':

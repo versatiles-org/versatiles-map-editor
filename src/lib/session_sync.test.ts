@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vite
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
 import { MapDocumentInteractive } from './map_document_interactive.js';
 import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { LngLatBounds } from 'maplibre-gl';
 import { SessionStore } from './session_store.js';
 import { SessionSync } from './session_sync.svelte.js';
 import { notify } from './notify.svelte.js';
@@ -285,6 +286,29 @@ describe('SessionSync', () => {
 			expect(elements).toHaveLength(2);
 			expect(elements).toContainEqual([0, 1]);
 			expect(elements).toContainEqual([1]);
+		});
+
+		it('keeps the camera of the map before when opening another one or a new one', async () => {
+			// as MapLibre's fitBounds without animation: it moves the map, and fires moveend at once
+			map.fitBounds.mockImplementation((bounds) => {
+				map.setCenter(LngLatBounds.convert(bounds).getCenter());
+				map.emit('moveend');
+			});
+			const other = store.create(step([marker(1)]), { camera: { center: [2, 48], radius: 5000 } });
+			await sync.attach(doc, await sync.prepare(encodeState({ map: camera, elements: [marker(13.4)] })));
+			const first = (await store.list()).find(({ id }) => id !== other)!.id;
+			await store.flush();
+			const cameraOf = async (id: string) => (await store.load(id))?.session.camera;
+			const before = await cameraOf(first);
+
+			expect(await sync.openRecent(other)).toBe(true);
+			await store.flush();
+			expect(await cameraOf(first)).toStrictEqual(before);
+
+			const opened = await cameraOf(other);
+			await sync.newMap();
+			await store.flush();
+			expect(await cameraOf(other)).toStrictEqual(opened);
 		});
 
 		it('opens a map of a file as a new map', async () => {
