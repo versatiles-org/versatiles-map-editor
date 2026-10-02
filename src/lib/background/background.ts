@@ -13,8 +13,10 @@ export interface BackgroundSettings {
 	 * map always does. Without them and without labels, the satellite map is the imagery alone.
 	 */
 	streets: boolean;
-	/** Color preset of the vector map. */
+	/** Color preset of the vector map, e.g. "gray", light or `dark`. */
 	theme: string;
+	/** Whether the vector map has the dark theme of its color preset, e.g. "gray-dark". */
+	dark: boolean;
 	font: string;
 	/** "user" (browser language), "local" (local names) or a language code. */
 	language: string;
@@ -55,8 +57,18 @@ export const THEMES = [
 	{ id: 'natural', name: 'Natural' },
 	{ id: 'muted', name: 'Muted' },
 	{ id: 'gray', name: 'Gray' },
-	{ id: 'toner', name: 'Black & white' }
+	{ id: 'toner', name: 'Toner' }
 ];
+
+/** The suffix of the dark theme of a color preset of `@versatiles/style`, e.g. "gray-dark". */
+const DARK_SUFFIX = '-dark';
+
+/** The color preset of a theme and whether it is its dark theme. Unknown themes are kept as they are. */
+function splitTheme(theme: string): { theme: string; dark: boolean } {
+	const preset = theme.slice(0, -DARK_SUFFIX.length);
+	if (theme.endsWith(DARK_SUFFIX) && THEMES.some((t) => t.id === preset)) return { theme: preset, dark: true };
+	return { theme, dark: false };
+}
 
 // Languages of the names in the OSM tiles of tiles.versatiles.org
 export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
@@ -101,7 +113,7 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 	return {
 		base,
 		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
-		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
+		...splitTheme(typeof overlay.theme === 'string' ? overlay.theme : 'colorful'),
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
 		labels,
@@ -285,7 +297,12 @@ export function changeSettings(
 	if (!isObject(overlay.text)) overlay.text = {};
 	const text = overlay.text as Options;
 
-	if (change.theme) overlay.theme = change.theme;
+	if (change.theme || change.dark !== undefined) {
+		// the color preset and light or dark: a change of one keeps the other
+		const current = splitTheme(typeof overlay.theme === 'string' ? overlay.theme : 'colorful');
+		const dark = change.dark ?? current.dark;
+		overlay.theme = (change.theme || current.theme) + (dark ? DARK_SUFFIX : '');
+	}
 
 	if (change.font) text.font = change.font;
 	if (change.labelSize !== undefined) text.scale = change.labelSize;

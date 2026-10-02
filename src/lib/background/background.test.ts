@@ -14,6 +14,7 @@ describe('getSettings', () => {
 			base: 'vector',
 			streets: true,
 			theme: 'colorful',
+			dark: false,
 			font: 'noto_sans_regular',
 			language: 'user',
 			labels: 'normal',
@@ -33,6 +34,7 @@ describe('getSettings', () => {
 			base: 'vector',
 			streets: true,
 			theme: 'gray',
+			dark: false,
 			font: 'lato_regular',
 			language: 'local',
 			labels: 'fewer',
@@ -47,6 +49,28 @@ describe('getSettings', () => {
 });
 
 describe('changeSettings', () => {
+	it('sets the color preset and light or dark independently', () => {
+		const dark = changeSettings(undefined, { dark: true });
+		expect(dark?.options.theme).toBe('colorful-dark');
+		expect(getSettings(dark)).toMatchObject({ theme: 'colorful', dark: true });
+		const grayDark = changeSettings(dark, { theme: 'gray' });
+		expect(grayDark?.options.theme).toBe('gray-dark');
+		expect(getSettings(grayDark)).toMatchObject({ theme: 'gray', dark: true });
+		expect(changeSettings(grayDark, { dark: false })?.options.theme).toBe('gray');
+		expect(changeSettings(dark, { dark: false })).toBeUndefined();
+	});
+
+	it('keeps unknown themes as they are', () => {
+		expect(getSettings({ builder: 'osm', options: { theme: 'neon-dark' } })).toMatchObject({
+			theme: 'neon-dark',
+			dark: false
+		});
+		expect(getSettings({ builder: 'osm', options: { theme: 'toner-dark' } })).toMatchObject({
+			theme: 'toner',
+			dark: true
+		});
+	});
+
 	it('returns undefined for the editor default', () => {
 		expect(changeSettings(undefined, { theme: 'colorful' })).toBeUndefined();
 		const gray = changeSettings(undefined, { theme: 'gray' });

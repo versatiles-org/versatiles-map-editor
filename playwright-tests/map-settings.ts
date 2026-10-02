@@ -72,6 +72,29 @@ test('styling the background map', async ({ page }) => {
 	await waitForMapIsIdle(page);
 	await expect.poll(mapContent).toStrictEqual(deselected);
 
+	// the dark theme of the same color preset: a dark background, and light again
+	const mode = page.getByRole('radiogroup', { name: 'Mode' });
+	// the mean of the channels of the background color, e.g. "rgb(39,39,39)", from 0 to 255
+	const lightness = () =>
+		page.evaluate(() => {
+			const map = (window as unknown as MapWindow).map;
+			const layer = map.getStyle()?.layers.find((l) => l.type === 'background');
+			const color = layer && String(map.getPaintProperty(layer.id, 'background-color'));
+			const channels = color?.match(/\d+/g)?.slice(0, 3).map(Number) ?? [];
+			return channels.reduce((sum, value) => sum + value, 0) / channels.length;
+		});
+	await mode.getByRole('radio', { name: 'Dark' }).check();
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'osm', options: { theme: 'gray-dark', text: { language: 'user' } } });
+	await expect.poll(lightness).toBeLessThan(80);
+	await mode.getByRole('radio', { name: 'Light' }).check();
+	await expect
+		.poll(background)
+		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });
+	await expect.poll(lightness).toBeGreaterThan(180);
+	await waitForMapIsIdle(page);
+
 	await page.getByRole('combobox', { name: 'Language' }).selectOption('German');
 	await page.getByRole('radiogroup', { name: 'Labels' }).getByRole('radio', { name: 'Fewer' }).check();
 	await page.getByRole('radiogroup', { name: 'Base map' }).getByRole('radio', { name: 'Satellite' }).check();

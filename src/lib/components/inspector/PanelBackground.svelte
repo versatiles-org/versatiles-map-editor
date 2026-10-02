@@ -38,6 +38,10 @@
 		{ value: 'vector', label: 'OpenStreetMap' },
 		{ value: 'satellite', label: 'Satellite' }
 	];
+	const MODES: { value: boolean; label: string }[] = [
+		{ value: false, label: 'Light' },
+		{ value: true, label: 'Dark' }
+	];
 	const LABELS: { value: BackgroundSettings['labels']; label: string }[] = [
 		{ value: 'normal', label: 'Normal' },
 		{ value: 'fewer', label: 'Fewer' },
@@ -101,6 +105,15 @@
 					<option value={id}>{name}</option>
 				{/each}
 			</Select>
+		</InputRow>
+		<!-- each theme also as a dark theme -->
+		<InputRow id="{uid}-dark" label="Mode" group>
+			<ChoiceGroup
+				labelledby="{uid}-dark-label"
+				value={settings.dark}
+				onchange={(dark) => change('dark', dark)}
+				options={MODES}
+			/>
 		</InputRow>
 	{/if}
 
