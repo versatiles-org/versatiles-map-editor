@@ -337,6 +337,19 @@ describe('SessionSync', () => {
 			expect(await cameraOf(other)).toStrictEqual(otherCamera);
 		});
 
+		it('counts each opened map: a recent one, a new one, one of a file and one of a link', async () => {
+			const other = store.create(step([marker(1)]), { camera });
+			await sync.attach(doc, await sync.prepare(''));
+			const before = sync.openings;
+			await sync.openRecent(other);
+			await sync.newMap();
+			await sync.openMap({ elements: [marker(2)] });
+			location.hash = encodeState({ map: camera, elements: [marker(3)] });
+			dispatchEvent(new HashChangeEvent('hashchange'));
+			await vi.waitFor(() => expect(sync.openings).toBe(before + 4));
+			location.hash = '';
+		});
+
 		it('opens a map of a file as a new map', async () => {
 			await sync.attach(doc, await sync.prepare(''));
 			await sync.openMap({ meta: { title: 'File' }, elements: [marker(1)] });

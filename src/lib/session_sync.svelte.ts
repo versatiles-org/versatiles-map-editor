@@ -65,6 +65,8 @@ export class SessionSync {
 	#title: string | undefined;
 	/** Whether a map is being loaded, which moves the map to the camera that its session already has. */
 	#loading = false;
+	/** How many maps were opened so far, e.g. so a file name belongs to its map only. */
+	public openings = 0;
 	/** Whether the map is kept in the browser storage, e.g. for the status line. */
 	public status: SaveStatus = $state('saved');
 
@@ -256,6 +258,7 @@ export class SessionSync {
 	async #open(opening: Opening) {
 		const doc = this.#doc;
 		if (!doc) return;
+		this.openings++;
 		this.#first = undefined;
 		try {
 			switch (opening.kind) {

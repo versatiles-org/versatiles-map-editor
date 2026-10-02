@@ -22,6 +22,8 @@ export interface FileQuestions {
 export interface MapList {
 	newMap(): Promise<void>;
 	openMap(state: MapState): Promise<void>;
+	/** How many maps were opened so far, in any way, e.g. a recent map or a link in the address bar. */
+	readonly openings: number;
 }
 
 const EXTENSION = /\.mapjson$/i;
@@ -47,19 +49,29 @@ export function fileBaseName(title: string): string {
  * The commands of the menu for files: a new map, opening and downloading it, and the import and
  * export of GeoJSON and KML. A new or opened map is a new map of the list, so nothing is lost and
  * nothing is asked; an import is one undo step. The name of an opened or downloaded
- * file is suggested for the next download and names the exports; else the title of the map does.
+ * file is suggested for the next download and names the exports, until another map is opened;
+ * else the title of the map does.
  */
 export class FileCommands {
 	readonly #doc: MapDocumentInteractive;
 	readonly #maps: MapList;
 	readonly #questions: FileQuestions;
-	/** The name of the opened or downloaded file, if there is one. */
-	#filename: string | undefined;
+	/** The name of the opened or downloaded file, and the map it belongs to (see `MapList.openings`). */
+	#file: { name: string; opening: number } | undefined;
 
 	constructor(doc: MapDocumentInteractive, maps: MapList, questions: FileQuestions) {
 		this.#doc = doc;
 		this.#maps = maps;
 		this.#questions = questions;
+	}
+
+	/** The name of the file of the open map, if it has one. */
+	get #filename(): string | undefined {
+		return this.#file?.opening === this.#maps.openings ? this.#file.name : undefined;
+	}
+
+	set #filename(name: string) {
+		this.#file = { name, opening: this.#maps.openings };
 	}
 
 	/** The name that the next download suggests. */
@@ -75,7 +87,6 @@ export class FileCommands {
 	/** An empty map in the current view, without legend or background. */
 	public async newFile(): Promise<void> {
 		await this.#maps.newMap();
-		this.#filename = undefined;
 	}
 
 	public async openFile(): Promise<void> {

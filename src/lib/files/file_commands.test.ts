@@ -17,7 +17,7 @@ describe('FileCommands', () => {
 	let state: MapState;
 	let doc: MapDocumentInteractive;
 	let questions: { [K in keyof FileQuestions]: ReturnType<typeof vi.fn> };
-	let maps: { [K in keyof MapList]: ReturnType<typeof vi.fn> };
+	let maps: { newMap: ReturnType<typeof vi.fn>; openMap: ReturnType<typeof vi.fn>; openings: number };
 	let files: FileCommands;
 	const choose = (name: string, text: string) => vi.mocked(chooseTextFile).mockResolvedValue({ name, text });
 
@@ -34,7 +34,12 @@ describe('FileCommands', () => {
 			addState: vi.fn(),
 			state: { log: vi.fn() }
 		} as unknown as MapDocumentInteractive;
-		maps = { newMap: vi.fn(async () => {}), openMap: vi.fn(async () => {}) };
+		// each opens a map, as SessionSync does
+		maps = {
+			newMap: vi.fn(async () => void maps.openings++),
+			openMap: vi.fn(async () => void maps.openings++),
+			openings: 1
+		};
 		questions = { askDownloadFilename: vi.fn(async (name: string) => name) };
 		files = new FileCommands(doc, maps as unknown as MapList, questions as unknown as FileQuestions);
 	});
@@ -45,6 +50,16 @@ describe('FileCommands', () => {
 		await files.newFile();
 		expect(maps.newMap).toHaveBeenCalledTimes(1);
 		expect(files.filename).toBe('map.mapjson');
+	});
+
+	it('forgets the name of the file when another map is opened, e.g. a recent one or a link', async () => {
+		choose('trip.mapjson', JSON.stringify({ elements: [] }));
+		await files.openFile();
+		expect(files.filename).toBe('trip.mapjson');
+		// e.g. a recent map, which SessionSync opens without the file commands
+		maps.openings++;
+		doc.title = 'Holidays';
+		expect(files.filename).toBe('Holidays.mapjson');
 	});
 
 	describe('openExample', () => {
