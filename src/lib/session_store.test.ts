@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MAX_BYTES, MAX_STEPS, SessionStore } from './session_store.js';
+import { MAX_BYTES, SessionStore } from './session_store.js';
+import { MAX_STEPS } from './state/history.svelte.js';
 
 describe('SessionStore', () => {
 	let store: SessionStore;

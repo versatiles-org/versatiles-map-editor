@@ -1,4 +1,5 @@
 import type { MapState } from '@versatiles/map-state';
+import { MAX_STEPS } from './state/history.svelte.js';
 
 /**
  * The maps of the editor in the browser storage (IndexedDB): each map is a session with its undo
@@ -13,8 +14,6 @@ const STEPS = 'steps';
 /** The channel that tells the other tabs about changed sessions. */
 const CHANNEL = 'versatiles-map-editor:sessions';
 
-/** The most steps of the history of a session, as the history in memory keeps. */
-export const MAX_STEPS = 100;
 /** The most characters of all steps of a session; the oldest steps are dropped, e.g. of large imports. */
 export const MAX_BYTES = 10 * 1024 * 1024;
 

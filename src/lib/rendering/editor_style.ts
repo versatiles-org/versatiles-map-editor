@@ -2,7 +2,7 @@ import type { LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import type { StyleSpecification } from '@versatiles/style';
 import { getMapStyle, getSettings } from '../background/index.js';
-import { AREAS_TOP, ELEMENT_LAYERS, elementStyle } from './element_renderer.js';
+import { AREAS_TOP, ELEMENT_LAYERS, elementStyle, emptySource } from './element_renderer.js';
 
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */
 function hasCoarsePointer(): boolean {
@@ -13,11 +13,6 @@ function hasCoarsePointer(): boolean {
 interface StylePart {
 	sources: Record<string, SourceSpecification>;
 	layers: LayerSpecification[];
-}
-
-/** A GeoJSON source without features, which the editor fills. */
-function emptySource(): SourceSpecification {
-	return { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
 }
 
 /**

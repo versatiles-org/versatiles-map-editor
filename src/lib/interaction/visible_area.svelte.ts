@@ -1,17 +1,23 @@
 import type { Bounds } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { HANDLES, handlePosition, type Handle } from '../rendering/index.js';
-import { claimEvent, isClaimed, isMultiTouch, isTouchEvent, trackDrag, type MapPointerEvent } from './drag.js';
+import { MAX_LATITUDE } from '../geometry.js';
+import {
+	claimEvent,
+	isClaimed,
+	isMultiTouch,
+	isTouchEvent,
+	TOUCH_TOLERANCE,
+	trackDrag,
+	type MapPointerEvent
+} from './drag.js';
 
-/** How far from a handle the pointer may be, in pixels: more for a finger. */
+/** How far from a handle the pointer may be, in pixels, with a mouse (see `TOUCH_TOLERANCE`). */
 const MOUSE_TOLERANCE = 8;
-const TOUCH_TOLERANCE = 16;
 /** The smallest width and height of the frame, in pixels. */
 const MIN_SIZE = 20;
 /** The smallest width and height of the bounds of the elements, in pixels, e.g. around a single marker. */
 const MIN_BOUNDS = 40;
-/** The northernmost latitude of the Web Mercator projection. */
-const MAX_LATITUDE = 85.051129;
 
 /** How far a side moves with each press of a key, in pixels. */
 export const NUDGE = 10;

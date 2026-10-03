@@ -136,6 +136,11 @@ const DASH_ARRAYS = lookup(
 	[100]
 );
 
+/** A GeoJSON source without features, which the editor fills. */
+export function emptySource(): SourceSpecification {
+	return { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
+}
+
 /**
  * The sources and layers that draw all elements. Every map style gets them. The label positions
  * are those of the symbols that are loaded (see `loadSymbols`).
@@ -144,9 +149,8 @@ export function elementStyle(font: string): {
 	sources: Record<string, SourceSpecification>;
 	layers: LayerSpecification[];
 } {
-	const empty = (): SourceSpecification => ({ type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
 	return {
-		sources: Object.fromEntries(ROLES.map((role) => [ELEMENT_LAYERS[role], empty()])),
+		sources: Object.fromEntries(ROLES.map((role) => [ELEMENT_LAYERS[role], emptySource()])),
 		layers: [
 			elementLayer('fill', ELEMENT_LAYERS.fill, font),
 			elementLayer('stroke', ELEMENT_LAYERS.stroke, font),

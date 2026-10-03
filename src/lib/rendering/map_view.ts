@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
-import type { GeoPoint } from '../geometry.js';
+import { clampLatitude, lat2mercator, MAX_LATITUDE, mercator2lat, type GeoPoint } from '../geometry.js';
 import { ELEMENT_LAYERS, ElementRenderer, layerIdsOf, type Role } from './element_renderer.js';
 
 /** The role of the first layer of a role, e.g. "symbol" of `elements_symbol`. */
@@ -26,8 +26,6 @@ export function indexElements(elements: AbstractElement[]): ElementIndex {
 	};
 }
 
-/** The northernmost latitude of the Web Mercator projection. */
-const MAX_LATITUDE = 85.051129;
 /** The circumference of the earth in meters, as the viewport measures it. */
 const EARTH_CIRCUMFERENCE = 40074000;
 
@@ -131,10 +129,9 @@ export class MapView {
 		const dy = (radius * 360) / EARTH_CIRCUMFERENCE;
 		const dx = Math.min(180, dy / Math.max(Math.cos((center[1] * Math.PI) / 180), 1e-6));
 		// A viewport near a pole can reach beyond the latitudes of the map, where MapLibre throws
-		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
 		const bounds: [[number, number], [number, number]] = [
-			[center[0] - dx, lat(center[1] - dy)],
-			[center[0] + dx, lat(center[1] + dy)]
+			[center[0] - dx, clampLatitude(center[1] - dy)],
+			[center[0] + dx, clampLatitude(center[1] + dy)]
 		];
 		try {
 			this.map.fitBounds(bounds, { animate: false });
@@ -164,10 +161,9 @@ export class MapView {
 
 	#fit(frame: Bounds | undefined, elements: StateElement[]) {
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
-		const lat = (value: number) => Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, value));
 		const target: [[number, number], [number, number]] = [
-			[bounds[0], lat(bounds[1])],
-			[bounds[2], lat(bounds[3])]
+			[bounds[0], clampLatitude(bounds[1])],
+			[bounds[2], clampLatitude(bounds[3])]
 		];
 		const padding = frame ? FRAME_PADDING : ELEMENTS_PADDING;
 		// not `maxZoom: undefined`, which would replace MapLibre's default and make the zoom NaN
@@ -315,9 +311,6 @@ export function visibleAreaFeatures(frame: Bounds | undefined, bounds: Bounds | 
 export const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'] as const;
 export type Handle = (typeof HANDLES)[number];
 
-const mercatorY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
-const latitudeOf = (y: number) => (360 / Math.PI) * Math.atan(Math.exp(y)) - 90;
-
 /** Where a handle is: the middle of an edge is its middle on the map (in Web Mercator). */
 export function handlePosition([west, south, east, north]: Bounds, handle: Handle): [number, number] {
 	const lng = handle.includes('w') ? west : handle.includes('e') ? east : (west + east) / 2;
@@ -325,7 +318,7 @@ export function handlePosition([west, south, east, north]: Bounds, handle: Handl
 		? north
 		: handle.includes('s')
 			? south
-			: latitudeOf((mercatorY(south) + mercatorY(north)) / 2);
+			: mercator2lat((lat2mercator(south) + lat2mercator(north)) / 2);
 	return [lng, lat];
 }
 

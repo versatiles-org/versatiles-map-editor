@@ -1,6 +1,7 @@
 import { decodeState, type MapState } from '@versatiles/map-state';
 
-const MAXLENGTH = 100;
+/** The most steps of the history, which the browser storage keeps too. */
+export const MAX_STEPS = 100;
 
 /**
  * A step of the history: the state as JSON, or as the codec's encoded string if it was restored
@@ -76,8 +77,8 @@ export class StateHistory {
 		this.history.unshift({ json });
 
 		// Remove old history
-		if (this.history.length > MAXLENGTH) {
-			this.history.length = MAXLENGTH;
+		if (this.history.length > MAX_STEPS) {
+			this.history.length = MAX_STEPS;
 		}
 		this.updateButtons();
 		return true;
