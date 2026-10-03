@@ -1,6 +1,12 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
-	import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateLegendEntry } from '@versatiles/map-state';
+	import {
+		ARROW_DEFAULTS,
+		FILL_DEFAULTS,
+		LINE_DEFAULTS,
+		SYMBOL_DEFAULTS,
+		type StateLegendEntry
+	} from '@versatiles/map-state';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -15,6 +21,7 @@
 	import { canPasteStyleToEntry, pasteStyleToEntry } from '#lib/components/commands.js';
 	import { colorOf, entryStyle, setEntryOutline, setEntryType, updateEntry } from './legend_entries.js';
 	import StyleFill from './StyleFill.svelte';
+	import StyleArrows from './StyleArrows.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 
 	/**
@@ -121,7 +128,9 @@
 			/>
 		</InputRow>
 	{:else if entry.type === 'line'}
-		<StyleStroke layers={[entryStyle(doc, index, 'style', LINE_DEFAULTS)]} {doc} />
+		{@const line = entryStyle(doc, index, 'style', { ...LINE_DEFAULTS, ...ARROW_DEFAULTS })}
+		<StyleStroke layers={[line]} {doc} />
+		<StyleArrows layers={[line]} {doc} />
 	{:else}
 		{@const outline = entryStyle(doc, index, 'strokeStyle', LINE_DEFAULTS)}
 		<StyleFill layers={[entryStyle(doc, index, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />

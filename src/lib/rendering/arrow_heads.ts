@@ -32,6 +32,18 @@ const TRIANGLE_SINE = HEAD_WIDTH / 2 / Math.hypot(TRIANGLE_LENGTH, HEAD_WIDTH / 
 const CHEVRON_THICKNESS = HEAD_WIDTH / 3;
 const CHEVRON_ARM = (HEAD_WIDTH - CHEVRON_THICKNESS) / 2;
 
+/** The corners of the triangle and the middle line of the chevron, from the end point. */
+const TRIANGLE: GeoPoint[] = [
+	[0, 0],
+	[-TRIANGLE_LENGTH, -HEAD_WIDTH / 2],
+	[-TRIANGLE_LENGTH, HEAD_WIDTH / 2]
+];
+const CHEVRON: GeoPoint[] = [
+	[-CHEVRON_ARM, -CHEVRON_ARM],
+	[0, 0],
+	[-CHEVRON_ARM, CHEVRON_ARM]
+];
+
 const IMAGE_PREFIX = 'arrow-';
 
 /** The name of the image of an arrowhead, e.g. "arrow-triangle". */
@@ -50,11 +62,7 @@ function segmentDistance([px, py]: GeoPoint, [ax, ay]: GeoPoint, [bx, by]: GeoPo
 function headDistance(arrow: string, point: GeoPoint): number {
 	switch (arrow) {
 		case 'triangle': {
-			const corners: GeoPoint[] = [
-				[0, 0],
-				[-TRIANGLE_LENGTH, -HEAD_WIDTH / 2],
-				[-TRIANGLE_LENGTH, HEAD_WIDTH / 2]
-			];
+			const corners = TRIANGLE;
 			const edge = Math.min(...corners.map((a, i) => segmentDistance(point, a, corners[(i + 1) % 3])));
 			const [x, y] = point;
 			// inside: right of the base and within the slope of both sides
@@ -62,8 +70,8 @@ function headDistance(arrow: string, point: GeoPoint): number {
 			return inside ? -edge : edge;
 		}
 		case 'chevron': {
-			const arms = [-CHEVRON_ARM, CHEVRON_ARM].map((y) => segmentDistance(point, [0, 0], [-CHEVRON_ARM, y]));
-			return Math.min(...arms) - CHEVRON_THICKNESS / 2;
+			const [a, tip, b] = CHEVRON;
+			return Math.min(segmentDistance(point, tip, a), segmentDistance(point, tip, b)) - CHEVRON_THICKNESS / 2;
 		}
 		case 'circle':
 			return Math.hypot(...point) - HEAD_WIDTH / 2;
@@ -101,6 +109,59 @@ export function addArrowImage(map: maplibregl.Map, name: string): boolean {
 	if (arrow === 'none' || !ARROW_NAMES.includes(arrow)) return false;
 	if (!map.hasImage(name)) map.addImage(name, arrowImage(arrow), { sdf: true, pixelRatio: PIXEL_RATIO });
 	return true;
+}
+
+/**
+ * How far a head lies beyond the end point of its line, in pixels: the tip of the triangle so far
+ * that the round cap of the line is within it; the others on the end point.
+ */
+function headShift(arrow: string, lineWidth: number): number {
+	return arrow === 'triangle' ? lineWidth / 2 / TRIANGLE_SINE : 0;
+}
+
+/** How far a head reaches beyond the end point of its line, in pixels, e.g. to fit it into a box. */
+export function headReach(arrow: string, headWidth: number, lineWidth: number): number {
+	switch (arrow) {
+		case 'triangle':
+			return headShift(arrow, lineWidth);
+		case 'chevron':
+			// the round corner of the chevron's tip
+			return ((headWidth / HEAD_WIDTH) * CHEVRON_THICKNESS) / 2;
+		case 'circle':
+			return headWidth / 2;
+		default:
+			return 0;
+	}
+}
+
+/**
+ * Draw an arrowhead on a canvas as the map draws it, e.g. in the legend: `headWidth` pixels wide,
+ * at the end point of a line `lineWidth` wide, which is the origin of the context, pointing along
+ * its x axis. In the color of `fillStyle`.
+ */
+export function drawArrowHead(context: CanvasRenderingContext2D, arrow: string, headWidth: number, lineWidth: number) {
+	const scale = headWidth / HEAD_WIDTH;
+	context.save();
+	context.translate(headShift(arrow, lineWidth), 0);
+	context.scale(scale, scale);
+	context.beginPath();
+	if (arrow === 'triangle') {
+		for (const [x, y] of TRIANGLE) context.lineTo(x, y);
+		context.closePath();
+		context.fill();
+	} else if (arrow === 'chevron') {
+		for (const [x, y] of CHEVRON) context.lineTo(x, y);
+		context.setLineDash([]);
+		context.strokeStyle = context.fillStyle;
+		context.lineWidth = CHEVRON_THICKNESS;
+		context.lineCap = 'round';
+		context.lineJoin = 'round';
+		context.stroke();
+	} else if (arrow === 'circle') {
+		context.arc(0, 0, HEAD_WIDTH / 2, 0, 2 * Math.PI);
+		context.fill();
+	}
+	context.restore();
 }
 
 /** An arrowhead as the layer of the arrowheads draws it: at the end point, see `arrowHeadFeatures`. */
@@ -145,9 +206,8 @@ export function arrowHeads(path: GeoPath, arrows: ArrowProperties): ArrowHead[] 
 		const arrow = end ? arrows.end : arrows.start;
 		const rotate = endDirection(path, end);
 		if (arrow === 'none' || rotate === undefined) return [];
-		// the tip of the triangle so far beyond the end point that the round cap of the line is within
-		// it; in pixels of the image, which `icon-size` scales
-		const offset = arrow === 'triangle' ? arrows.width / 2 / TRIANGLE_SINE / size : 0;
+		// in pixels of the image, which `icon-size` scales
+		const offset = headShift(arrow, arrows.width) / size;
 		return [
 			{
 				point: path[end ? path.length - 1 : 0],

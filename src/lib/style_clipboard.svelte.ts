@@ -1,11 +1,16 @@
-import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
+import { ARROW_DEFAULTS, FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
 import type { AbstractElement } from './element/abstract.svelte.js';
 import type { StylePart } from './style/index.js';
 
 /** The parts of a style: markers have a symbol, lines a stroke, polygons and circles a fill and a stroke. */
 type Role = 'symbol' | 'fill' | 'stroke';
 const ROLES: Role[] = ['symbol', 'fill', 'stroke'];
-const DEFAULTS: Record<Role, StateStyle> = { symbol: SYMBOL_DEFAULTS, fill: FILL_DEFAULTS, stroke: LINE_DEFAULTS };
+// the arrowheads too, which outlines ignore, so pasting a line without arrowheads removes them
+const DEFAULTS: Record<Role, StateStyle> = {
+	symbol: SYMBOL_DEFAULTS,
+	fill: FILL_DEFAULTS,
+	stroke: { ...LINE_DEFAULTS, ...ARROW_DEFAULTS }
+};
 
 /** A copied style: the complete style of each role of the element. */
 export type CopiedStyle = Partial<Record<Role, StateStyle>>;

@@ -1,8 +1,10 @@
 import {
+	ARROW_DEFAULTS,
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
 	removeDefaultFields,
 	SYMBOL_DEFAULTS,
+	withoutUnusedFields,
 	type StateLegendEntry,
 	type StateStyle
 } from '@versatiles/map-state';
@@ -110,18 +112,20 @@ export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): v
 	const entries = doc.legend?.entries;
 	if (!copied || !entries?.[index]) return;
 	const label = entries[index].label;
-	// without the defaults, which the copy has
-	const style = (s: StateStyle | undefined, defaults: StateStyle) => s && removeDefaultFields(s, defaults);
+	// without the defaults, which the copy has; a line also without those of its arrowheads
+	const style = (s: StateStyle | undefined, defaults: StateStyle) =>
+		s && removeDefaultFields(withoutUnusedFields(s), defaults);
+	const lineDefaults = { ...LINE_DEFAULTS, ...ARROW_DEFAULTS };
 	const entry: StateLegendEntry = copied.symbol
 		? { type: 'marker', style: markerLook(style(copied.symbol, SYMBOL_DEFAULTS)), label }
 		: copied.fill
 			? {
 					type: 'polygon',
 					style: style(copied.fill, FILL_DEFAULTS),
-					strokeStyle: style(copied.stroke, LINE_DEFAULTS),
+					strokeStyle: style(copied.stroke, lineDefaults),
 					label
 				}
-			: { type: 'line', style: style(copied.stroke, LINE_DEFAULTS), label };
+			: { type: 'line', style: style(copied.stroke, lineDefaults), label };
 	if (!entry.style) delete entry.style;
 	if (!entry.strokeStyle) delete entry.strokeStyle;
 	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? entry : e)) };

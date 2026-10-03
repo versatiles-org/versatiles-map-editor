@@ -86,6 +86,22 @@ describe('StyleClipboard', () => {
 		expect(line.getState().style).toStrictEqual({ color: '#123456' });
 	});
 
+	it('transfers the arrowheads between lines, also none, but not onto an outline', () => {
+		const arrowed = newLine(doc);
+		arrowed.layer.patch({ arrowStart: 3, arrowEnd: 1, arrowSize: 2 });
+		const line = newLine(doc);
+		copyAndPaste(arrowed, line);
+		expect(line.getState().style).toStrictEqual({ arrowStart: 3, arrowEnd: 1, arrowSize: 2 });
+
+		// a line without arrowheads removes them
+		copyAndPaste(newLine(doc), line);
+		expect(line.getState().style).toBeUndefined();
+
+		const polygon = newPolygon(doc);
+		copyAndPaste(arrowed, polygon);
+		expect(polygon.getState().strokeStyle).toBeUndefined();
+	});
+
 	it('transfers only the color between elements without common style parts', () => {
 		const marker = newMarker(doc);
 		marker.layer.color = '#00ff00';

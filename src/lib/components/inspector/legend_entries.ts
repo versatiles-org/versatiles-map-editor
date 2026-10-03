@@ -1,9 +1,11 @@
 import {
+	ARROW_DEFAULTS,
 	formatHex,
 	LINE_DEFAULTS,
 	parseColor,
 	removeDefaultFields,
 	SYMBOL_DEFAULTS,
+	withoutUnusedFields,
 	type StateLegend,
 	type StateLegendEntry,
 	type StateStyle
@@ -93,7 +95,8 @@ export function entryStyle(
 ) {
 	const get = () => ({ ...defaults, ...legendOf(doc).entries[index]?.[key] });
 	const set = (field: keyof StateStyle, value: unknown) => {
-		const style = removeDefaultFields({ ...get(), [field]: value }, defaults);
+		// e.g. without the size of arrowheads that are switched off
+		const style = removeDefaultFields(withoutUnusedFields({ ...get(), [field]: value }), defaults);
 		replaceEntry(doc, index, (entry) => withStyle(entry, key, style));
 	};
 	return {
@@ -127,6 +130,25 @@ export function entryStyle(
 		},
 		set visible(value: boolean) {
 			set('visible', value);
+		},
+		// the arrowheads of a line, with `ARROW_DEFAULTS` in `defaults`
+		get arrowStart() {
+			return get().arrowStart ?? 0;
+		},
+		set arrowStart(value: number) {
+			set('arrowStart', value);
+		},
+		get arrowEnd() {
+			return get().arrowEnd ?? 0;
+		},
+		set arrowEnd(value: number) {
+			set('arrowEnd', value);
+		},
+		get arrowSize() {
+			return get().arrowSize ?? ARROW_DEFAULTS.arrowSize;
+		},
+		set arrowSize(value: number) {
+			set('arrowSize', value);
 		}
 	};
 }

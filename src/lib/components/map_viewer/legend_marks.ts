@@ -1,4 +1,6 @@
 import {
+	ARROW_DEFAULTS,
+	ARROW_NAMES,
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
 	parseColor,
@@ -8,7 +10,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import { dashArrays } from '../../style/index.js';
-import { fillPatternPixels, PATTERN_SIZE } from '../../rendering/index.js';
+import { drawArrowHead, fillPatternPixels, headReach, PATTERN_SIZE } from '../../rendering/index.js';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
 export const MARK_WIDTH = 28;
@@ -21,6 +23,8 @@ export const MARK_HEIGHT = 18;
 export const MAX_LINE_WIDTH = 6;
 export const MAX_OUTLINE_WIDTH = 3;
 export const MAX_PATTERNED_WIDTH = 2.5;
+/** The widest arrowhead that the legend draws, so two fit into the mark with a line between them. */
+export const MAX_ARROW_WIDTH = 12;
 
 /** The width of a line or an outline in the legend, see `MAX_LINE_WIDTH`. */
 function drawnWidth({ width, pattern }: { width: number; pattern: number }, max: number): number {
@@ -65,19 +69,41 @@ function prepare(canvas: HTMLCanvasElement): CanvasRenderingContext2D | undefine
 	return context;
 }
 
-/** Draw a short line in the style of a line, as on the map: its color, width and dashes. */
+/**
+ * Draw a short line in the style of a line, as on the map: its color, width and dashes, and its
+ * arrowheads, as wide as on the map up to `MAX_ARROW_WIDTH`, within the mark.
+ */
 export function drawLine(canvas: HTMLCanvasElement, style: StateStyle | undefined): void {
 	const context = prepare(canvas);
 	if (!context) return;
-	const line = lineOf(style);
+	const line = { ...LINE_DEFAULTS, ...ARROW_DEFAULTS, ...style };
 	const width = drawnWidth(line, MAX_LINE_WIDTH);
+	const headWidth = Math.min(line.arrowSize * width, MAX_ARROW_WIDTH);
+	const [start, end] = [line.arrowStart, line.arrowEnd].map((index) => ARROW_NAMES[index] ?? 'none');
+	// the end points: inside the mark by the round cap of the line, or by the arrowhead
+	const inset = (arrow: string) => 1 + (arrow === 'none' ? width / 2 : headReach(arrow, headWidth, width));
+	const [x0, x1] = [inset(start), MARK_WIDTH - inset(end)];
+	const y = MARK_HEIGHT / 2;
 	context.strokeStyle = line.color;
 	context.lineWidth = width;
 	setDashes(context, line.pattern, width);
 	context.beginPath();
-	context.moveTo(width / 2 + 1, MARK_HEIGHT / 2);
-	context.lineTo(MARK_WIDTH - width / 2 - 1, MARK_HEIGHT / 2);
+	context.moveTo(x0, y);
+	context.lineTo(x1, y);
 	context.stroke();
+	// solid, also on a dashed line
+	context.fillStyle = line.color;
+	for (const [arrow, x, angle] of [
+		[start, x0, Math.PI],
+		[end, x1, 0]
+	] as const) {
+		if (arrow === 'none') continue;
+		context.save();
+		context.translate(x, y);
+		context.rotate(angle);
+		drawArrowHead(context, arrow, headWidth, width);
+		context.restore();
+	}
 }
 
 /**

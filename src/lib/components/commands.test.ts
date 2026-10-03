@@ -213,6 +213,14 @@ describe('addToLegend', () => {
 		expect(doc.legend).toBeUndefined();
 	});
 
+	it('adds lines with and without arrowheads as entries of their own', () => {
+		const plain = doc.addElement({ type: 'line', points });
+		const arrowed = doc.addElement({ type: 'line', points, style: { arrowEnd: 1 } });
+		doc.selection.selectElements([plain, arrowed]);
+		expect(addToLegend(doc)).toBe(2);
+		expect(doc.legend?.entries.map((entry) => entry.style)).toStrictEqual([undefined, { arrowEnd: 1 }]);
+	});
+
 	it('adds each look once, and none that the legend shows already', () => {
 		const markers = ['Boots', 'Boots', 'Superdrug'].map((label) =>
 			doc.addElement({ type: 'marker', point: [0, 0], style: { color: '#009e73', symbol: 'base:icon-pill', label } })
@@ -278,6 +286,15 @@ describe('pasteStyleToEntry', () => {
 		).toStrictEqual({ type: 'polygon', style: { pattern: 1 }, strokeStyle: { visible: false }, label: 'Kept' });
 		// all defaults
 		expect(paste({ type: 'polygon', points })).toStrictEqual({ type: 'polygon', label: 'Kept' });
+	});
+
+	it('gives a line entry the arrowheads, with their size only if there are any', () => {
+		expect(paste({ type: 'line', points, style: { arrowEnd: 2, arrowSize: 4 } })).toStrictEqual({
+			type: 'line',
+			style: { arrowEnd: 2, arrowSize: 4 },
+			label: 'Kept'
+		});
+		expect(paste({ type: 'line', points, style: { arrowSize: 4 } })).toStrictEqual({ type: 'line', label: 'Kept' });
 	});
 
 	it('is one undo step', () => {
