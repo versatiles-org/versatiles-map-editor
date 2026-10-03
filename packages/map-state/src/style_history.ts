@@ -1,11 +1,12 @@
 import { parseColor } from './color.js';
+import { withoutUnusedFields } from './profile.js';
 import type { StateStyle } from './types.js';
 
 /**
  * The fields of a style with their key in the base64 format, and the value as it is encoded:
  * values that encode identically are equal, e.g. a halo of 1.04 and 1. The keys are written in an
  * Exp-Golomb code (`STYLE_KEY_PARAMETER`), so small keys are short: the fields that styles change
- * most often have the smallest keys. Keys 10 to 12 are kept for the arrowheads of lines.
+ * most often have the smallest keys.
  */
 export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (value: never) => unknown }[] = [
 	{ key: 1, name: 'color', encoded: (v: string) => colorKey(v) },
@@ -17,6 +18,9 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 7, name: 'align', encoded: (v: number) => Math.round(v) },
 	{ key: 8, name: 'width', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 9, name: 'pattern', encoded: (v: number) => Math.round(v) },
+	{ key: 10, name: 'arrowStart', encoded: (v: number) => Math.round(v) },
+	{ key: 11, name: 'arrowEnd', encoded: (v: number) => Math.round(v) },
+	{ key: 12, name: 'arrowSize', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 13, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 14, name: 'haloColor', encoded: (v: string) => colorKey(v) },
 	{ key: 15, name: 'rotate', encoded: (v: number) => Math.round(v) },
@@ -51,7 +55,8 @@ export function encodedValue(style: StateStyle, field: (typeof STYLE_FIELDS)[num
 
 /** The fields of a style as they are encoded: styles that encode identically have the same one. */
 export function canonical(style: StateStyle): string {
-	return JSON.stringify(STYLE_FIELDS.map((field) => encodedValue(style, field)));
+	const used = withoutUnusedFields(style);
+	return JSON.stringify(STYLE_FIELDS.map((field) => encodedValue(used, field)));
 }
 
 /** A style without its label, which an element stores by itself; a copy. */

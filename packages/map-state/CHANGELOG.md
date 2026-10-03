@@ -73,6 +73,10 @@ The first release.
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
+- Arrowheads of lines: `arrowStart` and `arrowEnd` in the style (`ARROW_NAMES`: none, triangle,
+  chevron, circle) and `arrowSize`, their width as a factor of the line width, which is only stored
+  with an arrowhead (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
+  `stroke-arrow-size`.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.

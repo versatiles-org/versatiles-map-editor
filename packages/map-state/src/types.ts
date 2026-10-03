@@ -153,6 +153,29 @@ export interface StateStyle {
 	 * @default true
 	 */
 	visible?: boolean;
+	/**
+	 * Lines: the arrowhead at the first point: 0 none, 1 triangle, 2 chevron, 3 circle.
+	 * @asType integer
+	 * @minimum 0
+	 * @maximum 3
+	 * @default 0
+	 */
+	arrowStart?: number;
+	/**
+	 * Lines: the arrowhead at the last point: 0 none, 1 triangle, 2 chevron, 3 circle.
+	 * @asType integer
+	 * @minimum 0
+	 * @maximum 3
+	 * @default 0
+	 */
+	arrowEnd?: number;
+	/**
+	 * Lines: the width of the arrowheads across the line, as a factor of the width of the line.
+	 * Only with an arrowhead.
+	 * @exclusiveMinimum 0
+	 * @default 3
+	 */
+	arrowSize?: number;
 	/** The symbol of a marker: the name of its image, e.g. "icons:anchor", or "" for none. */
 	symbol?: string;
 	/**

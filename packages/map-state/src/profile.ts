@@ -41,6 +41,12 @@ export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> 
 	visible: true,
 	width: 2
 };
+/** The arrowheads of lines, apart from `LINE_DEFAULTS`, which outlines share. */
+export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> = {
+	arrowStart: 0,
+	arrowEnd: 0,
+	arrowSize: 3
+};
 export const SYMBOL_DEFAULTS: Defaults<
 	| 'color'
 	| 'rotate'
@@ -72,6 +78,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 // index -> name enum tables (the numeric index lives in State, the name in GeoJSON)
 export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'];
 export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'];
+export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'];
 export const LABEL_ALIGN_NAMES = [
 	'auto',
 	'right',
@@ -168,9 +175,26 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'align', sanitizeIndex(v.align, 0, LABEL_ALIGN_NAMES.length - 1));
 	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
+	set(s, 'arrowStart', sanitizeIndex(v.arrowStart, 0, ARROW_NAMES.length - 1));
+	set(s, 'arrowEnd', sanitizeIndex(v.arrowEnd, 0, ARROW_NAMES.length - 1));
+	const arrowSize = sanitizeNumber(v.arrowSize, 0);
+	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
 	set(s, 'font', sanitizeString(v.font));
-	return Object.keys(s).length > 0 ? s : undefined;
+	const used = withoutUnusedFields(s);
+	return Object.keys(used).length > 0 ? used : undefined;
+}
+
+/** Whether a style has an arrowhead at an end of the line. */
+export function hasArrow(style: StateStyle | undefined): boolean {
+	return Boolean(style?.arrowStart || style?.arrowEnd);
+}
+
+/** A style without the fields that have no effect: the size of arrowheads, without one. */
+export function withoutUnusedFields(style: StateStyle): StateStyle {
+	if (style.arrowSize === undefined || hasArrow(style)) return style;
+	const { arrowSize: _arrowSize, ...rest } = style;
+	return rest;
 }
 
 /** Assign `value` to `style[key]` unless it is undefined. */
@@ -245,6 +269,30 @@ export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
 	}
 	return removeDefaultFields(s, LINE_DEFAULTS);
+}
+
+// ----- line: the stroke and the arrowheads -----
+
+export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
+	const s = { ...ARROW_DEFAULTS, ...style };
+	return {
+		...strokePropsFromStyle(style),
+		'stroke-arrow-start': nameOf(ARROW_NAMES, s.arrowStart),
+		'stroke-arrow-end': nameOf(ARROW_NAMES, s.arrowEnd),
+		// only with an arrowhead
+		'stroke-arrow-size': hasArrow(s) ? s.arrowSize : undefined
+	};
+}
+
+export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
+	const s: StateStyle = { ...strokeStyleFromProps(p) };
+	if (p) {
+		set(s, 'arrowStart', indexOf(ARROW_NAMES, p['stroke-arrow-start']));
+		set(s, 'arrowEnd', indexOf(ARROW_NAMES, p['stroke-arrow-end']));
+		const arrowSize = sanitizeNumber(p['stroke-arrow-size'], 0);
+		if (arrowSize) s.arrowSize = arrowSize;
+	}
+	return removeDefaultFields(withoutUnusedFields(s), ARROW_DEFAULTS);
 }
 
 // ----- symbol (marker) -----

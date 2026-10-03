@@ -101,7 +101,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 (lossy for foreign input, smallest output). Geometry mapping:
 
 - marker → `Point` with `symbol-*` properties
-- line → `LineString` with `stroke-*` properties
+- line → `LineString` with `stroke-*` properties, including its arrowheads (`stroke-arrow-*`)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
@@ -129,8 +129,8 @@ are skipped. Altitudes and
 polygon holes are dropped. Style values are sanitized (clamped, rounded,
 colors normalized to lowercase hex) or fall back to the defaults.
 
-Enum values use human-readable names (`fill-pattern`, `stroke-style`,
-`symbol-label-align`) whose index↔name tables live here. `symbol-pattern` is the name of the
+Enum values use human-readable names (`fill-pattern`, `stroke-style`, `stroke-arrow-start`,
+`stroke-arrow-end`, `symbol-label-align`) whose index↔name tables live here. `symbol-pattern` is the name of the
 image, e.g. `icons:anchor`. The editor's `StylePart` classes take
 their defaults and enum names from here and only add rendering data;
 `profile.test.ts` checks that every enum value can be rendered.

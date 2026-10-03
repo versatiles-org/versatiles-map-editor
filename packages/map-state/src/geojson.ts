@@ -22,6 +22,8 @@ import {
 	sanitizePosition,
 	sanitizePositions,
 	strokePropsFromStyle,
+	linePropsFromStyle,
+	lineStyleFromProps,
 	strokeStyleFromProps,
 	symbolPropsFromStyle,
 	symbolStyleFromProps
@@ -62,7 +64,7 @@ function markerToFeature(el: StateElementMarker): GeoJSON.Feature {
 function lineToFeature(el: StateElementLine): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean({ ...strokePropsFromStyle(el.style), description: el.popup?.text }),
+		properties: clean({ ...linePropsFromStyle(el.style), description: el.popup?.text }),
 		geometry: { type: 'LineString', coordinates: el.points }
 	};
 }
@@ -192,7 +194,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 		case 'LineString': {
 			const points = sanitizePositions(g.coordinates);
 			if (!points || points.length < 2) return undefined;
-			return { type: 'line', points, style: strokeStyleFromProps(p) };
+			return { type: 'line', points, style: lineStyleFromProps(p) };
 		}
 		case 'Polygon': {
 			// Only the outer ring is supported; holes are dropped.

@@ -268,6 +268,26 @@
 					"description": "Outlines: whether the outline is drawn.",
 					"default": true
 				},
+				"arrowStart": {
+					"type": "integer",
+					"description": "Lines: the arrowhead at the first point: 0 none, 1 triangle, 2 chevron, 3 circle.",
+					"minimum": 0,
+					"maximum": 3,
+					"default": 0
+				},
+				"arrowEnd": {
+					"type": "integer",
+					"description": "Lines: the arrowhead at the last point: 0 none, 1 triangle, 2 chevron, 3 circle.",
+					"minimum": 0,
+					"maximum": 3,
+					"default": 0
+				},
+				"arrowSize": {
+					"type": "number",
+					"description": "Lines: the width of the arrowheads across the line, as a factor of the width of the line. Only with an arrowhead.",
+					"exclusiveMinimum": 0,
+					"default": 3
+				},
 				"symbol": {
 					"type": "string",
 					"description": "The symbol of a marker: the name of its image, e.g. \"icons:anchor\", or \"\" for none."

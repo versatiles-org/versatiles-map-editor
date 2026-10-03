@@ -17,7 +17,8 @@ import {
 	removeViewerDefaults,
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
-	VIEWER_CHOICES
+	VIEWER_CHOICES,
+	withoutUnusedFields
 } from './profile.js';
 import { encodeStrings } from './string_coder.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
@@ -499,6 +500,7 @@ export class StateWriter {
 	 * whichever is shortest.
 	 */
 	writeStyle(style: StateStyle) {
+		style = withoutUnusedFields(style);
 		let best: StateWriter | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
 			const writer = this.fork();
@@ -550,6 +552,11 @@ export class StateWriter {
 				return this.writeVarint(Math.round(style.width! * 10));
 			case 'align':
 				return this.writeVarint(Math.round(style.align!));
+			case 'arrowStart':
+			case 'arrowEnd':
+				return this.writeVarint(Math.round(style[name]!));
+			case 'arrowSize':
+				return this.writeVarint(Math.round(style.arrowSize! * 10));
 			case 'color':
 			case 'labelColor':
 			case 'haloColor':

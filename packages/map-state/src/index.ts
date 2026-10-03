@@ -32,9 +32,13 @@ export { stateFromKML, stateToKML } from './kml.js';
 export {
 	FILL_DEFAULTS,
 	LINE_DEFAULTS,
+	ARROW_DEFAULTS,
 	SYMBOL_DEFAULTS,
 	FILL_PATTERN_NAMES,
 	STROKE_STYLE_NAMES,
+	ARROW_NAMES,
+	hasArrow,
+	withoutUnusedFields,
 	LABEL_ALIGN_NAMES,
 	removeDefaultFields,
 	LEGEND_DEFAULTS,

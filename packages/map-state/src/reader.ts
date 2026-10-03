@@ -33,6 +33,8 @@ import {
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
 	STROKE_STYLE_NAMES,
+	ARROW_NAMES,
+	hasArrow,
 	VIEWER_CHOICES
 } from './profile.js';
 import { LocalGrid } from './grid.js';
@@ -571,6 +573,8 @@ export class StateReader {
 			const base = this.styleHistory.get(ref);
 			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch({ ...base });
+			// the writer leaves it out without an arrowhead
+			if (style.arrowSize !== undefined && !hasArrow(style)) throw new Error('Arrow size without an arrowhead');
 			this.styleHistory.remember(style);
 			return style;
 		} catch (cause) {
@@ -620,6 +624,13 @@ export class StateReader {
 					break;
 				case 'align':
 					style.align = this.readIndex(LABEL_ALIGN_NAMES.length);
+					break;
+				case 'arrowStart':
+				case 'arrowEnd':
+					style[field.name] = this.readIndex(ARROW_NAMES.length);
+					break;
+				case 'arrowSize':
+					style.arrowSize = this.readVarint() / 10;
 					break;
 				case 'color':
 				case 'labelColor':
