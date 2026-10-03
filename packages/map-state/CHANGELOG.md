@@ -73,6 +73,9 @@ The first release.
   generated from the types with their descriptions, units, ranges and defaults
   (`npm run schema`). The types `Position` and `HexColor`.
 - `bold` and `italic` in the legend: the texts of all entries in bold or italic.
+- Smooth lines and polygons: `smooth: true` on a line or polygon draws it as a smooth curve through
+  its points, which stay as they are; 1 bit per line and polygon in the base64 string, `smooth` in
+  GeoJSON.
 - Arrowheads of lines: `arrowStart` and `arrowEnd` in the style (`ARROW_NAMES`: none, triangle,
   chevron, circle) and `arrowSize`, their width as a factor of the line width, which is only stored
   with an arrowhead (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and

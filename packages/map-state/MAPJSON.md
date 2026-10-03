@@ -102,12 +102,16 @@ Every element has a `type`, its geometry, a `style`, and optionally a `popup`: `
 shown when the element is clicked in a shared map. Its `text` is plain, with `**bold**`, line
 breaks and links (`[label](https://…)` or a bare URL).
 
-| `type`    | Geometry                                                           | Styles                                        |
-| --------- | ------------------------------------------------------------------ | --------------------------------------------- |
-| `marker`  | `point`: a position                                                | `style`: the symbol and its label             |
-| `line`    | `points`: at least 2 positions                                     | `style`: the line                             |
-| `polygon` | `points`: at least 3 positions; the last one connects to the first | `style`: the area; `strokeStyle`: its outline |
-| `circle`  | `point`: the center; `radius`: in meters                           | `style`: the area; `strokeStyle`: its outline |
+| `type`    | Geometry                                                                                | Styles                                        |
+| --------- | --------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `marker`  | `point`: a position                                                                     | `style`: the symbol and its label             |
+| `line`    | `points`: at least 2 positions; `smooth`, see below                                     | `style`: the line                             |
+| `polygon` | `points`: at least 3 positions; the last one connects to the first; `smooth`, see below | `style`: the area; `strokeStyle`: its outline |
+| `circle`  | `point`: the center; `radius`: in meters                                                | `style`: the area; `strokeStyle`: its outline |
+
+`"smooth": true` draws a line or polygon as a smooth curve through its points instead of straight
+from point to point. The file keeps only the points, so other programs, which do not know the field,
+show them joined by straight lines.
 
 ### Styles
 

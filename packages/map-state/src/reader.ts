@@ -392,6 +392,7 @@ export class StateReader {
 		try {
 			const element: StateElementLine = { type: 'line', points: this.readElementPoints() };
 			if (element.points.length < 2) throw new Error('A line of fewer than 2 points');
+			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
 			const popup = this.readPopup();
@@ -406,6 +407,7 @@ export class StateReader {
 		try {
 			const element: StateElementPolygon = { type: 'polygon', points: this.readElementPoints() };
 			if (element.points.length < 3) throw new Error('An area of fewer than 3 points');
+			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
 			this.readElementLabel(element);
 			const popup = this.readPopup();

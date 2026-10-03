@@ -547,12 +547,14 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 			const points = sanitizePositions(v.points);
 			if (!points || points.length < 2) return undefined;
 			element = { type: 'line', points, style: sanitizeStyle(v.style) };
+			if (sanitizeBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
 		case 'polygon': {
 			const points = sanitizePositions(v.points);
 			if (!points || points.length < 3) return undefined;
 			element = { type: 'polygon', points, style: sanitizeStyle(v.style), strokeStyle: sanitizeStyle(v.strokeStyle) };
+			if (sanitizeBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
 		case 'circle': {

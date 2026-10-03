@@ -180,7 +180,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLCYPDUBw1AaAMgOehCKGoAoagHDUBw1AUgoYxA1ABA1AHDUBw1AcNQHDUBSE0hohlcwBlcwEWKC4kSA'
+			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLCYPDUBw1AaAMgOehCKGoAoagHDUBw1AKQUMYgagAgagDhqA4agOGoDhqAUhNIaIZXMAZXMBFiguJEg'
 		);
 	});
 

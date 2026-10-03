@@ -410,6 +410,7 @@ export class StateWriter {
 
 	writeElementLine(element: StateElementLine, repeat = false) {
 		this.writeElementPoints(element.points);
+		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
 		this.writeElementLabel(element);
 		this.writePopup(element.popup);
@@ -417,6 +418,7 @@ export class StateWriter {
 
 	writeElementPolygon(element: StateElementPolygon, repeat = false) {
 		this.writeElementPoints(element.points);
+		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
 		this.writeElementLabel(element);
 		this.writePopup(element.popup);

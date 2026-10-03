@@ -101,8 +101,10 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 (lossy for foreign input, smallest output). Geometry mapping:
 
 - marker → `Point` with `symbol-*` properties
-- line → `LineString` with `stroke-*` properties, including its arrowheads (`stroke-arrow-*`)
-- polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`
+- line → `LineString` with `stroke-*` properties, including its arrowheads (`stroke-arrow-*`), and
+  `smooth: true` if it is drawn as a smooth curve through its points (other tools show the points
+  joined straight)
+- polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
 - visible area → `frame: [west, south, east, north]`

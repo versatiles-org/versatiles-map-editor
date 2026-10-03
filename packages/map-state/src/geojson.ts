@@ -14,6 +14,7 @@ import {
 	fillStyleFromProps,
 	popupFromProps,
 	removeViewerDefaults,
+	sanitizeBoolean,
 	sanitizeLabelMinZoom,
 	sanitizeCamera,
 	sanitizeNumber,
@@ -40,6 +41,11 @@ export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	meta?: StateMetadata;
 };
 
+/** The smoothing of a line or polygon (the property `smooth`), only if it is smooth. */
+function smoothOf(p: GeoJSON.GeoJsonProperties): { smooth?: true } {
+	return sanitizeBoolean(p?.smooth) ? { smooth: true } : {};
+}
+
 function clean(properties: GeoJSON.GeoJsonProperties): GeoJSON.GeoJsonProperties {
 	// drop undefined values so emitted properties stay compact and comparable
 	const out: Record<string, unknown> = {};
@@ -64,7 +70,7 @@ function markerToFeature(el: StateElementMarker): GeoJSON.Feature {
 function lineToFeature(el: StateElementLine): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean({ ...linePropsFromStyle(el.style), description: el.popup?.text }),
+		properties: clean({ ...linePropsFromStyle(el.style), smooth: el.smooth || undefined, description: el.popup?.text }),
 		geometry: { type: 'LineString', coordinates: el.points }
 	};
 }
@@ -75,6 +81,7 @@ function polygonToFeature(el: StateElementPolygon): GeoJSON.Feature {
 		properties: clean({
 			...fillPropsFromStyle(el.style),
 			...strokePropsFromStyle(el.strokeStyle),
+			smooth: el.smooth || undefined,
 			description: el.popup?.text
 		}),
 		geometry: { type: 'Polygon', coordinates: [[...el.points, el.points[0]]] }
@@ -194,7 +201,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 		case 'LineString': {
 			const points = sanitizePositions(g.coordinates);
 			if (!points || points.length < 2) return undefined;
-			return { type: 'line', points, style: lineStyleFromProps(p) };
+			return { type: 'line', points, style: lineStyleFromProps(p), ...smoothOf(p) };
 		}
 		case 'Polygon': {
 			// Only the outer ring is supported; holes are dropped.
@@ -208,7 +215,8 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 				type: 'polygon',
 				points,
 				style: fillStyleFromProps(p),
-				strokeStyle: strokeStyleFromProps(p)
+				strokeStyle: strokeStyleFromProps(p),
+				...smoothOf(p)
 			};
 		}
 		default:

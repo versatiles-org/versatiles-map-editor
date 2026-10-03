@@ -50,6 +50,11 @@ export interface StateElementLine {
 	type: 'line';
 	/** @minItems 2 */
 	points: Position[];
+	/**
+	 * Drawn as a smooth curve through the points, instead of straight from point to point.
+	 * @default false
+	 */
+	smooth?: boolean;
 	/** The line: `color`, `width`, `pattern` (solid, dashed, dotted). */
 	style?: StateStyle;
 	popup?: StatePopup;
@@ -60,6 +65,11 @@ export interface StateElementPolygon {
 	type: 'polygon';
 	/** @minItems 3 */
 	points: Position[];
+	/**
+	 * Drawn as a smooth curve through the points, instead of straight from point to point.
+	 * @default false
+	 */
+	smooth?: boolean;
 	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
 	style?: StateStyle;
 	/** The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted). */

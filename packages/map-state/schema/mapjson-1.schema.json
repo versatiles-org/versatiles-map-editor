@@ -402,6 +402,11 @@
 					},
 					"minItems": 2
 				},
+				"smooth": {
+					"type": "boolean",
+					"description": "Drawn as a smooth curve through the points, instead of straight from point to point.",
+					"default": false
+				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
 					"description": "The line: `color`, `width`, `pattern` (solid, dashed, dotted)."
@@ -427,6 +432,11 @@
 						"$ref": "#/definitions/Position"
 					},
 					"minItems": 3
+				},
+				"smooth": {
+					"type": "boolean",
+					"description": "Drawn as a smooth curve through the points, instead of straight from point to point.",
+					"default": false
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
