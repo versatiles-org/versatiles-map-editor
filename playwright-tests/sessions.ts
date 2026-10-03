@@ -109,7 +109,11 @@ test('each tab edits its own map, and a reload keeps it', async ({ page, context
 	// a duplicated tab (with the session id of the first tab) gets a copy of its map
 	const duplicate = await context.newPage();
 	const id = await page.evaluate(() => sessionStorage.getItem('versatiles-map-editor:session'));
-	await duplicate.addInitScript((id) => sessionStorage.setItem('versatiles-map-editor:session', id!), id);
+	// only in the page: its iframes (e.g. an empty one) share its sessionStorage, and would set it
+	// again after the editor has set the id of the copy
+	await duplicate.addInitScript((id) => {
+		if (window === window.top) sessionStorage.setItem('versatiles-map-editor:session', id!);
+	}, id);
 	await duplicate.goto('/');
 	await waitForMapIsReady(duplicate);
 	await expect.poll(() => lng(duplicate)).toBe(13.4);
