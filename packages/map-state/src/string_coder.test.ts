@@ -171,7 +171,8 @@ describe('the coder of the string table', () => {
 		expect(decodeStrings(encodeStrings(['ab', 'ab'], 1), 2, 1)).toStrictEqual(['ab', 'ab']);
 	});
 
-	it('stops at 2^22 symbols, which a hostile link could code in a few bits', () => {
+	// millions of symbols: about 3 s with coverage, five times as long on the runners of CI
+	it('stops at 2^22 symbols, which a hostile link could code in a few bits', { timeout: 60_000 }, () => {
 		const longest = 'a'.repeat(2 ** 22 - 1);
 		const block = encodeStrings([longest]);
 		expect(block.length).toBeLessThan(1000);

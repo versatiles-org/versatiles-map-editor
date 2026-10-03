@@ -87,7 +87,8 @@ function tryLink(link: string, slowest: { ms: number }) {
 	expect(() => encodeState(state)).not.toThrow();
 }
 
-describe('corrupt links', () => {
+// thousands of links: a few seconds each with coverage, five times as long on the runners of CI
+describe('corrupt links', { timeout: 60_000 }, () => {
 	it('are the examples, which are read', () => {
 		expect(links.length).toBeGreaterThan(0);
 		for (const link of links) checkDrawable(decodeState(link));
