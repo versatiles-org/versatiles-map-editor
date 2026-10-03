@@ -17,7 +17,8 @@
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
-	import { countTypes, elementIcon, elementText, typeName } from '$lib/components/element_names.js';
+	import { elementIcon, elementText } from '$lib/components/element_names.js';
+	import { countTypes, typeName } from '$lib/element/type_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a

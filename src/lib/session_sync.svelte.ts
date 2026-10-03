@@ -3,7 +3,7 @@ import type { MapDocumentInteractive } from './map_document_interactive.js';
 import { SessionStore, type CurrentSession, type StoredSession } from './session_store.js';
 import { notify } from './notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
-import { countTypes } from './components/element_names.js';
+import { countTypes } from './element/type_names.js';
 
 /** How many of the most recent sessions are kept, listed, and compared with the map of a link. */
 const RECENT = 10;
