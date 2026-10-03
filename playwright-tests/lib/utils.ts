@@ -199,6 +199,9 @@ export function printConsoleMessages(page: Page): void {
 		if (expectedConsoleMessages.get(page)?.some((pattern) => pattern.test(text))) return;
 		if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
 		if (text.includes('GPU stall due to ReadPixels')) return;
+		// Chrome, when a test reads the pixels of a canvas of the editor again and again, e.g. polling
+		// them; the editor itself only draws into these canvases, so they do not read frequently
+		if (text.includes('Multiple readback operations using getImageData are faster with the willReadFrequently')) return;
 		// Firefox, when the map measures its container while the page's styles are still loading
 		if (text.includes('Layout was forced before the page was fully loaded')) return;
 		console.log(process.platform + ': ' + text);
