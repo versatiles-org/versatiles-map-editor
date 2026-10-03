@@ -317,7 +317,7 @@ export class StateReader {
 			// effective resolution of coordinates is 1000 times the visible radius
 			const center = checkLatitude(this.readPoint(radius / 1e3));
 
-			if (this.readBit()) throw new Error('Addtional map meta data is not supported yet');
+			if (this.readBit()) throw new Error('Additional map metadata is not supported yet');
 
 			return { radius, center };
 		} catch (cause) {
@@ -698,7 +698,6 @@ export class StateReader {
 		return block;
 	}
 
-	/** See `StateWriter.writeStringRef`. */
 	/** See `StateWriter.writeStringRef`. */
 	readStringRef(format = false): string {
 		const section = format ? 0 : 1;

@@ -71,7 +71,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `centerOf(bounds)` their center.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
   `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
-  the way the editor does. `LEGEND_DEFAULTS` are the layout, font, bold and italic of a legend
+  the way the editor does. `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend
   that names none, and `removeLegendDefaults` leaves them out, as the base64 string does;
   `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as

@@ -294,9 +294,8 @@ export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undef
 	return text?.trim() ? { text } : undefined;
 }
 
-// ----- background map -----
+// ----- visible area -----
 
-/** A valid background, or undefined. The options are not checked, since they belong to `@versatiles/style`. */
 /** A valid frame: four numbers, west < east and south < north, within the latitudes of the map. */
 export function sanitizeFrame(value: unknown): Bounds | undefined {
 	if (!Array.isArray(value) || value.length !== 4) return undefined;
@@ -306,6 +305,9 @@ export function sanitizeFrame(value: unknown): Bounds | undefined {
 	return [west, south, east, north];
 }
 
+// ----- background map -----
+
+/** A valid background, or undefined. The options are not checked, since they belong to `@versatiles/style`. */
 export function sanitizeBackground(value: unknown): StateBackground | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const { builder, options } = value as Record<string, unknown>;
