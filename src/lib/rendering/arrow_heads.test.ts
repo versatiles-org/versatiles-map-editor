@@ -78,10 +78,7 @@ describe('arrowHeads', () => {
 			[[1, 0], true, 'arrow-chevron']
 		]);
 		expect(heads[0].properties.rotate).toBeCloseTo(180);
-		expect(heads.map((head) => head.properties.offset)).toStrictEqual([
-			[0, 0],
-			[0, 0]
-		]);
+		expect(heads.map((head) => head.properties.offset)).toStrictEqual([0, 0]);
 	});
 
 	it('is the size times the width of the line wide', () => {
@@ -94,7 +91,7 @@ describe('arrowHeads', () => {
 		for (const size of [1.5, 3, 6]) {
 			const [head] = arrowHeads(path, arrows({ end: 'triangle', size, width: 4 }));
 			// on the screen: the offset is scaled like the image
-			const beyond = head.properties.offset[0] * head.properties.size;
+			const beyond = head.properties.offset * head.properties.size;
 			// the sides of the triangle touch the cap (radius 2): its half angle has a sine of 1/√5
 			expect(beyond * (1 / Math.sqrt(5))).toBeCloseTo(2);
 		}

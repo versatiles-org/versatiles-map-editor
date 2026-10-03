@@ -221,7 +221,16 @@ function elementLayer(role: Role, id: string, font: string): LayerSpecification 
 					'symbol-sort-key': ['get', 'order'],
 					'icon-image': ['get', 'icon'],
 					'icon-size': ['get', 'size'],
-					'icon-offset': ['get', 'offset'],
+					// a number, since MapLibre makes array properties of features strings: [offset, 0]
+					'icon-offset': [
+						'interpolate',
+						['linear'],
+						['get', 'offset'],
+						0,
+						['literal', [0, 0]],
+						1000,
+						['literal', [1000, 0]]
+					],
 					// turned with the map, so it points along the line
 					'icon-rotate': ['get', 'rotate'],
 					'icon-rotation-alignment': 'map',

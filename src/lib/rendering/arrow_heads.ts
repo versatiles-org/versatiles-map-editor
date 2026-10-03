@@ -113,8 +113,8 @@ export interface ArrowHead {
 		/** Clockwise in degrees, from pointing east. */
 		rotate: number;
 		size: number;
-		/** Of the image (pointing east), in its pixels: the triangle lies beyond the end point. */
-		offset: [number, number];
+		/** Of the image along the line (it points east), in its pixels: the triangle lies beyond the end point. */
+		offset: number;
 		color: string;
 	};
 }
@@ -152,7 +152,7 @@ export function arrowHeads(path: GeoPath, arrows: ArrowProperties): ArrowHead[] 
 			{
 				point: path[end ? path.length - 1 : 0],
 				end,
-				properties: { icon: arrowImageName(arrow), rotate, size, offset: [offset, 0], color: arrows.color }
+				properties: { icon: arrowImageName(arrow), rotate, size, offset, color: arrows.color }
 			}
 		];
 	});

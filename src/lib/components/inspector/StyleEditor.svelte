@@ -4,6 +4,7 @@
 	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import type { StyleLayers } from '#lib/element/types.js';
 	import StyleFill from './StyleFill.svelte';
+	import StyleArrows from './StyleArrows.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
 	import CircleSize from './CircleSize.svelte';
@@ -36,6 +37,8 @@
 	// lines and the outlines of polygons and circles
 	const strokeLayers = $derived(layersOfRole('stroke'));
 	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
+	// only lines have arrowheads, not the outlines of areas
+	const arrowLayers = $derived(strokeLayers.every((layer) => layer.canHaveArrows) ? strokeLayers : []);
 
 	// an entry of the legend with the text of the element, but another style: maybe one that was forgotten
 	const differentEntry = $derived.by(() => {
@@ -76,6 +79,9 @@
 	{:else if strokeLayers.length > 0}
 		<InspectorSection title="Line">
 			<StyleStroke layers={strokeLayers} {doc} />
+			{#if arrowLayers.length > 0}
+				<StyleArrows layers={arrowLayers} {doc} />
+			{/if}
 		</InspectorSection>
 	{/if}
 	{#if circles.length > 0}

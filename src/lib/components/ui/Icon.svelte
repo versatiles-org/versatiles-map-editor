@@ -44,6 +44,8 @@
 		polygon: ['M12 3.5l8 5.8-3 9.7H7l-3-9.7z'],
 		redo: ['M15 14l5-5-5-5', 'M20 9H9.5a5.5 5.5 0 0 0 0 11H13'],
 		select: ['M5.75 5.25l12.5 6.3-5.4 1.8-1.8 5.4z', 'M12.85 13.35l5.4 5.4'],
+		// two arrows in opposite directions, e.g. to swap the ends of a line
+		swap: ['M4 8h16', 'M16 4l4 4-4 4', 'M20 16H4', 'M8 12l-4 4 4 4'],
 		share: ['M12 3v12M8 7l4-4 4 4', 'M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6'],
 		trash: ['M4 7h16M10 11v6M14 11v6M9 7V4h6v3', 'M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12'],
 		undo: ['M9 14L4 9l5-5', 'M4 9h10.5a5.5 5.5 0 0 1 0 11H11']
