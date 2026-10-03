@@ -32,6 +32,20 @@ describe('parseColor and formatHex', () => {
 		).toStrictEqual(['#010203', '#01020380', '#01020380', '#00ff00', '#00ff0080', '#00000000']);
 	});
 
+	it('read the arguments separated by commas, slashes or spaces, in any mix', () => {
+		for (const value of ['rgb(1, 2, 3, 0.5)', 'rgb( 1 2\t3 /0.5 )', 'rgba(1,2 , 3/ 50%)', 'rgb(1,,2,3,,0.5)']) {
+			expect(hex(value), value).toBe('#01020380');
+		}
+	});
+
+	it('read long values quickly, e.g. of a hostile file', () => {
+		const start = performance.now();
+		expect(parseColor(`rgb(1${' '.repeat(1e6)}2 3)`)).toStrictEqual({ r: 1, g: 2, b: 3, alpha: 1 });
+		expect(parseColor(`rgb(${' ,'.repeat(5e5)})`)).toBeUndefined();
+		// a few milliseconds; generous for slow test machines
+		expect(performance.now() - start).toBeLessThan(1000);
+	});
+
 	it('reject other values', () => {
 		for (const value of ['red', 'notacolor', '#ff00001', '#ggg', 'rgb(1,2)', 'rgb(a,b,c)', 'hsl(x,1%,1%)', '']) {
 			expect(parseColor(value)).toBeUndefined();

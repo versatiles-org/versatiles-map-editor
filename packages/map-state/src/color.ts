@@ -25,7 +25,8 @@ export function parseColor(value: string): RGBA | undefined {
 
 	const fn = /^(rgba?|hsla?)\((.*)\)$/.exec(text);
 	if (!fn) return undefined;
-	const args = fn[2].split(/\s*[,/]\s*|\s+/).filter(Boolean);
+	// separated by commas, slashes or spaces; without a pattern that could backtrack on long input
+	const args = fn[2].replace(/[,/]/g, ' ').trim().split(/\s+/).filter(Boolean);
 	if (args.length !== 3 && args.length !== 4) return undefined;
 	const alpha = args.length === 4 ? parseValue(args[3], 1) : 1;
 	if (alpha === undefined) return undefined;
