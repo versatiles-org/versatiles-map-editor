@@ -1,6 +1,6 @@
 import { type GeoPath, polygonArea } from '../geometry.js';
 import { FillStyle, LineStyle } from '../style/index.js';
-import { AbstractPathElement } from './abstract_path.js';
+import { AbstractPathElement } from './abstract_path.svelte.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
 import type { ElementOwner, Measurement, StyleLayers } from './types.js';
 
@@ -24,21 +24,23 @@ export class PolygonElement extends AbstractPathElement {
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
+		const ring = this.drawnPath;
 		return {
 			type: 'Feature',
 			properties: {},
-			geometry: { type: 'Polygon', coordinates: [[...this.path, this.path[0]]] }
+			geometry: { type: 'Polygon', coordinates: [[...ring, ring[0]]] }
 		};
 	}
 
 	protected getMeasurements(): Measurement[] {
-		return [{ kind: 'area', value: polygonArea(this.path) }];
+		return [{ kind: 'area', value: polygonArea(this.drawnPath) }];
 	}
 
 	getState(): StateElementPolygon {
 		return {
 			type: 'polygon',
 			points: this.path,
+			...this.getSmoothState(),
 			style: this.fillLayer.getState(),
 			strokeStyle: this.strokeLayer.getState(),
 			...this.getPopupState()
@@ -47,6 +49,7 @@ export class PolygonElement extends AbstractPathElement {
 
 	static fromState(doc: ElementOwner, state: StateElementPolygon) {
 		const element = new PolygonElement(doc, state.points);
+		element.smooth = state.smooth === true;
 		element.fillLayer.setState(state.style);
 		element.strokeLayer.setState(state.strokeStyle);
 		return element;

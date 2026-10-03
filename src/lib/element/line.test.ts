@@ -90,4 +90,49 @@ describe('LineElement', () => {
 		expect(line.layer.getProperties()).toBeDefined();
 		expect(line.getState().style).toStrictEqual({ color: '#00ff00' });
 	});
+
+	describe('smooth', () => {
+		const zigzag: GeoPoint[] = [
+			[13.3, 52.5],
+			[13.4, 52.55],
+			[13.5, 52.5]
+		];
+
+		it('is drawn as a curve through its nodes, and measured along it', () => {
+			element = new LineElement(mockDoc, zigzag);
+			const straight = element.measurements[0].value;
+			element.smooth = true;
+			const curve = element.getFeature().geometry.coordinates;
+			expect(curve.length).toBeGreaterThan(10);
+			for (const [lon, lat] of zigzag) {
+				expect(curve.some(([x, y]) => Math.abs(x - lon) < 1e-9 && Math.abs(y - lat) < 1e-9)).toBe(true);
+			}
+			// the curve is longer than the straight line from node to node
+			expect(element.measurements[0].value).toBeGreaterThan(straight);
+			// the nodes stay as they are
+			expect(element.path).toStrictEqual(zigzag);
+		});
+
+		it('is part of the state, only when set', () => {
+			element = new LineElement(mockDoc, zigzag);
+			expect('smooth' in element.getState()).toBe(false);
+			element.smooth = true;
+			expect(element.getState()).toMatchObject({ points: zigzag, smooth: true });
+
+			const restored = LineElement.fromState(mockDoc, element.getState());
+			expect(restored.smooth).toBe(true);
+			// e.g. undo: the state of the line before
+			restored.updateFromState({ type: 'line', points: zigzag });
+			expect(restored.smooth).toBe(false);
+			expect(restored.getFeature().geometry.coordinates).toStrictEqual(zigzag);
+		});
+
+		it('draws itself again when it changes', () => {
+			const changed = vi.spyOn(mockDoc, 'elementChanged');
+			changed.mockClear();
+			element.smooth = true;
+			element.smooth = true;
+			expect(changed).toHaveBeenCalledTimes(1);
+		});
+	});
 });

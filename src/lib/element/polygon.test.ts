@@ -93,4 +93,22 @@ describe('PolygonElement', () => {
 		expect(restoredElement.fillLayer.color).toBe('#00ff00');
 		expect(restoredElement.strokeLayer.width).toBe(2);
 	});
+
+	it('is drawn as a smooth closed curve through its nodes, and measured inside it', () => {
+		const triangle: [number, number][] = [
+			[13.3, 52.5],
+			[13.5, 52.5],
+			[13.4, 52.6]
+		];
+		element = new PolygonElement(mockDoc, triangle);
+		const straight = element.measurements[0].value;
+		element.smooth = true;
+		const [ring] = element.getFeature().geometry.coordinates;
+		// closed, through every node
+		expect(ring.at(-1)).toStrictEqual(ring[0]);
+		expect(ring.length).toBeGreaterThan(10);
+		// a smooth ring bulges out between its nodes
+		expect(element.measurements[0].value).toBeGreaterThan(straight);
+		expect(PolygonElement.fromState(mockDoc, element.getState()).smooth).toBe(true);
+	});
 });

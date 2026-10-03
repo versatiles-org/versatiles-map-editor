@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { AbstractPathElement } from './abstract_path.js';
+import { AbstractPathElement } from './abstract_path.svelte.js';
 import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner, SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
