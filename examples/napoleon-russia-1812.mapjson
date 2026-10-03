@@ -39,6 +39,7 @@
 				[36.03, 55.5],
 				[37.42, 55.74]
 			],
+			"smooth": true,
 			"style": { "color": "#e69f00", "width": 8, "arrowStart": 3, "arrowEnd": 1, "arrowSize": 2.5 },
 			"popup": {
 				"text": "**Advance**\nAbout 420,000 soldiers crossed the Niemen at Kowno on 24 June 1812. About 100,000 reached Moscow on 14 September."
@@ -49,8 +50,9 @@
 			"points": [
 				[37.5, 55.66],
 				[37.04, 55.01],
-				[36.03, 55.42],
-				[34.3, 55.13],
+				[36.52, 55.2],
+				[36.03, 55.36],
+				[34.3, 55.08],
 				[33.28, 54.86],
 				[32.05, 54.7],
 				[31.42, 54.56],
@@ -60,6 +62,7 @@
 				[25.28, 54.62],
 				[24.05, 54.76]
 			],
+			"smooth": true,
 			"style": { "color": "#000000", "width": 3, "arrowEnd": 2 },
 			"popup": {
 				"text": "**Retreat**\nThe army left Moscow on 19 October. About 10,000 soldiers crossed the Niemen again in December."
