@@ -14,6 +14,17 @@ for (let i = 0; i < BASE64_CHARS.length; i++) {
 	];
 }
 
+/** The bits as base64 characters, 6 bits each; the last ones filled up with zeros. */
+export function bitsToBase64(bits: boolean[]): string {
+	const chars: string[] = [];
+	for (let i = 0; i < bits.length; i += 6) {
+		let value = 0;
+		for (let j = i; j < i + 6; j++) value = 2 * value + (bits[j] ? 1 : 0);
+		chars.push(BASE64_CHARS[value]);
+	}
+	return chars.join('');
+}
+
 /**
  * The version of the format, at the start of every hash. Only this version is read. (Version 0,
  * the original format, is not supported any more.)

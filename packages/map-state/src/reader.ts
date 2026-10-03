@@ -113,15 +113,6 @@ export class StateReader {
 		}
 	}
 
-	read6pack(): number {
-		let value = 0;
-		for (let i = 0; i < 6; i++) {
-			value <<= 1;
-			if (this.bits[this.offset++]) value += 1;
-		}
-		return value;
-	}
-
 	/** See `StateWriter.writeVarint`. */
 	readVarint(signed?: true): number {
 		try {

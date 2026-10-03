@@ -1,6 +1,6 @@
 import { parseColor } from './color.js';
 import {
-	BASE64_CHARS,
+	bitsToBase64,
 	CODEC_VERSION,
 	ELEMENT_KEYS,
 	END_KEY,
@@ -19,7 +19,6 @@ import {
 	sanitizeLabelMinZoom,
 	VIEWER_CHOICES
 } from './profile.js';
-import { StateReader } from './reader.js';
 import { encodeStrings } from './string_coder.js';
 import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
@@ -81,12 +80,7 @@ export class StateWriter {
 	}
 
 	asBase64(): string {
-		const reader = new StateReader(this.bits);
-		const chars = [];
-		while (!reader.ended()) {
-			chars.push(BASE64_CHARS[reader.read6pack()]);
-		}
-		return chars.join('');
+		return bitsToBase64(this.bits);
 	}
 
 	asBitString(): string {

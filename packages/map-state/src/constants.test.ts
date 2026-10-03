@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { ELEMENT_KEYS, END_KEY, LEGEND_ENTRY_KEYS, LEGEND_KEYS, METADATA_KEYS, POPUP_KEYS } from './constants.js';
+import {
+	bitsToBase64,
+	ELEMENT_KEYS,
+	END_KEY,
+	LEGEND_ENTRY_KEYS,
+	LEGEND_KEYS,
+	METADATA_KEYS,
+	POPUP_KEYS
+} from './constants.js';
+import { StateReader } from './reader.js';
 import { STYLE_EXTENDED_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY } from './style_history.js';
 
 describe('the keys of the fields', () => {
@@ -18,5 +27,16 @@ describe('the keys of the fields', () => {
 			expect(keys, name).not.toContain(END_KEY);
 			for (const key of keys) expect(key, name).toBeLessThan(2 ** bits);
 		}
+	});
+});
+
+describe('base64', () => {
+	it('has 6 bits in each character, the last ones filled up with zeros', () => {
+		const bits = (text: string) => [...text].map((c) => c === '1');
+		expect(bitsToBase64(bits('000000111111'))).toBe('A_');
+		expect(bitsToBase64(bits('1'))).toBe('g');
+		expect(bitsToBase64([])).toBe('');
+		const random = Array.from({ length: 100 }, (_, i) => (i * 7919) % 3 === 0);
+		expect(StateReader.fromBase64(bitsToBase64(random)).bits.slice(0, 100)).toStrictEqual(random);
 	});
 });

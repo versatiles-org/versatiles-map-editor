@@ -54,7 +54,7 @@ const KINDS = {
 const KIND_NAMES = [...new Set(Object.values(KINDS)), 'structure'];
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
-const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'readExpGolomb', 'read6pack', 'readBlock']);
+const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'readExpGolomb', 'readBlock']);
 
 /** A reader that records each call of a read method: its name, and the bits it consumed. */
 class TracingReader extends StateReader {
