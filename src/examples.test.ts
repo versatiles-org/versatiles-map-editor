@@ -18,7 +18,8 @@ const EXAMPLES: Record<string, { types: Record<string, number>; legend: number; 
 	'berlin-low-emission-zone': { types: { polygon: 3, marker: 1 }, legend: 0, builder: 'osm' },
 	'chernobyl-exclusion-zone': { types: { circle: 2, marker: 4 }, legend: 2, builder: 'satellite' },
 	'london-pharmacies': { types: { marker: 557 }, legend: 1, builder: 'osm' },
-	'warsaw-christmas-markets-2025': { types: { marker: 23 }, legend: 3, builder: 'osm' }
+	'warsaw-christmas-markets-2025': { types: { marker: 23 }, legend: 3, builder: 'osm' },
+	'napoleon-russia-1812': { types: { line: 2, marker: 3 }, legend: 3, builder: 'osm' }
 };
 
 const read = (name: string): MapState => JSON.parse(readFileSync(`examples/${name}.mapjson`, 'utf-8'));
