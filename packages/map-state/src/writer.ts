@@ -686,7 +686,7 @@ function allStyles(root: MapState): StateStyle[] {
  * background as JSON, the color scheme, the label font, and the names of the symbols of the
  * legend and of the elements.
  */
-export function collectFormatStrings(root: MapState): string[] {
+function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
 	const strings = [meta?.background && JSON.stringify(meta.background), meta?.colorScheme].filter(
 		(value): value is string => !!value
@@ -755,7 +755,7 @@ function bitLength(value: number): number {
 }
 
 /** The number of bits of these unsigned values in the Exp-Golomb code with the parameter `k`. */
-export function expGolombBits(values: number[], k: number): number {
+function expGolombBits(values: number[], k: number): number {
 	let bits = 0;
 	for (const value of values) bits += 2 * bitLength(value + 2 ** k) - k - 1;
 	return bits;

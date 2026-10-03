@@ -173,9 +173,9 @@ describe('SessionStore', () => {
 
 	it('opens without waiting for the answer of the user, e.g. in Firefox', async () => {
 		vi.stubGlobal('navigator', { ...navigator, storage: { persist: () => new Promise(() => {}) } });
-		const other = (await SessionStore.open(`${name}-pending`))!;
-		expect(other.persisted).toBe(false);
-		await other.close();
+		const other = await SessionStore.open(`${name}-pending`);
+		expect(other).toBeDefined();
+		await other!.close();
 		vi.unstubAllGlobals();
 	});
 
@@ -184,7 +184,6 @@ describe('SessionStore', () => {
 		vi.stubGlobal('navigator', { ...navigator, storage: { persist } });
 		const other = (await SessionStore.open(`${name}-persist`))!;
 		expect(persist).toHaveBeenCalled();
-		await vi.waitFor(() => expect(other.persisted).toBe(true));
 		await other.close();
 		vi.unstubAllGlobals();
 	});

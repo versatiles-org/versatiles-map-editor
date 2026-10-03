@@ -4,7 +4,7 @@ import type { Bounds } from './types.js';
 const METERS_PER_DEGREE = 111320;
 
 /** The finest step of the coordinates, in degrees: 0.00001°, about 1.1 m. */
-export const BASE_STEP = 1e-5;
+const BASE_STEP = 1e-5;
 const STEPS_PER_DEGREE = 1e5;
 
 /** The coarsest step is the finest one times 2^15: 0.32768°, about 36 km. Stored in 4 bits. */

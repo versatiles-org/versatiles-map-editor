@@ -68,7 +68,6 @@ export class MapDocument {
 	#loading = $state(false);
 	private loadingStates = 0;
 	private stateRequest = 0;
-	private loadedCallbacks: (() => void)[] = [];
 
 	constructor(map: maplibregl.Map) {
 		this.view = new MapView(map);
@@ -238,7 +237,6 @@ export class MapDocument {
 	 * viewer, the map shows its frame, else its elements.
 	 */
 	public async loadState(state: MapState) {
-		if (!state) return;
 		this.clear();
 		const camera = this.isInteractive() ? state.map : undefined;
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
@@ -246,33 +244,16 @@ export class MapDocument {
 		await this.setState({ ...state, map: camera });
 	}
 
-	/** Whether a state is being loaded: until then, the map misses (some of) its elements. */
-	public isLoading(): boolean {
-		return this.loadingStates > 0;
-	}
-
-	/** Resolves when no state is being loaded any more. */
-	public whenLoaded(): Promise<void> {
-		if (!this.isLoading()) return Promise.resolve();
-		return new Promise((resolve) => this.loadedCallbacks.push(resolve));
-	}
-
 	public async setState(state: MapState) {
 		if (this.loadingStates++ === 0) this.#loading = true;
 		try {
 			await this.applyState(state);
 		} finally {
-			if (--this.loadingStates === 0) {
-				this.#loading = false;
-				const callbacks = this.loadedCallbacks;
-				this.loadedCallbacks = [];
-				callbacks.forEach((callback) => callback());
-			}
+			if (--this.loadingStates === 0) this.#loading = false;
 		}
 	}
 
 	private async applyState(state: MapState) {
-		if (!state) return;
 		// A newer state (e.g. a quick second redo) replaces this one while it waits
 		const request = ++this.stateRequest;
 		const outdated = () => this.destroyed || request !== this.stateRequest;

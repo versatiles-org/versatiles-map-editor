@@ -100,15 +100,12 @@ export class StateReader {
 		return this.bits[this.offset++];
 	}
 
-	readInteger(bits: number, signed?: true): number {
+	readInteger(bits: number): number {
 		try {
 			let value = 0;
 			for (let i = 0; i < bits; i++) {
 				value <<= 1;
 				if (this.readBit()) value += 1;
-			}
-			if (signed && value >= 1 << (bits - 1)) {
-				value -= 1 << bits;
 			}
 			return value;
 		} catch (cause) {

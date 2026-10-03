@@ -166,7 +166,7 @@ function anchorLayer(id: string): LayerSpecification {
  * A layer of a role, see `planLayers`: it draws the features that name it. Markers with the glyph
  * font of their labels.
  */
-export function elementLayer(role: Role, id: string, font: string): LayerSpecification {
+function elementLayer(role: Role, id: string, font: string): LayerSpecification {
 	const filter: ExpressionSpecification = ['==', ['get', 'layer'], id];
 	switch (role) {
 		case 'fill':
@@ -230,7 +230,7 @@ export function labelLayout({ overlap, minZoom }: LabelOptions) {
 export const LABELS_LAYER = 'elements_labels';
 
 /** The layer of the labels of the markers, see `LABELS_LAYER`: their texts without the symbols. */
-export function labelsLayer(font: string): LayerSpecification {
+function labelsLayer(font: string): LayerSpecification {
 	const markers = symbolLayer(font, LABELS_LAYER) as {
 		layout: Record<string, unknown>;
 		paint: Record<string, unknown>;

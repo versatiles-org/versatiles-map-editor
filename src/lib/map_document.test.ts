@@ -129,26 +129,15 @@ describe('MapDocument', () => {
 
 	describe('loading', () => {
 		it('reports a state as loading until its elements exist', async () => {
-			expect(mapDocument.isLoading()).toBe(false);
 			expect(mapDocument.loading).toBe(false);
 			// the style is not loaded yet, so the elements have to wait
 			const loading = mapDocument.setState({ elements: [{ type: 'marker', point: [1, 2] }] });
-			expect(mapDocument.isLoading()).toBe(true);
 			expect(mapDocument.loading).toBe(true);
-			let loaded = false;
-			mapDocument.whenLoaded().then(() => (loaded = true));
 
 			map.setStyle();
 			await loading;
-			await Promise.resolve();
-			expect(loaded).toBe(true);
-			expect(mapDocument.isLoading()).toBe(false);
 			expect(mapDocument.loading).toBe(false);
 			expect(mapDocument.elements).toHaveLength(1);
-		});
-
-		it('resolves at once when nothing is loading', async () => {
-			await expect(mapDocument.whenLoaded()).resolves.toBeUndefined();
 		});
 
 		it('lets a newer state replace an older one that is still waiting', async () => {
@@ -182,12 +171,12 @@ describe('MapDocument', () => {
 
 			const elements = mapDocument.elements;
 			expect(elements.map((e) => e.getState().type)).toStrictEqual(['line']);
-			expect(mapDocument.isLoading()).toBe(false);
+			expect(mapDocument.loading).toBe(false);
 		});
 
 		it('is not loading any more after an error', async () => {
 			await expect(mapDocument.setState({ elements: [{ type: 'unknown' }] } as unknown as MapState)).rejects.toThrow();
-			expect(mapDocument.isLoading()).toBe(false);
+			expect(mapDocument.loading).toBe(false);
 		});
 	});
 

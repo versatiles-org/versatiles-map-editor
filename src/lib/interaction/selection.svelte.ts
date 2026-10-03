@@ -92,10 +92,6 @@ export class SelectionHandler {
 		this.selectElements(current.includes(element) ? current.filter((e) => e !== element) : [...current, element]);
 	}
 
-	public deselectElement(element: AbstractElement) {
-		this.deselectElements([element]);
-	}
-
 	public deselectElements(elements: AbstractElement[]) {
 		const removed = new Set(elements);
 		const current = this.#selectedElements;

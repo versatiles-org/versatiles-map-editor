@@ -201,7 +201,7 @@ describe('SelectionHandler', () => {
 			handler.toggleElement(elements[0]);
 			expect(selected()).toStrictEqual([elements[1], elements[2]]);
 
-			handler.deselectElement(elements[1]);
+			handler.deselectElements([elements[1]]);
 			expect(selected()).toStrictEqual([elements[2]]);
 			expect(handler.selectedElement).toBe(elements[2]);
 		});

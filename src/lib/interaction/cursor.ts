@@ -50,8 +50,4 @@ export class Cursor {
 		else this.#grab.delete(id);
 		this.update();
 	}
-
-	public isPrecise() {
-		return this.#precise.size > 0;
-	}
 }

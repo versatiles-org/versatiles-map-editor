@@ -84,11 +84,6 @@ export class SessionStore {
 	#errorListeners: ((error: unknown) => void)[] = [];
 	#changeListeners: ((id: string) => void)[] = [];
 	readonly #channel = typeof BroadcastChannel === 'undefined' ? undefined : new BroadcastChannel(CHANNEL);
-	/**
-	 * Whether the browser keeps the storage unless the user clears it (see `navigator.storage.persist`),
-	 * once the browser has answered.
-	 */
-	public persisted = false;
 
 	private constructor(db: IDBDatabase) {
 		this.#db = db;
@@ -115,12 +110,9 @@ export class SessionStore {
 			return undefined;
 		}
 		const store = new SessionStore(db);
-		// Not awaited: Firefox asks the user, and the answer can take long or never come
-		navigator.storage?.persist?.().then(
-			(persisted) => (store.persisted = persisted),
-			// e.g. not allowed: the storage is kept as long as the browser wants
-			() => {}
-		);
+		// The browser keeps the storage unless the user clears it. Not awaited: Firefox asks the user,
+		// and the answer can take long or never come. Not allowed: it is kept as long as the browser wants.
+		navigator.storage?.persist?.().catch(() => {});
 		return store;
 	}
 

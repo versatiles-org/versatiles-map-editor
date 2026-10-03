@@ -74,29 +74,12 @@ describe('StateReader', () => {
 			expect(test('1111')).toBe(15);
 		});
 
-		it('should read a signed integer', () => {
-			function test(bits: string): number {
-				const reader = StateReader.fromBitString(bits);
-				const value = reader.readInteger(bits.length, true);
-				expect(reader.ended()).toBe(true);
-				return value;
-			}
-			expect(test('0000')).toBe(0);
-			expect(test('0001')).toBe(1);
-			expect(test('0011')).toBe(3);
-			expect(test('0111')).toBe(7);
-			expect(test('1000')).toBe(-8);
-			expect(test('1100')).toBe(-4);
-			expect(test('1110')).toBe(-2);
-			expect(test('1111')).toBe(-1);
-		});
-
 		it('should read integer from writer correctly', () => {
-			function test(value: number, bits: number, signed?: true) {
+			function test(value: number, bits: number) {
 				const writer = new StateWriter();
 				writer.writeInteger(value, bits);
 				const reader = new StateReader(writer.bits);
-				expect(reader.readInteger(bits, signed)).toBe(value);
+				expect(reader.readInteger(bits)).toBe(value);
 				expect(reader.ended()).toBe(true);
 			}
 			test(0, 4);
@@ -106,8 +89,6 @@ describe('StateReader', () => {
 			test(14, 4);
 			test(15, 4);
 			test(255, 8);
-			test(-128, 8, true);
-			test(-1, 8, true);
 		});
 	});
 

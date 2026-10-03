@@ -243,7 +243,7 @@ class Decoder {
 }
 
 /**
- * The strings as one block of bits; `decodeStrings` needs their number. The first `formatCount`
+ * The strings as one block of bits; `decodeStringBlock` needs their number. The first `formatCount`
  * are words of the format, e.g. the options of the background map as JSON: a model that has
  * learned `STRING_PRIMER` codes them. The others, e.g. labels in any language, get an empty model,
  * which the words of the format would only make worse at text. The decoder refuses a string
@@ -298,13 +298,8 @@ export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 	return encoder.finish();
 }
 
-/** The `count` strings of a block of `encodeStrings`, the first `formatCount` words of the format. */
-export function decodeStrings(bits: boolean[], count: number, formatCount = 0): string[] {
-	return decodeStringBlock(bits, count, formatCount).strings;
-}
-
 /**
- * The strings at the start of `bits` (see `decodeStrings`), and the length of their block, after
+ * The strings at the start of `bits` (see `encodeStrings`), and the length of their block, after
  * which the bits go on. `bits`: the bits of each string, the last with the 2 of the flush; they add
  * up to `length`, e.g. to analyse which strings are long.
  */

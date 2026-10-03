@@ -1,6 +1,10 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
-import { decodeStringBlock, decodeStrings, encodeStrings } from './string_coder.js';
+import { decodeStringBlock, encodeStrings } from './string_coder.js';
+
+/** The `count` strings of a block of `encodeStrings`, the first `formatCount` words of the format. */
+const decodeStrings = (bits: boolean[], count: number, formatCount = 0) =>
+	decodeStringBlock(bits, count, formatCount).strings;
 import { collectStrings } from './writer.js';
 import { stateFromMapJSON } from './index.js';
 
