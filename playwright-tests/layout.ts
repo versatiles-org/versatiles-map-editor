@@ -151,6 +151,21 @@ test('the groups of the menu open as submenus beside it, by hover, click and key
 		await expect(exportMenu).toBeHidden();
 	});
 
+	await test.step('a submenu stays open while the pointer moves towards it over another item', async () => {
+		await importItem.hover();
+		await expect(importMenu).toBeVisible();
+		// from the middle of "Import" diagonally down to the lower half of its submenu, across "Export"
+		const from = await box(importItem);
+		const to = await box(importMenu);
+		const exportRow = await box(menu.getByRole('menuitem', { name: 'Export', exact: true }));
+		await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+		const target = { x: to.x + 20, y: Math.min(to.y + to.height - 4, exportRow.y + exportRow.height * 2) };
+		await page.mouse.move(target.x, target.y, { steps: 12 });
+		await expect(importMenu).toBeVisible();
+		await expect(exportMenu).toBeHidden();
+		await expect(importItem).toHaveAttribute('aria-expanded', 'true');
+	});
+
 	await test.step('the keyboard opens it with the focus inside, and goes back', async () => {
 		await importItem.focus();
 		await page.keyboard.press('ArrowRight');

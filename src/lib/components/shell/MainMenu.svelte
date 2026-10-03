@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { MenuAim } from './menu_aim.js';
 	import { tick, type Snippet } from 'svelte';
 	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import * as commands from '#lib/components/commands.js';
@@ -44,7 +45,7 @@
 	function close(focusButton = true) {
 		open = false;
 		expanded = undefined;
-		clearTimeout(timer);
+		cancelPending();
 		if (focusButton) button?.focus();
 	}
 
@@ -121,18 +122,50 @@
 	const triggers: Partial<Record<Group, HTMLButtonElement>> = $state({});
 	// where the open submenu is, in the window
 	let place: { left: number; top: number; maxHeight: number } | undefined = $state();
-	// opening and closing on hover waits a little, so the pointer can cross other items on its way
+	// Hovering opens and closes the submenus at once, like the menus of an operating system. Only
+	// while the pointer moves towards the open submenu, across other items, the submenu stays: the
+	// switch waits until a move does not head for it any more, or until the pointer rests.
+	const aim = new MenuAim();
+	/** How long the pointer may rest on its way to the open submenu. */
+	const AIM_WAIT = 300;
+	let pending: (() => void) | undefined;
 	let timer: ReturnType<typeof setTimeout> | undefined;
-	const later = (action: () => void, ms: number) => {
+
+	/** Whether the pointer moves towards the open submenu. */
+	function aimsAtSubmenu(e: PointerEvent): boolean {
+		const submenu = expanded && submenus[expanded];
+		return !!submenu && aim.aimsAt({ x: e.clientX, y: e.clientY }, submenu.getBoundingClientRect(), performance.now());
+	}
+
+	/** Do `action`, e.g. open another group, once the pointer no longer heads for the open submenu. */
+	function whileAiming(action: () => void) {
+		pending = action;
 		clearTimeout(timer);
-		timer = setTimeout(action, ms);
-	};
-	const HOVER_OPEN = 150;
-	const HOVER_CLOSE = 300;
+		timer = setTimeout(runPending, AIM_WAIT);
+	}
+
+	function runPending() {
+		const action = pending;
+		cancelPending();
+		action?.();
+	}
+
+	function cancelPending() {
+		clearTimeout(timer);
+		pending = undefined;
+	}
+
+	function trackPointer(e: PointerEvent) {
+		aim.add({ x: e.clientX, y: e.clientY }, performance.now());
+		if (!pending) return;
+		// still on its way: it may take its time
+		if (aimsAtSubmenu(e)) whileAiming(pending);
+		else runPending();
+	}
 
 	/** Open the submenu of a group beside its item; `focus`: with the focus on its first item, e.g. by keyboard. */
 	async function openGroup(group: Group, focus = false) {
-		clearTimeout(timer);
+		cancelPending();
 		expanded = group;
 		if (group === 'examples') void loadExamples();
 		await tick();
@@ -142,7 +175,7 @@
 
 	/** Close the open submenu; `focusTrigger`: the focus back on the item of its group, e.g. after ArrowLeft. */
 	function closeGroup(focusTrigger = false) {
-		clearTimeout(timer);
+		cancelPending();
 		const group = expanded;
 		expanded = undefined;
 		if (focusTrigger && group) triggers[group]?.focus();
@@ -229,9 +262,9 @@
 		aria-keyshortcuts={options.keys?.[2]}
 		onclick={() => run(command)}
 		onpointerenter={(e) => {
-			if (e.pointerType === 'mouse' && expanded && !e.currentTarget.closest('.submenu')) {
-				later(() => closeGroup(), HOVER_CLOSE);
-			}
+			if (e.pointerType !== 'mouse' || !expanded || e.currentTarget.closest('.submenu')) return;
+			if (aimsAtSubmenu(e)) whileAiming(() => closeGroup());
+			else closeGroup();
 		}}
 	>
 		<span class="name">{label}</span>
@@ -251,7 +284,9 @@
 		aria-controls="{uid}-{id}"
 		onclick={(e) => openGroup(id, e.detail === 0)}
 		onpointerenter={(e) => {
-			if (e.pointerType === 'mouse') later(() => openGroup(id), HOVER_OPEN);
+			if (e.pointerType !== 'mouse') return;
+			if (expanded && expanded !== id && aimsAtSubmenu(e)) whileAiming(() => openGroup(id));
+			else void openGroup(id);
 		}}
 	>
 		<span class="name">{label}</span>
@@ -268,7 +303,7 @@
 		style:left={place && `${place.left}px`}
 		style:top={place && `${place.top}px`}
 		style:max-height={place && `${place.maxHeight}px`}
-		onpointerenter={() => clearTimeout(timer)}
+		onpointerenter={cancelPending}
 		tabindex="-1"
 	>
 		{@render content()}
@@ -295,6 +330,7 @@
 		aria-label="Menu"
 		hidden={!open}
 		onkeydown={onKeydown}
+		onpointermove={trackPointer}
 		onscroll={placeSubmenu}
 		tabindex="-1"
 	>
