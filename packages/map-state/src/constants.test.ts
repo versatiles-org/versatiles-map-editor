@@ -9,7 +9,7 @@ import {
 	POPUP_KEYS
 } from './constants.js';
 import { StateReader } from './reader.js';
-import { STYLE_EXTENDED_KEY, STYLE_FIELDS, STYLE_REMOVE_KEY } from './style_history.js';
+import { STYLE_FIELDS, STYLE_REMOVE_KEY } from './style_history.js';
 
 describe('the keys of the fields', () => {
 	it('are each once in their list, not the end, and fit their bits', () => {
@@ -19,8 +19,8 @@ describe('the keys of the fields', () => {
 			['legend', Object.values(LEGEND_KEYS), 4],
 			['legend entry', Object.values(LEGEND_ENTRY_KEYS), 4],
 			['popup', Object.values(POPUP_KEYS), 4],
-			// keys from 16 after the extended key, in 4 more bits
-			['style', [...STYLE_FIELDS.map((field) => field.key), STYLE_EXTENDED_KEY, STYLE_REMOVE_KEY], 8]
+			// in an Exp-Golomb code, which has no limit; 9 bits at most for now
+			['style', [...STYLE_FIELDS.map((field) => field.key), STYLE_REMOVE_KEY], 5]
 		];
 		for (const [name, keys, bits] of lists) {
 			expect(new Set(keys).size, name).toBe(keys.length);

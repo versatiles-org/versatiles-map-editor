@@ -115,12 +115,12 @@ describe('style references', () => {
 	it('cost 1 bit for none and 3 bits for the latest style', () => {
 		const writer = new StateWriter();
 		writer.writeStyle({ halo: 1 });
-		// no reference, the halo, the end
-		expect(writer.asBitString()).toBe('1' + '0001' + '010100' + '0000');
+		// no reference, the key of the halo (13), its value, the end
+		expect(writer.asBitString()).toBe('1' + '0001110' + '010100' + '1');
 		const start = writer.bits.length;
 		writer.writeStyle({ halo: 1 });
 		// the latest style, the end
-		expect(writer.asBitString().slice(start)).toBe('010' + '0000');
+		expect(writer.asBitString().slice(start)).toBe('010' + '1');
 	});
 
 	it('reject an invalid reference', () => {
@@ -142,7 +142,7 @@ describe('style references', () => {
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeExpGolomb(3, 0); // reference to a style that does not exist
-		writer.writeInteger(0, 4);
+		writer.writeExpGolomb(0, 0); // end
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
 			expect.objectContaining({

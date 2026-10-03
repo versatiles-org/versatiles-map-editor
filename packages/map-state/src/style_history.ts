@@ -3,32 +3,37 @@ import type { StateStyle } from './types.js';
 
 /**
  * The fields of a style with their key in the base64 format, and the value as it is encoded:
- * values that encode identically are equal, e.g. a halo of 1.04 and 1. Key 2 is not used. Keys
- * from 16 are written after `STYLE_EXTENDED_KEY`.
+ * values that encode identically are equal, e.g. a halo of 1.04 and 1. The keys are written in an
+ * Exp-Golomb code (`STYLE_KEY_PARAMETER`), so small keys are short: the fields that styles change
+ * most often have the smallest keys. Keys 10 to 12 are kept for the arrowheads of lines.
  */
 export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (value: never) => unknown }[] = [
-	{ key: 1, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 3, name: 'pattern', encoded: (v: number) => Math.round(v) },
-	{ key: 4, name: 'rotate', encoded: (v: number) => Math.round(v) },
+	{ key: 1, name: 'color', encoded: (v: string) => colorKey(v) },
+	{ key: 2, name: 'symbol', encoded: (v: string) => v },
+	{ key: 3, name: 'labelColor', encoded: (v: string) => colorKey(v) },
+	{ key: 4, name: 'font', encoded: (v: string) => v },
 	{ key: 5, name: 'size', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 6, name: 'width', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 6, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 7, name: 'align', encoded: (v: number) => Math.round(v) },
-	{ key: 8, name: 'color', encoded: (v: string) => colorKey(v) },
-	{ key: 9, name: 'label', encoded: (v: string) => v },
+	{ key: 8, name: 'width', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 9, name: 'pattern', encoded: (v: number) => Math.round(v) },
+	{ key: 13, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 14, name: 'haloColor', encoded: (v: string) => colorKey(v) },
+	{ key: 15, name: 'rotate', encoded: (v: number) => Math.round(v) },
 	// only "false" is stored, "true" is the default
-	{ key: 10, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
-	{ key: 11, name: 'labelColor', encoded: (v: string) => colorKey(v) },
-	{ key: 12, name: 'haloColor', encoded: (v: string) => colorKey(v) },
-	{ key: 13, name: 'symbol', encoded: (v: string) => v },
-	{ key: 16, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 17, name: 'font', encoded: (v: string) => v }
+	{ key: 16, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
+	// elements store their label by themselves, only legend entries from files can have one here
+	{ key: 18, name: 'label', encoded: (v: string) => v }
 ];
 
-/** In a style patch: the next 4 bits are a key from 16 to 31, minus 16. */
-export const STYLE_EXTENDED_KEY = 14;
+/**
+ * The parameter k of the Exp-Golomb code of the keys of a style patch: the end (0) costs 1 bit, 1
+ * and 2 3 bits, 3 to 6 5 bits, 7 to 14 7 bits, 15 to 30 9 bits.
+ */
+export const STYLE_KEY_PARAMETER = 0;
 
-/** In a style patch: the next key (4 bits, or 8 with `STYLE_EXTENDED_KEY`) is that of a field to remove. */
-export const STYLE_REMOVE_KEY = 15;
+/** In a style patch: the next key is that of a field to remove. */
+export const STYLE_REMOVE_KEY = 17;
 
 /** Colors that are written identically have the same key, e.g. "#FF0000" and "#ff0000". */
 export function colorKey(color: string): string {

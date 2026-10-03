@@ -24,9 +24,10 @@ The first release.
     where it ends; each string once in its section, at most 2^22 characters, so a short hostile
     link cannot make the decoder produce millions of strings;
   - style references to similar earlier styles, in an Exp-Golomb code;
-  - style fields as 4-bit keys, and keys from 16 after the extended key 14, e.g. `labelSize` (the
-    size of a marker's label, apart from `size`, the size of its symbol) and `font` (the glyph font
-    of a marker's label);
+  - style fields as keys in an Exp-Golomb code (k = 0), the most frequent ones shortest: the end of
+    a style 1 bit, `color` and `symbol` 3 bits, `labelColor`, `font`, `size` and `labelSize` 5 bits,
+    the other fields 7 or 9 bits; e.g. `labelSize` (the size of a marker's label, apart from
+    `size`, the size of its symbol) and `font` (the glyph font of a marker's label);
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
   - coordinates as whole steps from an origin near them, so a link without a camera stays short, in

@@ -27,7 +27,7 @@ import {
 	colorKey,
 	encodedValue,
 	STYLE_FIELDS,
-	STYLE_EXTENDED_KEY,
+	STYLE_KEY_PARAMETER,
 	STYLE_REMOVE_KEY,
 	STYLE_REFERENCE_PARAMETER,
 	StyleHistory,
@@ -519,21 +519,19 @@ export class StateWriter {
 			const value = encodedValue(style, field);
 			if (value === encodedValue(base, field)) continue;
 			if (value === undefined) {
-				this.writeInteger(STYLE_REMOVE_KEY, 4);
+				this.writeStyleKey(STYLE_REMOVE_KEY);
 				this.writeStyleKey(field.key);
 				continue;
 			}
 			this.writeStyleKey(field.key);
 			this.writeStyleValue(field.name, style);
 		}
-		this.writeInteger(END_KEY, 4);
+		this.writeStyleKey(END_KEY);
 	}
 
-	/** The key of a style field: 4 bits, or `STYLE_EXTENDED_KEY` and 4 bits for keys from 16. */
+	/** The key of a style field, see `STYLE_KEY_PARAMETER`. */
 	private writeStyleKey(key: number) {
-		if (key < 16) return this.writeInteger(key, 4);
-		this.writeInteger(STYLE_EXTENDED_KEY, 4);
-		this.writeInteger(key - 16, 4);
+		this.writeExpGolomb(key, STYLE_KEY_PARAMETER);
 	}
 
 	private writeStyleValue(name: keyof StateStyle, style: StateStyle) {

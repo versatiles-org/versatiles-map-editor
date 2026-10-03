@@ -177,7 +177,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IAQCqJMAdkk20LQSiEBEyFhQFjI4BxqADDA');
+			expect(hash).toBe('IAQCqJMAdkk20LQSiEBEyFhQFjI4BxqAD4');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -202,7 +202,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('ISrze8BtoWglEICJkLAAQmAABhqBAAAw1A8AAA');
+			expect(hash).toBe('ISrze8BtoWglEICJkLAAQmAABhqBAAAw1A6Ag');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -230,7 +230,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('Iirze8EjRWAbaFoJRCAiZCwgGNAACAABxqAONQBxqAONP_AAcBAA');
+			expect(hash).toBe('Iirze8EjRWAbaFoJRCAiZCwgGNAACAABxqAONQBxqAONP-gOgo');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;

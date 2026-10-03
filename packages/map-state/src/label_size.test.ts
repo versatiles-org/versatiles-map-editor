@@ -30,13 +30,14 @@ describe('label size', () => {
 		expect(rounded.elements[0].style).toStrictEqual({ labelSize: 1.2 });
 	});
 
-	it('has a key after the extended key, also to remove it from an earlier style', () => {
+	it('has a key, also to remove it from an earlier style', () => {
 		const writer = new StateWriter();
 		writer.writeStylePatch({}, { labelSize: 1.5 });
 		writer.writeStylePatch({ labelSize: 1.5, size: 2 }, { size: 2 });
 		const bits = writer.bits.map(Number).join('');
-		// key 14, key 16 − 16, the varint 15, end; remove (15), key 14, key 16 − 16, end
-		expect(bits.startsWith('1110' + '0000')).toBe(true);
+		// key 6, the varint 15, end; remove (key 17), key 6, end
+		expect(bits.startsWith('00111')).toBe(true);
+		expect(bits.endsWith('000010010' + '00111' + '1')).toBe(true);
 		const reader = new StateReader(writer.bits);
 		expect(reader.readStylePatch({})).toStrictEqual({ labelSize: 1.5 });
 		expect(reader.readStylePatch({ labelSize: 1.5, size: 2 })).toStrictEqual({ size: 2 });

@@ -341,7 +341,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AYsKKFAABCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrHF5kICCoEAQABhqgAAGGqAzDY4GDggA'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAMKEOYhCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrHQQlAc9pCRAAGGqAAAYaoDMNjQ3RE'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -351,8 +351,8 @@ describe('StateReader', () => {
 
 	describe('readStyle', () => {
 		it('should read a style object', () => {
-			// no reference to an earlier style (Exp-Golomb: 1), then the halo (key 1, 0.1 as 1) and the end
-			const reader = StateReader.fromBitString('1' + '0001' + '000010' + '0000');
+			// no reference to an earlier style (Exp-Golomb: 1), then the halo (key 13, 0.1 as 1) and the end (key 0)
+			const reader = StateReader.fromBitString('1' + '0001110' + '000010' + '1');
 			const style = reader.readStyle();
 			expect(style).toStrictEqual({ halo: 0.1 });
 			expect(reader.ended()).toBe(true);
@@ -376,7 +376,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQxeMRMxFya5yIAnQA');
+			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQ0AbIQQJuFCDnghmIEQng');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -418,7 +418,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV-0oUAACOcmY17OIGhIkOnYyAtOGtIdiCDYBAWHoxPcJGUAAAA'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV-gBMoUEc5Mx0AIE6EiQ6djIC04a0h2IINgEBYfQAoTIJUg'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [

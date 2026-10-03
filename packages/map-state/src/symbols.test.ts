@@ -104,7 +104,7 @@ describe('symbols', () => {
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeExpGolomb(0, 0); // no reference
-		writer.writeInteger(13, 4); // symbol
+		writer.writeExpGolomb(2, 0); // symbol
 		// not the next string, but the one with index 5
 		writer.writeBit(false);
 		writer.writeVarint(5);

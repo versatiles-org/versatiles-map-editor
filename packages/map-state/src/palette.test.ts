@@ -72,9 +72,9 @@ describe('color palette', () => {
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
 		writer.writeExpGolomb(0, 0); // no reference
-		writer.writeInteger(8, 4); // color
+		writer.writeExpGolomb(1, 0); // color
 		writer.writeVarint(5);
-		writer.writeInteger(0, 4);
+		writer.writeExpGolomb(0, 0); // end
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
 			expect.objectContaining({

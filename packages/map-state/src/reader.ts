@@ -40,8 +40,8 @@ import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import {
 	STYLE_FIELDS,
+	STYLE_KEY_PARAMETER,
 	STYLE_REFERENCE_PARAMETER,
-	STYLE_EXTENDED_KEY,
 	STYLE_REMOVE_KEY,
 	StyleHistory,
 	withoutLabel
@@ -646,10 +646,9 @@ export class StateReader {
 		}
 	}
 
-	/** The key of a style field: 4 bits, or `STYLE_EXTENDED_KEY` and 4 bits for keys from 16. */
+	/** The key of a style field, see `STYLE_KEY_PARAMETER`. */
 	readStyleKey(): number {
-		const key = this.readInteger(4);
-		return key === STYLE_EXTENDED_KEY ? 16 + this.readInteger(4) : key;
+		return this.readExpGolomb(STYLE_KEY_PARAMETER);
 	}
 
 	/** The colors, each once, which are referenced by index afterwards. */
