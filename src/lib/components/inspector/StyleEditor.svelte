@@ -9,6 +9,7 @@
 	import StyleSymbol from './StyleSymbol.svelte';
 	import CircleSize from './CircleSize.svelte';
 	import type { CircleElement } from '#lib/element/circle.js';
+	import { AbstractPathElement } from '#lib/element/abstract_path.svelte.js';
 	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '#lib/components/ui/index.js';
 	import { addToLegend, reverseLines } from '#lib/components/commands.js';
 	import { elementText } from '#lib/components/element_names.js';
@@ -39,6 +40,11 @@
 	const strokeVisible = $derived(fillLayers.length > 0 ? group(strokeLayers, 'visible') : undefined);
 	// only lines have arrowheads, not the outlines of areas
 	const arrowLayers = $derived(strokeLayers.every((layer) => layer.canHaveArrows) ? strokeLayers : []);
+	// lines and polygons, whose shape can be smooth, if all elements are
+	const paths = $derived(
+		elements.every((e) => e instanceof AbstractPathElement) ? (elements as AbstractPathElement[]) : []
+	);
+	const smooth = $derived(paths.length > 0 ? group(paths, 'smooth') : undefined);
 
 	// an entry of the legend with the text of the element, but another style: maybe one that was forgotten
 	const differentEntry = $derived.by(() => {
@@ -81,6 +87,21 @@
 			<StyleStroke layers={strokeLayers} {doc} />
 			{#if arrowLayers.length > 0}
 				<StyleArrows layers={arrowLayers} {doc} />
+			{/if}
+		</InspectorSection>
+	{/if}
+	<!-- the geometry of lines and polygons, apart from their style -->
+	{#if smooth}
+		<InspectorSection title="Shape">
+			<InputRow id="{uid}-smooth" label="Smooth" mixed={smooth.mixed}>
+				<Checkbox
+					id="{uid}-smooth"
+					title="Draw as a smooth curve through the points"
+					bind:checked={smooth.value}
+					onchange={log}
+				/>
+			</InputRow>
+			{#if arrowLayers.length > 0}
 				<!-- e.g. for a line drawn from its end: the arrowheads point the other way -->
 				<ButtonGroup>
 					<Button onclick={() => reverseLines(doc)}>{arrowLayers.length > 1 ? 'Reverse lines' : 'Reverse line'}</Button>
