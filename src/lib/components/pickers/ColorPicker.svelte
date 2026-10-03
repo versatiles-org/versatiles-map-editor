@@ -3,23 +3,14 @@
 
 	// Where the user dragged a color picker to: all of them open there, until the page is reloaded
 	let dragged: Position | undefined;
-	// The channels that the user chose last, also for the other color pickers, until the page is reloaded
-	let mode: 'rgb' | 'hsv' = 'rgb';
 </script>
 
 <script lang="ts">
 	import { besideElement, keepInViewport } from './popup_position.js';
-	import { ChoiceGroup, IconButton, Slider, Select, TextField } from '$lib/components/ui/index.js';
-	import {
-		channelTrack,
-		hsvKeeping,
-		hsvToRgb,
-		rgbToHsv,
-		type Channel,
-		type HSV,
-		type RGB
-	} from '$lib/components/color.js';
+	import { IconButton, Select, TextField } from '$lib/components/ui/index.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
+	import ColorSliders from './ColorSliders.svelte';
+	import ColorSwatches from './ColorSwatches.svelte';
 	import type { ColorPalette } from '$lib/color_palette.svelte.js';
 	import { getColorScheme, config } from '$lib/background/index.js';
 
@@ -39,7 +30,6 @@
 	let open = $state(false);
 	// the value when the popup was opened, which a click on it restores
 	let oldValue = $state('');
-	let channels: 'rgb' | 'hsv' = $state(mode);
 	let paletteColors: string[] = $state([]);
 	let button: HTMLButtonElement | undefined = $state();
 	let panel: HTMLDivElement | undefined = $state();
@@ -53,47 +43,10 @@
 	}
 
 	const color: RGBA = $derived(read(value));
-	const rgb: RGB = $derived({ r: color.r, g: color.g, b: color.b });
 	const schemes = $derived(config.current.colorSchemes);
 	const colorScheme = $derived(getColorScheme(palette?.scheme, schemes));
 	// the whole value, with its opacity
 	const shown = $derived(formatHex(color));
-
-	// HSV is kept separately from the value, so the hue and saturation survive while the
-	// color is gray or black. It is updated when the value changes from outside.
-	let hsv: HSV = $state(rgbToHsv(read(value)));
-	let ownValue = value;
-	$effect(() => {
-		if (value === ownValue) return;
-		ownValue = value;
-		setHsvFromRgb(read(value));
-	});
-
-	function setHsvFromRgb(color: RGB) {
-		hsv = hsvKeeping(color, hsv);
-	}
-
-	function write(next: RGB) {
-		// the opacity is kept
-		ownValue = formatHex({ ...next, alpha: color.alpha });
-		value = ownValue;
-	}
-
-	function setHsv(next: HSV) {
-		hsv = next;
-		write(hsvToRgb(next));
-	}
-
-	function setRgb(color: RGB) {
-		setHsvFromRgb(color);
-		write(color);
-	}
-
-	/** Change the opacity, keeping the color. */
-	function setAlpha(alpha: number) {
-		ownValue = formatHex({ ...rgb, alpha });
-		value = ownValue;
-	}
 
 	function commit() {
 		palette?.use(value);
@@ -184,8 +137,7 @@
 	function pick(color: string) {
 		const parsed = parseColor(color);
 		if (!parsed) return;
-		setHsvFromRgb(parsed);
-		ownValue = value = formatHex(parsed);
+		value = formatHex(parsed);
 		commit();
 	}
 
@@ -194,105 +146,9 @@
 		const parsed = parseColor(scheme);
 		if (parsed) pick(formatHex({ ...parsed, alpha: color.alpha }));
 	}
-
-	function chooseChannels(next: 'rgb' | 'hsv') {
-		channels = mode = next;
-	}
-
-	const CHANNEL_CHOICES: { value: 'rgb' | 'hsv'; label: string }[] = [
-		{ value: 'rgb', label: 'RGB' },
-		{ value: 'hsv', label: 'HSV' }
-	];
-
-	/** The sliders of the chosen channels, and the opacity. */
-	const sliders = $derived.by(() => {
-		type Row = {
-			key: Channel;
-			short: string;
-			name: string;
-			max: number;
-			step: number;
-			scale?: number;
-			unit?: string;
-			get: () => number;
-			set: (n: number) => void;
-		};
-		const rows: Row[] =
-			channels === 'rgb'
-				? (['r', 'g', 'b'] as const).map((key, i) => ({
-						key,
-						short: key.toUpperCase(),
-						name: ['Red', 'Green', 'Blue'][i],
-						max: 255,
-						step: 1,
-						get: () => rgb[key],
-						set: (n: number) => setRgb({ ...rgb, [key]: n })
-					}))
-				: [
-						{
-							key: 'h',
-							short: 'H',
-							name: 'Hue',
-							max: 360,
-							step: 1,
-							unit: '°',
-							get: () => hsv.h,
-							set: (h) => setHsv({ ...hsv, h })
-						},
-						{
-							key: 's',
-							short: 'S',
-							name: 'Saturation',
-							max: 1,
-							step: 0.01,
-							scale: 100,
-							unit: '%',
-							get: () => hsv.s,
-							set: (s) => setHsv({ ...hsv, s })
-						},
-						{
-							key: 'v',
-							short: 'V',
-							name: 'Brightness',
-							max: 1,
-							step: 0.01,
-							scale: 100,
-							unit: '%',
-							get: () => hsv.v,
-							set: (v) => setHsv({ ...hsv, v })
-						}
-					];
-		rows.push({
-			key: 'alpha',
-			short: 'A',
-			name: 'Opacity',
-			max: 1,
-			step: 0.01,
-			scale: 100,
-			unit: '%',
-			get: () => color.alpha,
-			set: setAlpha
-		});
-		return rows;
-	});
 </script>
 
 <svelte:window onclick={onWindowClick} onkeydown={onWindowKeyDown} onresize={() => open && place()} />
-
-{#snippet swatches(colors: string[], label: string, onpick: (color: string) => void)}
-	<div class="palette" role="group" aria-label={label}>
-		{#each colors as color (color)}
-			<button
-				class="swatch"
-				class:active={color === value.toLowerCase()}
-				style:--swatch-color={color}
-				aria-label={color}
-				title={color}
-				onclick={() => onpick(color)}
-			></button>
-		{/each}
-	</div>
-{/snippet}
 
 <button
 	{id}
@@ -347,29 +203,7 @@
 			<span class="swatch new" style:--swatch-color={shown} role="img" aria-label="New color {shown}"></span>
 		</div>
 
-		<span class="sr-only" id="{id}-channels">Color channels</span>
-		<ChoiceGroup labelledby="{id}-channels" value={channels} onchange={chooseChannels} options={CHANNEL_CHOICES} />
-
-		<div class="sliders">
-			{#each sliders as row (row.key)}
-				<label id="{id}-{row.key}-label" for="{id}-{row.key}" title={row.name}>
-					<span aria-hidden="true">{row.short}</span><span class="sr-only">{row.name}</span>
-				</label>
-				<Slider
-					id="{id}-{row.key}"
-					min={0}
-					max={row.max}
-					step={row.step}
-					scale={row.scale}
-					unit={row.unit}
-					bind:value={row.get, row.set}
-					onchange={commit}
-					track={channelTrack(row.key, color, hsv)}
-					checkered={row.key === 'alpha'}
-					wide
-				/>
-			{/each}
-		</div>
+		<ColorSliders bind:value {id} onchange={commit} />
 
 		<div class="hex">
 			<label for="{id}-hex">Hex</label>
@@ -392,12 +226,12 @@
 					<option value={id}>{name}</option>
 				{/each}
 			</Select>
-			{@render swatches(colorScheme.colors, colorScheme.name, pickScheme)}
+			<ColorSwatches colors={colorScheme.colors} label={colorScheme.name} active={value} onpick={pickScheme} />
 		{/if}
 
 		{#if paletteColors.length > 0}
 			<div class="group-label">Used colors</div>
-			{@render swatches(paletteColors, 'Used colors', pick)}
+			<ColorSwatches colors={paletteColors} label="Used colors" active={value} onpick={pick} />
 		{/if}
 	</div>
 {/if}
@@ -486,20 +320,6 @@
 		}
 	}
 
-	/* a slider per channel, with its letter */
-	.sliders {
-		display: grid;
-		grid-template-columns: auto 1fr;
-		align-items: center;
-		gap: var(--space-2) var(--space-2);
-
-		label {
-			color: var(--color-text-muted);
-			font-size: var(--font-size-sm);
-			font-weight: 600;
-		}
-	}
-
 	.hex {
 		display: flex;
 		align-items: center;
@@ -517,18 +337,6 @@
 		}
 	}
 
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		padding: 0;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-		border: 0;
-	}
-
 	:global(.field.scheme) {
 		width: 100%;
 	}
@@ -537,29 +345,5 @@
 		font-size: var(--font-size-sm);
 		opacity: 0.7;
 		margin-bottom: calc(-0.5 * var(--space-3));
-	}
-
-	.palette {
-		display: grid;
-		grid-template-columns: repeat(8, 1fr);
-		gap: var(--space-1);
-
-		.swatch {
-			width: 100%;
-			height: auto;
-			aspect-ratio: 1;
-			padding: 0;
-			border: none;
-			border-radius: var(--radius-sm);
-			box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
-			cursor: pointer;
-		}
-
-		/* the chosen color: a ring in the accent inside, like a chosen picture (the focus ring is outside) */
-		.swatch.active {
-			box-shadow:
-				inset 0 0 0 2px var(--color-accent-line),
-				inset 0 0 0 4px var(--color-bg);
-		}
 	}
 </style>
