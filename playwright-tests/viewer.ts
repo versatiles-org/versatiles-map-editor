@@ -7,7 +7,8 @@ import {
 	storedState,
 	waitForMapIsIdle,
 	waitForMapIsReady,
-	type MapWindow
+	type MapWindow,
+	sidebar
 } from './lib/utils.js';
 
 test.describe('small screens', () => {
@@ -266,7 +267,7 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 test('the sidebar can be hidden, without moving the map content', async ({ page }) => {
 	await page.goto('/');
 	await waitForMapIsReady(page);
-	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const title = sidebar(page).getByRole('heading', { level: 2 });
 	await expect(title).toHaveText('Map');
 	const hide = page.getByRole('button', { name: 'Hide sidebar' });
 	await expect(hide).toHaveAttribute('aria-expanded', 'true');
@@ -397,7 +398,7 @@ test('the place of the legend is set in its panel and in Share alike', async ({ 
 	const viewer = async () => (await storedState(page)).meta?.viewer;
 	// the legend panel
 	await page.getByRole('button', { name: 'Edit legend' }).click();
-	const panel = page.locator('.sidebar');
+	const panel = sidebar(page);
 	const shown = panel.getByRole('checkbox', { name: 'Shown' });
 	await expect(shown).toBeChecked();
 	await expect(panel.getByRole('radio', { name: 'Bottom left' })).toBeChecked();

@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { encodeState } from '../packages/map-state/src/index.js';
-import { drawElement, menuItem, storedState, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, storedState, waitForMapIsReady, sidebar } from './lib/utils.js';
 
 test('dialogs are named, can be closed and are usable by keyboard', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
@@ -116,7 +116,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line']);
 	await page.keyboard.press('Shift+ArrowDown');
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Line', 'Marker: Berlin']);
-	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
+	await expect(sidebar(page).getByRole('heading', { name: '2 elements' })).toBeVisible();
 
 	// Delete removes the selected elements
 	await page.keyboard.press('Delete');
@@ -127,7 +127,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await page.keyboard.press('Home');
 	await page.keyboard.press('Enter');
 	await expect(list.getByRole('option', { selected: true })).toHaveText(['Polygon: Park']);
-	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Polygon');
+	await expect(sidebar(page).getByRole('heading', { level: 2 })).toHaveText('Polygon');
 });
 
 test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
@@ -173,7 +173,7 @@ test('the drawer of elements opens with E, and chooses the map, the legend or el
 	await waitForMapIsReady(page);
 	const drawer = page.getByRole('complementary', { name: /^Elements/ });
 	const toggle = page.getByRole('toolbar', { name: 'Tools' }).getByRole('button', { name: 'Elements' });
-	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const title = sidebar(page).getByRole('heading', { level: 2 });
 
 	await expect(drawer).toBeHidden();
 	await page.keyboard.press('e');
@@ -240,7 +240,7 @@ test('names show the popup text without its formatting', async ({ page }) => {
 	const option = page.getByRole('listbox', { name: 'Elements' }).getByRole('option');
 	await expect(option).toHaveText('Polygon: Low-emission zone');
 	await option.click();
-	await expect(page.locator('.sidebar .subtitle')).toHaveText('Low-emission zone');
+	await expect(sidebar(page).locator('.subtitle')).toHaveText('Low-emission zone');
 });
 
 test('the list of elements selects like lists of files', { tag: '@cross-browser' }, async ({ page }) => {
@@ -286,7 +286,7 @@ test('the list of elements selects like lists of files', { tag: '@cross-browser'
 	await expect(selectedLabels()).toHaveText([/M1/]);
 	await page.keyboard.press('ControlOrMeta+a');
 	await expect(selectedLabels()).toHaveCount(5);
-	await expect(page.locator('.sidebar').getByRole('heading', { name: '5 elements' })).toBeVisible();
+	await expect(sidebar(page).getByRole('heading', { name: '5 elements' })).toBeVisible();
 });
 
 test('dragging elements in the list changes the drawing order', { tag: '@cross-browser' }, async ({ page }) => {

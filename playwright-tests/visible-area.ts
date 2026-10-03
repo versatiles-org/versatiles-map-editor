@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
-import { menuItem, project, storedState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { menuItem, project, storedState, waitForMapIsReady, type MapWindow, sidebar } from './lib/utils.js';
 
 // The visible area (frame) of a map: what a shared or embedded map shows completely.
 
@@ -127,7 +127,7 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, elements }));
 	await waitForMapIsReady(page);
 	const bar = page.getByRole('group', { name: 'Visible area' });
-	const shared = page.locator('.sidebar').getByRole('region', { name: 'Map', exact: true });
+	const shared = sidebar(page).getByRole('region', { name: 'Map', exact: true });
 	await expect(shared).toContainText('Shared maps show all elements.');
 
 	// from the Map panel; without a frame, the bar shows the elements (a single marker has no size)

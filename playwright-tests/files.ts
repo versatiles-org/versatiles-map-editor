@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
-import { drawElement, menuItem, storedState, waitForMapIsReady } from './lib/utils.js';
+import { drawElement, menuItem, storedState, waitForMapIsReady, sidebar } from './lib/utils.js';
 
 test('downloads the map as GeoJSON and as map file', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
@@ -256,7 +256,7 @@ test.describe('importing a table', () => {
 				[[13.41, 52.51], 'Shop', undefined]
 			]);
 		// the imported markers are selected, and one undo step removes them
-		await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
+		await expect(sidebar(page).getByRole('heading', { name: '2 elements' })).toBeVisible();
 		await page.getByRole('button', { name: 'Undo' }).click();
 		await expect.poll(async () => (await markers(page)).length).toBe(0);
 	});

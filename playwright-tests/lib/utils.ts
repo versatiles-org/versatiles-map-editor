@@ -19,6 +19,11 @@ export async function project(page: Page, point: Point): Promise<Point> {
 	}, point);
 }
 
+/** The sidebar of the editor, with the inspector of the selection or of the map. */
+export function sidebar(page: Page): Locator {
+	return page.getByRole('complementary', { name: 'Sidebar' });
+}
+
 /**
  * An item of the editor's menu (☰), e.g. `await (await menuItem(page, 'Export', 'GeoJSON')).click()`.
  * Opens the menu, and expands the groups on the way.

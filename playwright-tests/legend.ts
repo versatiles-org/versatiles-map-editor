@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { GeoJSONSource } from 'maplibre-gl';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { type MapWindow, project, waitForMapIsReady, storedState } from './lib/utils.js';
+import { type MapWindow, project, waitForMapIsReady, storedState, sidebar } from './lib/utils.js';
 
 // The legend: its entries, their looks and their order, and how it is shown.
 
@@ -132,7 +132,7 @@ test('the entries of the legend are closed, and open to edit them', async ({ pag
 	// a click on an entry of the legend on the map opens it
 	await page.keyboard.press('Escape');
 	await page.getByRole('list', { name: 'Legend' }).getByRole('listitem').nth(1).click();
-	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
+	await expect(sidebar(page).getByRole('heading', { level: 2 })).toHaveText('Legend');
 	await expect(details(2)).toBeVisible();
 	await expect(details(1)).toBeHidden();
 });
@@ -284,7 +284,7 @@ test('adding the look of an element to the legend', async ({ page }) => {
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	await page.getByRole('listbox', { name: 'Elements' }).getByRole('option').first().click();
-	const panel = page.locator('.sidebar');
+	const panel = sidebar(page);
 	await panel.getByRole('textbox', { name: 'Popup' }).fill('Bus 100');
 	await panel.getByRole('textbox', { name: 'Popup' }).blur();
 
@@ -389,7 +389,7 @@ test(
 		});
 		await expect(take).toHaveAttribute('aria-pressed', 'false');
 		await expect.poll(highlighted).toBe(0);
-		await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
+		await expect(sidebar(page).getByRole('heading', { level: 2 })).toHaveText('Legend');
 
 		// one undo step
 		await page.getByRole('button', { name: 'Undo' }).click();
@@ -431,7 +431,7 @@ test('editing the legend', async ({ page }) => {
 
 	// a new legend starts with a color of the map, and is selected to edit it
 	await page.getByRole('button', { name: 'Add a legend' }).click();
-	await expect(page.locator('.sidebar').getByRole('heading', { level: 2 })).toHaveText('Legend');
+	await expect(sidebar(page).getByRole('heading', { level: 2 })).toHaveText('Legend');
 	await page.getByRole('textbox', { name: 'Text' }).fill('Park');
 	await page.getByRole('textbox', { name: 'Text' }).press('Enter');
 	await expect(overlay.getByRole('listitem')).toHaveText(['Park']);
@@ -482,7 +482,7 @@ test('editing the legend', async ({ page }) => {
 	await waitForMapIsReady(page);
 
 	// a click on the legend selects it, and Escape goes back to the map
-	const inspectorTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const inspectorTitle = sidebar(page).getByRole('heading', { level: 2 });
 	await overlay.click();
 	await expect(inspectorTitle).toHaveText('Legend');
 	await page.keyboard.press('Escape');

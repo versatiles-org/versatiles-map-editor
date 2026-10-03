@@ -8,7 +8,8 @@ import {
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow,
-	type Point
+	type Point,
+	sidebar
 } from './lib/utils.js';
 
 test('dragging a slider creates a single undo step', { tag: '@cross-browser' }, async ({ page }) => {
@@ -170,7 +171,9 @@ test('style editor controls have unique ids and labels', async ({ page }) => {
 	await waitForMapIsReady(page);
 
 	async function expectUniqueIds() {
-		const ids = await page.locator('.sidebar [id]').evaluateAll((els) => els.map((el) => el.id));
+		const ids = await sidebar(page)
+			.locator('[id]')
+			.evaluateAll((els) => els.map((el) => el.id));
 		expect(ids.length).toBeGreaterThan(0);
 		expect(new Set(ids).size).toBe(ids.length);
 	}
@@ -365,7 +368,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	const fillColors = async () =>
 		(await elements()).map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
 	// the heading of the inspector: the name of the selected element, or the number of elements
-	const styleTitle = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const styleTitle = sidebar(page).getByRole('heading', { level: 2 });
 
 	// Cmd/Ctrl+click adds the second polygon; the fill colors differ
 	const a = await project(page, [13.34, 52.475]);
@@ -474,7 +477,7 @@ test('copying and pasting a style', async ({ page }) => {
 	const [mx, my] = await project(page, [13.42, 52.5]);
 	await page.mouse.click(mx + 6, my - 8);
 	await page.keyboard.up('ControlOrMeta');
-	await expect(page.locator('.sidebar').getByRole('heading', { name: '2 elements' })).toBeVisible();
+	await expect(sidebar(page).getByRole('heading', { name: '2 elements' })).toBeVisible();
 	await pasteButton.click();
 
 	// the outline of the polygon gets the line style, the marker only its color
@@ -602,7 +605,7 @@ test('the inspector and the actions follow the selection', async ({ page }) => {
 		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
-	const title = page.locator('.sidebar').getByRole('heading', { level: 2 });
+	const title = sidebar(page).getByRole('heading', { level: 2 });
 	const bar = page.getByRole('toolbar', { name: 'Selection' });
 
 	// nothing selected: the properties of the map, and no actions
@@ -729,8 +732,8 @@ test(
 		// next to the sidebar, over the map, and not inside the scrolling sidebar
 		await fillColor.click();
 		await expect(popup).toBeVisible();
-		const sidebar = (await page.locator('.sidebar').boundingBox())!;
-		expect((await box()).x + (await box()).width).toBeLessThanOrEqual(sidebar.x);
+		const side = (await sidebar(page).boundingBox())!;
+		expect((await box()).x + (await box()).width).toBeLessThanOrEqual(side.x);
 		expect(await inViewport()).toBe(true);
 
 		// moved by its title bar

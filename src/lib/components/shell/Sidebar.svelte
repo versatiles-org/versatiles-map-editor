@@ -74,11 +74,12 @@
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="sidebar">
+<!-- a landmark, e.g. to jump to it with a screen reader -->
+<aside class="sidebar" aria-label="Sidebar">
 	<div style="margin-bottom: 36px;">
 		<Inspector doc={mapDocument} />
 	</div>
-</div>
+</aside>
 
 <style>
 	.sidebar {

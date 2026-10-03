@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { drawnElements, storedState, trackServerRequests, waitForMapIsReady } from './lib/utils.js';
+import { drawnElements, storedState, trackServerRequests, waitForMapIsReady, sidebar } from './lib/utils.js';
 
 const mapUrl =
 	'/#ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV-0oUAACOcmY17OIGhIkOnYyAtOGtIdiCDYBAWHoxPcJGUAAAA';
@@ -100,7 +100,7 @@ test('empty map', { tag: '@cross-browser' }, async ({ page }) => {
 
 	await expect(page.getByRole('banner')).toMatchAriaSnapshot(topbarAria);
 	await expect(page.getByRole('toolbar', { name: 'Tools' })).toMatchAriaSnapshot(railAria);
-	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
+	await expect(sidebar(page)).toMatchAriaSnapshot(sidebarAria);
 	// the search is on the map, right of the tools
 	const search = (await page.getByRole('combobox', { name: 'Search address or place' }).boundingBox())!;
 	expect(search.x).toBeGreaterThan(48);
@@ -136,7 +136,7 @@ test('filled map', async ({ page }) => {
 		'tiles/osm/tiles.json'
 	]);
 
-	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
+	await expect(sidebar(page)).toMatchAriaSnapshot(sidebarAria);
 });
 
 test('invalid hash', async ({ page }) => {
@@ -154,7 +154,7 @@ test('invalid hash', async ({ page }) => {
 	const message = page.getByRole('alert');
 	await expect(message).toHaveText(/The map in the link could not be read/);
 	await message.getByRole('button', { name: 'Dismiss' }).click();
-	await expect(page.locator('.sidebar')).toMatchAriaSnapshot(sidebarAria);
+	await expect(sidebar(page)).toMatchAriaSnapshot(sidebarAria);
 });
 
 test('a map near a pole keeps its elements', async ({ page }) => {
