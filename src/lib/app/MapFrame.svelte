@@ -271,9 +271,10 @@
 
 		map.on('idle', checkMapReady);
 
+		// once, the first time the map has loaded
 		function checkMapReady() {
-			if (triggeredMapReady) return;
 			if (!map!.loaded()) return;
+			map!.off('idle', checkMapReady);
 			triggeredMapReady = true;
 			if (onMapLoad) onMapLoad(map!, maplibre);
 		}
