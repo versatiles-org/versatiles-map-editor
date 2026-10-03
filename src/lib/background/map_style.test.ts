@@ -24,6 +24,22 @@ describe('src/lib/background/map_style.ts', () => {
 			expect(satellite).toHaveBeenCalledWith({ osmOverlay: false, ...fixed });
 		});
 
+		it('dims the borders and motorways over the imagery with line-layer-opacity', () => {
+			getMapStyle({ builder: 'satellite', options: {} });
+			expect(satellite).toHaveBeenLastCalledWith({ osmOverlay: { layerOpacity: true }, ...fixed });
+			getMapStyle({ builder: 'satellite', options: { osmOverlay: { theme: 'gray', layerOpacity: false } } });
+			expect(satellite).toHaveBeenLastCalledWith({ osmOverlay: { theme: 'gray', layerOpacity: true }, ...fixed });
+			const style = getMapStyle({ builder: 'satellite', options: {} });
+			const dimmed = style.layers.filter(
+				(layer) => 'paint' in layer && layer.paint && 'line-layer-opacity' in layer.paint
+			);
+			expect(dimmed.map((layer) => layer.id).sort()).toStrictEqual([
+				'boundary-country',
+				'boundary-state',
+				'street-motorway'
+			]);
+		});
+
 		it('never takes the tile server from the options', () => {
 			getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.org' }, projection: 'globe' } });
 			expect(osm).toHaveBeenCalledWith(fixed);
