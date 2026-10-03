@@ -272,47 +272,79 @@ export function changeSettings(
 
 	const newBuilder = change.base === 'satellite' ? 'satellite' : change.base === 'vector' ? 'osm' : builder;
 	if (newBuilder !== builder) {
-		// The labels and the changes of the colors are kept. The theme of the vector map does not
-		// apply to the satellite map.
-		const overlay = overlayOf({ builder, options });
-		const kept: Options = {};
-		if (overlay.text !== undefined) kept.text = overlay.text;
-		if (overlay.layers !== undefined) kept.layers = overlay.layers;
-		// the vector map always has its streets and borders, which only the satellite map can hide
-		if (newBuilder === 'osm' && isObject(kept.layers)) {
-			const layers: Options = { ...kept.layers };
-			for (const group of Object.keys({ ...STREETS_HIDDEN(), ...BORDERS_HIDDEN() })) delete layers[group];
-			if (Object.keys(layers).length > 0) kept.layers = layers;
-			else delete kept.layers;
-		}
-		const colors = getColors({ builder, options });
-		options = newBuilder === 'osm' ? kept : { osmOverlay: kept };
+		options = switchBuilder({ builder, options }, newBuilder);
 		builder = newBuilder;
-		if (JSON.stringify(colors) !== JSON.stringify(DEFAULT_COLORS)) setColors(builder, options, colors);
 	}
 
 	if (change.colors) setColors(builder, options, change.colors);
 
-	let overlay: Options = options;
+	const overlay = overlayFor(builder, options, change);
+	// the imagery alone, which stays so
+	if (!overlay) return minimizeBackground({ builder, options });
+	setText(overlay, change);
 	if (builder === 'satellite') {
-		if (options.osmOverlay === false) {
-			// the imagery alone: showing streets, borders or labels again starts the overlay with its
-			// defaults, and with the colors of the imagery, but only with what is shown
-			const labels = change.labels !== undefined && change.labels !== 'none';
-			if (!change.streets && !change.borders && !labels) return minimizeBackground({ builder, options });
-			const colors = getColors({ builder, options });
-			options.osmOverlay = {
-				layers: {
-					...(change.streets ? {} : STREETS_HIDDEN()),
-					...(change.borders ? {} : BORDERS_HIDDEN()),
-					...(labels ? {} : { labels: false })
-				}
-			};
-			setColors(builder, options, colors);
-		}
-		if (!isObject(options.osmOverlay)) options.osmOverlay = {};
-		overlay = options.osmOverlay as Options;
+		setSatelliteLayers(overlay, change);
+		// neither streets nor borders nor labels: the imagery alone
+		const { streets, borders, labels } = getSettings({ builder, options });
+		if (!streets && !borders && labels === 'none') options.osmOverlay = false;
 	}
+
+	return minimizeBackground({ builder, options });
+}
+
+/**
+ * The options of the other builder. The labels and the changes of the colors are kept. The theme
+ * of the vector map does not apply to the satellite map.
+ */
+function switchBuilder(background: StateBackground, builder: StateBackground['builder']): Options {
+	const overlay = overlayOf(background);
+	const kept: Options = {};
+	if (overlay.text !== undefined) kept.text = overlay.text;
+	if (overlay.layers !== undefined) kept.layers = overlay.layers;
+	// the vector map always has its streets and borders, which only the satellite map can hide
+	if (builder === 'osm' && isObject(kept.layers)) {
+		const layers: Options = { ...kept.layers };
+		for (const group of Object.keys({ ...STREETS_HIDDEN(), ...BORDERS_HIDDEN() })) delete layers[group];
+		if (Object.keys(layers).length > 0) kept.layers = layers;
+		else delete kept.layers;
+	}
+	const colors = getColors(background);
+	const options = builder === 'osm' ? kept : { osmOverlay: kept };
+	if (JSON.stringify(colors) !== JSON.stringify(DEFAULT_COLORS)) setColors(builder, options, colors);
+	return options;
+}
+
+/**
+ * The options of the streets, borders and labels: of the vector map itself, or of the overlay of
+ * the imagery. Undefined for the imagery alone that the change does not give any of them again.
+ */
+function overlayFor(
+	builder: StateBackground['builder'],
+	options: Options,
+	change: Partial<BackgroundSettings>
+): Options | undefined {
+	if (builder !== 'satellite') return options;
+	if (options.osmOverlay === false) {
+		// the imagery alone: showing streets, borders or labels again starts the overlay with its
+		// defaults, and with the colors of the imagery, but only with what is shown
+		const labels = change.labels !== undefined && change.labels !== 'none';
+		if (!change.streets && !change.borders && !labels) return undefined;
+		const colors = getColors({ builder, options });
+		options.osmOverlay = {
+			layers: {
+				...(change.streets ? {} : STREETS_HIDDEN()),
+				...(change.borders ? {} : BORDERS_HIDDEN()),
+				...(labels ? {} : { labels: false })
+			}
+		};
+		setColors(builder, options, colors);
+	}
+	if (!isObject(options.osmOverlay)) options.osmOverlay = {};
+	return options.osmOverlay as Options;
+}
+
+/** The theme and the labels: their font, size, halo, language and how many. */
+function setText(overlay: Options, change: Partial<BackgroundSettings>) {
 	if (!isObject(overlay.text)) overlay.text = {};
 	const text = overlay.text as Options;
 
@@ -337,11 +369,15 @@ export function changeSettings(
 		if (change.labels === 'fewer') text.spacing = FEWER_LABELS_SPACING;
 		else delete text.spacing;
 	}
+}
+
+/** The streets and the borders over the imagery, shown or hidden. */
+function setSatelliteLayers(overlay: Options, change: Partial<BackgroundSettings>) {
 	for (const [shown, hidden] of [
 		[change.streets, STREETS_HIDDEN()],
 		[change.borders, BORDERS_HIDDEN()]
 	] as const) {
-		if (builder !== 'satellite' || shown === undefined) continue;
+		if (shown === undefined) continue;
 		if (!isObject(overlay.layers)) overlay.layers = {};
 		const layers = overlay.layers as Options;
 		for (const [group, value] of Object.entries(hidden)) {
@@ -349,13 +385,6 @@ export function changeSettings(
 			else layers[group] = value;
 		}
 	}
-	// neither streets nor borders nor labels: the imagery alone
-	if (builder === 'satellite') {
-		const { streets, borders, labels } = getSettings({ builder, options });
-		if (!streets && !borders && labels === 'none') options.osmOverlay = false;
-	}
-
-	return minimizeBackground({ builder, options });
 }
 
 /** The smallest options that build the same map, or undefined for the editor's default background. */
