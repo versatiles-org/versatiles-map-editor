@@ -77,3 +77,29 @@ test('the arrowheads of a line are chosen for its start and its end, and swapped
 	await expect(page.getByRole('heading', { name: 'Outline' })).toBeVisible();
 	await expect(page.getByRole('radiogroup', { name: 'End' })).toHaveCount(0);
 });
+
+test('a line is reversed in the inspector, so its arrowheads point the other way', async ({ page }) => {
+	const points: [number, number][] = [
+		[13.38, 52.5],
+		[13.42, 52.5]
+	];
+	await page.goto(
+		'/#' +
+			encodeState({
+				map: { center: [13.4, 52.5], radius: 3000 },
+				elements: [{ type: 'line', points, style: { arrowEnd: 1 } }]
+			})
+	);
+	await waitForMapIsReady(page);
+	const line = async () => (await storedState(page)).elements[0] as { points: [number, number][]; style?: StateStyle };
+
+	await page.mouse.click(...(await project(page, [13.4, 52.5])));
+	await page.getByRole('button', { name: 'Reverse line' }).click();
+	await expect.poll(async () => (await line()).points).toStrictEqual([...points].reverse());
+	// the style keeps its start and its end
+	expect((await line()).style).toStrictEqual({ arrowEnd: 1 });
+
+	// one undo step
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await line()).points).toStrictEqual(points);
+});

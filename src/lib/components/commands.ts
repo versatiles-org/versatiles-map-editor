@@ -9,6 +9,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
+import { LineElement } from '../element/line.js';
 import type { MapDocumentInteractive } from '../map_document_interactive.js';
 import { elementText } from './element_names.js';
 import { legendEntryOf, lookOf, markerLook } from '../legend_looks.js';
@@ -148,5 +149,25 @@ export function pasteStyle(doc: MapDocumentInteractive): void {
 	const style = doc.styleClipboard.style;
 	if (!canPasteStyle(doc) || !style) return;
 	doc.styleClipboard.paste(doc.selection.selectedElements, style);
+	doc.state.log();
+}
+
+/** The selected lines, e.g. to reverse them. */
+function selectedLines(doc: MapDocumentInteractive): LineElement[] {
+	return doc.selection.selectedElements.filter((element) => element instanceof LineElement);
+}
+
+/**
+ * Reverse the points of the selected lines, so they run the other way: their arrowheads point the
+ * other way, e.g. of a line drawn from its end. The style keeps its start and its end. A selected
+ * point stays selected. One undo step.
+ */
+export function reverseLines(doc: MapDocumentInteractive): void {
+	const lines = selectedLines(doc);
+	if (lines.length === 0) return;
+	const node = doc.selection.selectedNode;
+	for (const line of lines) line.reverse();
+	const single = doc.selection.selectedElement;
+	if (node && single instanceof LineElement) doc.selection.selectNode(single.path.length - 1 - node.index);
 	doc.state.log();
 }

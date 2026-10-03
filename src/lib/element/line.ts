@@ -16,6 +16,13 @@ export class LineElement extends AbstractPathElement {
 		this.changed();
 	}
 
+	/** Reverse the order of the points, so the line runs the other way, e.g. its arrowheads. */
+	reverse() {
+		// a new array: the path can be shared, e.g. with the state the line was made of
+		this.path = [...this.path].reverse();
+		this.changed();
+	}
+
 	getStyleLayers(): StyleLayers {
 		return { stroke: this.layer };
 	}

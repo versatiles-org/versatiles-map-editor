@@ -10,7 +10,7 @@
 	import CircleSize from './CircleSize.svelte';
 	import type { CircleElement } from '#lib/element/circle.js';
 	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '#lib/components/ui/index.js';
-	import { addToLegend } from '#lib/components/commands.js';
+	import { addToLegend, reverseLines } from '#lib/components/commands.js';
 	import { elementText } from '#lib/components/element_names.js';
 	import { legendShows } from '#lib/legend_looks.js';
 	import InspectorSection from './InspectorSection.svelte';
@@ -81,6 +81,10 @@
 			<StyleStroke layers={strokeLayers} {doc} />
 			{#if arrowLayers.length > 0}
 				<StyleArrows layers={arrowLayers} {doc} />
+				<!-- e.g. for a line drawn from its end: the arrowheads point the other way -->
+				<ButtonGroup>
+					<Button onclick={() => reverseLines(doc)}>{arrowLayers.length > 1 ? 'Reverse lines' : 'Reverse line'}</Button>
+				</ButtonGroup>
 			{/if}
 		</InspectorSection>
 	{/if}

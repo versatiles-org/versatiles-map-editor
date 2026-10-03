@@ -13,7 +13,8 @@ import {
 	deleteSelection,
 	duplicateSelection,
 	moveSelection,
-	pasteStyle
+	pasteStyle,
+	reverseLines
 } from './commands.js';
 import { addElement } from '../__mocks__/elements.js';
 
@@ -320,5 +321,38 @@ describe('takeStyleForEntry', () => {
 		]);
 		doc.state.undo();
 		expect(doc.legend?.entries).toStrictEqual([{ type: 'line', label: 'Shop' }]);
+	});
+});
+
+describe('reverseLines', () => {
+	let doc: MapDocumentInteractive;
+	beforeEach(() => {
+		doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+	});
+	const points: [number, number][] = [
+		[0, 0],
+		[1, 0],
+		[1, 1]
+	];
+
+	it('reverses the points of the selected lines, which keep their arrowheads, in one undo step', () => {
+		const line = doc.addElement({ type: 'line', points, style: { arrowEnd: 1 } });
+		const polygon = doc.addElement({ type: 'polygon', points });
+		doc.state.log();
+		doc.selection.selectElements([line, polygon]);
+		reverseLines(doc);
+		expect(line.getState()).toMatchObject({ points: [...points].reverse(), style: { arrowEnd: 1 } });
+		expect(polygon.getState()).toMatchObject({ points });
+
+		doc.state.undo();
+		expect(doc.elements[0].getState()).toMatchObject({ points });
+	});
+
+	it('keeps the selected point selected', () => {
+		const line = doc.addElement({ type: 'line', points });
+		doc.selection.selectElements([line]);
+		doc.selection.selectNode(0);
+		reverseLines(doc);
+		expect(doc.selection.selectedNode).toMatchObject({ index: 2, coordinates: [0, 0] });
 	});
 });
