@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, type Snippet } from 'svelte';
 	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
 	import * as commands from '$lib/components/commands.js';
 	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
@@ -239,7 +239,7 @@
 	</button>
 {/snippet}
 
-{#snippet group(id: Group, label: string)}
+{#snippet group(id: Group, label: string, content: Snippet, menuLabel = label)}
 	<!-- a click or tap opens it, also when the pointer opened it already; by keyboard with the focus in it -->
 	<button
 		bind:this={triggers[id]}
@@ -257,6 +257,22 @@
 		<span class="name">{label}</span>
 		<span class="chevron"><Icon name="chevron" size={14} /></span>
 	</button>
+	<!-- beside the menu, see placeSubmenu -->
+	<div
+		bind:this={submenus[id]}
+		id="{uid}-{id}"
+		class="submenu"
+		role="menu"
+		aria-label={menuLabel}
+		hidden={expanded !== id}
+		style:left={place && `${place.left}px`}
+		style:top={place && `${place.top}px`}
+		style:max-height={place && `${place.maxHeight}px`}
+		onpointerenter={() => clearTimeout(timer)}
+		tabindex="-1"
+	>
+		{@render content()}
+	</div>
 {/snippet}
 
 <div class="main-menu">
@@ -284,38 +300,13 @@
 	>
 		{@render item('New map', () => files.newFile())}
 		{@render item('Open…', () => files.openFile())}
-		{@render group('examples', 'Open example')}
-		<div
-			bind:this={submenus.examples}
-			id="{uid}-examples"
-			class="submenu"
-			role="menu"
-			aria-label="Examples"
-			hidden={expanded !== 'examples'}
-			style:left={place && `${place.left}px`}
-			style:top={place && `${place.top}px`}
-			style:max-height={place && `${place.maxHeight}px`}
-			onpointerenter={() => clearTimeout(timer)}
-			tabindex="-1"
-		>
+		{#snippet exampleItems()}
 			{#each examples ?? [] as example (example.id)}
 				{@render item(example.title, () => files.openExample(example))}
 			{/each}
-		</div>
-		{@render group('recent', 'Recent maps')}
-		<div
-			bind:this={submenus.recent}
-			id="{uid}-recent"
-			class="submenu"
-			role="menu"
-			aria-label="Recent maps"
-			hidden={expanded !== 'recent'}
-			style:left={place && `${place.left}px`}
-			style:top={place && `${place.top}px`}
-			style:max-height={place && `${place.maxHeight}px`}
-			onpointerenter={() => clearTimeout(timer)}
-			tabindex="-1"
-		>
+		{/snippet}
+		{@render group('examples', 'Open example', exampleItems, 'Examples')}
+		{#snippet recentItems()}
 			{#each recent as map (map.id)}
 				<div class="recent">
 					<button
@@ -352,43 +343,20 @@
 			{:else}
 				<p class="empty">No maps yet</p>
 			{/each}
-		</div>
+		{/snippet}
+		{@render group('recent', 'Recent maps', recentItems)}
 		{@render item('Download…', () => files.downloadFile())}
-		{@render group('import', 'Import')}
-		<div
-			bind:this={submenus.import}
-			id="{uid}-import"
-			class="submenu"
-			role="menu"
-			aria-label="Import"
-			hidden={expanded !== 'import'}
-			style:left={place && `${place.left}px`}
-			style:top={place && `${place.top}px`}
-			style:max-height={place && `${place.maxHeight}px`}
-			onpointerenter={() => clearTimeout(timer)}
-			tabindex="-1"
-		>
+		{#snippet importItems()}
 			{@render item('GeoJSON…', () => files.importGeoJSON())}
 			{@render item('KML (Google Earth)…', () => files.importKML())}
 			{@render item('Table (CSV/TSV)…', () => dialogImportTable?.open())}
-		</div>
-		{@render group('export', 'Export')}
-		<div
-			bind:this={submenus.export}
-			id="{uid}-export"
-			class="submenu"
-			role="menu"
-			aria-label="Export"
-			hidden={expanded !== 'export'}
-			style:left={place && `${place.left}px`}
-			style:top={place && `${place.top}px`}
-			style:max-height={place && `${place.maxHeight}px`}
-			onpointerenter={() => clearTimeout(timer)}
-			tabindex="-1"
-		>
+		{/snippet}
+		{@render group('import', 'Import', importItems)}
+		{#snippet exportItems()}
 			{@render item('GeoJSON', () => files.exportGeoJSON())}
 			{@render item('KML (Google Earth)', () => files.exportKML())}
-		</div>
+		{/snippet}
+		{@render group('export', 'Export', exportItems)}
 		{@render item('Visible area…', () => doc.visibleArea.open())}
 		{#if fullscreen.available}
 			{@render item(fullscreen.active ? 'Exit fullscreen' : 'Fullscreen', () => fullscreen.toggle(), {
