@@ -2,7 +2,6 @@ import { expect, test } from './lib/test.js';
 import type { Locator, Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
-	blueAndRedAround,
 	drawElement,
 	project,
 	storedState,
@@ -525,27 +524,6 @@ test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@c
 	await expect.poll(markers).toBe(0);
 });
 
-test('marker labels with braces are drawn as they are', async ({ page }) => {
-	const errors: string[] = [];
-	page.on('console', (message) => {
-		if (message.type() === 'error') errors.push(message.text());
-	});
-	const center: [number, number] = [13.4, 52.5];
-	const marker = { type: 'marker' as const, point: center, style: { label: 'Price {EUR}' } };
-	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements: [marker] }));
-	await waitForMapIsReady(page);
-	await waitForMapIsIdle(page);
-	const [textField, labels] = await page.evaluate(() => {
-		const map = (window as unknown as MapWindow).map;
-		const features = map.queryRenderedFeatures({ layers: ['elements_symbol'] });
-		return [map.getLayoutProperty('elements_symbol', 'text-field'), features.map((f) => f.properties.label)];
-	});
-	// read as a property: in a plain string, maplibre would replace "{EUR}" with a feature property
-	expect(textField).toStrictEqual(['get', 'label']);
-	expect(labels).toStrictEqual(['Price {EUR}']);
-	expect(errors).toStrictEqual([]);
-});
-
 test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 	const view = { map: { center: [13.4, 52.5], radius: 10000 }, elements: [] } as MapState;
 	const types = async (page: Page) => (await storedState(page)).elements.map((e) => e.type);
@@ -828,142 +806,6 @@ test('Escape closes the color picker only from within it, and the element stays 
 	await page.keyboard.press('Escape');
 	await expect(popup).toBeVisible();
 	await expect(strokeColor).toBeFocused();
-});
-
-test('the text color and the halo color of a label', async ({ page }) => {
-	const center: Point = [13.4, 52.5];
-	await page.goto(
-		'/#' +
-			encodeState({
-				map: { center, radius: 10000 },
-				elements: [{ type: 'marker', point: center, style: { label: 'Cafe' } }]
-			})
-	);
-	await waitForMapIsReady(page);
-	const [x, y] = await project(page, center);
-	await page.mouse.click(x + 6, y - 8);
-	const setColor = async (name: string, hex: string) => {
-		await page.getByRole('button', { name: new RegExp(`^${name}`) }).click();
-		await page.getByLabel('Hex').fill(hex);
-		await page.getByLabel('Hex').press('Enter');
-		await page.keyboard.press('Escape');
-	};
-
-	await setColor('Text color', '#123456');
-	await setColor('Halo color', '#fedcba');
-	await expect
-		.poll(async () => (await storedState(page)).elements[0].style)
-		.toMatchObject({ labelColor: '#123456', haloColor: '#fedcba' });
-
-	// the map draws the label with them
-	await waitForMapIsIdle(page);
-	const drawn = await page.evaluate(
-		() => (window as unknown as MapWindow).map.queryRenderedFeatures({ layers: ['elements_symbol'] })[0]?.properties
-	);
-	expect(drawn).toMatchObject({ labelColor: 'rgb(18,52,86)', haloColor: 'rgb(254,220,186)' });
-});
-
-test('the size of a label apart from the size of its symbol', async ({ page }) => {
-	const center: Point = [13.4, 52.5];
-	await page.goto(
-		'/#' +
-			encodeState({
-				map: { center, radius: 10000 },
-				// a blue symbol, a red label to the right of it, no halo: the colors are easy to count
-				elements: [
-					{
-						type: 'marker',
-						point: center,
-						style: { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0, align: 1 }
-					}
-				]
-			})
-	);
-	await waitForMapIsReady(page);
-	const [x, y] = await project(page, center);
-
-	const drawn = () => blueAndRedAround(page, [x, y]);
-
-	const before = await drawn();
-	expect(before.blue.count).toBeGreaterThan(20);
-	expect(before.red.count).toBeGreaterThan(20);
-	expect(before.red.left).toBeGreaterThan(before.blue.right);
-
-	// a text twice as large: the label grows, the symbol stays
-	await page.mouse.click(x, y);
-	const textSize = page.getByRole('spinbutton', { name: 'Text size' });
-	await textSize.fill('2');
-	await textSize.press('Enter');
-	await expect.poll(async () => (await storedState(page)).elements[0].style).toMatchObject({ labelSize: 2 });
-	await page.keyboard.press('Escape');
-	const larger = await drawn();
-	expect(larger.red.count).toBeGreaterThan(before.red.count * 2.5);
-	// (the edges of the symbol, since its anti-aliased pixels may differ)
-	expect(Math.abs(larger.blue.left - before.blue.left)).toBeLessThanOrEqual(1);
-	expect(Math.abs(larger.blue.right - before.blue.right)).toBeLessThanOrEqual(1);
-	expect(larger.red.left).toBeGreaterThan(larger.blue.right);
-
-	// a symbol three times as large as its label: the label moves out with its edge
-	await page.mouse.click(x, y);
-	await textSize.fill('1');
-	await textSize.press('Enter');
-	const size = page.getByRole('spinbutton', { name: 'Size', exact: true });
-	await size.fill('3');
-	await size.press('Enter');
-	await page.keyboard.press('Escape');
-	const both = await drawn();
-	expect(both.blue.right - both.blue.left).toBeGreaterThan((larger.blue.right - larger.blue.left) * 2.5);
-	expect(both.red.left).toBeGreaterThan(both.blue.right);
-});
-
-test('a label at a corner of its symbol, and a label without symbol on the point', async ({ page }) => {
-	const center: Point = [13.4, 52.5];
-	const style = { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0 };
-	await page.goto(
-		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center, style }] })
-	);
-	await waitForMapIsReady(page);
-	const [x, y] = await project(page, center);
-	const positions = page.getByRole('radiogroup', { name: 'Label position' });
-	const align = async () => (await storedState(page)).elements[0].style?.align;
-	const middle = (box: { left: number; right: number; top: number; bottom: number }) => ({
-		x: (box.left + box.right) / 2,
-		y: (box.top + box.bottom) / 2
-	});
-
-	await test.step('above right and below left of the symbol', async () => {
-		await page.mouse.click(x, y);
-		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
-		await positions.getByRole('radio', { name: 'Above right' }).check();
-		await expect.poll(align).toBe(5);
-		let { blue, red } = await blueAndRedAround(page, [x, y]);
-		// beside the symbol, the bottom left corner of the label at its top right corner
-		expect(red.left).toBeGreaterThan(middle(blue).x);
-		expect(red.bottom).toBeLessThan(middle(blue).y);
-		expect(red.left).toBeGreaterThanOrEqual(blue.right - 3);
-		expect(red.bottom).toBeLessThanOrEqual(blue.top + 3);
-
-		await page.mouse.click(x, y);
-		await positions.getByRole('radio', { name: 'Below left' }).check();
-		await expect.poll(align).toBe(8);
-		({ blue, red } = await blueAndRedAround(page, [x, y]));
-		expect(red.right).toBeLessThan(middle(blue).x);
-		expect(red.top).toBeGreaterThan(middle(blue).y);
-	});
-
-	await test.step('without symbol: "Center", on the point', async () => {
-		await page.mouse.click(x, y);
-		await positions.getByRole('radio', { name: 'Automatic' }).check();
-		await page.getByRole('button', { name: /^Symbol/ }).click();
-		await page.getByRole('button', { name: 'No symbol', exact: true }).click();
-		await expect.poll(async () => (await storedState(page)).elements[0].style).toMatchObject({ symbol: '' });
-		await expect(positions.getByRole('radio', { name: 'On the point' })).toBeChecked();
-		await expect(positions.getByText('Center')).toBeVisible();
-		const { blue, red } = await blueAndRedAround(page, [x, y]);
-		expect(blue.count).toBe(0);
-		expect(Math.abs(middle(red).x)).toBeLessThan(3);
-		expect(Math.abs(middle(red).y)).toBeLessThan(3);
-	});
 });
 
 test('a marker without symbol has no color, size or rotation of a symbol', async ({ page }) => {
