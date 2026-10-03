@@ -573,7 +573,8 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 		// back to selecting, with the new line selected
 		await expect(tool(page, 'Select')).toHaveAttribute('aria-pressed', 'true');
 		await expect(page.getByRole('button', { name: 'Duplicate' })).toBeEnabled();
-		await page.waitForTimeout(500);
+		// after a zoom of the double-click, if there was one
+		await waitForMapIsIdle(page);
 		expect(await zoom()).toBe(before);
 	});
 

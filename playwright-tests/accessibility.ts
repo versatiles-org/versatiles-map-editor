@@ -20,7 +20,8 @@ test('dialogs are named, can be closed and are usable by keyboard', { tag: '@cro
 	// Escape closes it, also after the preview has loaded, which must not take the focus
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await expect(share.getByRole('button', { name: /^Copy link/ })).toBeFocused();
-	await page.waitForTimeout(1000);
+	// the editor and the map of the preview
+	await waitForMapIsReady(page, { count: 2 });
 	await page.keyboard.press('Escape');
 	await expect(share).toBeHidden();
 

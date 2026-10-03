@@ -149,6 +149,7 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 
 	await page.getByRole('button', { name: 'Line', exact: true }).tap();
 	await page.touchscreen.tap(x - 80, y);
+	// two taps, not a double tap, which would finish the line (DOUBLE_PRESS_MS of the editor: 400 ms)
 	await page.waitForTimeout(500);
 	await page.touchscreen.tap(x + 80, y);
 	await page.getByRole('button', { name: 'Finish' }).tap();
