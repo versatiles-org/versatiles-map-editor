@@ -15,7 +15,6 @@
 		onMapLoad={(map) => {
 			// exposed for debugging and for the Playwright tests
 			Object.assign(window, { map, mapReady: true });
-			console.log('map_ready');
 		}}
 	/>
 </div>

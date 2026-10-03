@@ -196,7 +196,6 @@ export function printConsoleMessages(page: Page): void {
 		let text = msg.text();
 		// Firefox shows objects, e.g. errors, only as "JSHandle@object", so they are described here
 		if (text.includes('JSHandle@')) text = (await Promise.all(msg.args().map(describeValue))).join(' ');
-		if (text === 'map_ready') return;
 		if (expectedConsoleMessages.get(page)?.some((pattern) => pattern.test(text))) return;
 		if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
 		if (text.includes('GPU stall due to ReadPixels')) return;
