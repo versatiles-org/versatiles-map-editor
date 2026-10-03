@@ -30,11 +30,14 @@ jobs:
           # the commit that CI has tested
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
+      # No npm cache: this job runs with the rights of the default branch, so it does not write a
+      # cache that other runs would use (cache poisoning), whatever commit it builds. Also not the
+      # automatic one, which a "packageManager" field in package.json would turn on.
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
+          package-manager-cache: false
 
       - name: Install
         run: npm ci
