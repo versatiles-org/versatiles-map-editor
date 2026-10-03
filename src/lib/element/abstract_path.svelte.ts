@@ -1,7 +1,7 @@
 import { AbstractElement } from './abstract.svelte.js';
 import type { ElementOwner, SelectionNode, SelectionNodeUpdater } from './types.js';
 import { getMiddlePoint, movePoint, type GeoPath, type GeoPoint } from '../geometry.js';
-import { smoothPath } from '../smooth_path.js';
+import { curvePoint, smoothPath } from '../smooth_path.js';
 import type { StateElement, StateElementLine, StateElementPolygon } from '@versatiles/map-state';
 
 export abstract class AbstractPathElement extends AbstractElement {
@@ -45,17 +45,21 @@ export abstract class AbstractPathElement extends AbstractElement {
 		this.changed();
 	}
 
+	/**
+	 * The middle of the segment from node `i` to the next one, where a new node can be added: on the
+	 * curve if the element is smooth, so the handle is where the element is drawn.
+	 */
+	private segmentMiddle(i: number): GeoPoint {
+		if (this.smooth) return curvePoint(this.path, !this.isLine, i, 0.5);
+		return getMiddlePoint(this.path[i], this.path[(i + 1) % this.path.length]);
+	}
+
 	getSelectionNodes(): SelectionNode[] {
 		const points: SelectionNode[] = [];
 		for (let i = 0; i < this.path.length; i++) {
 			points.push({ index: i, coordinates: this.path[i] });
 			if (this.isLine && i === this.path.length - 1) continue;
-			const j = (i + 1) % this.path.length;
-			points.push({
-				index: i + 0.5,
-				transparent: true,
-				coordinates: getMiddlePoint(this.path[i], this.path[j])
-			});
+			points.push({ index: i + 0.5, transparent: true, coordinates: this.segmentMiddle(i) });
 		}
 		return points;
 	}
@@ -71,7 +75,8 @@ export abstract class AbstractPathElement extends AbstractElement {
 		} else {
 			const i = Math.floor(index);
 			vertex = i + 1;
-			point = getMiddlePoint(this.path[i], this.path[vertex % this.path.length]);
+			// where its handle was, see `getSelectionNodes`
+			point = this.segmentMiddle(i);
 			this.path.splice(vertex, 0, point);
 		}
 

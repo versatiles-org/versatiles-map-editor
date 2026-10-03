@@ -3,7 +3,8 @@ import { AbstractPathElement } from './abstract_path.svelte.js';
 import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner, SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
-import { getMiddlePoint, lat2mercator } from '../geometry.js';
+import { getMiddlePoint, lat2mercator, type GeoPoint } from '../geometry.js';
+import { curvePoint } from '../smooth_path.js';
 
 class TestPathElement extends AbstractPathElement {
 	constructor(doc: ElementOwner, isLine: boolean) {
@@ -92,6 +93,24 @@ describe('AbstractPathElement', () => {
 		// the midpoint of the closing edge becomes the last vertex
 		expect(element.getSelectionNodeUpdater({ index: 2.5 })?.vertex).toBe(3);
 		expect(element.path).toStrictEqual([[0, 0], [10, 0], [10, 10], getMiddlePoint([10, 10], [0, 0])]);
+	});
+
+	it('has the handles of a smooth element on its curve, and adds the node there', () => {
+		const element = new TestPathElement(doc, true);
+		const path: GeoPoint[] = [
+			[13.3, 52.5],
+			[13.4, 52.55],
+			[13.5, 52.5]
+		];
+		element.path = path.map((p): GeoPoint => [...p]);
+		element.smooth = true;
+		const handle = element.getSelectionNodes().find((node) => node.index === 0.5)!;
+		expect(handle.coordinates).toStrictEqual(curvePoint(path, false, 0, 0.5));
+		// off the straight segment, where the curve is drawn
+		expect(handle.coordinates).not.toStrictEqual(getMiddlePoint(path[0], path[1]));
+
+		expect(element.getSelectionNodeUpdater({ index: 0.5 })?.vertex).toBe(1);
+		expect(element.path[1]).toStrictEqual(handle.coordinates);
 	});
 
 	it('should delete a vertex', () => {
