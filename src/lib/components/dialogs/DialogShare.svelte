@@ -193,18 +193,6 @@
 			font-size: var(--font-size-sm);
 			font-weight: 600;
 		}
-
-		:global(.sr-only) {
-			position: absolute;
-			width: 1px;
-			height: 1px;
-			margin: -1px;
-			padding: 0;
-			overflow: hidden;
-			clip-path: inset(50%);
-			white-space: nowrap;
-			border: 0;
-		}
 	}
 
 	/* the sections of the settings, as in the inspector */

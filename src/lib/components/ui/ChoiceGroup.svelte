@@ -64,7 +64,7 @@
 			{:else}
 				{#if picture}{@render picture(option.value)}{:else if option.short}<span aria-hidden="true">{option.short}</span
 					>{/if}
-				<span class="visually-hidden">{option.label}</span>
+				<span class="sr-only">{option.label}</span>
 			{/if}
 		</label>
 	{/each}
@@ -87,16 +87,6 @@
 		margin: 0;
 		opacity: 0;
 		cursor: pointer;
-	}
-
-	.visually-hidden {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: 0;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
 	}
 
 	.choice {

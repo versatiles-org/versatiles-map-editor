@@ -416,7 +416,7 @@
 		>
 			<span class="name">Report an issue</span>
 			<Icon name="external" size={14} />
-			<span class="visually-hidden">(opens in a new tab)</span>
+			<span class="sr-only">(opens in a new tab)</span>
 		</a>
 	</div>
 </div>
@@ -567,14 +567,5 @@
 	.empty {
 		margin: 4px 10px;
 		color: var(--color-text-muted);
-	}
-
-	.visually-hidden {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
 	}
 </style>

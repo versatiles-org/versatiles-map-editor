@@ -256,15 +256,4 @@
 	.search :global(.add-marker) {
 		margin-top: var(--space-2);
 	}
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		padding: 0;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
-		border: 0;
-	}
 </style>

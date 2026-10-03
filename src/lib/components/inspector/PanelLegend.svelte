@@ -274,7 +274,7 @@
 					class:drop-after={dropIndex === legend.entries.length && i === legend.entries.length - 1 && drag?.index !== i}
 				>
 					<fieldset class="entry" id="{uid}-{i}-entry">
-						<legend class="visually-hidden">Entry {i + 1}</legend>
+						<legend class="sr-only">Entry {i + 1}</legend>
 						<!-- closed: the handle to drag it, its look, its text, and the button to open it -->
 						<div class="row">
 							<span class="grip" aria-hidden="true" title="Drag to move" onpointerdown={(e) => onGripDown(e, i)}
@@ -363,15 +363,6 @@
 		padding: var(--space-1) var(--space-2);
 		border: 1px solid color-mix(in srgb, var(--color-text) 20%, transparent);
 		border-radius: var(--radius-md);
-	}
-
-	.visually-hidden {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		overflow: hidden;
-		clip-path: inset(50%);
-		white-space: nowrap;
 	}
 
 	/* the closed entry: handle, look, text and the button to open it, in one line */
