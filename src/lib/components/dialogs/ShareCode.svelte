@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Hint, TextArea, TextField } from '$lib/components/ui/index.js';
+	import { Button, Hint, TextArea, TextField } from '#lib/components/ui/index.js';
 
 	/** The link of the shared map and the code to embed it, each to copy. */
 	const { link, embed }: { link: string; embed: string } = $props();

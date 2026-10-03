@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Dialog, Button, TextArea } from '$lib/components/ui/index.js';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
+	import { Dialog, Button, TextArea } from '#lib/components/ui/index.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import {
 		applyCategory,
 		biasOptions,
@@ -17,11 +17,11 @@
 		type ImportSettings,
 		type Table,
 		type UncertainRow
-	} from '$lib/components/table_import/index.js';
-	import { getColorScheme, config } from '$lib/background/index.js';
+	} from '#lib/components/table_import/index.js';
+	import { getColorScheme, config } from '#lib/background/index.js';
 	import { SYMBOL_DEFAULTS } from '@versatiles/map-state';
-	import { NEW_MARKER_SYMBOL } from '$lib/element/marker.js';
-	import { formatCount } from '$lib/components/format.js';
+	import { NEW_MARKER_SYMBOL } from '#lib/element/marker.js';
+	import { formatCount } from '#lib/components/format.js';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 

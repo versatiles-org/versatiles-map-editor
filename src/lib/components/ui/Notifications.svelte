@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { dismiss, notifications } from '$lib/notify.svelte.js';
+	import { dismiss, notifications } from '#lib/notify.svelte.js';
 	import IconButton from './IconButton.svelte';
 
 	/** `right` keeps the messages clear of the sidebar. */

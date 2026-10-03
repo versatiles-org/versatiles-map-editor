@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { IconButton } from '$lib/components/ui/index.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import { IconButton } from '#lib/components/ui/index.js';
 
 	const { mapDocument }: { mapDocument: MapDocumentInteractive } = $props();
 

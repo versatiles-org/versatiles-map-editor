@@ -3,7 +3,7 @@
 
 	type LegendPosition = (typeof LEGEND_POSITIONS)[number];
 
-	import type { Box } from '$lib/rendering/index.js';
+	import type { Box } from '#lib/rendering/index.js';
 	import { untrack } from 'svelte';
 	import { capCenterShift, measureLine } from './cap_center.js';
 	import { textColor } from './legend_marks.js';

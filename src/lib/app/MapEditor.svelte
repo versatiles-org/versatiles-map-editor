@@ -4,10 +4,10 @@
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	import MapFrame, { type Insets } from './MapFrame.svelte';
 	import MapViewer from './MapViewer.svelte';
-	import type { MapDocument } from '$lib/map_document.svelte.js';
+	import type { MapDocument } from '#lib/map_document.svelte.js';
 	// Imported with the page, not loaded once the editor starts: on a slow network (300 ms latency),
 	// the editor then starts about 0.5 s sooner. Phones, which get the viewer, load ~95 KiB more.
-	import { MapDocumentInteractive } from '$lib/map_document_interactive.js';
+	import { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import {
 		ElementsDrawer,
 		Preview,
@@ -16,13 +16,13 @@
 		StatusBar,
 		ToolRail,
 		TopBar
-	} from '$lib/components/shell/index.js';
-	import { DrawBar, NodeDeleteButton, SelectionBar, VisibleAreaBar } from '$lib/components/map_editor/index.js';
-	import { newMarkerState } from '$lib/element/marker.js';
-	import { loadConfig } from '$lib/background/index.js';
-	import { SessionSync } from '$lib/session_sync.svelte.js';
-	import DialogFile from '$lib/components/dialogs/DialogFile.svelte';
-	import { FileCommands } from '$lib/files/file_commands.js';
+	} from '#lib/components/shell/index.js';
+	import { DrawBar, NodeDeleteButton, SelectionBar, VisibleAreaBar } from '#lib/components/map_editor/index.js';
+	import { newMarkerState } from '#lib/element/marker.js';
+	import { loadConfig } from '#lib/background/index.js';
+	import { SessionSync } from '#lib/session_sync.svelte.js';
+	import DialogFile from '#lib/components/dialogs/DialogFile.svelte';
+	import { FileCommands } from '#lib/files/file_commands.js';
 
 	let {
 		onMapLoad
@@ -50,7 +50,7 @@
 	function removeHash() {
 		void tick().then(() => {
 			const url = location.pathname + location.search;
-			// eslint-disable-next-line svelte/no-navigation-without-resolve -- only the fragment of the current URL is removed
+			// only the fragment of the current URL is removed
 			if (location.hash) replaceState(url, {});
 		});
 	}

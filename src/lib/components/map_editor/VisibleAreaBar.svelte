@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Bounds } from '@versatiles/map-state';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { Button } from '$lib/components/ui/index.js';
-	import { formatLength } from '$lib/components/format.js';
-	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
-	import { NUDGE } from '$lib/interaction/visible_area.svelte.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import { Button } from '#lib/components/ui/index.js';
+	import { formatLength } from '#lib/components/format.js';
+	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
+	import { NUDGE } from '#lib/interaction/visible_area.svelte.js';
 
 	/**
 	 * A bar at the bottom of the map while the visible area is edited: its size, and buttons to

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import { onMount } from 'svelte';
-	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '$lib/symbols_catalog.js';
-	import { getSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import { themeColor } from '$lib/rendering/theme_color.js';
-	import { Dialog, TextField } from '$lib/components/ui/index.js';
+	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '#lib/symbols_catalog.js';
+	import { getSymbolLibrary } from '#lib/components/symbols_draw.js';
+	import { themeColor } from '#lib/rendering/theme_color.js';
+	import { Dialog, TextField } from '#lib/components/ui/index.js';
 
 	let dialog: Dialog | undefined;
 	let filterInput: HTMLInputElement | undefined = $state();

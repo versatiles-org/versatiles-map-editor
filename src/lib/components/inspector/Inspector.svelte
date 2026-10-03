@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { addLegendEntry } from '$lib/components/commands.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import { addLegendEntry } from '#lib/components/commands.js';
 	import StyleEditor from './StyleEditor.svelte';
 	import {
 		Icon,
@@ -13,12 +13,12 @@
 		InputRow,
 		Slider,
 		TextField
-	} from '$lib/components/ui/index.js';
+	} from '#lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
-	import { elementIcon, elementText } from '$lib/components/element_names.js';
-	import { countTypes, typeName } from '$lib/element/type_names.js';
+	import { elementIcon, elementText } from '#lib/components/element_names.js';
+	import { countTypes, typeName } from '#lib/element/type_names.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a

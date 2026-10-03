@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { measurementText } from '$lib/components/format.js';
-	import type { AbstractElement } from '$lib/element/abstract.svelte.js';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { StyleLayers } from '$lib/element/types.js';
+	import { measurementText } from '#lib/components/format.js';
+	import type { AbstractElement } from '#lib/element/abstract.svelte.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { StyleLayers } from '#lib/element/types.js';
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';
 	import StyleSymbol from './StyleSymbol.svelte';
 	import CircleSize from './CircleSize.svelte';
-	import type { CircleElement } from '$lib/element/circle.js';
-	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '$lib/components/ui/index.js';
-	import { addToLegend } from '$lib/components/commands.js';
-	import { elementText } from '$lib/components/element_names.js';
-	import { legendShows } from '$lib/legend_looks.js';
+	import type { CircleElement } from '#lib/element/circle.js';
+	import { Button, ButtonGroup, Checkbox, InputRow, Hint, TextArea } from '#lib/components/ui/index.js';
+	import { addToLegend } from '#lib/components/commands.js';
+	import { elementText } from '#lib/components/element_names.js';
+	import { legendShows } from '#lib/legend_looks.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import { group } from './group.js';
 

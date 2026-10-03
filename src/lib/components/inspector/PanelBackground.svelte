@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import {
 		changeSettings,
 		DEFAULT_COLORS,
@@ -9,7 +9,7 @@
 		THEMES,
 		type BackgroundSettings,
 		type MapColors
-	} from '$lib/background/index.js';
+	} from '#lib/background/index.js';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -19,8 +19,8 @@
 		ButtonGroup,
 		Hint,
 		Select
-	} from '$lib/components/ui/index.js';
-	import { FontSelect } from '$lib/components/pickers/index.js';
+	} from '#lib/components/ui/index.js';
+	import { FontSelect } from '#lib/components/pickers/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 
 	/** Options stored in a map but not offered here (e.g. by a newer editor) are shown as they are. */

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { config, closestFace, facesOf, familiesOf, unknownFace } from '$lib/background/index.js';
-	import { InputRow, Select } from '$lib/components/ui/index.js';
+	import { config, closestFace, facesOf, familiesOf, unknownFace } from '#lib/background/index.js';
+	import { InputRow, Select } from '#lib/components/ui/index.js';
 
 	/**
 	 * A font of the tile server as a family and a style (e.g. "Lato" and "Bold"). Another family

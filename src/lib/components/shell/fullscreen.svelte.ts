@@ -1,4 +1,4 @@
-import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
+import { isOwnKeyTarget } from '../shortcuts.js';
 
 /**
  * The editor in fullscreen, e.g. to look at the map without the rest of the screen. The browser

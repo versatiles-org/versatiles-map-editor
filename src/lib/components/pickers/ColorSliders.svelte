@@ -4,7 +4,7 @@
 </script>
 
 <script lang="ts">
-	import { ChoiceGroup, Slider } from '$lib/components/ui/index.js';
+	import { ChoiceGroup, Slider } from '#lib/components/ui/index.js';
 	import {
 		channelTrack,
 		hsvKeeping,
@@ -13,7 +13,7 @@
 		type Channel,
 		type HSV,
 		type RGB
-	} from '$lib/components/color.js';
+	} from '#lib/components/color.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 
 	/**

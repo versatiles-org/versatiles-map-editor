@@ -7,12 +7,12 @@
 
 <script lang="ts">
 	import { besideElement, keepInViewport } from './popup_position.js';
-	import { IconButton, Select, TextField } from '$lib/components/ui/index.js';
+	import { IconButton, Select, TextField } from '#lib/components/ui/index.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 	import ColorSliders from './ColorSliders.svelte';
 	import ColorSwatches from './ColorSwatches.svelte';
-	import type { ColorPalette } from '$lib/color_palette.svelte.js';
-	import { getColorScheme, config } from '$lib/background/index.js';
+	import type { ColorPalette } from '#lib/color_palette.svelte.js';
+	import { getColorScheme, config } from '#lib/background/index.js';
 
 	let {
 		value = $bindable(),

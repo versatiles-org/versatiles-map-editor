@@ -55,7 +55,7 @@ Rules:
 - A module lives next to its users: in their folder, or in the nearest folder above all of them.
   One exception: `files/` is only used by the menu in `shell/`, but the file handling is kept
   together, apart from the components.
-- Components import other folders with `$lib/…`, TypeScript modules with relative paths.
+- Components import other folders with `#lib/…` (a subpath import of `package.json`), TypeScript modules with relative paths.
 - A folder with an `index.ts` is imported through it, while its own modules import each other
   directly. Code that loads at different times (viewer and editor) gets no shared `index.ts`: it
   would put the editor's code into the viewer's first load.

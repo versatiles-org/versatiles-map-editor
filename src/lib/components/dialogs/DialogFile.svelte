@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import { Dialog, Button, ButtonGroup, TextField } from '$lib/components/ui/index.js';
-	import { EventHandler } from '$lib/event_handler.js';
+	import { Dialog, Button, ButtonGroup, TextField } from '#lib/components/ui/index.js';
+	import { EventHandler } from '#lib/event_handler.js';
 
 	/** The dialog that asks for the name of a downloaded file. */
 	type Mode = 'download' | null;

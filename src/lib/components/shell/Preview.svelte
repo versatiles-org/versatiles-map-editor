@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { isOwnKeyTarget } from '$lib/components/shortcuts.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
 
 	/**
 	 * The map as visitors see it, over the editor below the top bar: the read-only viewer of the

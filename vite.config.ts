@@ -126,18 +126,16 @@ export default defineConfig({
 		sveltekit({
 			preprocess: vitePreprocess(),
 			adapter: staticAdapter(),
-			alias: {
-				// SvelteKit 3 has #lib instead; kept until the imports move to it
-				$lib: 'src/lib',
-				// the map state codec, used from its source (packages/map-state), so it needs no build
-				'@versatiles/map-state': 'packages/map-state/src/index.ts'
-			},
 			prerender: { handleMissingId: 'ignore' }
 		}),
 		doc.plugin
 	],
-	// Component tests need Svelte's client build, which is only resolved with the browser condition
-	resolve: process.env.VITEST ? { conditions: ['browser'] } : undefined,
+	resolve: {
+		// the map state codec, used from its source (packages/map-state), so it needs no build
+		alias: { '@versatiles/map-state': resolve('packages/map-state/src/index.ts') },
+		// Component tests need Svelte's client build, which is only resolved with the browser condition
+		...(process.env.VITEST ? { conditions: ['browser'] } : {})
+	},
 	test: {
 		environment: 'happy-dom',
 		include: ['src/**/*.{test,spec}.{js,ts}', 'packages/*/src/**/*.{test,spec}.{js,ts}'],

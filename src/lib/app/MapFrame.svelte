@@ -12,19 +12,19 @@
 	import { onMount, type Snippet } from 'svelte';
 	import 'maplibre-gl/dist/maplibre-gl.css';
 	import './theme.css';
-	import '$lib/components/fields.css';
+	import '#lib/components/fields.css';
 	import * as maplibre from 'maplibre-gl';
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	// maplibre-gl v6 derives its worker URL from import.meta.url, which points into the
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
-	import { Legend, LoadingIndicator, SearchPlace } from '$lib/components/map_viewer/index.js';
-	import { Notifications } from '$lib/components/ui/index.js';
-	import { SymbolLibrary, setSymbolLibrary } from '$lib/components/symbols_draw.js';
-	import type { MapDocument } from '$lib/map_document.svelte.js';
-	import type { Box } from '$lib/rendering/index.js';
+	import { Legend, LoadingIndicator, SearchPlace } from '#lib/components/map_viewer/index.js';
+	import { Notifications } from '#lib/components/ui/index.js';
+	import { SymbolLibrary, setSymbolLibrary } from '#lib/components/symbols_draw.js';
+	import type { MapDocument } from '#lib/map_document.svelte.js';
+	import type { Box } from '#lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
-	import type { SessionSync } from '$lib/session_sync.svelte.js';
+	import type { SessionSync } from '#lib/session_sync.svelte.js';
 	import {
 		addAttribution,
 		addNavigation,

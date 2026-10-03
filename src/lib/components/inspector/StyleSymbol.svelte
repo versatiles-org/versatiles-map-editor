@@ -1,10 +1,10 @@
 <script lang="ts">
 	import InspectorSection from './InspectorSection.svelte';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import { labelPositions, SymbolStyle } from '$lib/style/index.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import { labelPositions, SymbolStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup, Slider, TextField } from '$lib/components/ui/index.js';
-	import { ColorPicker, FontSelect, SymbolSelector } from '$lib/components/pickers/index.js';
+	import { InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
+	import { ColorPicker, FontSelect, SymbolSelector } from '#lib/components/pickers/index.js';
 
 	/** The symbol layers of all selected markers, which are edited together. */
 	const { layers, doc }: { layers: SymbolStyle[]; doc: MapDocumentInteractive } = $props();

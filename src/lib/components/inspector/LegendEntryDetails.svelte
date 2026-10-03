@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
 	import { FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateLegendEntry } from '@versatiles/map-state';
 	import {
 		InputRow,
@@ -10,9 +10,9 @@
 		Hint,
 		Icon,
 		IconButton
-	} from '$lib/components/ui/index.js';
-	import { ColorPicker, SymbolSelector } from '$lib/components/pickers/index.js';
-	import { canPasteStyleToEntry, pasteStyleToEntry } from '$lib/components/commands.js';
+	} from '#lib/components/ui/index.js';
+	import { ColorPicker, SymbolSelector } from '#lib/components/pickers/index.js';
+	import { canPasteStyleToEntry, pasteStyleToEntry } from '#lib/components/commands.js';
 	import { colorOf, entryStyle, setEntryOutline, setEntryType, updateEntry } from './legend_entries.js';
 	import StyleFill from './StyleFill.svelte';
 	import StyleStroke from './StyleStroke.svelte';

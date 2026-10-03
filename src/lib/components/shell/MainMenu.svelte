@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { tick, type Snippet } from 'svelte';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import * as commands from '$lib/components/commands.js';
-	import DialogImportTable from '$lib/components/dialogs/DialogImportTable.svelte';
-	import DialogShortcuts from '$lib/components/dialogs/DialogShortcuts.svelte';
-	import { Icon, IconButton } from '$lib/components/ui/index.js';
-	import type { FileCommands } from '$lib/files/file_commands.js';
-	import type { RecentMap, SessionSync } from '$lib/session_sync.svelte.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import * as commands from '#lib/components/commands.js';
+	import DialogImportTable from '#lib/components/dialogs/DialogImportTable.svelte';
+	import DialogShortcuts from '#lib/components/dialogs/DialogShortcuts.svelte';
+	import { Icon, IconButton } from '#lib/components/ui/index.js';
+	import type { FileCommands } from '#lib/files/file_commands.js';
+	import type { RecentMap, SessionSync } from '#lib/session_sync.svelte.js';
 	import type { Example } from 'virtual:examples';
 	import { fullscreen } from './fullscreen.svelte.js';
 

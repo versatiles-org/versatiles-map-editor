@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MapEditor from '$lib/app/MapEditor.svelte';
+	import MapEditor from '#lib/app/MapEditor.svelte';
 </script>
 
 <svelte:head>

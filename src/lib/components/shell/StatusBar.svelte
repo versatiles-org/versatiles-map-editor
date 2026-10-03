@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { TOGGLE_KEY } from '$lib/interaction/index.js';
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import type { SessionSync } from '$lib/session_sync.svelte.js';
-	import type { FileCommands } from '$lib/files/file_commands.js';
-	import { Button } from '$lib/components/ui/index.js';
+	import { TOGGLE_KEY } from '#lib/interaction/index.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { SessionSync } from '#lib/session_sync.svelte.js';
+	import type { FileCommands } from '#lib/files/file_commands.js';
+	import { Button } from '#lib/components/ui/index.js';
 
 	/**
 	 * The line at the bottom of the editor: what the current tool or selection does, so the

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, ChoiceGroup } from '$lib/components/ui/index.js';
+	import { Button, ChoiceGroup } from '#lib/components/ui/index.js';
 
 	/**
 	 * The shared map as visitors see it, in an aspect ratio to choose. `onreload`: the map is to be

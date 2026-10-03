@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '$lib/map_document_interactive.js';
-	import * as commands from '$lib/components/commands.js';
-	import { IconButton } from '$lib/components/ui/index.js';
-	import { coordinatesOf } from '$lib/geometry.js';
+	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import * as commands from '#lib/components/commands.js';
+	import { IconButton } from '#lib/components/ui/index.js';
+	import { coordinatesOf } from '#lib/geometry.js';
 
 	/**
 	 * The actions of the selected elements, next to them on the map. It works with a mouse and
