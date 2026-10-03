@@ -25,6 +25,7 @@ export const LAYERS_UNDER_MAP_LABELS = [
 	'highlight_point',
 	ELEMENT_LAYERS.fill,
 	ELEMENT_LAYERS.stroke,
+	ELEMENT_LAYERS.arrow,
 	AREAS_TOP
 ];
 

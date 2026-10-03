@@ -11,7 +11,7 @@ export class LineElement extends AbstractPathElement {
 		super(doc, true);
 		this.path = line;
 
-		this.layer = new LineStyle(() => this.changed(), { canHide: false });
+		this.layer = new LineStyle(() => this.changed(), { canHide: false, arrows: true });
 
 		this.changed();
 	}

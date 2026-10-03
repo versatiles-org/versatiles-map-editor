@@ -10,6 +10,45 @@ describe('LineStyle', () => {
 		layer = new LineStyle(onChange);
 	});
 
+	describe('arrowheads', () => {
+		let line: LineStyle;
+		beforeEach(() => {
+			line = new LineStyle(onChange, { canHide: false, arrows: true });
+		});
+
+		it('are none by default, and only lines have them', () => {
+			expect(line.getArrowProperties()).toBeUndefined();
+			layer.arrowEnd = 1;
+			layer.patch({ arrowStart: 2, arrowSize: 2 });
+			expect([layer.arrowStart, layer.arrowEnd, layer.arrowSize]).toStrictEqual([0, 0, 3]);
+			expect(layer.getState()).toBeUndefined();
+			expect(onChange).not.toHaveBeenCalled();
+		});
+
+		it('are drawn with the width and the color of the line', () => {
+			line.setState({ arrowStart: 3, arrowEnd: 1, arrowSize: 2, width: 5, color: '#0000ff' });
+			expect(line.getArrowProperties()).toStrictEqual({
+				start: 'circle',
+				end: 'triangle',
+				size: 2,
+				width: 5,
+				color: 'rgb(0,0,255)'
+			});
+		});
+
+		it('are stored without the size if there is none', () => {
+			line.arrowEnd = 2;
+			line.arrowSize = 4;
+			expect(line.getState()).toStrictEqual({ arrowEnd: 2, arrowSize: 4 });
+			line.arrowEnd = 0;
+			expect(line.getState()).toBeUndefined();
+			// the size stays for the next arrowhead
+			expect(line.arrowSize).toBe(4);
+			line.setState({ arrowStart: 1 });
+			expect(line.getState()).toStrictEqual({ arrowStart: 1 });
+		});
+	});
+
 	it('should have the correct keys in default style', () => {
 		const keys = Object.keys(LineStyle.defaultStyle).sort();
 		expect(keys).toStrictEqual(['color', 'pattern', 'visible', 'width']);

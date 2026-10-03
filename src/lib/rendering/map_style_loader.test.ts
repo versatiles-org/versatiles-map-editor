@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { inlineSources } from '@versatiles/style';
 import { deferInlineSources } from '../__mocks__/inline_sources.js';
 import { MapStyleLoader } from './map_style_loader.js';
-import type { ElementRenderer } from './element_renderer.js';
+import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
 describe('MapStyleLoader', () => {
@@ -107,11 +107,24 @@ describe('MapStyleLoader', () => {
 	});
 
 	describe('labels of the background map on top', () => {
-		const under = ['highlight_line', 'highlight_point', 'elements_fill', 'elements_stroke', 'elements_areas_top'];
+		const under = [
+			'highlight_line',
+			'highlight_point',
+			'elements_fill',
+			'elements_stroke',
+			'elements_arrows',
+			'elements_areas_top'
+		];
 
 		beforeEach(async () => {
 			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
-			const types: Record<string, string> = { water: 'fill', place_labels: 'symbol', elements_symbol: 'symbol' };
+			// the arrowheads of lines are symbols too, under the labels of the background map
+			const types: Record<string, string> = {
+				water: 'fill',
+				place_labels: 'symbol',
+				elements_arrows: 'symbol',
+				elements_symbol: 'symbol'
+			};
 			map.getLayersOrder.mockReturnValue(['water', 'place_labels', ...under, 'elements_symbol']);
 			map.getLayer.mockImplementation((id: string) => ({ type: types[id] ?? 'line' }));
 			map.moveLayer.mockClear();
@@ -137,7 +150,10 @@ describe('MapStyleLoader', () => {
 			await loader.setBackground({ builder: 'osm', options: { theme: 'gray' } }, 'noto_sans_regular');
 			const style = (map.setStyle.mock.lastCall as unknown[])[0] as { layers: { id: string; type: string }[] };
 			const ids = style.layers.map((layer) => layer.id);
-			const firstLabel = style.layers.findIndex((layer) => layer.type === 'symbol');
+			// the arrowheads of lines are symbols too, under the labels
+			const firstLabel = style.layers.findIndex(
+				(layer) => layer.type === 'symbol' && !layer.id.startsWith(ELEMENT_LAYERS.arrow)
+			);
 			expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
 		});
 	});

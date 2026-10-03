@@ -2,12 +2,13 @@ import type * as maplibregl from 'maplibre-gl';
 import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/abstract.svelte.js';
 import { clampLatitude, lat2mercator, MAX_LATITUDE, mercator2lat, type GeoPoint } from '../geometry.js';
-import { ELEMENT_LAYERS, ElementRenderer, layerIdsOf, type Role } from './element_renderer.js';
+import { ELEMENT_LAYERS, ElementRenderer, elementIdOf, layerIdsOf, type Role } from './element_renderer.js';
 
-/** The role of the first layer of a role, e.g. "symbol" of `elements_symbol`. */
-function roleOf(id: string): Role {
-	return (Object.keys(ELEMENT_LAYERS) as Role[]).find((role) => ELEMENT_LAYERS[role] === id)!;
+/** The role of the first layer or the source of a role, e.g. "symbol" of `elements_symbol`. */
+function roleOf(id: string): Role | undefined {
+	return (Object.keys(ELEMENT_LAYERS) as Role[]).find((role) => ELEMENT_LAYERS[role] === id);
 }
+
 import { MapStyleLoader } from './map_style_loader.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
@@ -101,11 +102,13 @@ export class MapView {
 				[x + tolerance, y + tolerance]
 			],
 			// each role is drawn by several layers, see planLayers
-			{ layers: layerIds.flatMap((id) => this.renderer.layerIds(roleOf(id))) }
+			{ layers: layerIds.flatMap((id) => this.renderer.layerIds(roleOf(id)!)) }
 		);
-		// the topmost first; the element layers share the element ids as feature ids
+		// the topmost first; the features have the element ids, see `elementIdOf`
 		for (const feature of features) {
-			const element = typeof feature.id === 'number' ? byId.get(feature.id) : undefined;
+			// the source of a role has the id of its first layer
+			const id = typeof feature.id === 'number' ? elementIdOf(feature.id, roleOf(feature.source)) : undefined;
+			const element = id === undefined ? undefined : byId.get(id);
 			if (element) return element;
 		}
 		return undefined;

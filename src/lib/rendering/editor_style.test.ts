@@ -13,6 +13,7 @@ describe('buildStyle', () => {
 			'highlight_point',
 			ELEMENT_LAYERS.fill,
 			ELEMENT_LAYERS.stroke,
+			ELEMENT_LAYERS.arrow,
 			AREAS_TOP,
 			ELEMENT_LAYERS.symbol,
 			ELEMENTS_TOP,
@@ -42,10 +43,20 @@ describe('buildStyle', () => {
 	it('puts the areas and lines of the elements under the labels of the background map', () => {
 		const style = buildStyle(undefined, 'noto_sans_regular', true);
 		const ids = style.layers.map((layer) => layer.id);
-		const firstLabel = style.layers.findIndex((layer) => layer.type === 'symbol');
+		// the arrowheads of lines are symbols too, under the labels
+		const firstLabel = style.layers.findIndex(
+			(layer) => layer.type === 'symbol' && !layer.id.startsWith(ELEMENT_LAYERS.arrow)
+		);
 		expect(firstLabel).toBeGreaterThan(0);
 		expect(style.layers[firstLabel].id).not.toBe(ELEMENT_LAYERS.symbol);
-		const under = ['highlight_line', 'highlight_point', ELEMENT_LAYERS.fill, ELEMENT_LAYERS.stroke, AREAS_TOP];
+		const under = [
+			'highlight_line',
+			'highlight_point',
+			ELEMENT_LAYERS.fill,
+			ELEMENT_LAYERS.stroke,
+			ELEMENT_LAYERS.arrow,
+			AREAS_TOP
+		];
 		expect(ids.slice(firstLabel - under.length, firstLabel)).toStrictEqual(under);
 		// the markers, the selection, the visible area and the drawing stay on top
 		expect(ids.slice(-11)).toStrictEqual([

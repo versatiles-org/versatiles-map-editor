@@ -209,6 +209,33 @@ describe('MapDocument', () => {
 		expect(mapDocument.elementAt({ x: 10, y: 20 }, 0, [])).toBeUndefined();
 	});
 
+	it('finds a line by its arrowheads', async () => {
+		map.setStyle();
+		await mapDocument.setState({
+			elements: [
+				{ type: 'marker', point: [0, 0] },
+				{
+					type: 'line',
+					points: [
+						[0, 0],
+						[1, 1]
+					],
+					style: { arrowEnd: 1 }
+				}
+			]
+		});
+		const [marker, line] = mapDocument.elements;
+		// the features of the arrowheads have ids of their own, two per line
+		map.queryRenderedFeatures.mockReturnValue([
+			{ source: 'elements_arrows', id: line.id * 2 + 1 },
+			{ source: 'elements_symbol', id: marker.id }
+		] as unknown as maplibregl.MapGeoJSONFeature[]);
+		expect(mapDocument.elementAt({ x: 10, y: 20 }, 2)).toBe(line);
+		expect(map.queryRenderedFeatures.mock.lastCall![1]).toStrictEqual({
+			layers: ['elements_symbol', 'elements_stroke', 'elements_arrows']
+		});
+	});
+
 	describe('background', () => {
 		const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
 

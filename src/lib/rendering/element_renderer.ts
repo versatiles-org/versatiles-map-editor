@@ -4,9 +4,13 @@ import type { AbstractElement } from '../element/abstract.svelte.js';
 import type { StyleLayers } from '../element/types.js';
 import { dashArrays, LABEL_POSITIONS, labelPositionTable } from '../style/index.js';
 import { allSymbols } from '../symbols_catalog.js';
+import { arrowHeads } from './arrow_heads.js';
 
-/** The parts of a style that elements have, each drawn by one layer for all elements. */
-export type Role = keyof StyleLayers;
+/**
+ * The parts of a style that elements have, each drawn by one layer for all elements, and the
+ * arrowheads of lines, which are part of their stroke.
+ */
+export type Role = keyof StyleLayers | 'arrow';
 
 /**
  * The source of each role, and its first layer, see `planLayers`. Within a layer, the elements keep
@@ -15,9 +19,16 @@ export type Role = keyof StyleLayers;
 export const ELEMENT_LAYERS: Record<Role, string> = {
 	fill: 'elements_fill',
 	stroke: 'elements_stroke',
+	arrow: 'elements_arrows',
 	symbol: 'elements_symbol'
 };
 const ROLES = Object.keys(ELEMENT_LAYERS) as Role[];
+
+/** The roles that an element draws: those of its style, and the arrowheads of a line that has them. */
+export function rolesOf(element: AbstractElement): Role[] {
+	const layers = element.getStyleLayers();
+	return ROLES.filter((role) => (role === 'arrow' ? layers.stroke?.getArrowProperties() : layers[role]));
+}
 
 /**
  * Invisible layers that mark places in the map style: the top of the areas and lines while the
@@ -54,7 +65,9 @@ export interface LayerPlan {
  * its area, its outline or line, its marker. Then it merges each layer into the one before it if
  * they draw the same, e.g. two lines in a row: within a layer, the elements keep their order, so
  * this draws exactly the same with fewer layers. Only a marker after a label stays apart: MapLibre
- * draws the symbols of a layer before all its labels (maplibre-gl-js issue #49).
+ * draws the symbols of a layer before all its labels (maplibre-gl-js issue #49). The arrowheads of
+ * lines are drawn over the lines of their layer: a line after a line with arrowheads joins the
+ * layer of that line, under its arrowheads, so lines in a row keep one layer.
  *
  * With `markersOnTop` (e.g. while the labels of the background map are between the areas and lines
  * and the markers), the layers of the markers come after those of all areas and lines.
@@ -97,7 +110,9 @@ function mergeLayers(
 	if (mergeAreas) single = [...ROLES.flatMap((role) => single.filter((layer) => layer.role === role))];
 	const merged: { role: Role; elements: number[]; label: boolean }[] = [];
 	for (const { role, element, label } of single) {
-		const last = merged.at(-1);
+		// a line under the arrowheads of the lines before it
+		const lines = role === 'stroke' && merged.at(-1)?.role === 'arrow' ? merged.at(-2) : undefined;
+		const last = lines?.role === 'stroke' ? lines : merged.at(-1);
 		if (last && last.role === role && !last.label) {
 			last.elements.push(element);
 			last.label = label;
@@ -114,7 +129,7 @@ function mergeLayers(
 
 /** The ids of the layers that draw the element: one per role of its style, shared with the other elements. */
 export function layerIdsOf(element: AbstractElement): string[] {
-	return (Object.keys(element.getStyleLayers()) as Role[]).map((role) => ELEMENT_LAYERS[role]);
+	return rolesOf(element).map((role) => ELEMENT_LAYERS[role]);
 }
 
 /**
@@ -154,6 +169,7 @@ export function elementStyle(font: string): {
 		layers: [
 			elementLayer('fill', ELEMENT_LAYERS.fill, font),
 			elementLayer('stroke', ELEMENT_LAYERS.stroke, font),
+			elementLayer('arrow', ELEMENT_LAYERS.arrow, font),
 			anchorLayer(AREAS_TOP),
 			elementLayer('symbol', ELEMENT_LAYERS.symbol, font),
 			anchorLayer(ELEMENTS_TOP)
@@ -194,6 +210,26 @@ function elementLayer(role: Role, id: string, font: string): LayerSpecification 
 					'line-width': ['get', 'width'],
 					'line-dasharray': DASH_ARRAYS
 				}
+			};
+		case 'arrow':
+			return {
+				id,
+				source: ELEMENT_LAYERS.arrow,
+				type: 'symbol',
+				filter,
+				layout: {
+					'symbol-sort-key': ['get', 'order'],
+					'icon-image': ['get', 'icon'],
+					'icon-size': ['get', 'size'],
+					'icon-offset': ['get', 'offset'],
+					// turned with the map, so it points along the line
+					'icon-rotate': ['get', 'rotate'],
+					'icon-rotation-alignment': 'map',
+					'icon-pitch-alignment': 'map',
+					'icon-allow-overlap': true,
+					'icon-ignore-placement': true
+				},
+				paint: { 'icon-color': ['get', 'color'] }
 			};
 		case 'symbol':
 			return symbolLayer(font, id);
@@ -366,9 +402,8 @@ export class ElementRenderer {
 
 	/** What the element draws, for the layers. */
 	private static drawnOf(element: AbstractElement): Drawn {
-		const layers = element.getStyleLayers();
-		const label = layers.symbol?.getProperties().label;
-		return { roles: ROLES.filter((role) => layers[role]), label: typeof label === 'string' && label.trim() !== '' };
+		const label = element.getStyleLayers().symbol?.getProperties().label;
+		return { roles: rolesOf(element), label: typeof label === 'string' && label.trim() !== '' };
 	}
 
 	private static key({ roles, label }: Drawn): string {
@@ -573,18 +608,19 @@ export class ElementRenderer {
 			this.syncLayers();
 			this.updateFonts(true);
 			for (const role of ROLES) {
-				const features = this.elements.flatMap((element) => this.featureOf(element, role) ?? []);
+				const features = this.elements.flatMap((element) => this.featuresOf(element, role));
 				this.source(role)?.setData({ type: 'FeatureCollection', features });
 			}
 		} else if (this.changed.size > 0) {
 			const changed = [...this.changed].filter((element) => this.order.has(element));
 			for (const role of ROLES) {
-				const elements = changed.filter((element) => element.getStyleLayers()[role]);
+				// an element that gets or loses a role is planned again, see `update`
+				const elements = changed.filter((element) => this.layerOf.get(element)?.[role]);
 				if (elements.length === 0) continue;
 				this.source(role)?.updateData({
 					// replaced, or removed if it is not drawn any more (e.g. a hidden outline)
-					remove: elements.map((element) => element.id),
-					add: elements.flatMap((element) => this.featureOf(element, role) ?? [])
+					remove: elements.flatMap((element) => featureIds(element, role)),
+					add: elements.flatMap((element) => this.featuresOf(element, role))
 				});
 			}
 			this.updateFonts(false);
@@ -598,15 +634,40 @@ export class ElementRenderer {
 		return this.map.style ? this.map.getSource<maplibregl.GeoJSONSource>(ELEMENT_LAYERS[role]) : undefined;
 	}
 
-	private featureOf(element: AbstractElement, role: Role): GeoJSON.Feature | undefined {
-		const properties = element.getStyleLayers()[role]?.getProperties();
-		if (!properties) return undefined;
+	/** The features of the element in the source of the role: one, or one per arrowhead. */
+	private featuresOf(element: AbstractElement, role: Role): GeoJSON.Feature[] {
+		const common = { order: this.order.get(element), layer: this.layerOf.get(element)?.[role] };
 		const { geometry } = element.getFeature();
-		return {
-			type: 'Feature',
-			id: element.id,
-			geometry,
-			properties: { ...properties, order: this.order.get(element), layer: this.layerOf.get(element)?.[role] }
-		};
+		if (role === 'arrow') {
+			const arrows = element.getStyleLayers().stroke?.getArrowProperties();
+			if (!arrows || geometry.type !== 'LineString') return [];
+			return arrowHeads(geometry.coordinates as [number, number][], arrows).map(({ point, end, properties }) => ({
+				type: 'Feature',
+				id: arrowFeatureId(element.id, end),
+				geometry: { type: 'Point', coordinates: point },
+				properties: { ...properties, ...common }
+			}));
+		}
+		const properties = element.getStyleLayers()[role]?.getProperties();
+		if (!properties) return [];
+		return [{ type: 'Feature', id: element.id, geometry, properties: { ...properties, ...common } }];
 	}
+}
+
+/**
+ * The id of the feature of an arrowhead: two per element, since a source needs a different id for
+ * each feature. `elementIdOf` returns the element id.
+ */
+function arrowFeatureId(id: number, end: boolean): number {
+	return id * 2 + (end ? 1 : 0);
+}
+
+/** The ids of the features that an element can have in the source of a role. */
+function featureIds(element: AbstractElement, role: Role): number[] {
+	return role === 'arrow' ? [arrowFeatureId(element.id, false), arrowFeatureId(element.id, true)] : [element.id];
+}
+
+/** The id of the element of a feature in the source of a role, e.g. of a feature under the mouse. */
+export function elementIdOf(featureId: number, role: Role | undefined): number {
+	return role === 'arrow' ? Math.floor(featureId / 2) : featureId;
 }

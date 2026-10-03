@@ -11,6 +11,7 @@ import {
 	type Drawn,
 	type LayerPlan
 } from './element_renderer.js';
+import type { LineElement } from '../element/line.js';
 import type { PolygonElement } from '../element/polygon.js';
 import type { MarkerElement } from '../element/marker.js';
 
@@ -27,7 +28,15 @@ describe('ElementRenderer', () => {
 	beforeEach(async () => {
 		map = new MockMap();
 		sources = {};
-		order = ['elements_fill', 'elements_stroke', 'elements_areas_top', 'elements_symbol', 'elements_top', 'selection'];
+		order = [
+			'elements_fill',
+			'elements_stroke',
+			'elements_arrows',
+			'elements_areas_top',
+			'elements_symbol',
+			'elements_top',
+			'selection'
+		];
 		map.getLayersOrder.mockImplementation(() => [...order]);
 		const place = (id: string, before: string) => {
 			if (order.includes(id)) order.splice(order.indexOf(id), 1);
@@ -125,18 +134,61 @@ describe('ElementRenderer', () => {
 		expect(lastFeatures('symbol')).toStrictEqual([]);
 	});
 
+	it('draws the arrowheads of lines in a source of their own, two features per line', async () => {
+		const points: [number, number][] = [
+			[0, 0],
+			[1, 0]
+		];
+		await doc.setState({
+			elements: [
+				{ type: 'line', points, style: { arrowStart: 3, arrowEnd: 1, color: '#0000ff' } },
+				{ type: 'line', points }
+			]
+		});
+		doc.view.renderer.flush();
+		const [line, plain] = doc.elements as [LineElement, LineElement];
+		expect(layerIdsOf(line)).toStrictEqual(['elements_stroke', 'elements_arrows']);
+		expect(layerIdsOf(plain)).toStrictEqual(['elements_stroke']);
+		expect(
+			lastFeatures('arrow').map((f) => [f.id, f.geometry, f.properties?.icon, f.properties?.layer, f.properties?.color])
+		).toStrictEqual([
+			[line.id * 2, { type: 'Point', coordinates: [0, 0] }, 'arrow-circle', 'elements_arrows', 'rgb(0,0,255)'],
+			[line.id * 2 + 1, { type: 'Point', coordinates: [1, 0] }, 'arrow-triangle', 'elements_arrows', 'rgb(0,0,255)']
+		]);
+
+		// a change replaces both arrowheads
+		line.layer.color = '#00ff00';
+		await Promise.resolve();
+		const diff = sources.elements_arrows.updateData.mock.lastCall![0];
+		expect(diff.remove).toStrictEqual([line.id * 2, line.id * 2 + 1]);
+		expect(diff.add).toHaveLength(2);
+
+		// without arrowheads, the layers are planned again
+		line.layer.arrowStart = 0;
+		line.layer.arrowEnd = 0;
+		await Promise.resolve();
+		expect(lastFeatures('arrow')).toStrictEqual([]);
+		expect(layerIdsOf(line)).toStrictEqual(['elements_stroke']);
+	});
+
 	it('gives every map style the element layers, with the font of the map', () => {
 		const { sources, layers } = elementStyle('lato_bold');
-		expect(Object.keys(sources)).toStrictEqual(['elements_fill', 'elements_stroke', 'elements_symbol']);
+		expect(Object.keys(sources)).toStrictEqual([
+			'elements_fill',
+			'elements_stroke',
+			'elements_arrows',
+			'elements_symbol'
+		]);
 		// areas at the bottom, markers on top, and the invisible marks of the tops
 		expect(layers.map((l) => l.id)).toStrictEqual([
 			'elements_fill',
 			'elements_stroke',
+			'elements_arrows',
 			'elements_areas_top',
 			'elements_symbol',
 			'elements_top'
 		]);
-		const symbol = layers[3] as { layout: Record<string, unknown> };
+		const symbol = layers[4] as { layout: Record<string, unknown> };
 		expect(symbol.layout['text-font']).toStrictEqual(['literal', ['lato_bold']]);
 	});
 
@@ -250,6 +302,8 @@ describe('ElementRenderer', () => {
 		const elementLayers = () => order.filter((id) => id.startsWith('elements'));
 		expect(elementLayers()).toStrictEqual([
 			'elements_areas_top',
+			// the first layer of a role that draws nothing at the bottom
+			'elements_arrows',
 			'elements_symbol',
 			'elements_fill',
 			'elements_stroke',
@@ -262,6 +316,7 @@ describe('ElementRenderer', () => {
 		doc.view.renderer.setMarkersOnTop(true);
 		doc.view.renderer.flush();
 		expect(elementLayers()).toStrictEqual([
+			'elements_arrows',
 			'elements_fill',
 			'elements_stroke',
 			'elements_areas_top',
@@ -278,6 +333,7 @@ describe('planLayers', () => {
 	const polygon: Drawn = { roles: ['fill', 'stroke'], label: false };
 	const area: Drawn = { roles: ['fill'], label: false };
 	const line: Drawn = { roles: ['stroke'], label: false };
+	const arrowed: Drawn = { roles: ['stroke', 'arrow'], label: false };
 	const layers = (plan: LayerPlan) => plan.layers.map(({ role, elements }) => `${role} ${elements.join()}`);
 
 	/**
@@ -324,6 +380,21 @@ describe('planLayers', () => {
 			'symbol 3'
 		]);
 		expect(layers(planLayers([marker, polygon, marker]))).toStrictEqual(['symbol 0', 'fill 1', 'stroke 1', 'symbol 2']);
+	});
+
+	it('draws the arrowheads of lines in a row over all of their lines', () => {
+		expect(layers(planLayers([arrowed, line, arrowed, marker, arrowed]))).toStrictEqual([
+			'stroke 0,1,2',
+			'arrow 0,2',
+			'symbol 3',
+			'stroke 4',
+			'arrow 4'
+		]);
+		// an outline after an area does not join the lines before it
+		expect(layers(planLayers([arrowed, polygon]))).toStrictEqual(['stroke 0', 'arrow 0', 'fill 1', 'stroke 1']);
+		// with too many layers, all arrowheads over all lines and outlines
+		const many = Array.from({ length: MAX_LAYERS + 1 }, (_, i) => (i % 2 ? polygon : arrowed));
+		expect(planLayers(many).layers.map(({ role }) => role)).toStrictEqual(['fill', 'stroke', 'arrow']);
 	});
 
 	it('puts the markers over all areas and lines on demand', () => {

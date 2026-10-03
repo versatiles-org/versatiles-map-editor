@@ -4,6 +4,7 @@ import { inlineSources } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer, type LabelOptions } from './element_renderer.js';
 import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
 import { themeColor } from './theme_color.js';
+import { addArrowImage } from './arrow_heads.js';
 import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
 
@@ -36,8 +37,8 @@ export class MapStyleLoader {
 			this.#applyFont();
 			this.#applyLayerOrder();
 		});
-		// the images of the fill patterns are made when the map needs them, e.g. again after a new style
-		map.setMissingStyleImageResolver((id) => void addFillPatternImage(map, id));
+		// the images of the fill patterns and arrowheads are made when the map needs them, e.g. again after a new style
+		map.setMissingStyleImageResolver((id) => void (addFillPatternImage(map, id) || addArrowImage(map, id)));
 		void this.#load(undefined);
 	}
 
@@ -97,8 +98,9 @@ export class MapStyleLoader {
 		const map = this.#map;
 		if (!this.#loaded || !map.getLayer(ELEMENT_LAYERS.symbol)) return;
 		const order = map.getLayersOrder();
-		// the first label of the background map, or the markers if it has none
-		const labels = order.find((id) => map.getLayer(id)?.type === 'symbol');
+		// the first label of the background map, or the markers if it has none; the arrowheads of lines
+		// are symbols too, but under the labels
+		const labels = order.find((id) => map.getLayer(id)?.type === 'symbol' && !id.startsWith(ELEMENT_LAYERS.arrow));
 		const before = this.#mapLabelsOnTop && labels ? labels : ELEMENT_LAYERS.symbol;
 		// e.g. a new style, which is built in this order
 		const at = order.indexOf(before) - LAYERS_UNDER_MAP_LABELS.length;
