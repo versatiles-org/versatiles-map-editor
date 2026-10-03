@@ -147,9 +147,9 @@
 			<section aria-labelledby="{uid}-options">
 				<h3 id="{uid}-options">Options</h3>
 				<!-- from 1 m to a hundredth of the shared area, each step twice the one before; moving it ends "Automatic" -->
-				<InputRow id="share-precision" label="Precision">
+				<InputRow id="{uid}-precision" label="Precision">
 					<Slider
-						id="share-precision"
+						id="{uid}-precision"
 						min={0}
 						max={maxExponent}
 						step={1}

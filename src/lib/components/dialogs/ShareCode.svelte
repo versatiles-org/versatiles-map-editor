@@ -4,6 +4,8 @@
 	/** The link of the shared map and the code to embed it, each to copy. */
 	const { link, embed }: { link: string; embed: string } = $props();
 
+	const uid = $props.id();
+
 	let btnLink: HTMLButtonElement | undefined = $state();
 	let btnEmbed: HTMLButtonElement | undefined = $state();
 
@@ -42,18 +44,18 @@
 </script>
 
 <section>
-	<h3><label for="text-link">Link</label></h3>
+	<h3><label for="{uid}-link">Link</label></h3>
 	<Hint>Anyone with the link can view the map, but not change it.</Hint>
 	<div class="row">
-		<TextField id="text-link" class="code" readonly value={link} onfocus={(e) => e.currentTarget.select()} />
+		<TextField id="{uid}-link" class="code" readonly value={link} onfocus={(e) => e.currentTarget.select()} />
 		<Button variant="primary" class="copy" bind:element={btnLink} onclick={() => copy(link, 'link')}>Copy link</Button>
 	</div>
 </section>
 
 <section>
-	<h3><label for="text-iframe">Embed code</label></h3>
+	<h3><label for="{uid}-embed">Embed code</label></h3>
 	<Hint>Paste it into the HTML of a website.</Hint>
-	<TextArea id="text-iframe" class="code" rows={4} readonly value={embed} onfocus={(e) => e.currentTarget.select()} />
+	<TextArea id="{uid}-embed" class="code" rows={4} readonly value={embed} onfocus={(e) => e.currentTarget.select()} />
 	<div class="buttons">
 		<Button class="copy" bind:element={btnEmbed} onclick={() => copy(embed, 'embed')}>Copy embed code</Button>
 	</div>
