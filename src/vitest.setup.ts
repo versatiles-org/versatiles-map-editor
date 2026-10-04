@@ -25,12 +25,17 @@ vi.mock('./lib/symbols_catalog.js', async (importOriginal) => {
 	return original;
 });
 
-// configReady() loads the configuration file next to the page, which unit tests do not have: the
-// defaults, at once. config.test.ts tests the loading itself.
-vi.mock('./lib/background/config.svelte.js', async (importOriginal) => ({
-	...(await importOriginal<typeof import('./lib/background/config.svelte.js')>()),
-	configReady: vi.fn(async () => ({}))
-}));
+// configReady() and loadConfig() load the configuration file next to the page, which unit tests do
+// not have (happy-dom would ask localhost:3000): the defaults, at once. config.test.ts tests the
+// loading itself, with files of its own (loadConfig with a URL).
+vi.mock('./lib/background/config.svelte.js', async (importOriginal) => {
+	const original = await importOriginal<typeof import('./lib/background/config.svelte.js')>();
+	return {
+		...original,
+		configReady: vi.fn(async () => ({})),
+		loadConfig: vi.fn(async (url?: string) => (url ? original.loadConfig(url) : undefined))
+	};
+});
 
 // Svelte warns in development, e.g. about a binding that is not reactive. Its warnings are bugs, so
 // they fail the test. They are collected and checked after each test, since Svelte warns in
