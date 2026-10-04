@@ -1,15 +1,7 @@
 import { StylePart } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
-import {
-	type StateStyle,
-	ARROW_DEFAULTS,
-	ARROW_NAMES,
-	LINE_DEFAULTS,
-	STROKE_STYLE_NAMES,
-	hasArrow,
-	removeDefaultFields,
-	withoutUnusedFields
-} from '@versatiles/map-state';
+import { type StateStyle, ARROW_NAMES, LINE_DEFAULTS, STROKE_STYLE_NAMES, hasArrow } from '@versatiles/map-state';
+import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
 // Dash array per stroke style index; the names come from the codec
 const arrays: number[][] = [
@@ -36,14 +28,16 @@ export interface ArrowProperties {
 export class LineStyle extends StylePart {
 	static readonly defaultStyle = LINE_DEFAULTS;
 	protected readonly defaults: StateStyle;
+	/** A line, with arrowheads, or the outline of an area. */
+	readonly role: StyleRole;
 
 	#color: string = $state(LINE_DEFAULTS.color);
 	#dashed: number = $state(LINE_DEFAULTS.pattern);
 	#visible: boolean = $state(LINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
-	#arrowStart: number = $state(ARROW_DEFAULTS.arrowStart);
-	#arrowEnd: number = $state(ARROW_DEFAULTS.arrowEnd);
-	#arrowSize: number = $state(ARROW_DEFAULTS.arrowSize);
+	#arrowStart: number = $state(ROLE_DEFAULTS.line.arrowStart);
+	#arrowEnd: number = $state(ROLE_DEFAULTS.line.arrowEnd);
+	#arrowSize: number = $state(ROLE_DEFAULTS.line.arrowSize);
 	/** Whether it can be hidden: the outline of an area can, a line cannot (it would be invisible). */
 	readonly canHide: boolean;
 	/** Whether it can have arrowheads: a line can, the outline of an area cannot (it has no ends). */
@@ -53,7 +47,8 @@ export class LineStyle extends StylePart {
 		super(onChange);
 		this.canHide = canHide;
 		this.canHaveArrows = arrows;
-		this.defaults = arrows ? { ...LINE_DEFAULTS, ...ARROW_DEFAULTS } : LINE_DEFAULTS;
+		this.role = arrows ? 'line' : 'outline';
+		this.defaults = ROLE_DEFAULTS[this.role];
 	}
 
 	get color(): string {
@@ -150,7 +145,7 @@ export class LineStyle extends StylePart {
 			style.arrowSize = this.arrowSize;
 		}
 		// e.g. the size of arrowheads that are switched off is not stored
-		return removeDefaultFields(withoutUnusedFields(style), this.defaults);
+		return storedStyle(this.role, style);
 	}
 
 	patch(state: StateStyle) {

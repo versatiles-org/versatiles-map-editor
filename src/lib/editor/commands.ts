@@ -1,18 +1,8 @@
-import {
-	ARROW_DEFAULTS,
-	FILL_DEFAULTS,
-	LINE_DEFAULTS,
-	removeDefaultFields,
-	SYMBOL_DEFAULTS,
-	withoutUnusedFields,
-	type StateLegendEntry,
-	type StateStyle
-} from '@versatiles/map-state';
-import type { AbstractElement } from '../element/index.js';
-import { LineElement } from '../element/index.js';
+import type { StateLegendEntry, StateStyle } from '@versatiles/map-state';
+import { elementText, LineElement, type AbstractElement } from '../element/index.js';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
-import { elementText } from '../element/index.js';
 import { legendEntryOf, lookOf, markerLook } from '../state/index.js';
+import { storedStyle, type StyleRole } from '../style/index.js';
 
 /*
  * The commands for the selected elements, shared by the menu, the sidebar and the keyboard
@@ -113,20 +103,18 @@ export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): v
 	const entries = doc.legend?.entries;
 	if (!copied || !entries?.[index]) return;
 	const label = entries[index].label;
-	// without the defaults, which the copy has; a line also without those of its arrowheads
-	const style = (s: StateStyle | undefined, defaults: StateStyle) =>
-		s && removeDefaultFields(withoutUnusedFields(s), defaults);
-	const lineDefaults = { ...LINE_DEFAULTS, ...ARROW_DEFAULTS };
+	// as stored, without the defaults, which the copy has
+	const style = (role: StyleRole, s: StateStyle | undefined) => s && storedStyle(role, s);
 	const entry: StateLegendEntry = copied.symbol
-		? { type: 'marker', style: markerLook(style(copied.symbol, SYMBOL_DEFAULTS)), label }
+		? { type: 'marker', style: markerLook(style('symbol', copied.symbol)), label }
 		: copied.fill
 			? {
 					type: 'polygon',
-					style: style(copied.fill, FILL_DEFAULTS),
-					strokeStyle: style(copied.stroke, lineDefaults),
+					style: style('fill', copied.fill),
+					strokeStyle: style('outline', copied.stroke),
 					label
 				}
-			: { type: 'line', style: style(copied.stroke, lineDefaults), label };
+			: { type: 'line', style: style('line', copied.stroke), label };
 	if (!entry.style) delete entry.style;
 	if (!entry.strokeStyle) delete entry.strokeStyle;
 	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? entry : e)) };

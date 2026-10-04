@@ -1,16 +1,10 @@
-import { ARROW_DEFAULTS, FILL_DEFAULTS, LINE_DEFAULTS, SYMBOL_DEFAULTS, type StateStyle } from '@versatiles/map-state';
+import type { StateStyle } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/index.js';
-import type { StylePart } from '../style/index.js';
+import { completeStyle, type StylePart } from '../style/index.js';
 
 /** The parts of a style: markers have a symbol, lines a stroke, polygons and circles a fill and a stroke. */
 type Role = 'symbol' | 'fill' | 'stroke';
 const ROLES: Role[] = ['symbol', 'fill', 'stroke'];
-// the arrowheads too, which outlines ignore, so pasting a line without arrowheads removes them
-const DEFAULTS: Record<Role, StateStyle> = {
-	symbol: SYMBOL_DEFAULTS,
-	fill: FILL_DEFAULTS,
-	stroke: { ...LINE_DEFAULTS, ...ARROW_DEFAULTS }
-};
 
 /** A copied style: the complete style of each role of the element. */
 export type CopiedStyle = Partial<Record<Role, StateStyle>>;
@@ -35,8 +29,10 @@ export class StyleClipboard {
 	public copy(element: AbstractElement) {
 		const style: CopiedStyle = {};
 		for (const [role, layer] of Object.entries(layersOf(element)) as [Role, StylePart][]) {
-			// with the defaults, so pasting also resets the properties that are not set
-			style[role] = { ...DEFAULTS[role], ...layer.getState() };
+			// with the defaults, so pasting also resets the properties that are not set; a stroke with
+			// those of the arrowheads of a line, which outlines ignore, so pasting a line without
+			// arrowheads removes them
+			style[role] = completeStyle(role === 'stroke' ? 'line' : role, layer.getState());
 		}
 		// The label is content, not style
 		if (style.symbol) delete style.symbol.label;

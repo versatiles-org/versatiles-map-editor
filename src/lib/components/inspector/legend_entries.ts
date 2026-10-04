@@ -1,16 +1,6 @@
-import {
-	ARROW_DEFAULTS,
-	formatHex,
-	LINE_DEFAULTS,
-	parseColor,
-	removeDefaultFields,
-	SYMBOL_DEFAULTS,
-	withoutUnusedFields,
-	type StateLegend,
-	type StateLegendEntry,
-	type StateStyle
-} from '@versatiles/map-state';
+import { formatHex, parseColor, type StateLegend, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../../editor/index.js';
+import { completeStyle, ROLE_DEFAULTS, storedStyle, type StyleRole } from '../../style/index.js';
 
 // Editing the legend and its entries in the inspector. The changes are not logged unless said, so
 // e.g. typing a text is one undo step when the field is left.
@@ -41,7 +31,7 @@ function replaceEntry(
 }
 
 /** The main color of an entry: of its symbol, its line or its area. */
-export const colorOf = (entry: StateLegendEntry) => entry.style?.color ?? SYMBOL_DEFAULTS.color;
+export const colorOf = (entry: StateLegendEntry) => completeStyle('symbol', entry.style).color;
 
 /**
  * Another type for the entry, in its color: a marker with the default symbol, a line, or an area
@@ -66,7 +56,7 @@ export function setEntryType(doc: MapDocumentInteractive, index: number, type: S
 export function setEntryOutline(doc: MapDocumentInteractive, index: number, visible: boolean) {
 	const entry = legendOf(doc).entries[index];
 	if (!entry) return;
-	const outline = entryStyle(doc, index, 'strokeStyle', LINE_DEFAULTS);
+	const outline = entryStyle(doc, index, 'strokeStyle', 'outline');
 	if (visible && !entry.strokeStyle?.color) {
 		const fill = parseColor(colorOf(entry));
 		if (fill) outline.color = formatHex({ ...fill, alpha: 1 });
@@ -85,18 +75,13 @@ function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style:
 
 /**
  * A style of an entry with the properties of the style of an element (see StyleFill and
- * StyleStroke), which edit it like that of an element: a field that gets its default is left out.
+ * StyleStroke), which edit it like that of an element: it is stored as an element's, see
+ * `storedStyle`.
  */
-export function entryStyle(
-	doc: MapDocumentInteractive,
-	index: number,
-	key: 'style' | 'strokeStyle',
-	defaults: StateStyle
-) {
-	const get = () => ({ ...defaults, ...legendOf(doc).entries[index]?.[key] });
+export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'style' | 'strokeStyle', role: StyleRole) {
+	const get = (): StateStyle => completeStyle(role, legendOf(doc).entries[index]?.[key]);
 	const set = (field: keyof StateStyle, value: unknown) => {
-		// e.g. without the size of arrowheads that are switched off
-		const style = removeDefaultFields(withoutUnusedFields({ ...get(), [field]: value }), defaults);
+		const style = storedStyle(role, { ...get(), [field]: value });
 		replaceEntry(doc, index, (entry) => withStyle(entry, key, style));
 	};
 	return {
@@ -131,7 +116,7 @@ export function entryStyle(
 		set visible(value: boolean) {
 			set('visible', value);
 		},
-		// the arrowheads of a line, with `ARROW_DEFAULTS` in `defaults`
+		// the arrowheads of a line
 		get arrowStart() {
 			return get().arrowStart ?? 0;
 		},
@@ -145,7 +130,7 @@ export function entryStyle(
 			set('arrowEnd', value);
 		},
 		get arrowSize() {
-			return get().arrowSize ?? ARROW_DEFAULTS.arrowSize;
+			return get().arrowSize ?? ROLE_DEFAULTS.line.arrowSize;
 		},
 		set arrowSize(value: number) {
 			set('arrowSize', value);

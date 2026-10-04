@@ -1,15 +1,5 @@
-import {
-	ARROW_DEFAULTS,
-	ARROW_NAMES,
-	FILL_DEFAULTS,
-	LINE_DEFAULTS,
-	parseColor,
-	formatHex,
-	SYMBOL_DEFAULTS,
-	type StateLegendEntry,
-	type StateStyle
-} from '@versatiles/map-state';
-import { dashArrays } from '../../style/index.js';
+import { ARROW_NAMES, parseColor, formatHex, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
+import { completeStyle, dashArrays } from '../../style/index.js';
 import { drawArrowHead, fillPatternPixels, headReach, PATTERN_SIZE } from '../../rendering/index.js';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
@@ -31,20 +21,15 @@ function drawnWidth({ width, pattern }: { width: number; pattern: number }, max:
 	return Math.min(width, max, pattern === 0 ? Infinity : MAX_PATTERNED_WIDTH);
 }
 
-/** The style of a line or an outline, with its defaults. */
-function lineOf(style: StateStyle | undefined) {
-	return { ...LINE_DEFAULTS, ...style };
-}
-
 /**
  * The color of the text of an entry: the color of the symbol or the line, or of an area's outline,
  * else of its fill. Areas are often translucent, so their texts are opaque.
  */
 export function textColor(entry: StateLegendEntry): string {
-	if (entry.type === 'marker') return entry.style?.color ?? SYMBOL_DEFAULTS.color;
-	if (entry.type === 'line') return lineOf(entry.style).color;
-	const outline = lineOf(entry.strokeStyle);
-	const color = outline.visible ? outline.color : (entry.style?.color ?? FILL_DEFAULTS.color);
+	if (entry.type === 'marker') return completeStyle('symbol', entry.style).color;
+	if (entry.type === 'line') return completeStyle('line', entry.style).color;
+	const outline = completeStyle('outline', entry.strokeStyle);
+	const color = outline.visible ? outline.color : completeStyle('fill', entry.style).color;
 	const parsed = parseColor(color);
 	return parsed ? formatHex({ ...parsed, alpha: 1 }) : color;
 }
@@ -76,7 +61,7 @@ function prepare(canvas: HTMLCanvasElement): CanvasRenderingContext2D | undefine
 export function drawLine(canvas: HTMLCanvasElement, style: StateStyle | undefined): void {
 	const context = prepare(canvas);
 	if (!context) return;
-	const line = { ...LINE_DEFAULTS, ...ARROW_DEFAULTS, ...style };
+	const line = completeStyle('line', style);
 	const width = drawnWidth(line, MAX_LINE_WIDTH);
 	const headWidth = Math.min(line.arrowSize * width, MAX_ARROW_WIDTH);
 	const [start, end] = [line.arrowStart, line.arrowEnd].map((index) => ARROW_NAMES[index] ?? 'none');
@@ -117,7 +102,7 @@ export function drawArea(
 ): void {
 	const context = prepare(canvas);
 	if (!context) return;
-	const { color, pattern } = { ...FILL_DEFAULTS, ...fill };
+	const { color, pattern } = completeStyle('fill', fill);
 	const box = { x: 2, y: 3, width: MARK_WIDTH - 4, height: MARK_HEIGHT - 6 };
 
 	const tile = document.createElement('canvas');
@@ -129,7 +114,7 @@ export function drawArea(
 		context.fillRect(box.x, box.y, box.width, box.height);
 	}
 
-	const outline = lineOf(stroke);
+	const outline = completeStyle('outline', stroke);
 	if (!outline.visible) return;
 	const width = drawnWidth(outline, MAX_OUTLINE_WIDTH);
 	context.strokeStyle = outline.color;

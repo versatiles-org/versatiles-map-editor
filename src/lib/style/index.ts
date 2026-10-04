@@ -4,6 +4,7 @@
  * directly, others import from here.
  */
 export * from './abstract.svelte.js';
+export * from './defaults.js';
 export * from './fill.svelte.js';
 export * from './line.svelte.js';
 export * from './symbol.svelte.js';

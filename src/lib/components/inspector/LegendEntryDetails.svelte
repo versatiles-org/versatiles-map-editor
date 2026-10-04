@@ -1,12 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import {
-		ARROW_DEFAULTS,
-		FILL_DEFAULTS,
-		LINE_DEFAULTS,
-		SYMBOL_DEFAULTS,
-		type StateLegendEntry
-	} from '@versatiles/map-state';
+	import type { StateLegendEntry } from '@versatiles/map-state';
+	import { completeStyle } from '#lib/style/index.js';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -111,7 +106,7 @@
 			<SymbolSelector
 				id="{id}-symbol"
 				bind:symbol={
-					() => entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol,
+					() => completeStyle('symbol', entry.style).symbol,
 					(symbol) => {
 						updateEntry(doc, index, { style: { ...entry.style, symbol: symbol ?? '' } });
 						log();
@@ -128,12 +123,12 @@
 			/>
 		</InputRow>
 	{:else if entry.type === 'line'}
-		{@const line = entryStyle(doc, index, 'style', { ...LINE_DEFAULTS, ...ARROW_DEFAULTS })}
+		{@const line = entryStyle(doc, index, 'style', 'line')}
 		<StyleStroke layers={[line]} {doc} />
 		<StyleArrows layers={[line]} {doc} />
 	{:else}
-		{@const outline = entryStyle(doc, index, 'strokeStyle', LINE_DEFAULTS)}
-		<StyleFill layers={[entryStyle(doc, index, 'style', FILL_DEFAULTS)]} {doc} colorLabel="Fill color" />
+		{@const outline = entryStyle(doc, index, 'strokeStyle', 'outline')}
+		<StyleFill layers={[entryStyle(doc, index, 'style', 'fill')]} {doc} colorLabel="Fill color" />
 		<InputRow id="{id}-outline" label="Outline">
 			<Checkbox
 				id="{id}-outline"

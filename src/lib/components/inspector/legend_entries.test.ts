@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { ARROW_DEFAULTS, LINE_DEFAULTS } from '@versatiles/map-state';
 import { MockMap, type MaplibreMap } from '../../__mocks__/map.js';
 import { MapDocumentInteractive } from '../../editor/map_document_interactive.js';
 import { entryStyle } from './legend_entries.js';
@@ -8,7 +7,7 @@ describe('entryStyle', () => {
 	it('edits the arrowheads of a line entry, without the size if there are none', () => {
 		const doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
 		doc.legend = { entries: [{ type: 'line', label: 'Route' }] };
-		const line = entryStyle(doc, 0, 'style', { ...LINE_DEFAULTS, ...ARROW_DEFAULTS });
+		const line = entryStyle(doc, 0, 'style', 'line');
 		expect([line.arrowStart, line.arrowEnd, line.arrowSize]).toStrictEqual([0, 0, 3]);
 
 		line.arrowEnd = 1;

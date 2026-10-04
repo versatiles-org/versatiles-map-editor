@@ -1,14 +1,15 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
-	import { parseColor, SYMBOL_DEFAULTS, type StateLegendEntry } from '@versatiles/map-state';
+	import { parseColor, type StateLegendEntry } from '@versatiles/map-state';
+	import { completeStyle } from '#lib/style/index.js';
 	import { getSymbolLibrary } from '#lib/components/common/index.js';
 	import { drawArea, drawLine, MARK_HEIGHT, MARK_WIDTH } from './legend_marks.js';
 
 	/** A small copy of the element of a legend entry: its symbol, its line or its area, as on the map. */
 	const { entry }: { entry: StateLegendEntry } = $props();
 
-	const color = $derived(entry.style?.color ?? SYMBOL_DEFAULTS.color);
-	const symbol = $derived(entry.type === 'marker' ? (entry.style?.symbol ?? SYMBOL_DEFAULTS.symbol) : '');
+	const color = $derived(completeStyle('symbol', entry.style).color);
+	const symbol = $derived(entry.type === 'marker' ? completeStyle('symbol', entry.style).symbol : '');
 
 	/** The opacity of a color, 1 if it has none, which fades a symbol with its outline, as on the map. */
 	function opacityOf(color: string): number {

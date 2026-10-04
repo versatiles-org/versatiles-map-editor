@@ -1,12 +1,5 @@
-import {
-	FILL_DEFAULTS,
-	LINE_DEFAULTS,
-	SYMBOL_DEFAULTS,
-	type StateElement,
-	type StateLegend,
-	type StateLegendEntry,
-	type StateStyle
-} from '@versatiles/map-state';
+import { completeStyle } from '../style/index.js';
+import { type StateElement, type StateLegend, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
 
 /*
  * The look of an element as a legend entry shows it, to compare entries with elements: e.g. to add
@@ -113,9 +106,9 @@ export function legendShows(
  */
 export function legendColors(legend: StateLegend | undefined): string[] {
 	return (legend?.entries ?? []).flatMap((entry) => {
-		if (entry.type === 'marker') return [entry.style?.color ?? SYMBOL_DEFAULTS.color];
-		if (entry.type === 'line') return [entry.style?.color ?? LINE_DEFAULTS.color];
-		const outline = { ...LINE_DEFAULTS, ...entry.strokeStyle };
-		return [entry.style?.color ?? FILL_DEFAULTS.color, ...(outline.visible ? [outline.color] : [])];
+		if (entry.type === 'marker') return [completeStyle('symbol', entry.style).color];
+		if (entry.type === 'line') return [completeStyle('line', entry.style).color];
+		const outline = completeStyle('outline', entry.strokeStyle);
+		return [completeStyle('fill', entry.style).color, ...(outline.visible ? [outline.color] : [])];
 	});
 }
