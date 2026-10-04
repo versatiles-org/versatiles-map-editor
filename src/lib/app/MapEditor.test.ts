@@ -1,3 +1,5 @@
+// a browser storage, as browsers have, which happy-dom lacks: the editor keeps its maps in it
+import 'fake-indexeddb/auto';
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 const { maps } = vi.hoisted(() => ({ maps: [] as { remove: Mock; setStyle: Mock }[] }));
