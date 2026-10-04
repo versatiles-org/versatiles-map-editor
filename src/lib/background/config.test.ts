@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchFontFaces, type FontFaceInfo } from '@versatiles/style';
+import { readFileSync } from 'fs';
 import { config, DEFAULT_CONFIG, loadConfig, resolveConfig } from './config.svelte.js';
+import { parseJsonc } from './jsonc.js';
 import { COLOR_SCHEMES } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace } from './fonts.js';
 
@@ -42,8 +44,10 @@ describe('resolveConfig', () => {
 	it('offers each color, scheme and face once, which the pickers need', () => {
 		const repeated = { ...ci, colors: ['#003366', '#E30613', '#003366', '#e30613'] };
 		expect(resolveConfig({ colorSchemes: [repeated] }).colorSchemes[0].colors).toStrictEqual(['#003366', '#e30613']);
-		// two schemes with one id: invalid
-		expect(() => resolveConfig({ colorSchemes: [ci, { ...ci, name: 'Other' }] })).toThrow('is used twice');
+		// two schemes with one id: invalid, so the predefined ones are offered
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		expect(resolveConfig({ colorSchemes: [ci, { ...ci, name: 'Other' }] }).colorSchemes).toStrictEqual(COLOR_SCHEMES);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"colorSchemes"'), expect.stringContaining('used twice'));
 		// one with the id of a predefined scheme replaces it
 		const own = { id: COLOR_SCHEMES[0].id, name: 'Own', colors: ['#000000'] };
 		const schemes = resolveConfig({ colorSchemes: [own] }).colorSchemes;
@@ -72,7 +76,8 @@ describe('resolveConfig', () => {
 		expect(fonts).toStrictEqual([unknownFace('my_font')]);
 	});
 
-	it('rejects invalid files', () => {
+	it('ignores invalid fields with a warning, and keeps the valid ones', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const invalid = [
 			[],
 			'text',
@@ -80,9 +85,43 @@ describe('resolveConfig', () => {
 			{ colorSchemes: [{ name: 'x', colors: ['#000000'] }] },
 			{ colorSchemes: [{ id: 'x', name: 'x', colors: [] }] },
 			{ colorSchemes: [{ id: 'x', name: 'x', colors: ['red'] }] },
+			{ replaceDefaultSchemes: 'yes' },
 			{ fonts: [1] }
 		];
-		for (const file of invalid) expect(() => resolveConfig(file)).toThrow();
+		for (const file of invalid) {
+			warn.mockClear();
+			expect(resolveConfig(file)).toStrictEqual(DEFAULT_CONFIG);
+			expect(warn).toHaveBeenCalledTimes(1);
+		}
+		// one invalid field does not discard the others
+		const config = resolveConfig({ colorSchemes: [ci], fonts: 'lato_bold', replaceDefaultSchemes: true });
+		expect(config.colorSchemes.map((s) => s.id)).toStrictEqual(['ci']);
+		expect(config.fonts).toStrictEqual(FALLBACK_FONTS);
+	});
+
+	it('warns about unknown fields, e.g. misspelled ones', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		expect(resolveConfig({ colourSchemes: [ci] })).toStrictEqual(DEFAULT_CONFIG);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"colourSchemes"'));
+	});
+});
+
+describe('the default configuration file', () => {
+	it('has every field commented out at its default, so it changes nothing', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const text = readFileSync('static/map-editor.config.jsonc', 'utf-8');
+		expect(resolveConfig(parseJsonc(text))).toStrictEqual(DEFAULT_CONFIG);
+		expect(warn).not.toHaveBeenCalled();
+		// and every field without its comment marks is valid
+		const uncommented = text.replace(/^(\s*)\/\/ ("\w+":.*)$/gm, '$1$2');
+		expect(Object.keys(parseJsonc(uncommented) as object)).toStrictEqual([
+			'colorSchemes',
+			'replaceDefaultSchemes',
+			'fonts',
+			'replaceDefaultFonts'
+		]);
+		resolveConfig(parseJsonc(uncommented));
+		expect(warn).not.toHaveBeenCalled();
 	});
 });
 
@@ -96,23 +135,28 @@ describe('loadConfig', () => {
 			})
 		);
 
-	it('loads the file and the faces of the tile server', async () => {
-		respond(new Response(JSON.stringify({ colorSchemes: [ci], replaceDefaultSchemes: true })));
-		await loadConfig('https://example.org/map-editor.config.json');
+	it('loads the file, with comments, and the faces of the tile server', async () => {
+		const text = `{
+			// the corporate colors
+			"colorSchemes": ${JSON.stringify([ci])},
+			"replaceDefaultSchemes": true, // only them
+		}`;
+		respond(new Response(text));
+		await loadConfig('https://example.org/map-editor.config.jsonc');
 		expect(config.current.colorSchemes.map((s) => s.id)).toStrictEqual(['ci']);
 		expect(config.current.fonts).toStrictEqual(server);
 	});
 
 	it('offers the faces of the tile server without a file', async () => {
 		respond(new Response('not found', { status: 404 }));
-		await loadConfig('https://example.org/map-editor.config.json');
+		await loadConfig('https://example.org/map-editor.config.jsonc');
 		expect(config.current).toStrictEqual({ colorSchemes: COLOR_SCHEMES, fonts: server });
 	});
 
 	it('offers a few regular faces without the list of the tile server', async () => {
 		vi.mocked(fetchFontFaces).mockResolvedValue(undefined);
 		respond(new Response('not found', { status: 404 }));
-		await loadConfig('https://example.org/map-editor.config.json');
+		await loadConfig('https://example.org/map-editor.config.jsonc');
 		expect(config.current.fonts).toStrictEqual(FALLBACK_FONTS);
 	});
 

@@ -5,3 +5,6 @@ package.json
 playwright-tests/__snapshots__/
 packages/*/dist/
 packages/*/package.json
+
+# a file for people to read and edit: its blank lines between commented-out fields stay
+static/map-editor.config.jsonc

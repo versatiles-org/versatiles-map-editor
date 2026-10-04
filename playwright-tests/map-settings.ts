@@ -507,13 +507,15 @@ test('choosing a color scheme', async ({ page }) => {
 });
 
 test('color schemes and fonts of an organisation', async ({ page }) => {
-	await page.route('**/map-editor.config.json', (route) =>
+	// JSON with comments, like the default file
+	await page.route('**/map-editor.config.jsonc', (route) =>
 		route.fulfill({
-			json: {
-				colorSchemes: [{ id: 'ci', name: 'Corporate', colors: ['#003366', '#e30613', '#f5a800'] }],
-				replaceDefaultSchemes: true,
-				fonts: ['lato_bold']
-			}
+			body: `{
+				// the corporate identity
+				"colorSchemes": [{ "id": "ci", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
+				"replaceDefaultSchemes": true, /* only them */
+				"fonts": ["lato_bold"],
+			}`
 		})
 	);
 	await page.goto('/');

@@ -1,0 +1,29 @@
+// Configuration of the VersaTiles Map Editor on this web server.
+// The editor reads this file when it starts, so changes need no rebuild.
+// Every field is optional: without it, or with an invalid value, the default is used, and the
+// browser console names the invalid field. Comments (// and /* */) are allowed.
+{
+	// ---- Colors -----------------------------------------------------------------------------
+
+	// Color schemes offered in the color picker, before the predefined ones
+	// (bright, muted, okabe-ito, set1, dark2, pastel1). Each id once; a scheme with the id of a
+	// predefined one replaces it. Colors as "#rrggbb".
+	// Default: none
+	// "colorSchemes": [{ "id": "corporate", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
+
+	// Offer only the color schemes above, not the predefined ones.
+	// Default: false
+	// "replaceDefaultSchemes": false,
+
+	// ---- Fonts ------------------------------------------------------------------------------
+
+	// Font faces offered first for labels, by their glyph names on the tile server, e.g.
+	// "lato_bold". Faces the tile server does not have are skipped, with a warning in the
+	// browser console.
+	// Default: none (all faces of the tile server are offered)
+	// "fonts": ["open_sans_regular", "open_sans_bold"],
+
+	// Offer only the fonts above.
+	// Default: false
+	// "replaceDefaultFonts": false
+}

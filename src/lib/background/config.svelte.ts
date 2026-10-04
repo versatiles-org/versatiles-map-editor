@@ -1,13 +1,15 @@
 import { fetchFontFaces } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
+import { parseJsonc } from './jsonc.js';
 import { TILE_SERVER } from './map_style.js';
 
 /**
  * An optional configuration file of an editor instance, next to the page, so an organisation can
  * offer its own color schemes and fonts (e.g. its corporate identity) without rebuilding the editor.
+ * JSON with comments, see `parseJsonc`.
  */
-export const CONFIG_URL = 'map-editor.config.json';
+export const CONFIG_URL = 'map-editor.config.jsonc';
 
 /** The content of the configuration file. Every field is optional. */
 export interface ConfigFile {
@@ -43,12 +45,7 @@ export const config = new (class {
  */
 export async function loadConfig(url = new URL(CONFIG_URL, document.baseURI).href): Promise<void> {
 	const [file, fonts] = await Promise.all([loadFile(url), loadFonts()]);
-	try {
-		config.current = resolveConfig(file ?? {}, fonts);
-	} catch (error) {
-		console.warn(`Invalid editor configuration in ${url}`, error);
-		config.current = resolveConfig({}, fonts);
-	}
+	config.current = resolveConfig(file ?? {}, fonts);
 }
 
 /** The content of the configuration file, or undefined without one. */
@@ -57,7 +54,7 @@ async function loadFile(url: string): Promise<unknown> {
 		const response = await fetch(url);
 		// no file: no configuration
 		if (!response.ok) return undefined;
-		return await response.json();
+		return parseJsonc(await response.text());
 	} catch (error) {
 		console.warn(`Failed to load the editor configuration from ${url}`, error);
 		return undefined;
@@ -74,21 +71,57 @@ async function loadFonts(): Promise<FontFace[] | undefined> {
 	}
 }
 
+/** The fields of the configuration file, to warn about unknown ones, e.g. misspelled. */
+const FIELDS: (keyof ConfigFile)[] = ['colorSchemes', 'replaceDefaultSchemes', 'fonts', 'replaceDefaultFonts'];
+
 /**
  * Check the file and merge it with the defaults. `fonts`: the faces of the tile server, if its list
- * could be loaded. Throws if the file is invalid.
+ * could be loaded. A field that is invalid gets its default, with a warning in the console, so one
+ * mistake does not discard the whole file.
  */
 export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
-	if (typeof file !== 'object' || file === null || Array.isArray(file)) throw new Error('Not an object');
-	const {
-		colorSchemes = [],
-		replaceDefaultSchemes,
-		fonts: configuredFonts = [],
-		replaceDefaultFonts
-	} = file as ConfigFile;
+	if (typeof file !== 'object' || file === null || Array.isArray(file)) {
+		console.warn('The editor configuration is not an object and is ignored');
+		file = {};
+	}
+	const fields = file as Record<string, unknown>;
+	for (const name of Object.keys(fields)) {
+		if (!(FIELDS as string[]).includes(name)) console.warn(`Unknown field "${name}" in the editor configuration`);
+	}
+	/** The checked value of a field, or undefined if it is missing or invalid. */
+	function read<T>(name: keyof ConfigFile, check: (value: unknown) => T): T | undefined {
+		if (fields[name] === undefined) return undefined;
+		try {
+			return check(fields[name]);
+		} catch (error) {
+			console.warn(`Invalid field "${name}" in the editor configuration, which is ignored:`, (error as Error).message);
+			return undefined;
+		}
+	}
 
-	if (!Array.isArray(colorSchemes)) throw new Error('"colorSchemes" must be an array');
-	const schemes = colorSchemes.map((scheme, i): ColorScheme => {
+	const schemes = read('colorSchemes', checkColorSchemes) ?? [];
+	const replaceSchemes = read('replaceDefaultSchemes', checkBoolean) ?? false;
+	const configuredFonts = read('fonts', checkFonts) ?? [];
+	const replaceFonts = read('replaceDefaultFonts', checkBoolean) ?? false;
+
+	return {
+		colorSchemes:
+			replaceSchemes && schemes.length > 0
+				? schemes
+				: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))],
+		fonts: resolveFonts(configuredFonts, replaceFonts, fonts)
+	};
+}
+
+function checkBoolean(value: unknown): boolean {
+	if (typeof value !== 'boolean') throw new Error('must be true or false');
+	return value;
+}
+
+function checkColorSchemes(value: unknown): ColorScheme[] {
+	if (!Array.isArray(value)) throw new Error('must be a list');
+	const colorSchemes = value as Partial<ColorScheme>[];
+	return colorSchemes.map((scheme, i): ColorScheme => {
 		const { id, name, colors } = scheme ?? {};
 		if (typeof id !== 'string' || !id) throw new Error(`colorSchemes[${i}].id must be a text`);
 		if (typeof name !== 'string' || !name) throw new Error(`colorSchemes[${i}].name must be a text`);
@@ -101,18 +134,13 @@ export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
 		// each once, as the picker shows them
 		return { id, name, colors: [...new Set(colors.map((c) => c.toLowerCase()))] };
 	});
+}
 
-	if (!Array.isArray(configuredFonts) || !configuredFonts.every((f) => typeof f === 'string')) {
-		throw new Error('"fonts" must be a list of glyph names');
+function checkFonts(value: unknown): string[] {
+	if (!Array.isArray(value) || !value.every((f) => typeof f === 'string')) {
+		throw new Error('must be a list of glyph names');
 	}
-
-	return {
-		colorSchemes:
-			replaceDefaultSchemes && schemes.length > 0
-				? schemes
-				: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))],
-		fonts: resolveFonts(configuredFonts, replaceDefaultFonts === true, fonts)
-	};
+	return value;
 }
 
 /**
