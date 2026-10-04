@@ -121,6 +121,59 @@ describe('resolveConfig', () => {
 		expect(warn).toHaveBeenCalledTimes(4);
 	});
 
+	it('takes the start view, and ignores an invalid one', () => {
+		expect(resolveConfig({ startView: [9.7, 53.4, 10.3, 53.7] }).startView).toStrictEqual([9.7, 53.4, 10.3, 53.7]);
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		for (const startView of [[10, 53, 9, 54], [9, 53, 10], 'Hamburg']) {
+			expect(resolveConfig({ startView }).startView).toBeUndefined();
+		}
+		expect(warn).toHaveBeenCalledTimes(3);
+	});
+
+	it('gives new maps the starting background, in the default language unless it sets one', () => {
+		const start = (file: object) => resolveConfig(file).startBackground;
+		// the editor's default background is not stored
+		expect(start({})).toBeUndefined();
+		expect(start({ defaultLanguage: 'user' })).toBeUndefined();
+		expect(start({ defaultLanguage: 'de' })).toStrictEqual({ builder: 'osm', options: { text: { language: 'de' } } });
+		expect(start({ startBackground: { builder: 'osm', options: { theme: 'gray' } } })).toStrictEqual({
+			builder: 'osm',
+			options: { theme: 'gray', text: { language: 'user' } }
+		});
+		const french = { builder: 'osm', options: { text: { language: 'fr' } } };
+		expect(start({ startBackground: french, defaultLanguage: 'de' })).toStrictEqual(french);
+		// the imagery alone has no labels
+		const imagery = { builder: 'satellite', options: { osmOverlay: false } };
+		expect(start({ startBackground: imagery, defaultLanguage: 'de' })).toStrictEqual(imagery);
+	});
+
+	it('ignores a starting background or a language that the map cannot have', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		for (const startBackground of [
+			'gray',
+			{ builder: 'google', options: {} },
+			{ builder: 'osm', options: [] },
+			{ builder: 'osm', options: { theme: 'no such theme' } }
+		]) {
+			expect(resolveConfig({ startBackground }).startBackground).toBeUndefined();
+		}
+		for (const defaultLanguage of ['German', 'DE', 7]) {
+			expect(resolveConfig({ defaultLanguage }).startBackground).toBeUndefined();
+		}
+		expect(warn).toHaveBeenCalledTimes(7);
+	});
+
+	it('offers the default color scheme first, which the color picker takes', () => {
+		const ids = (file: object) => resolveConfig(file).colorSchemes.map(({ id }) => id);
+		expect(ids({ defaultColorScheme: 'dark2' })[0]).toBe('dark2');
+		expect(ids({ colorSchemes: [ci], defaultColorScheme: 'muted' }).slice(0, 2)).toStrictEqual(['muted', 'ci']);
+		expect(ids({ defaultColorScheme: 'dark2' })).toHaveLength(COLOR_SCHEMES.length);
+		// only one that is offered
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		expect(ids({ colorSchemes: [ci], replaceDefaultSchemes: true, defaultColorScheme: 'muted' })).toStrictEqual(['ci']);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"defaultColorScheme"'), expect.stringContaining('ci'));
+	});
+
 	it('warns about unknown fields, e.g. misspelled ones', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		expect(resolveConfig({ colourSchemes: [ci] })).toStrictEqual(DEFAULT_CONFIG);
@@ -139,8 +192,12 @@ describe('the default configuration file', () => {
 		expect(Object.keys(parseJsonc(uncommented) as object)).toStrictEqual([
 			'tileServer',
 			'geocoder',
+			'startView',
+			'startBackground',
+			'defaultLanguage',
 			'colorSchemes',
 			'replaceDefaultSchemes',
+			'defaultColorScheme',
 			'fonts',
 			'replaceDefaultFonts'
 		]);

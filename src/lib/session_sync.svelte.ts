@@ -4,6 +4,7 @@ import { SessionStore, type CurrentSession, type StoredSession } from './session
 import { notify } from './notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
 import { countTypes } from './element/type_names.js';
+import { config, configReady } from './background/index.js';
 
 /** How many of the most recent sessions are kept, listed, and compared with the map of a link. */
 const RECENT = 10;
@@ -52,6 +53,13 @@ function encodeStep(state: MapState): string {
  * keeps the tab's session (its id is in `sessionStorage`); a duplicated tab gets a copy of it.
  * The storage keeps the `RECENT` most recently changed maps, and those that tabs have open.
  */
+/** A new, empty map, with the starting background of the configuration of this instance. */
+async function newMapState(): Promise<MapState> {
+	await configReady();
+	const background = config.current.startBackground;
+	return background ? { elements: [], meta: { background } } : { elements: [] };
+}
+
 export class SessionSync {
 	readonly #store: SessionStore | undefined;
 	readonly #removeHash: () => void;
@@ -219,7 +227,6 @@ export class SessionSync {
 	public async newMap() {
 		const doc = this.#doc;
 		if (!doc) return;
-		await this.#load(doc, { elements: [] });
 		await this.#open({ kind: 'new' });
 	}
 
@@ -282,6 +289,8 @@ export class SessionSync {
 				case 'new':
 					this.#setSession(undefined);
 					this.#title = undefined;
+					// in the current view, e.g. the start view
+					await this.#load(doc, await newMapState(), { keepView: true });
 					this.#first = encodeStep(doc.getState());
 					break;
 			}
@@ -295,10 +304,10 @@ export class SessionSync {
 	 * Load a map into the document. Its moves are not stored: they would give the camera to the
 	 * session open before, and each reload would store the camera again, slightly changed.
 	 */
-	async #load(doc: MapDocumentInteractive, state: MapState) {
+	async #load(doc: MapDocumentInteractive, state: MapState, options?: { keepView?: boolean }) {
 		this.#loading = true;
 		try {
-			await doc.loadState(state);
+			await doc.loadState(state, options);
 		} finally {
 			this.#loading = false;
 		}

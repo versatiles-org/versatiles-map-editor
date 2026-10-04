@@ -152,12 +152,16 @@ packing), then add the workflow as trusted publisher in the package settings on 
 
 ## Configuration
 
-An organisation running the editor can use its own tile server and geocoder, and offer its own color schemes and fonts, e.g. its corporate identity. Put them into `map-editor.config.jsonc` next to the editor's `index.html`. In this repository it is [`static/map-editor.config.jsonc`](static/map-editor.config.jsonc), which lists every field with its default, commented out. No rebuild is needed. The file is JSON with comments (`//` and `/* */`, and a comma after the last item is allowed). Every field is optional:
+An organisation running the editor can use its own tile server and geocoder, start new maps where and how it likes, and offer its own color schemes and fonts, e.g. its corporate identity. Put them into `map-editor.config.jsonc` next to the editor's `index.html`. In this repository it is [`static/map-editor.config.jsonc`](static/map-editor.config.jsonc), which lists every field with its default, commented out. No rebuild is needed. The file is JSON with comments (`//` and `/* */`, and a comma after the last item is allowed). Every field is optional:
 
 ```jsonc
 {
 	"tileServer": "https://tiles.example.org",
 	"geocoder": "https://geocode.example.org/api",
+	"startView": [9.73, 53.39, 10.33, 53.74],
+	"startBackground": { "builder": "osm", "options": { "theme": "gray" } },
+	"defaultLanguage": "de",
+	"defaultColorScheme": "corporate",
 	"colorSchemes": [{ "id": "corporate", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
 	"replaceDefaultSchemes": false,
 	"fonts": ["open_sans_regular", "lato_bold"],
@@ -166,6 +170,8 @@ An organisation running the editor can use its own tile server and geocoder, and
 ```
 
 - `tileServer` (default `https://tiles.versatiles.org`) serves the background map, the satellite imagery, the symbols (sprites) and the fonts (glyphs), with the same vector tiles (Shortbread) and `assets/` as tiles.versatiles.org. `geocoder` (default `https://geocode.versatiles.org/api`) is the address search, with the API of [Photon](https://github.com/komoot/photon). Both apply to the editor and the viewer, and only this file sets them, never a shared map.
+- `startView` (`[west, south, east, north]`) is what a new map shows, instead of the country of the user (guessed from the time zone, in the EU and the US) or the whole world. `startBackground` is the background of a new map, as in `.mapjson` files, and `defaultLanguage` the language of its labels (`"user"`: of the browser, the default; `"local"`; or a code like `"de"`), unless the starting background sets one. A new map stores its background like a chosen one (unless it is the editor's default), so its links look the same on every server.
+- `defaultColorScheme` is the `id` of the scheme that the color picker offers by default (one of the configured or predefined schemes); without it, the first one.
 - `colorSchemes` are offered in the color picker before the predefined schemes. Each `id` may be used once; a scheme with the `id` of a predefined one replaces it. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
 - The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and of each marker. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.
 

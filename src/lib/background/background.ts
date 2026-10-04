@@ -387,6 +387,20 @@ function setSatelliteLayers(overlay: Options, change: Partial<BackgroundSettings
 	}
 }
 
+/**
+ * The background of a new map, e.g. of the configuration of this editor instance: `base` with the
+ * labels in `language`, unless `base` sets a language itself. Undefined for the editor's default
+ * background, which is not stored.
+ */
+export function startingBackground(
+	base: StateBackground = DEFAULT_BACKGROUND,
+	language?: string
+): StateBackground | undefined {
+	const text = overlayOf(base).text;
+	if (!language || (isObject(text) && typeof text.language === 'string')) return minimizeBackground(base);
+	return changeSettings(base, { language });
+}
+
 /** The smallest options that build the same map, or undefined for the editor's default background. */
 export function minimizeBackground({ builder, options }: StateBackground): StateBackground | undefined {
 	const minimized =

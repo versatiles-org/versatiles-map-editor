@@ -8,6 +8,7 @@ import { SessionStore } from './session_store.js';
 import { SessionSync } from './session_sync.svelte.js';
 import { notify } from './notify.svelte.js';
 import { FakeLockManager } from './__mocks__/locks.js';
+import { config, DEFAULT_CONFIG } from './background/index.js';
 
 vi.mock('./notify.svelte.js', () => ({ notify: vi.fn() }));
 
@@ -310,6 +311,24 @@ describe('SessionSync', () => {
 			expect(elements).toHaveLength(2);
 			expect(elements).toContainEqual([0, 1]);
 			expect(elements).toContainEqual([1]);
+		});
+
+		it('starts a new map in the current view, with the starting background of the configuration', async () => {
+			const background = { builder: 'osm' as const, options: { theme: 'gray', text: { language: 'de' } } };
+			config.current = { ...DEFAULT_CONFIG, startBackground: background };
+			try {
+				await sync.attach(doc, await sync.prepare(''));
+				expect(doc.getState().meta?.background).toStrictEqual(background);
+				await doc.setBackground(undefined);
+				const fitBounds = vi.mocked(map.fitBounds);
+				fitBounds.mockClear();
+				await sync.newMap();
+				expect(doc.getState().meta?.background).toStrictEqual(background);
+				// in the current view, not the whole world, as a map without camera, frame and elements shows
+				expect(fitBounds).not.toHaveBeenCalled();
+			} finally {
+				config.current = DEFAULT_CONFIG;
+			}
 		});
 
 		it('keeps the stored cameras when opening a map, of it and of the map before', async () => {

@@ -1,7 +1,9 @@
-import { fetchFontFaces } from '@versatiles/style';
+import { fetchFontFaces, osm, satellite, type OsmOptions, type SatelliteOptions } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { parseJsonc } from './jsonc.js';
+import { startingBackground } from './background.js';
+import { sanitizeFrame, type Bounds, type StateBackground } from '@versatiles/map-state';
 
 /**
  * An optional configuration file of an editor instance, next to the page, so an organisation can
@@ -24,6 +26,14 @@ export interface ConfigFile {
 	tileServer?: string;
 	/** The URL of the geocoder of the address search, like geocode.versatiles.org/api. */
 	geocoder?: string;
+	/** What a new map shows: [west, south, east, north]. Without it, the country of the user, if known. */
+	startView?: Bounds;
+	/** The background of a new map, as in .mapjson files. */
+	startBackground?: StateBackground;
+	/** The language of the labels of the background of a new map, unless `startBackground` sets one. */
+	defaultLanguage?: string;
+	/** The id of the color scheme that the color picker offers by default. */
+	defaultColorScheme?: string;
 	/**
 	 * Color schemes offered in the color picker, before the predefined ones. Each `id` once; one of
 	 * a predefined scheme replaces it. A color twice in a scheme is offered once.
@@ -40,6 +50,11 @@ export interface ConfigFile {
 export interface EditorConfig {
 	tileServer: string;
 	geocoder: string;
+	/** What a new map shows, see `ConfigFile`. */
+	startView: Bounds | undefined;
+	/** The background of a new map, with its language; undefined for the editor's default one. */
+	startBackground: StateBackground | undefined;
+	/** The default scheme first, which the color picker offers by default. */
 	colorSchemes: ColorScheme[];
 	/** The font faces offered for the map labels, grouped by family. */
 	fonts: FontFace[];
@@ -48,6 +63,8 @@ export interface EditorConfig {
 export const DEFAULT_CONFIG: EditorConfig = {
 	tileServer: DEFAULT_TILE_SERVER,
 	geocoder: DEFAULT_GEOCODER,
+	startView: undefined,
+	startBackground: undefined,
 	colorSchemes: COLOR_SCHEMES,
 	fonts: FALLBACK_FONTS
 };
@@ -111,8 +128,12 @@ async function loadFonts(tileServer: string): Promise<FontFace[] | undefined> {
 const FIELDS: (keyof ConfigFile)[] = [
 	'tileServer',
 	'geocoder',
+	'startView',
+	'startBackground',
+	'defaultLanguage',
 	'colorSchemes',
 	'replaceDefaultSchemes',
+	'defaultColorScheme',
 	'fonts',
 	'replaceDefaultFonts'
 ];
@@ -150,11 +171,22 @@ function checkConfig(file: unknown): ConfigFile {
 	const checked: ConfigFile = {
 		tileServer: read('tileServer', checkUrl),
 		geocoder: read('geocoder', checkUrl),
+		startView: read('startView', checkStartView),
+		startBackground: read('startBackground', checkBackground),
+		defaultLanguage: read('defaultLanguage', checkLanguage),
 		colorSchemes: read('colorSchemes', checkColorSchemes),
 		replaceDefaultSchemes: read('replaceDefaultSchemes', checkBoolean),
 		fonts: read('fonts', checkFonts),
 		replaceDefaultFonts: read('replaceDefaultFonts', checkBoolean)
 	};
+	// one of the schemes that are offered
+	checked.defaultColorScheme = read('defaultColorScheme', (value) => {
+		const offered = buildConfig(checked).colorSchemes.map(({ id }) => id);
+		if (typeof value !== 'string' || !offered.includes(value)) {
+			throw new Error(`must be the id of an offered color scheme: ${offered.join(', ')}`);
+		}
+		return value;
+	});
 	return Object.fromEntries(Object.entries(checked).filter(([, value]) => value !== undefined));
 }
 
@@ -164,14 +196,23 @@ function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
 	const replaceSchemes = file.replaceDefaultSchemes ?? false;
 	const configuredFonts = file.fonts ?? [];
 	const replaceFonts = file.replaceDefaultFonts ?? false;
+	const offered =
+		replaceSchemes && schemes.length > 0
+			? schemes
+			: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))];
+	// the default first, as the color picker takes the first one
+	const first = offered.find(({ id }) => id === file.defaultColorScheme);
 
 	return {
 		tileServer: file.tileServer ?? DEFAULT_TILE_SERVER,
 		geocoder: file.geocoder ?? DEFAULT_GEOCODER,
-		colorSchemes:
-			replaceSchemes && schemes.length > 0
-				? schemes
-				: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))],
+		startView: file.startView,
+		// the vector map, in the language of the browser: the editor's default background
+		startBackground: startingBackground(
+			file.startBackground ?? { builder: 'osm', options: {} },
+			file.defaultLanguage ?? 'user'
+		),
+		colorSchemes: first ? [first, ...offered.filter((scheme) => scheme !== first)] : offered,
 		fonts: resolveFonts(configuredFonts, replaceFonts, fonts)
 	};
 }
@@ -187,6 +228,39 @@ function checkUrl(value: unknown): string {
 	}
 	if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`"${value}" is not an http(s) URL`);
 	return value.replace(/\/+$/, '');
+}
+
+function checkStartView(value: unknown): Bounds {
+	const bounds = sanitizeFrame(value);
+	if (!bounds) throw new Error('must be [west, south, east, north] in degrees, with west < east and south < north');
+	return bounds;
+}
+
+/** A background as in .mapjson files, which @versatiles/style can build. */
+function checkBackground(value: unknown): StateBackground {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('must be an object');
+	const { builder, options = {} } = value as Record<string, unknown>;
+	if (builder !== 'osm' && builder !== 'satellite') throw new Error('"builder" must be "osm" or "satellite"');
+	if (typeof options !== 'object' || options === null || Array.isArray(options)) {
+		throw new Error('"options" must be an object');
+	}
+	const background: StateBackground = { builder, options: options as Record<string, unknown> };
+	try {
+		// as getMapStyle builds it, which fails e.g. for an unknown theme
+		if (builder === 'osm') osm(background.options as OsmOptions);
+		else satellite(background.options as SatelliteOptions);
+	} catch (error) {
+		throw new Error(`invalid options: ${(error as Error).message}`, { cause: error });
+	}
+	return background;
+}
+
+/** "user" (the language of the browser), "local" (local names) or a language code, e.g. "de". */
+function checkLanguage(value: unknown): string {
+	if (typeof value !== 'string' || !/^(user|local|[a-z]{2,3})$/.test(value)) {
+		throw new Error('must be "user", "local" or a language code like "de"');
+	}
+	return value;
 }
 
 function checkBoolean(value: unknown): boolean {

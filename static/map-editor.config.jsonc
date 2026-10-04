@@ -14,6 +14,25 @@
 	// Default: "https://geocode.versatiles.org/api"
 	// "geocoder": "https://geocode.versatiles.org/api",
 
+	// ---- New maps ---------------------------------------------------------------------------
+
+	// What a new map shows when the editor opens it: [west, south, east, north] in degrees.
+	// Default: the country of the user (guessed from the time zone, in the EU and the US),
+	// else the whole world
+	// "startView": [-180, -85, 180, 85],
+
+	// The background of a new map, as in .mapjson files: the builder "osm" (the vector map) or
+	// "satellite", and the options of @versatiles/style, e.g. { "theme": "gray" }. Once chosen,
+	// it is the map's own background, which shared links keep on every server.
+	// Default: { "builder": "osm", "options": {} }
+	// "startBackground": { "builder": "osm", "options": {} },
+
+	// The language of the labels of the background map of a new map, unless the starting
+	// background sets one: "user" (the language of the browser), "local" (local names) or a
+	// language code, e.g. "de".
+	// Default: "user"
+	// "defaultLanguage": "user",
+
 	// ---- Colors -----------------------------------------------------------------------------
 
 	// Color schemes offered in the color picker, before the predefined ones
@@ -25,6 +44,11 @@
 	// Offer only the color schemes above, not the predefined ones.
 	// Default: false
 	// "replaceDefaultSchemes": false,
+
+	// The color scheme the color picker offers by default, by its id: one of the schemes above
+	// or a predefined one.
+	// Default: the first scheme offered
+	// "defaultColorScheme": "bright",
 
 	// ---- Fonts ------------------------------------------------------------------------------
 

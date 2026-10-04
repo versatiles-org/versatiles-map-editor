@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState } from '../packages/map-state/src/index.js';
-import { waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { drawElement, settledStoredState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 const OWN_SERVER = 'https://tiles.example.test';
 
@@ -42,3 +42,30 @@ for (const [page, path] of [
 		expect(requests.versatiles).toStrictEqual([]);
 	});
 }
+
+test('a new map starts in the configured view, with the starting background and color scheme', async ({ page }) => {
+	await page.route('**/map-editor.config.jsonc', (route) =>
+		route.fulfill({
+			body: `{
+				"startView": [9.73, 53.39, 10.33, 53.74], // Hamburg
+				"startBackground": { "builder": "osm", "options": { "theme": "gray" } },
+				"defaultLanguage": "de",
+				"defaultColorScheme": "dark2"
+			}`
+		})
+	);
+	await page.goto('/');
+	await waitForMapIsReady(page);
+
+	const center = await page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());
+	expect(center[0]).toBeCloseTo(10.03, 1);
+	expect(center[1]).toBeCloseTo(53.57, 1);
+
+	// the background of the map, stored with it, e.g. for a shared link
+	await drawElement(page, 'Marker');
+	const background = { builder: 'osm', options: { theme: 'gray', text: { language: 'de' } } };
+	expect((await settledStoredState(page)).meta?.background).toStrictEqual(background);
+
+	await page.getByLabel('Color').first().click();
+	await expect(page.getByRole('combobox', { name: 'Color scheme' })).toHaveValue('dark2');
+});

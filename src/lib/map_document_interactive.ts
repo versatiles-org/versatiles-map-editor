@@ -48,8 +48,8 @@ export class MapDocumentInteractive extends MapDocument {
 	}
 
 	/** Load a map, e.g. from a file, as a new start of the history. */
-	public async loadState(state: MapState) {
-		await super.loadState(state);
+	public async loadState(state: MapState, options: { keepView?: boolean } = {}) {
+		await super.loadState(state, options);
 		if (state) this.state.history.reset(state);
 	}
 

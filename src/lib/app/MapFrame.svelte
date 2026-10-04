@@ -24,6 +24,7 @@
 	import type { MapDocument } from '#lib/map_document.svelte.js';
 	import type { Box } from '#lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
+	import { config, configReady } from '#lib/background/index.js';
 	import type { SessionSync } from '#lib/session_sync.svelte.js';
 	import {
 		addAttribution,
@@ -226,11 +227,18 @@
 		return destroy;
 	});
 
-	/** Show the country of the user (from the time zone), when there is no map to show. */
+	/**
+	 * Show the start view of the configuration, else the country of the user (from the time zone),
+	 * when there is no map to show.
+	 */
 	async function showCountry(map: MaplibreMapType) {
-		// only needed without a map, so it is loaded only then
-		const { getCountryBoundingBox } = await import('./location.js');
-		const bbox = getCountryBoundingBox();
+		await configReady();
+		let bbox = config.current.startView;
+		if (!bbox) {
+			// only needed without a map, so it is loaded only then
+			const { getCountryBoundingBox } = await import('./location.js');
+			bbox = getCountryBoundingBox() ?? undefined;
+		}
 		if (bbox && !destroyed) map.fitBounds(bbox, { animate: false });
 	}
 
