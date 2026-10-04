@@ -1,5 +1,5 @@
 import { StylePart } from './abstract.svelte.js';
-import { Color } from '@versatiles/style';
+import { cssColor } from './css_color.js';
 import { type StateStyle, ARROW_NAMES, LINE_DEFAULTS, STROKE_STYLE_NAMES, hasArrow } from '@versatiles/map-state';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
@@ -122,7 +122,7 @@ export class LineStyle extends StylePart {
 			end: ARROW_NAMES[this.arrowEnd] ?? 'none',
 			size: this.arrowSize,
 			width: this.width,
-			color: Color.parse(this.color).asString()
+			color: cssColor(this.color)
 		};
 	}
 
@@ -130,7 +130,7 @@ export class LineStyle extends StylePart {
 		// a hidden outline is not drawn at all
 		if (!this.visible) return undefined;
 		return {
-			color: Color.parse(this.color).asString(),
+			color: cssColor(this.color),
 			width: this.width,
 			// the layer looks up the dash array by the stroke style
 			dash: this.dashed

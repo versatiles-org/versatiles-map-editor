@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { Color } from '@versatiles/style';
+import { parseColor } from '@versatiles/map-state';
 import { parseFillPatternName } from '../style/index.js';
 
 /** A repeating pattern of opacities (0–5 per pixel), shifted by `xf` per column and `yf` per row. */
@@ -24,7 +24,7 @@ export function fillPatternPixels(pattern: number, color: string): Uint8ClampedA
 	// a solid fill is a pattern without gaps
 	const fill = patternFills[pattern] ?? { xf: 1, yf: 1, pattern: '5' };
 	const alpha = fill.pattern.split('').map((c) => parseInt(c, 10) / 5);
-	const [r, g, b, a = 1] = Color.parse(color).to('srgb').asArray();
+	const { r, g, b, alpha: a } = parseColor(color) ?? { r: 0, g: 0, b: 0, alpha: 1 };
 
 	const data = new Uint8ClampedArray(PATTERN_SIZE * PATTERN_SIZE * 4);
 	for (let y = 0; y < PATTERN_SIZE; y++) {

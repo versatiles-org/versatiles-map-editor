@@ -1,5 +1,5 @@
 import { StylePart } from './abstract.svelte.js';
-import { Color } from '@versatiles/style';
+import { cssColor } from './css_color.js';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
@@ -256,7 +256,7 @@ export class SymbolStyle extends StylePart {
 			labelOpacity: text.opacity,
 			// none: the font of the background map, see `ElementRenderer.applyFonts`
 			...(this.font ? { font: this.font } : {}),
-			haloColor: Color.parse(this.haloColor).asString(),
+			haloColor: cssColor(this.haloColor),
 			position: this.getPosition()
 		};
 	}
