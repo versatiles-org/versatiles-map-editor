@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { EDITOR_NAME } from '#lib/version.js';
 	import MapEditor from '#lib/app/MapEditor.svelte';
 </script>
 
 <svelte:head>
+	<meta name="generator" content={EDITOR_NAME} />
 	<title>VersaTiles Map Editor</title>
 	<meta
 		name="description"

@@ -118,8 +118,11 @@ function docBundle(page: string | undefined): { plugin?: Plugin; manualChunks?: 
 	return { plugin, manualChunks };
 }
 const doc = docBundle(process.env.DOC_BUNDLE);
+// the version of the editor, e.g. in the archive of a release, see `src/lib/version.ts`
+const { version } = JSON.parse(readFileSync('package.json', 'utf-8')) as { version: string };
 
 export default defineConfig({
+	define: { __EDITOR_VERSION__: JSON.stringify(version) },
 	plugins: [
 		maplibreWorker(),
 		examples(),

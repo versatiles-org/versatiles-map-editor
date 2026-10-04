@@ -1,3 +1,6 @@
+// Replaced by Vite with the version of package.json, see vite.config.ts
+declare const __EDITOR_VERSION__: string;
+
 // Provided by the maplibreWorker plugin in vite.config.ts
 declare module 'virtual:maplibre-worker-url' {
 	const url: string;

@@ -1,0 +1,69 @@
+name: Release the editor
+
+# Builds the editor when a tag like "editor-v1.2.3" is pushed, and publishes the build as a ZIP
+# archive in a GitHub release, for others to run on their own web server. The tag must match the
+# version in package.json. ("map-state-v…" tags release the package, "v…" tags belong to the
+# editor's history before.)
+on:
+  push:
+    tags: ['editor-v*']
+
+jobs:
+  release:
+    name: Build and publish the archive
+    runs-on: ubuntu-latest
+    permissions:
+      # to create the release
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # all tags, for the notes since the release before
+          fetch-depth: 0
+
+      # No npm cache: a tag runs with the rights of the repository, so it does not use a cache that
+      # other runs have written (cache poisoning).
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Check that the tag matches the version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME#editor-v}" != "$version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in package.json"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - name: Install
+        run: npm ci
+
+      # The commit has passed CI on main; the unit tests and the types once more, as the build is published
+      - name: Test
+        run: npm run check-types && npm run test-unit
+
+      - name: Build
+        run: npm run build
+
+      # In a folder of its own, so unpacking the archive does not spread the files
+      - name: Pack the archive
+        run: |
+          mkdir release
+          cp -r build release/versatiles-map-editor
+          (cd release && zip -r -q "versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the notes since the release of the editor before, not since a tag of the package
+          previous="$(git describe --tags --abbrev=0 --match 'editor-v*' "$GITHUB_REF_NAME^" 2>/dev/null || true)"
+          gh release create "$GITHUB_REF_NAME" "release/versatiles-map-editor-$VERSION.zip" \
+            --title "Map Editor $VERSION" \
+            --verify-tag \
+            --generate-notes \
+            ${previous:+--notes-start-tag "$previous"}

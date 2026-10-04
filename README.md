@@ -179,11 +179,26 @@ A missing file leaves the defaults. An invalid field gets its default, so one mi
 
 ## Versions
 
-The editor itself has no versions: every change on `main` is deployed to GitHub Pages once CI has
-passed, and the git history is its record of changes. Only the package `@versatiles/map-state` has
-releases, with its own [changelog](packages/map-state/CHANGELOG.md). The tags `v2.x.x` come from the
-history of [`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte),
-from which the editor was extracted.
+Every change on `main` is deployed to GitHub Pages once CI has passed. For running the editor on
+another web server, it has releases: each is a ZIP archive of the build on the
+[releases page](https://github.com/versatiles-org/versatiles-map-editor/releases), with the notes of
+its changes. The version is in `package.json`, and the editor shows it as the tooltip of its title
+and in the `generator` of its pages.
+
+To release a new version of the editor:
+
+1. Raise the version in `package.json` (and with `npm install` in `package-lock.json`). Commit this
+   and push it to `main`.
+2. Tag the commit with `editor-v` and the version, and push the tag, e.g.
+   `git tag editor-v1.1.0 && git push origin editor-v1.1.0`.
+3. The workflow `release-editor.yml` checks that the tag matches the version, runs the unit tests,
+   builds the editor, and publishes `versatiles-map-editor-<version>.zip` in a GitHub release, with
+   the notes since the release before.
+
+The package `@versatiles/map-state` has releases of its own, with its own
+[changelog](packages/map-state/CHANGELOG.md), see above. The tags `v2.x.x` come from the history of
+[`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte), from which the
+editor was extracted.
 
 ## License
 

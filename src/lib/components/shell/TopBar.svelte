@@ -8,6 +8,7 @@
 	import { wholeWidth } from './whole_width.js';
 	// the logo of versatiles.org
 	import logo from './versatiles-logo.svg';
+	import { EDITOR_NAME } from '#lib/version.js';
 
 	/** The bar at the top of the editor: the menu, undo and redo, and sharing, which is what maps are made for. */
 	let {
@@ -41,7 +42,9 @@
 
 <header class="topbar">
 	<MainMenu {doc} {sync} {files} />
-	<h1 bind:this={title}><img src={logo} alt="" width="19" height="22" /><span>VersaTiles Map Editor</span></h1>
+	<h1 bind:this={title} title={EDITOR_NAME}>
+		<img src={logo} alt="" width="19" height="22" /><span>VersaTiles Map Editor</span>
+	</h1>
 	<span class="separator"></span>
 	<IconButton
 		icon="undo"

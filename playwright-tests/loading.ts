@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import { drawnElements, storedState, trackServerRequests, waitForMapIsReady, sidebar } from './lib/utils.js';
@@ -188,4 +189,14 @@ test('a loading indicator shows until the map has loaded', async ({ page }) => {
 	release();
 	await waitForMapIsReady(page);
 	await expect(page.getByText('Loading map…')).toHaveCount(0);
+});
+
+test('the editor and the viewer name their version', async ({ page }) => {
+	const { version } = JSON.parse(readFileSync('package.json', 'utf-8')) as { version: string };
+	const name = `VersaTiles Map Editor ${version}`;
+	await page.goto('/');
+	await expect(page.locator('meta[name="generator"]')).toHaveAttribute('content', name);
+	await expect(page.getByRole('heading', { name: 'VersaTiles Map Editor' })).toHaveAttribute('title', name);
+	await page.goto('/view/');
+	await expect(page.locator('meta[name="generator"]')).toHaveAttribute('content', name);
 });
