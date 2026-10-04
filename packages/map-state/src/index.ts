@@ -45,9 +45,7 @@ export {
 	removeLegendDefaults,
 	VIEWER_DEFAULTS,
 	VIEWER_CHOICES,
-	removeViewerDefaults,
-	sanitizeViewer,
-	sanitizeLabelMinZoom
+	removeViewerDefaults
 } from './profile.js';
 
 /**

@@ -62,8 +62,7 @@ The first release.
 - `viewer` in the metadata: what a shared or embedded map shows over it, and where: the address
   search (`SEARCH_POSITIONS` or "none"), the buttons for zooming (`NAVIGATION_POSITIONS` or "none")
   and the legend (`LEGEND_POSITIONS` or "none"). `VIEWER_DEFAULTS` (no search, the buttons at the
-  top right, the legend at the bottom left), `VIEWER_CHOICES`, `removeViewerDefaults` and
-  `sanitizeViewer`.
+  top right, the legend at the bottom left), `VIEWER_CHOICES` and `removeViewerDefaults`.
 - The `.mapjson` file format, with its version: `stateToMapJSON` writes a map state with
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first; `stateFromMapJSON` reads
   one, and throws a `MapJSONVersionError` for a newer version; it keeps only the valid parts of a
@@ -84,8 +83,7 @@ The first release.
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.
 - `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
-  `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata;
-  `sanitizeLabelMinZoom`.
+  `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata.
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).
