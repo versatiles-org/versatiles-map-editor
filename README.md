@@ -152,6 +152,8 @@ packing), then add the workflow as trusted publisher in the package settings on 
 
 ## Configuration
 
+To run the editor on your own web server, see [Running the editor on your own web server](docs/SELF_HOSTING.md): installing a release, the web server, all fields of the configuration, and the tile server and geocoder it needs.
+
 An organisation running the editor can use its own tile server and geocoder, start new maps where and how it likes, and offer its own color schemes and fonts, e.g. its corporate identity. Put them into `map-editor.config.jsonc` next to the editor's `index.html`. In this repository it is [`static/map-editor.config.jsonc`](static/map-editor.config.jsonc), which lists every field with its default, commented out. No rebuild is needed. The file is JSON with comments (`//` and `/* */`, and a comma after the last item is allowed). Every field is optional:
 
 ```jsonc

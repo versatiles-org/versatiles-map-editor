@@ -206,6 +206,29 @@ describe('the default configuration file', () => {
 	});
 });
 
+describe('the guide to running the editor (docs/SELF_HOSTING.md)', () => {
+	const guide = readFileSync('docs/SELF_HOSTING.md', 'utf-8');
+
+	it('has an example that the editor takes without a warning', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const example = /```jsonc\n([\s\S]*?)```/.exec(guide)![1];
+		const config = resolveConfig(parseJsonc(example));
+		expect(warn).not.toHaveBeenCalled();
+		expect(config.tileServer).toBe('https://tiles.example.org');
+		expect(config.colorSchemes[0].id).toBe('city');
+	});
+
+	it('describes every field of the configuration', () => {
+		const fields = Object.keys(
+			parseJsonc(
+				readFileSync('static/map-editor.config.jsonc', 'utf-8').replace(/^(\s*)\/\/ ("\w+":.*)$/gm, '$1$2')
+			) as object
+		);
+		const missing = fields.filter((field) => !guide.includes(`| \`${field}\``));
+		expect(missing).toStrictEqual([]);
+	});
+});
+
 describe('loadConfig', () => {
 	const respond = (response: Response | Error) =>
 		vi.stubGlobal(
