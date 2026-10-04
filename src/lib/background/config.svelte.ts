@@ -2,7 +2,6 @@ import { fetchFontFaces } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { parseJsonc } from './jsonc.js';
-import { TILE_SERVER } from './map_style.js';
 
 /**
  * An optional configuration file of an editor instance, next to the page, so an organisation can
@@ -11,8 +10,20 @@ import { TILE_SERVER } from './map_style.js';
  */
 export const CONFIG_URL = 'map-editor.config.jsonc';
 
+/** The tile server of the background map, its symbols and fonts, unless the configuration sets one. */
+export const DEFAULT_TILE_SERVER = 'https://tiles.versatiles.org';
+/** The geocoder of the address search, unless the configuration sets one. */
+export const DEFAULT_GEOCODER = 'https://geocode.versatiles.org/api';
+
 /** The content of the configuration file. Every field is optional. */
 export interface ConfigFile {
+	/**
+	 * The tile server: vector tiles, satellite imagery, sprites and glyphs, like
+	 * tiles.versatiles.org. Without a slash at the end.
+	 */
+	tileServer?: string;
+	/** The URL of the geocoder of the address search, like geocode.versatiles.org/api. */
+	geocoder?: string;
 	/**
 	 * Color schemes offered in the color picker, before the predefined ones. Each `id` once; one of
 	 * a predefined scheme replaces it. A color twice in a scheme is offered once.
@@ -27,25 +38,50 @@ export interface ConfigFile {
 }
 
 export interface EditorConfig {
+	tileServer: string;
+	geocoder: string;
 	colorSchemes: ColorScheme[];
 	/** The font faces offered for the map labels, grouped by family. */
 	fonts: FontFace[];
 }
 
-export const DEFAULT_CONFIG: EditorConfig = { colorSchemes: COLOR_SCHEMES, fonts: FALLBACK_FONTS };
+export const DEFAULT_CONFIG: EditorConfig = {
+	tileServer: DEFAULT_TILE_SERVER,
+	geocoder: DEFAULT_GEOCODER,
+	colorSchemes: COLOR_SCHEMES,
+	fonts: FALLBACK_FONTS
+};
 
 /** The configuration of this editor instance: `config.current`. Holds the defaults until the file is loaded. */
 export const config = new (class {
 	current: EditorConfig = $state.raw(DEFAULT_CONFIG);
 })();
 
+let ready: Promise<ConfigFile> | undefined;
+
 /**
- * Load the font faces of the tile server and the configuration file into `config`. Without the
- * list of fonts, a few regular faces are offered; without a (valid) file, the defaults.
+ * Load the configuration file next to the page into `config`, once: the editor and the viewer wait
+ * for it before they load anything from the tile server. Returns the checked file. The fonts are
+ * those that the file names, until `loadConfig` has the list of the tile server.
  */
-export async function loadConfig(url = new URL(CONFIG_URL, document.baseURI).href): Promise<void> {
-	const [file, fonts] = await Promise.all([loadFile(url), loadFonts()]);
-	config.current = resolveConfig(file ?? {}, fonts);
+export function configReady(): Promise<ConfigFile> {
+	ready ??= loadFile(new URL(CONFIG_URL, document.baseURI).href).then((file) => {
+		const checked = checkConfig(file ?? {});
+		config.current = buildConfig(checked);
+		return checked;
+	});
+	return ready;
+}
+
+/**
+ * Load the configuration file, then the font faces of its tile server, into `config`, e.g. for the
+ * pickers of the editor. Without the list of fonts, a few regular faces are offered; without a
+ * (valid) file, the defaults. `url`: another file than the one next to the page, e.g. in tests.
+ */
+export async function loadConfig(url?: string): Promise<void> {
+	const file = url ? checkConfig((await loadFile(url)) ?? {}) : await configReady();
+	const fonts = await loadFonts(buildConfig(file).tileServer);
+	config.current = buildConfig(file, fonts);
 }
 
 /** The content of the configuration file, or undefined without one. */
@@ -62,9 +98,9 @@ async function loadFile(url: string): Promise<unknown> {
 }
 
 /** The font faces of the tile server, or undefined if its list cannot be loaded. */
-async function loadFonts(): Promise<FontFace[] | undefined> {
+async function loadFonts(tileServer: string): Promise<FontFace[] | undefined> {
 	try {
-		return (await fetchFontFaces({ base: TILE_SERVER }))?.map(fromFontFaceInfo);
+		return (await fetchFontFaces({ base: tileServer }))?.map(fromFontFaceInfo);
 	} catch (error) {
 		console.warn('Failed to load the list of map fonts', error);
 		return undefined;
@@ -72,7 +108,14 @@ async function loadFonts(): Promise<FontFace[] | undefined> {
 }
 
 /** The fields of the configuration file, to warn about unknown ones, e.g. misspelled. */
-const FIELDS: (keyof ConfigFile)[] = ['colorSchemes', 'replaceDefaultSchemes', 'fonts', 'replaceDefaultFonts'];
+const FIELDS: (keyof ConfigFile)[] = [
+	'tileServer',
+	'geocoder',
+	'colorSchemes',
+	'replaceDefaultSchemes',
+	'fonts',
+	'replaceDefaultFonts'
+];
 
 /**
  * Check the file and merge it with the defaults. `fonts`: the faces of the tile server, if its list
@@ -80,6 +123,11 @@ const FIELDS: (keyof ConfigFile)[] = ['colorSchemes', 'replaceDefaultSchemes', '
  * mistake does not discard the whole file.
  */
 export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
+	return buildConfig(checkConfig(file), fonts);
+}
+
+/** The valid fields of the file, with a warning in the console for each other one. */
+function checkConfig(file: unknown): ConfigFile {
 	if (typeof file !== 'object' || file === null || Array.isArray(file)) {
 		console.warn('The editor configuration is not an object and is ignored');
 		file = {};
@@ -99,18 +147,46 @@ export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
 		}
 	}
 
-	const schemes = read('colorSchemes', checkColorSchemes) ?? [];
-	const replaceSchemes = read('replaceDefaultSchemes', checkBoolean) ?? false;
-	const configuredFonts = read('fonts', checkFonts) ?? [];
-	const replaceFonts = read('replaceDefaultFonts', checkBoolean) ?? false;
+	const checked: ConfigFile = {
+		tileServer: read('tileServer', checkUrl),
+		geocoder: read('geocoder', checkUrl),
+		colorSchemes: read('colorSchemes', checkColorSchemes),
+		replaceDefaultSchemes: read('replaceDefaultSchemes', checkBoolean),
+		fonts: read('fonts', checkFonts),
+		replaceDefaultFonts: read('replaceDefaultFonts', checkBoolean)
+	};
+	return Object.fromEntries(Object.entries(checked).filter(([, value]) => value !== undefined));
+}
+
+/** The configuration of the checked file, see `resolveConfig`. */
+function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
+	const schemes = file.colorSchemes ?? [];
+	const replaceSchemes = file.replaceDefaultSchemes ?? false;
+	const configuredFonts = file.fonts ?? [];
+	const replaceFonts = file.replaceDefaultFonts ?? false;
 
 	return {
+		tileServer: file.tileServer ?? DEFAULT_TILE_SERVER,
+		geocoder: file.geocoder ?? DEFAULT_GEOCODER,
 		colorSchemes:
 			replaceSchemes && schemes.length > 0
 				? schemes
 				: [...schemes, ...COLOR_SCHEMES.filter((scheme) => !schemes.some(({ id }) => id === scheme.id))],
 		fonts: resolveFonts(configuredFonts, replaceFonts, fonts)
 	};
+}
+
+/** An absolute http(s) URL, without a slash at its end, e.g. "https://tiles.example.org". */
+function checkUrl(value: unknown): string {
+	if (typeof value !== 'string') throw new Error('must be a URL like "https://example.org"');
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		throw new Error(`"${value}" is not a URL like "https://example.org"`);
+	}
+	if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`"${value}" is not an http(s) URL`);
+	return value.replace(/\/+$/, '');
 }
 
 function checkBoolean(value: unknown): boolean {

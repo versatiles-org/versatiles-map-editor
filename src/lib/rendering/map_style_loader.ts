@@ -7,6 +7,7 @@ import { themeColor } from './theme_color.js';
 import { addArrowImage } from './arrow_heads.js';
 import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets } from '../symbols_catalog.js';
+import { configReady } from '../background/index.js';
 
 /**
  * Loads the style of the map: the background map with the editor's layers, the font of the labels
@@ -112,6 +113,8 @@ export class MapStyleLoader {
 
 	async #load(background: StateBackground | undefined) {
 		const request = ++this.#request;
+		// The configuration of this instance, e.g. its tile server, before anything is loaded from it
+		await configReady();
 		// The sprite sheets with all symbols, loaded once for all maps. The style needs them for
 		// its sprites and for the places of the labels around the symbols.
 		await loadSymbols();

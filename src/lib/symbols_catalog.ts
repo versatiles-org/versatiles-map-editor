@@ -1,4 +1,4 @@
-import { TILE_SERVER } from './background/index.js';
+import { config } from './background/index.js';
 
 /** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
 export type IconAnchor =
@@ -29,7 +29,10 @@ export interface SymbolCatalog {
 	symbols: SymbolInfo[];
 }
 
-const SPRITES_URL = `${TILE_SERVER}/assets/sprites/`;
+/** The folder of the sprite sheets on the tile server of the configuration. */
+function spritesUrl(): string {
+	return `${config.current.tileServer}/assets/sprites/`;
+}
 
 // empty until the symbols of the server are loaded
 let catalog: SymbolCatalog = { sheets: [], symbols: [] };
@@ -108,7 +111,7 @@ interface SpriteImage {
 }
 
 async function fetchJSON<T>(path: string): Promise<T> {
-	const response = await fetch(SPRITES_URL + path);
+	const response = await fetch(spritesUrl() + path);
 	if (!response.ok) throw new Error(`${response.status} for ${path}`);
 	return (await response.json()) as T;
 }
@@ -125,7 +128,7 @@ export function anchorOf(center: unknown): IconAnchor {
 
 /** The sprite sheets for the map style, all with symbols. */
 export function spriteSheets(): { id: string; url: string }[] {
-	return catalog.sheets.map((id) => ({ id, url: SPRITES_URL + id }));
+	return catalog.sheets.map((id) => ({ id, url: spritesUrl() + id }));
 }
 
 /** All symbols, in the order of their sheets. */

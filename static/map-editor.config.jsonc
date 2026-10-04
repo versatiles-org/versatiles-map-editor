@@ -3,6 +3,17 @@
 // Every field is optional: without it, or with an invalid value, the default is used, and the
 // browser console names the invalid field. Comments (// and /* */) are allowed.
 {
+	// ---- Servers ----------------------------------------------------------------------------
+
+	// The tile server: vector tiles, satellite imagery, symbols (sprites) and fonts (glyphs).
+	// It must serve the same as tiles.versatiles.org: Shortbread vector tiles and its assets/.
+	// Default: "https://tiles.versatiles.org"
+	// "tileServer": "https://tiles.versatiles.org",
+
+	// The geocoder of the address search, with the API of Photon.
+	// Default: "https://geocode.versatiles.org/api"
+	// "geocoder": "https://geocode.versatiles.org/api",
+
 	// ---- Colors -----------------------------------------------------------------------------
 
 	// Color schemes offered in the color picker, before the predefined ones

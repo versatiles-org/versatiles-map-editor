@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getMapStyle } from './map_style.js';
+import { config, DEFAULT_CONFIG } from './config.svelte.js';
 import { osm, satellite } from '@versatiles/style';
 
 vi.mock('@versatiles/style', { spy: true });
@@ -38,6 +39,16 @@ describe('src/lib/background/map_style.ts', () => {
 				'boundary-state',
 				'street-motorway'
 			]);
+		});
+
+		it('takes the tile server from the configuration of this instance', () => {
+			config.current = { ...DEFAULT_CONFIG, tileServer: 'https://tiles.example.org' };
+			try {
+				getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.com' } } });
+				expect(osm).toHaveBeenLastCalledWith({ ...fixed, urls: { base: 'https://tiles.example.org' } });
+			} finally {
+				config.current = DEFAULT_CONFIG;
+			}
 		});
 
 		it('never takes the tile server from the options', () => {

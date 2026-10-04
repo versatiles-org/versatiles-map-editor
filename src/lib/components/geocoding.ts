@@ -2,10 +2,10 @@
  * Address and place search with our geocoding service (Photon API, see
  * https://github.com/versatiles-org/photon-stack). Shared by the editor's search, the
  * search in embedded maps and the address column of the CSV import, so it must not
- * depend on the editor.
+ * depend on the editor. The URL is that of the configuration (`geocoder`).
  */
 
-export const GEOCODER_URL = 'https://geocode.versatiles.org/api';
+import { config } from '../background/index.js';
 
 // Languages of the result labels supported by the service; others get the local names
 const LANGUAGES = ['de', 'en', 'fr'];
@@ -46,7 +46,7 @@ export async function geocode(query: string, options: GeocodingOptions = {}): Pr
 		if (options.zoom != null) params.set('zoom', String(Math.round(options.zoom)));
 	}
 
-	const response = await fetch(`${GEOCODER_URL}?${params}`, { signal: options.signal });
+	const response = await fetch(`${config.current.geocoder}?${params}`, { signal: options.signal });
 	if (!response.ok) throw new Error(`Geocoding failed: ${response.status} ${response.statusText}`);
 	const data = (await response.json()) as GeoJSON.FeatureCollection;
 	const results: GeocodingResult[] = [];

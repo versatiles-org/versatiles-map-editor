@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { formatLabel, geocode, GEOCODER_URL } from './geocoding.js';
+import { formatLabel, geocode } from './geocoding.js';
+import { config, DEFAULT_CONFIG, DEFAULT_GEOCODER } from '../background/index.js';
 
 function mockFetch(body: unknown, init: ResponseInit = {}) {
 	const fetch = vi.fn(async () => new Response(JSON.stringify(body), init));
@@ -9,13 +10,25 @@ function mockFetch(body: unknown, init: ResponseInit = {}) {
 
 function requestedParams(fetch: ReturnType<typeof mockFetch>): Record<string, string> {
 	const url = new URL((fetch.mock.calls[0] as unknown as [string])[0]);
-	expect(url.origin + url.pathname).toBe(GEOCODER_URL);
+	expect(url.origin + url.pathname).toBe(config.current.geocoder);
 	return Object.fromEntries(url.searchParams);
 }
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+	vi.unstubAllGlobals();
+	config.current = DEFAULT_CONFIG;
+});
 
 describe('geocode', () => {
+	it('asks the geocoder of the configuration', async () => {
+		const fetch = mockFetch({ features: [] });
+		await geocode('Berlin');
+		expect(new URL((fetch.mock.calls[0] as unknown as [string])[0]).origin).toBe(new URL(DEFAULT_GEOCODER).origin);
+		config.current = { ...DEFAULT_CONFIG, geocoder: 'https://geocode.example.org/photon' };
+		await geocode('Berlin');
+		expect((fetch.mock.calls[1] as unknown as [string])[0]).toMatch(/^https:\/\/geocode\.example\.org\/photon\?/);
+	});
+
 	const feature = (properties: Record<string, unknown>, coordinates: unknown = [13.4, 52.5]) => ({
 		type: 'Feature',
 		properties,

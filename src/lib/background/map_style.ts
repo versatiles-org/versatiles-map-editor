@@ -1,8 +1,7 @@
 import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpecification } from '@versatiles/style';
 import type { StateBackground } from '@versatiles/map-state';
 import { DEFAULT_BACKGROUND } from './background.js';
-
-export const TILE_SERVER = 'https://tiles.versatiles.org';
+import { config } from './config.svelte.js';
 
 /**
  * The streets, borders and labels over the imagery, as the options have them, with borders and
@@ -18,12 +17,13 @@ function overlayOf(options: SatelliteOptions): SatelliteOptions['osmOverlay'] {
 }
 
 /**
- * The style of the background map. The tile server and the projection are set by the editor,
- * never by the (shared) options, so a map cannot load tiles or fonts from other servers; so is the
+ * The style of the background map. The tile server (of the configuration, see `configReady`) and the
+ * projection are set by the editor, never by the (shared) options, so a map cannot load tiles or
+ * fonts from other servers; so is the
  * way the overlay of the imagery is drawn (see `overlayOf`).
  */
 export function getMapStyle(background: StateBackground = DEFAULT_BACKGROUND): StyleSpecification {
-	const fixed = { urls: { base: TILE_SERVER }, projection: 'mercator' as const };
+	const fixed = { urls: { base: config.current.tileServer }, projection: 'mercator' as const };
 	try {
 		if (background.builder === 'satellite') {
 			const options = background.options as SatelliteOptions;

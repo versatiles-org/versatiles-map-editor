@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fetchFontFaces, type FontFaceInfo } from '@versatiles/style';
 import { readFileSync } from 'fs';
-import { config, DEFAULT_CONFIG, loadConfig, resolveConfig } from './config.svelte.js';
+import {
+	config,
+	DEFAULT_CONFIG,
+	DEFAULT_GEOCODER,
+	DEFAULT_TILE_SERVER,
+	loadConfig,
+	resolveConfig
+} from './config.svelte.js';
 import { parseJsonc } from './jsonc.js';
 import { COLOR_SCHEMES } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace } from './fonts.js';
@@ -32,7 +39,7 @@ afterEach(() => vi.unstubAllGlobals());
 describe('resolveConfig', () => {
 	it('keeps the defaults for an empty file', () => {
 		expect(resolveConfig({})).toStrictEqual(DEFAULT_CONFIG);
-		expect(resolveConfig({}, server)).toStrictEqual({ colorSchemes: COLOR_SCHEMES, fonts: server });
+		expect(resolveConfig({}, server)).toStrictEqual({ ...DEFAULT_CONFIG, fonts: server });
 	});
 
 	it('offers the configured color schemes first, or only them', () => {
@@ -99,6 +106,21 @@ describe('resolveConfig', () => {
 		expect(config.fonts).toStrictEqual(FALLBACK_FONTS);
 	});
 
+	it('takes the servers, without a slash at the end', () => {
+		const config = resolveConfig({ tileServer: 'https://tiles.example.org/', geocoder: 'http://localhost:2322/api' });
+		expect(config.tileServer).toBe('https://tiles.example.org');
+		expect(config.geocoder).toBe('http://localhost:2322/api');
+		expect(resolveConfig({})).toMatchObject({ tileServer: DEFAULT_TILE_SERVER, geocoder: DEFAULT_GEOCODER });
+	});
+
+	it('ignores servers that are no http(s) URLs', () => {
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		for (const tileServer of ['tiles.example.org', 'ftp://tiles.example.org', 42, '']) {
+			expect(resolveConfig({ tileServer }).tileServer).toBe(DEFAULT_TILE_SERVER);
+		}
+		expect(warn).toHaveBeenCalledTimes(4);
+	});
+
 	it('warns about unknown fields, e.g. misspelled ones', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		expect(resolveConfig({ colourSchemes: [ci] })).toStrictEqual(DEFAULT_CONFIG);
@@ -115,6 +137,8 @@ describe('the default configuration file', () => {
 		// and every field without its comment marks is valid
 		const uncommented = text.replace(/^(\s*)\/\/ ("\w+":.*)$/gm, '$1$2');
 		expect(Object.keys(parseJsonc(uncommented) as object)).toStrictEqual([
+			'tileServer',
+			'geocoder',
 			'colorSchemes',
 			'replaceDefaultSchemes',
 			'fonts',
@@ -147,10 +171,29 @@ describe('loadConfig', () => {
 		expect(config.current.fonts).toStrictEqual(server);
 	});
 
+	it('loads the fonts from the tile server of the file', async () => {
+		respond(new Response('{ "tileServer": "https://tiles.example.org" }'));
+		await loadConfig('https://example.org/map-editor.config.jsonc');
+		expect(fetchFontFaces).toHaveBeenLastCalledWith({ base: 'https://tiles.example.org' });
+		expect(config.current.tileServer).toBe('https://tiles.example.org');
+	});
+
+	it('loads the file next to the page once, for the editor and the viewer', async () => {
+		// the real one, which the setup of the tests replaces
+		const { configReady } = await vi.importActual<typeof import('./config.svelte.js')>('./config.svelte.js');
+		const fetch = vi.fn(async () => new Response('{ "geocoder": "https://geocode.example.org/api" }'));
+		vi.stubGlobal('fetch', fetch);
+		const [first, second] = await Promise.all([configReady(), configReady()]);
+		expect(first).toBe(second);
+		expect(fetch).toHaveBeenCalledTimes(1);
+		expect(String((fetch.mock.calls[0] as unknown[])[0])).toMatch(/\/map-editor\.config\.jsonc$/);
+		expect(config.current.geocoder).toBe('https://geocode.example.org/api');
+	});
+
 	it('offers the faces of the tile server without a file', async () => {
 		respond(new Response('not found', { status: 404 }));
 		await loadConfig('https://example.org/map-editor.config.jsonc');
-		expect(config.current).toStrictEqual({ colorSchemes: COLOR_SCHEMES, fonts: server });
+		expect(config.current).toStrictEqual({ ...DEFAULT_CONFIG, fonts: server });
 	});
 
 	it('offers a few regular faces without the list of the tile server', async () => {
@@ -168,7 +211,7 @@ describe('loadConfig', () => {
 		await loadConfig('https://example.org/b.json');
 		respond(new TypeError('Failed to fetch'));
 		await loadConfig('https://example.org/c.json');
-		expect(config.current).toStrictEqual({ colorSchemes: COLOR_SCHEMES, fonts: server });
+		expect(config.current).toStrictEqual({ ...DEFAULT_CONFIG, fonts: server });
 		expect(warn).toHaveBeenCalledTimes(3);
 	});
 });

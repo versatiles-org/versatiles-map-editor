@@ -25,6 +25,13 @@ vi.mock('./lib/symbols_catalog.js', async (importOriginal) => {
 	return original;
 });
 
+// configReady() loads the configuration file next to the page, which unit tests do not have: the
+// defaults, at once. config.test.ts tests the loading itself.
+vi.mock('./lib/background/config.svelte.js', async (importOriginal) => ({
+	...(await importOriginal<typeof import('./lib/background/config.svelte.js')>()),
+	configReady: vi.fn(async () => ({}))
+}));
+
 // Svelte warns in development, e.g. about a binding that is not reactive. Its warnings are bugs, so
 // they fail the test. They are collected and checked after each test, since Svelte warns in
 // effects, where an error would not reach the test, and possibly after the test has finished.
