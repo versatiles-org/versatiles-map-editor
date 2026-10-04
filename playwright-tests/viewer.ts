@@ -36,7 +36,7 @@ test.describe('view page', () => {
 			map: { center: [13.4, 52.5], radius: 10000 },
 			elements: [{ type: 'marker', point: [13.4, 52.5] }]
 		});
-		await page.goto('/view#' + hash);
+		await page.goto('/view/#' + hash);
 		await waitForMapIsReady(page);
 		await expect(page.getByRole('button', { name: 'Undo' })).toHaveCount(0);
 		await expect(page.getByText('Open this page on a larger screen to edit the map.')).toHaveCount(0);
@@ -66,7 +66,7 @@ test.describe('viewer', () => {
 				{ type: 'circle', point: [13.5, 52.55], radius: 1000 }
 			]
 		};
-		await page.goto('/view#' + encodeState(state));
+		await page.goto('/view/#' + encodeState(state));
 		await waitForMapIsReady(page);
 		await waitForMapIsIdle(page);
 		const cursor = () =>
@@ -115,7 +115,7 @@ test('precision of a shared map', async ({ page }) => {
 	const shared = async () => {
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
 		// the shared map opens in the viewer
-		expect(new URL(link).pathname).toBe('/view');
+		expect(new URL(link).pathname).toBe('/view/');
 		const element = decodeState(new URL(link).hash.slice(1)).elements[0] as StateElementMarker;
 		return { point: element.point, length: link.length };
 	};
@@ -297,7 +297,7 @@ test('a marker with an opacity fades together with its halo', async ({ page }) =
 
 	/** The pixels around the marker, with the opacity of its symbols set to `opacity` if given. */
 	async function pixels(state: string, opacity?: number): Promise<number[]> {
-		await page.goto('/view#' + state);
+		await page.goto('/view/#' + state);
 		await waitForMapIsReady(page);
 		if (opacity !== undefined) {
 			await page.evaluate(
@@ -338,7 +338,7 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 	/** The red pixels of the flag of B, which is in front of the long label of A at the right of A. */
 	async function redOfB(labelOfA: string): Promise<number> {
 		await page.goto(
-			'/view#' +
+			'/view/#' +
 				encodeState({
 					map: { center: a, radius: 2000 },
 					elements: [
@@ -538,7 +538,7 @@ test('an area in front of a marker covers it', { tag: '@cross-browser' }, async 
 	};
 	/** The red pixels of the marker. */
 	async function redOfMarker(elements: MapState['elements']): Promise<number> {
-		await page.goto('/view#' + encodeState({ map: { center: point, radius: 2000 }, elements }));
+		await page.goto('/view/#' + encodeState({ map: { center: point, radius: 2000 }, elements }));
 		await page.reload();
 		await waitForMapIsReady(page);
 		const [x, y] = await project(page, point);
@@ -579,7 +579,7 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
 	async function colors(elements: MapState['elements']) {
 		const meta = { mapLabelsOnTop: true };
-		await page.goto('/view#' + encodeState({ map: { center: point, radius: 2000 }, meta, elements }));
+		await page.goto('/view/#' + encodeState({ map: { center: point, radius: 2000 }, meta, elements }));
 		await page.reload();
 		await waitForMapIsReady(page);
 		const [x, y] = await project(page, point);
@@ -612,7 +612,7 @@ test('with many labels, the marker in front keeps its label where labels overlap
 			{ type: 'marker', point, style: { color: '#ff0000', label: 'Red in front' } }
 		]
 	};
-	await page.goto('/view#' + encodeState(state));
+	await page.goto('/view/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, point);
 	const shown = () =>
@@ -647,7 +647,7 @@ test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
 			for (const layout of ['vertical', 'horizontal', 'inline'] as const) {
 				const legend = { font, layout, bold: font === 'serif', entries };
 				await page.goto(
-					'/view#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] })
+					'/view/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] })
 				);
 				await waitForMapIsReady(page);
 				const rows = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');

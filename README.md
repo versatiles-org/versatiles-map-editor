@@ -32,7 +32,7 @@ The code is in `src/lib`. `map_document*.ts` hold the map with its elements, leg
 background. Next to them are the modules that several folders share.
 
 - `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
-  viewer (`/view`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`src/lib/session_sync.svelte.ts`), the layout and the theme
+  viewer (`/view/`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`src/lib/session_sync.svelte.ts`), the layout and the theme
 
 - `components/`: the Svelte components: `ui/` generic controls, `pickers/` for a color, a font or
   a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`, and
@@ -113,10 +113,10 @@ Sized by the bundle's own source map: **1354.2 KB** raw, **382 KB** gzipped, acr
 
 ## Embedding
 
-The read-only viewer at `/view` reads the map from the URL hash, so it can be embedded in an `<iframe>`:
+The read-only viewer at `/view/` (the folder `view/` next to the editor, so it needs no rewrite rules on a web server, also in a subfolder) reads the map from the URL hash, so it can be embedded in an `<iframe>`:
 
 ```html
-<iframe src="https://your-host/view#<state-hash>" style="width: 600px; height: 600px;"></iframe>
+<iframe src="https://your-host/view/#<state-hash>" style="width: 600px; height: 600px;"></iframe>
 ```
 
 The state can alternatively be provided via the iframe's `data` attribute. The editor (`/`) takes the same hash, e.g. to edit a shared map further: it opens the map as a new one in the browser storage and removes the hash from the URL.

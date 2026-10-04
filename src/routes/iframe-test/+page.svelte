@@ -46,7 +46,7 @@
 			}
 		]
 	};
-	const src = '/view#' + encodeState(state);
+	const src = 'view/#' + encodeState(state);
 </script>
 
 <table>

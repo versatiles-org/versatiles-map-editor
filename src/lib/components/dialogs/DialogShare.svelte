@@ -21,7 +21,7 @@
 	const uid = $props.id();
 
 	// the shared map opens in the read-only viewer, next to the editor
-	const baseUrl = new URL('view', window.location.href.replace(/#.*$/, '')).href;
+	const baseUrl = new URL('view/', window.location.href.replace(/#.*$/, '')).href;
 
 	let linkCode = $state('');
 	let embedCode = $state('');

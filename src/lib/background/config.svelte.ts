@@ -1,3 +1,4 @@
+import { asset } from '$app/paths';
 import { fetchFontFaces, osm, satellite, type OsmOptions, type SatelliteOptions } from '@versatiles/style';
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
@@ -6,11 +7,12 @@ import { startingBackground } from './background.js';
 import { sanitizeFrame, type Bounds, type StateBackground } from '@versatiles/map-state';
 
 /**
- * An optional configuration file of an editor instance, next to the page, so an organisation can
+ * An optional configuration file of an editor instance, in its root folder (next to the editor's
+ * index.html, also for the viewer in view/), so an organisation can
  * offer its own color schemes and fonts (e.g. its corporate identity) without rebuilding the editor.
  * JSON with comments, see `parseJsonc`.
  */
-export const CONFIG_URL = 'map-editor.config.jsonc';
+export const CONFIG_URL = 'map-editor.config.jsonc' as const;
 
 /** The tile server of the background map, its symbols and fonts, unless the configuration sets one. */
 export const DEFAULT_TILE_SERVER = 'https://tiles.versatiles.org';
@@ -82,7 +84,8 @@ let ready: Promise<ConfigFile> | undefined;
  * those that the file names, until `loadConfig` has the list of the tile server.
  */
 export function configReady(): Promise<ConfigFile> {
-	ready ??= loadFile(new URL(CONFIG_URL, document.baseURI).href).then((file) => {
+	// the root of the app, also in a subfolder, also from the viewer in view/
+	ready ??= loadFile(new URL(asset(CONFIG_URL), location.href).href).then((file) => {
 		const checked = checkConfig(file ?? {});
 		config.current = buildConfig(checked);
 		return checked;

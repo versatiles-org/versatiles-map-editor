@@ -49,7 +49,7 @@ test('the title of the map names the page, the files and the shared map', async 
 
 	// the shared map has it too
 	const hash = encodeState(await storedState(page));
-	await page.goto('/view#' + hash);
+	await page.goto('/view/#' + hash);
 	await waitForMapIsReady(page);
 	await expect(page).toHaveTitle('Cafés in Berlin – VersaTiles Map');
 

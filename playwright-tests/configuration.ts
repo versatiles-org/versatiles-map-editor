@@ -27,7 +27,7 @@ async function useOwnTileServer(page: Page): Promise<{ own: string[]; versatiles
 
 for (const [page, path] of [
 	['editor', '/'],
-	['viewer', '/view#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements: [] })]
+	['viewer', '/view/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements: [] })]
 ] as const) {
 	test(`the ${page} loads the map, its symbols and fonts from the configured tile server`, async ({ page: tab }) => {
 		const requests = await useOwnTileServer(tab);

@@ -11,7 +11,7 @@
 	let { doc, open = $bindable(), top }: { doc: MapDocumentInteractive; open: boolean; top: number } = $props();
 
 	// the viewer, next to the editor
-	const baseUrl = new URL('view', window.location.href.replace(/#.*$/, '')).href;
+	const baseUrl = new URL('view/', window.location.href.replace(/#.*$/, '')).href;
 	let iframe: HTMLIFrameElement | undefined = $state();
 	let src = $state('');
 

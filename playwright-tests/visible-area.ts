@@ -30,7 +30,7 @@ async function settledPosition(page: Page, point: [number, number]): Promise<[nu
 test('a shared map shows its frame completely, in the viewer and in the editor', async ({ page }) => {
 	// the viewer, in a window of another shape
 	await page.setViewportSize({ width: 500, height: 800 });
-	await page.goto('/view#' + encodeState({ frame, elements }));
+	await page.goto('/view/#' + encodeState({ frame, elements }));
 	await waitForMapIsReady(page);
 	let shown = await frameOnPage(page, frame);
 	expect(shown.left).toBeGreaterThanOrEqual(9);
@@ -61,7 +61,7 @@ test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 		style: { color: '#ff0000' },
 		label
 	}));
-	await page.goto('/view#' + encodeState({ frame, elements, meta: { legend: { entries } } }));
+	await page.goto('/view/#' + encodeState({ frame, elements, meta: { legend: { entries } } }));
 	await waitForMapIsReady(page);
 	const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
 	await expect
@@ -79,7 +79,7 @@ test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 });
 
 test('without a frame, a shared map shows its elements, a single marker not closer than zoom 15', async ({ page }) => {
-	await page.goto('/view#' + encodeState({ elements }));
+	await page.goto('/view/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	const zoom = await page.evaluate(() => (window as unknown as { map: { getZoom(): number } }).map.getZoom());
 	expect(zoom).toBeCloseTo(15, 1);
@@ -89,7 +89,7 @@ test('without a frame, a shared map shows its elements, a single marker not clos
 });
 
 test('an empty shared map without a frame shows the whole world', async ({ page }) => {
-	await page.goto('/view#' + encodeState({ elements: [] }));
+	await page.goto('/view/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const bounds = await page.evaluate(() =>
 		(window as unknown as { map: { getBounds(): { toArray(): number[][] } } }).map.getBounds().toArray()
@@ -99,7 +99,7 @@ test('an empty shared map without a frame shows the whole world', async ({ page 
 
 test('the viewer shows the frame again when its size changes, until the visitor moves the map', async ({ page }) => {
 	await page.setViewportSize({ width: 1000, height: 600 });
-	await page.goto('/view#' + encodeState({ frame, elements }));
+	await page.goto('/view/#' + encodeState({ frame, elements }));
 	await waitForMapIsReady(page);
 
 	// e.g. a rotated phone: the frame fits the new, narrower width, and fills it (without the padding
@@ -210,7 +210,7 @@ test('the preview of the share dialog shows the frame completely in all three as
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	/** Where the frame is in the preview, and the size of the preview, once its map is ready. */
 	const inPreview = async () => {
-		const preview = page.frames().find((f) => f.url().includes('/view#'));
+		const preview = page.frames().find((f) => f.url().includes('/view/#'));
 		if (!preview) return undefined;
 		// undefined while the preview loads again, e.g. for another aspect ratio
 		return preview

@@ -257,10 +257,10 @@ test('the editor has buttons for zooming, the viewer too unless the map has none
 	await page.getByRole('button', { name: 'Zoom out' }).click();
 	await expect.poll(zoom).toBeCloseTo(before, 1);
 
-	await page.goto('/view#' + encodeState(state));
+	await page.goto('/view/#' + encodeState(state));
 	await waitForMapIsReady(page);
 	await expect(zoomIn(page)).toBeVisible();
-	await page.goto('/view#' + encodeState({ ...state, meta: { ...state.meta, viewer: { navigation: 'none' } } }));
+	await page.goto('/view/#' + encodeState({ ...state, meta: { ...state.meta, viewer: { navigation: 'none' } } }));
 	await page.reload();
 	await waitForMapIsReady(page);
 	await expect(zoomIn(page)).toHaveCount(0);
