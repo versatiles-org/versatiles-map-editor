@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Map as MaplibreMapType } from 'maplibre-gl';
 	import MapFrame from './MapFrame.svelte';
-	import { MapDocument } from '#lib/map_document.svelte.js';
+	import { MapDocument } from '#lib/document/index.js';
 	import { PopupHandler } from './popup_handler.svelte.js';
-	import type { SessionSync } from '#lib/session_sync.svelte.js';
+	import type { SessionSync } from '#lib/sessions/index.js';
 
 	/** The read-only viewer of a map, e.g. embedded in a website: its elements show their popups. */
 	let {

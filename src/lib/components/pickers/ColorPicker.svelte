@@ -11,7 +11,7 @@
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 	import ColorSliders from './ColorSliders.svelte';
 	import ColorSwatches from './ColorSwatches.svelte';
-	import type { ColorPalette } from '#lib/color_palette.svelte.js';
+	import type { ColorPalette } from '#lib/editor/index.js';
 	import { getColorScheme, config } from '#lib/background/index.js';
 
 	let {

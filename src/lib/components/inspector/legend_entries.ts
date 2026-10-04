@@ -10,7 +10,7 @@ import {
 	type StateLegendEntry,
 	type StateStyle
 } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from '../../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../../editor/index.js';
 
 // Editing the legend and its entries in the inspector. The changes are not logged unless said, so
 // e.g. typing a text is one undo step when the field is left.

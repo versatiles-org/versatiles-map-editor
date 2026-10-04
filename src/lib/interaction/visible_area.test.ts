@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { MapDocumentInteractive } from '../map_document_interactive.js';
+import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import { LngLat, MockMap, Point, type MaplibreMap } from '../__mocks__/map.js';
 import { handlePosition, type Handle } from '../rendering/index.js';
 import type { Bounds } from '@versatiles/map-state';

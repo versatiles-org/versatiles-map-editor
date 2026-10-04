@@ -1,5 +1,5 @@
 import type { Bounds } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import { HANDLES, handlePosition, type Handle } from '../rendering/index.js';
 import { MAX_LATITUDE } from '../geometry.js';
 import {

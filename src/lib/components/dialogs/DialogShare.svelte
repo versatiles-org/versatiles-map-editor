@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StateManager } from '#lib/state/manager.js';
+	import type { StateManager } from '#lib/state/index.js';
 	import { Dialog, Button, Checkbox, Hint, InputRow, Slider } from '#lib/components/ui/index.js';
 	import {
 		boundsOf,
@@ -8,7 +8,7 @@
 		resolutionForArea,
 		resolutionOfExponent
 	} from '@versatiles/map-state';
-	import { formatPrecision } from '#lib/components/format.js';
+	import { formatPrecision } from '#lib/components/common/index.js';
 	import ShareCode from './ShareCode.svelte';
 	import ShareControls from './ShareControls.svelte';
 	import SharePreview from './SharePreview.svelte';

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { StateViewer } from '@versatiles/map-state';
-	import type { StateManager } from '#lib/state/manager.js';
+	import type { StateManager } from '#lib/state/index.js';
 	import { Checkbox, ChoiceGroup, Hint } from '#lib/components/ui/index.js';
-	import { defaultPlace, PLACES } from '#lib/components/viewer_controls.js';
+	import { defaultPlace, PLACES } from '#lib/components/common/index.js';
 
 	/** What visitors see over the shared map, and where. `onchange`: after a change, which is logged. */
 	const { state: stateManager, onchange }: { state: StateManager; onchange: () => void } = $props();

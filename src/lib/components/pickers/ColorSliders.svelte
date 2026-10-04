@@ -5,15 +5,7 @@
 
 <script lang="ts">
 	import { ChoiceGroup, Slider } from '#lib/components/ui/index.js';
-	import {
-		channelTrack,
-		hsvKeeping,
-		hsvToRgb,
-		rgbToHsv,
-		type Channel,
-		type HSV,
-		type RGB
-	} from '#lib/components/color.js';
+	import { channelTrack, hsvKeeping, hsvToRgb, rgbToHsv, type Channel, type HSV, type RGB } from './color.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 
 	/**

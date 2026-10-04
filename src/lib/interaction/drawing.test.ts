@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { MapDocumentInteractive } from '../map_document_interactive.js';
+import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { addElement } from '../__mocks__/elements.js';
 

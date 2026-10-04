@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, TextField } from '#lib/components/ui/index.js';
-	import { geocode, type GeocodingResult } from '#lib/components/geocoding.js';
+	import { geocode, type GeocodingResult } from '#lib/components/common/index.js';
 	import type { Map as MaplibreMap } from 'maplibre-gl';
 
 	const {

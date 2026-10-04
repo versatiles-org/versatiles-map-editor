@@ -1,6 +1,6 @@
 import type { GeoJSONSource } from 'maplibre-gl';
-import type { AbstractElement } from '../element/abstract.svelte.js';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { AbstractElement } from '../element/index.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import { claimEvent, TOUCH_TOLERANCE } from './drag.js';
 
 /** How far from an element the pointer may be, in pixels, so thin lines are easy to hit. */

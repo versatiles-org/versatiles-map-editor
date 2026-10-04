@@ -20,12 +20,12 @@
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import { Legend, LoadingIndicator, SearchPlace } from '#lib/components/map_viewer/index.js';
 	import { Notifications } from '#lib/components/ui/index.js';
-	import { SymbolLibrary, setSymbolLibrary } from '#lib/components/symbols_draw.js';
-	import type { MapDocument } from '#lib/map_document.svelte.js';
+	import { SymbolLibrary, setSymbolLibrary } from '#lib/components/common/index.js';
+	import type { MapDocument } from '#lib/document/index.js';
 	import type { Box } from '#lib/rendering/index.js';
 	import { UrlHash } from './url_hash.js';
 	import { config, configReady } from '#lib/background/index.js';
-	import type { SessionSync } from '#lib/session_sync.svelte.js';
+	import type { SessionSync } from '#lib/sessions/index.js';
 	import {
 		addAttribution,
 		addNavigation,

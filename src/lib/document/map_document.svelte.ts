@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from './element/abstract.svelte.js';
-import type { MapDocumentInteractive } from './map_document_interactive.js';
+import type { AbstractElement } from '../element/index.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import {
 	boundsOf,
 	removeLegendDefaults,
@@ -14,9 +14,9 @@ import {
 	type StateMetadata,
 	type StateViewer
 } from '@versatiles/map-state';
-import { elementFromState } from './element/registry.js';
-import { MapView, type ElementIndex } from './rendering/index.js';
-import { getSettings, sameBackground } from './background/index.js';
+import { elementFromState } from '../element/index.js';
+import { MapView, type ElementIndex } from '../rendering/index.js';
+import { getSettings, sameBackground } from '../background/index.js';
 
 export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity

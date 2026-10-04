@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import { parseColor, SYMBOL_DEFAULTS, type StateLegendEntry } from '@versatiles/map-state';
-	import { getSymbolLibrary } from '#lib/components/symbols_draw.js';
+	import { getSymbolLibrary } from '#lib/components/common/index.js';
 	import { drawArea, drawLine, MARK_HEIGHT, MARK_WIDTH } from './legend_marks.js';
 
 	/** A small copy of the element of a legend entry: its symbol, its line or its area, as on the map. */

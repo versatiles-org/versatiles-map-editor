@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { FakeLockManager } from './__mocks__/locks.js';
+import { FakeLockManager } from '../__mocks__/locks.js';
 import { SessionLocks } from './session_locks.js';
 
 /** As browsers do: a lock is granted later, not during the request. */

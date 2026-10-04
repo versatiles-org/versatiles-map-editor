@@ -2,7 +2,7 @@ import { expect, test } from './lib/test.js';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import type { Page } from '@playwright/test';
 import { getMiddlePoint } from '../src/lib/geometry.js';
-import { curvePoint } from '../src/lib/smooth_path.js';
+import { curvePoint } from '../src/lib/element/smooth_path.js';
 import { project, storedState, waitForMapIsIdle, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 const line: [number, number][] = [

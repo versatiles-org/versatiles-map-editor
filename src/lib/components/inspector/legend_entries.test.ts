@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ARROW_DEFAULTS, LINE_DEFAULTS } from '@versatiles/map-state';
 import { MockMap, type MaplibreMap } from '../../__mocks__/map.js';
-import { MapDocumentInteractive } from '../../map_document_interactive.js';
+import { MapDocumentInteractive } from '../../editor/map_document_interactive.js';
 import { entryStyle } from './legend_entries.js';
 
 describe('entryStyle', () => {

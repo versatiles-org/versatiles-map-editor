@@ -1,6 +1,6 @@
 import { isToggleClick } from './modifiers.js';
-import type { AbstractElement } from '../element/abstract.svelte.js';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { AbstractElement } from '../element/index.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import type { SelectionHandler } from './selection.svelte.js';
 import { type GeoPoint, lat2mercator } from '../geometry.js';
 import {

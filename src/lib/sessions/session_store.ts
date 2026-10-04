@@ -1,5 +1,5 @@
 import type { MapState } from '@versatiles/map-state';
-import { MAX_STEPS } from './state/history.svelte.js';
+import { MAX_STEPS } from '../state/index.js';
 
 /**
  * The maps of the editor in the browser storage (IndexedDB): each map is a session with its undo

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { TOGGLE_KEY } from '#lib/interaction/index.js';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
-	import type { SessionSync } from '#lib/session_sync.svelte.js';
-	import type { FileCommands } from '#lib/files/file_commands.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
+	import type { SessionSync } from '#lib/sessions/index.js';
+	import type { FileCommands } from '#lib/files/index.js';
 	import { Button } from '#lib/components/ui/index.js';
 
 	/**

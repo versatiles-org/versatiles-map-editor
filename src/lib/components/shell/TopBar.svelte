@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import DialogShare from '#lib/components/dialogs/DialogShare.svelte';
 	import { Icon, IconButton, Button } from '#lib/components/ui/index.js';
-	import type { SessionSync } from '#lib/session_sync.svelte.js';
-	import type { FileCommands } from '#lib/files/file_commands.js';
+	import type { SessionSync } from '#lib/sessions/index.js';
+	import type { FileCommands } from '#lib/files/index.js';
 	import MainMenu from './MainMenu.svelte';
 	import { wholeWidth } from './whole_width.js';
 	// the logo of versatiles.org

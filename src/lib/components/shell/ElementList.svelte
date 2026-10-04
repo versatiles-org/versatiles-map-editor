@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { tick } from 'svelte';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import ElementName from './ElementName.svelte';
 	import { Icon, Hint } from '#lib/components/ui/index.js';
-	import { elementIcon } from '#lib/components/element_names.js';
-	import { typeName } from '#lib/element/type_names.js';
+	import { elementIcon } from '#lib/components/common/index.js';
+	import { typeName } from '#lib/element/index.js';
 	import { isToggleClick, TOGGLE_KEY } from '#lib/interaction/index.js';
-	import type { AbstractElement } from '#lib/element/abstract.svelte.js';
+	import type { AbstractElement } from '#lib/element/index.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen

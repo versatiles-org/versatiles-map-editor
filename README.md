@@ -28,33 +28,47 @@ npm run preview  # preview the production build
 
 ### Project structure
 
-The code is in `src/lib`. `map_document*.ts` hold the map with its elements, legend and
-background. Next to them are the modules that several folders share.
+The code is in `src/lib`, in folders by layer: each one uses the ones below it, none uses code of
+one above it (only `interaction/`, `state/` and `document/` name the type of the editor's
+document). From the top:
 
 - `app/`: the two pages: `MapEditor.svelte` the editor (`/`) and `MapViewer.svelte` the read-only
-  viewer (`/view/`), both around the map in `MapFrame.svelte`, with the map of the link or of the browser storage (`src/lib/session_sync.svelte.ts`), the layout and the theme
+  viewer (`/view/`), both around the map in `MapFrame.svelte`, with the layout and the theme
 
 - `components/`: the Svelte components: `ui/` generic controls, `pickers/` for a color, a font or
-  a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`, and
-  `map/` what floats over the map, split into `viewer/` (also in the viewer) and `editor/` (only
-  in the editor)
+  a symbol of the map, `shell/` the frame of the editor, `inspector/` the sidebar, `dialogs/`,
+  `table_import/`, `map_viewer/` what floats over the map (also in the viewer), `map_editor/` (only
+  in the editor), and `common/` the helpers of several of them
 
-- `element/`, `style/`, `state/`: the elements, their styles, and the state with undo and redo
+- `sessions/`: the maps of the browser storage, kept in step with the open map
+
+- `files/`: opening, saving and downloading maps as files
+
+- `editor/`: the map document of the editor, with its handlers, the commands on the selected
+  elements, the style clipboard and the palette of used colors; only the editor loads it
 
 - `interaction/`: selecting, moving, reshaping and drawing with the mouse and fingers
+
+- `state/`: the history with undo and redo, and the legend that follows the styles
+
+- `document/`: the map document of the viewer and the editor: elements, background and legend on
+  the map
 
 - `rendering/`: how the map is drawn: the layers of the elements, the editor's layers over the
   background map, and loading this style
 
-- `background/`: the background map, its style, and the configuration
+- `element/`, `style/`: the elements with their geometry and texts, and their styles
 
-- `files/`: the file commands of the menu
+- `background/`: the background map, its style, its symbols and fonts, and the configuration
+
+- in `src/lib` itself: the helpers that all layers may use (`geometry`, `notify`, `event_handler`,
+  `version`)
 
 Rules:
 
 - A module lives next to its users: in their folder, or in the nearest folder above all of them.
-  One exception: `files/` is only used by the menu in `shell/`, but the file handling is kept
-  together, apart from the components.
+  One exception: `files/` is only used by the menu in `shell/` and the editor, but the file
+  handling is kept together, apart from the components.
 - Components import other folders with `#lib/…` (a subpath import of `package.json`), TypeScript modules with relative paths.
 - A folder with an `index.ts` is imported through it, while its own modules import each other
   directly. Code that loads at different times (viewer and editor) gets no shared `index.ts`: it

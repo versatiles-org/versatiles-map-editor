@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import type { StateLegend, StateViewer } from '@versatiles/map-state';
 	import {
 		InputRow,
@@ -13,10 +13,10 @@
 		IconButton,
 		TextField
 	} from '#lib/components/ui/index.js';
-	import { addLegendEntry, takeStyleForEntry } from '#lib/components/commands.js';
-	import { defaultPlace, PLACES } from '#lib/components/viewer_controls.js';
+	import { addLegendEntry, takeStyleForEntry } from '#lib/editor/index.js';
+	import { defaultPlace, PLACES } from '#lib/components/common/index.js';
 	import { LegendMark } from '#lib/components/map_viewer/index.js';
-	import { unusedEntries } from '#lib/legend_looks.js';
+	import { unusedEntries } from '#lib/state/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import LegendEntryDetails from './LegendEntryDetails.svelte';
 	import { legendOf, updateEntry, updateLegend } from './legend_entries.js';

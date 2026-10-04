@@ -1,11 +1,11 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MapDocument } from './map_document.svelte.js';
-import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import type { MapState, StateLegendEntry } from '@versatiles/map-state';
-import type { AbstractElement } from './element/abstract.svelte.js';
-import { MarkerElement } from './element/marker.js';
+import type { AbstractElement } from '../element/abstract.svelte.js';
+import { MarkerElement } from '../element/marker.js';
 import { inlineSources } from '@versatiles/style';
-import { deferInlineSources } from './__mocks__/inline_sources.js';
+import { deferInlineSources } from '../__mocks__/inline_sources.js';
 import type { StyleSpecification } from 'maplibre-gl';
 import type * as maplibregl from 'maplibre-gl';
 

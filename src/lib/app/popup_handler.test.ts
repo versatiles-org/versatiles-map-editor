@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { MapGeoJSONFeature } from 'maplibre-gl';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
-import { MapDocument } from '../map_document.svelte.js';
+import { MapDocument } from '../document/map_document.svelte.js';
 import { PopupHandler } from './popup_handler.svelte.js';
 
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));

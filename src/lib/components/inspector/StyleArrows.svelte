@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { ARROW_NAMES } from '@versatiles/map-state';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import type { LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, IconButton, Slider } from '#lib/components/ui/index.js';

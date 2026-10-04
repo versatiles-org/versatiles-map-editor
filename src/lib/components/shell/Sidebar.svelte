@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Inspector from '#lib/components/inspector/Inspector.svelte';
-	import * as commands from '#lib/components/commands.js';
-	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import * as commands from '#lib/editor/index.js';
+	import { isOwnKeyTarget } from '#lib/components/common/index.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 
 	const { mapDocument }: { mapDocument: MapDocumentInteractive } = $props();
 

@@ -38,7 +38,7 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 
 // imported after the mocks are set up
 const { default: MapEditor } = await import('./MapEditor.svelte');
-const { MapDocumentInteractive } = await import('../map_document_interactive.js');
+const { MapDocumentInteractive } = await import('../editor/map_document_interactive.js');
 
 describe('MapEditor', () => {
 	afterEach(() => {

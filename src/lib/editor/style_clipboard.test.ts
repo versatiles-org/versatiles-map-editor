@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { StyleClipboard } from './style_clipboard.svelte.js';
-import { MockElementOwner } from './element/__mocks__/owner.js';
-import type { ElementOwner } from './element/types.js';
-import { MarkerElement } from './element/marker.js';
-import { LineElement } from './element/line.js';
-import { PolygonElement } from './element/polygon.js';
-import { CircleElement } from './element/circle.js';
+import { MockElementOwner } from '../element/__mocks__/owner.js';
+import type { ElementOwner } from '../element/types.js';
+import { MarkerElement } from '../element/marker.js';
+import { LineElement } from '../element/line.js';
+import { PolygonElement } from '../element/polygon.js';
+import { CircleElement } from '../element/circle.js';
 
 // elements of each type, where the geometry does not matter
 const newMarker = (doc: ElementOwner) => new MarkerElement(doc, [0, 0]);

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { CircleElement } from '#lib/element/circle.js';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { CircleElement } from '#lib/element/index.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { circleArea, MAX_CIRCLE_RADIUS, radiusForArea } from '#lib/geometry.js';
-	import { formatArea, formatLength, parseArea, parseLength, unitOf } from '#lib/components/format.js';
+	import { formatArea, formatLength, parseArea, parseLength, unitOf } from '#lib/components/common/index.js';
 	import { Hint, InputRow, TextField } from '#lib/components/ui/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 

@@ -1,10 +1,10 @@
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from './map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import { SessionStore, type CurrentSession, type StoredSession } from './session_store.js';
-import { notify } from './notify.svelte.js';
+import { notify } from '../notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
-import { countTypes } from './element/type_names.js';
-import { config, configReady } from './background/index.js';
+import { countTypes } from '../element/index.js';
+import { config, configReady } from '../background/index.js';
 
 /** How many of the most recent sessions are kept, listed, and compared with the map of a link. */
 const RECENT = 10;

@@ -1,16 +1,16 @@
 import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
-import { MapDocumentInteractive } from './map_document_interactive.js';
-import { MockMap, type MaplibreMap } from './__mocks__/map.js';
+import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
+import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { LngLatBounds } from 'maplibre-gl';
 import { SessionStore } from './session_store.js';
 import { SessionSync } from './session_sync.svelte.js';
-import { notify } from './notify.svelte.js';
-import { FakeLockManager } from './__mocks__/locks.js';
-import { config, DEFAULT_CONFIG } from './background/index.js';
+import { notify } from '../notify.svelte.js';
+import { FakeLockManager } from '../__mocks__/locks.js';
+import { config, DEFAULT_CONFIG } from '../background/index.js';
 
-vi.mock('./notify.svelte.js', () => ({ notify: vi.fn() }));
+vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 const camera = { center: [13.4, 52.5] as [number, number], radius: 1000 };
 const marker = (lng: number): MapState['elements'][number] => ({ type: 'marker', point: [lng, 52.5] });

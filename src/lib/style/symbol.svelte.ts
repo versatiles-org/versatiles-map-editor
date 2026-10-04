@@ -1,7 +1,7 @@
 import { StylePart } from './abstract.svelte.js';
 import { Color } from '@versatiles/style';
 import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
-import { getSymbol, type SymbolInfo } from '../symbols_catalog.js';
+import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
 
 type TextAnchor =

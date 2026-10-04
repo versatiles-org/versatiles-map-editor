@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
-import type { AbstractElement } from '../element/abstract.svelte.js';
+import type { AbstractElement } from '../element/index.js';
 import { clampLatitude, lat2mercator, MAX_LATITUDE, mercator2lat, type GeoPoint } from '../geometry.js';
 import { ELEMENT_LAYERS, ElementRenderer, elementIdOf, layerIdsOf, type Role } from './element_renderer.js';
 

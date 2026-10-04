@@ -1,5 +1,5 @@
 import { decodeState } from '@versatiles/map-state';
-import type { MapDocument } from '../map_document.svelte.js';
+import type { MapDocument } from '../document/index.js';
 import { notify } from '../notify.svelte.js';
 
 /**

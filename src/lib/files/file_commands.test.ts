@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { encodeState, MAPJSON_SCHEMA_URL, type MapState } from '@versatiles/map-state';
 import { FileCommands, fileBaseName, type FileQuestions, type MapList } from './file_commands.js';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { notify } from '../notify.svelte.js';

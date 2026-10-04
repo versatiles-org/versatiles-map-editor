@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
 import Legend from './Legend.svelte';
-import { SymbolLibrary, symbolLibraryContext } from '../symbols_draw.js';
+import { SymbolLibrary, symbolLibraryContext } from '../common/symbols_draw.js';
 import { MockMap } from '../../__mocks__/map.js';
 import type * as maplibregl from 'maplibre-gl';
 

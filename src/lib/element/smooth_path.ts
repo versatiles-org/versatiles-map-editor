@@ -1,4 +1,4 @@
-import { lat2mercator, mercator2lat, type GeoPath, type GeoPoint } from './geometry.js';
+import { lat2mercator, mercator2lat, type GeoPath, type GeoPoint } from '../geometry.js';
 
 /*
  * Smooth lines and polygons: a curve through all nodes of a path, a centripetal Catmull-Rom spline

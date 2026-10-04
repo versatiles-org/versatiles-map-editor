@@ -1,7 +1,7 @@
 import { vi, type Mocked } from 'vitest';
 import { MockMap } from '../../__mocks__/map.js';
-import type { MapDocumentInteractive } from '../../map_document_interactive.js';
-import type { StateManager } from '../../state/manager.js';
+import type { MapDocumentInteractive } from '../../editor/index.js';
+import type { StateManager } from '../../state/index.js';
 import type { Cursor } from '../cursor.js';
 
 /** A map document with only what the selection needs, and its mocked map, cursor and state. */

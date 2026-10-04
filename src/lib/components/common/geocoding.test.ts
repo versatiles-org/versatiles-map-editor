@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { formatLabel, geocode } from './geocoding.js';
-import { config, DEFAULT_CONFIG, DEFAULT_GEOCODER } from '../background/index.js';
+import { config, DEFAULT_CONFIG, DEFAULT_GEOCODER } from '../../background/index.js';
 
 function mockFetch(body: unknown, init: ResponseInit = {}) {
 	const fetch = vi.fn(async () => new Response(JSON.stringify(body), init));

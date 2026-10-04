@@ -5,7 +5,7 @@
  * depend on the editor. The URL is that of the configuration (`geocoder`).
  */
 
-import { config } from '../background/index.js';
+import { config } from '../../background/index.js';
 
 // Languages of the result labels supported by the service; others get the local names
 const LANGUAGES = ['de', 'en', 'fr'];

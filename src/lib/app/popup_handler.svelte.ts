@@ -1,8 +1,8 @@
 import { Popup, type GeoJSONSource, type MapMouseEvent } from 'maplibre-gl';
-import type { AbstractElement } from '../element/abstract.svelte.js';
-import type { MapDocument } from '../map_document.svelte.js';
+import type { AbstractElement } from '../element/index.js';
+import type { MapDocument } from '../document/index.js';
 import { indexElements, type ElementIndex } from '../rendering/index.js';
-import { renderPopupText } from '../popup_text.js';
+import { renderPopupText } from '../element/index.js';
 
 // Tolerance in pixels around the pointer, so thin lines are easier to hit, especially with a finger
 const TOLERANCE = 4;

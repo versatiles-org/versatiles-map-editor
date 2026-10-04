@@ -7,7 +7,7 @@ import {
 	stateToMapJSON,
 	type MapState
 } from '@versatiles/map-state';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import { downloadBlob, downloadJSON } from './download.js';
 import { chooseTextFile, FileReadError } from './file.js';
 import { notify } from '../notify.svelte.js';

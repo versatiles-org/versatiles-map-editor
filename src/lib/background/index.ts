@@ -8,3 +8,4 @@ export * from './color_schemes.js';
 export * from './config.svelte.js';
 export * from './fonts.js';
 export * from './map_style.js';
+export * from './symbols_catalog.js';

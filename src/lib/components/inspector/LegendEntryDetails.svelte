@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import {
 		ARROW_DEFAULTS,
 		FILL_DEFAULTS,
@@ -18,7 +18,7 @@
 		IconButton
 	} from '#lib/components/ui/index.js';
 	import { ColorPicker, SymbolSelector } from '#lib/components/pickers/index.js';
-	import { canPasteStyleToEntry, pasteStyleToEntry } from '#lib/components/commands.js';
+	import { canPasteStyleToEntry, pasteStyleToEntry } from '#lib/editor/index.js';
 	import { colorOf, entryStyle, setEntryOutline, setEntryType, updateEntry } from './legend_entries.js';
 	import StyleFill from './StyleFill.svelte';
 	import StyleArrows from './StyleArrows.svelte';

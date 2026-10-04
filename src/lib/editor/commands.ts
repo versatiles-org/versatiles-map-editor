@@ -8,11 +8,11 @@ import {
 	type StateLegendEntry,
 	type StateStyle
 } from '@versatiles/map-state';
-import type { AbstractElement } from '../element/abstract.svelte.js';
-import { LineElement } from '../element/line.js';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
-import { elementText } from './element_names.js';
-import { legendEntryOf, lookOf, markerLook } from '../legend_looks.js';
+import type { AbstractElement } from '../element/index.js';
+import { LineElement } from '../element/index.js';
+import type { MapDocumentInteractive } from './map_document_interactive.js';
+import { elementText } from '../element/index.js';
+import { legendEntryOf, lookOf, markerLook } from '../state/index.js';
 
 /*
  * The commands for the selected elements, shared by the menu, the sidebar and the keyboard

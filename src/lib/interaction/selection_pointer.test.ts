@@ -3,7 +3,7 @@ import { SelectionHandler } from './selection.svelte.js';
 import type { MockMap } from '../__mocks__/map.js';
 import { createMockDoc } from './__mocks__/doc.js';
 import type * as maplibregl from 'maplibre-gl';
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import type { Cursor } from './cursor.js';
 import type { StateManager } from '../state/manager.js';
 import type { AbstractElement } from '../element/abstract.svelte.js';

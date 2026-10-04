@@ -1,13 +1,13 @@
 import { decodeState, type MapState, type StateElement } from '@versatiles/map-state';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { MapDocumentInteractive } from './map_document_interactive.js';
-import { MarkerElement } from './element/marker.js';
-import { LineElement } from './element/line.js';
-import { PolygonElement } from './element/polygon.js';
-import { CircleElement } from './element/circle.js';
-import { LngLat, MockMap, type MaplibreMap } from './__mocks__/map.js';
-import type { GeoPath, GeoPoint } from './geometry.js';
-import { addElement } from './__mocks__/elements.js';
+import { MarkerElement } from '../element/marker.js';
+import { LineElement } from '../element/line.js';
+import { PolygonElement } from '../element/polygon.js';
+import { CircleElement } from '../element/circle.js';
+import { LngLat, MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import type { GeoPath, GeoPoint } from '../geometry.js';
+import { addElement } from '../__mocks__/elements.js';
 
 describe('MapDocument', () => {
 	let mockMap: MockMap;

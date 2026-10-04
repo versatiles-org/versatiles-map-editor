@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
-import { MapDocument } from '../map_document.svelte.js';
+import { MapDocument } from '../document/map_document.svelte.js';
 import {
 	ELEMENT_LAYERS,
 	elementStyle,

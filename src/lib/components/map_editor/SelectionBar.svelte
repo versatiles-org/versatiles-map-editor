@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
-	import * as commands from '#lib/components/commands.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
+	import * as commands from '#lib/editor/index.js';
 	import { IconButton } from '#lib/components/ui/index.js';
 	import { coordinatesOf } from '#lib/geometry.js';
 

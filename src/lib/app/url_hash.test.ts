@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { encodeState } from '@versatiles/map-state';
-import type { MapDocument } from '../map_document.svelte.js';
+import type { MapDocument } from '../document/map_document.svelte.js';
 import { UrlHash } from './url_hash.js';
 import { notify } from '../notify.svelte.js';
 

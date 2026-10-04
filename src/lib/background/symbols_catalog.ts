@@ -1,4 +1,4 @@
-import { config } from './background/index.js';
+import { config } from './config.svelte.js';
 
 /** The point of the image that is placed on the point of a marker, e.g. the tip of a pin. */
 export type IconAnchor =

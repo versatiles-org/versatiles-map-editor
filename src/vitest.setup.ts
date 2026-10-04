@@ -11,8 +11,8 @@ vi.mock('@versatiles/style', async (importOriginal) => ({
 // "base" sheet (a fixture) are loaded once, before the first test. symbols_catalog.test.ts tests the
 // download itself. To update the fixture:
 // curl -s https://tiles.versatiles.org/assets/sprites/base.json | jq 'map_values({sdf: (.sdf == true)})'
-vi.mock('./lib/symbols_catalog.js', async (importOriginal) => {
-	const original = await importOriginal<typeof import('./lib/symbols_catalog.js')>();
+vi.mock('./lib/background/symbols_catalog.js', async (importOriginal) => {
+	const original = await importOriginal<typeof import('./lib/background/symbols_catalog.js')>();
 	const { default: base } = await import('./lib/__fixtures__/sprite-base.json', { with: { type: 'json' } });
 	const files: Record<string, unknown> = { 'index.json': ['base'], 'base.json': base };
 	const fetch = globalThis.fetch;

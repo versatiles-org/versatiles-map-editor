@@ -1,8 +1,8 @@
-import type { MapDocumentInteractive } from '../map_document_interactive.js';
+import type { MapDocumentInteractive } from '../editor/index.js';
 import { encodeState, type MapState } from '@versatiles/map-state';
 import { StateHistory } from './history.svelte.js';
 import { EventHandler } from '../event_handler.js';
-import { followStyleChanges } from '../legend_looks.js';
+import { followStyleChanges } from './legend_looks.js';
 import { notify } from '../notify.svelte.js';
 
 export class StateManager {

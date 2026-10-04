@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog } from '#lib/components/ui/index.js';
-	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
+	import { isOwnKeyTarget } from '#lib/components/common/index.js';
 
 	/** All keyboard shortcuts of the editor in one place, opened with "?" or from the menu. */
 	let dialog: Dialog | undefined = $state();

@@ -1,5 +1,5 @@
 import type { StateElementMarker, StateLegend, StateLegendEntry, StateStyle } from '@versatiles/map-state';
-import { geocode, type GeocodingOptions, type GeocodingResult } from '../geocoding.js';
+import { geocode, type GeocodingOptions, type GeocodingResult } from '../common/index.js';
 import { parseNumber, type AddressPart, type Table } from './table.js';
 
 /** Which columns hold the position, the label and the popup of the markers. */

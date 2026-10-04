@@ -1,9 +1,9 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from './element/abstract.svelte.js';
-import { MapDocument } from './map_document.svelte.js';
-import { elementFromState } from './element/registry.js';
-import { Cursor, DrawingHandler, SelectionHandler, StylePickerMode, VisibleAreaMode } from './interaction/index.js';
-import { StateManager } from './state/manager.js';
+import type { AbstractElement } from '../element/index.js';
+import { MapDocument } from '../document/index.js';
+import { elementFromState } from '../element/index.js';
+import { Cursor, DrawingHandler, SelectionHandler, StylePickerMode, VisibleAreaMode } from '../interaction/index.js';
+import { StateManager } from '../state/index.js';
 import { ColorPalette } from './color_palette.svelte.js';
 import { StyleClipboard } from './style_clipboard.svelte.js';
 import {
@@ -15,8 +15,8 @@ import {
 	type MapState,
 	type Bounds
 } from '@versatiles/map-state';
-import type { GeoPoint } from './geometry.js';
-import { legendColors } from './legend_looks.js';
+import type { GeoPoint } from '../geometry.js';
+import { legendColors } from '../state/index.js';
 
 export class MapDocumentInteractive extends MapDocument {
 	public readonly selection: SelectionHandler;

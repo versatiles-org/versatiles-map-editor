@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { StateManager } from './manager.js';
-import { MapDocumentInteractive } from '../map_document_interactive.js';
+import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import type { MapState } from '@versatiles/map-state';
 import { MockMap } from '../__mocks__/map.js';
 

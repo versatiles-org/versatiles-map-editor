@@ -1,4 +1,4 @@
-import type { Measurement } from '../element/types.js';
+import type { Measurement } from '../../element/index.js';
 
 // Numbers use the browser's locale unless a locale is given
 function formatNumber(value: number, locale?: string): string {

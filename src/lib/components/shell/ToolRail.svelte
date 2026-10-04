@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import type { Tool } from '#lib/interaction/index.js';
 	import { IconButton } from '#lib/components/ui/index.js';
-	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
+	import { isOwnKeyTarget } from '#lib/components/common/index.js';
 
 	/** The tools at the left of the editor: selecting, drawing each kind of element, and the list of elements. */
 	let { doc, drawerOpen = $bindable() }: { doc: MapDocumentInteractive; drawerOpen: boolean } = $props();

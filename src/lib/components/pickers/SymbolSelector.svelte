@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Action } from 'svelte/action';
 	import { onMount } from 'svelte';
-	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '#lib/symbols_catalog.js';
-	import { getSymbolLibrary } from '#lib/components/symbols_draw.js';
+	import { allSymbols, filterSymbols, getSymbol, loadSymbols, matchesFilter } from '#lib/background/index.js';
+	import { getSymbolLibrary } from '#lib/components/common/index.js';
 	import { themeColor } from '#lib/rendering/index.js';
 	import { Dialog, TextField } from '#lib/components/ui/index.js';
 

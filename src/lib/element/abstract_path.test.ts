@@ -4,7 +4,7 @@ import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner, SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
 import { getMiddlePoint, lat2mercator, type GeoPoint } from '../geometry.js';
-import { curvePoint } from '../smooth_path.js';
+import { curvePoint } from './smooth_path.js';
 
 class TestPathElement extends AbstractPathElement {
 	constructor(doc: ElementOwner, isLine: boolean) {

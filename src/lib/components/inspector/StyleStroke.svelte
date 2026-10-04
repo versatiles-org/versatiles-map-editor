@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { dashArrays, LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';

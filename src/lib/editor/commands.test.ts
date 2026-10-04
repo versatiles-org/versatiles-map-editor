@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { MapDocumentInteractive } from '../map_document_interactive.js';
+import { MapDocumentInteractive } from './map_document_interactive.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import {
 	addLegendEntry,

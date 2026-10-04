@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Bounds } from '@versatiles/map-state';
-	import type { MapDocumentInteractive } from '#lib/map_document_interactive.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { Button } from '#lib/components/ui/index.js';
-	import { formatLength } from '#lib/components/format.js';
-	import { isOwnKeyTarget } from '#lib/components/shortcuts.js';
+	import { formatLength } from '#lib/components/common/index.js';
+	import { isOwnKeyTarget } from '#lib/components/common/index.js';
 	import { NUDGE } from '#lib/interaction/index.js';
 
 	/**
