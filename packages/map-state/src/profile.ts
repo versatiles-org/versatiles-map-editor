@@ -17,6 +17,7 @@ import {
 	type Position,
 	type StateBackground,
 	type StateElement,
+	type StateLabels,
 	type StateLegend,
 	type StateMetadata,
 	type StatePopup,
@@ -443,6 +444,18 @@ export function sanitizeLabelMinZoom(value: unknown): number | undefined {
 	return zoom > 0 && zoom <= 24 ? zoom : undefined;
 }
 
+/** The settings of the labels that differ from the defaults, or undefined if none does. */
+export function sanitizeLabels(value: unknown): StateLabels | undefined {
+	if (typeof value !== 'object' || value === null) return undefined;
+	const v = value as Record<string, unknown>;
+	const labels: StateLabels = {};
+	if (v.overlap === 'hide') labels.overlap = 'hide';
+	const minZoom = sanitizeLabelMinZoom(v.minZoom);
+	if (minZoom !== undefined) labels.minZoom = minZoom;
+	if (v.mapOnTop === true) labels.mapOnTop = true;
+	return Object.keys(labels).length > 0 ? labels : undefined;
+}
+
 // ----- viewer -----
 
 /** What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left. */
@@ -520,10 +533,8 @@ export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
 	if (colorScheme) meta.colorScheme = colorScheme;
 	const viewer = sanitizeViewer(v.viewer);
 	if (viewer) meta.viewer = viewer;
-	if (v.labelOverlap === 'hide') meta.labelOverlap = 'hide';
-	const labelMinZoom = sanitizeLabelMinZoom(v.labelMinZoom);
-	if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
-	if (v.mapLabelsOnTop === true) meta.mapLabelsOnTop = true;
+	const labels = sanitizeLabels(v.labels);
+	if (labels) meta.labels = labels;
 	const title = sanitizeString(v.title);
 	if (title) meta.title = title;
 	return Object.keys(meta).length > 0 ? meta : undefined;

@@ -72,9 +72,7 @@ describe('the JSON Schema of .mapjson files', () => {
 				},
 				viewer: { search: 'top-right', navigation: 'none', legend: 'bottom' },
 				colorScheme: 'dark2',
-				labelOverlap: 'hide',
-				labelMinZoom: 12.5,
-				mapLabelsOnTop: true,
+				labels: { overlap: 'hide', minZoom: 12.5, mapOnTop: true },
 				title: 'All'
 			},
 			elements: [

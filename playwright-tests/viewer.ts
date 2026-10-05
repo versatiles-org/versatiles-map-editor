@@ -580,7 +580,7 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 	};
 	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
 	async function colors(elements: MapState['elements']) {
-		const meta = { mapLabelsOnTop: true };
+		const meta = { labels: { mapOnTop: true } };
 		await page.goto('/view/#' + encodeState({ view: { center: point, radius: 2000 }, meta, elements }));
 		await page.reload();
 		await waitForMapIsReady(page);
@@ -607,7 +607,7 @@ test('with many labels, the marker in front keeps its label where labels overlap
 	}));
 	const state: MapState = {
 		view: { center: point, radius: 2000 },
-		meta: { labelOverlap: 'hide' },
+		meta: { labels: { overlap: 'hide' } },
 		elements: [
 			...many,
 			{ type: 'marker', point, label: 'Blue behind', style: { color: '#0000ff' } },

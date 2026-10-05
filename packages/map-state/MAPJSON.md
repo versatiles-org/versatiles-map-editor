@@ -170,16 +170,25 @@ and their images at `…/sprites/<sheet>.json`. An unknown name is drawn as noth
 
 `meta` holds the properties of the map. All fields are optional.
 
-| Field            | Description                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `title`          | The title, e.g. for the page and file names.                                                                                                           |
-| `background`     | The background map, see below. Without it, the editor's default: the OpenStreetMap map with labels in the language of the browser.                     |
-| `legend`         | A legend, see below.                                                                                                                                   |
-| `viewer`         | What shared and embedded maps show over the map, and where, see below.                                                                                 |
-| `colorScheme`    | The id of the color palette that the editor offers for this map, e.g. `"dark2"`. Only for editing.                                                     |
-| `labelOverlap`   | `"hide"`: labels of markers that would overlap other labels are hidden (their symbols stay). Without it, all are shown.                                |
-| `labelMinZoom`   | The zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`. Without it, at every zoom level. |
-| `mapLabelsOnTop` | `true`: the labels of the background map are drawn over the areas and lines of the elements (markers stay on top). Without it, under them.             |
+| Field         | Description                                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `title`       | The title, e.g. for the page and file names.                                                                                       |
+| `background`  | The background map, see below. Without it, the editor's default: the OpenStreetMap map with labels in the language of the browser. |
+| `legend`      | A legend, see below.                                                                                                               |
+| `viewer`      | What shared and embedded maps show over the map, and where, see below.                                                             |
+| `colorScheme` | The id of the color palette that the editor offers for this map, e.g. `"dark2"`. Only for editing.                                 |
+| `labels`      | How the labels are shown, see below.                                                                                               |
+
+### Labels
+
+`{ "overlap", "minZoom", "mapOnTop" }`: how the labels of markers and of the background map are
+shown.
+
+| Field      | Values                                                                                                                                 | Default        |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `overlap`  | labels of markers that would overlap other labels: `"show"` them all, also on top of each other, or `"hide"` them (their symbols stay) | `"show"`       |
+| `minZoom`  | the zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`                   | at every zoom  |
+| `mapOnTop` | `true`: the labels of the background map are drawn over the areas and lines of the elements (markers stay on top)                      | `false`, under |
 
 ### Background map
 

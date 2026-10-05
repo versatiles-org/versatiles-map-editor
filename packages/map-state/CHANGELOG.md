@@ -53,9 +53,8 @@ The first release.
 - The text color and the halo color of a marker's label: `labelColor` and `haloColor` in the style,
   `symbol-label-color` and `symbol-halo-color` in GeoJSON, and the label color as `LabelStyle` in
   KML. Without them, the text is black and the halo white.
-- The metadata of a map: the background map, a legend, a color scheme, `viewer`, `title` (also the name of the
-  KML document) and `mapLabelsOnTop` (the labels of the background map over the areas and lines of
-  the elements).
+- The metadata of a map: the background map, a legend, a color scheme, `viewer`, `title` (also the
+  name of the KML document) and `labels`.
 - The style vocabulary of the editor: defaults, names of patterns, stroke styles and label
   alignments. `LEGEND_DEFAULTS` and `removeLegendDefaults` for the layout, font, bold and italic of
   a legend, which the base64 string leaves out, and a legend read from GeoJSON or KML too.
@@ -110,8 +109,10 @@ The first release.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.
-- `labelOverlap` ("hide": labels of markers that would overlap other labels are hidden) and
-  `labelMinZoom` (the zoom level from which they are shown, with one decimal place) in the metadata.
+- `labels` in the metadata (`StateLabels`): `overlap` ("hide": labels of markers that would overlap
+  other labels are hidden), `minZoom` (the zoom level from which they are shown, with one decimal
+  place) and `mapOnTop` (the labels of the background map over the areas and lines of the
+  elements).
 - Colors are always returned as lowercase hex (`#rrggbb`, or `#rrggbbaa` when transparent), also
   the transparency of marker and line colors in KML of other tools. `parseColor` and `formatHex`
   read and write colors with their opacity (`RGBA`).

@@ -104,21 +104,9 @@
 					"$ref": "#/definitions/StateViewer",
 					"description": "What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend."
 				},
-				"labelOverlap": {
-					"type": "string",
-					"const": "hide",
-					"description": "Hide the labels of markers that would overlap other labels (\"hide\"); their symbols stay. Without it, all labels are shown, also on top of each other."
-				},
-				"labelMinZoom": {
-					"type": "number",
-					"description": "The zoom level from which the labels of markers are shown, with one decimal place, above 0 and up to 24, e.g. 12.5. Without it, at every zoom level.",
-					"exclusiveMinimum": 0,
-					"maximum": 24,
-					"multipleOf": 0.1
-				},
-				"mapLabelsOnTop": {
-					"type": "boolean",
-					"description": "Draw the labels of the background map over the areas and lines of the elements. Without it, they are under them. The labels of markers are always on top."
+				"labels": {
+					"$ref": "#/definitions/StateLabels",
+					"description": "How the labels are shown: those of markers, and those of the background map."
 				},
 				"title": {
 					"type": "string",
@@ -361,6 +349,30 @@
 				}
 			},
 			"description": "What the viewer shows over the map, and where: each at a position, or \"none\". Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
+		},
+		"StateLabels": {
+			"type": "object",
+			"properties": {
+				"overlap": {
+					"type": "string",
+					"enum": ["show", "hide"],
+					"description": "Labels of markers that would overlap other labels: \"show\" them all, also on top of each other, or \"hide\" them (their symbols stay).",
+					"default": "show"
+				},
+				"minZoom": {
+					"type": "number",
+					"description": "The zoom level from which the labels of markers are shown, with one decimal place, above 0 and up to 24, e.g. 12.5. Without it, at every zoom level.",
+					"exclusiveMinimum": 0,
+					"maximum": 24,
+					"multipleOf": 0.1
+				},
+				"mapOnTop": {
+					"type": "boolean",
+					"description": "Draw the labels of the background map over the areas and lines of the elements, instead of under them. The labels of markers are always on top.",
+					"default": false
+				}
+			},
+			"description": "How the labels are shown: those of markers, and those of the background map."
 		},
 		"StateElement": {
 			"anyOf": [

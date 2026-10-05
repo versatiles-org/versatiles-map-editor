@@ -15,7 +15,7 @@ import {
 	popupFromProps,
 	removeViewerDefaults,
 	sanitizeBoolean,
-	sanitizeLabelMinZoom,
+	sanitizeLabels,
 	sanitizeView,
 	sanitizeNumber,
 	sanitizeFrame,
@@ -128,10 +128,8 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
 	const viewer = removeViewerDefaults(state.meta?.viewer);
 	if (viewer) meta.viewer = viewer;
-	if (state.meta?.labelOverlap === 'hide') meta.labelOverlap = 'hide';
-	const labelMinZoom = sanitizeLabelMinZoom(state.meta?.labelMinZoom);
-	if (labelMinZoom !== undefined) meta.labelMinZoom = labelMinZoom;
-	if (state.meta?.mapLabelsOnTop) meta.mapLabelsOnTop = true;
+	const labels = sanitizeLabels(state.meta?.labels);
+	if (labels) meta.labels = labels;
 	if (state.meta?.title) meta.title = state.meta.title;
 	if (Object.keys(meta).length > 0) doc.meta = meta;
 	return doc;

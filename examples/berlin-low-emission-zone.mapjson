@@ -17,7 +17,7 @@
 			}
 		},
 		"title": "Berlin low-emission zone",
-		"mapLabelsOnTop": true
+		"labels": { "mapOnTop": true }
 	},
 	"elements": [
 		{

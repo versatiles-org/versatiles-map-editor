@@ -127,8 +127,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
   `meta.viewer`: what the read-only viewer shows over the map, and where;
-  `meta.title`: the title of the map; `meta.mapLabelsOnTop`: the labels of the background map
-  over the areas and lines)
+  `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, from
+  which zoom level they are shown, and whether the labels of the background map are on top)
 
 The opacity of every color is its alpha (`#rrggbbaa`), also of a fill. GeoJSON has the fill's
 apart, as simplestyle does: `fill-color` without alpha and `fill-opacity`; on import, `fill-opacity`

@@ -58,16 +58,8 @@ export const MAPJSON_FIELDS = {
 	MapJSON: ['$schema', 'view', 'frame', 'meta', 'elements'],
 	// the view, which has no definition of its own
 	view: ['center', 'radius'],
-	StateMetadata: [
-		'background',
-		'legend',
-		'colorScheme',
-		'viewer',
-		'labelOverlap',
-		'labelMinZoom',
-		'mapLabelsOnTop',
-		'title'
-	],
+	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
+	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
 	StateBackground: ['builder', 'options'],
 	StateLegend: ['layout', 'font', 'bold', 'italic', 'theme', 'entries'],
 	StateLegendEntry: ['type', 'style', 'strokeStyle', 'label'],
@@ -117,6 +109,7 @@ export function unknownMapJSONFields(json: unknown): string[] {
 	if (meta) {
 		check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');
 		check(meta.viewer, MAPJSON_FIELDS.StateViewer, 'meta.viewer');
+		check(meta.labels, MAPJSON_FIELDS.StateLabels, 'meta.labels');
 		const legend = check(meta.legend, MAPJSON_FIELDS.StateLegend, 'meta.legend');
 		if (legend && Array.isArray(legend.entries)) {
 			legend.entries.forEach((value, index) => {

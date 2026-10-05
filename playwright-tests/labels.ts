@@ -266,14 +266,14 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 	await labels.getByRole('radiogroup', { name: 'Overlapping' }).getByRole('radio', { name: 'Hide' }).check();
 	await expect.poll(() => layout('text-overlap')).toStrictEqual(['"never"', '"never"']);
 	expect(await layout('text-optional')).toStrictEqual(['true', 'true']);
-	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide' });
+	await expect.poll(meta).toStrictEqual({ labels: { overlap: 'hide' } });
 
 	const shownFrom = labels.getByRole('spinbutton', { name: 'Shown from' });
 	await shownFrom.fill('14.5');
 	await shownFrom.press('Enter');
 	const step = JSON.stringify(['step', ['zoom'], '', 14.5, ['get', 'label']]);
 	await expect.poll(() => layout('text-field')).toStrictEqual([step, step]);
-	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide', labelMinZoom: 14.5 });
+	await expect.poll(meta).toStrictEqual({ labels: { overlap: 'hide', minZoom: 14.5 } });
 
 	// kept in the map, e.g. when it is opened again
 	await page.reload();
@@ -284,9 +284,9 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 	// from the zoom level the map is at
 	const zoom = await page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
 	await labels.getByRole('button', { name: /^From this zoom/ }).click();
-	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide', labelMinZoom: Math.floor(zoom * 10) / 10 });
+	await expect.poll(meta).toStrictEqual({ labels: { overlap: 'hide', minZoom: Math.floor(zoom * 10) / 10 } });
 
 	// one undo step each
 	await page.locator('body').press('ControlOrMeta+z');
-	await expect.poll(meta).toStrictEqual({ labelOverlap: 'hide', labelMinZoom: 14.5 });
+	await expect.poll(meta).toStrictEqual({ labels: { overlap: 'hide', minZoom: 14.5 } });
 });

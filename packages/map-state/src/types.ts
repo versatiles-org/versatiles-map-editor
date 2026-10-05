@@ -270,11 +270,20 @@ export interface StateMetadata {
 	colorScheme?: string;
 	/** What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend. */
 	viewer?: StateViewer;
+	/** How the labels are shown: those of markers, and those of the background map. */
+	labels?: StateLabels;
+	/** The title of the map, e.g. for the list of maps, the title of the page and file names. */
+	title?: string;
+}
+
+/** How the labels are shown: those of markers, and those of the background map. */
+export interface StateLabels {
 	/**
-	 * Hide the labels of markers that would overlap other labels ("hide"); their symbols stay.
-	 * Without it, all labels are shown, also on top of each other.
+	 * Labels of markers that would overlap other labels: "show" them all, also on top of each
+	 * other, or "hide" them (their symbols stay).
+	 * @default "show"
 	 */
-	labelOverlap?: 'hide';
+	overlap?: 'show' | 'hide';
 	/**
 	 * The zoom level from which the labels of markers are shown, with one decimal place, above 0 and
 	 * up to 24, e.g. 12.5. Without it, at every zoom level.
@@ -282,14 +291,13 @@ export interface StateMetadata {
 	 * @maximum 24
 	 * @multipleOf 0.1
 	 */
-	labelMinZoom?: number;
+	minZoom?: number;
 	/**
-	 * Draw the labels of the background map over the areas and lines of the elements. Without it,
-	 * they are under them. The labels of markers are always on top.
+	 * Draw the labels of the background map over the areas and lines of the elements, instead of
+	 * under them. The labels of markers are always on top.
+	 * @default false
 	 */
-	mapLabelsOnTop?: boolean;
-	/** The title of the map, e.g. for the list of maps, the title of the page and file names. */
-	title?: string;
+	mapOnTop?: boolean;
 }
 
 export const LEGEND_POSITIONS = [

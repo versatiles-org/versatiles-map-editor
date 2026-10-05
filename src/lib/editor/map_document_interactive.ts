@@ -10,6 +10,7 @@ import {
 	stateFromGeoJSON,
 	type GeoJSONDocument,
 	type StateElement,
+	type StateLabels,
 	type StateMetadata,
 	type MapState,
 	type Bounds
@@ -128,9 +129,11 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.viewer) meta.viewer = this.viewer;
 		const title = this.title.trim();
 		if (title) meta.title = title;
-		if (this.labelOverlap === 'hide') meta.labelOverlap = 'hide';
-		if (this.labelMinZoom > 0) meta.labelMinZoom = this.labelMinZoom;
-		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
+		const labels: StateLabels = {};
+		if (this.labelOverlap === 'hide') labels.overlap = 'hide';
+		if (this.labelMinZoom > 0) labels.minZoom = this.labelMinZoom;
+		if (this.mapLabelsOnTop) labels.mapOnTop = true;
+		if (Object.keys(labels).length > 0) meta.labels = labels;
 		return {
 			view: this.view.getViewport(),
 			...(this.frame ? { frame: this.frame } : {}),
@@ -157,9 +160,9 @@ export class MapDocumentInteractive extends MapDocument {
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.viewer) this.viewer = { ...this.viewer, ...meta.viewer };
 		if (meta.title) this.title = meta.title;
-		if (meta.labelOverlap) this.labelOverlap = meta.labelOverlap;
-		if (meta.labelMinZoom) this.labelMinZoom = meta.labelMinZoom;
-		if (meta.mapLabelsOnTop) this.mapLabelsOnTop = true;
+		if (meta.labels?.overlap) this.labelOverlap = meta.labels.overlap;
+		if (meta.labels?.minZoom) this.labelMinZoom = meta.labels.minZoom;
+		if (meta.labels?.mapOnTop) this.mapLabelsOnTop = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

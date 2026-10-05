@@ -47,7 +47,7 @@ describe('.mapjson files', () => {
 		const json = {
 			view: { center: [13.4, 'north'], radius: 1000 },
 			frame: [10, 50, 5, 55],
-			meta: { title: 'Map', viewer: { search: 'middle' }, labelMinZoom: 99, background: 'osm' },
+			meta: { title: 'Map', viewer: { search: 'middle' }, labels: { minZoom: 99 }, background: 'osm' },
 			elements: [
 				{
 					type: 'marker',

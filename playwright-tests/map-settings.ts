@@ -373,7 +373,7 @@ test('the labels of the background map over areas and lines, those of markers al
 	// over them, but still under the markers
 	await checkbox.check();
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
-	await expect.poll(async () => (await storedState(page)).meta?.mapLabelsOnTop).toBe(true);
+	await expect.poll(async () => (await storedState(page)).meta?.labels?.mapOnTop).toBe(true);
 
 	// kept in the map, and by a new background map
 	await page.reload();
@@ -388,7 +388,7 @@ test('the labels of the background map over areas and lines, those of markers al
 	// under them again
 	await checkbox.uncheck();
 	await expect.poll(order).toStrictEqual({ fill: 1, stroke: 1, symbol: 1 });
-	await expect.poll(async () => (await storedState(page)).meta?.mapLabelsOnTop).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).meta?.labels?.mapOnTop).toBeUndefined();
 });
 
 /**

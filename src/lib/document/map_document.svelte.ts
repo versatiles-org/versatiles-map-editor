@@ -298,9 +298,9 @@ export class MapDocument {
 		this.legend = meta?.legend;
 		this.viewer = meta?.viewer;
 		this.title = meta?.title ?? '';
-		this.labelOverlap = meta?.labelOverlap === 'hide' ? 'hide' : 'show';
-		this.labelMinZoom = meta?.labelMinZoom ?? 0;
-		this.mapLabelsOnTop = meta?.mapLabelsOnTop === true;
+		this.labelOverlap = meta?.labels?.overlap === 'hide' ? 'hide' : 'show';
+		this.labelMinZoom = meta?.labels?.minZoom ?? 0;
+		this.mapLabelsOnTop = meta?.labels?.mapOnTop === true;
 	}
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */

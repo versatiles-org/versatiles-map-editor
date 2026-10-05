@@ -13,8 +13,7 @@
 		},
 		"viewer": { "search": "top-left", "legend": "none" },
 		"title": "Pharmacies in Inner London",
-		"labelOverlap": "hide",
-		"labelMinZoom": 12.9
+		"labels": { "overlap": "hide", "minZoom": 12.9 }
 	},
 	"elements": [
 		{

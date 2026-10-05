@@ -113,8 +113,7 @@ const state = {
 		title: 'Pharmacies in Inner London',
 		// readable at every zoom level: labels that would overlap are hidden, and all are shown only
 		// from the zoom level where the streets of the city are drawn
-		labelOverlap: 'hide',
-		labelMinZoom: 12.9
+		labels: { overlap: 'hide', minZoom: 12.9 }
 	},
 	elements: pharmacies.map(({ point, name }) => ({
 		type: 'marker',

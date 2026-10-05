@@ -16,7 +16,7 @@ import {
 	LEGEND_DEFAULTS,
 	removeViewerDefaults,
 	sanitizeFrame,
-	sanitizeLabelMinZoom,
+	sanitizeLabels,
 	VIEWER_CHOICES,
 	withoutUnusedFields
 } from './profile.js';
@@ -353,9 +353,7 @@ export class StateWriter {
 				metadata.legend ||
 				metadata.colorScheme ||
 				removeViewerDefaults(metadata.viewer) ||
-				metadata.labelOverlap === 'hide' ||
-				sanitizeLabelMinZoom(metadata.labelMinZoom) !== undefined ||
-				metadata.mapLabelsOnTop ||
+				sanitizeLabels(metadata.labels) ||
 				metadata.title);
 		if (!stored) {
 			return this.writeBit(false);
@@ -376,7 +374,8 @@ export class StateWriter {
 			this.writeInteger(METADATA_KEYS.legend, 6);
 			this.writeLegend(metadata.legend);
 		}
-		if (metadata.mapLabelsOnTop) {
+		const labels = sanitizeLabels(metadata.labels);
+		if (labels?.mapOnTop) {
 			// a flag: the key alone
 			this.writeInteger(METADATA_KEYS.mapLabelsOnTop, 6);
 		}
@@ -384,15 +383,14 @@ export class StateWriter {
 			this.writeInteger(METADATA_KEYS.title, 6);
 			this.writeStringRef(metadata.title);
 		}
-		if (metadata.labelOverlap === 'hide') {
+		if (labels?.overlap === 'hide') {
 			// a flag: the key alone
 			this.writeInteger(METADATA_KEYS.labelOverlap, 6);
 		}
-		const labelMinZoom = sanitizeLabelMinZoom(metadata.labelMinZoom);
-		if (labelMinZoom !== undefined) {
+		if (labels?.minZoom !== undefined) {
 			this.writeInteger(METADATA_KEYS.labelMinZoom, 6);
 			// in tenths of a zoom level
-			this.writeVarint(Math.round(labelMinZoom * 10));
+			this.writeVarint(Math.round(labels.minZoom * 10));
 		}
 		const viewer = removeViewerDefaults(metadata.viewer);
 		if (viewer) {

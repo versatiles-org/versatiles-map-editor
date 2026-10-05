@@ -352,7 +352,7 @@ export class StateReader {
 						metadata.colorScheme = this.readStringRef(true);
 						break;
 					case METADATA_KEYS.mapLabelsOnTop:
-						metadata.mapLabelsOnTop = true;
+						metadata.labels = { ...metadata.labels, mapOnTop: true };
 						break;
 					case METADATA_KEYS.title:
 						metadata.title = this.readStringRef();
@@ -361,13 +361,13 @@ export class StateReader {
 						metadata.viewer = this.readViewer();
 						break;
 					case METADATA_KEYS.labelOverlap:
-						metadata.labelOverlap = 'hide';
+						metadata.labels = { ...metadata.labels, overlap: 'hide' };
 						break;
 					case METADATA_KEYS.labelMinZoom: {
 						// in tenths of a zoom level
 						const zoom = sanitizeLabelMinZoom(this.readVarint() / 10);
 						if (zoom === undefined) throw new Error('Invalid zoom level of labels');
-						metadata.labelMinZoom = zoom;
+						metadata.labels = { ...metadata.labels, minZoom: zoom };
 						break;
 					}
 					default:
