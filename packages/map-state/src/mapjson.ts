@@ -5,7 +5,7 @@ import type { MapState } from './types.js';
 export const MAPJSON_VERSION = 1;
 
 /** The JSON Schema of .mapjson files of this version: `$schema` of every file, e.g. for editors. */
-export const MAPJSON_SCHEMA_URL = `https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-${MAPJSON_VERSION}.schema.json`;
+export const MAPJSON_SCHEMA_URL = `https://versatiles.org/versatiles-map-editor/schema/mapjson-${MAPJSON_VERSION}.schema.json`;
 
 /** The content of a .mapjson file: a map state with the URL of its schema. */
 export type MapJSON = {

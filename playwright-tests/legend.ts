@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
 import type { GeoJSONSource } from 'maplibre-gl';
-import { encodeState, type MapState } from '../packages/map-state/src/index.js';
+import { encodeState, type MapState, type StateElement } from '../packages/map-state/src/index.js';
 import { type MapWindow, project, waitForMapIsReady, storedState, sidebar } from './lib/utils.js';
 
 // The legend: its entries, their looks and their order, and how it is shown.
@@ -280,7 +280,7 @@ test('adding the look of an element to the legend', async ({ page }) => {
 			[13.41, 52.5]
 		] as [number, number][]
 	};
-	const elements = [{ ...route, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
+	const elements: StateElement[] = [{ ...route, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
@@ -312,7 +312,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 		[13.41, 52.5]
 	];
 	const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Route' }] };
-	const elements = [{ type: 'line' as const, points, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
+	const elements: StateElement[] = [{ type: 'line', points, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -347,9 +347,9 @@ test(
 			[13.39, 52.505]
 		];
 		const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Park' }] };
-		const elements = [
+		const elements: StateElement[] = [
 			{
-				type: 'polygon' as const,
+				type: 'polygon',
 				points,
 				style: { color: '#00ff004d', pattern: 'diagonal-up' },
 				strokeStyle: { color: '#00aa00' }

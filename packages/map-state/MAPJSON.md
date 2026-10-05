@@ -10,13 +10,15 @@ what their formats have no place for (see [Other forms](#other-forms)).
 This guide explains the format. The exact rules are in its JSON Schema,
 [`schema/mapjson-1.schema.json`](schema/mapjson-1.schema.json), which is generated from the
 TypeScript types in [`src/types.ts`](src/types.ts), with their descriptions, units, ranges and
-defaults. The [example maps](../../examples) are `.mapjson` files.
+defaults, and published at the address that every file names in `$schema`:
+`https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json`. The
+[example maps](../../examples) are `.mapjson` files.
 
 ## A minimal file
 
 ```json
 {
-	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"elements": [{ "type": "marker", "point": [13.3777, 52.5163] }]
 }
 ```
@@ -28,7 +30,7 @@ its elements, on the editor's default background map.
 
 ```json
 {
-	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"map": { "center": [13.39, 52.51], "radius": 2500 },
 	"frame": [13.36, 52.5, 13.42, 52.525],
 	"meta": {

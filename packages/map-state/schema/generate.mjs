@@ -14,8 +14,7 @@ import { createGenerator } from 'ts-json-schema-generator';
 // the package: the folder above this script (by its path, since tests replace the class URL)
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 export const SCHEMA_FILE = join(root, 'schema/mapjson-1.schema.json');
-const SCHEMA_ID =
-	'https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json';
+const SCHEMA_ID = 'https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json';
 
 /** The schema, as an object. */
 export function mapJsonSchema() {

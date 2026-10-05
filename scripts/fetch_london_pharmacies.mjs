@@ -98,8 +98,7 @@ const radius = Math.round(((frame[3] - frame[1]) / 2) * 111320);
 
 const state = {
 	// the format version of the file, see packages/map-state/MAPJSON.md
-	$schema:
-		'https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json',
+	$schema: 'https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json',
 	map: { center, radius },
 	frame,
 	meta: {

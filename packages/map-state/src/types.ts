@@ -40,7 +40,7 @@ export type StateElement = StateElementMarker | StateElementLine | StateElementP
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
-	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `labelPosition`. */
+	/** The symbol and its label (the style fields for markers). */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -55,7 +55,7 @@ export interface StateElementLine {
 	 * @default false
 	 */
 	smooth?: boolean;
-	/** The line: `color`, `width`, `dash` (solid, dashed, dotted), the arrowheads. */
+	/** The line: its color, width and dashes, and the arrowheads (the style fields for lines). */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -70,9 +70,9 @@ export interface StateElementPolygon {
 	 * @default false
 	 */
 	smooth?: boolean;
-	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
+	/** The area: its color (with its opacity) and pattern (the style fields for areas). */
 	style?: StateStyle;
-	/** The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted). */
+	/** The outline: whether it is drawn, its color, width and dashes (the style fields for outlines). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }
@@ -86,9 +86,9 @@ export interface StateElementCircle {
 	 * @exclusiveMinimum 0
 	 */
 	radius: number;
-	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
+	/** The area: its color (with its opacity) and pattern (the style fields for areas). */
 	style?: StateStyle;
-	/** The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted). */
+	/** The outline: whether it is drawn, its color, width and dashes (the style fields for outlines). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }

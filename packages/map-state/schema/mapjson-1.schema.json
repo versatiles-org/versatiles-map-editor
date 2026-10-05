@@ -1,7 +1,7 @@
 {
 	"title": "VersaTiles map (.mapjson), format version 1",
 	"description": "A map of the VersaTiles map editor: its view, visible area, properties and elements. See packages/map-state/MAPJSON.md.",
-	"$id": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
+	"$id": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$ref": "#/definitions/MapJSON",
 	"definitions": {
@@ -403,7 +403,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `labelPosition`."
+					"description": "The symbol and its label (the style fields for markers)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -446,7 +446,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The line: `color`, `width`, `dash` (solid, dashed, dotted), the arrowheads."
+					"description": "The line: its color, width and dashes, and the arrowheads (the style fields for lines)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -477,11 +477,11 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin)."
+					"description": "The area: its color (with its opacity) and pattern (the style fields for areas)."
 				},
 				"strokeStyle": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted)."
+					"description": "The outline: whether it is drawn, its color, width and dashes (the style fields for outlines)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -508,11 +508,11 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin)."
+					"description": "The area: its color (with its opacity) and pattern (the style fields for areas)."
 				},
 				"strokeStyle": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted)."
+					"description": "The outline: whether it is drawn, its color, width and dashes (the style fields for outlines)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
