@@ -69,9 +69,11 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
   `centerOf(bounds)` their center.
-- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `SYMBOL_DEFAULTS`, `FILL_PATTERN_NAMES`,
-  `STROKE_STYLE_NAMES`, `LABEL_ALIGN_NAMES`, `removeDefaultFields`) helps to render the elements
-  the way the editor does. `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend
+- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`,
+  `removeDefaultFields`) helps to render the elements the way the editor does. The choices of a
+  style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
+  `LABEL_ALIGN_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and `AlignName`;
+  the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles). `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend
   that names none, and `removeLegendDefaults` leaves them out, as the base64 string does;
   `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
@@ -180,6 +182,8 @@ To keep hashes short:
 - a style refers to a similar one of the last 32 styles and stores only the fields that differ,
   or that it does not have (#4, `style_history.ts`); the reference is an Exp-Golomb code, 1 bit
   for none and 3 bits for the latest style;
+- the choices of a style (the fill pattern, the dashes, the arrowheads and the position of the
+  label) are names in the state, and in the base64 string the index of the name in its table;
 - an element that has the type and the styles of the element before costs 1 bit for them; the
   label of an element's style is stored as a field of the element, so elements that differ only
   in their labels still repeat their style;
