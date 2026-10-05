@@ -118,7 +118,7 @@
 		box-sizing: border-box;
 		width: 32px;
 		height: 16px;
-		border: 1px solid currentColor;
+		border: 1px solid currentcolor;
 		border-radius: var(--radius-sm);
 	}
 </style>
