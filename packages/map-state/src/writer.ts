@@ -23,6 +23,7 @@ import {
 import { encodeStrings } from './string_coder.js';
 import {
 	ARROW_NAMES,
+	LABEL_ALIGN_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -566,7 +567,7 @@ export class StateWriter {
 			case 'width':
 				return this.writeVarint(Math.round(style.width! * 10));
 			case 'align':
-				return this.writeVarint(Math.round(style.align!));
+				return this.writeName(LABEL_ALIGN_NAMES, style.align!);
 			case 'arrowStart':
 			case 'arrowEnd':
 				return this.writeName(ARROW_NAMES, style[name]!);

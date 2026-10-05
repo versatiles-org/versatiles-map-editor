@@ -342,8 +342,8 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 				encodeState({
 					map: { center: a, radius: 2000 },
 					elements: [
-						{ type: 'marker', point: a, style: { label: labelOfA, color: '#0000ff', size: 2, align: 1 } },
-						{ type: 'marker', point: b, style: { label: 'B', color: '#ff0000', size: 2, align: 1 } }
+						{ type: 'marker', point: a, style: { label: labelOfA, color: '#0000ff', size: 2, align: 'right' } },
+						{ type: 'marker', point: b, style: { label: 'B', color: '#ff0000', size: 2, align: 'right' } }
 					]
 				})
 		);

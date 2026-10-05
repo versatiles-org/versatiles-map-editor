@@ -1,7 +1,8 @@
 <script lang="ts">
 	import InspectorSection from './InspectorSection.svelte';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { labelPositions, SymbolStyle } from '#lib/style/index.js';
+	import { LABEL_ALIGN_NAMES, type AlignName } from '@versatiles/map-state';
+	import { SymbolStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
 	import { ColorPicker, FontSelect, SymbolSelector } from '#lib/components/pickers/index.js';
@@ -24,7 +25,7 @@
 	// color, size and rotation do nothing without a symbol (e.g. a marker that is only a label)
 	const hasSymbol = $derived(symbol.mixed || symbol.value !== '');
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
-	const CELLS: Record<string, [number, number]> = {
+	const CELLS: Record<AlignName, [number, number]> = {
 		auto: [2, 2],
 		right: [2, 3],
 		left: [2, 1],
@@ -35,7 +36,7 @@
 		'bottom-right': [3, 3],
 		'bottom-left': [3, 1]
 	};
-	const NAMES: Record<string, string> = {
+	const NAMES: Record<Exclude<AlignName, 'auto'>, string> = {
 		right: 'Right',
 		left: 'Left',
 		top: 'Above',
@@ -55,9 +56,9 @@
 				: { label: 'On the point', short: 'Center' }
 	);
 	const alignments = $derived(
-		labelPositions.map(({ index, name }) => ({
-			value: index,
-			label: name === 'auto' ? center.label : (NAMES[name] ?? name),
+		LABEL_ALIGN_NAMES.map((name) => ({
+			value: name,
+			label: name === 'auto' ? center.label : NAMES[name],
 			cell: CELLS[name],
 			short: name === 'auto' ? center.short : undefined
 		}))
@@ -125,8 +126,8 @@
 			labelledby="{uid}-labelAlign-label"
 			value={labelAlign.value}
 			mixed={labelAlign.mixed}
-			onchange={(index) => {
-				labelAlign.value = index;
+			onchange={(name) => {
+				labelAlign.value = name;
 				log();
 			}}
 			options={alignments}

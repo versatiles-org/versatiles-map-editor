@@ -1,6 +1,7 @@
 import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
+	LABEL_ALIGN_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -33,7 +34,6 @@ import {
 } from './constants.js';
 import {
 	FILL_PATTERN_NAMES,
-	LABEL_ALIGN_NAMES,
 	sanitizeBackground,
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
@@ -635,7 +635,7 @@ export class StateReader {
 					style.width = this.readVarint() / 10;
 					break;
 				case 'align':
-					style.align = this.readIndex(LABEL_ALIGN_NAMES.length);
+					style.align = this.readName(LABEL_ALIGN_NAMES);
 					break;
 				case 'arrowStart':
 				case 'arrowEnd':

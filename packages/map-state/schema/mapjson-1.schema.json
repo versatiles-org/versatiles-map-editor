@@ -254,11 +254,9 @@
 					"default": 2
 				},
 				"align": {
-					"type": "integer",
-					"description": "Markers: the position of the label: 0 automatic (on the point, without a symbol), 1 right, 2 left, 3 top, 4 bottom, 5 top right, 6 top left, 7 bottom right, 8 bottom left.",
-					"minimum": 0,
-					"maximum": 8,
-					"default": 0
+					"$ref": "#/definitions/AlignName",
+					"description": "Markers: the position of the label around the symbol; \"auto\" where it fits, or on the point without a symbol.",
+					"default": "auto"
 				},
 				"color": {
 					"$ref": "#/definitions/HexColor",
@@ -313,6 +311,10 @@
 			},
 			"additionalProperties": false,
 			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
+		},
+		"AlignName": {
+			"type": "string",
+			"enum": ["auto", "right", "left", "top", "bottom", "top-right", "top-left", "bottom-right", "bottom-left"]
 		},
 		"HexColor": {
 			"type": "string",

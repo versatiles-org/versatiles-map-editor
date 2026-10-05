@@ -1,6 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type StateStyle, LABEL_ALIGN_NAMES, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
+import { type AlignName, type StateStyle, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
 
@@ -85,30 +85,19 @@ export function labelPositionTable(symbols: SymbolInfo[]): Record<string, (TextA
 	return table;
 }
 
-interface LabelAlign {
-	index: number;
-	name: string;
-	anchor?: TextAnchor;
-}
-
-// Text anchor per label alignment index ("auto" uses variable anchors); the names come from the codec
-const anchors: (TextAnchor | undefined)[] = [
-	undefined, // auto
-	'left', // right
-	'right', // left
-	'bottom', // top
-	'top', // bottom
-	'bottom-left', // top right
-	'bottom-right', // top left
-	'top-left', // bottom right
-	'top-right' // bottom left
-];
-
-export const labelPositions: LabelAlign[] = LABEL_ALIGN_NAMES.map((name, index) => ({
-	index,
-	name,
-	anchor: anchors[index]
-}));
+// The text anchor of each position of the label: the side of the label next to the symbol ("auto"
+// has variable anchors)
+const anchors: Record<AlignName, TextAnchor | undefined> = {
+	auto: undefined,
+	right: 'left',
+	left: 'right',
+	top: 'bottom',
+	bottom: 'top',
+	'top-right': 'bottom-left',
+	'top-left': 'bottom-right',
+	'bottom-right': 'top-left',
+	'bottom-left': 'top-right'
+};
 
 export class SymbolStyle extends StylePart {
 	static readonly defaultStyle = SYMBOL_DEFAULTS;
@@ -121,7 +110,7 @@ export class SymbolStyle extends StylePart {
 	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
 	#label: string = $state(SYMBOL_DEFAULTS.label);
-	#labelAlign: number = $state(SYMBOL_DEFAULTS.align);
+	#labelAlign: AlignName = $state(SYMBOL_DEFAULTS.align);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
 	#font: string = $state(SYMBOL_DEFAULTS.font);
 	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
@@ -185,10 +174,11 @@ export class SymbolStyle extends StylePart {
 		this.#label = value;
 		this.changed();
 	}
-	get labelAlign(): number {
+	/** The position of the label around the symbol. */
+	get labelAlign(): AlignName {
 		return this.#labelAlign;
 	}
-	set labelAlign(value: number) {
+	set labelAlign(value: AlignName) {
 		if (value === this.#labelAlign) return;
 		this.#labelAlign = value;
 		this.changed();
@@ -226,7 +216,7 @@ export class SymbolStyle extends StylePart {
 
 	/** The name of the label position, see `LABEL_POSITIONS`. */
 	private getPosition(): string {
-		const anchor = lookupLabelAlign(this.labelAlign).anchor;
+		const anchor = anchors[this.labelAlign];
 		const suffix = boxSuffix(iconBox(this.symbolInfo));
 		if (anchor) return anchor + suffix;
 		// a label without symbol is on the point
@@ -288,22 +278,9 @@ export class SymbolStyle extends StylePart {
 		if (style.halo != null) this.halo = style.halo;
 		if (style.symbol != null) this.symbol = style.symbol;
 		if (style.label != null) this.label = style.label;
-		if (style.align != null) this.labelAlign = lookupLabelAlign(style.align).index;
+		if (style.align != null) this.labelAlign = style.align;
 		if (style.labelColor != null) this.labelColor = style.labelColor;
 		if (style.font != null) this.font = style.font;
 		if (style.haloColor != null) this.haloColor = style.haloColor;
 	}
-}
-
-function lookupLabelAlign(index: number | string): LabelAlign {
-	let pos;
-
-	if (typeof index === 'number') {
-		pos = labelPositions.find((p) => p.index === index);
-	} else if (typeof index === 'string') {
-		pos = labelPositions.find((p) => p.name === index);
-	}
-
-	if (pos == null) return labelPositions[0];
-	return pos;
 }

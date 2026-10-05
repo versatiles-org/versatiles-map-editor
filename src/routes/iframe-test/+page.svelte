@@ -24,8 +24,8 @@
 				],
 				style: { width: 5, color: '#aa0000' }
 			},
-			{ type: 'marker', point: [13.35139, 52.50655], style: { color: '#aa0000', align: 2, label: 'End' } },
-			{ type: 'marker', point: [13.37097, 52.51871], style: { color: '#aa0000', align: 2, label: 'Start' } },
+			{ type: 'marker', point: [13.35139, 52.50655], style: { color: '#aa0000', align: 'left', label: 'End' } },
+			{ type: 'marker', point: [13.37097, 52.51871], style: { color: '#aa0000', align: 'left', label: 'Start' } },
 			{
 				type: 'polygon',
 				points: [

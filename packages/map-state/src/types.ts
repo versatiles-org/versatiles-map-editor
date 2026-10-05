@@ -97,6 +97,20 @@ export interface StateElementCircle {
 export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'] as const;
 export type ArrowName = (typeof ARROW_NAMES)[number];
 
+/** The positions of the label of a marker around its symbol. */
+export const LABEL_ALIGN_NAMES = [
+	'auto',
+	'right',
+	'left',
+	'top',
+	'bottom',
+	'top-right',
+	'top-left',
+	'bottom-right',
+	'bottom-left'
+] as const;
+export type AlignName = (typeof LABEL_ALIGN_NAMES)[number];
+
 /**
  * The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which
  * fields count depends on what it styles (see the elements); missing fields have their default.
@@ -151,14 +165,11 @@ export interface StateStyle {
 	 */
 	width?: number;
 	/**
-	 * Markers: the position of the label: 0 automatic (on the point, without a symbol), 1 right,
-	 * 2 left, 3 top, 4 bottom, 5 top right, 6 top left, 7 bottom right, 8 bottom left.
-	 * @asType integer
-	 * @minimum 0
-	 * @maximum 8
-	 * @default 0
+	 * Markers: the position of the label around the symbol; "auto" where it fits, or on the point
+	 * without a symbol.
+	 * @default "auto"
 	 */
-	align?: number;
+	align?: AlignName;
 	/**
 	 * The color of the symbol, the line, or the area, with its opacity.
 	 * @default "#ff0000"

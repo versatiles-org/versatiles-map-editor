@@ -366,7 +366,7 @@ describe('StateReader', () => {
 				rotate: -45,
 				size: 2.5,
 				width: 2.3,
-				align: 4,
+				align: 'bottom',
 				label: 'test',
 				visible: false,
 				color: '#c400ff42'
@@ -448,7 +448,7 @@ describe('StateReader', () => {
 					{
 						point: [expect.closeTo(13.35139, 5), expect.closeTo(52.50655, 5)],
 						style: {
-							align: 2,
+							align: 'left',
 							color: '#aa0000',
 							label: 'End'
 						},
@@ -457,7 +457,7 @@ describe('StateReader', () => {
 					{
 						point: [expect.closeTo(13.37097, 5), expect.closeTo(52.51871, 5)],
 						style: {
-							align: 2,
+							align: 'left',
 							color: '#aa0000',
 							label: 'Start'
 						},
@@ -688,7 +688,7 @@ describe('invalid links', () => {
 	it('are refused with style values beyond their names', () => {
 		const marker = (style: StateStyle): MapState => ({ elements: [{ type: 'marker', point: [0, 0], style }] });
 		expect(decodeError(marker({ pattern: 3 }))).toBe('Invalid index: 3 of 3');
-		expect(decodeError(marker({ align: 9 }))).toBe('Invalid index: 9 of 9');
+		expect(decodeError(marker({ dash: 3 }))).toBe('Invalid index: 3 of 3');
 		expect(decodeError(marker({ rotate: 200 }))).toBe('Invalid rotation: 200');
 	});
 

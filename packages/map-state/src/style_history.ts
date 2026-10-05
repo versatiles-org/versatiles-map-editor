@@ -15,7 +15,7 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 4, name: 'font', encoded: (v: string) => v },
 	{ key: 5, name: 'size', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 6, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 7, name: 'align', encoded: (v: number) => Math.round(v) },
+	{ key: 7, name: 'align', encoded: (v: string) => v },
 	{ key: 8, name: 'width', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 9, name: 'dash', encoded: (v: number) => Math.round(v) },
 	{ key: 10, name: 'arrowStart', encoded: (v: string) => v },

@@ -27,27 +27,27 @@ describe('style references', () => {
 		expect(decode(encode(markers))).toStrictEqual(markers);
 	});
 
-	it('round the rotation, the pattern and the position of the label to whole numbers', () => {
+	it('round the rotation and the dashes to whole numbers', () => {
 		// e.g. a rotation typed into the editor, or a file
 		const state: MapState = {
 			elements: [
-				{ type: 'marker', point: [0, 0], style: { rotate: 17.5, align: 1.4 } },
-				{ type: 'marker', point: [1, 1], style: { rotate: 18, align: 1 } },
+				{ type: 'marker', point: [0, 0], style: { rotate: 17.5 } },
+				{ type: 'marker', point: [1, 1], style: { rotate: 18 } },
 				{
 					type: 'line',
 					points: [
 						[0, 0],
 						[1, 1]
 					],
-					style: { pattern: 0.6 }
+					style: { dash: 0.6 }
 				}
 			]
 		};
 		const decoded = decode(encode(state)).elements.map((element) => element.style);
-		expect(decoded).toStrictEqual([{ rotate: 18, align: 1 }, { rotate: 18, align: 1 }, { pattern: 1 }]);
+		expect(decoded).toStrictEqual([{ rotate: 18 }, { rotate: 18 }, { dash: 1 }]);
 		// written as the whole numbers, so the second marker refers to the style of the first
 		const whole: MapState = {
-			elements: [{ ...state.elements[0], style: { rotate: 18, align: 1 } }, ...state.elements.slice(1)]
+			elements: [{ ...state.elements[0], style: { rotate: 18 } }, ...state.elements.slice(1)]
 		};
 		expect(encode(state)).toBe(encode(whole));
 	});

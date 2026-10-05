@@ -77,7 +77,7 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 					{
 						type: 'marker',
 						point: center,
-						style: { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0, align: 1 }
+						style: { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0, align: 'right' }
 					}
 				]
 			})
@@ -138,7 +138,7 @@ test('a label at a corner of its symbol, and a label without symbol on the point
 		await page.mouse.click(x, y);
 		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
 		await positions.getByRole('radio', { name: 'Above right' }).check();
-		await expect.poll(align).toBe(5);
+		await expect.poll(align).toBe('top-right');
 		let { blue, red } = await blueAndRedAround(page, [x, y]);
 		// beside the symbol, the bottom left corner of the label at its top right corner
 		expect(red.left).toBeGreaterThan(middle(blue).x);
@@ -148,7 +148,7 @@ test('a label at a corner of its symbol, and a label without symbol on the point
 
 		await page.mouse.click(x, y);
 		await positions.getByRole('radio', { name: 'Below left' }).check();
-		await expect.poll(align).toBe(8);
+		await expect.poll(align).toBe('bottom-left');
 		({ blue, red } = await blueAndRedAround(page, [x, y]));
 		expect(red.right).toBeLessThan(middle(blue).x);
 		expect(red.top).toBeGreaterThan(middle(blue).y);

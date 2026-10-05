@@ -100,17 +100,17 @@ describe('SymbolStyle', () => {
 	});
 
 	it('places the label at the chosen side or corner, the first one that fits, or on the point without image', () => {
-		layer.labelAlign = 3; // top
+		layer.labelAlign = 'top'; // top
 		expect(layer.getProperties().position).toBe('bottom');
 		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
-		layer.labelAlign = 5; // top right: the bottom left corner of the label at the top right of the symbol
+		layer.labelAlign = 'top-right'; // top right: the bottom left corner of the label at the top right of the symbol
 		expect(layer.getProperties().position).toBe('bottom-left');
 		const near = (x: number, y: number) => [expect.closeTo(x), expect.closeTo(y)];
 		expect(LABEL_POSITIONS['bottom-left']).toStrictEqual(['bottom-left', near(0.495, -0.495)]);
-		layer.labelAlign = 8; // bottom left
+		layer.labelAlign = 'bottom-left'; // bottom left
 		expect(layer.getProperties().position).toBe('top-right');
 		// automatic: the sides first, then the corners
-		layer.labelAlign = 0;
+		layer.labelAlign = 'auto';
 		expect(LABEL_POSITIONS.auto.filter((a) => typeof a === 'string')).toStrictEqual([
 			'left',
 			'right',
@@ -153,7 +153,7 @@ describe('SymbolStyle', () => {
 		// an unknown image, e.g. before the symbols are loaded, is 32×32 pixels on the point
 		expect(layer.getProperties().position).toBe('auto');
 		layer.symbol = 'base:icon-bench';
-		layer.labelAlign = 1; // right
+		layer.labelAlign = 'right'; // right
 		expect(layer.getProperties().position).toBe('left');
 	});
 
@@ -164,7 +164,7 @@ describe('SymbolStyle', () => {
 		layer.halo = 3;
 		layer.symbol = 'icons:anchor';
 		layer.label = 'Test Label';
-		layer.labelAlign = 2;
+		layer.labelAlign = 'left';
 
 		expect(layer.getState()).toEqual({
 			color: '#00ff00',
@@ -173,7 +173,7 @@ describe('SymbolStyle', () => {
 			halo: 3,
 			symbol: 'icons:anchor',
 			label: 'Test Label',
-			align: 2
+			align: 'left'
 		});
 	});
 
@@ -185,7 +185,7 @@ describe('SymbolStyle', () => {
 			halo: 2,
 			symbol: 'icons:anchor',
 			label: 'New Label',
-			align: 2
+			align: 'left'
 		});
 
 		expect(layer.color).toBe('#0000ff');
@@ -194,7 +194,7 @@ describe('SymbolStyle', () => {
 		expect(layer.halo).toBe(2);
 		expect(layer.symbol).toBe('icons:anchor');
 		expect(layer.label).toBe('New Label');
-		expect(layer.labelAlign).toBe(2);
+		expect(layer.labelAlign).toBe('left');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
@@ -209,12 +209,12 @@ describe('SymbolStyle', () => {
 	});
 
 	it('should restore falsy values', () => {
-		layer.patch({ halo: 0, rotate: 90, label: 'Label', align: 2 });
-		layer.patch({ rotate: 0, label: '', align: 0 });
+		layer.patch({ halo: 0, rotate: 90, label: 'Label', align: 'left' });
+		layer.patch({ rotate: 0, label: '', align: 'auto' });
 
 		expect(layer.halo).toBe(0);
 		expect(layer.rotate).toBe(0);
 		expect(layer.label).toBe('');
-		expect(layer.labelAlign).toBe(0);
+		expect(layer.labelAlign).toBe('auto');
 	});
 });

@@ -57,7 +57,7 @@
 				"halo": 1.5,
 				"symbol": "icons:nuclear",
 				"label": "Nuclear power plant",
-				"align": 4,
+				"align": "bottom",
 				"labelColor": "#ff4d4d",
 				"font": "noto_sans_bold",
 				"haloColor": "#000000"
@@ -73,7 +73,7 @@
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
 				"label": "Pripyat",
-				"align": 3,
+				"align": "top",
 				"labelColor": "#ffc84d",
 				"font": "noto_sans_bold",
 				"haloColor": "#000000"

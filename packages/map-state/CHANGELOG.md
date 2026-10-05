@@ -80,6 +80,9 @@ The first release.
   `arrowSize`, their width as a factor of the line width, which is only stored with an arrowhead
   (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
   `stroke-arrow-size`.
+- The position of the label of a marker, `align`, by name (`LABEL_ALIGN_NAMES`, type `AlignName`:
+  auto, right, left, top, bottom and the four corners, e.g. top-right; in the base64 string as
+  its index); in GeoJSON `symbol-label-align`.
 - Two fields instead of one `pattern`: `dash` for lines and outlines (`STROKE_STYLE_NAMES`: solid,
   dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`: solid, diagonal, diagonal-thin),
   each with its own style key; in GeoJSON `stroke-style` and `fill-pattern`, as before.

@@ -38,7 +38,6 @@ export {
 	STROKE_STYLE_NAMES,
 	hasArrow,
 	withoutUnusedFields,
-	LABEL_ALIGN_NAMES,
 	removeDefaultFields,
 	LEGEND_DEFAULTS,
 	removeLegendDefaults,
