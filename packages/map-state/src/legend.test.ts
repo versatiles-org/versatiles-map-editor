@@ -10,7 +10,7 @@ import {
 import type { StateLegend } from './types.js';
 
 describe('the defaults of a legend', () => {
-	const entries = [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }];
+	const entries = [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }];
 	const explicit: StateLegend = { ...LEGEND_DEFAULTS, entries };
 
 	it('are left out', () => {
@@ -36,7 +36,7 @@ describe('the defaults of a legend', () => {
 });
 
 describe('bold and italic texts of a legend', () => {
-	const entries = [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }];
+	const entries = [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }];
 
 	it('are kept by a link and by GeoJSON, each on its own', () => {
 		for (const legend of [
@@ -67,7 +67,7 @@ describe('bold and italic texts of a legend', () => {
 });
 
 describe('the theme of a legend', () => {
-	const entries = [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }];
+	const entries = [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }];
 
 	it('is kept by a link and by GeoJSON', () => {
 		for (const theme of ['dark', 'glass'] as const) {

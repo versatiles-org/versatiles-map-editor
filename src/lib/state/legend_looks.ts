@@ -22,7 +22,7 @@ export function legendEntryOf(state: StateElement): StateLegendEntry {
 			? { type: 'marker', style: markerLook(state.style), label: '' }
 			: state.type === 'line'
 				? { type: 'line', style: state.style, label: '' }
-				: { type: 'polygon', style: state.style, strokeStyle: state.strokeStyle, label: '' };
+				: { type: 'area', style: state.style, strokeStyle: state.strokeStyle, label: '' };
 	if (!entry.style) delete entry.style;
 	if (!entry.strokeStyle) delete entry.strokeStyle;
 	return entry;

@@ -13,7 +13,7 @@ function encode(state: MapState): string {
 // many elements in a few colors, as in a typical map
 // without a viewport, whose radius is stored lossy by design
 const state: MapState = {
-	meta: { legend: { entries: [{ type: 'polygon', style: { color: '#0000ff' }, label: 'Water' }] } },
+	meta: { legend: { entries: [{ type: 'area', style: { color: '#0000ff' }, label: 'Water' }] } },
 	elements: Array.from({ length: 20 }, (_, i) => ({
 		type: 'polygon' as const,
 		// from integers, so the coordinates are exact at the codec's resolution

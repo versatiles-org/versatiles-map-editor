@@ -87,7 +87,7 @@ test('a new or opened map is a new map, and the one before is kept in the recent
 		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
 			title: 'Markers',
-			legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A' }] }
+			legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }] }
 		},
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
@@ -177,7 +177,7 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
 			background: { builder: 'osm', options: { theme: 'gray' } },
-			legend: { entries: [{ type: 'polygon' as const, style: { color: '#00ff00' }, label: 'Park' }] }
+			legend: { entries: [{ type: 'area' as const, style: { color: '#00ff00' }, label: 'Park' }] }
 		},
 		elements: [
 			{ type: 'marker', point: [13.41, 52.51], label: 'Café', style: { color: '#0000ff' }, popup: { text: 'Open' } },

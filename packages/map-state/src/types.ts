@@ -349,7 +349,7 @@ export interface StateLegend {
 }
 
 /** What a legend entry shows: a marker, a line, or an area (e.g. of a polygon or a circle). */
-export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'polygon'] as const;
+export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'area'] as const;
 
 /**
  * A row of the legend: a small copy of an element, and a text. Its styles are those of an element
@@ -357,9 +357,9 @@ export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'polygon'] as const;
  */
 export interface StateLegendEntry {
 	type: (typeof LEGEND_ENTRY_TYPES)[number];
-	/** Markers: the symbol. Lines: the line. Polygons: the area. */
+	/** Markers: the symbol. Lines: the line. Areas: the area. */
 	style?: StateStyle;
-	/** Polygons: the outline. */
+	/** Areas: the outline. */
 	strokeStyle?: StateStyle;
 	/** The text next to it. */
 	label: string;

@@ -106,8 +106,8 @@ The first release.
   from 0.05 to 0.95 (`PATTERN_COVERAGE_RANGE`); only stored with a pattern (`hasPattern`,
   `withoutUnusedFields`), in the base64 string in tenths and in percent, which the reader checks
   against the ranges; in GeoJSON `fill-pattern-scale` and `fill-pattern-coverage`.
-- Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
-  and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
+- Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, area), a `style`
+  and for areas a `strokeStyle`, like those of such an element, and a `label`. Their
   styles are written like those of elements, which can refer to them.
 - `labels` in the metadata (`StateLabels`): `overlap` ("hide": labels of markers that would overlap
   other labels are hidden), `minZoom` (the zoom level from which they are shown, with one decimal

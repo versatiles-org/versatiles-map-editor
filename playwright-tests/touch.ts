@@ -222,7 +222,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 });
 
 test('rearranging the entries of the legend with a finger', async ({ page }) => {
-	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
+	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'area' as const, style: { color: '#ff0000' }, label }));
 	await page.goto('/#' + encodeState({ view: { center, radius: 3000 }, meta: { legend: { entries } }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();

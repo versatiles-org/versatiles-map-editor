@@ -201,11 +201,11 @@ does not offer itself.
 
 ### Legend
 
-`{ "entries": [ … ], "layout", "font", "bold", "italic", "theme" }`. Each of its `entries` is a small copy
-of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `type` is `"marker"`,
-`"line"` or `"polygon"` (an area, also for circles), and `style` and `strokeStyle` are styles like
-those of an element of that type (see [Styles](#styles)), with the same defaults: e.g. a marker
-entry without a style is a red flag. Only polygons have a `strokeStyle`, for their outline. The
+`{ "entries": [ … ], "layout", "font", "bold", "italic", "theme" }`. Each of its `entries` is a
+small copy of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `type` is
+`"marker"`, `"line"` or `"area"` (of a polygon or a circle), and `style` and `strokeStyle` are
+styles like those of such an element (see [Styles](#styles)), with the same defaults: e.g. a marker
+entry without a style is a red flag. Only areas have a `strokeStyle`, for their outline. The
 entry's `label` is its text.
 
 | Field    | Values                                                                           | Default        |

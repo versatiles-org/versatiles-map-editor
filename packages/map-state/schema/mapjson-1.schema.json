@@ -169,15 +169,15 @@
 			"properties": {
 				"type": {
 					"type": "string",
-					"enum": ["marker", "line", "polygon"]
+					"enum": ["marker", "line", "area"]
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "Markers: the symbol. Lines: the line. Polygons: the area."
+					"description": "Markers: the symbol. Lines: the line. Areas: the area."
 				},
 				"strokeStyle": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "Polygons: the outline."
+					"description": "Areas: the outline."
 				},
 				"label": {
 					"type": "string",

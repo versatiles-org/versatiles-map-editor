@@ -213,8 +213,8 @@ test.describe('overlays of the viewer on a phone', () => {
 							viewer: { search: search ? 'top-left' : 'none', legend: position },
 							legend: {
 								entries: [
-									{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'A long legend entry' },
-									{ type: 'polygon' as const, style: { color: '#00ff00' }, label: 'Another entry' }
+									{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A long legend entry' },
+									{ type: 'area' as const, style: { color: '#00ff00' }, label: 'Another entry' }
 								]
 							}
 						},
@@ -372,7 +372,7 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 });
 
 test('a legend hidden in the viewer stays in the editor, to be edited', async ({ page }) => {
-	const legend = { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'Park' }] };
+	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
@@ -394,7 +394,7 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 });
 
 test('the place of the legend is set in its panel and in Share alike', async ({ page }) => {
-	const legend = { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'Park' }] };
+	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
 	await waitForMapIsReady(page);
 	const viewer = async () => (await storedState(page)).meta?.viewer;
@@ -642,7 +642,7 @@ test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
 
 	test('are centered on their symbols and swatches', async ({ page }) => {
 		const entries = [
-			{ type: 'polygon' as const, style: { color: '#0072b2' }, label: 'HHHH' },
+			{ type: 'area' as const, style: { color: '#0072b2' }, label: 'HHHH' },
 			{ type: 'marker' as const, style: { color: '#d55e00', symbol: 'icons:anchor' }, label: 'HHHH' }
 		];
 		for (const font of ['sans-serif', 'serif', 'monospace'] as const) {

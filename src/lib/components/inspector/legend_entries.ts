@@ -51,7 +51,7 @@ export function setEntryType(doc: MapDocumentInteractive, index: number, type: S
 	if (!entry || type === entry.type) return;
 	const style = { color: colorOf(entry) };
 	replaceEntry(doc, index, () =>
-		type === 'polygon'
+		type === 'area'
 			? { type, style, strokeStyle: { visible: false }, label: entry.label }
 			: { type, style, label: entry.label }
 	);

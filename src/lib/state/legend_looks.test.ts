@@ -19,7 +19,7 @@ const cafe = (color: string, label = 'Cafe'): StateElement => ({
 	style: { color, symbol: 'base:icon-cafe' }
 });
 const parks: StateLegendEntry = {
-	type: 'polygon',
+	type: 'area',
 	style: { color: '#00aa00' },
 	strokeStyle: { visible: false },
 	label: 'Parks'
@@ -43,7 +43,7 @@ describe('legend looks', () => {
 			const after = [park('#008800'), park('#008800'), cafe('#0000ff')];
 			const followed = followStyleChanges(before, after, [parks, cafes]);
 			expect(followed?.entries).toStrictEqual([
-				{ type: 'polygon', style: { color: '#008800' }, strokeStyle: { visible: false }, label: 'Parks' },
+				{ type: 'area', style: { color: '#008800' }, strokeStyle: { visible: false }, label: 'Parks' },
 				cafes
 			]);
 			expect(followed?.changed.map((e) => e.label)).toStrictEqual(['Parks']);
@@ -97,7 +97,7 @@ describe('legend looks', () => {
 					cafes,
 					{ type: 'line', style: { color: '#aa00aa' }, label: 'Bus' },
 					// an area with its outline, and a marker with the default red
-					{ type: 'polygon', style: { color: '#00ff0080' }, strokeStyle: { color: '#008800' }, label: 'Forest' },
+					{ type: 'area', style: { color: '#00ff0080' }, strokeStyle: { color: '#008800' }, label: 'Forest' },
 					{ type: 'marker', label: 'Flag' }
 				]
 			})

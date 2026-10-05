@@ -35,7 +35,7 @@ describe('symbols', () => {
 						{ type: 'marker', style: { color: '#ff0000', symbol: 'icons:anchor' }, label: 'Harbour' },
 						// only in the legend
 						{ type: 'marker', style: { color: '#00ff00', symbol: 'base:icon-zoo' }, label: 'Zoo' },
-						{ type: 'polygon', style: { color: '#0000ff' }, label: 'Area' }
+						{ type: 'area', style: { color: '#0000ff' }, label: 'Area' }
 					]
 				}
 			},

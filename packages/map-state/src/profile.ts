@@ -426,7 +426,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		if (!type) continue;
 		const style = sanitizeStyle(e.style);
 		// only areas have an outline
-		const strokeStyle = type === 'polygon' ? sanitizeStyle(e.strokeStyle) : undefined;
+		const strokeStyle = type === 'area' ? sanitizeStyle(e.strokeStyle) : undefined;
 		legend.entries.push({ type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label });
 	}
 	return removeLegendDefaults(legend);

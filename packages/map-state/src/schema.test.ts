@@ -68,7 +68,7 @@ describe('the JSON Schema of .mapjson files', () => {
 					layout: 'inline',
 					font: 'serif',
 					bold: true,
-					entries: [{ type: 'polygon', style: { color: '#ff0000' }, label: 'A' }]
+					entries: [{ type: 'area', style: { color: '#ff0000' }, label: 'A' }]
 				},
 				viewer: { search: 'top-right', navigation: 'none', legend: 'bottom' },
 				colorScheme: 'dark2',

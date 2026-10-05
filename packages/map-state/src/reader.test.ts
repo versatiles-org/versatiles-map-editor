@@ -575,7 +575,7 @@ describe('legend', () => {
 					font: 'serif',
 					entries: [
 						{
-							type: 'polygon',
+							type: 'area',
 							style: { color: '#ff0000', pattern: 'diagonal-up' },
 							strokeStyle: { width: 3 },
 							label: 'Red area'

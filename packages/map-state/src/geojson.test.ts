@@ -308,7 +308,7 @@ describe('legend', () => {
 						{ type: 'line', style: { color: '#F00', width: '3', dash: 7, size: -1, extra: 1 }, label: 5 },
 						// only areas have an outline
 						{ type: 'marker', style: { symbol: 'flag' }, strokeStyle: { color: '#000' }, label: 'y' },
-						{ type: 'polygon', style: 'red', strokeStyle: { visible: false }, label: 'z' },
+						{ type: 'area', style: 'red', strokeStyle: { visible: false }, label: 'z' },
 						{ type: 'circle', style: { color: '#0F0' }, label: 'x' },
 						// without a type
 						{ color: '#0F0', label: 'x', symbol: 'icons:anchor' },
@@ -325,7 +325,7 @@ describe('legend', () => {
 					// only valid fields; a symbol is the name of its image, e.g. no short name
 					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '5' },
 					{ type: 'marker', label: 'y' },
-					{ type: 'polygon', strokeStyle: { visible: false }, label: 'z' }
+					{ type: 'area', strokeStyle: { visible: false }, label: 'z' }
 				]
 			}
 		});

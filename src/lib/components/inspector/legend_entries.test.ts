@@ -19,7 +19,7 @@ describe('entryStyle', () => {
 
 	it('edits the size and the coverage of a pattern, without them if the fill is solid', () => {
 		const doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
-		doc.legend = { entries: [{ type: 'polygon', label: 'Zone' }] };
+		doc.legend = { entries: [{ type: 'area', label: 'Zone' }] };
 		const fill = entryStyle(doc, 0, 'style', 'fill');
 		expect([fill.pattern, fill.patternScale, fill.patternCoverage]).toStrictEqual(['solid', 1, 0.5]);
 

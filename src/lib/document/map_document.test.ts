@@ -270,7 +270,7 @@ describe('MapDocument', () => {
 	});
 
 	it('keeps the legend without its default values, as links store it', async () => {
-		const entries: StateLegendEntry[] = [{ type: 'polygon', style: { color: '#ff0000' }, label: 'A' }];
+		const entries: StateLegendEntry[] = [{ type: 'area', style: { color: '#ff0000' }, label: 'A' }];
 		await mapDocument.loadState({
 			elements: [],
 			meta: { legend: { layout: 'vertical', font: 'sans-serif', entries } }

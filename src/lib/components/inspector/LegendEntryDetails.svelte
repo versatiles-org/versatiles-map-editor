@@ -52,7 +52,7 @@
 	const TYPES: { value: StateLegendEntry['type']; label: string }[] = [
 		{ value: 'marker', label: 'Marker' },
 		{ value: 'line', label: 'Line' },
-		{ value: 'polygon', label: 'Area' }
+		{ value: 'area', label: 'Area' }
 	];
 </script>
 

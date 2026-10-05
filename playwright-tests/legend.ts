@@ -8,7 +8,7 @@ import { type MapWindow, project, waitForMapIsReady, storedState, sidebar } from
 test('rearranging the entries of the legend', { tag: '@cross-browser' }, async ({ page }) => {
 	// tall enough for all entries in the sidebar, for the mouse to reach them
 	await page.setViewportSize({ width: 1280, height: 1600 });
-	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
+	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'area' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
 		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
@@ -57,9 +57,7 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 });
 
 test('the theme of the legend: light, dark or a glass over the map', { tag: '@cross-browser' }, async ({ page }) => {
-	const entries = [
-		{ type: 'polygon' as const, style: { color: '#0072b2' }, strokeStyle: { visible: false }, label: 'A' }
-	];
+	const entries = [{ type: 'area' as const, style: { color: '#0072b2' }, strokeStyle: { visible: false }, label: 'A' }];
 	await page.goto(
 		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
@@ -98,7 +96,7 @@ test('the theme of the legend: light, dark or a glass over the map', { tag: '@cr
 });
 
 test('the entries of the legend are closed, and open to edit them', async ({ page }) => {
-	const entries = ['A', 'B'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
+	const entries = ['A', 'B'].map((label) => ({ type: 'area' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
 		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
@@ -178,12 +176,12 @@ test(
 		await entry.getByRole('radio', { name: 'Area' }).check();
 		await expect
 			.poll(stored)
-			.toStrictEqual({ type: 'polygon', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
+			.toStrictEqual({ type: 'area', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
 		await entry.getByRole('combobox', { name: 'Pattern' }).click();
 		await page.getByRole('option', { name: 'Diagonal up', exact: true }).click();
 		await entry.getByRole('checkbox', { name: 'Outline' }).check();
 		await expect.poll(stored).toStrictEqual({
-			type: 'polygon',
+			type: 'area',
 			style: { color: '#0000ff', pattern: 'diagonal-up' },
 			strokeStyle: { color: '#0000ff' },
 			label: 'A'
@@ -210,8 +208,8 @@ test('a legend entry follows the style of its elements', async ({ page }) => {
 	});
 	// "Lakes" shows a color that no area has
 	const entries = [
-		{ type: 'polygon' as const, style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Parks' },
-		{ type: 'polygon' as const, style: { color: '#00ffff' }, strokeStyle: { visible: false }, label: 'Lakes' }
+		{ type: 'area' as const, style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Parks' },
+		{ type: 'area' as const, style: { color: '#00ffff' }, strokeStyle: { visible: false }, label: 'Lakes' }
 	];
 	await page.goto(
 		'/#' +
@@ -388,7 +386,7 @@ test(
 		// a click on it takes its style; the legend stays selected
 		await page.mouse.click(x, y);
 		await expect.poll(entry).toStrictEqual({
-			type: 'polygon',
+			type: 'area',
 			style: { color: '#00ff004d', pattern: 'diagonal-up' },
 			strokeStyle: { color: '#00aa00' },
 			label: 'Park'
@@ -469,7 +467,7 @@ test('editing the legend', async ({ page }) => {
 		layout: 'horizontal',
 		entries: [
 			// a new entry is an area without an outline, one with a symbol a marker
-			{ type: 'polygon', style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Park' },
+			{ type: 'area', style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Park' },
 			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' }
 		]
 	});

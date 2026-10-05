@@ -11,7 +11,7 @@ const state: MapState = {
 	view: { center, radius: 10000 },
 	meta: {
 		viewer: { legend: 'top-left' },
-		legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'Route' }] }
+		legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Route' }] }
 	},
 	elements: [
 		{

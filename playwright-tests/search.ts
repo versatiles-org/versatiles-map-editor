@@ -155,7 +155,7 @@ test.describe('address search in the viewer', () => {
 				view: { center: [13.4, 52.5], radius: 10000 },
 				meta: {
 					viewer: { search: 'top-left', legend: 'top-left' },
-					legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'Area' }] }
+					legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Area' }] }
 				},
 				elements: [{ type: 'marker', point: [13.4, 52.5] }]
 			};

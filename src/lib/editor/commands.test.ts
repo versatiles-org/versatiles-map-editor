@@ -166,7 +166,7 @@ describe('addLegendEntry', () => {
 		// all colors are offered in the color picker, also those of the legend and of the halos
 		expect(doc.colors.getColors().sort()).toStrictEqual(['#111111', '#222222', '#ffffff']);
 		// areas of the color, without an outline
-		expect(doc.legend?.entries[0]).toMatchObject({ type: 'polygon', strokeStyle: { visible: false } });
+		expect(doc.legend?.entries[0]).toMatchObject({ type: 'area', strokeStyle: { visible: false } });
 
 		doc.state.undo();
 		expect(doc.legend?.entries).toHaveLength(1);
@@ -208,13 +208,13 @@ describe('addToLegend', () => {
 			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' },
 			{ type: 'line', style: { color: '#d55e00', dash: 'dashed', width: 4 }, label: 'Bus 100' },
 			{
-				type: 'polygon',
+				type: 'area',
 				style: { color: '#00ff004d', pattern: 'diagonal-down' },
 				strokeStyle: { color: '#00ff00' },
 				label: ''
 			},
 			// a circle is an area
-			{ type: 'polygon', strokeStyle: { visible: false }, label: '' }
+			{ type: 'area', strokeStyle: { visible: false }, label: '' }
 		]);
 		doc.state.undo();
 		expect(doc.legend).toBeUndefined();
@@ -258,7 +258,7 @@ describe('pasteStyleToEntry', () => {
 	let doc: MapDocumentInteractive;
 	beforeEach(() => {
 		doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
-		doc.legend = { entries: [{ type: 'polygon', style: { color: '#000000' }, label: 'Kept' }] };
+		doc.legend = { entries: [{ type: 'area', style: { color: '#000000' }, label: 'Kept' }] };
 		doc.state.log();
 	});
 	const points: [number, number][] = [
@@ -297,13 +297,13 @@ describe('pasteStyleToEntry', () => {
 				strokeStyle: { visible: false }
 			})
 		).toStrictEqual({
-			type: 'polygon',
+			type: 'area',
 			style: { pattern: 'diagonal-up' },
 			strokeStyle: { visible: false },
 			label: 'Kept'
 		});
 		// all defaults
-		expect(paste({ type: 'polygon', points })).toStrictEqual({ type: 'polygon', label: 'Kept' });
+		expect(paste({ type: 'polygon', points })).toStrictEqual({ type: 'area', label: 'Kept' });
 	});
 
 	it('gives a line entry the arrowheads, with their size only if there are any', () => {
@@ -318,7 +318,7 @@ describe('pasteStyleToEntry', () => {
 	it('is one undo step', () => {
 		paste({ type: 'line', points, style: { color: '#d55e00' } });
 		doc.state.undo();
-		expect(doc.legend?.entries[0]).toStrictEqual({ type: 'polygon', style: { color: '#000000' }, label: 'Kept' });
+		expect(doc.legend?.entries[0]).toStrictEqual({ type: 'area', style: { color: '#000000' }, label: 'Kept' });
 	});
 });
 

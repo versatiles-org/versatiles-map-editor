@@ -13,13 +13,13 @@
 		"legend": {
 			"entries": [
 				{
-					"type": "polygon",
+					"type": "area",
 					"style": { "color": "#ff710040" },
 					"strokeStyle": { "color": "#ff7100", "width": 2.5 },
 					"label": "10 km zone"
 				},
 				{
-					"type": "polygon",
+					"type": "area",
 					"style": { "color": "#e69f0040" },
 					"strokeStyle": { "color": "#e69f00", "dash": "dotted", "width": 2.5 },
 					"label": "30 km exclusion zone"

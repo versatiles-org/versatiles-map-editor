@@ -57,7 +57,7 @@ test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 	// a window of the shape of the frame, so the frame would fill it, also under the legend
 	await page.setViewportSize({ width: 600, height: 500 });
 	const entries = ['Cafés', 'Bakeries', 'Parks', 'Museums'].map((label) => ({
-		type: 'polygon' as const,
+		type: 'area' as const,
 		style: { color: '#ff0000' },
 		label
 	}));
