@@ -572,7 +572,7 @@ export class StateReader {
 	readStyle(role: StyleRoleName): StateStyle {
 		try {
 			const ref = this.readExpGolomb(STYLE_REFERENCE_PARAMETER);
-			if (ref > 0 && !this.styleHistory.isOfRole(ref, role)) throw new Error(`Invalid style reference: ${ref}`);
+			if (ref > this.styleHistory.count(role)) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch(role, { ...this.styleHistory.get(ref, role) });
 			// the writer leaves it out without an arrowhead
 			if (style.arrowSize !== undefined && !hasArrow(style)) throw new Error('Arrow size without an arrowhead');

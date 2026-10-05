@@ -504,10 +504,9 @@ export class StateWriter {
 	writeStyle(role: StyleRoleName, style: StateStyle) {
 		style = withoutUnusedFields(style);
 		let best: StateWriter | undefined;
-		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
-			if (ref > 0 && !this.styleHistory.isOfRole(ref, role)) continue;
+		for (let ref = 0; ref <= this.styleHistory.count(role); ref++) {
 			const writer = this.fork();
-			writer.writeExpGolomb(ref, STYLE_REFERENCE_PARAMETER);
+			writer.writeStyleReference(ref);
 			writer.writeStylePatch(role, this.styleHistory.get(ref, role) ?? {}, style);
 			if (!best || writer.bits.length < best.bits.length) best = writer;
 		}
@@ -516,6 +515,11 @@ export class StateWriter {
 		// the strings the chosen encoding referenced
 		this.nextString = [...best!.nextString];
 		this.styleHistory.remember(role, style);
+	}
+
+	/** A reference to an earlier style of the role: 0 for none, 1 for the latest, see `StyleHistory`. */
+	writeStyleReference(ref: number) {
+		this.writeExpGolomb(ref, STYLE_REFERENCE_PARAMETER);
 	}
 
 	/** The fields of the role that differ from `base`: changed ones with their value, missing ones as removed. */

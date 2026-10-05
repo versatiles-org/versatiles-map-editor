@@ -23,7 +23,8 @@ The first release.
     that learned the vocabulary of the format before; the block needs no length, the decoder knows
     where it ends; each string once in its section, at most 2^22 characters, so a short hostile
     link cannot make the decoder produce millions of strings;
-  - style references to similar earlier styles, in an Exp-Golomb code;
+  - style references to similar earlier styles of the same role, counted back among the
+    different styles of that role, in an Exp-Golomb code;
   - style fields as keys in an Exp-Golomb code (k = 0), numbered per role (`STYLE_KEYS`: marker,
     line, area, outline), the most frequent ones of the role shortest: the end of a style 1 bit,
     the first two fields 3 bits (e.g. `color` and `symbol` of a marker, `color` and `width` of a

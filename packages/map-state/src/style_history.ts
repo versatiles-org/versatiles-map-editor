@@ -114,36 +114,37 @@ export function canonical(role: StyleRoleName, style: StateStyle): string {
  */
 export const STYLE_REFERENCE_PARAMETER = 0;
 
-/** Styles are referenced by their distance from the end, so the size is limited. */
+/** Styles are referenced by their distance from the end, so the size of each role's list is limited. */
 export const STYLE_HISTORY_SIZE = 32;
 
 /**
- * The styles written or read so far, so a style can refer to a similar earlier
- * one. Writer and reader update it identically. A style that is used again moves to the end,
- * so frequently used styles have short references.
+ * The styles written or read so far, a list per role, so a style can refer to a similar earlier
+ * style of its role: by the lookback among them, 1 for the latest (0 is no reference). The list
+ * has each style once, and a style that is used again moves to the end, so frequently used
+ * styles have short references; styles of other roles in between do not count. Writer and reader
+ * update it identically. (Measured with the examples: counting every earlier style instead, or a
+ * separate bit for "no reference", made the links longer.)
  */
 export class StyleHistory {
-	private styles: { role: StyleRoleName; style: StateStyle; key: string }[] = [];
+	private styles = new Map<StyleRoleName, { style: StateStyle; key: string }[]>();
 
-	/** Reference 1 is the latest style; a reference to a style of another role is none. */
+	/** Reference 1 is the latest style of the role, 2 the one before, and so on. */
 	get(ref: number, role: StyleRoleName): StateStyle | undefined {
-		const entry = ref >= 1 ? this.styles[this.styles.length - ref] : undefined;
-		return entry?.role === role ? entry.style : undefined;
+		const list = this.styles.get(role) ?? [];
+		return ref >= 1 ? list[list.length - ref]?.style : undefined;
 	}
 
-	/** Whether reference `ref` is to a style of the role, which a style of the role can refer to. */
-	isOfRole(ref: number, role: StyleRoleName): boolean {
-		return ref >= 1 && this.styles[this.styles.length - ref]?.role === role;
-	}
-
-	get length(): number {
-		return this.styles.length;
+	/** How many styles of the role can be referred to. */
+	count(role: StyleRoleName): number {
+		return this.styles.get(role)?.length ?? 0;
 	}
 
 	remember(role: StyleRoleName, style: StateStyle) {
 		const key = canonical(role, style);
-		this.styles = this.styles.filter((s) => s.key !== key);
-		this.styles.push({ role, style, key });
-		if (this.styles.length > STYLE_HISTORY_SIZE) this.styles.shift();
+		let list = this.styles.get(role) ?? [];
+		list = list.filter((s) => s.key !== key);
+		list.push({ style, key });
+		if (list.length > STYLE_HISTORY_SIZE) list.shift();
+		this.styles.set(role, list);
 	}
 }

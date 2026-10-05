@@ -188,10 +188,11 @@ To keep hashes short:
   model has learned the format's vocabulary before (`string_primer.ts`). For the others, it starts
   empty and learns the strings of the map, so text in any script gets shorter, and repeated words
   cost little;
-- a style refers to a similar one of the last 32 styles of its role (marker, line, area or
-  outline) and stores only the fields that differ, or that it does not have (#4,
-  `style_history.ts`); the reference is an Exp-Golomb code, 1 bit for none and 3 bits for the
-  latest style; the fields have keys per role (`STYLE_KEYS`), so a role with few fields has
+- a style refers to a similar earlier style of its role (marker, line, area or outline) and
+  stores only the fields that differ, or that it does not have (#4, `style_history.ts`); the
+  reference counts back among the last 32 different styles of the role, so styles of other roles
+  in between cost nothing: an Exp-Golomb code, 1 bit for none and 3 bits for the latest style of
+  the role; the fields have keys per role (`STYLE_KEYS`), so a role with few fields has
   short keys;
 - the choices of a style (the fill pattern, the dashes, the arrowheads and the position of the
   label) are names in the state, and in the base64 string the index of the name in its table;

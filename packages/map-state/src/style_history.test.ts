@@ -156,17 +156,50 @@ describe('StyleHistory', () => {
 		expect(history.get(1, 'marker')).toStrictEqual({ color: '#00ff00' });
 		// the same style, as it is encoded
 		history.remember('marker', { color: '#ff0000' });
-		expect(history.length).toBe(2);
+		expect(history.count('marker')).toBe(2);
 		expect(history.get(1, 'marker')).toStrictEqual({ color: '#ff0000' });
 		expect(history.get(2, 'marker')).toStrictEqual({ color: '#00ff00' });
 		expect(history.get(0, 'marker')).toBeUndefined();
 		expect(history.get(3, 'marker')).toBeUndefined();
 	});
 
+	it('counts only the styles of the role, so styles of other roles in between cost nothing', () => {
+		const history = new StyleHistory();
+		history.remember('marker', { color: '#ff0000' });
+		history.remember('line', { width: 4 });
+		history.remember('area', { pattern: 'dots' });
+		history.remember('outline', { width: 4 });
+		// the marker is the latest style of its role
+		expect(history.get(1, 'marker')).toStrictEqual({ color: '#ff0000' });
+		expect(history.count('marker')).toBe(1);
+		// equal fields of another role are another style
+		expect(history.get(1, 'line')).toStrictEqual({ width: 4 });
+		expect(history.get(1, 'outline')).toStrictEqual({ width: 4 });
+	});
+
+	it('is the same in the writer and the reader, which refuses a reference to a style that is not there', () => {
+		const writer = new StateWriter();
+		writer.writeStyle('marker', { rotation: 45, size: 2 });
+		writer.writeStyle('line', { width: 4 });
+		// refers to the marker before: the line in between does not count
+		const start = writer.bits.length;
+		writer.writeStyle('marker', { rotation: 45, size: 2 });
+		expect(writer.asBitString().slice(start)).toBe('010' + '1');
+		const reader = new StateReader(writer.bits);
+		reader.readStyle('marker');
+		reader.readStyle('line');
+		expect(reader.readStyle('marker')).toStrictEqual({ rotation: 45, size: 2 });
+		// a reference to the second style of the area, of which there is none
+		const hostile = new StateWriter();
+		hostile.writeExpGolomb(2, 0);
+		hostile.writeExpGolomb(0, 0);
+		expect(() => new StateReader(hostile.bits).readStyle('area')).toThrow();
+	});
+
 	it('keeps a limited number of styles', () => {
 		const history = new StyleHistory();
 		for (let i = 0; i < STYLE_HISTORY_SIZE + 10; i++) history.remember('marker', { rotation: i });
-		expect(history.length).toBe(STYLE_HISTORY_SIZE);
+		expect(history.count('marker')).toBe(STYLE_HISTORY_SIZE);
 		expect(history.get(STYLE_HISTORY_SIZE, 'marker')).toStrictEqual({ rotation: 10 });
 	});
 });
