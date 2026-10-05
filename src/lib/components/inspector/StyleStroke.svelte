@@ -25,7 +25,12 @@
 	const color = $derived(group(layers, 'color'));
 	const width = $derived(group(layers, 'width'));
 	const dash = $derived(group(layers, 'dash'));
-	const styles = STROKE_STYLE_NAMES.map((name) => ({ value: name, label: name }));
+	const NAMES: Record<DashName, string> = {
+		solid: 'Solid',
+		dashed: 'Dashed',
+		dotted: 'Dotted'
+	};
+	const styles = STROKE_STYLE_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 
 	/** The dashes as in the map, for a line of this width in the preview. */
 	function dashes(name: DashName, width = 3): string | undefined {

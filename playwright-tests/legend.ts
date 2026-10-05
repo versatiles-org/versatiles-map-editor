@@ -166,7 +166,7 @@ test(
 		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff' }, label: 'A' });
 		await expect.poll(inked).toBeGreaterThan(0);
 		const solid = await inked();
-		await entry.getByRole('radio', { name: 'dotted' }).check();
+		await entry.getByRole('radio', { name: 'Dotted', exact: true }).check();
 		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff', dash: 'dotted' }, label: 'A' });
 		// dots, with gaps between them
 		await expect.poll(inked).toBeLessThan(solid * 0.8);
@@ -179,7 +179,7 @@ test(
 		await expect
 			.poll(stored)
 			.toStrictEqual({ type: 'polygon', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
-		await entry.getByRole('radio', { name: 'diagonal', exact: true }).check();
+		await entry.getByRole('radio', { name: 'Diagonal', exact: true }).check();
 		await entry.getByRole('checkbox', { name: 'Outline' }).check();
 		await expect.poll(stored).toStrictEqual({
 			type: 'polygon',

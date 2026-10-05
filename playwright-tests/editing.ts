@@ -656,7 +656,7 @@ test(
 		await page.mouse.click(...(await project(page, [13.4, 52.49])));
 		const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
 		await expect(patterns.getByRole('radio')).toHaveCount(3);
-		await patterns.getByRole('radio', { name: 'diagonal', exact: true }).check();
+		await patterns.getByRole('radio', { name: 'Diagonal', exact: true }).check();
 		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal');
 		await page.keyboard.press('ArrowRight');
 		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-thin');

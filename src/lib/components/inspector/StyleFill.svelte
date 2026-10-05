@@ -24,7 +24,12 @@
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
 	const pattern = $derived(group(layers, 'pattern'));
-	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: name }));
+	const NAMES: Record<FillPatternName, string> = {
+		solid: 'Solid',
+		diagonal: 'Diagonal',
+		'diagonal-thin': 'Diagonal, thin'
+	};
+	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 	// the width of the stripes in the preview, per pattern; none is filled
 	const stripes: Record<FillPatternName, number> = { solid: 0, diagonal: 2.5, 'diagonal-thin': 1 };
 </script>
