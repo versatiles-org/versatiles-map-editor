@@ -31,7 +31,6 @@
     "test-playwright-docker": "./scripts/test_playwright_docker.sh",
     "test-unit": "vitest run --testTimeout 10000",
     "test": "npm run test-unit && npm run test-playwright",
-    "prepare": "husky",
     "upgrade": "vrt deps-upgrade"
   },
   "dependencies": {
@@ -55,7 +54,6 @@
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.13.0",
     "happy-dom": "^20.14.5",
-    "husky": "^9.1.7",
     "npm-check-updates": "^23.1.0",
     "playwright": "^1.63.0",
     "postcss-html": "^2.0.0",
