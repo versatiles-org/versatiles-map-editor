@@ -3,7 +3,7 @@ import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
 	FILL_PATTERN_NAMES,
-	LABEL_ALIGN_NAMES,
+	LABEL_POSITION_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -57,7 +57,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	| 'halo'
 	| 'symbol'
 	| 'label'
-	| 'align'
+	| 'labelPosition'
 	| 'labelColor'
 	| 'labelSize'
 	| 'font'
@@ -71,7 +71,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
 	symbol: 'base:icon-embassy',
 	label: '',
-	align: 'auto',
+	labelPosition: 'auto',
 	labelColor: '#000000',
 	// the font of the labels of the background map
 	font: '',
@@ -149,7 +149,7 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	const labelSize = sanitizeNumber(v.labelSize, 0);
 	if (labelSize) s.labelSize = labelSize;
 	set(s, 'width', sanitizeNumber(v.width, 0));
-	set(s, 'align', oneOf(LABEL_ALIGN_NAMES, v.align));
+	set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, v.labelPosition));
 	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
 	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
@@ -283,7 +283,7 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-size': s.size,
 		'symbol-pattern': s.symbol,
 		'symbol-label': s.label,
-		'symbol-label-align': s.align,
+		'symbol-label-position': s.labelPosition,
 		'symbol-label-color': s.labelColor,
 		'symbol-label-size': s.labelSize,
 		// none: the font of the labels of the background map
@@ -300,7 +300,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'rotate', sanitizeRotation(p['symbol-rotate']));
 		set(s, 'size', sanitizeNumber(p['symbol-size'], 0));
 		set(s, 'label', sanitizeString(p['symbol-label']));
-		set(s, 'align', oneOf(LABEL_ALIGN_NAMES, p['symbol-label-align']));
+		set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, p['symbol-label-position']));
 		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));
 		const labelSize = sanitizeNumber(p['symbol-label-size'], 0);
 		if (labelSize) s.labelSize = labelSize;

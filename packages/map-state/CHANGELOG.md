@@ -80,9 +80,10 @@ The first release.
   `arrowSize`, their width as a factor of the line width, which is only stored with an arrowhead
   (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
   `stroke-arrow-size`.
-- The position of the label of a marker, `align`, by name (`LABEL_ALIGN_NAMES`, type `AlignName`:
-  auto, right, left, top, bottom and the four corners, e.g. top-right; in the base64 string as
-  its index); in GeoJSON `symbol-label-align`.
+- The position of the label of a marker, `labelPosition`, by name (`LABEL_POSITION_NAMES`, type
+  `LabelPositionName`: auto, right, left, top, bottom and the four corners, e.g. top-right; in the
+  base64 string as its index); in GeoJSON and KML `symbol-label-position`. The name says where
+  the label is, unlike MapLibre's `text-anchor`.
 - Two fields instead of one `pattern`, by name: `dash` for lines and outlines (`STROKE_STYLE_NAMES`,
   type `DashName`: solid, dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`, type
   `FillPatternName`: solid, diagonal, diagonal-thin), each with its own style key and in the base64

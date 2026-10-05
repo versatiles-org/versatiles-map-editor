@@ -19,7 +19,15 @@ const state: MapState = {
 		{
 			type: 'marker',
 			point: [13.42, 52.52],
-			style: { color: '#0000ff', symbol: 'icons:anchor', size: 2, rotate: -45, halo: 2, label: '123', align: 'top' },
+			style: {
+				color: '#0000ff',
+				symbol: 'icons:anchor',
+				size: 2,
+				rotate: -45,
+				halo: 2,
+				label: '123',
+				labelPosition: 'top'
+			},
 			popup: { text: 'Line 1\n**bold** <b>not html</b> & [link](https://example.org)' }
 		},
 		{

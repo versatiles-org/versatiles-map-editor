@@ -65,7 +65,7 @@
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
 				"label": "Hamburg Hbf",
-				"align": "top",
+				"labelPosition": "top",
 				"font": "noto_sans_bold"
 			}
 		},
@@ -78,7 +78,7 @@
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
 				"label": "Berlin Hbf",
-				"align": "top",
+				"labelPosition": "top",
 				"font": "noto_sans_bold"
 			}
 		},
@@ -89,7 +89,7 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
 				"label": "Ludwigslust",
-				"align": "right",
+				"labelPosition": "right",
 				"labelColor": "#d55e00",
 				"font": "noto_sans_bold"
 			}
@@ -101,7 +101,7 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
 				"label": "Wittenberge",
-				"align": "right",
+				"labelPosition": "right",
 				"labelColor": "#d55e00",
 				"font": "noto_sans_bold"
 			}
@@ -113,7 +113,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Uelzen",
-				"align": "left",
+				"labelPosition": "left",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -125,7 +125,7 @@
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
 				"label": "Stendal",
-				"align": "left",
+				"labelPosition": "left",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}

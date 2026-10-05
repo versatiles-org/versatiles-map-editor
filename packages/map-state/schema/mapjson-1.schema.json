@@ -249,8 +249,8 @@
 					"minimum": 0,
 					"default": 2
 				},
-				"align": {
-					"$ref": "#/definitions/AlignName",
+				"labelPosition": {
+					"$ref": "#/definitions/LabelPositionName",
 					"description": "Markers: the position of the label around the symbol; \"auto\" where it fits, or on the point without a symbol.",
 					"default": "auto"
 				},
@@ -316,7 +316,7 @@
 			"type": "string",
 			"enum": ["solid", "dashed", "dotted"]
 		},
-		"AlignName": {
+		"LabelPositionName": {
 			"type": "string",
 			"enum": ["auto", "right", "left", "top", "bottom", "top-right", "top-left", "bottom-right", "bottom-left"]
 		},
@@ -379,7 +379,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `align`."
+					"description": "The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `labelPosition`."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"

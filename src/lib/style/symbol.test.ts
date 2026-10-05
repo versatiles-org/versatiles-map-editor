@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { iconBox, LABEL_POSITIONS, labelPositionTable, SymbolStyle } from './symbol.svelte.js';
+import { iconBox, LABEL_PLACES, labelPlaceTable, SymbolStyle } from './symbol.svelte.js';
 import { getSymbol, type SymbolInfo } from '../background/symbols_catalog.js';
 
 describe('SymbolStyle', () => {
@@ -14,13 +14,13 @@ describe('SymbolStyle', () => {
 	it('should have the correct keys in default style', () => {
 		const keys = Object.keys(SymbolStyle.defaultStyle).sort();
 		expect(keys).toStrictEqual([
-			'align',
 			'color',
 			'font',
 			'halo',
 			'haloColor',
 			'label',
 			'labelColor',
+			'labelPosition',
 			'labelSize',
 			'rotate',
 			'size',
@@ -59,7 +59,7 @@ describe('SymbolStyle', () => {
 			labelColor: 'rgb(0,0,0)',
 			labelOpacity: 1,
 			haloColor: 'rgb(255,255,255)',
-			position: 'auto'
+			place: 'auto'
 		});
 		expect(onChange).toHaveBeenCalledTimes(4);
 	});
@@ -100,18 +100,18 @@ describe('SymbolStyle', () => {
 	});
 
 	it('places the label at the chosen side or corner, the first one that fits, or on the point without image', () => {
-		layer.labelAlign = 'top'; // top
-		expect(layer.getProperties().position).toBe('bottom');
-		expect(LABEL_POSITIONS.bottom).toStrictEqual(['bottom', [0, -0.7]]);
-		layer.labelAlign = 'top-right'; // top right: the bottom left corner of the label at the top right of the symbol
-		expect(layer.getProperties().position).toBe('bottom-left');
+		layer.labelPosition = 'top'; // top
+		expect(layer.getProperties().place).toBe('bottom');
+		expect(LABEL_PLACES.bottom).toStrictEqual(['bottom', [0, -0.7]]);
+		layer.labelPosition = 'top-right'; // top right: the bottom left corner of the label at the top right of the symbol
+		expect(layer.getProperties().place).toBe('bottom-left');
 		const near = (x: number, y: number) => [expect.closeTo(x), expect.closeTo(y)];
-		expect(LABEL_POSITIONS['bottom-left']).toStrictEqual(['bottom-left', near(0.495, -0.495)]);
-		layer.labelAlign = 'bottom-left'; // bottom left
-		expect(layer.getProperties().position).toBe('top-right');
+		expect(LABEL_PLACES['bottom-left']).toStrictEqual(['bottom-left', near(0.495, -0.495)]);
+		layer.labelPosition = 'bottom-left'; // bottom left
+		expect(layer.getProperties().place).toBe('top-right');
 		// automatic: the sides first, then the corners
-		layer.labelAlign = 'auto';
-		expect(LABEL_POSITIONS.auto.filter((a) => typeof a === 'string')).toStrictEqual([
+		layer.labelPosition = 'auto';
+		expect(LABEL_PLACES.auto.filter((a) => typeof a === 'string')).toStrictEqual([
 			'left',
 			'right',
 			'top',
@@ -123,8 +123,8 @@ describe('SymbolStyle', () => {
 		]);
 		// without image, on the point, and nowhere else
 		layer.symbol = '';
-		expect(layer.getProperties().position).toBe('center');
-		expect(LABEL_POSITIONS.center).toStrictEqual(['center', [0, 0]]);
+		expect(layer.getProperties().place).toBe('center');
+		expect(LABEL_PLACES.center).toStrictEqual(['center', [0, 0]]);
 	});
 
 	it('places the label around the image, e.g. beside the head of a pin on the point', () => {
@@ -133,11 +133,11 @@ describe('SymbolStyle', () => {
 		expect(iconBox(pin as SymbolInfo)).toStrictEqual([0, -1.1875, 0, 0.1875]);
 		expect(iconBox(getSymbol('base:icon-bench'))).toStrictEqual([0, 0, 0, 0]);
 
-		const table = labelPositionTable([getSymbol('base:icon-bench')!, pin as SymbolInfo]);
+		const table = labelPlaceTable([getSymbol('base:icon-bench')!, pin as SymbolInfo]);
 		const suffix = '@0,-1.1875,0,0.1875';
 		expect(Object.keys(table)).toStrictEqual([
-			...Object.keys(LABEL_POSITIONS),
-			...Object.keys(LABEL_POSITIONS).map((name) => name + suffix)
+			...Object.keys(LABEL_PLACES),
+			...Object.keys(LABEL_PLACES).map((name) => name + suffix)
 		]);
 		// right of the head, and above it, farther away than above a symbol of 32 px
 		const near = (x: number, y: number) => [expect.closeTo(x), expect.closeTo(y)];
@@ -151,10 +151,10 @@ describe('SymbolStyle', () => {
 	it('names the label position by the box of the image', () => {
 		layer.symbol = 'extras:pin-teardrop';
 		// an unknown image, e.g. before the symbols are loaded, is 32×32 pixels on the point
-		expect(layer.getProperties().position).toBe('auto');
+		expect(layer.getProperties().place).toBe('auto');
 		layer.symbol = 'base:icon-bench';
-		layer.labelAlign = 'right'; // right
-		expect(layer.getProperties().position).toBe('left');
+		layer.labelPosition = 'right'; // right
+		expect(layer.getProperties().place).toBe('left');
 	});
 
 	it('should return correct state object', () => {
@@ -164,7 +164,7 @@ describe('SymbolStyle', () => {
 		layer.halo = 3;
 		layer.symbol = 'icons:anchor';
 		layer.label = 'Test Label';
-		layer.labelAlign = 'left';
+		layer.labelPosition = 'left';
 
 		expect(layer.getState()).toEqual({
 			color: '#00ff00',
@@ -173,7 +173,7 @@ describe('SymbolStyle', () => {
 			halo: 3,
 			symbol: 'icons:anchor',
 			label: 'Test Label',
-			align: 'left'
+			labelPosition: 'left'
 		});
 	});
 
@@ -185,7 +185,7 @@ describe('SymbolStyle', () => {
 			halo: 2,
 			symbol: 'icons:anchor',
 			label: 'New Label',
-			align: 'left'
+			labelPosition: 'left'
 		});
 
 		expect(layer.color).toBe('#0000ff');
@@ -194,7 +194,7 @@ describe('SymbolStyle', () => {
 		expect(layer.halo).toBe(2);
 		expect(layer.symbol).toBe('icons:anchor');
 		expect(layer.label).toBe('New Label');
-		expect(layer.labelAlign).toBe('left');
+		expect(layer.labelPosition).toBe('left');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
@@ -209,12 +209,12 @@ describe('SymbolStyle', () => {
 	});
 
 	it('should restore falsy values', () => {
-		layer.patch({ halo: 0, rotate: 90, label: 'Label', align: 'left' });
-		layer.patch({ rotate: 0, label: '', align: 'auto' });
+		layer.patch({ halo: 0, rotate: 90, label: 'Label', labelPosition: 'left' });
+		layer.patch({ rotate: 0, label: '', labelPosition: 'auto' });
 
 		expect(layer.halo).toBe(0);
 		expect(layer.rotate).toBe(0);
 		expect(layer.label).toBe('');
-		expect(layer.labelAlign).toBe('auto');
+		expect(layer.labelPosition).toBe('auto');
 	});
 });

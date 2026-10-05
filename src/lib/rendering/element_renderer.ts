@@ -1,7 +1,7 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { ExpressionSpecification, LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { AbstractElement, StyleLayers } from '../element/index.js';
-import { dashArrays, LABEL_POSITIONS, labelPositionTable } from '../style/index.js';
+import { dashArrays, LABEL_PLACES, labelPlaceTable } from '../style/index.js';
 import { allSymbols } from '../background/index.js';
 import { arrowHeads } from './arrow_heads.js';
 
@@ -152,7 +152,7 @@ export function emptySource(): SourceSpecification {
 }
 
 /**
- * The sources and layers that draw all elements. Every map style gets them. The label positions
+ * The sources and layers that draw all elements. Every map style gets them. The label places
  * are those of the symbols that are loaded (see `loadSymbols`).
  */
 export function elementStyle(font: string): {
@@ -305,17 +305,16 @@ function scaledPlaces(places: (string | [number, number])[], factor: number): (s
 }
 
 /**
- * The places of the labels with their offsets, by the name of their label position (see
- * `LABEL_POSITIONS`). The offsets are in ems of the label, for a symbol as large as its label;
+ * The places of the labels with their offsets, by their name (see `LABEL_PLACES`). The offsets are in ems of the label, for a symbol as large as its label;
  * they grow with the size of the symbol relative to its label (`labelScale`), interpolated from 0.
  */
 function labelOffsets(): ExpressionSpecification {
-	const table = Object.entries(labelPositionTable(allSymbols()));
+	const table = Object.entries(labelPlaceTable(allSymbols()));
 	const scaled = (factor: number) =>
 		lookup(
-			'position',
+			'place',
 			table.map(([name, places]) => [name, scaledPlaces(places, factor)]),
-			scaledPlaces(LABEL_POSITIONS.auto, factor)
+			scaledPlaces(LABEL_PLACES.auto, factor)
 		);
 	return ['interpolate', ['linear'], ['get', 'labelScale'], 0, scaled(0), MAX_LABEL_SCALE, scaled(MAX_LABEL_SCALE)];
 }

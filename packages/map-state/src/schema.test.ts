@@ -66,7 +66,7 @@ describe('the JSON Schema of .mapjson files', () => {
 						label: 'M',
 						labelSize: 1.5,
 						font: 'noto_sans_bold',
-						align: 'top'
+						labelPosition: 'top'
 					},
 					popup: { text: '**bold**' }
 				},

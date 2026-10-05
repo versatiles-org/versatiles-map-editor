@@ -1,6 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type AlignName, type StateStyle, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
+import { type LabelPositionName, type StateStyle, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
 
@@ -26,18 +26,18 @@ export function iconBox(symbol: SymbolInfo | undefined): IconBox {
 	if (!symbol) return NO_BOX;
 	const { width, height, center } = symbol;
 	// in ems from pixels rounded to hundredths, and without -0, since the box is part of the name of
-	// the label position
+	// the label place
 	const em = (pixels: number) => Math.round(pixels * 100) / 100 / EM + 0;
 	return [em((0.5 - center[0]) * width), em((0.5 - center[1]) * height), em(width / 2 - EM), em(height / 2 - EM)];
 }
 
-/** The suffix of the name of a label position for an image, "" for one of 32×32 pixels on the point. */
+/** The suffix of the name of a label place for an image, "" for one of 32×32 pixels on the point. */
 function boxSuffix(box: IconBox): string {
 	return box.every((value) => value === 0) ? '' : '@' + box.join(',');
 }
 
-/** The possible places of a label around an image, see `LABEL_POSITIONS`. */
-function positionsAround([dx, dy, ex, ey]: IconBox): Record<string, (TextAnchor | [number, number])[]> {
+/** The possible places of a label around an image, see `LABEL_PLACES`. */
+function placesAround([dx, dy, ex, ey]: IconBox): Record<string, (TextAnchor | [number, number])[]> {
 	const offsets: Record<TextAnchor, [number, number]> = {
 		center: [dx, dy],
 		left: [dx + LABEL_OFFSET + ex, dy],
@@ -62,32 +62,32 @@ function positionsAround([dx, dy, ex, ey]: IconBox): Record<string, (TextAnchor 
 }
 
 /**
- * The possible places of a label with their offsets, by the name of the label position:
+ * The possible places of a label with their offsets, by their name:
  * the chosen side or corner, the first one that fits ("auto"), or on the point ("center", for
  * markers without image). The layer looks them up, since features cannot have array properties.
- * These are for images of 32×32 pixels on the point; `labelPositionTable` adds the others.
+ * These are for images of 32×32 pixels on the point; `labelPlaceTable` adds the others.
  */
-export const LABEL_POSITIONS = positionsAround(NO_BOX);
+export const LABEL_PLACES = placesAround(NO_BOX);
 
 /**
- * The label positions for all images of the symbols: around the image, e.g. beside the head of
- * a pin instead of its tip. The names of other images than those of `LABEL_POSITIONS` end with
+ * The label places for all images of the symbols: around the image, e.g. beside the head of
+ * a pin instead of its tip. The names of other images than those of `LABEL_PLACES` end with
  * their box, e.g. "left@0,-1.1875,0,0.1875".
  */
-export function labelPositionTable(symbols: SymbolInfo[]): Record<string, (TextAnchor | [number, number])[]> {
-	const table = { ...LABEL_POSITIONS };
+export function labelPlaceTable(symbols: SymbolInfo[]): Record<string, (TextAnchor | [number, number])[]> {
+	const table = { ...LABEL_PLACES };
 	for (const symbol of symbols) {
 		const box = iconBox(symbol);
 		const suffix = boxSuffix(box);
 		if (!suffix || table['auto' + suffix]) continue;
-		for (const [name, places] of Object.entries(positionsAround(box))) table[name + suffix] = places;
+		for (const [name, places] of Object.entries(placesAround(box))) table[name + suffix] = places;
 	}
 	return table;
 }
 
 // The text anchor of each position of the label: the side of the label next to the symbol ("auto"
 // has variable anchors)
-const anchors: Record<AlignName, TextAnchor | undefined> = {
+const anchors: Record<LabelPositionName, TextAnchor | undefined> = {
 	auto: undefined,
 	right: 'left',
 	left: 'right',
@@ -110,7 +110,7 @@ export class SymbolStyle extends StylePart {
 	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
 	#label: string = $state(SYMBOL_DEFAULTS.label);
-	#labelAlign: AlignName = $state(SYMBOL_DEFAULTS.align);
+	#labelPosition: LabelPositionName = $state(SYMBOL_DEFAULTS.labelPosition);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
 	#font: string = $state(SYMBOL_DEFAULTS.font);
 	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
@@ -175,12 +175,12 @@ export class SymbolStyle extends StylePart {
 		this.changed();
 	}
 	/** The position of the label around the symbol. */
-	get labelAlign(): AlignName {
-		return this.#labelAlign;
+	get labelPosition(): LabelPositionName {
+		return this.#labelPosition;
 	}
-	set labelAlign(value: AlignName) {
-		if (value === this.#labelAlign) return;
-		this.#labelAlign = value;
+	set labelPosition(value: LabelPositionName) {
+		if (value === this.#labelPosition) return;
+		this.#labelPosition = value;
 		this.changed();
 	}
 
@@ -214,9 +214,9 @@ export class SymbolStyle extends StylePart {
 
 	readonly symbolInfo = $derived(getSymbol(this.symbol));
 
-	/** The name of the label position, see `LABEL_POSITIONS`. */
-	private getPosition(): string {
-		const anchor = anchors[this.labelAlign];
+	/** The name of the place of the label, see `LABEL_PLACES`. */
+	private getPlace(): string {
+		const anchor = anchors[this.labelPosition];
 		const suffix = boxSuffix(iconBox(this.symbolInfo));
 		if (anchor) return anchor + suffix;
 		// a label without symbol is on the point
@@ -247,7 +247,7 @@ export class SymbolStyle extends StylePart {
 			// none: the font of the background map, see `ElementRenderer.applyFonts`
 			...(this.font ? { font: this.font } : {}),
 			haloColor: cssColor(this.haloColor),
-			position: this.getPosition()
+			place: this.getPlace()
 		};
 	}
 
@@ -261,7 +261,7 @@ export class SymbolStyle extends StylePart {
 				halo: this.halo,
 				symbol: this.symbol,
 				label: this.label,
-				align: this.labelAlign,
+				labelPosition: this.labelPosition,
 				labelColor: this.labelColor,
 				font: this.font,
 				haloColor: this.haloColor
@@ -278,7 +278,7 @@ export class SymbolStyle extends StylePart {
 		if (style.halo != null) this.halo = style.halo;
 		if (style.symbol != null) this.symbol = style.symbol;
 		if (style.label != null) this.label = style.label;
-		if (style.align != null) this.labelAlign = style.align;
+		if (style.labelPosition != null) this.labelPosition = style.labelPosition;
 		if (style.labelColor != null) this.labelColor = style.labelColor;
 		if (style.font != null) this.font = style.font;
 		if (style.haloColor != null) this.haloColor = style.haloColor;

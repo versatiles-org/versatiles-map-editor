@@ -366,7 +366,7 @@ describe('StateReader', () => {
 				rotate: -45,
 				size: 2.5,
 				width: 2.3,
-				align: 'bottom',
+				labelPosition: 'bottom',
 				label: 'test',
 				visible: false,
 				color: '#c400ff42'
@@ -448,7 +448,7 @@ describe('StateReader', () => {
 					{
 						point: [expect.closeTo(13.35139, 5), expect.closeTo(52.50655, 5)],
 						style: {
-							align: 'left',
+							labelPosition: 'left',
 							color: '#aa0000',
 							label: 'End'
 						},
@@ -457,7 +457,7 @@ describe('StateReader', () => {
 					{
 						point: [expect.closeTo(13.37097, 5), expect.closeTo(52.51871, 5)],
 						style: {
-							align: 'left',
+							labelPosition: 'left',
 							color: '#aa0000',
 							label: 'Start'
 						},

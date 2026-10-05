@@ -208,7 +208,7 @@ describe('StateWriter', () => {
 			rotate: -45,
 			size: 2.5,
 			width: 2.3,
-			align: 'bottom',
+			labelPosition: 'bottom',
 			label: 'test',
 			visible: false,
 			color: '#ff0000'

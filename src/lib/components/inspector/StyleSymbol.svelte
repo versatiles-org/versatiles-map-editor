@@ -1,7 +1,7 @@
 <script lang="ts">
 	import InspectorSection from './InspectorSection.svelte';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { LABEL_ALIGN_NAMES, type AlignName } from '@versatiles/map-state';
+	import { LABEL_POSITION_NAMES, type LabelPositionName } from '@versatiles/map-state';
 	import { SymbolStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
@@ -16,7 +16,7 @@
 	const rotate = $derived(group(layers, 'rotate'));
 	const halo = $derived(group(layers, 'halo'));
 	const label = $derived(group(layers, 'label'));
-	const labelAlign = $derived(group(layers, 'labelAlign'));
+	const labelPosition = $derived(group(layers, 'labelPosition'));
 	const labelColor = $derived(group(layers, 'labelColor'));
 	const haloColor = $derived(group(layers, 'haloColor'));
 	const size = $derived(group(layers, 'size'));
@@ -25,7 +25,7 @@
 	// color, size and rotation do nothing without a symbol (e.g. a marker that is only a label)
 	const hasSymbol = $derived(symbol.mixed || symbol.value !== '');
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center
-	const CELLS: Record<AlignName, [number, number]> = {
+	const CELLS: Record<LabelPositionName, [number, number]> = {
 		auto: [2, 2],
 		right: [2, 3],
 		left: [2, 1],
@@ -36,7 +36,7 @@
 		'bottom-right': [3, 3],
 		'bottom-left': [3, 1]
 	};
-	const NAMES: Record<Exclude<AlignName, 'auto'>, string> = {
+	const NAMES: Record<Exclude<LabelPositionName, 'auto'>, string> = {
 		right: 'Right',
 		left: 'Left',
 		top: 'Above',
@@ -56,7 +56,7 @@
 				: { label: 'On the point', short: 'Center' }
 	);
 	const alignments = $derived(
-		LABEL_ALIGN_NAMES.map((name) => ({
+		LABEL_POSITION_NAMES.map((name) => ({
 			value: name,
 			label: name === 'auto' ? center.label : NAMES[name],
 			cell: CELLS[name],
@@ -120,14 +120,14 @@
 		<Slider id="{uid}-labelSize" min={0.5} max={3} step={0.1} bind:value={labelSize.value} onchange={log} unit="×" />
 	</InputRow>
 
-	<InputRow id="{uid}-labelAlign" label="Label position" mixed={labelAlign.mixed} group>
+	<InputRow id="{uid}-labelPosition" label="Label position" mixed={labelPosition.mixed} group>
 		<ChoiceGroup
 			layout="grid"
-			labelledby="{uid}-labelAlign-label"
-			value={labelAlign.value}
-			mixed={labelAlign.mixed}
+			labelledby="{uid}-labelPosition-label"
+			value={labelPosition.value}
+			mixed={labelPosition.mixed}
 			onchange={(name) => {
-				labelAlign.value = name;
+				labelPosition.value = name;
 				log();
 			}}
 			options={alignments}

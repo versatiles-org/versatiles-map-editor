@@ -72,9 +72,10 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`,
   `removeDefaultFields`) helps to render the elements the way the editor does. The choices of a
   style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
-  `LABEL_ALIGN_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and `AlignName`;
-  the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles). `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend
-  that names none, and `removeLegendDefaults` leaves them out, as the base64 string does;
+  `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
+  `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
+  `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend that names none, and
+  `removeLegendDefaults` leaves them out, as the base64 string does;
   `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.
@@ -134,8 +135,8 @@ polygon holes are dropped. Style values are sanitized (clamped, rounded,
 colors normalized to lowercase hex) or fall back to the defaults.
 
 Choices are names (`fill-pattern`, `stroke-style`, `stroke-arrow-start`, `stroke-arrow-end`,
-`symbol-label-align`), as in the style itself; their tables (`FILL_PATTERN_NAMES`,
-`STROKE_STYLE_NAMES`, `ARROW_NAMES`, `LABEL_ALIGN_NAMES`) and name types live in `types.ts`.
+`symbol-label-position`), as in the style itself; their tables (`FILL_PATTERN_NAMES`,
+`STROKE_STYLE_NAMES`, `ARROW_NAMES`, `LABEL_POSITION_NAMES`) and name types live in `types.ts`.
 `symbol-pattern` is the name of the image, e.g. `icons:anchor`. The editor's `StylePart` classes
 take their defaults from here and only add rendering data, in records keyed by the name types, so
 TypeScript checks that every name can be rendered.

@@ -684,7 +684,7 @@ test(
 		const positions = page.getByRole('radiogroup', { name: 'Label position' });
 		await expect(positions.getByRole('radio', { name: 'Automatic' })).toBeChecked();
 		await positions.getByRole('radio', { name: 'Above', exact: true }).check();
-		await expect.poll(async () => (await storedState(page)).elements[1].style?.align).toBe('top');
+		await expect.poll(async () => (await storedState(page)).elements[1].style?.labelPosition).toBe('top');
 
 		// a typed value between the steps of the slider, e.g. 17° instead of 15° or 30°
 		const rotation = page.getByRole('spinbutton', { name: 'Rotation' });

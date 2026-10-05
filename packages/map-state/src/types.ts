@@ -40,7 +40,7 @@ export type StateElement = StateElementMarker | StateElementLine | StateElementP
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
-	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `align`. */
+	/** The symbol and its label: `symbol`, `color`, `size`, `rotate`, `halo`, `haloColor`, `label`, `labelColor`, `labelSize`, `font`, `labelPosition`. */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -98,7 +98,7 @@ export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'] as const;
 export type ArrowName = (typeof ARROW_NAMES)[number];
 
 /** The positions of the label of a marker around its symbol. */
-export const LABEL_ALIGN_NAMES = [
+export const LABEL_POSITION_NAMES = [
 	'auto',
 	'right',
 	'left',
@@ -109,7 +109,7 @@ export const LABEL_ALIGN_NAMES = [
 	'bottom-right',
 	'bottom-left'
 ] as const;
-export type AlignName = (typeof LABEL_ALIGN_NAMES)[number];
+export type LabelPositionName = (typeof LABEL_POSITION_NAMES)[number];
 
 /** The patterns of the fill of an area: solid, or diagonal lines. */
 export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'] as const;
@@ -171,7 +171,7 @@ export interface StateStyle {
 	 * without a symbol.
 	 * @default "auto"
 	 */
-	align?: AlignName;
+	labelPosition?: LabelPositionName;
 	/**
 	 * The color of the symbol, the line, or the area, with its opacity.
 	 * @default "#ff0000"
