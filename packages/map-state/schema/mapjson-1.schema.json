@@ -215,18 +215,14 @@
 					"default": 1
 				},
 				"pattern": {
-					"type": "integer",
-					"description": "Areas: the pattern of the fill: 0 solid, 1 diagonal lines, 2 thin diagonal lines.",
-					"minimum": 0,
-					"maximum": 2,
-					"default": 0
+					"$ref": "#/definitions/FillPatternName",
+					"description": "Areas: the pattern of the fill.",
+					"default": "solid"
 				},
 				"dash": {
-					"type": "integer",
-					"description": "Lines and outlines: 0 solid, 1 dashed, 2 dotted.",
-					"minimum": 0,
-					"maximum": 2,
-					"default": 0
+					"$ref": "#/definitions/DashName",
+					"description": "Lines and outlines: solid, dashed or dotted.",
+					"default": "solid"
 				},
 				"rotate": {
 					"type": "integer",
@@ -311,6 +307,14 @@
 			},
 			"additionalProperties": false,
 			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
+		},
+		"FillPatternName": {
+			"type": "string",
+			"enum": ["solid", "diagonal", "diagonal-thin"]
+		},
+		"DashName": {
+			"type": "string",
+			"enum": ["solid", "dashed", "dotted"]
 		},
 		"AlignName": {
 			"type": "string",

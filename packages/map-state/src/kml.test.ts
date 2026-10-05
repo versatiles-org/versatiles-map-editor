@@ -28,7 +28,7 @@ const state: MapState = {
 				[13.3, 52.4],
 				[13.35, 52.45]
 			],
-			style: { color: '#00ff00', width: 4, dash: 1 }
+			style: { color: '#00ff00', width: 4, dash: 'dashed' }
 		},
 		{
 			type: 'polygon',
@@ -37,7 +37,7 @@ const state: MapState = {
 				[13.4, 52.4],
 				[13.4, 52.5]
 			],
-			style: { color: '#12345680', pattern: 2 },
+			style: { color: '#12345680', pattern: 'diagonal-thin' },
 			strokeStyle: { color: '#654321', visible: false },
 			popup: { text: 'A polygon' }
 		},

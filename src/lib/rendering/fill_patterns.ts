@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { parseColor } from '@versatiles/map-state';
+import { parseColor, type FillPatternName } from '@versatiles/map-state';
 import { parseFillPatternName } from '../style/index.js';
 
 /** A repeating pattern of opacities (0–5 per pixel), shifted by `xf` per column and `yf` per row. */
@@ -9,18 +9,18 @@ interface Fill {
 	pattern: string;
 }
 
-/** The pixels of the fill patterns by their index (see `fillPatterns`); undefined is solid. */
-export const patternFills: (Fill | undefined)[] = [
-	undefined, // solid
-	{ xf: 1, yf: 1, pattern: '00002552' }, // diagonal
-	{ xf: 1, yf: 1, pattern: '0252' } // diagonal-thin
-];
+/** The pixels of each fill pattern; undefined is solid. */
+export const patternFills: Record<FillPatternName, Fill | undefined> = {
+	solid: undefined,
+	diagonal: { xf: 1, yf: 1, pattern: '00002552' },
+	'diagonal-thin': { xf: 1, yf: 1, pattern: '0252' }
+};
 
 /** The size of the image of a fill pattern, in pixels: 1 pixel of the map per pixel. */
 export const PATTERN_SIZE = 32;
 
 /** The pixels of the image of a fill pattern (see `patternFills`) in the color, e.g. for the legend too. */
-export function fillPatternPixels(pattern: number, color: string): Uint8ClampedArray<ArrayBuffer> {
+export function fillPatternPixels(pattern: FillPatternName, color: string): Uint8ClampedArray<ArrayBuffer> {
 	// a solid fill is a pattern without gaps
 	const fill = patternFills[pattern] ?? { xf: 1, yf: 1, pattern: '5' };
 	const alpha = fill.pattern.split('').map((c) => parseInt(c, 10) / 5);

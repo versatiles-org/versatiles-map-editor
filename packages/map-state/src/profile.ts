@@ -2,6 +2,7 @@ import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
+	FILL_PATTERN_NAMES,
 	LABEL_ALIGN_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
@@ -10,6 +11,7 @@ import {
 	LEGEND_POSITIONS,
 	NAVIGATION_POSITIONS,
 	SEARCH_POSITIONS,
+	STROKE_STYLE_NAMES,
 	type Bounds,
 	type MapState,
 	type Position,
@@ -26,18 +28,19 @@ import {
 // Style vocabulary of the serialization format.
 //
 // The editor keeps the live values in StylePart stores and projects them to two
-// shapes: a numeric, default-stripped `StateStyle` (for State/base64) and a
-// human-readable GeoJSON property bag. This module owns the mapping between the
-// two so the codec is the single source of truth: the editor's StylePart classes
-// take their default styles and enum names from here.
+// shapes: a default-stripped `StateStyle` (for State and .mapjson; the base64
+// codec writes its names as indexes) and a GeoJSON property bag. This module owns
+// the defaults and the mapping between the two, and the names are tables in
+// `types.ts`, so the codec is the single source of truth: the editor's StylePart
+// classes take their default styles and names from here.
 // ---------------------------------------------------------------------------
 
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
-export const FILL_DEFAULTS: Defaults<'color' | 'pattern'> = { color: '#ff0000', pattern: 0 };
+export const FILL_DEFAULTS: Defaults<'color' | 'pattern'> = { color: '#ff0000', pattern: 'solid' };
 export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
 	color: '#ff0000',
-	dash: 0,
+	dash: 'solid',
 	visible: true,
 	width: 2
 };
@@ -75,19 +78,6 @@ export const SYMBOL_DEFAULTS: Defaults<
 	haloColor: '#ffffff'
 };
 
-// index -> name enum tables (the numeric index lives in State, the name in GeoJSON)
-export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'];
-export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'];
-
-function nameOf(table: string[], index: number | undefined): string | undefined {
-	if (index == null) return undefined;
-	return table[index];
-}
-function indexOf(table: string[], name: unknown): number | undefined {
-	if (typeof name !== 'string') return undefined;
-	const index = table.indexOf(name);
-	return index < 0 ? undefined : index;
-}
 /** The value, if it is one of the names of the table; undefined for anything else. */
 function oneOf<T extends string>(table: readonly T[], value: unknown): T | undefined {
 	return (table as readonly unknown[]).includes(value) ? (value as T) : undefined;
@@ -139,12 +129,6 @@ export function sanitizeBoolean(value: unknown): boolean | undefined {
 	return undefined;
 }
 
-/** A whole number from `min` to `max`, e.g. the index of a pattern; undefined for anything else. */
-function sanitizeIndex(value: unknown, min: number, max: number): number | undefined {
-	const n = sanitizeNumber(value);
-	return n !== undefined && Number.isInteger(n) && n >= min && n <= max ? n : undefined;
-}
-
 /**
  * A style as JSON has it (e.g. of a legend entry in GeoJSON): only its valid fields, or undefined
  * if none is.
@@ -157,8 +141,8 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'labelColor', sanitizeColor(v.labelColor));
 	set(s, 'haloColor', sanitizeColor(v.haloColor));
 	set(s, 'halo', sanitizeNumber(v.halo, 0));
-	set(s, 'pattern', sanitizeIndex(v.pattern, 0, FILL_PATTERN_NAMES.length - 1));
-	set(s, 'dash', sanitizeIndex(v.dash, 0, STROKE_STYLE_NAMES.length - 1));
+	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
+	set(s, 'dash', oneOf(STROKE_STYLE_NAMES, v.dash));
 	set(s, 'rotate', sanitizeRotation(v.rotate));
 	const size = sanitizeNumber(v.size, 0);
 	if (size) s.size = size;
@@ -222,7 +206,7 @@ export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 	return {
 		'fill-color': formatHex({ r, g, b, alpha: 1 }),
 		'fill-opacity': Math.round(alpha * 1000) / 1000,
-		'fill-pattern': nameOf(FILL_PATTERN_NAMES, s.pattern)
+		'fill-pattern': s.pattern
 	};
 }
 
@@ -236,7 +220,7 @@ export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 			const color = parseColor(s.color ?? FILL_DEFAULTS.color)!;
 			s.color = formatHex({ ...color, alpha: color.alpha * opacity });
 		}
-		set(s, 'pattern', indexOf(FILL_PATTERN_NAMES, p['fill-pattern']));
+		set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, p['fill-pattern']));
 	}
 	return removeDefaultFields(s, FILL_DEFAULTS);
 }
@@ -247,7 +231,7 @@ export function strokePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 	const s = { ...LINE_DEFAULTS, ...style };
 	return {
 		'stroke-color': s.color,
-		'stroke-style': nameOf(STROKE_STYLE_NAMES, s.dash),
+		'stroke-style': s.dash,
 		'stroke-width': s.width,
 		'stroke-visibility': s.visible
 	};
@@ -257,7 +241,7 @@ export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 	const s: StateStyle = { ...LINE_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['stroke-color']));
-		set(s, 'dash', indexOf(STROKE_STYLE_NAMES, p['stroke-style']));
+		set(s, 'dash', oneOf(STROKE_STYLE_NAMES, p['stroke-style']));
 		set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
 		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
 	}

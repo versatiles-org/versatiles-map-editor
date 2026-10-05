@@ -111,6 +111,14 @@ export const LABEL_ALIGN_NAMES = [
 ] as const;
 export type AlignName = (typeof LABEL_ALIGN_NAMES)[number];
 
+/** The patterns of the fill of an area: solid, or diagonal lines. */
+export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'] as const;
+export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
+
+/** The dashes of a line or an outline. */
+export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'] as const;
+export type DashName = (typeof STROKE_STYLE_NAMES)[number];
+
 /**
  * The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which
  * fields count depends on what it styles (see the elements); missing fields have their default.
@@ -123,21 +131,15 @@ export interface StateStyle {
 	 */
 	halo?: number;
 	/**
-	 * Areas: the pattern of the fill: 0 solid, 1 diagonal lines, 2 thin diagonal lines.
-	 * @asType integer
-	 * @minimum 0
-	 * @maximum 2
-	 * @default 0
+	 * Areas: the pattern of the fill.
+	 * @default "solid"
 	 */
-	pattern?: number;
+	pattern?: FillPatternName;
 	/**
-	 * Lines and outlines: 0 solid, 1 dashed, 2 dotted.
-	 * @asType integer
-	 * @minimum 0
-	 * @maximum 2
-	 * @default 0
+	 * Lines and outlines: solid, dashed or dotted.
+	 * @default "solid"
 	 */
-	dash?: number;
+	dash?: DashName;
 	/**
 	 * Markers: the rotation of the symbol, in whole degrees clockwise.
 	 * @asType integer

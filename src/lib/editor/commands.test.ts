@@ -190,12 +190,12 @@ describe('addToLegend', () => {
 			point: [0, 0],
 			style: { color: '#0000ff', symbol: 'base:icon-cafe', label: 'Cafe', labelColor: '#000000', halo: 2 }
 		});
-		const route = doc.addElement({ type: 'line', points, style: { color: '#d55e00', dash: 1, width: 4 } });
+		const route = doc.addElement({ type: 'line', points, style: { color: '#d55e00', dash: 'dashed', width: 4 } });
 		route.popup = 'Bus 100\nevery 10 minutes';
 		const park = doc.addElement({
 			type: 'polygon',
 			points,
-			style: { color: '#00ff004d', pattern: 2 },
+			style: { color: '#00ff004d', pattern: 'diagonal-thin' },
 			strokeStyle: { color: '#00ff00' }
 		});
 		const zone = doc.addElement({ type: 'circle', point: [0, 0], radius: 100, strokeStyle: { visible: false } });
@@ -205,8 +205,13 @@ describe('addToLegend', () => {
 		expect(doc.legend?.entries).toStrictEqual([
 			// without the label of the marker, which is the entry's text
 			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' },
-			{ type: 'line', style: { color: '#d55e00', dash: 1, width: 4 }, label: 'Bus 100' },
-			{ type: 'polygon', style: { color: '#00ff004d', pattern: 2 }, strokeStyle: { color: '#00ff00' }, label: '' },
+			{ type: 'line', style: { color: '#d55e00', dash: 'dashed', width: 4 }, label: 'Bus 100' },
+			{
+				type: 'polygon',
+				style: { color: '#00ff004d', pattern: 'diagonal-thin' },
+				strokeStyle: { color: '#00ff00' },
+				label: ''
+			},
 			// a circle is an area
 			{ type: 'polygon', strokeStyle: { visible: false }, label: '' }
 		]);
@@ -277,14 +282,25 @@ describe('pasteStyleToEntry', () => {
 			label: 'Kept'
 		});
 		expect(canPasteStyleToEntry(doc)).toBe(true);
-		expect(paste({ type: 'line', points, style: { color: '#d55e00', dash: 2 } })).toStrictEqual({
+		expect(paste({ type: 'line', points, style: { color: '#d55e00', dash: 'dotted' } })).toStrictEqual({
 			type: 'line',
-			style: { color: '#d55e00', dash: 2 },
+			style: { color: '#d55e00', dash: 'dotted' },
 			label: 'Kept'
 		});
 		expect(
-			paste({ type: 'circle', point: [0, 0], radius: 1, style: { pattern: 1 }, strokeStyle: { visible: false } })
-		).toStrictEqual({ type: 'polygon', style: { pattern: 1 }, strokeStyle: { visible: false }, label: 'Kept' });
+			paste({
+				type: 'circle',
+				point: [0, 0],
+				radius: 1,
+				style: { pattern: 'diagonal' },
+				strokeStyle: { visible: false }
+			})
+		).toStrictEqual({
+			type: 'polygon',
+			style: { pattern: 'diagonal' },
+			strokeStyle: { visible: false },
+			label: 'Kept'
+		});
 		// all defaults
 		expect(paste({ type: 'polygon', points })).toStrictEqual({ type: 'polygon', label: 'Kept' });
 	});

@@ -121,7 +121,7 @@ describe('arrowImage', () => {
 
 	it('is added to the map as an SDF image when the map asks for it', () => {
 		const map = new MockMap();
-		expect(addArrowImage(map as unknown as MaplibreMap, 'fill-pattern:1:#ff0000')).toBe(false);
+		expect(addArrowImage(map as unknown as MaplibreMap, 'fill-pattern:diagonal:#ff0000')).toBe(false);
 		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-none')).toBe(false);
 		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-star')).toBe(false);
 		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron')).toBe(true);

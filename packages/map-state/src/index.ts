@@ -34,8 +34,6 @@ export {
 	LINE_DEFAULTS,
 	ARROW_DEFAULTS,
 	SYMBOL_DEFAULTS,
-	FILL_PATTERN_NAMES,
-	STROKE_STYLE_NAMES,
 	hasArrow,
 	withoutUnusedFields,
 	removeDefaultFields,

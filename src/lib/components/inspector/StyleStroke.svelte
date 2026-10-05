@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
+	import { STROKE_STYLE_NAMES, type DashName } from '@versatiles/map-state';
 	import { dashArrays, LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';
@@ -24,12 +25,12 @@
 	const color = $derived(group(layers, 'color'));
 	const width = $derived(group(layers, 'width'));
 	const dash = $derived(group(layers, 'dash'));
-	const styles = [...dashArrays].map(([index, { name }]) => ({ value: index, label: name }));
+	const styles = STROKE_STYLE_NAMES.map((name) => ({ value: name, label: name }));
 
 	/** The dashes as in the map, for a line of this width in the preview. */
-	function dashes(index: number, width = 3): string | undefined {
-		const array = dashArrays.get(index)?.array;
-		return array && array.length > 1 ? array.map((v) => v * width).join(' ') : undefined;
+	function dashes(name: DashName, width = 3): string | undefined {
+		const array = dashArrays[name];
+		return array.length > 1 ? array.map((v) => v * width).join(' ') : undefined;
 	}
 </script>
 
@@ -43,13 +44,13 @@
 		labelledby="{uid}-dash-label"
 		value={dash.value}
 		mixed={dash.mixed}
-		onchange={(index) => {
-			dash.value = index;
+		onchange={(name) => {
+			dash.value = name;
 			log();
 		}}
 		options={styles}
 	>
-		{#snippet picture(index)}
+		{#snippet picture(name)}
 			<svg width="44" height="10" aria-hidden="true">
 				<line
 					x1="4"
@@ -58,8 +59,8 @@
 					y2="5"
 					stroke="currentColor"
 					stroke-width="3"
-					stroke-linecap={index === 2 ? 'round' : 'butt'}
-					stroke-dasharray={dashes(index)}
+					stroke-linecap={name === 'dotted' ? 'round' : 'butt'}
+					stroke-dasharray={dashes(name)}
 				/>
 			</svg>
 		{/snippet}

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { parseColor } from './color.js';
 import { decodeState, encodeState, stateFromMapJSON, type MapState } from './index.js';
 import { sanitizeFrame } from './profile.js';
-import { LABEL_ALIGN_NAMES, type Position, type StateStyle } from './types.js';
+import { FILL_PATTERN_NAMES, LABEL_ALIGN_NAMES, STROKE_STYLE_NAMES, type Position, type StateStyle } from './types.js';
 
 // Links that are cut off, changed or made up must either be refused quickly, or give a map that the
 // editor can draw and the writer can write again: what a corrupt or hostile link can do.
@@ -34,8 +34,8 @@ function checkStyle(style: StateStyle | undefined) {
 	for (const key of ['halo', 'size', 'labelSize', 'width'] as const) {
 		if (style[key] !== undefined) expect(Number.isFinite(style[key])).toBe(true);
 	}
-	if (style.pattern !== undefined) expect([0, 1, 2]).toContain(style.pattern);
-	if (style.dash !== undefined) expect([0, 1, 2]).toContain(style.dash);
+	if (style.pattern !== undefined) expect(FILL_PATTERN_NAMES).toContain(style.pattern);
+	if (style.dash !== undefined) expect(STROKE_STYLE_NAMES).toContain(style.dash);
 	if (style.align !== undefined) expect(LABEL_ALIGN_NAMES).toContain(style.align);
 	if (style.rotate !== undefined) expect(Math.abs(style.rotate)).toBeLessThanOrEqual(180);
 	for (const key of ['color', 'labelColor', 'haloColor'] as const) {

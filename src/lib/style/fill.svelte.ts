@@ -1,5 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
 import {
+	type FillPatternName,
 	type StateStyle,
 	FILL_DEFAULTS,
 	FILL_PATTERN_NAMES,
@@ -8,23 +9,19 @@ import {
 	removeDefaultFields
 } from '@versatiles/map-state';
 
-/** The fill patterns by their index, with their names from the codec, e.g. for choosing one. */
-export const fillPatterns = new Map<number, { name: string }>(
-	FILL_PATTERN_NAMES.map((name, index) => [index, { name }])
-);
-
 const PATTERN_PREFIX = 'fill-pattern:';
 
 /** The name of the image that fills an area with the pattern in the color, shared by all such areas. */
-export function fillPatternName(pattern: number, color: string): string {
+export function fillPatternName(pattern: FillPatternName, color: string): string {
 	return `${PATTERN_PREFIX}${pattern}:${color.toLowerCase()}`;
 }
 
 /** The pattern and the color of an image of `fillPatternName`, or undefined for other images. */
-export function parseFillPatternName(name: string): { pattern: number; color: string } | undefined {
+export function parseFillPatternName(name: string): { pattern: FillPatternName; color: string } | undefined {
 	if (!name.startsWith(PATTERN_PREFIX)) return undefined;
-	const [pattern, color] = name.slice(PATTERN_PREFIX.length).split(':');
-	return { pattern: Number(pattern), color };
+	const [value, color] = name.slice(PATTERN_PREFIX.length).split(':');
+	const pattern = FILL_PATTERN_NAMES.find((pattern) => pattern === value);
+	return pattern && color ? { pattern, color } : undefined;
 }
 
 export class FillStyle extends StylePart {
@@ -32,7 +29,7 @@ export class FillStyle extends StylePart {
 	protected readonly defaults = FillStyle.defaultStyle;
 
 	#color: string = $state(FILL_DEFAULTS.color);
-	#pattern: number = $state(FILL_DEFAULTS.pattern);
+	#pattern: FillPatternName = $state(FILL_DEFAULTS.pattern);
 
 	get color(): string {
 		return this.#color;
@@ -42,10 +39,10 @@ export class FillStyle extends StylePart {
 		this.#color = value;
 		this.changed();
 	}
-	get pattern(): number {
+	get pattern(): FillPatternName {
 		return this.#pattern;
 	}
-	set pattern(value: number) {
+	set pattern(value: FillPatternName) {
 		if (value === this.#pattern) return;
 		this.#pattern = value;
 		this.changed();

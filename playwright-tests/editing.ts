@@ -657,9 +657,9 @@ test(
 		const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
 		await expect(patterns.getByRole('radio')).toHaveCount(3);
 		await patterns.getByRole('radio', { name: 'diagonal', exact: true }).check();
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe(1);
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal');
 		await page.keyboard.press('ArrowRight');
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe(2);
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-thin');
 
 		// a slider shows its value
 		const width = page.getByRole('slider', { name: 'Width' });

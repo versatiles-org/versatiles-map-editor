@@ -90,7 +90,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 1],
 					[2, 0]
 				],
-				style: { color: '#00ff00', dash: 1, width: 5 },
+				style: { color: '#00ff00', dash: 'dashed', width: 5 },
 				popup: { text: 'A line' }
 			},
 			{
@@ -109,7 +109,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 				point: [10, 20],
 				radius: 500,
 				style: { color: '#778899' },
-				strokeStyle: { dash: 2 },
+				strokeStyle: { dash: 'dotted' },
 				popup: { text: 'A circle' }
 			}
 		]

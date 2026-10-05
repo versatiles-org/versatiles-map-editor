@@ -174,7 +174,7 @@ describe('StateWriter', () => {
 					type: 'circle',
 					point: [15, 16],
 					radius: 17,
-					style: { pattern: 1 },
+					style: { pattern: 'diagonal' },
 					strokeStyle: { width: 0.2 }
 				}
 			]
@@ -204,7 +204,7 @@ describe('StateWriter', () => {
 		writer.writeStringTable(['test']);
 		writer.writeStyle({
 			halo: 1.5,
-			pattern: 3,
+			pattern: 'diagonal-thin',
 			rotate: -45,
 			size: 2.5,
 			width: 2.3,
@@ -213,7 +213,7 @@ describe('StateWriter', () => {
 			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('Cf4AAAgGHfLNlDQBshBAm4c8EMxAiE4UGg');
+		expect(writer.asBase64()).toBe('Cf4AAAgGHfLNlDQBshBAm4c8EMxAiE4UEg');
 	});
 
 	it('should write a RGB color correctly', () => {

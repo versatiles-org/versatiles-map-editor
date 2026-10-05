@@ -34,14 +34,14 @@
 					[13.3718, 52.51926],
 					[13.37115, 52.51794]
 				],
-				style: { color: '#aa0000', pattern: 2 },
+				style: { color: '#aa0000', pattern: 'diagonal-thin' },
 				strokeStyle: { width: 1, color: '#aa0000' }
 			},
 			{
 				type: 'circle',
 				point: [13.36106, 52.51089],
 				radius: 302,
-				style: { color: '#aa000038', pattern: 1 },
+				style: { color: '#aa000038', pattern: 'diagonal' },
 				strokeStyle: { color: '#aa0000' }
 			}
 		]

@@ -131,11 +131,12 @@ are skipped. Altitudes and
 polygon holes are dropped. Style values are sanitized (clamped, rounded,
 colors normalized to lowercase hex) or fall back to the defaults.
 
-Enum values use human-readable names (`fill-pattern`, `stroke-style`, `stroke-arrow-start`,
-`stroke-arrow-end`, `symbol-label-align`) whose index↔name tables live here. `symbol-pattern` is the name of the
-image, e.g. `icons:anchor`. The editor's `StylePart` classes take
-their defaults and enum names from here and only add rendering data;
-`profile.test.ts` checks that every enum value can be rendered.
+Choices are names (`fill-pattern`, `stroke-style`, `stroke-arrow-start`, `stroke-arrow-end`,
+`symbol-label-align`), as in the style itself; their tables (`FILL_PATTERN_NAMES`,
+`STROKE_STYLE_NAMES`, `ARROW_NAMES`, `LABEL_ALIGN_NAMES`) and name types live in `types.ts`.
+`symbol-pattern` is the name of the image, e.g. `icons:anchor`. The editor's `StylePart` classes
+take their defaults from here and only add rendering data, in records keyed by the name types, so
+TypeScript checks that every name can be rendered.
 
 ## KML (`kml.ts`)
 

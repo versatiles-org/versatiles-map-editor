@@ -1,7 +1,9 @@
 import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
+	FILL_PATTERN_NAMES,
 	LABEL_ALIGN_NAMES,
+	STROKE_STYLE_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -32,15 +34,7 @@ import {
 	ORIGIN_SCALE,
 	POPUP_KEYS
 } from './constants.js';
-import {
-	FILL_PATTERN_NAMES,
-	sanitizeBackground,
-	sanitizeFrame,
-	sanitizeLabelMinZoom,
-	STROKE_STYLE_NAMES,
-	hasArrow,
-	VIEWER_CHOICES
-} from './profile.js';
+import { sanitizeBackground, sanitizeFrame, sanitizeLabelMinZoom, hasArrow, VIEWER_CHOICES } from './profile.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
@@ -619,10 +613,10 @@ export class StateReader {
 					style.halo = this.readVarint() / 10;
 					break;
 				case 'pattern':
-					style.pattern = this.readIndex(FILL_PATTERN_NAMES.length);
+					style.pattern = this.readName(FILL_PATTERN_NAMES);
 					break;
 				case 'dash':
-					style.dash = this.readIndex(STROKE_STYLE_NAMES.length);
+					style.dash = this.readName(STROKE_STYLE_NAMES);
 					break;
 				case 'rotate':
 					style.rotate = this.readVarint(true);

@@ -1,4 +1,11 @@
-import { parseColor, type ArrowName, formatHex, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
+import {
+	parseColor,
+	type ArrowName,
+	type DashName,
+	formatHex,
+	type StateLegendEntry,
+	type StateStyle
+} from '@versatiles/map-state';
 import { completeStyle, dashArrays } from '../../style/index.js';
 import { drawArrowHead, fillPatternPixels, headReach, PATTERN_SIZE } from '../../rendering/index.js';
 
@@ -17,8 +24,8 @@ export const MAX_PATTERNED_WIDTH = 2.5;
 export const MAX_ARROW_WIDTH = 12;
 
 /** The width of a line or an outline in the legend, see `MAX_LINE_WIDTH`. */
-function drawnWidth({ width, dash }: { width: number; dash: number }, max: number): number {
-	return Math.min(width, max, dash === 0 ? Infinity : MAX_PATTERNED_WIDTH);
+function drawnWidth({ width, dash }: { width: number; dash: DashName }, max: number): number {
+	return Math.min(width, max, dash === 'solid' ? Infinity : MAX_PATTERNED_WIDTH);
 }
 
 /**
@@ -35,9 +42,9 @@ export function textColor(entry: StateLegendEntry): string {
 }
 
 /** Set the dashes of a line as on the map: in multiples of its width, with round ends. */
-function setDashes(context: CanvasRenderingContext2D, dash: number, width: number) {
-	const array = dashArrays.get(dash)?.array;
-	context.setLineDash(array && array.length > 1 ? array.map((v) => v * width) : []);
+function setDashes(context: CanvasRenderingContext2D, dash: DashName, width: number) {
+	const array = dashArrays[dash];
+	context.setLineDash(array.length > 1 ? array.map((v) => v * width) : []);
 	context.lineCap = 'round';
 	context.lineJoin = 'round';
 }

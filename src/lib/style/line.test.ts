@@ -57,7 +57,7 @@ describe('LineStyle', () => {
 	it('should initialize layer with default values', () => {
 		expect(layer).toBeDefined();
 		expect(layer.color).toBe('#ff0000');
-		expect(layer.dash).toBe(0);
+		expect(layer.dash).toBe('solid');
 		expect(layer.visible).toBe(true);
 		expect(layer.width).toBe(2);
 	});
@@ -65,8 +65,8 @@ describe('LineStyle', () => {
 	it('gives color, width and dash pattern as feature properties', () => {
 		layer.color = '#00ff00';
 		layer.width = 5;
-		layer.dash = 1;
-		expect(layer.getProperties()).toStrictEqual({ color: 'rgb(0,255,0)', width: 5, dash: 1 });
+		layer.dash = 'dashed';
+		expect(layer.getProperties()).toStrictEqual({ color: 'rgb(0,255,0)', width: 5, dash: 'dashed' });
 		expect(onChange).toHaveBeenCalledTimes(3);
 	});
 
@@ -77,36 +77,36 @@ describe('LineStyle', () => {
 
 	it('should return correct state object', () => {
 		layer.color = '#00ff00';
-		layer.dash = 1;
+		layer.dash = 'dashed';
 		layer.visible = false;
 		layer.width = 4;
 
-		expect(layer.getState()).toEqual({ color: '#00ff00', dash: 1, visible: false, width: 4 });
+		expect(layer.getState()).toEqual({ color: '#00ff00', dash: 'dashed', visible: false, width: 4 });
 	});
 
 	it('should restore state correctly', () => {
-		layer.setState({ color: '#0000ff', dash: 2, width: 3 });
+		layer.setState({ color: '#0000ff', dash: 'dotted', width: 3 });
 
 		expect(layer.color).toBe('#0000ff');
-		expect(layer.dash).toBe(2);
+		expect(layer.dash).toBe('dotted');
 		expect(layer.width).toBe(3);
 	});
 
-	it('should restore falsy values', () => {
-		layer.patch({ visible: false, dash: 1 });
-		layer.patch({ dash: 0 });
+	it('should restore the default value', () => {
+		layer.patch({ visible: false, dash: 'dashed' });
+		layer.patch({ dash: 'solid' });
 
 		expect(layer.visible).toBe(false);
-		expect(layer.dash).toBe(0);
+		expect(layer.dash).toBe('solid');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
-		layer.setState({ visible: false, dash: 1, width: 5 });
+		layer.setState({ visible: false, dash: 'dashed', width: 5 });
 		layer.setState({ color: '#00ff00' });
 
 		expect(layer.color).toBe('#00ff00');
 		expect(layer.visible).toBe(true);
-		expect(layer.dash).toBe(0);
+		expect(layer.dash).toBe('solid');
 		expect(layer.width).toBe(2);
 	});
 });

@@ -8,7 +8,7 @@ describe('the defaults of the roles of styles', () => {
 	});
 
 	it('complete a style with the defaults of its role', () => {
-		expect(completeStyle('fill', { pattern: 1 })).toStrictEqual({ color: '#ff0000', pattern: 1 });
+		expect(completeStyle('fill', { pattern: 'diagonal' })).toStrictEqual({ color: '#ff0000', pattern: 'diagonal' });
 		expect(completeStyle('line').arrowSize).toBe(3);
 		expect(completeStyle('symbol', { color: '#0000ff' }).color).toBe('#0000ff');
 	});

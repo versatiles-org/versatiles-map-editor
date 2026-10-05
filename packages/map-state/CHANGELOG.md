@@ -83,9 +83,10 @@ The first release.
 - The position of the label of a marker, `align`, by name (`LABEL_ALIGN_NAMES`, type `AlignName`:
   auto, right, left, top, bottom and the four corners, e.g. top-right; in the base64 string as
   its index); in GeoJSON `symbol-label-align`.
-- Two fields instead of one `pattern`: `dash` for lines and outlines (`STROKE_STYLE_NAMES`: solid,
-  dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`: solid, diagonal, diagonal-thin),
-  each with its own style key; in GeoJSON `stroke-style` and `fill-pattern`, as before.
+- Two fields instead of one `pattern`, by name: `dash` for lines and outlines (`STROKE_STYLE_NAMES`,
+  type `DashName`: solid, dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`, type
+  `FillPatternName`: solid, diagonal, diagonal-thin), each with its own style key and in the base64
+  string as its index; in GeoJSON `stroke-style` and `fill-pattern`.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.

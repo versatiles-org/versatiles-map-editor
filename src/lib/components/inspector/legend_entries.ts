@@ -2,6 +2,8 @@ import {
 	formatHex,
 	parseColor,
 	type ArrowName,
+	type DashName,
+	type FillPatternName,
 	type StateLegend,
 	type StateLegendEntry,
 	type StateStyle
@@ -101,13 +103,13 @@ export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'sty
 		get pattern() {
 			return get().pattern!;
 		},
-		set pattern(value: number) {
+		set pattern(value: FillPatternName) {
 			set('pattern', value);
 		},
 		get dash() {
 			return get().dash!;
 		},
-		set dash(value: number) {
+		set dash(value: DashName) {
 			set('dash', value);
 		},
 		get width() {

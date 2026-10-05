@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { fillPatterns, type FillStyle } from '#lib/style/index.js';
+	import { FILL_PATTERN_NAMES, type FillPatternName } from '@versatiles/map-state';
+	import type { FillStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup } from '#lib/components/ui/index.js';
 	import { ColorPicker } from '#lib/components/pickers/index.js';
@@ -23,9 +24,9 @@
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
 	const pattern = $derived(group(layers, 'pattern'));
-	const patterns = [...fillPatterns].map(([index, { name }]) => ({ value: index, label: name }));
+	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: name }));
 	// the width of the stripes in the preview, per pattern; none is filled
-	const stripes = [0, 2.5, 1];
+	const stripes: Record<FillPatternName, number> = { solid: 0, diagonal: 2.5, 'diagonal-thin': 1 };
 </script>
 
 <InputRow label={colorLabel} id="{uid}-color" mixed={color.mixed}>
@@ -38,23 +39,23 @@
 		labelledby="{uid}-pattern-label"
 		value={pattern.value}
 		mixed={pattern.mixed}
-		onchange={(index) => {
-			pattern.value = index;
+		onchange={(name) => {
+			pattern.value = name;
 			log();
 		}}
 		options={patterns}
 	>
-		{#snippet picture(index)}
+		{#snippet picture(name)}
 			<svg width="40" height="18" aria-hidden="true">
 				<defs>
 					<pattern
-						id="{uid}-stripes-{index}"
+						id="{uid}-stripes-{name}"
 						width="6"
 						height="6"
 						patternUnits="userSpaceOnUse"
 						patternTransform="rotate(45)"
 					>
-						<line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" stroke-width={stripes[index] ?? 1} />
+						<line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" stroke-width={stripes[name]} />
 					</pattern>
 				</defs>
 				<rect
@@ -63,8 +64,8 @@
 					width="38"
 					height="16"
 					rx="2"
-					fill={stripes[index] ? `url(#${uid}-stripes-${index})` : 'currentColor'}
-					fill-opacity={stripes[index] ? 1 : 0.6}
+					fill={stripes[name] ? `url(#${uid}-stripes-${name})` : 'currentColor'}
+					fill-opacity={stripes[name] ? 1 : 0.6}
 					stroke="currentColor"
 				/>
 			</svg>

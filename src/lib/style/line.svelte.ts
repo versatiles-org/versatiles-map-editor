@@ -1,18 +1,14 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type ArrowName, type StateStyle, LINE_DEFAULTS, STROKE_STYLE_NAMES, hasArrow } from '@versatiles/map-state';
+import { type ArrowName, type DashName, type StateStyle, LINE_DEFAULTS, hasArrow } from '@versatiles/map-state';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
-// Dash array per stroke style index; the names come from the codec
-const arrays: number[][] = [
-	[100], // solid
-	[2, 4], // dashed
-	[0, 2] // dotted
-];
-
-export const dashArrays = new Map<number, { name: string; array: number[] | undefined }>(
-	STROKE_STYLE_NAMES.map((name, index) => [index, { name, array: arrays[index] }])
-);
+/** The dashes and gaps of each dash style, in multiples of the width of the line. */
+export const dashArrays: Record<DashName, number[]> = {
+	solid: [100],
+	dashed: [2, 4],
+	dotted: [0, 2]
+};
 
 /** The arrowheads of a line, which the layer of the arrowheads draws, see `arrowHeadFeatures`. */
 export interface ArrowProperties {
@@ -32,7 +28,7 @@ export class LineStyle extends StylePart {
 	readonly role: StyleRole;
 
 	#color: string = $state(LINE_DEFAULTS.color);
-	#dash: number = $state(LINE_DEFAULTS.dash);
+	#dash: DashName = $state(LINE_DEFAULTS.dash);
 	#visible: boolean = $state(LINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
 	#arrowStart: ArrowName = $state(ROLE_DEFAULTS.line.arrowStart);
@@ -59,11 +55,11 @@ export class LineStyle extends StylePart {
 		this.#color = value;
 		this.changed();
 	}
-	/** Solid, dashed or dotted: an index of `STROKE_STYLE_NAMES`. */
-	get dash(): number {
+	/** Solid, dashed or dotted. */
+	get dash(): DashName {
 		return this.#dash;
 	}
-	set dash(value: number) {
+	set dash(value: DashName) {
 		if (value === this.#dash) return;
 		this.#dash = value;
 		this.changed();

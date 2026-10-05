@@ -23,7 +23,9 @@ import {
 import { encodeStrings } from './string_coder.js';
 import {
 	ARROW_NAMES,
+	FILL_PATTERN_NAMES,
 	LABEL_ALIGN_NAMES,
+	STROKE_STYLE_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -555,9 +557,9 @@ export class StateWriter {
 			case 'halo':
 				return this.writeVarint(Math.round(style.halo! * 10));
 			case 'pattern':
-				return this.writeVarint(Math.round(style.pattern!));
+				return this.writeName(FILL_PATTERN_NAMES, style.pattern!);
 			case 'dash':
-				return this.writeVarint(Math.round(style.dash!));
+				return this.writeName(STROKE_STYLE_NAMES, style.dash!);
 			case 'rotate':
 				return this.writeVarint(Math.round(style.rotate!), true);
 			case 'size':

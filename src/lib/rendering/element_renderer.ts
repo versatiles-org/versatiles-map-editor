@@ -133,7 +133,7 @@ export function layerIdsOf(element: AbstractElement): string[] {
 
 /**
  * A value that the layer looks up by a feature property, since features cannot have array
- * properties (e.g. dash arrays): `lookup('dash', [[1, [2, 4]], …], [100])`.
+ * properties (e.g. dash arrays): `lookup('dash', [['dashed', [2, 4]], …], [100])`.
  */
 function lookup(property: string, entries: [string | number, unknown][], fallback: unknown): ExpressionSpecification {
 	return [
@@ -144,11 +144,7 @@ function lookup(property: string, entries: [string | number, unknown][], fallbac
 	] as unknown as ExpressionSpecification;
 }
 
-const DASH_ARRAYS = lookup(
-	'dash',
-	[...dashArrays].flatMap(([index, { array }]) => (array ? [[index, array] as [number, number[]]] : [])),
-	[100]
-);
+const DASH_ARRAYS = lookup('dash', Object.entries(dashArrays), dashArrays.solid);
 
 /** A GeoJSON source without features, which the editor fills. */
 export function emptySource(): SourceSpecification {

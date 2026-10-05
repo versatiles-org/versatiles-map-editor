@@ -18,57 +18,57 @@ describe('FillStyle', () => {
 	it('should initialize layer with default values', () => {
 		expect(layer).toBeDefined();
 		expect(layer.color).toBe('#ff0000');
-		expect(layer.pattern).toBe(0);
+		expect(layer.pattern).toBe('solid');
 	});
 
 	it('gives the pattern image in the opaque color, and the opacity of the color on its own', () => {
-		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:0:#ff0000', opacity: 1 });
+		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:solid:#ff0000', opacity: 1 });
 		layer.color = '#00FF0080';
-		layer.pattern = 1;
-		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:1:#00ff00', opacity: 128 / 255 });
+		layer.pattern = 'diagonal';
+		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:diagonal:#00ff00', opacity: 128 / 255 });
 	});
 
 	it('reports every change, but not the initial values', () => {
 		expect(onChange).not.toHaveBeenCalled();
 		layer.color = '#00ff00';
-		layer.pattern = 2;
+		layer.pattern = 'diagonal-thin';
 		expect(onChange).toHaveBeenCalledTimes(2);
 	});
 
 	it('should return correct state object', () => {
 		layer.color = '#00ff0080';
-		layer.pattern = 1;
+		layer.pattern = 'diagonal';
 
-		expect(layer.getState()).toEqual({ color: '#00ff0080', pattern: 1 });
+		expect(layer.getState()).toEqual({ color: '#00ff0080', pattern: 'diagonal' });
 	});
 
 	it('should restore state correctly', () => {
-		layer.setState({ color: '#0000ffcc', pattern: 2 });
+		layer.setState({ color: '#0000ffcc', pattern: 'diagonal-thin' });
 
 		expect(layer.color).toBe('#0000ffcc');
-		expect(layer.pattern).toBe(2);
+		expect(layer.pattern).toBe('diagonal-thin');
 	});
 
-	it('should restore falsy values', () => {
-		layer.patch({ pattern: 1 });
-		layer.patch({ pattern: 0 });
+	it('should restore the default value', () => {
+		layer.patch({ pattern: 'diagonal' });
+		layer.patch({ pattern: 'solid' });
 
-		expect(layer.pattern).toBe(0);
+		expect(layer.pattern).toBe('solid');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
-		layer.setState({ color: '#00ff00', pattern: 1 });
+		layer.setState({ color: '#00ff00', pattern: 'diagonal' });
 		layer.setState({ color: '#0000ff' });
 
 		expect(layer.color).toBe('#0000ff');
-		expect(layer.pattern).toBe(0);
+		expect(layer.pattern).toBe('solid');
 	});
 });
 
 describe('the names of fill pattern images', () => {
 	it('hold the pattern and the color, in lowercase', () => {
-		const name = fillPatternName(1, '#FF0000');
-		expect(parseFillPatternName(name)).toStrictEqual({ pattern: 1, color: '#ff0000' });
+		const name = fillPatternName('diagonal', '#FF0000');
+		expect(parseFillPatternName(name)).toStrictEqual({ pattern: 'diagonal', color: '#ff0000' });
 		expect(parseFillPatternName('base:icon-airfield')).toBeUndefined();
 	});
 });

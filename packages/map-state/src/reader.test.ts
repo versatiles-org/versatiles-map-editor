@@ -361,8 +361,8 @@ describe('StateReader', () => {
 		it('should read a style correctly', () => {
 			const style: StateStyle = {
 				halo: 1.5,
-				dash: 1,
-				pattern: 2,
+				dash: 'dashed',
+				pattern: 'diagonal-thin',
 				rotate: -45,
 				size: 2.5,
 				width: 2.3,
@@ -476,7 +476,7 @@ describe('StateReader', () => {
 						},
 						style: {
 							color: '#aa0000',
-							pattern: 2
+							pattern: 'diagonal-thin'
 						},
 						type: 'polygon'
 					}
@@ -578,9 +578,14 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'serif',
 					entries: [
-						{ type: 'polygon', style: { color: '#ff0000', pattern: 1 }, strokeStyle: { width: 3 }, label: 'Red area' },
+						{
+							type: 'polygon',
+							style: { color: '#ff0000', pattern: 'diagonal' },
+							strokeStyle: { width: 3 },
+							label: 'Red area'
+						},
 						{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor', size: 1.5 }, label: 'Blue marker' },
-						{ type: 'line', style: { color: '#00ff00', dash: 2 }, label: '' },
+						{ type: 'line', style: { color: '#00ff00', dash: 'dotted' }, label: '' },
 						// all defaults
 						{ type: 'marker', label: 'Flag' }
 					]
@@ -594,7 +599,7 @@ describe('legend', () => {
 						[13, 52],
 						[13.1, 52]
 					],
-					style: { color: '#00ff00', dash: 2 }
+					style: { color: '#00ff00', dash: 'dotted' }
 				}
 			]
 		};
@@ -685,10 +690,8 @@ describe('invalid links', () => {
 		expect(decodeError({ map: { center: [0, 120], radius: 1000 }, elements: [] })).toMatch(/^Invalid latitude: 1[12]/);
 	});
 
-	it('are refused with style values beyond their names', () => {
+	it('are refused with a rotation beyond 180°', () => {
 		const marker = (style: StateStyle): MapState => ({ elements: [{ type: 'marker', point: [0, 0], style }] });
-		expect(decodeError(marker({ pattern: 3 }))).toBe('Invalid index: 3 of 3');
-		expect(decodeError(marker({ dash: 3 }))).toBe('Invalid index: 3 of 3');
 		expect(decodeError(marker({ rotate: 200 }))).toBe('Invalid rotation: 200');
 	});
 
