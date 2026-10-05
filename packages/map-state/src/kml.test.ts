@@ -45,7 +45,7 @@ const state: MapState = {
 				[13.4, 52.4],
 				[13.4, 52.5]
 			],
-			style: { color: '#12345680', pattern: 'diagonal-thin' },
+			style: { color: '#12345680', pattern: 'diagonal-down' },
 			strokeStyle: { color: '#654321', visible: false },
 			popup: { text: 'A polygon' }
 		},

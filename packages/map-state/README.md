@@ -74,6 +74,9 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
   `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
   `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
+  `hasArrow` and `hasPattern` tell whether a style has an arrowhead or a fill pattern, and
+  `PATTERN_SCALE_RANGE` and `PATTERN_COVERAGE_RANGE` are the ranges of the size and the coverage
+  of a pattern.
   `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend that names none, and
   `removeLegendDefaults` leaves them out, as the base64 string does;
   `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.

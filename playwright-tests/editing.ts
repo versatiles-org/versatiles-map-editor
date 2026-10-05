@@ -655,11 +655,11 @@ test(
 		// the fill pattern as pictures, chosen by click and by arrow keys
 		await page.mouse.click(...(await project(page, [13.4, 52.49])));
 		const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
-		await expect(patterns.getByRole('radio')).toHaveCount(3);
-		await patterns.getByRole('radio', { name: 'Diagonal', exact: true }).check();
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal');
+		await expect(patterns.getByRole('radio')).toHaveCount(8);
+		await patterns.getByRole('radio', { name: 'Diagonal up', exact: true }).check();
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-up');
 		await page.keyboard.press('ArrowRight');
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-thin');
+		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-down');
 
 		// a slider shows its value
 		const width = page.getByRole('slider', { name: 'Width' });

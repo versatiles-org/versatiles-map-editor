@@ -101,8 +101,8 @@ describe('MapStyleLoader', () => {
 			const resolver = map.setMissingStyleImageResolver.mock.lastCall![0] as (id: string) => void;
 			resolver('base:icon-airfield');
 			expect(map.addImage).not.toHaveBeenCalled();
-			resolver('fill-pattern:diagonal:#ff0000');
-			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:diagonal:#ff0000', expect.anything(), {
+			resolver('fill-pattern:diagonal-up:1:0.5:#ff0000');
+			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:diagonal-up:1:0.5:#ff0000', expect.anything(), {
 				pixelRatio: 2
 			});
 		});

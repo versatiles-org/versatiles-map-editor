@@ -26,12 +26,26 @@
 	const pattern = $derived(group(layers, 'pattern'));
 	const NAMES: Record<FillPatternName, string> = {
 		solid: 'Solid',
-		diagonal: 'Diagonal',
-		'diagonal-thin': 'Diagonal, thin'
+		'diagonal-up': 'Diagonal up',
+		'diagonal-down': 'Diagonal down',
+		horizontal: 'Horizontal',
+		vertical: 'Vertical',
+		cross: 'Cross',
+		'diagonal-cross': 'Diagonal cross',
+		dots: 'Dots'
 	};
 	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
-	// the width of the stripes in the preview, per pattern; none is filled
-	const stripes: Record<FillPatternName, number> = { solid: 0, diagonal: 2.5, 'diagonal-thin': 1 };
+	// the pictures: vertical lines (and horizontal ones for the crosses) turned by an angle, or dots
+	const PICTURES: Record<FillPatternName, { angle: number; cross?: boolean; dots?: boolean }> = {
+		solid: { angle: 0 },
+		'diagonal-up': { angle: 45 },
+		'diagonal-down': { angle: -45 },
+		horizontal: { angle: 90 },
+		vertical: { angle: 0 },
+		cross: { angle: 0, cross: true },
+		'diagonal-cross': { angle: 45, cross: true },
+		dots: { angle: 0, dots: true }
+	};
 </script>
 
 <InputRow label={colorLabel} id="{uid}-color" mixed={color.mixed}>
@@ -51,16 +65,24 @@
 		options={patterns}
 	>
 		{#snippet picture(name)}
+			{@const { angle, cross, dots } = PICTURES[name]}
 			<svg width="40" height="18" aria-hidden="true">
 				<defs>
 					<pattern
-						id="{uid}-stripes-{name}"
+						id="{uid}-pattern-{name}"
 						width="6"
 						height="6"
 						patternUnits="userSpaceOnUse"
-						patternTransform="rotate(45)"
+						patternTransform="rotate({angle})"
 					>
-						<line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" stroke-width={stripes[name]} />
+						{#if dots}
+							<circle cx="3" cy="3" r="1.6" fill="currentColor" />
+						{:else}
+							<line x1="3" y1="0" x2="3" y2="6" stroke="currentColor" stroke-width={cross ? 1.5 : 2.5} />
+							{#if cross}
+								<line x1="0" y1="3" x2="6" y2="3" stroke="currentColor" stroke-width="1.5" />
+							{/if}
+						{/if}
 					</pattern>
 				</defs>
 				<rect
@@ -69,8 +91,8 @@
 					width="38"
 					height="16"
 					rx="2"
-					fill={stripes[name] ? `url(#${uid}-stripes-${name})` : 'currentColor'}
-					fill-opacity={stripes[name] ? 1 : 0.6}
+					fill={name === 'solid' ? 'currentColor' : `url(#${uid}-pattern-${name})`}
+					fill-opacity={name === 'solid' ? 0.6 : 1}
 					stroke="currentColor"
 				/>
 			</svg>

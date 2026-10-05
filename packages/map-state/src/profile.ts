@@ -37,7 +37,16 @@ import {
 
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
-export const FILL_DEFAULTS: Defaults<'color' | 'pattern'> = { color: '#ff0000', pattern: 'solid' };
+export const FILL_DEFAULTS: Defaults<'color' | 'pattern' | 'patternScale' | 'patternCoverage'> = {
+	color: '#ff0000',
+	pattern: 'solid',
+	patternScale: 1,
+	patternCoverage: 0.5
+};
+/** The range of the size of a pattern, a factor (`patternScale`). */
+export const PATTERN_SCALE_RANGE = [0.5, 4] as const;
+/** The range of the share of an area that a pattern covers (`patternCoverage`). */
+export const PATTERN_COVERAGE_RANGE = [0.05, 0.95] as const;
 export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
 	color: '#ff0000',
 	dash: 'solid',
@@ -142,6 +151,8 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'haloColor', sanitizeColor(v.haloColor));
 	set(s, 'halo', sanitizeNumber(v.halo, 0));
 	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
+	set(s, 'patternScale', sanitizeNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
+	set(s, 'patternCoverage', sanitizeNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
 	set(s, 'dash', oneOf(STROKE_STYLE_NAMES, v.dash));
 	set(s, 'rotate', sanitizeRotation(v.rotate));
 	const size = sanitizeNumber(v.size, 0);
@@ -167,11 +178,26 @@ export function hasArrow(style: StateStyle | undefined): boolean {
 	return (style?.arrowStart ?? 'none') !== 'none' || (style?.arrowEnd ?? 'none') !== 'none';
 }
 
-/** A style without the fields that have no effect: the size of arrowheads, without one. */
+/** Whether a style fills its area with a pattern, not solid. */
+export function hasPattern(style: StateStyle | undefined): boolean {
+	return (style?.pattern ?? 'solid') !== 'solid';
+}
+
+/**
+ * A style without the fields that have no effect: the size of arrowheads without one, and the
+ * size and the coverage of a pattern without one.
+ */
 export function withoutUnusedFields(style: StateStyle): StateStyle {
-	if (style.arrowSize === undefined || hasArrow(style)) return style;
-	const { arrowSize: _arrowSize, ...rest } = style;
-	return rest;
+	let used = style;
+	if (used.arrowSize !== undefined && !hasArrow(used)) {
+		const { arrowSize: _arrowSize, ...rest } = used;
+		used = rest;
+	}
+	if ((used.patternScale !== undefined || used.patternCoverage !== undefined) && !hasPattern(used)) {
+		const { patternScale: _scale, patternCoverage: _coverage, ...rest } = used;
+		used = rest;
+	}
+	return used;
 }
 
 /** Assign `value` to `style[key]` unless it is undefined. */
@@ -206,7 +232,10 @@ export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 	return {
 		'fill-color': formatHex({ r, g, b, alpha: 1 }),
 		'fill-opacity': Math.round(alpha * 1000) / 1000,
-		'fill-pattern': s.pattern
+		'fill-pattern': s.pattern,
+		// only with a pattern
+		'fill-pattern-scale': hasPattern(s) ? s.patternScale : undefined,
+		'fill-pattern-coverage': hasPattern(s) ? s.patternCoverage : undefined
 	};
 }
 
@@ -221,8 +250,10 @@ export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 			s.color = formatHex({ ...color, alpha: color.alpha * opacity });
 		}
 		set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, p['fill-pattern']));
+		set(s, 'patternScale', sanitizeNumber(p['fill-pattern-scale'], ...PATTERN_SCALE_RANGE));
+		set(s, 'patternCoverage', sanitizeNumber(p['fill-pattern-coverage'], ...PATTERN_COVERAGE_RANGE));
 	}
-	return removeDefaultFields(s, FILL_DEFAULTS);
+	return removeDefaultFields(withoutUnusedFields(s), FILL_DEFAULTS);
 }
 
 // ----- stroke / line (line, polygon stroke, circle stroke) -----

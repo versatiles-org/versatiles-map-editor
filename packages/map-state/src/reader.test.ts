@@ -362,7 +362,7 @@ describe('StateReader', () => {
 			const style: StateStyle = {
 				halo: 1.5,
 				dash: 'dashed',
-				pattern: 'diagonal-thin',
+				pattern: 'diagonal-down',
 				rotate: -45,
 				size: 2.5,
 				width: 2.3,
@@ -476,7 +476,7 @@ describe('StateReader', () => {
 						},
 						style: {
 							color: '#aa0000',
-							pattern: 'diagonal-thin'
+							pattern: 'diagonal-down'
 						},
 						type: 'polygon'
 					}
@@ -580,7 +580,7 @@ describe('legend', () => {
 					entries: [
 						{
 							type: 'polygon',
-							style: { color: '#ff0000', pattern: 'diagonal' },
+							style: { color: '#ff0000', pattern: 'diagonal-up' },
 							strokeStyle: { width: 3 },
 							label: 'Red area'
 						},

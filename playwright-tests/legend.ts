@@ -179,11 +179,11 @@ test(
 		await expect
 			.poll(stored)
 			.toStrictEqual({ type: 'polygon', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
-		await entry.getByRole('radio', { name: 'Diagonal', exact: true }).check();
+		await entry.getByRole('radio', { name: 'Diagonal up', exact: true }).check();
 		await entry.getByRole('checkbox', { name: 'Outline' }).check();
 		await expect.poll(stored).toStrictEqual({
 			type: 'polygon',
-			style: { color: '#0000ff', pattern: 'diagonal' },
+			style: { color: '#0000ff', pattern: 'diagonal-up' },
 			strokeStyle: { color: '#0000ff' },
 			label: 'A'
 		});
@@ -350,7 +350,7 @@ test(
 			{
 				type: 'polygon' as const,
 				points,
-				style: { color: '#00ff004d', pattern: 'diagonal' },
+				style: { color: '#00ff004d', pattern: 'diagonal-up' },
 				strokeStyle: { color: '#00aa00' }
 			}
 		];
@@ -388,7 +388,7 @@ test(
 		await page.mouse.click(x, y);
 		await expect.poll(entry).toStrictEqual({
 			type: 'polygon',
-			style: { color: '#00ff004d', pattern: 'diagonal' },
+			style: { color: '#00ff004d', pattern: 'diagonal-up' },
 			strokeStyle: { color: '#00aa00' },
 			label: 'Park'
 		});

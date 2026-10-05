@@ -29,7 +29,10 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	// elements store their label by themselves, only legend entries from files can have one here
 	{ key: 18, name: 'label', encoded: (v: string) => v },
 	// the fill pattern of areas, rarer than the dashes of lines
-	{ key: 19, name: 'pattern', encoded: (v: string) => v }
+	{ key: 19, name: 'pattern', encoded: (v: string) => v },
+	// the size and the coverage of a pattern, only with one
+	{ key: 20, name: 'patternScale', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 21, name: 'patternCoverage', encoded: (v: number) => Math.round(v * 100) }
 ];
 
 /**

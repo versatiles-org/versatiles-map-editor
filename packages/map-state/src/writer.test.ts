@@ -174,7 +174,7 @@ describe('StateWriter', () => {
 					type: 'circle',
 					point: [15, 16],
 					radius: 17,
-					style: { pattern: 'diagonal' },
+					style: { pattern: 'diagonal-up' },
 					strokeStyle: { width: 0.2 }
 				}
 			]
@@ -204,7 +204,7 @@ describe('StateWriter', () => {
 		writer.writeStringTable(['test']);
 		writer.writeStyle({
 			halo: 1.5,
-			pattern: 'diagonal-thin',
+			pattern: 'diagonal-down',
 			rotate: -45,
 			size: 2.5,
 			width: 2.3,

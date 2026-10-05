@@ -54,7 +54,7 @@ describe('style references', () => {
 						[1, 0],
 						[1, 1]
 					],
-					style: { color: '#00ff00', pattern: 'diagonal' },
+					style: { color: '#00ff00', pattern: 'diagonal-up' },
 					strokeStyle: { color: '#000000', width: 3, visible: false }
 				},
 				{

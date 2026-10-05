@@ -67,7 +67,7 @@
 				[13.28315, 52.5079],
 				[13.2815, 52.50434]
 			],
-			"style": { "color": "#0072b280", "pattern": "diagonal-thin" },
+			"style": { "color": "#0072b280", "pattern": "diagonal-up", "patternCoverage": 0.25 },
 			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
 				"text": "** (Umweltzone)**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."

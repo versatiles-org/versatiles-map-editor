@@ -111,8 +111,20 @@ export const LABEL_POSITION_NAMES = [
 ] as const;
 export type LabelPositionName = (typeof LABEL_POSITION_NAMES)[number];
 
-/** The patterns of the fill of an area: solid, or diagonal lines. */
-export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'] as const;
+/**
+ * The patterns of the fill of an area: solid, lines in a direction ("diagonal-up" is "/"), lines in
+ * two directions, or dots. Their size and coverage are fields of their own.
+ */
+export const FILL_PATTERN_NAMES = [
+	'solid',
+	'diagonal-up',
+	'diagonal-down',
+	'horizontal',
+	'vertical',
+	'cross',
+	'diagonal-cross',
+	'dots'
+] as const;
 export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
 
 /** The dashes of a line or an outline. */
@@ -135,6 +147,22 @@ export interface StateStyle {
 	 * @default "solid"
 	 */
 	pattern?: FillPatternName;
+	/**
+	 * Areas with a pattern: its size, as a factor; at 1 the lines (across them) or the dots are 8
+	 * pixels apart. Only with a pattern.
+	 * @minimum 0.5
+	 * @maximum 4
+	 * @default 1
+	 */
+	patternScale?: number;
+	/**
+	 * Areas with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95.
+	 * Only with a pattern.
+	 * @minimum 0.05
+	 * @maximum 0.95
+	 * @default 0.5
+	 */
+	patternCoverage?: number;
 	/**
 	 * Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.
 	 * @default "solid"

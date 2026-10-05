@@ -7,7 +7,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import { completeStyle, dashArrays } from '../../style/index.js';
-import { drawArrowHead, fillPatternImage, headReach } from '../../rendering/index.js';
+import { drawArrowHead, headReach, patternImage } from '../../rendering/index.js';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
 export const MARK_WIDTH = 28;
@@ -109,10 +109,10 @@ export function drawArea(
 ): void {
 	const context = prepare(canvas);
 	if (!context) return;
-	const { color, pattern } = completeStyle('fill', fill);
+	const { color, pattern, patternScale, patternCoverage } = completeStyle('fill', fill);
 	const box = { x: 2, y: 3, width: MARK_WIDTH - 4, height: MARK_HEIGHT - 6 };
 
-	const image = fillPatternImage(pattern, color);
+	const image = patternImage(pattern, patternScale, patternCoverage, color);
 	const tile = document.createElement('canvas');
 	[tile.width, tile.height] = [image.width, image.height];
 	tile.getContext('2d')?.putImageData(new ImageData(image.data, image.width), 0, 0);

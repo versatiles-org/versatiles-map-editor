@@ -2,17 +2,6 @@ import type * as maplibregl from 'maplibre-gl';
 import { parseColor, type FillPatternName } from '@versatiles/map-state';
 import { parseFillPatternName } from '../style/index.js';
 
-/** The shapes of fill patterns: lines in one direction, lines in two directions, or dots. */
-export type PatternShape =
-	'solid' | 'diagonal-up' | 'diagonal-down' | 'horizontal' | 'vertical' | 'cross' | 'diagonal-cross' | 'dots';
-
-/** The shape and the coverage of each fill pattern of the format, at scale 1. */
-const PATTERNS: Record<FillPatternName, { shape: PatternShape; coverage: number }> = {
-	solid: { shape: 'solid', coverage: 1 },
-	diagonal: { shape: 'diagonal-up', coverage: 0.5 },
-	'diagonal-thin': { shape: 'diagonal-up', coverage: 0.25 }
-};
-
 /** The distance between the lines (across them) or the dots of a pattern at scale 1, in CSS pixels. */
 export const PATTERN_SPACING = 8;
 
@@ -30,7 +19,7 @@ export interface PatternImage {
 	pixelRatio: number;
 }
 
-const isDiagonal = (shape: PatternShape) => shape.startsWith('diagonal');
+const isDiagonal = (shape: FillPatternName) => shape.startsWith('diagonal');
 
 /** `value` modulo `period`, from 0 to `period`, also for negative values. */
 const modulo = (value: number, period: number) => ((value % period) + period) % period;
@@ -45,7 +34,7 @@ function distanceToMultiple(value: number, period: number): number {
  * The distance of the point x, y of a tile of `size` pixels from the nearest line or dot of the
  * shape, in pixels. The lines run through the corners of the tile, so it repeats without a seam.
  */
-function distance(shape: PatternShape, size: number, x: number, y: number): number {
+function distance(shape: FillPatternName, size: number, x: number, y: number): number {
 	switch (shape) {
 		case 'horizontal':
 			return distanceToMultiple(y, size);
@@ -86,7 +75,7 @@ function bound(sorted: Float32Array, value: number, above: boolean): number {
  * many samples are as `coverage` asks for, so the mean opacity of the tile is the coverage. That
  * also holds for dots so large that they overlap.
  */
-function opacities(shape: PatternShape, scale: number, coverage: number): { size: number; opacity: Float32Array } {
+function opacities(shape: FillPatternName, scale: number, coverage: number): { size: number; opacity: Float32Array } {
 	const spacing = PATTERN_SPACING * scale * PATTERN_PIXEL_RATIO;
 	// not a tiny tile: the map would show its edges as faint dots
 	if (shape === 'solid') return { size: spacing, opacity: new Float32Array(spacing ** 2).fill(1) };
@@ -127,8 +116,8 @@ function opacities(shape: PatternShape, scale: number, coverage: number): { size
 
 const cache = new Map<string, { size: number; opacity: Float32Array }>();
 
-/** The image of a pattern of the shape in the color, e.g. for the map and the legend. */
-export function patternImage(shape: PatternShape, scale: number, coverage: number, color: string): PatternImage {
+/** The image of a fill pattern in the color, e.g. for the map and the legend. */
+export function patternImage(shape: FillPatternName, scale: number, coverage: number, color: string): PatternImage {
 	const key = `${shape}:${scale}:${coverage}`;
 	let tile = cache.get(key);
 	if (!tile) cache.set(key, (tile = opacities(shape, scale, coverage)));
@@ -141,12 +130,6 @@ export function patternImage(shape: PatternShape, scale: number, coverage: numbe
 	return { width: size, height: size, data, pixelRatio: PATTERN_PIXEL_RATIO };
 }
 
-/** The image of a fill pattern of the format in the color. */
-export function fillPatternImage(pattern: FillPatternName, color: string): PatternImage {
-	const { shape, coverage } = PATTERNS[pattern];
-	return patternImage(shape, 1, coverage, color);
-}
-
 /**
  * Add the image of a fill pattern, when the map asks for it (e.g. again after a new map style).
  * Returns false for other images.
@@ -155,7 +138,8 @@ export function addFillPatternImage(map: maplibregl.Map, name: string): boolean 
 	const parsed = parseFillPatternName(name);
 	if (!parsed) return false;
 	if (!map.hasImage(name)) {
-		const { width, height, data, pixelRatio } = fillPatternImage(parsed.pattern, parsed.color);
+		const { pattern, scale, coverage, color } = parsed;
+		const { width, height, data, pixelRatio } = patternImage(pattern, scale, coverage, color);
 		map.addImage(name, { width, height, data }, { pixelRatio });
 	}
 	return true;

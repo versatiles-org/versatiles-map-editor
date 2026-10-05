@@ -106,6 +106,18 @@ export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'sty
 		set pattern(value: FillPatternName) {
 			set('pattern', value);
 		},
+		get patternScale() {
+			return get().patternScale!;
+		},
+		set patternScale(value: number) {
+			set('patternScale', value);
+		},
+		get patternCoverage() {
+			return get().patternCoverage!;
+		},
+		set patternCoverage(value: number) {
+			set('patternCoverage', value);
+		},
 		get dash() {
 			return get().dash!;
 		},

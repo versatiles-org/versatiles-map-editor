@@ -219,6 +219,20 @@
 					"description": "Areas: the pattern of the fill.",
 					"default": "solid"
 				},
+				"patternScale": {
+					"type": "number",
+					"description": "Areas with a pattern: its size, as a factor; at 1 the lines (across them) or the dots are 8 pixels apart. Only with a pattern.",
+					"minimum": 0.5,
+					"maximum": 4,
+					"default": 1
+				},
+				"patternCoverage": {
+					"type": "number",
+					"description": "Areas with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95. Only with a pattern.",
+					"minimum": 0.05,
+					"maximum": 0.95,
+					"default": 0.5
+				},
 				"dash": {
 					"$ref": "#/definitions/DashName",
 					"description": "Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.",
@@ -310,7 +324,7 @@
 		},
 		"FillPatternName": {
 			"type": "string",
-			"enum": ["solid", "diagonal", "diagonal-thin"]
+			"enum": ["solid", "diagonal-up", "diagonal-down", "horizontal", "vertical", "cross", "diagonal-cross", "dots"]
 		},
 		"DashName": {
 			"type": "string",

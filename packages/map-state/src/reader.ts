@@ -34,7 +34,16 @@ import {
 	ORIGIN_SCALE,
 	POPUP_KEYS
 } from './constants.js';
-import { sanitizeBackground, sanitizeFrame, sanitizeLabelMinZoom, hasArrow, VIEWER_CHOICES } from './profile.js';
+import {
+	hasArrow,
+	hasPattern,
+	PATTERN_COVERAGE_RANGE,
+	PATTERN_SCALE_RANGE,
+	sanitizeBackground,
+	sanitizeFrame,
+	sanitizeLabelMinZoom,
+	VIEWER_CHOICES
+} from './profile.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
@@ -574,6 +583,8 @@ export class StateReader {
 			const style = this.readStylePatch({ ...base });
 			// the writer leaves it out without an arrowhead
 			if (style.arrowSize !== undefined && !hasArrow(style)) throw new Error('Arrow size without an arrowhead');
+			if ((style.patternScale !== undefined || style.patternCoverage !== undefined) && !hasPattern(style))
+				throw new Error('Pattern size or coverage without a pattern');
 			this.styleHistory.remember(style);
 			return style;
 		} catch (cause) {
@@ -637,6 +648,17 @@ export class StateReader {
 					break;
 				case 'arrowSize':
 					style.arrowSize = this.readVarint() / 10;
+					break;
+				// limited, since a large pattern would take long to draw
+				case 'patternScale':
+					style.patternScale = this.readVarint() / 10;
+					if (style.patternScale < PATTERN_SCALE_RANGE[0] || style.patternScale > PATTERN_SCALE_RANGE[1])
+						throw new Error(`Invalid pattern scale: ${style.patternScale}`);
+					break;
+				case 'patternCoverage':
+					style.patternCoverage = this.readVarint() / 100;
+					if (style.patternCoverage < PATTERN_COVERAGE_RANGE[0] || style.patternCoverage > PATTERN_COVERAGE_RANGE[1])
+						throw new Error(`Invalid pattern coverage: ${style.patternCoverage}`);
 					break;
 				case 'color':
 				case 'labelColor':

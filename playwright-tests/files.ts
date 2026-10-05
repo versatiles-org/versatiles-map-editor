@@ -188,7 +188,7 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 					[13.4, 52.4],
 					[13.4, 52.5]
 				],
-				style: { color: '#00ff00', pattern: 'diagonal' }
+				style: { color: '#00ff00', pattern: 'diagonal-up' }
 			},
 			{ type: 'circle', point: [13.45, 52.55], radius: 800 }
 		]

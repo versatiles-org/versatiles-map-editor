@@ -1,15 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import {
-	addFillPatternImage,
-	PATTERN_PIXEL_RATIO,
-	PATTERN_SPACING,
-	patternImage,
-	type PatternShape
-} from './fill_patterns.js';
+import { type FillPatternName } from '@versatiles/map-state';
+import { addFillPatternImage, PATTERN_PIXEL_RATIO, PATTERN_SPACING, patternImage } from './fill_patterns.js';
 import { fillPatternName } from '../style/index.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
-const SHAPES: PatternShape[] = [
+const SHAPES: FillPatternName[] = [
 	'diagonal-up',
 	'diagonal-down',
 	'horizontal',
@@ -20,7 +15,7 @@ const SHAPES: PatternShape[] = [
 ];
 
 /** The opacity of each pixel of the image, from 0 to 1, by row and column. */
-function opacities(shape: PatternShape, scale: number, coverage: number): number[][] {
+function opacities(shape: FillPatternName, scale: number, coverage: number): number[][] {
 	const { width, height, data } = patternImage(shape, scale, coverage, '#000000');
 	return Array.from({ length: height }, (_, y) =>
 		Array.from({ length: width }, (_, x) => data[(y * width + x) * 4 + 3] / 255)
@@ -45,13 +40,13 @@ describe('fill patterns', () => {
 
 	it('repeat without a seam', () => {
 		// the opacity is the same one pixel along the lines, across the edge of the tile
-		const along: Partial<Record<PatternShape, [number, number]>> = {
+		const along: Partial<Record<FillPatternName, [number, number]>> = {
 			horizontal: [1, 0],
 			vertical: [0, 1],
 			'diagonal-up': [1, -1],
 			'diagonal-down': [1, 1]
 		};
-		for (const [shape, [dx, dy]] of Object.entries(along) as [PatternShape, [number, number]][]) {
+		for (const [shape, [dx, dy]] of Object.entries(along) as [FillPatternName, [number, number]][]) {
 			const rows = opacities(shape, 1.5, 0.3);
 			const size = rows.length;
 			for (let y = 0; y < size; y++) {
@@ -63,7 +58,7 @@ describe('fill patterns', () => {
 	});
 
 	it('are as large as their scale, the diagonals as far apart across their lines', () => {
-		const size = (shape: PatternShape, scale: number) => patternImage(shape, scale, 0.5, '#000000').width;
+		const size = (shape: FillPatternName, scale: number) => patternImage(shape, scale, 0.5, '#000000').width;
 		expect(size('horizontal', 1)).toBe(PATTERN_SPACING * PATTERN_PIXEL_RATIO);
 		expect(size('dots', 2)).toBe(2 * PATTERN_SPACING * PATTERN_PIXEL_RATIO);
 		expect(size('diagonal-up', 1)).toBe(Math.round(PATTERN_SPACING * PATTERN_PIXEL_RATIO * Math.SQRT2));
@@ -83,7 +78,7 @@ describe('fill patterns', () => {
 describe('fill pattern images', () => {
 	it('are made once per pattern and color, when the map needs them', () => {
 		const map = new MockMap();
-		const name = fillPatternName('diagonal', '#FF0000');
+		const name = fillPatternName({ pattern: 'diagonal-up', scale: 1, coverage: 0.5, color: '#FF0000' });
 		expect(addFillPatternImage(map as unknown as MaplibreMap, name)).toBe(true);
 		expect(map.addImage).toHaveBeenCalledWith(name, expect.objectContaining({ width: 23, height: 23 }), {
 			pixelRatio: 2
@@ -99,9 +94,13 @@ describe('fill pattern images', () => {
 		expect(map.addImage).toHaveBeenCalledTimes(1);
 	});
 
-	it('of thin diagonals cover a quarter', () => {
+	it('have the size and the coverage of their name', () => {
 		const map = new MockMap();
-		addFillPatternImage(map as unknown as MaplibreMap, fillPatternName('diagonal-thin', '#000000'));
+		const name = fillPatternName({ pattern: 'dots', scale: 2, coverage: 0.25, color: '#000000' });
+		addFillPatternImage(map as unknown as MaplibreMap, name);
+		expect(map.addImage).toHaveBeenCalledWith(name, expect.objectContaining({ width: 32, height: 32 }), {
+			pixelRatio: 2
+		});
 		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
 		const alphas = [...data].filter((_, i) => i % 4 === 3);
 		expect(alphas.reduce((sum, a) => sum + a, 0) / alphas.length / 255).toBeCloseTo(0.25, 1);
@@ -109,7 +108,10 @@ describe('fill pattern images', () => {
 
 	it('fill a solid area completely, with the transparency of the color', () => {
 		const map = new MockMap();
-		addFillPatternImage(map as unknown as MaplibreMap, fillPatternName('solid', '#0000ff80'));
+		addFillPatternImage(
+			map as unknown as MaplibreMap,
+			fillPatternName({ pattern: 'solid', scale: 1, coverage: 1, color: '#0000ff80' })
+		);
 		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
 		expect(new Set([...data].filter((_, i) => i % 4 === 3))).toStrictEqual(new Set([128]));
 	});

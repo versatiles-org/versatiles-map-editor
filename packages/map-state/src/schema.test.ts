@@ -76,7 +76,7 @@ describe('the JSON Schema of .mapjson files', () => {
 						[13.4, 52.5],
 						[13.5, 52.6]
 					],
-					style: { width: 3, pattern: 'diagonal' }
+					style: { width: 3, pattern: 'diagonal-up' }
 				},
 				{
 					type: 'polygon',
@@ -85,7 +85,7 @@ describe('the JSON Schema of .mapjson files', () => {
 						[13.5, 52.6],
 						[13.3, 52.6]
 					],
-					style: { pattern: 'diagonal-thin' },
+					style: { pattern: 'diagonal-down' },
 					strokeStyle: { visible: false }
 				},
 				{ type: 'circle', point: [13.4, 52.5], radius: 500 }

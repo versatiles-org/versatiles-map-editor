@@ -24,7 +24,7 @@ test('styling the background map', async ({ page }) => {
 					[13.38, 52.5]
 				],
 				// a pattern is an image, which a new style must not lose
-				style: { pattern: 'diagonal' }
+				style: { pattern: 'diagonal-up' }
 			},
 			{ type: 'marker', point: [13.42, 52.5] }
 		]

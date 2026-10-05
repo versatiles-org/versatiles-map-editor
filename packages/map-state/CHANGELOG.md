@@ -86,9 +86,14 @@ The first release.
   the label is, unlike MapLibre's `text-anchor`.
 - Two fields instead of one `pattern`, by name: `dash` for lines and outlines (`STROKE_STYLE_NAMES`,
   type `DashName`: solid, dashed, dotted, long-dash, dash-dot) and `pattern` for areas
-  (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal, diagonal-thin), each with its
-  own style key and in the base64 string as its index; in GeoJSON `stroke-style` and
-  `fill-pattern`.
+  (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal-up, diagonal-down, horizontal,
+  vertical, cross, diagonal-cross, dots), each with its own style key and in the base64 string as
+  its index; in GeoJSON `stroke-style` and `fill-pattern`.
+- The size and the coverage of a fill pattern: `patternScale`, a factor from 0.5 to 4
+  (`PATTERN_SCALE_RANGE`), and `patternCoverage`, the share of the area that the pattern covers,
+  from 0.05 to 0.95 (`PATTERN_COVERAGE_RANGE`); only stored with a pattern (`hasPattern`,
+  `withoutUnusedFields`), in the base64 string in tenths and in percent, which the reader checks
+  against the ranges; in GeoJSON `fill-pattern-scale` and `fill-pattern-coverage`.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.

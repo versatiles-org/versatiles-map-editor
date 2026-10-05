@@ -195,7 +195,7 @@ describe('addToLegend', () => {
 		const park = doc.addElement({
 			type: 'polygon',
 			points,
-			style: { color: '#00ff004d', pattern: 'diagonal-thin' },
+			style: { color: '#00ff004d', pattern: 'diagonal-down' },
 			strokeStyle: { color: '#00ff00' }
 		});
 		const zone = doc.addElement({ type: 'circle', point: [0, 0], radius: 100, strokeStyle: { visible: false } });
@@ -208,7 +208,7 @@ describe('addToLegend', () => {
 			{ type: 'line', style: { color: '#d55e00', dash: 'dashed', width: 4 }, label: 'Bus 100' },
 			{
 				type: 'polygon',
-				style: { color: '#00ff004d', pattern: 'diagonal-thin' },
+				style: { color: '#00ff004d', pattern: 'diagonal-down' },
 				strokeStyle: { color: '#00ff00' },
 				label: ''
 			},
@@ -292,12 +292,12 @@ describe('pasteStyleToEntry', () => {
 				type: 'circle',
 				point: [0, 0],
 				radius: 1,
-				style: { pattern: 'diagonal' },
+				style: { pattern: 'diagonal-up' },
 				strokeStyle: { visible: false }
 			})
 		).toStrictEqual({
 			type: 'polygon',
-			style: { pattern: 'diagonal' },
+			style: { pattern: 'diagonal-up' },
 			strokeStyle: { visible: false },
 			label: 'Kept'
 		});

@@ -575,6 +575,10 @@ export class StateWriter {
 				return this.writeName(ARROW_NAMES, style[name]!);
 			case 'arrowSize':
 				return this.writeVarint(Math.round(style.arrowSize! * 10));
+			case 'patternScale':
+				return this.writeVarint(Math.round(style.patternScale! * 10));
+			case 'patternCoverage':
+				return this.writeVarint(Math.round(style.patternCoverage! * 100));
 			case 'color':
 			case 'labelColor':
 			case 'haloColor':
