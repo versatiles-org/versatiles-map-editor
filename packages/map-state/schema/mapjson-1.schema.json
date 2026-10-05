@@ -324,7 +324,17 @@
 		},
 		"FillPatternName": {
 			"type": "string",
-			"enum": ["solid", "diagonal-up", "diagonal-down", "horizontal", "vertical", "cross", "diagonal-cross", "dots"]
+			"enum": [
+				"solid",
+				"diagonal-up",
+				"diagonal-down",
+				"horizontal",
+				"vertical",
+				"cross",
+				"diagonal-cross",
+				"dots",
+				"diagonal-dots"
+			]
 		},
 		"DashName": {
 			"type": "string",

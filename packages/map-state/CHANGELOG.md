@@ -87,8 +87,8 @@ The first release.
 - Two fields instead of one `pattern`, by name: `dash` for lines and outlines (`STROKE_STYLE_NAMES`,
   type `DashName`: solid, dashed, dotted, long-dash, dash-dot) and `pattern` for areas
   (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal-up, diagonal-down, horizontal,
-  vertical, cross, diagonal-cross, dots), each with its own style key and in the base64 string as
-  its index; in GeoJSON `stroke-style` and `fill-pattern`.
+  vertical, cross, diagonal-cross, dots, diagonal-dots), each with its own style key and in the
+  base64 string as its index; in GeoJSON `stroke-style` and `fill-pattern`.
 - Rules for the names of the choices of a style (`types.ts`, `MAPJSON.md`): lowercase words joined
   by `-`, the default first, variants with a word added, positions vertical first; the tables only
   grow at their end, and an unknown name is read as the default.

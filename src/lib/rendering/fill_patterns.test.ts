@@ -11,7 +11,8 @@ const SHAPES: FillPatternName[] = [
 	'vertical',
 	'cross',
 	'diagonal-cross',
-	'dots'
+	'dots',
+	'diagonal-dots'
 ];
 
 /** The opacity of each pixel of the image, from 0 to 1, by row and column. */
@@ -62,6 +63,8 @@ describe('fill patterns', () => {
 		expect(size('horizontal', 1)).toBe(PATTERN_SPACING * PATTERN_PIXEL_RATIO);
 		expect(size('dots', 2)).toBe(2 * PATTERN_SPACING * PATTERN_PIXEL_RATIO);
 		expect(size('diagonal-up', 1)).toBe(Math.round(PATTERN_SPACING * PATTERN_PIXEL_RATIO * Math.SQRT2));
+		// the next dots in the middle, as far away as those of "dots"
+		expect(size('diagonal-dots', 1)).toBe(size('diagonal-up', 1));
 	});
 
 	it('have lines that get wider with the coverage, not denser', () => {

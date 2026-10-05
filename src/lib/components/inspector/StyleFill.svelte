@@ -41,7 +41,8 @@
 		vertical: 'Vertical',
 		cross: 'Cross',
 		'diagonal-cross': 'Diagonal cross',
-		dots: 'Dots'
+		dots: 'Dots',
+		'diagonal-dots': 'Diagonal dots'
 	};
 	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 	/** Stripes of `width` pixels, 6 pixels apart, across the direction `angle` (0: horizontal). */
@@ -56,7 +57,10 @@
 		vertical: stripes(90),
 		cross: `${stripes(0, 1.5)}, ${stripes(90, 1.5)}`,
 		'diagonal-cross': `${stripes(45, 1.5)}, ${stripes(-45, 1.5)}`,
-		dots: 'radial-gradient(circle, currentColor 1.6px, transparent 2px) 0 0 / 6px 6px'
+		dots: 'radial-gradient(circle, currentColor 1.6px, transparent 2px) 0 0 / 6px 6px',
+		'diagonal-dots': [0, 4]
+			.map((offset) => `radial-gradient(circle, currentColor 1.6px, transparent 2px) ${offset}px ${offset}px / 8px 8px`)
+			.join(', ')
 	};
 </script>
 

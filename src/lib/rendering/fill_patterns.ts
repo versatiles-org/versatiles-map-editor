@@ -51,6 +51,12 @@ function distance(shape: FillPatternName, size: number, x: number, y: number): n
 			return Math.min(distanceToMultiple(x + y, size), distanceToMultiple(x - y, size)) / Math.SQRT2;
 		case 'dots':
 			return Math.hypot(distanceToMultiple(x, size), distanceToMultiple(y, size));
+		// dots at the corners and in the middle: a grid of dots turned by 45°
+		case 'diagonal-dots':
+			return Math.min(
+				Math.hypot(distanceToMultiple(x, size), distanceToMultiple(y, size)),
+				Math.hypot(distanceToMultiple(x - size / 2, size), distanceToMultiple(y - size / 2, size))
+			);
 		case 'solid':
 			return 0;
 	}

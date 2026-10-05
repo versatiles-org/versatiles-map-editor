@@ -121,7 +121,7 @@ export type LabelPositionName = (typeof LABEL_POSITION_NAMES)[number];
 
 /**
  * The patterns of the fill of an area: solid, lines in a direction ("diagonal-up" is "/"), lines in
- * two directions, or dots. Their size and coverage are fields of their own.
+ * two directions, or dots in rows or diagonally. Their size and coverage are fields of their own.
  */
 export const FILL_PATTERN_NAMES = [
 	'solid',
@@ -131,7 +131,8 @@ export const FILL_PATTERN_NAMES = [
 	'vertical',
 	'cross',
 	'diagonal-cross',
-	'dots'
+	'dots',
+	'diagonal-dots'
 ] as const;
 export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
 

@@ -658,7 +658,7 @@ test(
 		const patterns = page.getByRole('combobox', { name: 'Pattern' });
 		await expect(patterns).toHaveText('Solid');
 		await patterns.click();
-		await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(8);
+		await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(9);
 		await page.getByRole('option', { name: 'Diagonal up', exact: true }).click();
 		await expect(page.getByRole('listbox')).toHaveCount(0);
 		await expect.poll(pattern).toBe('diagonal-up');
@@ -740,7 +740,7 @@ test('the size and the coverage of a fill pattern, only with a pattern', async (
 	await expect(size).toHaveCount(0);
 
 	await page.getByRole('combobox', { name: 'Pattern' }).click();
-	await page.getByRole('option', { name: 'Dots' }).click();
+	await page.getByRole('option', { name: 'Dots', exact: true }).click();
 	await expect(coverage).toHaveValue('50');
 	await size.fill('2');
 	await size.press('Enter');
@@ -756,7 +756,7 @@ test('the size and the coverage of a fill pattern, only with a pattern', async (
 	// a solid fill has neither
 	await page.mouse.click(...(await project(page, [13.4, 52.49])));
 	await page.getByRole('combobox', { name: 'Pattern' }).click();
-	await page.getByRole('option', { name: 'Solid' }).click();
+	await page.getByRole('option', { name: 'Solid', exact: true }).click();
 	await expect(size).toHaveCount(0);
 	await expect.poll(fill).toBeUndefined();
 });
