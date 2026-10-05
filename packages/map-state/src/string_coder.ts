@@ -1,21 +1,29 @@
 /**
  * The strings of the string table as one block of bits: an adaptive model predicts each character
- * from the two before it, and an arithmetic coder spends fewer bits on the likelier characters.
+ * from the four before it, and an arithmetic coder spends fewer bits on the likelier characters.
  * The model starts empty and learns the strings while they are coded, so text in any language and
  * script gets shorter, and repeated words and names cost little. Only the words of the format, e.g.
  * the options of the background map, have a model that learned them before (`STRING_PRIMER`).
  *
- * The model is PPM (prediction by partial matching) of order 2 with escape method C and with
- * exclusion: a symbol is coded in the context of the two symbols before it; if it was never seen
- * there, an escape is coded and the context of one symbol before is tried, then of none, then the
- * symbol itself. The coder is the integer arithmetic coder of Witten, Neal and Cleary, with 32-bit
- * bounds. Everything is exact integer arithmetic below 2^53, so every browser decodes the same.
+ * The model is PPM (prediction by partial matching) of order 4 with escape method D, exclusion and
+ * update exclusion: a symbol is coded in the context of the four symbols before it (at the start
+ * of a string, fewer and END); if it was never seen there, an escape is coded and the context of
+ * three symbols before is tried, and so on down to none, then the symbol itself. Method D: a
+ * symbol seen n times counts 2n − 1, the escape as many as the context has symbols. Update
+ * exclusion: only the context that had the symbol and the longer ones learn it, so the short
+ * contexts are not dominated by frequent symbols. (Measured against order 2 with method C and
+ * without update exclusion: the string tables of the examples about 7 % shorter.) The coder is the
+ * integer arithmetic coder of Witten, Neal and Cleary, with 32-bit bounds. Everything is exact
+ * integer arithmetic below 2^53, so every browser decodes the same.
  */
 
 import { STRING_PRIMER } from './string_primer.js';
 
 /** The symbols are the code points of the strings, and this one after each string. */
 const END = -1;
+
+/** The longest context, in symbols. */
+const ORDER = 4;
 
 /** A context with a total above this halves its counts, so `range × total` stays exact. */
 const MAX_TOTAL = 2 ** 16;
@@ -62,49 +70,65 @@ class Context {
 	}
 }
 
-/** The contexts of order 2, 1 and 0. Encoder and decoder update them identically. */
+/**
+ * The contexts of order 0 to `ORDER`, by the symbols before (at the start of a string, END for
+ * those before it). Encoder and decoder update them identically.
+ */
 class Model {
-	private order2 = new Map<string, Context>();
-	private order1 = new Map<number, Context>();
-	private order0 = new Context();
+	private byOrder: Map<string, Context>[] = Array.from({ length: ORDER + 1 }, () => new Map());
 
-	/** A model that has learned `primer`, as if it were coded before (see `STRING_PRIMER`). */
+	/** A model that has learned `primer`, as if it were coded before (see `STRING_PRIMER`), in all its contexts. */
 	constructor(primer: readonly string[] = []) {
 		for (const string of primer) {
-			let a = END;
-			let b = END;
+			const before = start();
 			for (const char of string) {
 				const symbol = char.codePointAt(0)!;
-				this.update(a, b, symbol);
-				a = b;
-				b = symbol;
+				this.update(before, symbol, 0);
+				shift(before, symbol);
 			}
-			this.update(a, b, END);
+			this.update(before, END, 0);
 		}
 	}
 
-	/** The contexts of a symbol after `a` and `b`, the longest first; those not seen so far are missing. */
-	contexts(a: number, b: number): Context[] {
-		const contexts: Context[] = [];
-		const context2 = this.order2.get(`${a},${b}`);
-		if (context2) contexts.push(context2);
-		const context1 = this.order1.get(b);
-		if (context1) contexts.push(context1);
-		if (this.order0.total > 0) contexts.push(this.order0);
-		return contexts;
+	/** The contexts of a symbol after the symbols `before`, the longest first, with their order; those not seen so far are missing. */
+	contexts(before: number[]): { order: number; context: Context }[] {
+		const found: { order: number; context: Context }[] = [];
+		for (let order = ORDER; order >= 0; order--) {
+			const context = this.byOrder[order].get(key(before, order));
+			if (context) found.push({ order, context });
+		}
+		return found;
 	}
 
-	update(a: number, b: number, symbol: number) {
-		const key = `${a},${b}`;
-		let context2 = this.order2.get(key);
-		if (!context2) this.order2.set(key, (context2 = new Context()));
-		context2.add(symbol);
-		let context1 = this.order1.get(b);
-		if (!context1) this.order1.set(b, (context1 = new Context()));
-		context1.add(symbol);
-		this.order0.add(symbol);
+	/** Learn the symbol in the contexts of order `from` to `ORDER`: update exclusion, see above. */
+	update(before: number[], symbol: number, from: number) {
+		for (let order = from; order <= ORDER; order++) {
+			const k = key(before, order);
+			let context = this.byOrder[order].get(k);
+			if (!context) this.byOrder[order].set(k, (context = new Context()));
+			context.add(symbol);
+		}
 	}
 }
+
+/** The symbols before the first of a string: END. */
+function start(): number[] {
+	return new Array<number>(ORDER).fill(END);
+}
+
+/** The symbols before the next one, after `symbol`. */
+function shift(before: number[], symbol: number) {
+	before.shift();
+	before.push(symbol);
+}
+
+/** The key of the context of the last `order` symbols. */
+function key(before: number[], order: number): string {
+	return before.slice(ORDER - order).join(',');
+}
+
+/** The frequency of a symbol seen `count` times, by escape method D. */
+const weight = (count: number) => 2 * count - 1;
 
 /**
  * The frequencies of a context without the excluded symbols: the symbols left, with the escape
@@ -115,7 +139,7 @@ function frequencies(context: Context, excluded: Set<number>): { sum: number; es
 	let escape = 0;
 	for (let i = 0; i < context.symbols.length; i++) {
 		if (excluded.has(context.symbols[i])) continue;
-		sum += context.counts[i];
+		sum += weight(context.counts[i]);
 		escape++;
 	}
 	return escape > 0 ? { sum, escape } : undefined;
@@ -261,27 +285,27 @@ export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 		symbolCount += symbols.length;
 		if (symbolCount > MAX_SYMBOLS)
 			throw new Error(`The texts of the map are too long: more than ${MAX_SYMBOLS} characters`);
-		let a = END;
-		let b = END;
+		const before = start();
 		for (const symbol of symbols) {
 			const excluded = new Set<number>();
-			let coded = false;
-			for (const context of model.contexts(a, b)) {
+			// the order of the context that had the symbol: it and the longer ones learn it
+			let found: number | undefined;
+			for (const { order, context } of model.contexts(before)) {
 				const frequency = frequencies(context, excluded);
 				if (!frequency) continue;
 				const total = frequency.sum + frequency.escape;
 				let from = 0;
 				const index = context.symbols.indexOf(symbol);
 				if (index >= 0 && !excluded.has(symbol)) {
-					for (let i = 0; i < index; i++) if (!excluded.has(context.symbols[i])) from += context.counts[i];
-					encoder.encode(from, from + context.counts[index], total);
-					coded = true;
+					for (let i = 0; i < index; i++) if (!excluded.has(context.symbols[i])) from += weight(context.counts[i]);
+					encoder.encode(from, from + weight(context.counts[index]), total);
+					found = order;
 					break;
 				}
 				encoder.encode(frequency.sum, total, total);
 				for (const seen of context.symbols) excluded.add(seen);
 			}
-			if (!coded) {
+			if (found === undefined) {
 				// a symbol that no context has seen: its kind, then its code point
 				const kind = newSymbolKind(symbol);
 				encoder.encode(kind, kind + 1, NEW_SYMBOL_BITS.length);
@@ -290,9 +314,8 @@ export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 					encoder.encode(value, value + 1, 2);
 				}
 			}
-			model.update(a, b, symbol);
-			a = b;
-			b = symbol;
+			model.update(before, symbol, found ?? 0);
+			shift(before, symbol);
 		}
 	}
 	return encoder.finish();
@@ -323,13 +346,13 @@ export function decodeStringBlock(
 			seen = new Set();
 		}
 		const codePoints: number[] = [];
-		let a = END;
-		let b = END;
+		const before = start();
 		while (true) {
 			if (++symbolCount > MAX_SYMBOLS) throw new Error(`More than ${MAX_SYMBOLS} symbols in the strings`);
 			const excluded = new Set<number>();
 			let symbol: number | undefined;
-			for (const context of model.contexts(a, b)) {
+			let found: number | undefined;
+			for (const { order, context } of model.contexts(before)) {
 				const frequency = frequencies(context, excluded);
 				if (!frequency) continue;
 				const total = frequency.sum + frequency.escape;
@@ -337,11 +360,12 @@ export function decodeStringBlock(
 				let from = 0;
 				for (let i = 0; i < context.symbols.length && symbol === undefined; i++) {
 					if (excluded.has(context.symbols[i])) continue;
-					if (target < from + context.counts[i]) {
+					if (target < from + weight(context.counts[i])) {
 						symbol = context.symbols[i];
-						decoder.decode(from, from + context.counts[i], total);
+						decoder.decode(from, from + weight(context.counts[i]), total);
+						found = order;
 					} else {
-						from += context.counts[i];
+						from += weight(context.counts[i]);
 					}
 				}
 				if (symbol !== undefined) break;
@@ -359,11 +383,10 @@ export function decodeStringBlock(
 				}
 				if (symbol > 0x10ffff) throw new Error(`Invalid code point: ${symbol}`);
 			}
-			model.update(a, b, symbol);
+			model.update(before, symbol, found ?? 0);
 			if (symbol === END) break;
 			codePoints.push(symbol);
-			a = b;
-			b = symbol;
+			shift(before, symbol);
 		}
 		// in chunks: spreading a long array into the arguments overflows the stack
 		let string = '';

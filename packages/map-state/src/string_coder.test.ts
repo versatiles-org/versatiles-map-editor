@@ -43,13 +43,13 @@ describe('the coder of the string table', () => {
 		expect(bits).toMatchInlineSnapshot(`
 			{
 			  "chinese.mapjson": 2078,
-			  "emoji.mapjson": 1953,
-			  "french.mapjson": 3247,
-			  "german.mapjson": 3396,
-			  "greek.mapjson": 2210,
-			  "japanese.mapjson": 2557,
-			  "polish.mapjson": 3482,
-			  "russian.mapjson": 2769,
+			  "emoji.mapjson": 1918,
+			  "french.mapjson": 3164,
+			  "german.mapjson": 3340,
+			  "greek.mapjson": 2190,
+			  "japanese.mapjson": 2551,
+			  "polish.mapjson": 3461,
+			  "russian.mapjson": 2690,
 			}
 		`);
 	});
@@ -68,7 +68,7 @@ describe('the coder of the string table', () => {
 		const empty = encodeStrings([background, 'noto_sans_bold']).length;
 		expect(primed).toBeLessThan(empty / 2);
 		// a change of the primer changes these bits: links written before cannot be read
-		expect(primed).toMatchInlineSnapshot(`170`);
+		expect(primed).toMatchInlineSnapshot(`105`);
 	});
 
 	it('keeps the words of the format and the other strings', () => {

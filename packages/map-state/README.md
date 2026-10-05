@@ -183,8 +183,9 @@ To keep hashes short:
   the label fonts), then the others (the title, the labels, the legend labels, the popups). A field
   refers to a string of its section by 1 bit for the next new one, else by its index. The table is
   one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
-  adaptive model predicts each character from the two before it (PPM of order 2 over code points),
-  and an arithmetic coder spends fewer bits on likelier characters. For the words of the format, the
+  adaptive model predicts each character from the four before it (PPM of order 4 over code points,
+  with escape method D and update exclusion), and an arithmetic coder spends fewer bits on likelier
+  characters. For the words of the format, the
   model has learned the format's vocabulary before (`string_primer.ts`). For the others, it starts
   empty and learns the strings of the map, so text in any script gets shorter, and repeated words
   cost little;

@@ -18,9 +18,9 @@ The first release.
   - a string table: the background as JSON, the color scheme, the names of the symbols and the
     label fonts, the title, the labels, the legend labels and the popups stored once, and referenced
     with 1 bit for the next new string, else by index; the strings are coded by an adaptive
-    order-2 model with an arithmetic coder: about 2.5–5.5 bits per character in alphabetic
-    scripts and 12 in Chinese and Japanese, instead of 7–19; the words of the format with a model
-    that learned the vocabulary of the format before; the block needs no length, the decoder knows
+    model with an arithmetic coder, PPM of order 4 with escape method D and update exclusion, so
+    repeated words and phrases cost little; the words of the format with a model that learned the
+    vocabulary of the format before; the block needs no length, the decoder knows
     where it ends; each string once in its section, at most 2^22 characters, so a short hostile
     link cannot make the decoder produce millions of strings;
   - style references to similar earlier styles of the same role, counted back among the
