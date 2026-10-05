@@ -7,7 +7,6 @@
 	"definitions": {
 		"MapJSON": {
 			"type": "object",
-			"additionalProperties": false,
 			"properties": {
 				"map": {
 					"type": "object",
@@ -22,7 +21,6 @@
 						}
 					},
 					"required": ["center", "radius"],
-					"additionalProperties": false,
 					"description": "The camera: where the author's editor looks, e.g. after a reload. Links for sharing and embedding leave it out; they show the `frame`, else the elements."
 				},
 				"frame": {
@@ -126,8 +124,7 @@
 					"type": "string",
 					"description": "The title of the map, e.g. for the list of maps, the title of the page and file names."
 				}
-			},
-			"additionalProperties": false
+			}
 		},
 		"StateBackground": {
 			"type": "object",
@@ -142,7 +139,6 @@
 				}
 			},
 			"required": ["builder", "options"],
-			"additionalProperties": false,
 			"description": "A background map built with `@versatiles/style`: the builder and its options, minimized (e.g. with `osm.minimizeOptions`). Storing the options instead of a preset keeps every current and future option of `@versatiles/style` available."
 		},
 		"StateLegend": {
@@ -178,8 +174,7 @@
 					}
 				}
 			},
-			"required": ["entries"],
-			"additionalProperties": false
+			"required": ["entries"]
 		},
 		"StateLegendEntry": {
 			"type": "object",
@@ -202,7 +197,6 @@
 				}
 			},
 			"required": ["type", "label"],
-			"additionalProperties": false,
 			"description": "A row of the legend: a small copy of an element, and a text. Its styles are those of an element of its type, with the same defaults (see the elements); the label of a marker style is not shown."
 		},
 		"StateStyle": {
@@ -319,7 +313,6 @@
 					"default": "#ffffff"
 				}
 			},
-			"additionalProperties": false,
 			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
 		},
 		"FillPatternName": {
@@ -372,7 +365,6 @@
 					"description": "The legend, if the map has one: a side (centered) or a corner. Default: \"bottom-left\"."
 				}
 			},
-			"additionalProperties": false,
 			"description": "What the viewer shows over the map, and where: each at a position, or \"none\". Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
 		},
 		"StateElement": {
@@ -410,7 +402,6 @@
 				}
 			},
 			"required": ["type", "point"],
-			"additionalProperties": false,
 			"description": "A symbol at a point, with an optional label."
 		},
 		"StatePopup": {
@@ -422,7 +413,6 @@
 				}
 			},
 			"required": ["text"],
-			"additionalProperties": false,
 			"description": "A popup that opens when the element is clicked or tapped in the viewer."
 		},
 		"StateElementLine": {
@@ -453,7 +443,6 @@
 				}
 			},
 			"required": ["type", "points"],
-			"additionalProperties": false,
 			"description": "A line through points."
 		},
 		"StateElementPolygon": {
@@ -488,7 +477,6 @@
 				}
 			},
 			"required": ["type", "points"],
-			"additionalProperties": false,
 			"description": "An area within points; the last point connects to the first one."
 		},
 		"StateElementCircle": {
@@ -519,7 +507,6 @@
 				}
 			},
 			"required": ["type", "point", "radius"],
-			"additionalProperties": false,
 			"description": "A circle around a point."
 		}
 	}

@@ -85,8 +85,9 @@ its elements, on the editor's default background map.
   what differs, e.g. a style `{}` is the default style. Writing a default is allowed.
 - **Order:** `elements` are in drawing order, the first one at the back, the last one in front.
   An area in front of a marker covers it.
-- **Unknown fields** are not allowed by the schema; the editor ignores them, but does not keep
-  them.
+- **Unknown fields** are allowed, e.g. those of a newer version: the editor warns about them when
+  it opens the file, but does not keep them. The schema allows them too, so it does not catch a
+  misspelt field; the editor's warning names it.
 
 ## The map
 
@@ -238,6 +239,11 @@ const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this 
 The version of the format is in the name of the schema in `$schema`: `mapjson-1.schema.json` is
 version 1. A file without `$schema` is read as version 1. A file of a newer version than the editor
 knows is refused, instead of being read wrongly.
+
+New fields and new names of the choices do not change the version: an older editor reads such a
+file, warns about the fields it does not know and uses the defaults of the names it does not know.
+Only a change that an older editor would read wrongly makes a new version, e.g. a field that
+changes its meaning.
 
 ## Other forms
 

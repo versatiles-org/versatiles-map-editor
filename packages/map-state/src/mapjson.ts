@@ -1,5 +1,6 @@
 import { sanitizeCamera, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
-import type { MapState } from './types.js';
+import { STYLE_FIELDS } from './style_history.js';
+import type { MapState, StateElement } from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
 export const MAPJSON_VERSION = 1;
@@ -47,4 +48,94 @@ export function stateFromMapJSON(json: unknown): MapState {
 	const metadata = sanitizeMetadata(meta);
 	if (metadata) state.meta = metadata;
 	return state;
+}
+
+/**
+ * The fields of each object of a .mapjson file, by the name of its definition in the schema (a
+ * test compares them), to find the fields that this version does not know.
+ */
+export const MAPJSON_FIELDS = {
+	MapJSON: ['$schema', 'map', 'frame', 'meta', 'elements'],
+	// the camera, `map`, which has no definition of its own
+	camera: ['center', 'radius'],
+	StateMetadata: [
+		'background',
+		'legend',
+		'colorScheme',
+		'viewer',
+		'labelOverlap',
+		'labelMinZoom',
+		'mapLabelsOnTop',
+		'title'
+	],
+	StateBackground: ['builder', 'options'],
+	StateLegend: ['layout', 'font', 'bold', 'italic', 'theme', 'entries'],
+	StateLegendEntry: ['type', 'style', 'strokeStyle', 'label'],
+	StateViewer: ['search', 'navigation', 'legend'],
+	StatePopup: ['text'],
+	StateStyle: STYLE_FIELDS.map((field) => field.name),
+	StateElementMarker: ['type', 'point', 'style', 'popup'],
+	StateElementLine: ['type', 'points', 'smooth', 'style', 'popup'],
+	StateElementPolygon: ['type', 'points', 'smooth', 'style', 'strokeStyle', 'popup'],
+	StateElementCircle: ['type', 'point', 'radius', 'style', 'strokeStyle', 'popup']
+} satisfies Record<string, readonly string[]>;
+
+const ELEMENT_FIELDS: Record<StateElement['type'], readonly string[]> = {
+	marker: MAPJSON_FIELDS.StateElementMarker,
+	line: MAPJSON_FIELDS.StateElementLine,
+	polygon: MAPJSON_FIELDS.StateElementPolygon,
+	circle: MAPJSON_FIELDS.StateElementCircle
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+	typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * The fields of the content of a .mapjson file that this version does not know, by their path, e.g.
+ * `elements[3].style.shadow`; and elements of an unknown type, e.g. `elements[4]`. They are allowed
+ * (e.g. from a newer version, which may add fields), but `stateFromMapJSON` does not keep them, so
+ * the editor warns about them. The options of the background map are those of `@versatiles/style`,
+ * which are not checked here.
+ */
+export function unknownMapJSONFields(json: unknown): string[] {
+	const unknown: string[] = [];
+	/** The object, after noting its unknown fields; undefined if it is none. */
+	const check = (value: unknown, known: readonly string[], path: string) => {
+		if (!isObject(value)) return undefined;
+		for (const key of Object.keys(value)) if (!known.includes(key)) unknown.push(path ? `${path}.${key}` : key);
+		return value;
+	};
+	const checkStyles = (owner: Record<string, unknown>, path: string) => {
+		check(owner.style, MAPJSON_FIELDS.StateStyle, `${path}.style`);
+		check(owner.strokeStyle, MAPJSON_FIELDS.StateStyle, `${path}.strokeStyle`);
+	};
+
+	const root = check(json, MAPJSON_FIELDS.MapJSON, '');
+	if (!root) return unknown;
+	check(root.map, MAPJSON_FIELDS.camera, 'map');
+	const meta = check(root.meta, MAPJSON_FIELDS.StateMetadata, 'meta');
+	if (meta) {
+		check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');
+		check(meta.viewer, MAPJSON_FIELDS.StateViewer, 'meta.viewer');
+		const legend = check(meta.legend, MAPJSON_FIELDS.StateLegend, 'meta.legend');
+		if (legend && Array.isArray(legend.entries)) {
+			legend.entries.forEach((value, index) => {
+				const path = `meta.legend.entries[${index}]`;
+				const entry = check(value, MAPJSON_FIELDS.StateLegendEntry, path);
+				if (entry) checkStyles(entry, path);
+			});
+		}
+	}
+	if (Array.isArray(root.elements)) {
+		root.elements.forEach((value, index) => {
+			const path = `elements[${index}]`;
+			const known = isObject(value) ? ELEMENT_FIELDS[value.type as StateElement['type']] : undefined;
+			// e.g. a type of a newer version: the element is left out
+			if (!known) return void unknown.push(path);
+			const element = check(value, known, path)!;
+			checkStyles(element, path);
+			check(element.popup, MAPJSON_FIELDS.StatePopup, `${path}.popup`);
+		});
+	}
+	return unknown;
 }

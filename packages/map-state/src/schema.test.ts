@@ -6,6 +6,7 @@ import { Ajv } from 'ajv';
 // @ts-expect-error a script without types
 import { mapJsonSchema, SCHEMA_FILE } from '../schema/generate.mjs';
 import { MAPJSON_SCHEMA_URL, stateFromMapJSON, stateToMapJSON, type MapState } from './index.js';
+import { MAPJSON_FIELDS } from './mapjson.js';
 
 const committed = JSON.parse(readFileSync(SCHEMA_FILE, 'utf-8'));
 const validate = new Ajv({ allErrors: true }).compile(committed);
@@ -15,6 +16,29 @@ describe('the JSON Schema of .mapjson files', () => {
 	it('is generated from the types, as committed (npm run schema writes it)', () => {
 		expect(mapJsonSchema()).toStrictEqual(committed);
 	}, 30000);
+
+	it('has the fields that the reader knows, to find unknown ones', () => {
+		const { definitions } = committed as { definitions: Record<string, { properties?: Record<string, unknown> }> };
+		const fields = (properties?: Record<string, unknown>) => Object.keys(properties ?? {}).sort();
+		for (const [name, known] of Object.entries(MAPJSON_FIELDS)) {
+			const properties =
+				name === 'camera'
+					? (definitions.MapJSON.properties!.map as { properties: Record<string, unknown> }).properties
+					: definitions[name]?.properties;
+			expect([...known].sort(), name).toStrictEqual(fields(properties));
+		}
+		// every object of the schema is in the list
+		const objects = Object.entries(definitions).filter(([, definition]) => definition.properties);
+		expect(objects.map(([name]) => name).sort()).toStrictEqual(
+			Object.keys(MAPJSON_FIELDS)
+				.filter((name) => name !== 'camera')
+				.sort()
+		);
+	});
+
+	it('allows unknown fields, e.g. of a newer version', () => {
+		expect(validate({ $schema: MAPJSON_SCHEMA_URL, elements: [], future: 1 }), errors().join()).toBe(true);
+	});
 
 	it('is the one that the files name', () => {
 		expect(committed.$id).toBe(MAPJSON_SCHEMA_URL);
@@ -110,7 +134,6 @@ describe('the JSON Schema of .mapjson files', () => {
 				}
 			]),
 			file([{ type: 'marker', point: [0, 0], style: { color: 'red' } }]),
-			file([{ type: 'marker', point: [0, 0], style: { colour: '#ff0000' } }]),
 			{ $schema: MAPJSON_SCHEMA_URL }
 		]) {
 			expect(validate(wrong), JSON.stringify(wrong)).toBe(false);

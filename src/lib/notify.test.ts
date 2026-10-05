@@ -8,17 +8,20 @@ describe('notify', () => {
 	});
 	afterEach(() => vi.useRealTimers());
 
-	it('shows an error until it is dismissed, and other messages for a few seconds', () => {
+	it('shows an error or a warning until it is dismissed, and other messages for a few seconds', () => {
 		notify('Something failed');
 		notify('Saved', 'info');
+		notify('Some fields were not kept', 'warning');
 		expect(notifications.list.map((n) => [n.message, n.kind])).toStrictEqual([
 			['Something failed', 'error'],
-			['Saved', 'info']
+			['Saved', 'info'],
+			['Some fields were not kept', 'warning']
 		]);
+		const kept = ['Something failed', 'Some fields were not kept'];
 		vi.advanceTimersByTime(8000);
-		expect(notifications.list.map((n) => n.message)).toStrictEqual(['Something failed']);
+		expect(notifications.list.map((n) => n.message)).toStrictEqual(kept);
 		vi.advanceTimersByTime(60000);
-		expect(notifications.list.map((n) => n.message)).toStrictEqual(['Something failed']);
+		expect(notifications.list.map((n) => n.message)).toStrictEqual(kept);
 	});
 
 	it('can be dismissed', () => {

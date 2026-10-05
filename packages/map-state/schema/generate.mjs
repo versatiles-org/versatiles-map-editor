@@ -23,6 +23,8 @@ export function mapJsonSchema() {
 		tsconfig: join(root, 'tsconfig.build.json'),
 		type: 'MapJSON',
 		skipTypeCheck: true,
+		// fields that a version does not know are allowed, e.g. of a newer one; readers warn about them
+		additionalProperties: true,
 		schemaId: SCHEMA_ID
 	}).createSchema('MapJSON');
 	return {

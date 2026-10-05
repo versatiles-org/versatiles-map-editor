@@ -62,7 +62,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - `CODEC_VERSION` is the format version that `encodeState` writes.
 - `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) name the JSON Schema of their format version in
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION`); `stateFromMapJSON` throws a
-  `MapJSONVersionError` for a file of a newer version. The schema is in the package, at
+  `MapJSONVersionError` for a file of a newer version. Unknown fields are allowed, but not kept;
+  `unknownMapJSONFields` lists them by their path, e.g. to warn about them. The schema is in the package, at
   `schema/mapjson-1.schema.json`, e.g. to validate files:
   `import schema from '@versatiles/map-state/schema/mapjson-1.schema.json' with { type: 'json' }`.
   The site of the editor publishes it at its `$schema` address,

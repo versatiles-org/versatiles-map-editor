@@ -67,7 +67,9 @@ The first release.
   `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION` = 1) first, the schema's permanent
   address, `https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json`, where the
   site of the editor publishes it; `stateFromMapJSON` reads
-  one, and throws a `MapJSONVersionError` for a newer version; it keeps only the valid parts of a
+  one, and throws a `MapJSONVersionError` for a newer version; unknown fields are allowed (also by
+  the schema) but not kept, and `unknownMapJSONFields` lists them, so a newer version can add
+  fields without a new format version; it keeps only the valid parts of a
   file, like the GeoJSON import: elements that cannot be drawn and invalid values are left out.
 - The JSON Schema of `.mapjson` files, `schema/mapjson-1.schema.json` (also in the npm package, as
   `@versatiles/map-state/schema/mapjson-1.schema.json`),

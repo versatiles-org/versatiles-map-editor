@@ -94,6 +94,20 @@ describe('FileCommands', () => {
 			expect(maps.openMap).toHaveBeenCalledWith({ ...map, meta: { title: 'Holidays' } });
 		});
 
+		it('opens a file with unknown fields, and warns that they are not kept', async () => {
+			const fields = { future: 1, elements: [{ type: 'marker', point: [1, 2], a: 1, b: 2, c: 3 }] };
+			choose('trip.mapjson', JSON.stringify(fields));
+			await files.openFile();
+			expect(maps.openMap).toHaveBeenCalledWith({
+				elements: [{ type: 'marker', point: [1, 2] }],
+				meta: { title: 'trip' }
+			});
+			expect(notify).toHaveBeenLastCalledWith(
+				'The file contains fields that this version of the editor does not know, which are not kept: future, elements[0].a, elements[0].b and 1 more.',
+				'warning'
+			);
+		});
+
 		it('tells the user about a file of a newer version of the editor', async () => {
 			choose('trip.mapjson', JSON.stringify({ $schema: MAPJSON_SCHEMA_URL.replace('-1.', '-2.'), elements: [] }));
 			await files.openFile();

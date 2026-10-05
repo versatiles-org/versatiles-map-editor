@@ -3,6 +3,7 @@ import {
 	MapJSONVersionError,
 	stateFromKML,
 	stateFromMapJSON,
+	unknownMapJSONFields,
 	stateToKML,
 	stateToMapJSON,
 	type MapState
@@ -93,12 +94,14 @@ export class FileCommands {
 		try {
 			const file = await chooseTextFile('.mapjson');
 			if (!file) return;
+			const json: unknown = JSON.parse(file.text);
 			// only its valid parts, since a file may contain anything
-			const state = stateFromMapJSON(JSON.parse(file.text));
+			const state = stateFromMapJSON(json);
 			// named after the file, without a title of its own
 			const title = state.meta?.title || file.name.replace(EXTENSION, '');
 			await this.#maps.openMap({ ...state, meta: { ...state.meta, title } });
 			this.#filename = file.name;
+			warnOfUnknownFields(unknownMapJSONFields(json));
 		} catch (error) {
 			console.error(error);
 			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
@@ -164,4 +167,18 @@ export class FileCommands {
 			else notify(`Failed to import ${format}. Please check the file format.`);
 		}
 	}
+}
+
+/**
+ * Warn that a file has fields that this version does not know, e.g. from a newer version: they
+ * are not kept, so saving the map loses them. Names the first few.
+ */
+function warnOfUnknownFields(fields: string[]): void {
+	if (fields.length === 0) return;
+	const named = fields.slice(0, 3).join(', ');
+	const more = fields.length > 3 ? ` and ${fields.length - 3} more` : '';
+	notify(
+		`The file contains fields that this version of the editor does not know, which are not kept: ${named}${more}.`,
+		'warning'
+	);
 }

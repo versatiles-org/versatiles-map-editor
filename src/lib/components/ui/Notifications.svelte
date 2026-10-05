@@ -47,9 +47,13 @@
 		line-height: 1.35;
 	}
 
-	/* a stripe at the left: red for errors, the accent for other messages */
+	/* a stripe at the left: red for errors, yellow for warnings, the accent for other messages */
 	.error {
 		border-left: 3px solid var(--color-error);
+	}
+
+	.warning {
+		border-left: 3px solid var(--color-warning);
 	}
 
 	.info {

@@ -1,6 +1,13 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
-import { MAPJSON_SCHEMA_URL, MapJSONVersionError, stateFromMapJSON, stateToMapJSON, type MapState } from './index.js';
+import {
+	MAPJSON_SCHEMA_URL,
+	MapJSONVersionError,
+	stateFromMapJSON,
+	stateToMapJSON,
+	unknownMapJSONFields,
+	type MapState
+} from './index.js';
 
 describe('.mapjson files', () => {
 	const state: MapState = { meta: { title: 'T' }, elements: [{ type: 'marker', point: [1, 2] }] };
@@ -78,5 +85,53 @@ describe('.mapjson files', () => {
 				{ type: 'circle', point: [0, 0], radius: 50, strokeStyle: { width: 0 } }
 			]
 		});
+	});
+
+	it('report the fields that this version does not know, which are not kept', () => {
+		const json = {
+			$schema: MAPJSON_SCHEMA_URL,
+			future: true,
+			map: { center: [13.4, 52.5], radius: 1000, tilt: 30 },
+			meta: {
+				title: 'T',
+				theme: 'x',
+				background: { builder: 'osm', options: { anything: 1 } },
+				legend: { entries: [{ type: 'line', label: 'A', icon: 'x', style: { glow: 2 } }] },
+				viewer: { scale: 'top-left' }
+			},
+			elements: [
+				// e.g. a typo, which the schema allows now
+				{ type: 'marker', point: [1, 2], style: { colour: '#ff0000' }, note: 'n' },
+				{ type: 'text', point: [1, 2] },
+				{
+					type: 'polygon',
+					points: [
+						[0, 0],
+						[1, 0],
+						[1, 1]
+					],
+					strokeStyle: { glow: 1 },
+					popup: { text: 'p', image: 'i' }
+				}
+			]
+		};
+		expect(unknownMapJSONFields(json)).toStrictEqual([
+			'future',
+			'map.tilt',
+			'meta.theme',
+			'meta.viewer.scale',
+			'meta.legend.entries[0].icon',
+			'meta.legend.entries[0].style.glow',
+			'elements[0].note',
+			'elements[0].style.colour',
+			'elements[1]',
+			'elements[2].strokeStyle.glow',
+			'elements[2].popup.image'
+		]);
+		// and none of the examples has any
+		for (const file of globSync('examples/*.mapjson')) {
+			expect(unknownMapJSONFields(JSON.parse(readFileSync(file, 'utf-8'))), file).toStrictEqual([]);
+		}
+		expect(unknownMapJSONFields('no map')).toStrictEqual([]);
 	});
 });

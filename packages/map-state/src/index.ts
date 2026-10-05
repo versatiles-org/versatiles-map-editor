@@ -24,6 +24,7 @@ export {
 	MapJSONVersionError,
 	stateFromMapJSON,
 	stateToMapJSON,
+	unknownMapJSONFields,
 	type MapJSON
 } from './mapjson.js';
 export { stateFromKML, stateToKML } from './kml.js';
