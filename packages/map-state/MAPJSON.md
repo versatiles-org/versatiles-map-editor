@@ -141,6 +141,17 @@ optional.
 | `arrowEnd`        | –                                                                                                                                                                                                                             | lines: the arrowhead at the last point, as `arrowStart`; default `"none"`                                  | –                                                                                                                                                        |
 | `arrowSize`       | –                                                                                                                                                                                                                             | lines with an arrowhead: its width, a factor of the line width; default `3`                                | –                                                                                                                                                        |
 
+**Names** are the values of the choices in a style (`pattern`, `dash`, `arrowStart`, `arrowEnd`,
+`labelPosition`):
+
+- in lowercase, with words joined by `-`, e.g. `"diagonal-up"`;
+- the default is the first name of each list above, e.g. `"solid"` or `"none"`;
+- a later version may add names, but never renames or removes one; a reader that does not know a
+  name uses the default of the field instead;
+- a variant adds a word to the name of its base, e.g. `"diagonal-up"`, `"diagonal-cross"` or
+  `"long-dash"`;
+- positions name the vertical side first, e.g. `"top-right"`, as the legend and the viewer do.
+
 **The label position** says where the label is, seen from the symbol: `"top"` puts it above the
 symbol, `"bottom-left"` below and to the left. This is the opposite of MapLibre's `text-anchor`,
 which names the side of the label that is at the point: a label above the symbol has the

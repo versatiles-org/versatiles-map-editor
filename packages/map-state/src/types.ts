@@ -93,6 +93,14 @@ export interface StateElementCircle {
 	popup?: StatePopup;
 }
 
+// The names of the choices of a style. Rules, since they are part of .mapjson files and links:
+// - lowercase ASCII, words joined by "-";
+// - the default is the first name of its table;
+// - the tables only grow, at their end: links store the index of a name, so a name is never
+//   inserted, reordered, renamed or removed once released;
+// - a variant adds a word to the name of its base ("diagonal-up", "long-dash", a later "triangle-open");
+// - positions name the vertical side first ("top-right"), as the legend and the viewer do.
+
 /** The arrowheads at the ends of a line; "none" is a plain end. */
 export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'] as const;
 export type ArrowName = (typeof ARROW_NAMES)[number];

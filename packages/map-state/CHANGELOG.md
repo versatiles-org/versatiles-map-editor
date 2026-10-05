@@ -89,6 +89,9 @@ The first release.
   (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal-up, diagonal-down, horizontal,
   vertical, cross, diagonal-cross, dots), each with its own style key and in the base64 string as
   its index; in GeoJSON `stroke-style` and `fill-pattern`.
+- Rules for the names of the choices of a style (`types.ts`, `MAPJSON.md`): lowercase words joined
+  by `-`, the default first, variants with a word added, positions vertical first; the tables only
+  grow at their end, and an unknown name is read as the default.
 - The size and the coverage of a fill pattern: `patternScale`, a factor from 0.5 to 4
   (`PATTERN_SCALE_RANGE`), and `patternCoverage`, the share of the area that the pattern covers,
   from 0.05 to 0.95 (`PATTERN_COVERAGE_RANGE`); only stored with a pattern (`hasPattern`,

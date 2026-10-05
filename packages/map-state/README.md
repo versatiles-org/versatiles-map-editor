@@ -74,6 +74,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
   `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
   `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
+  Links store the index of a name, so the tables only grow at their end (the rules for names are
+  in `types.ts` and `MAPJSON.md`).
   `hasArrow` and `hasPattern` tell whether a style has an arrowhead or a fill pattern, and
   `PATTERN_SCALE_RANGE` and `PATTERN_COVERAGE_RANGE` are the ranges of the size and the coverage
   of a pattern.
