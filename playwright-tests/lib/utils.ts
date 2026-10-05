@@ -285,7 +285,7 @@ export async function storedState(page: Page): Promise<MapState> {
 					request.onsuccess = () => resolve(request.result as T);
 					request.onerror = () => reject(request.error);
 				});
-			type Session = { id: string; changed: number; position: number; camera?: MapState['map'] };
+			type Session = { id: string; changed: number; position: number; camera?: MapState['view'] };
 			const sessions = await read<Session[]>('sessions', undefined, true);
 			const own = sessionStorage.getItem('versatiles-map-editor:session');
 			const session = sessions.find(({ id }) => id === own) ?? sessions.sort((a, b) => b.changed - a.changed)[0];
@@ -298,7 +298,7 @@ export async function storedState(page: Page): Promise<MapState> {
 	});
 	if (!stored) return { elements: [] };
 	const state = decodeState(stored.state);
-	return stored.camera ? { ...state, map: stored.camera } : state;
+	return stored.camera ? { ...state, view: stored.camera } : state;
 }
 
 /**

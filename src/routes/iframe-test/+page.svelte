@@ -3,7 +3,7 @@
 
 	// a small map with every kind of element, encoded here, so the link stays readable when the format changes
 	const state: MapState = {
-		map: { center: [13.360986424048201, 52.5134277906428], radius: 1097.496025637164 },
+		view: { center: [13.360986424048201, 52.5134277906428], radius: 1097.496025637164 },
 		elements: [
 			{
 				type: 'line',

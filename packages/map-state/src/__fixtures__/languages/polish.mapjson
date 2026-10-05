@@ -1,6 +1,6 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"map": {
+	"view": {
 		"center": [19.9274, 50.0565],
 		"radius": 3907
 	},

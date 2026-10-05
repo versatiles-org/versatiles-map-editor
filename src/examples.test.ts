@@ -35,7 +35,7 @@ describe('example maps', () => {
 				expect(types).toStrictEqual(expected.types);
 				expect(state.meta?.legend?.entries ?? []).toHaveLength(expected.legend);
 				expect(state.meta?.background?.builder).toBe(expected.builder);
-				expect(state.map).toBeDefined();
+				expect(state.view).toBeDefined();
 			});
 
 			it('survives a link', () => {

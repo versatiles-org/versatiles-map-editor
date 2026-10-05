@@ -26,7 +26,7 @@ export class StateManager {
 	 */
 	public getHash({ resolution, camera = true }: { resolution?: number; camera?: boolean } = {}): string {
 		const state = this.mapDocument.getState();
-		if (!camera) delete state.map;
+		if (!camera) delete state.view;
 		return encodeState(state, { resolution });
 	}
 

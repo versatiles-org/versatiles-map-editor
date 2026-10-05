@@ -161,7 +161,7 @@ test('invalid hash', async ({ page }) => {
 test('a map near a pole keeps its elements', async ({ page }) => {
 	// half the height of the view reaches beyond the latitudes of the map
 	const state: MapState = {
-		map: { center: [0, 70], radius: 3_061_000 },
+		view: { center: [0, 70], radius: 3_061_000 },
 		elements: [{ type: 'marker', point: [10, 70] }]
 	};
 	await page.goto('/#' + encodeState(state));

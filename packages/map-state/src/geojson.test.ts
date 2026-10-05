@@ -67,14 +67,14 @@ describe('stateToGeoJSON', () => {
 	});
 
 	it('emits the viewport as center + radius', () => {
-		const doc = stateToGeoJSON({ map: { center: [13.4, 52.5], radius: 1234 }, elements: [] });
-		expect(doc.map).toEqual({ center: [13.4, 52.5], radius: 1234 });
+		const doc = stateToGeoJSON({ view: { center: [13.4, 52.5], radius: 1234 }, elements: [] });
+		expect(doc.view).toEqual({ center: [13.4, 52.5], radius: 1234 });
 	});
 });
 
 describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 1234 },
+		view: { center: [13.4, 52.5], radius: 1234 },
 		elements: [
 			{ type: 'marker', point: [13.4, 52.5] },
 			{
@@ -519,8 +519,8 @@ describe('stateFromGeoJSON with unusual input', () => {
 	});
 
 	it('ignores an invalid viewport', () => {
-		const doc: GeoJSONDocument = { ...collection(), map: { center: [1, 2], radius: 'far' as unknown as number } };
-		expect(stateFromGeoJSON(doc).map).toBeUndefined();
+		const doc: GeoJSONDocument = { ...collection(), view: { center: [1, 2], radius: 'far' as unknown as number } };
+		expect(stateFromGeoJSON(doc).view).toBeUndefined();
 	});
 
 	it('always produces encodable documents', () => {

@@ -16,7 +16,7 @@ import {
 	removeViewerDefaults,
 	sanitizeBoolean,
 	sanitizeLabelMinZoom,
-	sanitizeCamera,
+	sanitizeView,
 	sanitizeNumber,
 	sanitizeFrame,
 	sanitizeMetadata,
@@ -35,7 +35,7 @@ import {
  * meters) and the `frame`, the visible area of the map (`[west, south, east, north]`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
-	map?: { center: [number, number]; radius: number };
+	view?: { center: [number, number]; radius: number };
 	frame?: Bounds;
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
@@ -118,7 +118,7 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	});
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
-	if (state.map) doc.map = { center: state.map.center, radius: state.map.radius };
+	if (state.view) doc.view = { center: state.view.center, radius: state.view.radius };
 	const frame = sanitizeFrame(state.frame);
 	if (frame) doc.frame = frame;
 	const meta: StateMetadata = {};
@@ -257,9 +257,9 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 	}
 
 	const state: MapState = { elements };
-	if (doc.type === 'FeatureCollection' && 'map' in doc) {
-		const camera = sanitizeCamera(doc.map);
-		if (camera) state.map = camera;
+	if (doc.type === 'FeatureCollection' && 'view' in doc) {
+		const view = sanitizeView(doc.view);
+		if (view) state.view = view;
 	}
 	if (doc.type === 'FeatureCollection' && 'frame' in doc) {
 		const frame = sanitizeFrame(doc.frame);

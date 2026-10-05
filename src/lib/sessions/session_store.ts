@@ -25,7 +25,7 @@ export interface SessionRecord {
 	/** When the map was last changed, in milliseconds since 1970. */
 	changed: number;
 	/** The camera, which is not part of the history. */
-	camera?: MapState['map'];
+	camera?: MapState['view'];
 	/** The number of the oldest step that is kept. Steps are numbered upwards. */
 	first: number;
 	/** The number of the current step: lower after undo. `first - 1` without steps. */
@@ -79,7 +79,7 @@ export class SessionStore {
 	// the writes, one after the other, so they are written in the order of the changes
 	#queue: Promise<unknown> = Promise.resolve();
 	// the latest camera of each session that is not written yet
-	readonly #cameras = new Map<string, MapState['map']>();
+	readonly #cameras = new Map<string, MapState['view']>();
 	#errorListeners: ((error: unknown) => void)[] = [];
 	#changeListeners: ((id: string) => void)[] = [];
 	readonly #channel = typeof BroadcastChannel === 'undefined' ? undefined : new BroadcastChannel(CHANNEL);
@@ -183,7 +183,7 @@ export class SessionStore {
 	}
 
 	/** Start a new session, with the state of the map as its first step. Returns its id. */
-	public create(state: string, { camera, title }: { camera?: MapState['map']; title?: string } = {}): string {
+	public create(state: string, { camera, title }: { camera?: MapState['view']; title?: string } = {}): string {
 		const id = crypto.randomUUID();
 		const session: SessionRecord = { id, changed: Date.now(), first: 0, position: 0, sizes: [state.length] };
 		if (camera) session.camera = camera;
@@ -232,7 +232,7 @@ export class SessionStore {
 	}
 
 	/** Store the camera, e.g. after the map was moved. Only the latest camera of a burst is written. */
-	public setCamera(id: string, camera: MapState['map']) {
+	public setCamera(id: string, camera: MapState['view']) {
 		const pending = this.#cameras.has(id);
 		this.#cameras.set(id, camera);
 		if (pending) return;

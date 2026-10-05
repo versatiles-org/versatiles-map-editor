@@ -5,7 +5,7 @@ import type { MapState } from './types.js';
 
 // every element type, style field and map property
 const state: MapState = {
-	map: { center: [13.4, 52.5], radius: 12345 },
+	view: { center: [13.4, 52.5], radius: 12345 },
 	meta: {
 		background: { builder: 'osm', options: { theme: 'gray' } },
 		legend: {

@@ -48,8 +48,8 @@ const KINDS = {
 	readStyle: 'styles',
 	readElementStyles: 'styles',
 	readPalette: 'colors',
-	readMap: 'camera & frame',
-	readFrame: 'camera & frame'
+	readView: 'view & frame',
+	readFrame: 'view & frame'
 };
 const KIND_NAMES = [...new Set(Object.values(KINDS)), 'structure'];
 

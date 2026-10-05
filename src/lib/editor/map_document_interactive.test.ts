@@ -139,7 +139,7 @@ describe('MapDocument', () => {
 		it('should create and restore empty map', async () => {
 			expect(doc.getState()).toStrictEqual({
 				elements: [],
-				map: { center: [1, 2], radius: 312696.8037113758 }
+				view: { center: [1, 2], radius: 312696.8037113758 }
 			});
 			expect(doc.state.getHash()).toBe('IAG2haCUQgImQsAA');
 
@@ -148,7 +148,7 @@ describe('MapDocument', () => {
 
 			expect(doc.getState()).toStrictEqual({
 				elements: [],
-				map: { center: [12, 34], radius: 215179.62743964553 }
+				view: { center: [12, 34], radius: 215179.62743964553 }
 			});
 
 			const hash = doc.state.getHash();
@@ -386,14 +386,14 @@ describe('MapDocument', () => {
 			expect(geojson.type).toBe('FeatureCollection');
 			expect(geojson.features).toHaveLength(1);
 			expect(geojson.features[0].geometry.type).toBe('Point');
-			expect(geojson.map?.center).toEqual([10, 20]);
-			expect(typeof geojson.map?.radius).toBe('number');
+			expect(geojson.view?.center).toEqual([10, 20]);
+			expect(typeof geojson.view?.radius).toBe('number');
 		});
 
 		it('applies the viewport from an imported document', () => {
 			doc.addGeoJSON({
 				type: 'FeatureCollection',
-				map: { center: [10, 20], radius: 1000 },
+				view: { center: [10, 20], radius: 1000 },
 				features: []
 			});
 			expect(mockMap.fitBounds).toHaveBeenCalled();
@@ -587,7 +587,7 @@ describe('MapDocument', () => {
 		});
 
 		it('is not shown when the editor has a camera, e.g. of its session', async () => {
-			await doc.loadState({ frame, elements, map: { center: [10, 50], radius: 1000 } });
+			await doc.loadState({ frame, elements, view: { center: [10, 50], radius: 1000 } });
 			const [[west, south], [east, north]] = mockMap.fitBounds.mock.lastCall?.[0] as [number, number][];
 			expect((west + east) / 2).toBeCloseTo(10);
 			expect((south + north) / 2).toBeCloseTo(50);
@@ -608,8 +608,8 @@ describe('MapDocument', () => {
 			doc.frame = frame;
 			const shared = decodeState(doc.state.getHash({ camera: false }));
 			expect(shared.frame).toStrictEqual(frame);
-			expect(shared.map).toBeUndefined();
-			expect(decodeState(doc.state.getHash()).map).toBeDefined();
+			expect(shared.view).toBeUndefined();
+			expect(decodeState(doc.state.getHash()).view).toBeDefined();
 		});
 
 		it('is next to the bounds of the elements', () => {

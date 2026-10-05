@@ -88,18 +88,18 @@ describe('StateWriter', () => {
 
 	it('should write a map object correctly', () => {
 		const writer = new StateWriter();
-		writer.writeMap({
+		writer.writeView({
 			radius: 128,
 			center: [5, 6]
 		});
 		expect(writer.asBase64()).toBe('owDLD4DzOSE');
 	});
 
-	describe('writeMap edge cases', () => {
+	describe('writeView edge cases', () => {
 		function roundTrip(map: { radius: number; center: [number, number] }) {
 			const writer = new StateWriter();
-			writer.writeMap(map);
-			return new StateReader(writer.bits).readMap();
+			writer.writeView(map);
+			return new StateReader(writer.bits).readView();
 		}
 
 		it('should skip degenerate viewports', () => {
@@ -111,12 +111,12 @@ describe('StateWriter', () => {
 
 		it('should skip degenerate viewports of a whole map, whose elements are kept', () => {
 			const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
-			for (const map of [
+			for (const view of [
 				{ radius: 100, center: [NaN, 6] as [number, number] },
 				{ radius: 100, center: [5, Infinity] as [number, number] },
 				{ radius: 0, center: [5, 6] as [number, number] }
 			]) {
-				expect(decodeState(encodeState({ map, elements }))).toStrictEqual({ elements });
+				expect(decodeState(encodeState({ view, elements }))).toStrictEqual({ elements });
 			}
 		});
 
@@ -145,7 +145,7 @@ describe('StateWriter', () => {
 	it('should write a root object correctly', () => {
 		const writer = new StateWriter();
 		writer.writeRoot({
-			map: { radius: 1024, center: [1, 2] },
+			view: { radius: 1024, center: [1, 2] },
 			elements: [
 				{
 					type: 'marker',
@@ -187,7 +187,7 @@ describe('StateWriter', () => {
 	it('should write an empty root object correctly', () => {
 		const writer = new StateWriter();
 		writer.writeRoot({
-			map: {
+			view: {
 				radius: 1024,
 				center: [0, 0]
 			},

@@ -52,7 +52,7 @@ test('the editor and the viewer work in a subfolder of a web server', async ({ p
 
 test('a shared link opens the viewer in a subfolder directly', async ({ page }) => {
 	const requests = await serveInSubfolder(page);
-	const state = encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements: [] });
+	const state = encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, elements: [] });
 	await page.goto(SUBFOLDER + '/view/#' + state);
 	await waitForMapIsReady(page);
 	expect(requests.outside).toStrictEqual([]);

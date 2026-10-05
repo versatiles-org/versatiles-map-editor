@@ -99,7 +99,7 @@ const radius = Math.round(((frame[3] - frame[1]) / 2) * 111320);
 const state = {
 	// the format version of the file, see packages/map-state/MAPJSON.md
 	$schema: 'https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json',
-	map: { center, radius },
+	view: { center, radius },
 	frame,
 	meta: {
 		// a faded gray map, so the markers stand out

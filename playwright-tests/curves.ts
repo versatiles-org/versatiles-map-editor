@@ -18,7 +18,7 @@ const polygon: [number, number][] = [
 
 test('lines and polygons are made smooth in the section "Shape", together, in one undo step', async ({ page }) => {
 	const state: MapState = {
-		map: { center: [13.4, 52.495], radius: 3000 },
+		view: { center: [13.4, 52.495], radius: 3000 },
 		elements: [
 			{ type: 'line', points: line },
 			{ type: 'polygon', points: polygon },
@@ -91,7 +91,7 @@ test(
 	async ({ page }) => {
 		const open = async (smooth: boolean) => {
 			const state: MapState = {
-				map: { center: line[1], radius: 2000 },
+				view: { center: line[1], radius: 2000 },
 				elements: [{ type: 'line', points: line, smooth, style: { color: '#0000ff', width: 4 } }]
 			};
 			await page.goto('/#' + encodeState(state));
@@ -112,7 +112,7 @@ test(
 
 test('the handles for new nodes of a smooth line are on its curve', async ({ page }) => {
 	const state: MapState = {
-		map: { center: line[1], radius: 2000 },
+		view: { center: line[1], radius: 2000 },
 		elements: [{ type: 'line', points: line, smooth: true }]
 	};
 	await page.goto('/#' + encodeState(state));

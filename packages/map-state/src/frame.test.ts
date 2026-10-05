@@ -39,10 +39,10 @@ describe('frame', () => {
 	});
 
 	it('is kept next to the camera, which has a center of its own', () => {
-		const withCamera: MapState = { ...state, map: { center: [10, 50], radius: 1000 } };
+		const withCamera: MapState = { ...state, view: { center: [10, 50], radius: 1000 } };
 		const decoded = decodeState(encodeState(withCamera));
 		expect(decoded.frame).toStrictEqual(frame);
-		expect(decoded.map?.center).toStrictEqual([10, 50]);
+		expect(decoded.view?.center).toStrictEqual([10, 50]);
 		expect(decoded.elements).toStrictEqual(state.elements);
 	});
 

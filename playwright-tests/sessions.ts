@@ -8,7 +8,7 @@ import { drawElement, drawnElements, menuItem, storedState, waitForMapIsReady } 
 
 /** A map with one marker at the longitude, and its title. */
 const mapAt = (lng: number, title?: string): MapState => ({
-	map: { center: [lng, 52.5], radius: 10000 },
+	view: { center: [lng, 52.5], radius: 10000 },
 	...(title ? { meta: { title } } : {}),
 	elements: [{ type: 'marker', point: [lng, 52.5] }]
 });
@@ -32,7 +32,7 @@ test('the stored map keeps the elements while the map is loading', async ({ page
 		await route.fallback();
 	});
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -48,7 +48,7 @@ test('the stored map keeps the elements while the map is loading', async ({ page
 
 test('the editor keeps its map, history and camera in the browser, not in the URL', async ({ page }) => {
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -59,14 +59,14 @@ test('the editor keeps its map, history and camera in the browser, not in the UR
 
 	await drawElement(page, 'Marker');
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
-	const camera = (await storedState(page)).map;
+	const camera = (await storedState(page)).view;
 
 	// a reload continues the map, with its camera and the step to undo
 	await page.reload();
 	await waitForMapIsReady(page);
 	expect(new URL(page.url()).hash).toBe('');
 	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(2);
-	expect((await storedState(page)).map).toStrictEqual(camera);
+	expect((await storedState(page)).view).toStrictEqual(camera);
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 	await page.getByRole('button', { name: 'Redo' }).click();
@@ -75,7 +75,7 @@ test('the editor keeps its map, history and camera in the browser, not in the UR
 
 test('each tab edits its own map, and a reload keeps it', async ({ page, context }) => {
 	const mapOf = (lng: number): MapState => ({
-		map: { center: [lng, 52.5], radius: 10000 },
+		view: { center: [lng, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [lng, 52.5] }]
 	});
 	const lng = async (page: Page) => {

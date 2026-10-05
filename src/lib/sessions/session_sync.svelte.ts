@@ -15,8 +15,8 @@ const RELOAD_WAIT = 500;
 
 /** What the editor opens: a stored session, the map of a link as a new session, or a new map. */
 export type Opening =
-	| { kind: 'session'; stored: StoredSession; camera?: MapState['map'] }
-	| { kind: 'link'; state: MapState; encoded: string; camera?: MapState['map'] }
+	| { kind: 'session'; stored: StoredSession; camera?: MapState['view'] }
+	| { kind: 'link'; state: MapState; encoded: string; camera?: MapState['view'] }
 	| { kind: 'new'; camera?: undefined };
 
 /** A map of the list of recent maps. */
@@ -40,7 +40,7 @@ export type SaveStatus = 'saved' | 'memory' | 'failed';
 
 /** A state as the history and the storage keep it: encoded, without the viewport. */
 function encodeStep(state: MapState): string {
-	return encodeState({ ...state, map: undefined });
+	return encodeState({ ...state, view: undefined });
 }
 
 /**
@@ -164,15 +164,15 @@ export class SessionSync {
 			// e.g. a closed storage: the map of the link opens as a new map
 			console.warn('Failed to look for the map of the link in the storage', error);
 		}
-		if (stored) return { kind: 'session', stored, camera: state.map ?? stored.session.camera };
-		return { kind: 'link', state, encoded, camera: state.map };
+		if (stored) return { kind: 'session', stored, camera: state.view ?? stored.session.camera };
+		return { kind: 'link', state, encoded, camera: state.view };
 	}
 
 	/** The current state of the most recently changed map, with its camera, e.g. for the viewer on phones. */
 	public async last(): Promise<MapState | undefined> {
 		const found = await this.#findSession(async ({ state }) => decodeStep(state) !== undefined);
 		const state = found && decodeStep(found.state);
-		return found && state ? { ...state, map: found.session.camera } : undefined;
+		return found && state ? { ...state, view: found.session.camera } : undefined;
 	}
 
 	/** The most recently changed maps, e.g. for the menu. */
@@ -232,7 +232,7 @@ export class SessionSync {
 
 	/** Open a map, e.g. of a file, as a new map in the storage. */
 	public async openMap(state: MapState) {
-		await this.#open({ kind: 'link', state, encoded: encodeStep(state), camera: state.map });
+		await this.#open({ kind: 'link', state, encoded: encodeStep(state), camera: state.view });
 	}
 
 	/** Delete a map of the storage, unless it is open, here or in another tab. */
@@ -274,7 +274,7 @@ export class SessionSync {
 				case 'session': {
 					const { stored, camera } = opening;
 					const state = decodeState(stored.states[stored.position]);
-					await this.#load(doc, { ...state, map: camera });
+					await this.#load(doc, { ...state, view: camera });
 					doc.state.history.restore(stored.states, stored.position);
 					this.#setSession(stored.session.id);
 					this.#title = stored.session.title;
@@ -283,7 +283,7 @@ export class SessionSync {
 				case 'link':
 					// stored at once, while the map loads
 					this.#title = opening.state.meta?.title;
-					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.map, title: this.#title }));
+					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.view, title: this.#title }));
 					await this.#load(doc, opening.state);
 					break;
 				case 'new':

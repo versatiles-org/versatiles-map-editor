@@ -8,7 +8,7 @@
 		"MapJSON": {
 			"type": "object",
 			"properties": {
-				"map": {
+				"view": {
 					"type": "object",
 					"properties": {
 						"center": {

@@ -498,7 +498,7 @@ export function sanitizePositions(value: unknown): Position[] | undefined {
 }
 
 /** The camera of the editor: a center and a radius in meters, or undefined. */
-export function sanitizeCamera(value: unknown): MapState['map'] {
+export function sanitizeView(value: unknown): MapState['view'] {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const { center, radius } = value as Record<string, unknown>;
 	const position = sanitizePosition(center);

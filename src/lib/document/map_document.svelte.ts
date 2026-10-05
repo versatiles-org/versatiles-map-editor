@@ -238,10 +238,10 @@ export class MapDocument {
 	 */
 	public async loadState(state: MapState, { keepView = false } = {}) {
 		this.clear();
-		const camera = this.isInteractive() ? state.map : undefined;
+		const camera = this.isInteractive() ? state.view : undefined;
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
 		if (!camera && !keepView) this.view.fitArea(state.frame, state.elements, { keep: !this.isInteractive() });
-		await this.setState({ ...state, map: camera });
+		await this.setState({ ...state, view: camera });
 	}
 
 	public async setState(state: MapState) {
@@ -260,7 +260,7 @@ export class MapDocument {
 
 		this.deselectAll();
 
-		if (state.map) this.view.fitViewport(state.map);
+		if (state.view) this.view.fitViewport(state.view);
 		this.frame = state.frame;
 		this.applyMetadata(state.meta);
 		// Only awaited when it changes, so an unchanged background restores the elements at once

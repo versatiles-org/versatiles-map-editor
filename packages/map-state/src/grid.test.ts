@@ -58,7 +58,7 @@ describe('LocalGrid', () => {
 
 // a map in Berlin, far from the origin of the coordinates
 const berlin: MapState = {
-	map: { center: [13.4, 52.5], radius: 10000 },
+	view: { center: [13.4, 52.5], radius: 10000 },
 	elements: [
 		{ type: 'marker', point: [13.41234, 52.51234] },
 		{

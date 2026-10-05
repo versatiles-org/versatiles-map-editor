@@ -30,7 +30,7 @@ The first release.
     `size`, the size of its symbol) and `font` (the glyph font of a marker's label);
   - 1 bit for an element with the type and the styles of the element before, whose label is
     stored apart from its style;
-  - coordinates as whole steps from an origin near them, so a link without a camera stays short, in
+  - coordinates as whole steps from an origin near them, so a link without a view stays short, in
     steps of 0.00001° × 2^n (n from 0 to 15, in 4 bits: about 1 m to 36 km), which decode to at most
     5 decimal places; `exponentForResolution`, `resolutionOfExponent`, `MAX_EXPONENT`,
     `resolutionForArea` (the precision for sharing an area) and `coarsestResolutionForArea` (the
@@ -93,6 +93,8 @@ The first release.
   (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal-up, diagonal-down, horizontal,
   vertical, cross, diagonal-cross, dots, diagonal-dots), each with its own style key and in the
   base64 string as its index; in GeoJSON `stroke-style` and `fill-pattern`.
+- `view` for the place where the author's editor looks (`center` and `radius`), also in GeoJSON
+  (a member of the `FeatureCollection`) and KML (`versatiles:view`).
 - Rules for the names of the choices of a style (`types.ts`, `MAPJSON.md`): lowercase words joined
   by `-`, the default first, variants with a word added, positions vertical first; the tables only
   grow at their end, and an unknown name is read as the default.

@@ -22,8 +22,8 @@ describe('the JSON Schema of .mapjson files', () => {
 		const fields = (properties?: Record<string, unknown>) => Object.keys(properties ?? {}).sort();
 		for (const [name, known] of Object.entries(MAPJSON_FIELDS)) {
 			const properties =
-				name === 'camera'
-					? (definitions.MapJSON.properties!.map as { properties: Record<string, unknown> }).properties
+				name === 'view'
+					? (definitions.MapJSON.properties!.view as { properties: Record<string, unknown> }).properties
 					: definitions[name]?.properties;
 			expect([...known].sort(), name).toStrictEqual(fields(properties));
 		}
@@ -31,7 +31,7 @@ describe('the JSON Schema of .mapjson files', () => {
 		const objects = Object.entries(definitions).filter(([, definition]) => definition.properties);
 		expect(objects.map(([name]) => name).sort()).toStrictEqual(
 			Object.keys(MAPJSON_FIELDS)
-				.filter((name) => name !== 'camera')
+				.filter((name) => name !== 'view')
 				.sort()
 		);
 	});
@@ -60,7 +60,7 @@ describe('the JSON Schema of .mapjson files', () => {
 
 	it('fits what the editor writes, with every kind of element and property', () => {
 		const state: MapState = {
-			map: { center: [13.4, 52.5], radius: 1200 },
+			view: { center: [13.4, 52.5], radius: 1200 },
 			frame: [13.3, 52.4, 13.5, 52.6],
 			meta: {
 				background: { builder: 'satellite', options: { osmOverlay: false } },

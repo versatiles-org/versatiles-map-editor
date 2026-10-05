@@ -11,7 +11,7 @@ import { child, children, descendants, parseXml, text, xml, type XmlElement } fr
  *   exact map state. Files of other tools are imported as far as KML styles can be mapped.
  */
 
-const MAP_DATA = 'versatiles:map';
+const VIEW_DATA = 'versatiles:view';
 const FRAME_DATA = 'versatiles:frame';
 const META_DATA = 'versatiles:meta';
 const CENTER_DATA = 'center';
@@ -38,12 +38,12 @@ function viewOfFrame([west, south, east, north]: Bounds): { center: [number, num
 export function stateToKML(state: MapState): string {
 	const doc = stateToGeoJSON(state);
 	const documentData: Record<string, string> = {};
-	if (doc.map) documentData[MAP_DATA] = JSON.stringify(doc.map);
+	if (doc.view) documentData[VIEW_DATA] = JSON.stringify(doc.view);
 	if (doc.frame) documentData[FRAME_DATA] = JSON.stringify(doc.frame);
 	if (doc.meta) documentData[META_DATA] = JSON.stringify(doc.meta);
 
 	// where Google Earth looks: at the frame, else at the camera
-	const view = doc.frame ? viewOfFrame(doc.frame) : doc.map;
+	const view = doc.frame ? viewOfFrame(doc.frame) : doc.view;
 	const content = [
 		xml('name', state.meta?.title || 'Map'),
 		view &&
@@ -191,8 +191,8 @@ export function stateFromKML(kml: string): MapState {
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features: [] };
 	const document = child(kmlElement, 'Document') ?? kmlElement;
 	const documentData = readExtendedData(child(document, 'ExtendedData'));
-	const map = parseJson(documentData[MAP_DATA]);
-	if (map) doc.map = map as GeoJSONDocument['map'];
+	const view = parseJson(documentData[VIEW_DATA]);
+	if (view) doc.view = view as GeoJSONDocument['view'];
 	const frame = parseJson(documentData[FRAME_DATA]);
 	if (frame) doc.frame = frame as GeoJSONDocument['frame'];
 	const meta = parseJson(documentData[META_DATA]);

@@ -63,7 +63,7 @@ for (const name of EXAMPLES) {
 			]);
 			const downloaded: MapState = JSON.parse(readFileSync(await download.path(), 'utf-8'));
 			// with its title, and its visible area
-			expect({ ...downloaded, map: state.map }).toStrictEqual(state);
+			expect({ ...downloaded, view: state.view }).toStrictEqual(state);
 		});
 
 		test('shared as a link, in the viewer', async ({ page }) => {

@@ -82,7 +82,7 @@ describe('MapDocument', () => {
 
 	it('should load a state', async () => {
 		const state: MapState = {
-			map: { center: [0, 0], radius: 1000 },
+			view: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
 		const clearSpy = vi.spyOn(mapDocument, 'clear');
@@ -91,7 +91,7 @@ describe('MapDocument', () => {
 		await mapDocument.loadState(state);
 		expect(clearSpy).toHaveBeenCalled();
 		// the viewer shows the frame, else the elements, not the camera of the author
-		expect(setStateSpy).toHaveBeenCalledWith({ ...state, map: undefined });
+		expect(setStateSpy).toHaveBeenCalledWith({ ...state, view: undefined });
 	});
 
 	it('should propagate errors while loading a state', async () => {
@@ -101,7 +101,7 @@ describe('MapDocument', () => {
 
 	it('should set a state and fit map bounds', async () => {
 		const state: MapState = {
-			map: { center: [0, 0], radius: 1000 },
+			view: { center: [0, 0], radius: 1000 },
 			elements: []
 		};
 		await mapDocument.setState(state);

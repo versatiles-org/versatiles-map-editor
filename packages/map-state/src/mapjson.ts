@@ -1,4 +1,4 @@
-import { sanitizeCamera, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
+import { sanitizeView, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
 import { STYLE_FIELDS } from './style_history.js';
 import type { MapState, StateElement } from './types.js';
 
@@ -35,14 +35,14 @@ export function stateToMapJSON(state: MapState): MapJSON {
  */
 export function stateFromMapJSON(json: unknown): MapState {
 	if (typeof json !== 'object' || json === null || Array.isArray(json)) throw new Error('The file contains no map');
-	const { $schema, map, frame, meta, elements } = json as Record<string, unknown>;
+	const { $schema, view, frame, meta, elements } = json as Record<string, unknown>;
 	const version = typeof $schema === 'string' ? /mapjson-(\d+)\.schema\.json$/.exec($schema)?.[1] : undefined;
 	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
 	if (!Array.isArray(elements)) throw new Error('The file contains no map elements');
 
 	const state: MapState = { elements: elements.map(sanitizeElement).filter((element) => element !== undefined) };
-	const camera = sanitizeCamera(map);
-	if (camera) state.map = camera;
+	const camera = sanitizeView(view);
+	if (camera) state.view = camera;
 	const area = sanitizeFrame(frame);
 	if (area) state.frame = area;
 	const metadata = sanitizeMetadata(meta);
@@ -55,9 +55,9 @@ export function stateFromMapJSON(json: unknown): MapState {
  * test compares them), to find the fields that this version does not know.
  */
 export const MAPJSON_FIELDS = {
-	MapJSON: ['$schema', 'map', 'frame', 'meta', 'elements'],
-	// the camera, `map`, which has no definition of its own
-	camera: ['center', 'radius'],
+	MapJSON: ['$schema', 'view', 'frame', 'meta', 'elements'],
+	// the view, which has no definition of its own
+	view: ['center', 'radius'],
 	StateMetadata: [
 		'background',
 		'legend',
@@ -112,7 +112,7 @@ export function unknownMapJSONFields(json: unknown): string[] {
 
 	const root = check(json, MAPJSON_FIELDS.MapJSON, '');
 	if (!root) return unknown;
-	check(root.map, MAPJSON_FIELDS.camera, 'map');
+	check(root.view, MAPJSON_FIELDS.view, 'view');
 	const meta = check(root.meta, MAPJSON_FIELDS.StateMetadata, 'meta');
 	if (meta) {
 		check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');

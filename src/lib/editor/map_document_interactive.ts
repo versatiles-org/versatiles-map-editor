@@ -132,7 +132,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.labelMinZoom > 0) meta.labelMinZoom = this.labelMinZoom;
 		if (this.mapLabelsOnTop) meta.mapLabelsOnTop = true;
 		return {
-			map: this.view.getViewport(),
+			view: this.view.getViewport(),
 			...(this.frame ? { frame: this.frame } : {}),
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
 			elements: this.elements.map((element) => element.getState())
@@ -148,7 +148,7 @@ export class MapDocumentInteractive extends MapDocument {
 	 * properties it has (e.g. the background) replace the current ones.
 	 */
 	public addState(state: MapState) {
-		if (state.map) this.view.fitViewport(state.map);
+		if (state.view) this.view.fitViewport(state.view);
 		// both frames: one that covers both; else the one there is
 		if (state.frame) this.frame = this.frame ? unionOf(this.frame, state.frame) : state.frame;
 		const meta = state.meta ?? {};

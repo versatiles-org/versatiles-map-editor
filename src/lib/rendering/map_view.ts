@@ -12,7 +12,7 @@ function roleOf(id: string): Role | undefined {
 import { MapStyleLoader } from './map_style_loader.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
-export type Viewport = NonNullable<MapState['map']>;
+export type Viewport = NonNullable<MapState['view']>;
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {

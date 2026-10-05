@@ -10,7 +10,7 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 	await page.setViewportSize({ width: 1280, height: 1600 });
 	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -61,7 +61,7 @@ test('the theme of the legend: light, dark or a glass over the map', { tag: '@cr
 		{ type: 'polygon' as const, style: { color: '#0072b2' }, strokeStyle: { visible: false }, label: 'A' }
 	];
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -100,7 +100,7 @@ test('the theme of the legend: light, dark or a glass over the map', { tag: '@cr
 test('the entries of the legend are closed, and open to edit them', async ({ page }) => {
 	const entries = ['A', 'B'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 	);
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -144,7 +144,7 @@ test(
 		await page.setViewportSize({ width: 1280, height: 1100 });
 		const entries = [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'A' }];
 		await page.goto(
-			'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
+			'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend: { entries } }, elements: [] })
 		);
 		await waitForMapIsReady(page);
 		await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -216,7 +216,7 @@ test('a legend entry follows the style of its elements', async ({ page }) => {
 	await page.goto(
 		'/#' +
 			encodeState({
-				map: { center: [13.4, 52.5], radius: 3000 },
+				view: { center: [13.4, 52.5], radius: 3000 },
 				meta: { legend: { entries } },
 				elements: [area(13.38), area(13.41)]
 			})
@@ -281,7 +281,7 @@ test('adding the look of an element to the legend', async ({ page }) => {
 		] as [number, number][]
 	};
 	const elements: StateElement[] = [{ ...route, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	await page.getByRole('listbox', { name: 'Elements' }).getByRole('option').first().click();
@@ -313,7 +313,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 	];
 	const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Route' }] };
 	const elements: StateElement[] = [{ type: 'line', points, style: { color: '#d55e00', dash: 'dashed', width: 4 } }];
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
 	await page.getByRole('button', { name: 'Open entry 1' }).click();
@@ -355,7 +355,7 @@ test(
 				strokeStyle: { color: '#00aa00' }
 			}
 		];
-		await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
+		await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 		await waitForMapIsReady(page);
 		await page.getByRole('button', { name: 'Edit legend' }).click();
 		await page.getByRole('button', { name: 'Open entry 1' }).click();
@@ -408,7 +408,7 @@ test('editing the legend', async ({ page }) => {
 	const pageErrors: string[] = [];
 	page.on('pageerror', (error) => pageErrors.push(error.message));
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{
 				type: 'polygon',

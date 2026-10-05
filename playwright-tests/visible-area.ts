@@ -124,7 +124,7 @@ test('the viewer shows the frame again when its size changes, until the visitor 
 });
 
 test('the visible area is edited in a mode of its own, from the menu or the Map panel', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, elements }));
 	await waitForMapIsReady(page);
 	const bar = page.getByRole('group', { name: 'Visible area' });
 	const shared = sidebar(page).getByRole('region', { name: 'Map', exact: true });
@@ -174,7 +174,7 @@ test('the share dialog warns about elements outside the visible area, and edits 
 			]
 		}
 	];
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements: outside }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements: outside }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -204,7 +204,7 @@ test('the share dialog tells that an empty map without a visible area shows the 
 });
 
 test('the preview of the share dialog shows the frame completely in all three aspect ratios', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -248,7 +248,7 @@ test('the preview of the share dialog shows the frame completely in all three as
 
 test('dragging a handle changes the frame, one undo step per drag', async ({ page }) => {
 	// a view with the whole frame, left of the sidebar
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 
@@ -270,7 +270,7 @@ test('dragging a handle changes the frame, one undo step per drag', async ({ pag
 });
 
 test('the keyboard moves the sides of the frame, one undo step per key', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 	const size = page.getByRole('group', { name: 'Visible area' }).getByRole('status');
@@ -295,7 +295,7 @@ test('the keyboard moves the sides of the frame, one undo step per key', async (
 });
 
 test('importing a file with a frame gives a frame that covers both', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
 	await waitForMapIsReady(page);
 	const file = { type: 'FeatureCollection', features: [], frame: [13.45, 52.5, 13.6, 52.6] };
 	const importGeoJSON = await menuItem(page, 'Import', 'GeoJSON…');

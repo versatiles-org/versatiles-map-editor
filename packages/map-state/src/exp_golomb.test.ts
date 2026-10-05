@@ -69,29 +69,29 @@ describe('the coordinates of elements', () => {
 				]
 			}
 		];
-		expect(decodeState(encodeState({ map: { center: [13.4, 52.5], radius: 1000 }, elements })).elements).toStrictEqual(
+		expect(decodeState(encodeState({ view: { center: [13.4, 52.5], radius: 1000 }, elements })).elements).toStrictEqual(
 			elements
 		);
 	});
 
 	it('are differences to the point before if that is shorter, e.g. for points in a row', () => {
 		// far from the origin, the camera, but each near the one before
-		const map = { center: [0, 0] as [number, number], radius: 1000 };
+		const view = { center: [0, 0] as [number, number], radius: 1000 };
 		const markers: StateElement[] = Array.from({ length: 50 }, (_, i) => ({
 			type: 'marker',
 			point: [13 + i * 0.0001, 52 + (i % 3) * 0.0001]
 		}));
 		// the same points, but in a jumbled order
 		const jumbled = markers.map((_, i) => markers[(i * 17) % 50]);
-		const length = (elements: StateElement[]) => encodeState({ map, elements }).length;
+		const length = (elements: StateElement[]) => encodeState({ view, elements }).length;
 		// from the origin, each marker would cost about 47 bits: about 390 characters for all
 		expect(length(markers)).toBeLessThan(200);
 		expect(length(markers)).toBeLessThan(length(jumbled));
-		expect(decodeState(encodeState({ map, elements: markers })).elements).toStrictEqual(markers);
+		expect(decodeState(encodeState({ view, elements: markers })).elements).toStrictEqual(markers);
 	});
 
 	it('keep the points of markers and circles relative across lines and areas between them', () => {
-		const map = { center: [0, 0] as [number, number], radius: 1000 };
+		const view = { center: [0, 0] as [number, number], radius: 1000 };
 		const elements: StateElement[] = [
 			{ type: 'marker', point: [13.4, 52.5] },
 			{
@@ -104,7 +104,7 @@ describe('the coordinates of elements', () => {
 			{ type: 'circle', point: [13.40001, 52.50001], radius: 50 },
 			{ type: 'marker', point: [13.40002, 52.5] }
 		];
-		expect(decodeState(encodeState({ map, elements })).elements).toStrictEqual(elements);
+		expect(decodeState(encodeState({ view, elements })).elements).toStrictEqual(elements);
 	});
 
 	it('have a parameter per axis if that is shorter, e.g. for points sorted by latitude', () => {
@@ -114,7 +114,7 @@ describe('the coordinates of elements', () => {
 			reader.readVersion();
 			reader.readPalette();
 			reader.readStringTable();
-			reader.readMap();
+			reader.readView();
 			reader.readInteger(4); // the step of the coordinates
 			reader.readVarint(true); // the origin
 			reader.readVarint(true);

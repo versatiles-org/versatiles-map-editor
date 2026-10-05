@@ -195,7 +195,7 @@ test('duplicating an element', { tag: '@cross-browser' }, async ({ page }) => {
 	// a marker in the center of the map
 	const center: [number, number] = [13.4, 52.5];
 	await page.goto(
-		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
 
@@ -243,7 +243,7 @@ test('deleting nodes and elements with the keyboard', { tag: '@cross-browser' },
 		[13.45, 52.5]
 	];
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'line', points }] })
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'line', points }] })
 	);
 	await waitForMapIsReady(page);
 	const linePoints = async () => (await storedState(page)).elements.map((e) => ('points' in e ? e.points.length : 0));
@@ -329,7 +329,7 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 test('editing a popup', async ({ page }) => {
 	const center: [number, number] = [13.4, 52.5];
 	await page.goto(
-		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
@@ -354,7 +354,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 		[x, y + 0.01]
 	];
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{ type: 'polygon', points: square(13.33, 52.47) },
 			{ type: 'polygon', points: square(13.4, 52.47), style: { color: '#0000ff' } },
@@ -429,7 +429,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 
 test('copying and pasting a style', async ({ page }) => {
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{
 				type: 'line',
@@ -497,7 +497,7 @@ test('copying and pasting a style', async ({ page }) => {
 test('Delete and Backspace keep the elements in sliders and dialogs', { tag: '@cross-browser' }, async ({ page }) => {
 	const center: [number, number] = [13.4, 52.5];
 	await page.goto(
-		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
@@ -602,7 +602,7 @@ test.describe('drawing with the tools', { tag: '@cross-browser' }, () => {
 test('the inspector and the actions follow the selection', async ({ page }) => {
 	const center: Point = [13.4, 52.5];
 	await page.goto(
-		'/#' + encodeState({ map: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
+		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
 	);
 	await waitForMapIsReady(page);
 	const title = sidebar(page).getByRole('heading', { level: 2 });
@@ -634,7 +634,7 @@ test(
 	{ tag: '@cross-browser' },
 	async ({ page }) => {
 		const state: MapState = {
-			map: { center: [13.4, 52.5], radius: 10000 },
+			view: { center: [13.4, 52.5], radius: 10000 },
 			elements: [
 				{
 					type: 'polygon',
@@ -725,7 +725,7 @@ test('the size and the coverage of a fill pattern, only with a pattern', async (
 		[13.4, 52.52]
 	];
 	await page.goto(
-		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'polygon', points }] })
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'polygon', points }] })
 	);
 	await waitForMapIsReady(page);
 	const fill = async () => (await storedState(page)).elements[0].style;
@@ -767,7 +767,7 @@ test(
 	async ({ page }) => {
 		await page.setViewportSize({ width: 900, height: 560 });
 		const state: MapState = {
-			map: { center: [13.4, 52.5], radius: 10000 },
+			view: { center: [13.4, 52.5], radius: 10000 },
 			elements: [
 				{
 					type: 'polygon',
@@ -834,7 +834,7 @@ test(
 
 test('Escape closes the color picker only from within it, and the element stays selected', async ({ page }) => {
 	const state: MapState = {
-		map: { center: [13.4, 52.5], radius: 10000 },
+		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{
 				type: 'polygon',
@@ -877,7 +877,7 @@ test('Escape closes the color picker only from within it, and the element stays 
 test('a marker without symbol has no color, size or rotation of a symbol', async ({ page }) => {
 	const center: Point = [13.4, 52.5];
 	const state = (symbol?: string): MapState => ({
-		map: { center, radius: 10000 },
+		view: { center, radius: 10000 },
 		elements: [{ type: 'marker', point: center, style: { label: 'Text', ...(symbol === undefined ? {} : { symbol }) } }]
 	});
 	await page.goto('/#' + encodeState(state('')));
@@ -895,7 +895,7 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 	await page.goto(
 		'/#' +
 			encodeState({
-				map: { center, radius: 10000 },
+				view: { center, radius: 10000 },
 				elements: [
 					{ type: 'marker', point: center, style: { label: 'A' } },
 					{ type: 'marker', point: center, style: { label: 'B' } }
@@ -941,7 +941,7 @@ test('a marker without symbol is a letter in the color of its label in the list'
 	await page.goto(
 		'/#' +
 			encodeState({
-				map: { center, radius: 10000 },
+				view: { center, radius: 10000 },
 				elements: [
 					{ type: 'marker', point: center, style: { color: '#00ff00', label: 'Pin' } },
 					{ type: 'marker', point: [13.41, 52.5], style: { symbol: '', label: 'Text', labelColor: '#0000ff' } }
@@ -965,7 +965,7 @@ test('typing the radius or the area of circles', async ({ page }) => {
 	await page.goto(
 		'/#' +
 			encodeState({
-				map: { center: [13.4, 52.5], radius: 5000 },
+				view: { center: [13.4, 52.5], radius: 5000 },
 				elements: [
 					{ type: 'circle', point: a, radius: 500 },
 					{ type: 'circle', point: b, radius: 800 }
@@ -1021,7 +1021,7 @@ test('typing the radius or the area of circles', async ({ page }) => {
 });
 
 test('Shift-drag on the map zooms to a box', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
 	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
 	const before = await zoom();

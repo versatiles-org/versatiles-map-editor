@@ -192,32 +192,32 @@ describe('StateReader', () => {
 		});
 	});
 
-	describe('readMap', () => {
+	describe('readView', () => {
 		it('should write and read a map object 1', () => {
-			const map: MapState['map'] = {
+			const map: MapState['view'] = {
 				center: [1.0085728693898135, 2.017145738779627],
 				radius: 10085.53503412156
 			};
 			const writer = new StateWriter();
-			writer.writeMap(map);
+			writer.writeView(map);
 			expect(writer.asBitString()).toBe('110000101000000011000111001100000010001010011110000100');
 
 			const reader = new StateReader(writer.bits);
-			expect(reader.readMap()).toStrictEqual(map);
+			expect(reader.readView()).toStrictEqual(map);
 			expect(reader.ended()).toBe(true);
 		});
 
 		it('should write and read a map object 2', () => {
-			const map0: MapState['map'] = {
+			const map0: MapState['view'] = {
 				center: [-121.013, 82.65],
 				radius: 10.021315508993025
 			};
 			const writer = new StateWriter();
-			writer.writeMap(map0);
+			writer.writeView(map0);
 			expect(writer.asBitString()).toBe('100100001010011110101111001110001011011101000011001010111011100010111100');
 
 			const reader = new StateReader(writer.bits);
-			const map1 = reader.readMap();
+			const map1 = reader.readView();
 			expect(map1?.center).toStrictEqual(map0.center);
 			expect(map1?.radius).toBeCloseTo(map0.radius, 10);
 			expect(reader.ended()).toBe(true);
@@ -282,7 +282,7 @@ describe('StateReader', () => {
 
 		it('should read a simple root state', () => {
 			const root = {
-				map: {
+				view: {
 					center: [1, 2],
 					radius: 8192
 				},
@@ -306,7 +306,7 @@ describe('StateReader', () => {
 
 		it('should read a root object correctly', () => {
 			const root: MapState = {
-				map: {
+				view: {
 					radius: 1024,
 					center: [1, 2]
 				},
@@ -481,7 +481,7 @@ describe('StateReader', () => {
 						type: 'polygon'
 					}
 				],
-				map: {
+				view: {
 					center: [expect.closeTo(13.36075, 5), expect.closeTo(52.51318, 5)],
 					radius: expect.closeTo(1078.64)
 				}
@@ -687,7 +687,7 @@ describe('invalid links', () => {
 				]
 			})
 		).toBe('Invalid latitude: -91');
-		expect(decodeError({ map: { center: [0, 120], radius: 1000 }, elements: [] })).toMatch(/^Invalid latitude: 1[12]/);
+		expect(decodeError({ view: { center: [0, 120], radius: 1000 }, elements: [] })).toMatch(/^Invalid latitude: 1[12]/);
 	});
 
 	it('are refused with a rotation beyond 180°', () => {

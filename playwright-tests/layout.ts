@@ -8,7 +8,7 @@ import { coveredPoints, menuItem, project, waitForMapIsReady, type MapWindow } f
 
 const center: [number, number] = [13.4, 52.5];
 const state: MapState = {
-	map: { center, radius: 10000 },
+	view: { center, radius: 10000 },
 	meta: {
 		viewer: { legend: 'top-left' },
 		legend: { entries: [{ type: 'polygon' as const, style: { color: '#ff0000' }, label: 'Route' }] }

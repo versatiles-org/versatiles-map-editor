@@ -1,6 +1,6 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"map": { "center": [13.378944999999959, 52.50300238942748], "radius": 6437.163848928544 },
+	"view": { "center": [13.378944999999959, 52.50300238942748], "radius": 6437.163848928544 },
 	"meta": {
 		"background": {
 			"builder": "osm",

@@ -58,7 +58,7 @@ const points: Point[] = [
 	[13.35, 52.5],
 	[13.45, 52.5]
 ];
-const line: MapState = { map: { center, radius: 10000 }, elements: [{ type: 'line', points }] };
+const line: MapState = { view: { center, radius: 10000 }, elements: [{ type: 'line', points }] };
 
 const linePoints = async (page: Page) => {
 	const element = (await storedState(page)).elements[0];
@@ -143,7 +143,7 @@ test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 });
 
 test('drawing a line with taps and the Finish button', async ({ page }) => {
-	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
 
@@ -159,7 +159,7 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 
 test('dragging a handle of the visible area with a finger, a bit off the handle', async ({ page }) => {
 	const frame: [number, number, number, number] = [13.35, 52.47, 13.45, 52.53];
-	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, frame, elements: [] }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, frame, elements: [] }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 	const touch = await Touchscreen.create(page);
@@ -190,7 +190,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 		point: [13.3 + i * 0.005, 52.5] as Point,
 		style: { label: `M${i + 1}` }
 	}));
-	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, elements }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Elements', exact: true }).tap();
 	const touch = await Touchscreen.create(page);
@@ -223,7 +223,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 
 test('rearranging the entries of the legend with a finger', async ({ page }) => {
 	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'polygon' as const, style: { color: '#ff0000' }, label }));
-	await page.goto('/#' + encodeState({ map: { center, radius: 3000 }, meta: { legend: { entries } }, elements: [] }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 3000 }, meta: { legend: { entries } }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();
 	const touch = await Touchscreen.create(page);
@@ -239,7 +239,7 @@ test('rearranging the entries of the legend with a finger', async ({ page }) => 
 test('taking the style of an element for a legend entry with a tap', async ({ page }) => {
 	const legend = { entries: [{ type: 'marker' as const, label: 'Route' }] };
 	const elements: MapState['elements'] = [{ type: 'line', points, style: { color: '#d55e00', width: 4 } }];
-	await page.goto('/#' + encodeState({ map: { center, radius: 10000 }, meta: { legend }, elements }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();
 	await page.getByRole('button', { name: 'Open entry 1' }).tap();

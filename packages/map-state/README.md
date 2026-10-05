@@ -23,7 +23,7 @@ npm install @versatiles/map-state
 import { encodeState, decodeState, stateToGeoJSON, type MapState } from '@versatiles/map-state';
 
 const state: MapState = {
-	map: { center: [13.4, 52.5], radius: 5000 },
+	view: { center: [13.4, 52.5], radius: 5000 },
 	elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#0000ff', label: 'Berlin' } }]
 };
 
@@ -100,10 +100,10 @@ which are internal: only the exports above are the public API.
 
 | Representation | Source                      | Notes                                                                              |
 | -------------- | --------------------------- | ---------------------------------------------------------------------------------- |
-| `MapState`     | canonical                   | viewport (`center` + `radius` m), `meta`, `elements[]` with `StateStyle`           |
+| `MapState`     | canonical                   | view (`center` + `radius` m), `meta`, `elements[]` with `StateStyle`               |
 | `.mapjson`     | `mapjson.ts`                | the map state as JSON, the file format of the editor; see [MAPJSON.md](MAPJSON.md) |
 | base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                               |
-| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `map` and `meta` foreign members                             |
+| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `view` and `meta` foreign members                            |
 | KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`                        |
 
 ## GeoJSON profile (`profile.ts`)
@@ -117,7 +117,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- viewport → `map: { center, radius }` (mirrors the state; lossless round-trip)
+- viewport → `view: { center, radius }` (mirrors the state; lossless round-trip)
 - visible area → `frame: [west, south, east, north]`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
@@ -170,7 +170,7 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
 this version is read; a later version can be told apart by it. Then come the palette, the string
-table, the camera (`map`, optional: where the author's editor looks), the resolution, the origin
+table, the view (`view`, optional: where the author's editor looks), the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
 relative, the frame (optional: the visible area of a shared map), the metadata and the elements.
 To keep hashes short:
@@ -197,7 +197,7 @@ To keep hashes short:
   label of an element's style is stored as a field of the element, so elements that differ only
   in their labels still repeat their style;
 - the coordinates of the frame and the elements are whole steps from an origin near them (the center
-  of the frame, else of the camera, else of the elements, rounded to 1/100 degree), with a global
+  of the frame, else of the view, else of the elements, rounded to 1/100 degree), with a global
   step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each zoom
   level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples of
   0.00001°, decoded coordinates have at most 5 decimal places. `encodeState(state, { resolution })`

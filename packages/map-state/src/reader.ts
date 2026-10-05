@@ -220,8 +220,8 @@ export class StateReader {
 			this.styleHistory = new StyleHistory();
 
 			// the camera
-			root.map = this.readMap();
-			if (!root.map) delete root.map;
+			root.view = this.readView();
+			if (!root.view) delete root.view;
 
 			this.readGrid();
 
@@ -317,7 +317,7 @@ export class StateReader {
 		}
 	}
 
-	readMap(): MapState['map'] {
+	readView(): MapState['view'] {
 		try {
 			if (!this.readBit()) return undefined;
 

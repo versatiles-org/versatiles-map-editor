@@ -16,7 +16,7 @@ export interface MapState {
 	 * The camera: where the author's editor looks, e.g. after a reload. Links for sharing and
 	 * embedding leave it out; they show the `frame`, else the elements.
 	 */
-	map?: {
+	view?: {
 		center: Position;
 		/**
 		 * The radius of the largest circle that the window shows, in meters.

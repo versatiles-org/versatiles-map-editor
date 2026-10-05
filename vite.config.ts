@@ -70,7 +70,7 @@ function examples(): Plugin {
 					// e.g. the dev server builds the module again when an example changes
 					this.addWatchFile(file);
 					const state = stateFromMapJSON(JSON.parse(readFileSync(file, 'utf-8')));
-					delete state.map;
+					delete state.view;
 					const id = name.replace(/\.mapjson$/, '');
 					return { id, title: state.meta?.title ?? id, hash: encodeState(state) };
 				})

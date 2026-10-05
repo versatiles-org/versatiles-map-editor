@@ -45,7 +45,7 @@ describe('.mapjson files', () => {
 
 	it('keep only what is valid, since they may contain anything', () => {
 		const json = {
-			map: { center: [13.4, 'north'], radius: 1000 },
+			view: { center: [13.4, 'north'], radius: 1000 },
 			frame: [10, 50, 5, 55],
 			meta: { title: 'Map', viewer: { search: 'middle' }, labelMinZoom: 99, background: 'osm' },
 			elements: [
@@ -91,7 +91,7 @@ describe('.mapjson files', () => {
 		const json = {
 			$schema: MAPJSON_SCHEMA_URL,
 			future: true,
-			map: { center: [13.4, 52.5], radius: 1000, tilt: 30 },
+			view: { center: [13.4, 52.5], radius: 1000, tilt: 30 },
 			meta: {
 				title: 'T',
 				theme: 'x',
@@ -117,7 +117,7 @@ describe('.mapjson files', () => {
 		};
 		expect(unknownMapJSONFields(json)).toStrictEqual([
 			'future',
-			'map.tilt',
+			'view.tilt',
 			'meta.theme',
 			'meta.viewer.scale',
 			'meta.legend.entries[0].icon',

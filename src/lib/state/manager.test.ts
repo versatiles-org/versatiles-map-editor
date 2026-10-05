@@ -9,14 +9,14 @@ describe('StateManager', () => {
 	let mapDocument: MapDocumentInteractive;
 	let stateManager: StateManager;
 	const state1: MapState = {
-		map: {
+		view: {
 			center: [1, 2],
 			radius: 16
 		},
 		elements: [{ type: 'marker', point: [3, 4], style: { label: 'test' } }]
 	};
 	const state2: MapState = {
-		map: {
+		view: {
 			center: [3, 4],
 			radius: 1024
 		},
@@ -76,11 +76,11 @@ describe('StateManager', () => {
 
 			// the viewport is not part of the history
 			stateManager.undo();
-			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state1, map: undefined });
+			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state1, view: undefined });
 			expect(getStatus()).toStrictEqual([true, true, 3, 1, 3, 1]);
 
 			stateManager.redo();
-			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state2, map: undefined });
+			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state2, view: undefined });
 			expect(getStatus()).toStrictEqual([true, false, 3, 0, 3, 2]);
 		});
 

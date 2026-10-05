@@ -31,7 +31,7 @@ its elements, on the editor's default background map.
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"map": { "center": [13.39, 52.51], "radius": 2500 },
+	"view": { "center": [13.39, 52.51], "radius": 2500 },
 	"frame": [13.36, 52.5, 13.42, 52.525],
 	"meta": {
 		"title": "A walk through Berlin",
@@ -94,7 +94,7 @@ its elements, on the editor's default background map.
 | Field      | Description                                                                                                                                                                   |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                                                                                |
-| `map`      | The view of the author: `center` (a position) and `radius` (in meters, the largest circle in the window). The editor opens the map there. Shared maps leave it out. Optional. |
+| `view`     | The view of the author: `center` (a position) and `radius` (in meters, the largest circle in the window). The editor opens the map there. Shared maps leave it out. Optional. |
 | `frame`    | The visible area: what shared and embedded maps show completely, on any screen. Without it, they show all elements. Optional.                                                 |
 | `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                                                                           |
 | `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                                                                           |
@@ -249,8 +249,8 @@ changes its meaning.
 
 The same map can be held in other forms, which the package converts into each other:
 
-| Form    | Use                                                                                                              | Compared with `.mapjson`                                                                                                         |
-| ------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Link    | the base64 string in the URL of a shared map, e.g. `…/view/#…`                                                   | The same content, compact; coordinates are rounded to the precision of the link.                                                 |
-| GeoJSON | for other tools: a `FeatureCollection` with the styles as feature properties, and `map`, `frame`, `meta` members | The same content; the order of the elements is the order of the features. See the [README](README.md#geojson-profile-profilets). |
-| KML     | for Google Earth and GIS tools                                                                                   | The geometry and the main styles; other properties in `<ExtendedData>`. See the [README](README.md#kml-kmlts).                   |
+| Form    | Use                                                                                                               | Compared with `.mapjson`                                                                                                         |
+| ------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Link    | the base64 string in the URL of a shared map, e.g. `…/view/#…`                                                    | The same content, compact; coordinates are rounded to the precision of the link.                                                 |
+| GeoJSON | for other tools: a `FeatureCollection` with the styles as feature properties, and `view`, `frame`, `meta` members | The same content; the order of the elements is the order of the features. See the [README](README.md#geojson-profile-profilets). |
+| KML     | for Google Earth and GIS tools                                                                                    | The geometry and the main styles; other properties in `<ExtendedData>`. See the [README](README.md#kml-kmlts).                   |
