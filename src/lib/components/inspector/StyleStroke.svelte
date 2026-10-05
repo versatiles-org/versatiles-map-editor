@@ -28,12 +28,14 @@
 	const NAMES: Record<DashName, string> = {
 		solid: 'Solid',
 		dashed: 'Dashed',
-		dotted: 'Dotted'
+		dotted: 'Dotted',
+		'long-dash': 'Long dash',
+		'dash-dot': 'Dash-dot'
 	};
 	const styles = STROKE_STYLE_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 
 	/** The dashes as in the map, for a line of this width in the preview. */
-	function dashes(name: DashName, width = 3): string | undefined {
+	function dashes(name: DashName, width = 2): string | undefined {
 		const array = dashArrays[name];
 		return array.length > 1 ? array.map((v) => v * width).join(' ') : undefined;
 	}
@@ -56,15 +58,16 @@
 		options={styles}
 	>
 		{#snippet picture(name)}
-			<svg width="44" height="10" aria-hidden="true">
+			<!-- small, so the five fit into one row of the sidebar -->
+			<svg width="28" height="10" aria-hidden="true">
 				<line
-					x1="4"
+					x1="3"
 					y1="5"
-					x2="40"
+					x2="25"
 					y2="5"
 					stroke="currentColor"
-					stroke-width="3"
-					stroke-linecap={name === 'dotted' ? 'round' : 'butt'}
+					stroke-width="2"
+					stroke-linecap="round"
 					stroke-dasharray={dashes(name)}
 				/>
 			</svg>

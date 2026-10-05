@@ -3,11 +3,19 @@ import { cssColor } from './css_color.js';
 import { type ArrowName, type DashName, type StateStyle, LINE_DEFAULTS, hasArrow } from '@versatiles/map-state';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
-/** The dashes and gaps of each dash style, in multiples of the width of the line. */
+/**
+ * The dashes and gaps of each dash style, in multiples of the width of the line. The lines have
+ * round caps, which add half the width at each end of a dash: "dashed" shows dashes and gaps of 3
+ * widths, a dash of 0 is a dot.
+ */
 export const dashArrays: Record<DashName, number[]> = {
 	solid: [100],
 	dashed: [2, 4],
-	dotted: [0, 2]
+	dotted: [0, 2],
+	// dashes of 6 widths, gaps of 3
+	'long-dash': [5, 4],
+	// a dash of 3 widths, a gap of 2, a dot, a gap of 2
+	'dash-dot': [2, 3, 0, 3]
 };
 
 /** The arrowheads of a line, which the layer of the arrowheads draws, see `arrowHeadFeatures`. */
@@ -55,7 +63,7 @@ export class LineStyle extends StylePart {
 		this.#color = value;
 		this.changed();
 	}
-	/** Solid, dashed or dotted. */
+	/** Solid, dashed, dotted, long dashes, or dashes and dots. */
 	get dash(): DashName {
 		return this.#dash;
 	}

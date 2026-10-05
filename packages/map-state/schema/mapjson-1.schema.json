@@ -221,7 +221,7 @@
 				},
 				"dash": {
 					"$ref": "#/definitions/DashName",
-					"description": "Lines and outlines: solid, dashed or dotted.",
+					"description": "Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.",
 					"default": "solid"
 				},
 				"rotate": {
@@ -314,7 +314,7 @@
 		},
 		"DashName": {
 			"type": "string",
-			"enum": ["solid", "dashed", "dotted"]
+			"enum": ["solid", "dashed", "dotted", "long-dash", "dash-dot"]
 		},
 		"LabelPositionName": {
 			"type": "string",

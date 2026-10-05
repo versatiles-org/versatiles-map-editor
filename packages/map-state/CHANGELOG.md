@@ -85,9 +85,10 @@ The first release.
   base64 string as its index); in GeoJSON and KML `symbol-label-position`. The name says where
   the label is, unlike MapLibre's `text-anchor`.
 - Two fields instead of one `pattern`, by name: `dash` for lines and outlines (`STROKE_STYLE_NAMES`,
-  type `DashName`: solid, dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`, type
-  `FillPatternName`: solid, diagonal, diagonal-thin), each with its own style key and in the base64
-  string as its index; in GeoJSON `stroke-style` and `fill-pattern`.
+  type `DashName`: solid, dashed, dotted, long-dash, dash-dot) and `pattern` for areas
+  (`FILL_PATTERN_NAMES`, type `FillPatternName`: solid, diagonal, diagonal-thin), each with its
+  own style key and in the base64 string as its index; in GeoJSON `stroke-style` and
+  `fill-pattern`.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.

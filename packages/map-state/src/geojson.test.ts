@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from './geojson.js';
-import { encodeGeoJSON, decodeGeoJSON } from './index.js';
-import type { MapState } from './types.js';
+import { decodeState, encodeGeoJSON, decodeGeoJSON, encodeState } from './index.js';
+import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, type MapState } from './types.js';
 
 describe('stateToGeoJSON', () => {
 	it('maps a marker to a Point feature with symbol properties', () => {
@@ -117,6 +117,25 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 
 	it('preserves the document exactly', () => {
 		expect(stateFromGeoJSON(stateToGeoJSON(state))).toEqual(state);
+	});
+});
+
+describe('the names of the dashes and the fill patterns', () => {
+	it('all survive a link and GeoJSON', () => {
+		const points: [number, number][] = [
+			[13.4, 52.5],
+			[13.5, 52.6],
+			[13.4, 52.6]
+		];
+		const state: MapState = {
+			elements: [
+				...STROKE_STYLE_NAMES.slice(1).map((dash) => ({ type: 'line' as const, points, style: { dash } })),
+				...FILL_PATTERN_NAMES.slice(1).map((pattern) => ({ type: 'polygon' as const, points, style: { pattern } }))
+			]
+		};
+		const styles = state.elements.map((element) => element.style);
+		expect(decodeState(encodeState(state)).elements.map((element) => element.style)).toStrictEqual(styles);
+		expect(stateFromGeoJSON(stateToGeoJSON(state)).elements.map((element) => element.style)).toStrictEqual(styles);
 	});
 });
 

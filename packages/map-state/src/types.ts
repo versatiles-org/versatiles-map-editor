@@ -116,7 +116,7 @@ export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'] as cons
 export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
 
 /** The dashes of a line or an outline. */
-export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'] as const;
+export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted', 'long-dash', 'dash-dot'] as const;
 export type DashName = (typeof STROKE_STYLE_NAMES)[number];
 
 /**
@@ -136,7 +136,7 @@ export interface StateStyle {
 	 */
 	pattern?: FillPatternName;
 	/**
-	 * Lines and outlines: solid, dashed or dotted.
+	 * Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.
 	 * @default "solid"
 	 */
 	dash?: DashName;
