@@ -1,32 +1,59 @@
 {
 	"$schema": "https://raw.githubusercontent.com/versatiles-org/versatiles-map-editor/main/packages/map-state/schema/mapjson-1.schema.json",
-	"map": { "center": [20.95368000000002, 52.294233438256384], "radius": 29551.411955597407 },
+	"map": {
+		"center": [20.95368000000002, 52.294233438256384],
+		"radius": 29551.411955597407
+	},
 	"meta": {
 		"background": {
 			"builder": "osm",
-			"options": { "text": { "spacing": 2 }, "recolor": { "saturate": -0.2, "brightness": 0.15, "contrast": 0.7 } }
+			"options": {
+				"text": {
+					"spacing": 2
+				},
+				"recolor": {
+					"saturate": -0.2,
+					"brightness": 0.15,
+					"contrast": 0.7
+				}
+			}
 		},
 		"legend": {
 			"entries": [
 				{
 					"type": "marker",
-					"style": { "size": 1.2, "color": "#ff4060", "symbol": "extras:shape-star" },
+					"style": {
+						"size": 1.2,
+						"color": "#ff4060",
+						"symbol": "extras:shape-star"
+					},
 					"label": "Christmas markets for weeks"
 				},
 				{
 					"type": "marker",
-					"style": { "size": 0.8, "color": "#56b4e9", "symbol": "base:icon-gift" },
+					"style": {
+						"size": 0.8,
+						"color": "#56b4e9",
+						"symbol": "base:icon-gift"
+					},
 					"label": "Fairs in Warsaw, one day or weekend"
 				},
 				{
 					"type": "marker",
-					"style": { "color": "#ff8000", "symbol": "base:icon-marketplace", "size": 0.8 },
+					"style": {
+						"color": "#ff8000",
+						"symbol": "base:icon-marketplace",
+						"size": 0.8
+					},
 					"label": "Markets near Warsaw, one day or weekend"
 				}
 			],
 			"theme": "dark"
 		},
-		"viewer": { "search": "top-left", "legend": "bottom-right" },
+		"viewer": {
+			"search": "top-left",
+			"legend": "bottom-right"
+		},
 		"title": "Christmas markets 2025 in and near Warsaw"
 	},
 	"elements": [
@@ -43,7 +70,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Kiermasz Świąteczny, Piaseczno**\nOn the market square, with the lighting of the Christmas tree\n7 December 2025, 11:00–17:00"
+				"text": "Kiermasz Świąteczny, Piaseczno"
 			}
 		},
 		{
@@ -59,7 +86,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Pruszków**\nOn Plac Jana Pawła II, with a Santa village\n7 December 2025, 11:00–20:00"
+				"text": "Jarmark Bożonarodzeniowy, Pruszków"
 			}
 		},
 		{
@@ -75,7 +102,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Świąteczny, Konstancin-Jeziorna**\nCrafts and ornaments at the Hugonówka house of culture\n7 December 2025, 12:00–19:00"
+				"text": "Jarmark Świąteczny, Konstancin-Jeziorna"
 			}
 		},
 		{
@@ -90,7 +117,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Pałacowy Kiermasz Świąteczny, Jabłonna**\nAt the palace\n7 December 2025, 10:00–20:00" }
+			"popup": {
+				"text": "Pałacowy Kiermasz Świąteczny, Jabłonna"
+			}
 		},
 		{
 			"type": "marker",
@@ -105,7 +134,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Nieporęt**\nOn Plac Wolności, with a Christmas carousel\n7 December 2025, 10:00–18:00"
+				"text": "Jarmark Bożonarodzeniowy, Nieporęt"
 			}
 		},
 		{
@@ -121,7 +150,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Podkowa Leśna**\nIn the Polish-Hungarian Friendship Park, with over 100 exhibitors\n6–7 December 2025"
+				"text": "Jarmark Bożonarodzeniowy, Podkowa Leśna"
 			}
 		},
 		{
@@ -137,7 +166,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Otwock**\nOn ulica Andriollego, with over 50 stalls and a Ferris wheel\n13–14 December 2025, 10:00–20:00"
+				"text": "Jarmark Bożonarodzeniowy, Otwock"
 			}
 		},
 		{
@@ -153,7 +182,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Święta w Karolinie, Otrębusy**\nAt Karolin, the home of the folk ensemble Mazowsze\n13–14 December 2025, 11:00–20:00"
+				"text": "Święta w Karolinie, Otrębusy"
 			}
 		},
 		{
@@ -168,7 +197,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Nadarzyn**\nOn Plac Poniatowskiego\n13–14 December 2025" }
+			"popup": {
+				"text": "Jarmark Świąteczny, Nadarzyn"
+			}
 		},
 		{
 			"type": "marker",
@@ -182,7 +213,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Błonie**\nOn the market square\n12–14 December 2025, 11:00–18:00" }
+			"popup": {
+				"text": "Jarmark Świąteczny, Błonie"
+			}
 		},
 		{
 			"type": "marker",
@@ -196,7 +229,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Jarmark Bożonarodzeniowy, Milanówek**\nOn ulica Warszawska\n14 December 2025, 11:00–18:00" }
+			"popup": {
+				"text": "Jarmark Bożonarodzeniowy, Milanówek"
+			}
 		},
 		{
 			"type": "marker",
@@ -210,7 +245,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Kiermasz Świąteczny, Józefosław**\nBy the Klub Kultury\n14 December 2025, 11:00–17:00" }
+			"popup": {
+				"text": "Kiermasz Świąteczny, Józefosław"
+			}
 		},
 		{
 			"type": "marker",
@@ -225,7 +262,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Jarmark Bożonarodzeniowy, Sulejówek**\nIn the Glinianki park\n21 December 2025, from 10:00"
+				"text": "Jarmark Bożonarodzeniowy, Sulejówek"
 			}
 		},
 		{
@@ -241,7 +278,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Świąteczny Kiermasz Rękodzieła, Grodzisk Mazowiecki**\nA handicraft fair at the Mediateka\n21 December 2025, 10:00–16:00"
+				"text": "Świąteczny Kiermasz Rękodzieła, Grodzisk Mazowiecki"
 			}
 		},
 		{
@@ -256,7 +293,9 @@
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Jarmark Świąteczny, Serock**\nOn the market square\n21 December 2025, 14:00–19:00" }
+			"popup": {
+				"text": "Jarmark Świąteczny, Serock"
+			}
 		},
 		{
 			"type": "marker",
@@ -269,7 +308,7 @@
 				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Christmas fairs in the Palace of Culture**\nTarg Świąteczny w PKiN, 6–7 December 2025\nŚwiąteczne Targi WZORY, a design fair with over 200 exhibitors, 13–14 December 2025"
+				"text": "Christmas fairs in the Palace of Culture"
 			}
 		},
 		{
@@ -283,7 +322,7 @@
 				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Jestem Slow! #Prezenty**\nA fair of local makers at Elektrownia Powiśle\n6–7 December 2025"
+				"text": "Jestem Slow! #Prezenty"
 			}
 		},
 		{
@@ -296,7 +335,9 @@
 				"font": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
-			"popup": { "text": "**Targi Unikatów**\nHandmade, art and design at Hala Koszyki\n13–14 December 2025" }
+			"popup": {
+				"text": "Targi Unikatów"
+			}
 		},
 		{
 			"type": "marker",
@@ -309,7 +350,7 @@
 				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Targi Sploty #Święta!**\nChristmas fashion and design at Fabryka Norblina\n13–14 December 2025"
+				"text": "Targi Sploty #Święta!"
 			}
 		},
 		{
@@ -323,7 +364,7 @@
 				"haloColor": "#000000"
 			},
 			"popup": {
-				"text": "**Wielki Targ Świąteczny w Fortecy**\nThe Christmas farmers’ market at Fort Legionów\n21 December 2025"
+				"text": "Wielki Targ Świąteczny w Fortecy"
 			}
 		},
 		{
@@ -338,7 +379,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Christmas market at the Barbakan**\nJarmark Bożonarodzeniowy przy Barbakanie, along the city walls of the Old Town\n22 November 2025 – 6 January 2026, daily from 11:00"
+				"text": "Christmas market at the Barbakan"
 			}
 		},
 		{
@@ -353,7 +394,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Warsaw Christmas Market**\nJarmark Warszawski at the Palace of Culture, with over 100 stalls and a 55 m Ferris wheel\n28 November 2025 – 1 January 2026, daily from 11:00"
+				"text": "Warsaw Christmas Market"
 			}
 		},
 		{
@@ -368,7 +409,7 @@
 				"font": "noto_sans_bold"
 			},
 			"popup": {
-				"text": "**Christmas market above the clouds**\nJarmark Świąteczny Powyżej Chmur, on the terrace of the Varso Tower, 49 floors up, with tickets\nfrom 1 December 2025, daily 10:00–22:00"
+				"text": "Christmas market above the clouds"
 			}
 		}
 	]

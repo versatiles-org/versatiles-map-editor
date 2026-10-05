@@ -12,12 +12,12 @@
 				{
 					"type": "line",
 					"style": { "color": "#d55e00", "dash": "dotted", "width": 3 },
-					"label": "Closed for renovation, Aug 2025 – Apr 2026"
+					"label": "Closed for renovation, Aug 2025 - Apr 2026"
 				},
 				{ "type": "line", "style": { "color": "#0072b2", "width": 3 }, "label": "Detour of long-distance trains" }
 			]
 		},
-		"title": "Hamburg–Berlin railway renovation"
+		"title": "Hamburg-Berlin railway renovation"
 	},
 	"elements": [
 		{
@@ -37,7 +37,7 @@
 			],
 			"style": { "color": "#d55e00", "dash": "dotted", "width": 3 },
 			"popup": {
-				"text": "**Hamburg–Berlin railway**\nClosed for a general renovation by Deutsche Bahn from August 2025 to April 2026."
+				"text": "**Hamburg-Berlin railway**\nClosed for renovation, Aug 2025 - Apr 2026"
 			}
 		},
 		{
@@ -54,7 +54,7 @@
 				[13.3695, 52.5251]
 			],
 			"style": { "color": "#0072b2", "width": 3 },
-			"popup": { "text": "**Detour**\nLong-distance trains ran via Uelzen and Stendal, which takes longer." }
+			"popup": { "text": "**Detour**\nLong-distance trains ran via Uelzen and Stendal." }
 		},
 		{
 			"type": "marker",

@@ -12,12 +12,12 @@
 				{
 					"type": "line",
 					"style": { "color": "#e69f00", "width": 8, "arrowStart": "circle", "arrowEnd": "triangle", "arrowSize": 2.5 },
-					"label": "Advance, June – September 1812"
+					"label": "Advance, June - September 1812"
 				},
 				{
 					"type": "line",
 					"style": { "color": "#000000", "width": 3, "arrowEnd": "chevron" },
-					"label": "Retreat, October – December 1812"
+					"label": "Retreat, October - December 1812"
 				},
 				{ "type": "marker", "style": { "color": "#d55e00", "symbol": "extras:shape-star" }, "label": "Battle" }
 			]
@@ -90,7 +90,7 @@
 				"labelPosition": "bottom",
 				"font": "noto_sans_bold"
 			},
-			"popup": { "text": "**Crossing of the Berezina**\n26–29 November 1812, on two bridges near Studzianka." }
+			"popup": { "text": "**Crossing of the Berezina**\n26-29 November 1812, on two bridges near Studzianka." }
 		},
 		{
 			"type": "marker",
