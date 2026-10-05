@@ -20,7 +20,7 @@
     "dev": "vite dev",
     "doc": "npm run doc-graph && npm run doc-bundle",
     "doc-bundle": "scripts/doc_bundle.sh",
-    "doc-graph": "vrt deps-graph --svg docs/dependency-graph.svg | vrt doc-insert README.md '### Dependency Graph' && prettier --write --log-level warn README.md",
+    "doc-graph": "svelte-kit sync && vrt deps-graph --svg docs/dependency-graph.svg | vrt doc-insert README.md '### Dependency Graph' && prettier --write --log-level warn README.md",
     "format": "prettier --write --log-level warn .",
     "format:check": "prettier --check .",
     "lint": "eslint --color . && stylelint --color \"**/*.{css,scss,svelte}\"",
