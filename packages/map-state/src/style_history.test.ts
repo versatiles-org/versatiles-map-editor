@@ -108,11 +108,11 @@ describe('style references', () => {
 
 	it('cost 1 bit for none and 3 bits for the latest style', () => {
 		const writer = new StateWriter();
-		writer.writeStyle({ haloWidth: 1 });
-		// no reference, the key of the halo (13), its value, the end
-		expect(writer.asBitString()).toBe('1' + '0001110' + '010100' + '1');
+		writer.writeStyle('marker', { haloWidth: 1 });
+		// no reference, the key of the halo of a marker (8), its value, the end
+		expect(writer.asBitString()).toBe('1' + '0001001' + '010100' + '1');
 		const start = writer.bits.length;
-		writer.writeStyle({ haloWidth: 1 });
+		writer.writeStyle('marker', { haloWidth: 1 });
 		// the latest style, the end
 		expect(writer.asBitString().slice(start)).toBe('010' + '1');
 	});
@@ -151,22 +151,22 @@ describe('style references', () => {
 describe('StyleHistory', () => {
 	it('references the latest style as 1 and moves reused styles to the end', () => {
 		const history = new StyleHistory();
-		history.remember({ color: '#ff0000' });
-		history.remember({ color: '#00ff00' });
-		expect(history.get(1)).toStrictEqual({ color: '#00ff00' });
+		history.remember('marker', { color: '#ff0000' });
+		history.remember('marker', { color: '#00ff00' });
+		expect(history.get(1, 'marker')).toStrictEqual({ color: '#00ff00' });
 		// the same style, as it is encoded
-		history.remember({ color: '#ff0000' });
+		history.remember('marker', { color: '#ff0000' });
 		expect(history.length).toBe(2);
-		expect(history.get(1)).toStrictEqual({ color: '#ff0000' });
-		expect(history.get(2)).toStrictEqual({ color: '#00ff00' });
-		expect(history.get(0)).toBeUndefined();
-		expect(history.get(3)).toBeUndefined();
+		expect(history.get(1, 'marker')).toStrictEqual({ color: '#ff0000' });
+		expect(history.get(2, 'marker')).toStrictEqual({ color: '#00ff00' });
+		expect(history.get(0, 'marker')).toBeUndefined();
+		expect(history.get(3, 'marker')).toBeUndefined();
 	});
 
 	it('keeps a limited number of styles', () => {
 		const history = new StyleHistory();
-		for (let i = 0; i < STYLE_HISTORY_SIZE + 10; i++) history.remember({ rotation: i });
+		for (let i = 0; i < STYLE_HISTORY_SIZE + 10; i++) history.remember('marker', { rotation: i });
 		expect(history.length).toBe(STYLE_HISTORY_SIZE);
-		expect(history.get(STYLE_HISTORY_SIZE)).toStrictEqual({ rotation: 10 });
+		expect(history.get(STYLE_HISTORY_SIZE, 'marker')).toStrictEqual({ rotation: 10 });
 	});
 });

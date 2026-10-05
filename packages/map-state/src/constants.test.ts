@@ -9,7 +9,8 @@ import {
 	POPUP_KEYS
 } from './constants.js';
 import { StateReader } from './reader.js';
-import { STYLE_FIELDS, STYLE_REMOVE_KEY } from './style_history.js';
+import { STYLE_KEYS, styleFields, styleRemoveKey } from './style_history.js';
+import { STYLE_ROLE_FIELDS, type StyleRoleName } from './types.js';
 
 describe('the keys of the fields', () => {
 	it('are each once in their list, not the end, and fit their bits', () => {
@@ -19,13 +20,24 @@ describe('the keys of the fields', () => {
 			['legend', Object.values(LEGEND_KEYS), 4],
 			['legend entry', Object.values(LEGEND_ENTRY_KEYS), 4],
 			['popup', Object.values(POPUP_KEYS), 4],
-			// in an Exp-Golomb code, which has no limit; 9 bits at most for now
-			['style', [...STYLE_FIELDS.map((field) => field.key), STYLE_REMOVE_KEY], 5]
+			// in an Exp-Golomb code, which has no limit; 7 bits at most for now
+			...(Object.keys(STYLE_KEYS) as StyleRoleName[]).map((role): [string, number[], number] => [
+				`style of ${role}`,
+				[...styleFields(role).map((field) => field.key), styleRemoveKey(role)],
+				4
+			])
 		];
 		for (const [name, keys, bits] of lists) {
 			expect(new Set(keys).size, name).toBe(keys.length);
 			expect(keys, name).not.toContain(END_KEY);
 			for (const key of keys) expect(key, name).toBeLessThan(2 ** bits);
+		}
+	});
+
+	it('of a style are there for every field of its role', () => {
+		for (const role of Object.keys(STYLE_KEYS) as StyleRoleName[]) {
+			const names = styleFields(role).map((field) => field.name);
+			expect([...names].sort(), role).toStrictEqual([...STYLE_ROLE_FIELDS[role]].sort());
 		}
 	});
 });

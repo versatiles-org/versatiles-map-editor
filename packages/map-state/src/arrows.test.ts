@@ -41,9 +41,9 @@ describe('arrowheads', () => {
 
 	it('have neighbouring keys', () => {
 		const writer = new StateWriter();
-		writer.writeStylePatch({}, { arrowStart: 'triangle', arrowEnd: 'chevron', arrowSize: 2 });
-		// keys 10, 11 and 12 in 7 bits each, with their varints (the indexes 1 and 2, and 20), then the end
-		expect(writer.asBitString()).toBe('0001011' + '000010' + '0001100' + '000100' + '0001101' + '101000' + '1');
+		writer.writeStylePatch('line', {}, { arrowStart: 'triangle', arrowEnd: 'chevron', arrowSize: 2 });
+		// the keys of a line 4, 5 and 6 in 5 bits each, with their varints (the indexes 1 and 2, and 20), then the end
+		expect(writer.asBitString()).toBe('00101' + '000010' + '00110' + '000100' + '00111' + '101000' + '1');
 	});
 
 	it('have no size without an arrowhead', () => {
@@ -59,10 +59,10 @@ describe('arrowheads', () => {
 	it('reject a size without an arrowhead in a link', () => {
 		const writer = new StateWriter();
 		writer.writeExpGolomb(0, 0); // no reference
-		writer.writeExpGolomb(12, 0); // arrowSize
+		writer.writeExpGolomb(6, 0); // arrowSize
 		writer.writeVarint(20);
 		writer.writeExpGolomb(0, 0); // end
-		expect(() => new StateReader(writer.bits).readStyle()).toThrow(
+		expect(() => new StateReader(writer.bits).readStyle('line')).toThrow(
 			expect.objectContaining({ cause: expect.objectContaining({ message: 'Arrow size without an arrowhead' }) })
 		);
 	});
@@ -70,10 +70,10 @@ describe('arrowheads', () => {
 	it('reject an unknown style in a link', () => {
 		const writer = new StateWriter();
 		writer.writeExpGolomb(0, 0); // no reference
-		writer.writeExpGolomb(11, 0); // arrowEnd
+		writer.writeExpGolomb(5, 0); // arrowEnd
 		writer.writeVarint(4);
 		writer.writeExpGolomb(0, 0); // end
-		expect(() => new StateReader(writer.bits).readStyle()).toThrow(
+		expect(() => new StateReader(writer.bits).readStyle('line')).toThrow(
 			expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid index: 4 of 4' }) })
 		);
 		// and the writer does not write one

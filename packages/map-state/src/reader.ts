@@ -21,6 +21,7 @@ import {
 	type StatePopup,
 	type MapState,
 	type StateStyle,
+	type StyleRoleName,
 	type StateViewer
 } from './types.js';
 import {
@@ -48,10 +49,11 @@ import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import {
-	STYLE_FIELDS,
+	roleOf,
+	styleFields,
 	STYLE_KEY_PARAMETER,
 	STYLE_REFERENCE_PARAMETER,
-	STYLE_REMOVE_KEY,
+	styleRemoveKey,
 	StyleHistory
 } from './style_history.js';
 
@@ -449,8 +451,8 @@ export class StateReader {
 			}
 			return;
 		}
-		if (this.readBit()) element.style = { ...this.readStyle() };
-		if (hasStroke && this.readBit()) element.strokeStyle = { ...this.readStyle() };
+		if (this.readBit()) element.style = { ...this.readStyle(roleOf(element.type)) };
+		if (hasStroke && this.readBit()) element.strokeStyle = { ...this.readStyle('outline') };
 	}
 
 	readLegend(): StateLegend {
@@ -521,7 +523,7 @@ export class StateReader {
 			switch (key) {
 				case END_KEY:
 					if (!type) throw new Error('Legend entry without type');
-					return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label };
+					return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label } as StateLegendEntry;
 				case LEGEND_ENTRY_KEYS.label:
 					label = this.readStringRef();
 					break;
@@ -529,11 +531,14 @@ export class StateReader {
 					type = LEGEND_ENTRY_TYPES[this.readVarint()];
 					if (!type) throw new Error('Invalid legend entry type');
 					break;
+				// the type first, which tells the role of the styles
 				case LEGEND_ENTRY_KEYS.style:
-					style = this.readStyle();
+					if (!type) throw new Error('A style of a legend entry before its type');
+					style = this.readStyle(roleOf(type));
 					break;
 				case LEGEND_ENTRY_KEYS.strokeStyle:
-					strokeStyle = this.readStyle();
+					if (type !== 'area') throw new Error('An outline of a legend entry that is no area');
+					strokeStyle = this.readStyle('outline');
 					break;
 				default:
 					throw new Error(`Invalid legend entry key: ${key}`);
@@ -563,25 +568,23 @@ export class StateReader {
 		}
 	}
 
-	/** A style: a reference to an earlier style (0: none) and the differences to it. */
-	readStyle(): StateStyle {
+	/** A style of the role: a reference to an earlier style of the role (0: none) and the differences to it. */
+	readStyle(role: StyleRoleName): StateStyle {
 		try {
 			const ref = this.readExpGolomb(STYLE_REFERENCE_PARAMETER);
-			const base = this.styleHistory.get(ref);
-			if (ref > 0 && !base) throw new Error(`Invalid style reference: ${ref}`);
-			const style = this.readStylePatch({ ...base });
+			if (ref > 0 && !this.styleHistory.isOfRole(ref, role)) throw new Error(`Invalid style reference: ${ref}`);
+			const style = this.readStylePatch(role, { ...this.styleHistory.get(ref, role) });
 			// the writer leaves it out without an arrowhead
 			if (style.arrowSize !== undefined && !hasArrow(style)) throw new Error('Arrow size without an arrowhead');
 			if ((style.patternScale !== undefined || style.patternCoverage !== undefined) && !hasPattern(style))
 				throw new Error('Pattern size or coverage without a pattern');
-			this.styleHistory.remember(style);
+			this.styleHistory.remember(role, style);
 			return style;
 		} catch (cause) {
 			throw new Error(`Error reading style`, { cause });
 		}
 	}
 
-	/** Apply the changed and removed fields to `style`. */
 	/** A varint below `count`, e.g. the index of a name. */
 	readIndex(count: number): number {
 		const index = this.readVarint();
@@ -594,19 +597,22 @@ export class StateReader {
 		return table[this.readIndex(table.length)];
 	}
 
-	readStylePatch(style: StateStyle): StateStyle {
+	/** Apply the changed and removed fields of a style of the role to `style`. */
+	readStylePatch(role: StyleRoleName, style: StateStyle): StateStyle {
+		const fields = styleFields(role);
+		const removeKey = styleRemoveKey(role);
 		while (true) {
 			const key = this.readStyleKey();
 			if (key === END_KEY) return style;
-			if (key === STYLE_REMOVE_KEY) {
+			if (key === removeKey) {
 				const removed = this.readStyleKey();
-				const field = STYLE_FIELDS.find((f) => f.key === removed);
+				const field = fields.find((f) => f.key === removed);
 				if (!field) throw new Error(`Invalid state key: ${removed}`);
 				delete style[field.name];
 				continue;
 			}
 			// the keys of the fields as the writer has them
-			const field = STYLE_FIELDS.find((f) => f.key === key);
+			const field = fields.find((f) => f.key === key);
 			if (!field) throw new Error(`Invalid state key: ${key}`);
 			switch (field.name) {
 				case 'haloWidth':

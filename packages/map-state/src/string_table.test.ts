@@ -93,8 +93,8 @@ describe('the string table', () => {
 		// each style is written by trying several encodings; the second one refers to the first
 		const writer = new StateWriter();
 		writer.writeStringTable([], ['a', 'b', 'c']);
-		writer.writeStyle({ font: 'a', size: 2 });
-		writer.writeStyle({ font: 'b', size: 2 });
+		writer.writeStyle('marker', { font: 'a', size: 2 });
+		writer.writeStyle('marker', { font: 'b', size: 2 });
 		// so "c" is the next new string of the words of the format
 		const start = writer.bits.length;
 		writer.writeStringRef('c', true);

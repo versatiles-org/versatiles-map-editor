@@ -326,8 +326,8 @@ describe('StateReader', () => {
 					{
 						type: 'polygon',
 						points: path,
-						style: { haloWidth: 1.5, width: 0.8, color: '#0000ff64' },
-						strokeStyle: { haloWidth: 1.5, width: 0.8, color: '#ffff00' }
+						style: { pattern: 'dots', patternScale: 1.5, color: '#0000ff64' },
+						strokeStyle: { dash: 'dotted', width: 0.8, color: '#ffff00' }
 					},
 					{
 						type: 'circle',
@@ -341,7 +341,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAMKEOYhCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrFoISgOe0hJAAGGqAAAYaoDMNjQ3RE'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAOKEJYhCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrFoJnEe6EaBRJAAGGqAAAYaoDMNjQ3RE'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -351,34 +351,33 @@ describe('StateReader', () => {
 
 	describe('readStyle', () => {
 		it('should read a style object', () => {
-			// no reference to an earlier style (Exp-Golomb: 1), then the halo (key 13, 0.1 as 1) and the end (key 0)
-			const reader = StateReader.fromBitString('1' + '0001110' + '000010' + '1');
-			const style = reader.readStyle();
+			// no reference to an earlier style (Exp-Golomb: 1), then the halo of a marker (key 8, 0.1 as 1) and the end (key 0)
+			const reader = StateReader.fromBitString('1' + '0001001' + '000010' + '1');
+			const style = reader.readStyle('marker');
 			expect(style).toStrictEqual({ haloWidth: 0.1 });
 			expect(reader.ended()).toBe(true);
 		});
 
 		it('should read a style correctly', () => {
-			const style: StateStyle = {
+			const marker: StateStyle = {
 				haloWidth: 1.5,
-				dash: 'dashed',
-				pattern: 'diagonal-down',
 				rotation: -45,
 				size: 2.5,
-				width: 2.3,
 				labelPosition: 'bottom',
-				visible: false,
 				color: '#c400ff42'
 			};
+			const outline: StateStyle = { dash: 'dashed', width: 2.3, visible: false, color: '#c400ff42' };
 			const writer = new StateWriter();
-			// the palette of the colors, which the style refers to
+			// the palette of the colors, which the styles refer to
 			writer.writePalette(['#c400ff42']);
-			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0KgDZCCBNwoIc8EMxAiFBI');
+			writer.writeStyle('marker', marker);
+			writer.writeStyle('outline', outline);
+			expect(writer.asBase64()).toBe('CYgB_0KgD5CCBLwzMTQDuIUK');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
-			expect(reader.readStyle()).toStrictEqual(style);
+			expect(reader.readStyle('marker')).toStrictEqual(marker);
+			expect(reader.readStyle('outline')).toStrictEqual(outline);
 			expect(reader.ended()).toBe(true);
 		});
 	});
@@ -415,7 +414,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKEc5Mx0AIE6EiQ6djIC04a0h2IINgEBYdoAKCZBKk'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QDlChHOTMdACBOhIkOnYyAtOGtIdiCDYBAWHaAYnQDUg'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [

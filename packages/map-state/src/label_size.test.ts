@@ -32,15 +32,15 @@ describe('label size', () => {
 
 	it('has a key, also to remove it from an earlier style', () => {
 		const writer = new StateWriter();
-		writer.writeStylePatch({}, { labelSize: 1.5 });
-		writer.writeStylePatch({ labelSize: 1.5, size: 2 }, { size: 2 });
+		writer.writeStylePatch('marker', {}, { labelSize: 1.5 });
+		writer.writeStylePatch('marker', { labelSize: 1.5, size: 2 }, { size: 2 });
 		const bits = writer.bits.map(Number).join('');
-		// key 6, the varint 15, end; remove (key 17), key 6, end
-		expect(bits.startsWith('00111')).toBe(true);
-		expect(bits.endsWith('000010010' + '00111' + '1')).toBe(true);
+		// the key of the label size of a marker (5), the varint 15, end; remove (key 10), key 5, end
+		expect(bits.startsWith('00110')).toBe(true);
+		expect(bits.endsWith('0001011' + '00110' + '1')).toBe(true);
 		const reader = new StateReader(writer.bits);
-		expect(reader.readStylePatch({})).toStrictEqual({ labelSize: 1.5 });
-		expect(reader.readStylePatch({ labelSize: 1.5, size: 2 })).toStrictEqual({ size: 2 });
+		expect(reader.readStylePatch('marker', {})).toStrictEqual({ labelSize: 1.5 });
+		expect(reader.readStylePatch('marker', { labelSize: 1.5, size: 2 })).toStrictEqual({ size: 2 });
 	});
 
 	it('is a property in GeoJSON and a field in .mapjson files', () => {

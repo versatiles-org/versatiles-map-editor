@@ -72,28 +72,28 @@ describe('the size and the coverage of patterns', () => {
 			writer.writeExpGolomb(0, 0); // no reference
 			write(writer);
 			writer.writeExpGolomb(0, 0); // end
-			return () => new StateReader(writer.bits).readStyle();
+			return () => new StateReader(writer.bits).readStyle('area');
 		};
 		const refused = (message: string) => expect.objectContaining({ cause: expect.objectContaining({ message }) });
 		expect(
 			read((writer) => {
-				writer.writeExpGolomb(20, 0); // patternScale
+				writer.writeExpGolomb(3, 0); // patternScale
 				writer.writeVarint(20);
 			})
 		).toThrow(refused('Pattern size or coverage without a pattern'));
 		expect(
 			read((writer) => {
-				writer.writeExpGolomb(19, 0); // pattern
+				writer.writeExpGolomb(2, 0); // pattern
 				writer.writeVarint(7); // dots
-				writer.writeExpGolomb(20, 0); // patternScale
+				writer.writeExpGolomb(3, 0); // patternScale
 				writer.writeVarint(1000); // 100×, which would take long to draw
 			})
 		).toThrow(refused('Invalid pattern scale: 100'));
 		expect(
 			read((writer) => {
-				writer.writeExpGolomb(19, 0);
+				writer.writeExpGolomb(2, 0);
 				writer.writeVarint(7);
-				writer.writeExpGolomb(21, 0); // patternCoverage
+				writer.writeExpGolomb(4, 0); // patternCoverage
 				writer.writeVarint(100);
 			})
 		).toThrow(refused('Invalid pattern coverage: 1'));

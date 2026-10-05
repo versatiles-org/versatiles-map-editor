@@ -158,7 +158,7 @@ describe('StateWriter', () => {
 						[5, 6],
 						[7, 8]
 					],
-					style: { haloWidth: 1.5, size: 0.8, color: '#00ff00' }
+					style: { width: 1.5, dash: 'dashed', color: '#00ff00' }
 				},
 				{
 					type: 'polygon',
@@ -167,8 +167,8 @@ describe('StateWriter', () => {
 						[11, 12],
 						[13, 14]
 					],
-					style: { haloWidth: 1.5, size: 0.8, color: '#0000ff' },
-					strokeStyle: { haloWidth: 1.5, size: 0.8, color: '#ffff00' }
+					style: { pattern: 'cross', color: '#0000ff' },
+					strokeStyle: { width: 0.8, visible: false, color: '#ffff00' }
 				},
 				{
 					type: 'circle',
@@ -180,7 +180,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLCYPDUBw1AaAMgOehCKGoAoagHDUBw1AKQUYxA1ABA1AHDUBw1AcNQHDUApCaQ0hlcwBlcwEWFAuJEg'
+			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLCYPDUBw1AaAOgJehCKGoAoagHDUBw1ANBN4gUYxA1ABA1AHDUBw1AcNQHDUA0IyuhmgSQyuYAyuYCLYXYk'
 		);
 	});
 
@@ -200,17 +200,15 @@ describe('StateWriter', () => {
 		const writer = new StateWriter();
 		// the palette of the colors, which the style refers to
 		writer.writePalette(['#ff0000']);
-		writer.writeStyle({
+		writer.writeStyle('marker', {
 			haloWidth: 1.5,
-			pattern: 'diagonal-down',
 			rotation: -45,
 			size: 2.5,
-			width: 2.3,
 			labelPosition: 'bottom',
-			visible: false,
 			color: '#ff0000'
 		});
-		expect(writer.asBase64()).toBe('Cf4AAKANkIIE3DnghmIEQoJ');
+		writer.writeStyle('area', { pattern: 'diagonal-down', color: '#ff0000' });
+		expect(writer.asBase64()).toBe('Cf4AAKAPkIIEvDMxNAMS');
 	});
 
 	it('should write a RGB color correctly', () => {

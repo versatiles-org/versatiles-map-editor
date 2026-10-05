@@ -41,6 +41,7 @@ import {
 	type StatePopup,
 	type MapState,
 	type StateStyle,
+	type StyleRoleName,
 	type StateViewer
 } from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
@@ -48,9 +49,10 @@ import {
 	canonical,
 	colorKey,
 	encodedValue,
-	STYLE_FIELDS,
+	roleOf,
+	styleFields,
 	STYLE_KEY_PARAMETER,
-	STYLE_REMOVE_KEY,
+	styleRemoveKey,
 	STYLE_REFERENCE_PARAMETER,
 	StyleHistory
 } from './style_history.js';
@@ -236,13 +238,14 @@ export class StateWriter {
 	/** The styles of an element, unless it repeats those of the element before: the style, and for areas the outline. */
 	private writeElementStyles(element: StateElement, repeat: boolean) {
 		if (repeat) return;
-		this.writeOptionalStyle(element.style);
-		if (element.type === 'polygon' || element.type === 'circle') this.writeOptionalStyle(element.strokeStyle);
+		this.writeOptionalStyle(roleOf(element.type), element.style);
+		if (element.type === 'polygon' || element.type === 'circle')
+			this.writeOptionalStyle('outline', element.strokeStyle);
 	}
 
-	private writeOptionalStyle(style: StateStyle | undefined) {
+	private writeOptionalStyle(role: StyleRoleName, style: StateStyle | undefined) {
 		this.writeBit(style !== undefined);
-		if (style) this.writeStyle(style);
+		if (style) this.writeStyle(role, style);
 	}
 
 	/** The label of a marker: 1 bit whether it has one, then the string. */
@@ -470,11 +473,11 @@ export class StateWriter {
 			// the styles like those of elements, which can refer to them
 			if (entry.style) {
 				this.writeInteger(LEGEND_ENTRY_KEYS.style, 4);
-				this.writeStyle(entry.style);
+				this.writeStyle(roleOf(entry.type), entry.style);
 			}
 			if ('strokeStyle' in entry && entry.strokeStyle) {
 				this.writeInteger(LEGEND_ENTRY_KEYS.strokeStyle, 4);
-				this.writeStyle(entry.strokeStyle);
+				this.writeStyle('outline', entry.strokeStyle);
 			}
 			if (entry.label) {
 				this.writeInteger(LEGEND_ENTRY_KEYS.label, 4);
@@ -495,32 +498,33 @@ export class StateWriter {
 	}
 
 	/**
-	 * A style: a reference to a similar earlier style (0: none) and only the differences to it,
-	 * whichever is shortest.
+	 * A style of the role: a reference to a similar earlier style of the role (0: none) and only the
+	 * differences to it, whichever is shortest.
 	 */
-	writeStyle(style: StateStyle) {
+	writeStyle(role: StyleRoleName, style: StateStyle) {
 		style = withoutUnusedFields(style);
 		let best: StateWriter | undefined;
 		for (let ref = 0; ref <= this.styleHistory.length; ref++) {
+			if (ref > 0 && !this.styleHistory.isOfRole(ref, role)) continue;
 			const writer = this.fork();
 			writer.writeExpGolomb(ref, STYLE_REFERENCE_PARAMETER);
-			writer.writeStylePatch(this.styleHistory.get(ref) ?? {}, style);
+			writer.writeStylePatch(role, this.styleHistory.get(ref, role) ?? {}, style);
 			if (!best || writer.bits.length < best.bits.length) best = writer;
 		}
 		// not with a spread: a style can have many bits
 		for (const bit of best!.bits) this.bits.push(bit);
 		// the strings the chosen encoding referenced
 		this.nextString = [...best!.nextString];
-		this.styleHistory.remember(style);
+		this.styleHistory.remember(role, style);
 	}
 
-	/** The fields that differ from `base`: changed ones with their value, missing ones as removed. */
-	writeStylePatch(base: StateStyle, style: StateStyle) {
-		for (const field of STYLE_FIELDS) {
+	/** The fields of the role that differ from `base`: changed ones with their value, missing ones as removed. */
+	writeStylePatch(role: StyleRoleName, base: StateStyle, style: StateStyle) {
+		for (const field of styleFields(role)) {
 			const value = encodedValue(style, field);
 			if (value === encodedValue(base, field)) continue;
 			if (value === undefined) {
-				this.writeStyleKey(STYLE_REMOVE_KEY);
+				this.writeStyleKey(styleRemoveKey(role));
 				this.writeStyleKey(field.key);
 				continue;
 			}
@@ -780,9 +784,9 @@ export function bestExpGolombParameter(values: number[]): number {
 
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
 function repeatKey(element: StateElement): string {
-	const key = (style: StateStyle | undefined) => (style ? canonical(style) : '-');
+	const key = (role: StyleRoleName, style: StateStyle | undefined) => (style ? canonical(role, style) : '-');
 	const strokeStyle = 'strokeStyle' in element ? element.strokeStyle : undefined;
-	return [element.type, key(element.style), key(strokeStyle)].join('|');
+	return [element.type, key(roleOf(element.type), element.style), key('outline', strokeStyle)].join('|');
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */
