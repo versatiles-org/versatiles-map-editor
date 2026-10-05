@@ -69,6 +69,8 @@ export class StateReader {
 	private nextString: [number, number] = [0, 0];
 	// the styles read so far
 	private styleHistory = new StyleHistory();
+	/** See `StateWriter.hasPopups`. */
+	private hasPopups = true;
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
@@ -232,6 +234,7 @@ export class StateReader {
 			// Read the metadata
 			root.meta = this.readMetadata();
 			if (!root.meta) delete root.meta;
+			this.hasPopups = this.readBit();
 
 			// Read the elements
 			let previous: StateElement | undefined;
@@ -549,7 +552,7 @@ export class StateReader {
 	/** See `StateWriter.writePopup`: 1 bit whether there is one, then its key/value pairs. */
 	readPopup(): StatePopup | undefined {
 		try {
-			if (!this.readBit()) return undefined;
+			if (!this.hasPopups || !this.readBit()) return undefined;
 			const popup: StatePopup = { text: '' };
 			while (true) {
 				const key = this.readInteger(4);

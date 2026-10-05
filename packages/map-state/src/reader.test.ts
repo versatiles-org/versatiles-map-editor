@@ -261,6 +261,7 @@ describe('StateReader', () => {
 			writer.writeBit(false); // the points of markers and circles from the origin
 			writer.writeBit(false); // no frame
 			writer.writeBit(false); // no metadata
+			writer.writeBit(true); // elements may have popups
 			writer.writeInteger(5, 3); // unknown element key
 			writer.writeInteger(0, 3);
 
@@ -272,9 +273,9 @@ describe('StateReader', () => {
 
 		it('should read a root state', () => {
 			// version 1, no colors, no strings, no camera, the resolution, the origin, one parameter of
-			// the code of the coordinates, points from the origin, no frame, no metadata, no elements
+			// the code of the coordinates, points from the origin, no frame, no metadata, no popups, no elements
 			const reader = StateReader.fromBitString(
-				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0'
+				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0'
 			);
 			const root = reader.readRoot();
 			expect(root).toStrictEqual({ elements: [] });
@@ -297,7 +298,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBitString()).toBe(
-				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000100110000011110000110101000000011100001101010000000000'
+				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000100110000001111000011010100000001110000110101000000000'
 			);
 
 			const reader = new StateReader(writer.bits);
@@ -341,7 +342,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAOKEJYhCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrFoJnEe6EaBRJAAGGqAAAYaoDMNjQ3RE'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDgQAYbAAAYbANAHFCEsRCAAYawAAGGsAADDYAADDYAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWLQTOI90I0CiUAAYaoAABhqgMw2NDdEQ'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -414,7 +415,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QDlChHOTMdACBOhIkOnYyAtOGtIdiCDYBAWHaAYnQDUg'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -486,6 +487,27 @@ describe('StateReader', () => {
 });
 
 describe('popups', () => {
+	it('cost no bit per element in a map without any', () => {
+		const markers = (count: number, popup: boolean): MapState['elements'] =>
+			Array.from({ length: count }, (_, i) => ({
+				type: 'marker',
+				point: [0, 0],
+				...(popup && i === 0 ? { popup: { text: 'x' } } : {})
+			}));
+		const bits = (elements: MapState['elements']) => {
+			const writer = new StateWriter();
+			writer.writeRoot({ elements });
+			return writer.bits.length;
+		};
+		// with one popup, each other marker has a bit for it; without, none has
+		const withPopup = bits(markers(21, true)) - bits(markers(1, true));
+		const without = bits(markers(21, false)) - bits(markers(1, false));
+		expect(withPopup - without).toBe(20);
+		for (const popup of [false, true]) {
+			expect(decodeState(encodeState({ elements: markers(5, popup) })).elements).toStrictEqual(markers(5, popup));
+		}
+	});
+
 	const text = 'Line 1\n**bold** [link](https://example.org) äöü € 🗺️';
 
 	it('round-trip for all element types', () => {

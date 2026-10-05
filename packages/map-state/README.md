@@ -172,7 +172,8 @@ The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`),
 this version is read; a later version can be told apart by it. Then come the palette, the string
 table, the view (`view`, optional: where the author's editor looks), the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
-relative, the frame (optional: the visible area of a shared map), the metadata and the elements.
+relative, the frame (optional: the visible area of a shared map), the metadata, 1 bit whether an
+element has a popup (without one, the elements have no bit for it) and the elements.
 To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,

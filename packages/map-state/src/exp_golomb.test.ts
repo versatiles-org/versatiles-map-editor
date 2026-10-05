@@ -139,8 +139,8 @@ describe('the coordinates of elements', () => {
 	it('cost 1 bit each at the origin', () => {
 		const marker = (lng: number): StateElement => ({ type: 'marker', point: [lng, 0] });
 		const length = (count: number) => encodeState({ elements: Array.from({ length: count }, () => marker(0)) }).length;
-		// each marker: the repeat bit, 2 coordinates, the label and popup flags: 5 bits
-		expect((length(61) - length(1)) * 6).toBeGreaterThanOrEqual(5 * 60);
-		expect((length(61) - length(1)) * 6).toBeLessThan(5 * 60 + 6);
+		// each marker: the repeat bit, 2 coordinates and the label flag: 4 bits (no popup flag, since none has a popup)
+		expect((length(61) - length(1)) * 6).toBeGreaterThanOrEqual(4 * 60);
+		expect((length(61) - length(1)) * 6).toBeLessThan(4 * 60 + 6);
 	});
 });

@@ -68,6 +68,8 @@ export class StateWriter {
 	private nextString: [number, number] = [0, 0];
 	// the styles written so far
 	private styleHistory = new StyleHistory();
+	/** Whether an element of the map has a popup: without one, the elements have no bit for it. */
+	private hasPopups = true;
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
@@ -156,6 +158,8 @@ export class StateWriter {
 		this.writeGrid(root, frame);
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta);
+		this.hasPopups = root.elements.some((element) => !!element.popup?.text);
+		this.writeBit(this.hasPopups);
 
 		let previous: string | undefined;
 		root.elements.forEach((element, index) => {
@@ -488,7 +492,9 @@ export class StateWriter {
 		this.writeInteger(END_KEY, 4);
 	}
 
+	/** A popup: 1 bit whether there is one, unless no element of the map has one, then its key/value pairs. */
 	writePopup(popup?: StatePopup) {
+		if (!this.hasPopups) return;
 		if (!popup?.text) return this.writeBit(false);
 		this.writeBit(true);
 		// key/value pairs like a style, so fields can be added later

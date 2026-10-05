@@ -29,6 +29,7 @@ The first release.
     line, area, outline), the most frequent ones of the role shortest: the end of a style 1 bit,
     the first two fields 3 bits (e.g. `color` and `symbol` of a marker, `color` and `width` of a
     line), the next four 5 bits, the others 7 bits;
+  - 1 bit per map whether an element has a popup: without one, the elements have no bit for it;
   - 1 bit for an element with the type and the styles of the element before; the label of a
     marker is a field of the element, not of its style;
   - coordinates as whole steps from an origin near them, so a link without a view stays short, in
