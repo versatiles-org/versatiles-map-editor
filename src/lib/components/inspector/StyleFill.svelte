@@ -1,9 +1,14 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { FILL_PATTERN_NAMES, type FillPatternName } from '@versatiles/map-state';
+	import {
+		FILL_PATTERN_NAMES,
+		PATTERN_COVERAGE_RANGE,
+		PATTERN_SCALE_RANGE,
+		type FillPatternName
+	} from '@versatiles/map-state';
 	import type { FillStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup } from '#lib/components/ui/index.js';
+	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';
 	import { ColorPicker } from '#lib/components/pickers/index.js';
 
 	/**
@@ -15,7 +20,7 @@
 		doc,
 		colorLabel = 'Color'
 	}: {
-		layers: Pick<FillStyle, 'color' | 'pattern'>[];
+		layers: Pick<FillStyle, 'color' | 'pattern' | 'patternScale' | 'patternCoverage'>[];
 		doc: MapDocumentInteractive;
 		/** The name of the color, e.g. "Fill color" next to the color of an outline. */
 		colorLabel?: string;
@@ -24,6 +29,10 @@
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
 	const pattern = $derived(group(layers, 'pattern'));
+	const patternScale = $derived(group(layers, 'patternScale'));
+	const patternCoverage = $derived(group(layers, 'patternCoverage'));
+	// the size and the coverage only count with a pattern
+	const anyPattern = $derived(layers.some((layer) => layer.pattern !== 'solid'));
 	const NAMES: Record<FillPatternName, string> = {
 		solid: 'Solid',
 		'diagonal-up': 'Diagonal up',
@@ -99,3 +108,29 @@
 		{/snippet}
 	</ChoiceGroup>
 </InputRow>
+
+{#if anyPattern}
+	<InputRow id="{uid}-patternScale" label="Pattern size" mixed={patternScale.mixed}>
+		<Slider
+			id="{uid}-patternScale"
+			min={PATTERN_SCALE_RANGE[0]}
+			max={PATTERN_SCALE_RANGE[1]}
+			step={0.5}
+			bind:value={patternScale.value}
+			onchange={log}
+			unit="×"
+		/>
+	</InputRow>
+	<InputRow id="{uid}-patternCoverage" label="Coverage" mixed={patternCoverage.mixed}>
+		<Slider
+			id="{uid}-patternCoverage"
+			min={PATTERN_COVERAGE_RANGE[0]}
+			max={PATTERN_COVERAGE_RANGE[1]}
+			step={0.05}
+			scale={100}
+			bind:value={patternCoverage.value}
+			onchange={log}
+			unit="%"
+		/>
+	</InputRow>
+{/if}

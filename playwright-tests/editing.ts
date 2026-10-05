@@ -696,6 +696,47 @@ test(
 	}
 );
 
+test('the size and the coverage of a fill pattern, only with a pattern', async ({ page }) => {
+	const points: [number, number][] = [
+		[13.35, 52.48],
+		[13.45, 52.48],
+		[13.4, 52.52]
+	];
+	await page.goto(
+		'/#' + encodeState({ map: { center: [13.4, 52.5], radius: 10000 }, elements: [{ type: 'polygon', points }] })
+	);
+	await waitForMapIsReady(page);
+	const fill = async () => (await storedState(page)).elements[0].style;
+	const images = () =>
+		page.evaluate(() =>
+			(window as unknown as MapWindow).map.listImages().filter((id) => id.startsWith('fill-pattern:'))
+		);
+
+	await page.mouse.click(...(await project(page, [13.4, 52.49])));
+	const size = page.getByRole('spinbutton', { name: 'Pattern size' });
+	const coverage = page.getByRole('spinbutton', { name: 'Coverage' });
+	await expect(size).toHaveCount(0);
+
+	await page.getByRole('radiogroup', { name: 'Pattern' }).getByRole('radio', { name: 'Dots' }).check();
+	await expect(coverage).toHaveValue('50');
+	await size.fill('2');
+	await size.press('Enter');
+	await coverage.fill('25');
+	await coverage.press('Enter');
+	await expect.poll(fill).toStrictEqual({ pattern: 'dots', patternScale: 2, patternCoverage: 0.25 });
+	await expect.poll(images).toContain('fill-pattern:dots:2:0.25:#ff0000');
+
+	// one undo step per change
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(fill).toStrictEqual({ pattern: 'dots', patternScale: 2 });
+
+	// a solid fill has neither
+	await page.mouse.click(...(await project(page, [13.4, 52.49])));
+	await page.getByRole('radiogroup', { name: 'Pattern' }).getByRole('radio', { name: 'Solid' }).check();
+	await expect(size).toHaveCount(0);
+	await expect.poll(fill).toBeUndefined();
+});
+
 test(
 	'the color picker is a popup, which stays in the viewport and opens where it was moved to',
 	{ tag: '@cross-browser' },

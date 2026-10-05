@@ -16,4 +16,18 @@ describe('entryStyle', () => {
 		line.arrowEnd = 'none';
 		expect(doc.legend.entries[0].style).toBeUndefined();
 	});
+
+	it('edits the size and the coverage of a pattern, without them if the fill is solid', () => {
+		const doc = new MapDocumentInteractive(new MockMap() as unknown as MaplibreMap);
+		doc.legend = { entries: [{ type: 'polygon', label: 'Zone' }] };
+		const fill = entryStyle(doc, 0, 'style', 'fill');
+		expect([fill.pattern, fill.patternScale, fill.patternCoverage]).toStrictEqual(['solid', 1, 0.5]);
+
+		fill.pattern = 'dots';
+		fill.patternScale = 2;
+		fill.patternCoverage = 0.25;
+		expect(doc.legend.entries[0].style).toStrictEqual({ pattern: 'dots', patternScale: 2, patternCoverage: 0.25 });
+		fill.pattern = 'solid';
+		expect(doc.legend.entries[0].style).toBeUndefined();
+	});
 });
