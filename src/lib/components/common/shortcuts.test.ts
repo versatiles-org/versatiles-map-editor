@@ -13,6 +13,7 @@ describe('isOwnKeyTarget', () => {
 		expect(keyOn('<input>', 'input')).toBe(true);
 		expect(keyOn('<div role="slider"><span></span></div>', 'span')).toBe(true);
 		expect(keyOn('<div role="menu"><button></button></div>', 'button')).toBe(true);
+		expect(keyOn('<button role="combobox"></button>', 'button')).toBe(true);
 	});
 
 	it('leaves other keys to the shortcuts', () => {

@@ -12,6 +12,8 @@ export { default as Icon, type IconName } from './Icon.svelte';
 export { default as IconButton } from './IconButton.svelte';
 export { default as InputRow } from './InputRow.svelte';
 export { default as Notifications } from './Notifications.svelte';
+export { default as PictureSelect } from './PictureSelect.svelte';
+export { belowElement, besideElement, keepInViewport, type Position } from './popup_position.js';
 export { default as Select } from './Select.svelte';
 export { default as Slider } from './Slider.svelte';
 export { default as TextArea } from './TextArea.svelte';

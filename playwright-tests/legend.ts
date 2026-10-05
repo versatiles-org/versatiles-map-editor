@@ -179,7 +179,8 @@ test(
 		await expect
 			.poll(stored)
 			.toStrictEqual({ type: 'polygon', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
-		await entry.getByRole('radio', { name: 'Diagonal up', exact: true }).check();
+		await entry.getByRole('combobox', { name: 'Pattern' }).click();
+		await page.getByRole('option', { name: 'Diagonal up', exact: true }).click();
 		await entry.getByRole('checkbox', { name: 'Outline' }).check();
 		await expect.poll(stored).toStrictEqual({
 			type: 'polygon',

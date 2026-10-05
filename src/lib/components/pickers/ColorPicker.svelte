@@ -1,12 +1,18 @@
 <script lang="ts" module>
-	import { besideElement, keepInViewport, type Position } from './popup_position.js';
+	import {
+		besideElement,
+		IconButton,
+		keepInViewport,
+		Select,
+		TextField,
+		type Position
+	} from '#lib/components/ui/index.js';
 
 	// Where the user dragged a color picker to: all of them open there, until the page is reloaded
 	let dragged: Position | undefined;
 </script>
 
 <script lang="ts">
-	import { IconButton, Select, TextField } from '#lib/components/ui/index.js';
 	import { formatHex, parseColor, type RGBA } from '@versatiles/map-state';
 	import ColorSliders from './ColorSliders.svelte';
 	import ColorSwatches from './ColorSwatches.svelte';

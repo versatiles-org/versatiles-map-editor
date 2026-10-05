@@ -37,3 +37,15 @@ export function besideElement(element: Rect, top: number, size: Size, viewport: 
 	if (x < MARGIN) x = element.right + MARGIN;
 	return keepInViewport({ x, y: top }, size, viewport);
 }
+
+/** The distance of a drop-down list to its button. */
+const GAP = 2;
+
+/** Below an element, e.g. the button of a drop-down list, or above it if there is no room below. */
+export function belowElement(element: Rect & { bottom: number }, size: Size, viewport: Size): Position {
+	let y = element.bottom + GAP;
+	if (y + size.height > viewport.height - MARGIN && element.top - GAP - size.height >= MARGIN) {
+		y = element.top - GAP - size.height;
+	}
+	return keepInViewport({ x: element.left, y }, size, viewport);
+}

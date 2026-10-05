@@ -650,16 +650,38 @@ test(
 		await page.goto('/#' + encodeState(state));
 		await waitForMapIsReady(page);
 		const polygon = async () =>
-			(await storedState(page)).elements[0] as { style?: { pattern?: number }; strokeStyle?: { width?: number } };
+			(await storedState(page)).elements[0] as { style?: { pattern?: string }; strokeStyle?: { width?: number } };
+		const pattern = async () => (await polygon()).style?.pattern;
 
-		// the fill pattern as pictures, chosen by click and by arrow keys
+		// the fill pattern in a drop-down list with pictures, chosen by click
 		await page.mouse.click(...(await project(page, [13.4, 52.49])));
-		const patterns = page.getByRole('radiogroup', { name: 'Pattern' });
-		await expect(patterns.getByRole('radio')).toHaveCount(8);
-		await patterns.getByRole('radio', { name: 'Diagonal up', exact: true }).check();
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-up');
-		await page.keyboard.press('ArrowRight');
-		await expect.poll(async () => (await polygon()).style?.pattern).toBe('diagonal-down');
+		const patterns = page.getByRole('combobox', { name: 'Pattern' });
+		await expect(patterns).toHaveText('Solid');
+		await patterns.click();
+		await expect(page.getByRole('listbox').getByRole('option')).toHaveCount(8);
+		await page.getByRole('option', { name: 'Diagonal up', exact: true }).click();
+		await expect(page.getByRole('listbox')).toHaveCount(0);
+		await expect.poll(pattern).toBe('diagonal-up');
+		await expect(patterns).toBeFocused();
+		// and by keys: closed, an arrow key chooses the next one, as in a list of the browser
+		await patterns.press('ArrowDown');
+		await expect.poll(pattern).toBe('diagonal-down');
+		// open, the arrow keys move and Enter chooses
+		await patterns.press('Enter');
+		await expect(patterns).toHaveAttribute('aria-expanded', 'true');
+		await patterns.press('ArrowDown');
+		await patterns.press('Enter');
+		await expect.poll(pattern).toBe('horizontal');
+		// Escape closes it without a change, and keeps the selection
+		await patterns.press('Enter');
+		await patterns.press('End');
+		await patterns.press('Escape');
+		await expect(patterns).toHaveAttribute('aria-expanded', 'false');
+		await expect(patterns).toBeVisible();
+		await expect.poll(pattern).toBe('horizontal');
+		// a letter jumps to a pattern that starts with it, and is no shortcut of the editor
+		await patterns.press('v');
+		await expect.poll(pattern).toBe('vertical');
 
 		// a slider shows its value
 		const width = page.getByRole('slider', { name: 'Width' });
@@ -717,7 +739,8 @@ test('the size and the coverage of a fill pattern, only with a pattern', async (
 	const coverage = page.getByRole('spinbutton', { name: 'Coverage' });
 	await expect(size).toHaveCount(0);
 
-	await page.getByRole('radiogroup', { name: 'Pattern' }).getByRole('radio', { name: 'Dots' }).check();
+	await page.getByRole('combobox', { name: 'Pattern' }).click();
+	await page.getByRole('option', { name: 'Dots' }).click();
 	await expect(coverage).toHaveValue('50');
 	await size.fill('2');
 	await size.press('Enter');
@@ -732,7 +755,8 @@ test('the size and the coverage of a fill pattern, only with a pattern', async (
 
 	// a solid fill has neither
 	await page.mouse.click(...(await project(page, [13.4, 52.49])));
-	await page.getByRole('radiogroup', { name: 'Pattern' }).getByRole('radio', { name: 'Solid' }).check();
+	await page.getByRole('combobox', { name: 'Pattern' }).click();
+	await page.getByRole('option', { name: 'Solid' }).click();
 	await expect(size).toHaveCount(0);
 	await expect.poll(fill).toBeUndefined();
 });

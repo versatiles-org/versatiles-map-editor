@@ -8,7 +8,7 @@
 	} from '@versatiles/map-state';
 	import type { FillStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';
+	import { InputRow, PictureSelect, Slider } from '#lib/components/ui/index.js';
 	import { ColorPicker } from '#lib/components/pickers/index.js';
 
 	/**
@@ -44,16 +44,19 @@
 		dots: 'Dots'
 	};
 	const patterns = FILL_PATTERN_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
-	// the pictures: vertical lines (and horizontal ones for the crosses) turned by an angle, or dots
-	const PICTURES: Record<FillPatternName, { angle: number; cross?: boolean; dots?: boolean }> = {
-		solid: { angle: 0 },
-		'diagonal-up': { angle: 45 },
-		'diagonal-down': { angle: -45 },
-		horizontal: { angle: 90 },
-		vertical: { angle: 0 },
-		cross: { angle: 0, cross: true },
-		'diagonal-cross': { angle: 45, cross: true },
-		dots: { angle: 0, dots: true }
+	/** Stripes of `width` pixels, 6 pixels apart, across the direction `angle` (0: horizontal). */
+	const stripes = (angle: number, width = 2.5) =>
+		`repeating-linear-gradient(${angle}deg, currentColor 0 ${width}px, transparent ${width}px 6px)`;
+	// the pictures, as backgrounds in the color of the text
+	const PICTURES: Record<FillPatternName, string> = {
+		solid: 'color-mix(in srgb, currentColor 60%, transparent)',
+		'diagonal-up': stripes(-45),
+		'diagonal-down': stripes(45),
+		horizontal: stripes(0),
+		vertical: stripes(90),
+		cross: `${stripes(0, 1.5)}, ${stripes(90, 1.5)}`,
+		'diagonal-cross': `${stripes(45, 1.5)}, ${stripes(-45, 1.5)}`,
+		dots: 'radial-gradient(circle, currentColor 1.6px, transparent 2px) 0 0 / 6px 6px'
 	};
 </script>
 
@@ -61,10 +64,9 @@
 	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
-<InputRow label="Pattern" id="{uid}-pattern" mixed={pattern.mixed} group>
-	<ChoiceGroup
-		layout="pictures"
-		labelledby="{uid}-pattern-label"
+<InputRow label="Pattern" id="{uid}-pattern" mixed={pattern.mixed}>
+	<PictureSelect
+		id="{uid}-pattern"
 		value={pattern.value}
 		mixed={pattern.mixed}
 		onchange={(name) => {
@@ -74,39 +76,9 @@
 		options={patterns}
 	>
 		{#snippet picture(name)}
-			{@const { angle, cross, dots } = PICTURES[name]}
-			<svg width="40" height="18" aria-hidden="true">
-				<defs>
-					<pattern
-						id="{uid}-pattern-{name}"
-						width="6"
-						height="6"
-						patternUnits="userSpaceOnUse"
-						patternTransform="rotate({angle})"
-					>
-						{#if dots}
-							<circle cx="3" cy="3" r="1.6" fill="currentColor" />
-						{:else}
-							<line x1="3" y1="0" x2="3" y2="6" stroke="currentColor" stroke-width={cross ? 1.5 : 2.5} />
-							{#if cross}
-								<line x1="0" y1="3" x2="6" y2="3" stroke="currentColor" stroke-width="1.5" />
-							{/if}
-						{/if}
-					</pattern>
-				</defs>
-				<rect
-					x="1"
-					y="1"
-					width="38"
-					height="16"
-					rx="2"
-					fill={name === 'solid' ? 'currentColor' : `url(#${uid}-pattern-${name})`}
-					fill-opacity={name === 'solid' ? 0.6 : 1}
-					stroke="currentColor"
-				/>
-			</svg>
+			<span class="picture" style:background={PICTURES[name]}></span>
 		{/snippet}
-	</ChoiceGroup>
+	</PictureSelect>
 </InputRow>
 
 {#if anyPattern}
@@ -134,3 +106,15 @@
 		/>
 	</InputRow>
 {/if}
+
+<style>
+	/* a small area with the pattern, in the color of the text */
+	.picture {
+		flex: none;
+		box-sizing: border-box;
+		width: 32px;
+		height: 16px;
+		border: 1px solid currentColor;
+		border-radius: var(--radius-sm);
+	}
+</style>

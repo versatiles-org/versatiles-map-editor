@@ -2,7 +2,7 @@ import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 
 // The fields, lists and checkboxes of the editor are the components of ui/ (TextField, TextArea,
-// Select, Checkbox, Slider, ChoiceGroup), so they all look alike (see fields.css). Only these
+// Select, PictureSelect, Checkbox, Slider, ChoiceGroup), so they all look alike (see fields.css). Only these
 // components use the elements of the browser.
 
 /** Raw form controls outside ui/, which have no look of their own. */

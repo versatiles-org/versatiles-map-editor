@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { besideElement, keepInViewport } from './popup_position.js';
+import { belowElement, besideElement, keepInViewport } from './popup_position.js';
 
 const viewport = { width: 1000, height: 600 };
 const size = { width: 240, height: 400 };
@@ -29,5 +29,23 @@ describe('besideElement', () => {
 
 	it('opens right of the element, without room on the left', () => {
 		expect(besideElement({ left: 100, top: 0, right: 300 }, 100, size, viewport)).toStrictEqual({ x: 308, y: 100 });
+	});
+});
+
+describe('belowElement', () => {
+	const list = { width: 200, height: 300 };
+
+	it('opens below the element, at its left edge', () => {
+		expect(belowElement({ left: 800, top: 100, right: 980, bottom: 128 }, list, viewport)).toStrictEqual({
+			x: 792,
+			y: 130
+		});
+	});
+
+	it('opens above the element, without room below', () => {
+		expect(belowElement({ left: 500, top: 400, right: 680, bottom: 428 }, list, viewport)).toStrictEqual({
+			x: 500,
+			y: 98
+		});
 	});
 });
