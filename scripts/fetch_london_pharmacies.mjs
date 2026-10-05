@@ -111,7 +111,6 @@ const state = {
 		legend: { entries: [{ type: 'marker', style: { color: COLOR, symbol: SYMBOL }, label: 'Pharmacy' }] },
 		viewer: { search: 'top-left', legend: 'none' },
 		title: 'Pharmacies in Inner London',
-		labelFont: 'noto_sans_bold',
 		// readable at every zoom level: labels that would overlap are hidden, and all are shown only
 		// from the zoom level where the streets of the city are drawn
 		labelOverlap: 'hide',
@@ -120,14 +119,17 @@ const state = {
 	elements: pharmacies.map(({ point, name }) => ({
 		type: 'marker',
 		point,
+		...(name && { label: name }),
 		style: {
 			color: COLOR,
 			size: 0.8,
+			labelSize: 0.8,
+			halo: 2,
 			symbol: SYMBOL,
-			...(name && { label: name }),
 			// the label above the symbol
-			align: 3,
-			labelColor: LABEL_COLOR
+			labelPosition: 'top',
+			labelColor: LABEL_COLOR,
+			font: 'noto_sans_bold'
 		}
 	}))
 };

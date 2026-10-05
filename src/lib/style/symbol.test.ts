@@ -18,7 +18,6 @@ describe('SymbolStyle', () => {
 			'font',
 			'halo',
 			'haloColor',
-			'label',
 			'labelColor',
 			'labelPosition',
 			'labelSize',
@@ -172,7 +171,6 @@ describe('SymbolStyle', () => {
 			size: 2,
 			halo: 3,
 			symbol: 'icons:anchor',
-			label: 'Test Label',
 			labelPosition: 'left'
 		});
 	});
@@ -184,7 +182,6 @@ describe('SymbolStyle', () => {
 			size: 3,
 			halo: 2,
 			symbol: 'icons:anchor',
-			label: 'New Label',
 			labelPosition: 'left'
 		});
 
@@ -193,24 +190,26 @@ describe('SymbolStyle', () => {
 		expect(layer.size).toBe(3);
 		expect(layer.halo).toBe(2);
 		expect(layer.symbol).toBe('icons:anchor');
-		expect(layer.label).toBe('New Label');
 		expect(layer.labelPosition).toBe('left');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
-		layer.setState({ halo: 0, size: 2, label: 'Label', symbol: 'icons:anchor' });
+		layer.label = 'Label';
+		layer.setState({ halo: 0, size: 2, symbol: 'icons:anchor' });
 		layer.setState({ color: '#00ff00' });
 
 		expect(layer.color).toBe('#00ff00');
 		expect(layer.halo).toBe(1);
 		expect(layer.size).toBe(1);
-		expect(layer.label).toBe('');
+		// the label is a field of the marker, not of its style
+		expect(layer.label).toBe('Label');
+		expect(layer.getState()).toStrictEqual({ color: '#00ff00' });
 		expect(layer.symbol).toBe('base:icon-embassy');
 	});
 
 	it('should restore falsy values', () => {
-		layer.patch({ halo: 0, rotate: 90, label: 'Label', labelPosition: 'left' });
-		layer.patch({ rotate: 0, label: '', labelPosition: 'auto' });
+		layer.patch({ halo: 0, rotate: 90, labelPosition: 'left' });
+		layer.patch({ rotate: 0, labelPosition: 'auto' });
 
 		expect(layer.halo).toBe(0);
 		expect(layer.rotate).toBe(0);

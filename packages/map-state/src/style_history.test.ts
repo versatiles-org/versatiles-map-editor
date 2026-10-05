@@ -18,7 +18,8 @@ const markers: MapState = {
 		type: 'marker' as const,
 		point: [(1300 + i) / 100, (5200 + i) / 100] as [number, number],
 		// upper case, as the decoder returns colors
-		style: { color: ['#e41a1c', '#377eb8', '#4daf4a'][i % 3], symbol: 'icons:anchor', size: 1.5, label: `Place ${i}` }
+		label: `Place ${i}`,
+		style: { color: ['#e41a1c', '#377eb8', '#4daf4a'][i % 3], symbol: 'icons:anchor', size: 1.5 }
 	}))
 };
 
@@ -98,7 +99,8 @@ describe('style references', () => {
 			elements: Array.from({ length: STYLE_HISTORY_SIZE * 2 }, (_, i) => ({
 				type: 'marker' as const,
 				point: [0, 0] as [number, number],
-				style: { rotate: i % (STYLE_HISTORY_SIZE + 5), label: 'x' }
+				label: 'x',
+				style: { rotate: i % (STYLE_HISTORY_SIZE + 5) }
 			}))
 		};
 		expect(decode(encode(state))).toStrictEqual(state);

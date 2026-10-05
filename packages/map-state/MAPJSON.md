@@ -66,7 +66,8 @@ its elements, on the editor's default background map.
 		{
 			"type": "marker",
 			"point": [13.4, 52.52],
-			"style": { "symbol": "icons:anchor", "color": "#0072b2", "label": "Landing stage", "labelPosition": "right" },
+			"label": "Landing stage",
+			"style": { "symbol": "icons:anchor", "color": "#0072b2", "labelPosition": "right" },
 			"popup": { "text": "**Boats** to the lakes, see [the timetable](https://example.org)" }
 		}
 	]
@@ -103,7 +104,8 @@ its elements, on the editor's default background map.
 
 Every element has a `type`, its geometry, a `style`, and optionally a `popup`: `{ "text": "…" }`,
 shown when the element is clicked in a shared map. Its `text` is plain, with `**bold**`, line
-breaks and links (`[label](https://…)` or a bare URL).
+breaks and links (`[label](https://…)` or a bare URL). A marker can also have a `label`, the text
+next to its symbol, which its style styles.
 
 | `type`    | Geometry                                                                                | Styles                                        |
 | --------- | --------------------------------------------------------------------------------------- | --------------------------------------------- |
@@ -129,7 +131,6 @@ optional.
 | `rotate`          | the symbol, in whole degrees clockwise, −180 to 180, default `0`                                                                                                                                                              | –                                                                                                          | –                                                                                                                                                                                                   |
 | `halo`            | around the symbol and the label, in pixels, default `1`                                                                                                                                                                       | –                                                                                                          | –                                                                                                                                                                                                   |
 | `haloColor`       | default `"#ffffff"`                                                                                                                                                                                                           | –                                                                                                          | –                                                                                                                                                                                                   |
-| `label`           | the text next to the symbol, default `""` (none)                                                                                                                                                                              | –                                                                                                          | –                                                                                                                                                                                                   |
 | `labelColor`      | default `"#000000"`                                                                                                                                                                                                           | –                                                                                                          | –                                                                                                                                                                                                   |
 | `labelSize`       | a factor of the label (16 pixels), default `1`                                                                                                                                                                                | –                                                                                                          | –                                                                                                                                                                                                   |
 | `font`            | the glyph font of the label, e.g. `"noto_sans_bold"`; default `""`, the font of the background map                                                                                                                            | –                                                                                                          | –                                                                                                                                                                                                   |
@@ -196,7 +197,7 @@ of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `ty
 `"line"` or `"polygon"` (an area, also for circles), and `style` and `strokeStyle` are styles like
 those of an element of that type (see [Styles](#styles)), with the same defaults: e.g. a marker
 entry without a style is a red flag. Only polygons have a `strokeStyle`, for their outline. The
-`label` of a marker style is not shown; the entry's `label` is its text.
+entry's `label` is its text.
 
 | Field    | Values                                                                           | Default        |
 | -------- | -------------------------------------------------------------------------------- | -------------- |

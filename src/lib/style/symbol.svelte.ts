@@ -109,7 +109,7 @@ export class SymbolStyle extends StylePart {
 	#size: number = $state(SYMBOL_DEFAULTS.size);
 	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
-	#label: string = $state(SYMBOL_DEFAULTS.label);
+	#label: string = $state('');
 	#labelPosition: LabelPositionName = $state(SYMBOL_DEFAULTS.labelPosition);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
 	#font: string = $state(SYMBOL_DEFAULTS.font);
@@ -166,6 +166,10 @@ export class SymbolStyle extends StylePart {
 		this.#symbol = value;
 		this.changed();
 	}
+	/**
+	 * The text of the label, which this layer draws. It is content, not style: a field of the
+	 * marker (`StateElementMarker.label`), so `getState` and `patch` leave it out.
+	 */
 	get label(): string {
 		return this.#label;
 	}
@@ -260,7 +264,6 @@ export class SymbolStyle extends StylePart {
 				labelSize: this.labelSize,
 				halo: this.halo,
 				symbol: this.symbol,
-				label: this.label,
 				labelPosition: this.labelPosition,
 				labelColor: this.labelColor,
 				font: this.font,
@@ -277,7 +280,6 @@ export class SymbolStyle extends StylePart {
 		if (style.labelSize != null) this.labelSize = style.labelSize;
 		if (style.halo != null) this.halo = style.halo;
 		if (style.symbol != null) this.symbol = style.symbol;
-		if (style.label != null) this.label = style.label;
 		if (style.labelPosition != null) this.labelPosition = style.labelPosition;
 		if (style.labelColor != null) this.labelColor = style.labelColor;
 		if (style.font != null) this.font = style.font;

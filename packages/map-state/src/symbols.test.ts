@@ -20,7 +20,8 @@ function markers(n: number, count: number): MapState {
 		elements: Array.from({ length: n }, (_, i) => ({
 			type: 'marker' as const,
 			point: [(1300 + i) / 100, (5200 + ((i * 37) % 100)) / 100] as [number, number],
-			style: { symbol: `base:icon-symbol_${i % count}`, color: colors[i % colors.length], label: `Place ${i}` }
+			label: `Place ${i}`,
+			style: { symbol: `base:icon-symbol_${i % count}`, color: colors[i % colors.length] }
 		}))
 	};
 }
@@ -47,7 +48,7 @@ describe('symbols', () => {
 		const state: MapState = {
 			elements: [
 				{ type: 'marker', point: [13, 52], style: { symbol: '' } },
-				{ type: 'marker', point: [13.1, 52], style: { label: 'A' } }
+				{ type: 'marker', point: [13.1, 52], label: 'A' }
 			]
 		};
 		expect(decode(encode(state))).toStrictEqual(state);

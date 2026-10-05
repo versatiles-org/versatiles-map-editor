@@ -81,13 +81,13 @@ describe('the JSON Schema of .mapjson files', () => {
 				{
 					type: 'marker',
 					point: [13.4, 52.5],
+					label: 'M',
 					style: {
 						symbol: 'icons:anchor',
 						color: '#0000ff80',
 						size: 2,
 						rotate: -45,
 						halo: 2,
-						label: 'M',
 						labelSize: 1.5,
 						font: 'noto_sans_bold',
 						labelPosition: 'top'

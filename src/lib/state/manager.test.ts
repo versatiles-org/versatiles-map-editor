@@ -13,7 +13,7 @@ describe('StateManager', () => {
 			center: [1, 2],
 			radius: 16
 		},
-		elements: [{ type: 'marker', point: [3, 4], style: { label: 'test' } }]
+		elements: [{ type: 'marker', point: [3, 4], label: 'test' }]
 	};
 	const state2: MapState = {
 		view: {
@@ -58,7 +58,7 @@ describe('StateManager', () => {
 			mapDocument.setState(state1);
 			const hash = stateManager.getHash();
 			expect(mapDocument.getState).toHaveBeenCalled();
-			expect(hash).toBe('IAQDDvlmyh20LQSiEBEyFhMHhqA4agPg');
+			expect(hash).toBe('IAQDDvlmyh20LQSiEBEyFhMHhqA4agG');
 		});
 	});
 

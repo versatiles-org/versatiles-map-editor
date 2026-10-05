@@ -9,7 +9,7 @@ describe('large inputs', () => {
 
 	it('round-trip a very long popup and label', () => {
 		const state: MapState = {
-			elements: [{ type: 'marker', point: [1, 2], style: { label: long }, popup: { text: long } }]
+			elements: [{ type: 'marker', point: [1, 2], label: long, popup: { text: long } }]
 		};
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});

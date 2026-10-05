@@ -127,7 +127,7 @@ test('styling the background map', async ({ page }) => {
 test('the satellite imagery without streets, borders and labels', async ({ page }) => {
 	const state: MapState = {
 		view: { center: [13.4, 52.5], radius: 10000 },
-		elements: [{ type: 'marker', point: [13.4, 52.5], style: { label: 'Cafe' } }]
+		elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Cafe' }]
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
@@ -433,7 +433,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 	const at = (): [number, number] => [13.39 + random() * 0.02, 52.495 + random() * 0.01];
 	const kinds: (() => MapState['elements'][number])[] = [
 		() => ({ type: 'marker', point: at() }),
-		() => ({ type: 'marker', point: at(), style: { label: 'Label' } }),
+		() => ({ type: 'marker', point: at(), label: 'Label' }),
 		() => ({ type: 'polygon', points: [at(), at(), at()] }),
 		() => ({ type: 'polygon', points: [at(), at(), at()], strokeStyle: { visible: false } }),
 		() => ({ type: 'circle', point: at(), radius: 200 }),
@@ -444,7 +444,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 	const reference = (markersOnTop: boolean) => {
 		const parts = (e: MapState['elements'][number], i: number) =>
 			e.type === 'marker'
-				? [`${i} symbol`, ...(e.style?.label ? [`${i} label`] : [])]
+				? [`${i} symbol`, ...(e.type === 'marker' && e.label ? [`${i} label`] : [])]
 				: [
 						...(e.type === 'line' ? [] : [`${i} fill`]),
 						...('strokeStyle' in e && e.strokeStyle?.visible === false ? [] : [`${i} stroke`])

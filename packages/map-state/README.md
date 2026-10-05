@@ -24,7 +24,7 @@ import { encodeState, decodeState, stateToGeoJSON, type MapState } from '@versat
 
 const state: MapState = {
 	view: { center: [13.4, 52.5], radius: 5000 },
-	elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#0000ff', label: 'Berlin' } }]
+	elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Berlin', style: { color: '#0000ff' } }]
 };
 
 const hash = encodeState(state); // e.g. for https://your-editor/#…
@@ -194,8 +194,8 @@ To keep hashes short:
 - the choices of a style (the fill pattern, the dashes, the arrowheads and the position of the
   label) are names in the state, and in the base64 string the index of the name in its table;
 - an element that has the type and the styles of the element before costs 1 bit for them; the
-  label of an element's style is stored as a field of the element, so elements that differ only
-  in their labels still repeat their style;
+  label of a marker is a field of the element (1 bit, then the string), so markers that differ
+  only in their labels still repeat their style;
 - the coordinates of the frame and the elements are whole steps from an origin near them (the center
   of the frame, else of the view, else of the elements, rounded to 1/100 degree), with a global
   step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each zoom

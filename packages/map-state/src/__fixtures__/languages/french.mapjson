@@ -11,9 +11,9 @@
 		{
 			"type": "marker",
 			"point": [2.3376, 48.8606],
+			"label": "Musée du Louvre",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée du Louvre"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "Musée du Louvre\nRue de Rivoli, 75001 Paris\nOuvert tous les jours sauf le mardi, de 9 h à 18 h"
@@ -22,9 +22,9 @@
 		{
 			"type": "marker",
 			"point": [2.3266, 48.86],
+			"label": "Musée d’Orsay",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée d’Orsay"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "Musée d’Orsay\nEsplanade Valéry Giscard d’Estaing, 75007 Paris\nPeintures impressionnistes et post-impressionnistes"
@@ -33,9 +33,9 @@
 		{
 			"type": "marker",
 			"point": [2.3522, 48.8606],
+			"label": "Centre Pompidou",
 			"style": {
-				"color": "#0072b2",
-				"label": "Centre Pompidou"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "Centre Pompidou\nPlace Georges-Pompidou, 75004 Paris\nFermé pour travaux jusqu’en 2030"
@@ -44,25 +44,25 @@
 		{
 			"type": "marker",
 			"point": [2.3159, 48.8553],
+			"label": "Musée Rodin",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée Rodin"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [2.3226, 48.8638],
+			"label": "Musée de l’Orangerie",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée de l’Orangerie"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [2.3146, 48.866],
+			"label": "Petit Palais",
 			"style": {
-				"color": "#0072b2",
-				"label": "Petit Palais"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "Petit Palais\nAvenue Winston-Churchill, 75008 Paris\nMusée des Beaux-Arts de la Ville de Paris, accès libre"
@@ -71,17 +71,17 @@
 		{
 			"type": "marker",
 			"point": [2.3624, 48.8598],
+			"label": "Musée Picasso",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée Picasso"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [2.3625, 48.8576],
+			"label": "Musée Carnavalet",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée Carnavalet"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "Musée Carnavalet\n23 rue de Sévigné, 75003 Paris\nL’histoire de Paris, entrée gratuite aux collections permanentes"
@@ -90,17 +90,17 @@
 		{
 			"type": "marker",
 			"point": [2.2976, 48.8609],
+			"label": "Musée du quai Branly – Jacques Chirac",
 			"style": {
-				"color": "#0072b2",
-				"label": "Musée du quai Branly – Jacques Chirac"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [2.3879, 48.8956],
+			"label": "Cité des sciences et de l’industrie",
 			"style": {
-				"color": "#0072b2",
-				"label": "Cité des sciences et de l’industrie"
+				"color": "#0072b2"
 			}
 		}
 	]

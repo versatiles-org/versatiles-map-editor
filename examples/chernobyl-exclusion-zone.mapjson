@@ -50,13 +50,13 @@
 		{
 			"type": "marker",
 			"point": [30.099, 51.389],
+			"label": "Nuclear power plant",
 			"style": {
 				"color": "#ff4d4d",
 				"size": 1.3,
 				"labelSize": 1.3,
 				"halo": 1.5,
 				"symbol": "icons:nuclear",
-				"label": "Nuclear power plant",
 				"labelPosition": "bottom",
 				"labelColor": "#ff4d4d",
 				"font": "noto_sans_bold",
@@ -69,10 +69,10 @@
 		{
 			"type": "marker",
 			"point": [30.0569, 51.4056],
+			"label": "Pripyat",
 			"style": {
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
-				"label": "Pripyat",
 				"labelPosition": "top",
 				"labelColor": "#ffc84d",
 				"font": "noto_sans_bold",
@@ -85,10 +85,10 @@
 		{
 			"type": "marker",
 			"point": [30.2219, 51.2763],
+			"label": "Chernobyl",
 			"style": {
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
-				"label": "Chernobyl",
 				"labelColor": "#ffc84d",
 				"font": "noto_sans_bold",
 				"haloColor": "#000000"
@@ -98,10 +98,10 @@
 		{
 			"type": "marker",
 			"point": [30.7547, 51.5226],
+			"label": "Slavutych",
 			"style": {
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
-				"label": "Slavutych",
 				"labelColor": "#ffc84d",
 				"font": "noto_sans_bold",
 				"haloColor": "#000000"

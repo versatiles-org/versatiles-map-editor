@@ -267,11 +267,6 @@
 					"description": "The color of the symbol, the line, or the area, with its opacity.",
 					"default": "#ff0000"
 				},
-				"label": {
-					"type": "string",
-					"description": "Markers: the text of the label; \"\" for none.",
-					"default": ""
-				},
 				"visible": {
 					"type": "boolean",
 					"description": "Outlines: whether the outline is drawn.",
@@ -392,6 +387,11 @@
 				},
 				"point": {
 					"$ref": "#/definitions/Position"
+				},
+				"label": {
+					"type": "string",
+					"description": "The text of the label next to the symbol; none if it is missing or \"\".",
+					"default": ""
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",

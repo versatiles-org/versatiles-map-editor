@@ -20,13 +20,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07193, 51.5735],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -35,13 +35,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07237, 51.57244],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -50,13 +50,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09532, 51.57048],
+			"label": "Rowlands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rowlands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -65,13 +65,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11416, 51.57005],
+			"label": "Nuchem Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Nuchem Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -80,13 +80,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10908, 51.56754],
+			"label": "Dispensing Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dispensing Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -95,13 +95,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13443, 51.56506],
+			"label": "Well Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Well Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -122,13 +122,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09288, 51.56423],
+			"label": "Armstrong Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Armstrong Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -149,13 +149,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07858, 51.5623],
+			"label": "Safedale",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Safedale",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -164,13 +164,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07343, 51.56212],
+			"label": "Benjamin Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Benjamin Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -179,13 +179,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15025, 51.5616],
+			"label": "M. Simmonds Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "M. Simmonds Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -194,13 +194,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08338, 51.56101],
+			"label": "Safedale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Safedale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -209,13 +209,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0984, 51.56071],
+			"label": "C+H Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "C+H Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -224,13 +224,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12222, 51.55988],
+			"label": "Wellcare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Wellcare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -239,13 +239,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11551, 51.55979],
+			"label": "Devs Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Devs Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -266,13 +266,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0902, 51.55764],
+			"label": "Safedale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Safedale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -281,13 +281,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08329, 51.55695],
+			"label": "Allen Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Allen Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -296,13 +296,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13876, 51.55682],
+			"label": "DH Roberts Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "DH Roberts Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -311,13 +311,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17878, 51.55658],
+			"label": "Ritz Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ritz Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -326,13 +326,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17764, 51.55628],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -341,13 +341,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11103, 51.55607],
+			"label": "Hornsey Road Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hornsey Road Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -356,13 +356,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05555, 51.55599],
+			"label": "F.A. Strange",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "F.A. Strange",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -371,13 +371,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03913, 51.55581],
+			"label": "Bees Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bees Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -386,13 +386,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16628, 51.55496],
+			"label": "Hampstead Heath Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hampstead Heath Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -401,13 +401,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14521, 51.55486],
+			"label": "Eico Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Eico Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -416,13 +416,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17199, 51.5547],
+			"label": "Keats Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Keats Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -431,13 +431,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16598, 51.55448],
+			"label": "House of Mistry",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "House of Mistry",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -446,13 +446,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15515, 51.55401],
+			"label": "Macey Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Macey Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -461,13 +461,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21172, 51.55379],
+			"label": "Lever Medical Centre",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lever Medical Centre",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -476,13 +476,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16239, 51.55374],
+			"label": "Pharmacyrepublic",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pharmacyrepublic",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -491,13 +491,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07498, 51.55367],
+			"label": "ABC Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "ABC Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -518,13 +518,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04428, 51.55309],
+			"label": "Regal Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Regal Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -533,13 +533,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21029, 51.55262],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -548,13 +548,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08587, 51.55164],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -563,13 +563,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03452, 51.55163],
+			"label": "Silverfields Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Silverfields Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -578,13 +578,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05156, 51.55157],
+			"label": "Friends Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Friends Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -593,13 +593,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05177, 51.55108],
+			"label": "Safedale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Safedale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -608,13 +608,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1656, 51.55063],
+			"label": "Revital",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Revital",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -623,13 +623,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11777, 51.55057],
+			"label": "Caledonian Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Caledonian Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -638,13 +638,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16536, 51.55054],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -653,13 +653,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08688, 51.55011],
+			"label": "Mahesh Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Mahesh Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -668,13 +668,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14103, 51.55003],
+			"label": "Wellcare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Wellcare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -683,13 +683,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15281, 51.54945],
+			"label": "sandy Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "sandy Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -698,13 +698,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10828, 51.54932],
+			"label": "Egerton Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Egerton Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -713,13 +713,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17113, 51.54921],
+			"label": "Village Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Village Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -728,13 +728,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05497, 51.54906],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -743,13 +743,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19128, 51.54883],
+			"label": "Central Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Central Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -758,13 +758,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04108, 51.54882],
+			"label": "Silverfields Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Silverfields Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -773,13 +773,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05484, 51.54881],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -788,13 +788,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1283, 51.54867],
+			"label": "York Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "York Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -803,13 +803,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07518, 51.54862],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -818,13 +818,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14085, 51.54849],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -833,13 +833,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07572, 51.54782],
+			"label": "Edmunds",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Edmunds",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -848,13 +848,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14108, 51.54779],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -875,13 +875,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15175, 51.54669],
+			"label": "Camden Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Camden Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -890,13 +890,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05539, 51.54647],
+			"label": "Carsil Perfumery + Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Carsil Perfumery + Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -905,13 +905,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14139, 51.54644],
+			"label": "A&H Chinese Medicine Acupunture Herbs",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "A&H Chinese Medicine Acupunture Herbs",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -920,13 +920,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16209, 51.54613],
+			"label": "Allchin Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Allchin Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -935,13 +935,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14152, 51.54585],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -950,13 +950,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03516, 51.54526],
+			"label": "Bees Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bees Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -965,13 +965,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10341, 51.54512],
+			"label": "Rose Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rose Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -980,13 +980,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17708, 51.54506],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -995,13 +995,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04601, 51.54477],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1010,13 +1010,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17625, 51.54453],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1025,13 +1025,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04697, 51.54439],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1040,13 +1040,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17277, 51.54355],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1067,13 +1067,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15673, 51.54191],
+			"label": "Primrose Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Primrose Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1082,13 +1082,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07583, 51.54157],
+			"label": "Kingsland Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kingsland Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1097,13 +1097,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13854, 51.54134],
+			"label": "Biotech Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Biotech Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1112,13 +1112,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09517, 51.54073],
+			"label": "Apex Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Apex Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1127,13 +1127,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10277, 51.54017],
+			"label": "Clan Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clan Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1142,13 +1142,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09702, 51.54006],
+			"label": "Osbon Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Osbon Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1157,13 +1157,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11703, 51.54003],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1172,13 +1172,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05375, 51.54001],
+			"label": "Sonigra Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sonigra Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1187,13 +1187,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09657, 51.53999],
+			"label": "Savemain Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Savemain Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1202,13 +1202,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19367, 51.53855],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1217,13 +1217,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14251, 51.53851],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1232,13 +1232,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04475, 51.53826],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1247,13 +1247,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09208, 51.53805],
+			"label": "North London Health Centre",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "North London Health Centre",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1262,13 +1262,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19311, 51.538],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1277,13 +1277,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1419, 51.5377],
+			"label": "JP Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "JP Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1292,13 +1292,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18454, 51.53766],
+			"label": "Hodgetts Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hodgetts Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1307,13 +1307,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06116, 51.5373],
+			"label": "Clarks Healthcare",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clarks Healthcare",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1322,13 +1322,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10089, 51.53728],
+			"label": "Essex Chemist & Opticians",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Essex Chemist & Opticians",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1337,13 +1337,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09635, 51.53684],
+			"label": "Benzpharm",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Benzpharm",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1352,13 +1352,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11696, 51.53604],
+			"label": "Clockwork Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clockwork Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1367,13 +1367,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06247, 51.53584],
+			"label": "Norlington Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Norlington Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1382,13 +1382,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07708, 51.53522],
+			"label": "Clarks Healthcare",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clarks Healthcare",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1397,13 +1397,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13931, 51.53505],
+			"label": "Medicine Box Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Medicine Box Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1412,13 +1412,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09845, 51.53472],
+			"label": "St Peter's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "St Peter's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1439,13 +1439,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02732, 51.53413],
+			"label": "Parnell Pharmacy & Perfumery",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Parnell Pharmacy & Perfumery",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1454,13 +1454,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17106, 51.53396],
+			"label": "St Johns Wood Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "St Johns Wood Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1469,13 +1469,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10746, 51.53348],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1484,13 +1484,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10879, 51.53339],
+			"label": "Endo Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Endo Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1499,13 +1499,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02987, 51.53317],
+			"label": "Sinclairs Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sinclairs Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1514,13 +1514,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10638, 51.53302],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1529,13 +1529,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12696, 51.53263],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1544,13 +1544,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0317, 51.53238],
+			"label": "Bell Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bell Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1559,13 +1559,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16943, 51.53229],
+			"label": "Courtenay Chemists",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Courtenay Chemists",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1574,13 +1574,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1805, 51.53186],
+			"label": "Holmes Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Holmes Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1589,13 +1589,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12469, 51.5318],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1604,13 +1604,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05626, 51.53106],
+			"label": "Borno",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Borno",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1619,13 +1619,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18589, 51.53012],
+			"label": "Vineyard Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Vineyard Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1634,13 +1634,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16784, 51.52973],
+			"label": "Lord's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lord's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1649,13 +1649,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08368, 51.52956],
+			"label": "Judd's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Judd's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1664,13 +1664,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13293, 51.52951],
+			"label": "Evergreen Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Evergreen Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1679,13 +1679,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04625, 51.52945],
+			"label": "Massingham Chemists",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Massingham Chemists",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1694,13 +1694,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1294, 51.52922],
+			"label": "Baban Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Baban Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1709,13 +1709,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1105, 51.52914],
+			"label": "W.C & K. King Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "W.C & K. King Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1724,13 +1724,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14451, 51.52893],
+			"label": "Kings Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kings Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1739,13 +1739,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0703, 51.52871],
+			"label": "Columbia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Columbia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1754,13 +1754,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04947, 51.52836],
+			"label": "Britannia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Britannia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1769,13 +1769,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13257, 51.52811],
+			"label": "Well Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Well Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1784,13 +1784,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19632, 51.52763],
+			"label": "Browns Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Browns Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1799,13 +1799,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01758, 51.52735],
+			"label": "Bow Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bow Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1814,13 +1814,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02577, 51.52732],
+			"label": "Mayor's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Mayor's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1829,13 +1829,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12455, 51.52692],
+			"label": "John Walker Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "John Walker Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1844,13 +1844,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05966, 51.52687],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1859,13 +1859,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01036, 51.52672],
+			"label": "Tesco Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Tesco Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1874,13 +1874,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06397, 51.52666],
+			"label": "Old Maids Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Old Maids Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1889,13 +1889,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1384, 51.52663],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1904,13 +1904,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06452, 51.5266],
+			"label": "Florida Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Florida Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1919,13 +1919,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06236, 51.52659],
+			"label": "Fairdale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fairdale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1934,13 +1934,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20535, 51.52628],
+			"label": "Medicare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Medicare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1949,13 +1949,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03019, 51.52593],
+			"label": "Forward Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Forward Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1964,13 +1964,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17864, 51.52576],
+			"label": "Remedy's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Remedy's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1979,13 +1979,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09013, 51.52564],
+			"label": "Apex Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Apex Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -1994,13 +1994,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10974, 51.52539],
+			"label": "Rowlands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rowlands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2009,13 +2009,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17984, 51.52519],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2024,13 +2024,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0335, 51.52515],
+			"label": "Chrischem Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chrischem Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2039,13 +2039,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19772, 51.52502],
+			"label": "Pitchkins & Currans",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pitchkins & Currans",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2054,13 +2054,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20194, 51.52452],
+			"label": "Prince Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Prince Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2069,13 +2069,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12444, 51.52443],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2084,13 +2084,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13795, 51.52431],
+			"label": "Grafton Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Grafton Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2099,13 +2099,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17665, 51.52427],
+			"label": "Curie Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Curie Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2114,13 +2114,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16929, 51.52396],
+			"label": "Woods Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Woods Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2129,13 +2129,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01495, 51.52384],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2144,13 +2144,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20688, 51.52375],
+			"label": "Dillons Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dillons Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2159,13 +2159,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13757, 51.52374],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2174,13 +2174,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05454, 51.52314],
+			"label": "Region Choice Ltd",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Region Choice Ltd",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2189,13 +2189,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11463, 51.52289],
+			"label": "Gray's Inn Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Gray's Inn Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2204,13 +2204,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15843, 51.52288],
+			"label": "Berkeley Court Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Berkeley Court Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2219,13 +2219,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1575, 51.52285],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2234,13 +2234,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09772, 51.5228],
+			"label": "Chauhan S Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chauhan S Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2249,13 +2249,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17102, 51.52277],
+			"label": "Market Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Market Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2264,13 +2264,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19397, 51.52273],
+			"label": "Sumer Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sumer Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2279,13 +2279,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1734, 51.52253],
+			"label": "Dales Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dales Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2306,13 +2306,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20811, 51.52197],
+			"label": "Dr Care Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dr Care Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2321,13 +2321,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09202, 51.52188],
+			"label": "Portmans Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Portmans Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2336,13 +2336,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14365, 51.52177],
+			"label": "Chel Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chel Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2351,13 +2351,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20947, 51.52135],
+			"label": "Golborne Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Golborne Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2366,13 +2366,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12342, 51.5211],
+			"label": "Zen",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Zen",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2381,13 +2381,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19177, 51.521],
+			"label": "Benson Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Benson Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2396,13 +2396,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15302, 51.52059],
+			"label": "Peter's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Peter's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2411,13 +2411,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15652, 51.52056],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2426,13 +2426,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14268, 51.52036],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2453,13 +2453,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13352, 51.52022],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2468,13 +2468,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22596, 51.51994],
+			"label": "Shelly's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Shelly's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2483,13 +2483,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12199, 51.51991],
+			"label": "Holborn Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Holborn Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2498,13 +2498,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15622, 51.51986],
+			"label": "Sherlock Holmes Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sherlock Holmes Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2513,13 +2513,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1604, 51.51953],
+			"label": "Meacher Higgins and Thomas",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Meacher Higgins and Thomas",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2528,13 +2528,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10593, 51.51949],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2543,13 +2543,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15157, 51.51945],
+			"label": "Madesil Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Madesil Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2558,13 +2558,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06063, 51.51919],
+			"label": "Shanty's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Shanty's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2573,13 +2573,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16364, 51.51913],
+			"label": "Seymour Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Seymour Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2588,13 +2588,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16908, 51.51909],
+			"label": "Devonshire Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Devonshire Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2603,13 +2603,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16841, 51.51908],
+			"label": "Queen Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Queen Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2618,13 +2618,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15032, 51.51891],
+			"label": "Dajani Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dajani Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2633,13 +2633,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1365, 51.5188],
+			"label": "My London Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "My London Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2648,13 +2648,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15017, 51.51873],
+			"label": "Ainsworth Homeopathic Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ainsworth Homeopathic Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2663,13 +2663,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0883, 51.51866],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2678,13 +2678,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14044, 51.51864],
+			"label": "Shiv Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Shiv Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2693,13 +2693,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06301, 51.51862],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2708,13 +2708,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15565, 51.51858],
+			"label": "N.V.S. Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "N.V.S. Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2723,13 +2723,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14215, 51.51831],
+			"label": "Healthxchange Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Healthxchange Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2738,13 +2738,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03821, 51.51828],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2753,13 +2753,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02481, 51.51823],
+			"label": "Lincoln Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lincoln Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2768,13 +2768,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08295, 51.51821],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2783,13 +2783,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21062, 51.51804],
+			"label": "Spivack Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Spivack Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2798,13 +2798,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10842, 51.51797],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2813,13 +2813,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16692, 51.51796],
+			"label": "Safeer Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Safeer Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2828,13 +2828,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07936, 51.5179],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2843,13 +2843,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03975, 51.51774],
+			"label": "Sinclairs Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sinclairs Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2858,13 +2858,13 @@
 		{
 			"type": "marker",
 			"point": [-0.125, 51.51738],
+			"label": "Kerrs",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kerrs",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2873,13 +2873,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06977, 51.51738],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2888,13 +2888,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16679, 51.51729],
+			"label": "Pharmacentre",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pharmacentre",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2903,13 +2903,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15149, 51.51728],
+			"label": "King's",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "King's",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2918,13 +2918,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12051, 51.51722],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2933,13 +2933,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16581, 51.5172],
+			"label": "Prince Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Prince Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2948,13 +2948,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14187, 51.51715],
+			"label": "Church Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Church Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2963,13 +2963,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12351, 51.51714],
+			"label": "Chinese Medicine Centre",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chinese Medicine Centre",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2978,13 +2978,13 @@
 		{
 			"type": "marker",
 			"point": [-0.2096, 51.51709],
+			"label": "Chana Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chana Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -2993,13 +2993,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17272, 51.51709],
+			"label": "Apek Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Apek Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3008,13 +3008,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13127, 51.51709],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3023,13 +3023,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18819, 51.51697],
+			"label": "Bayswater Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bayswater Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3038,13 +3038,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14305, 51.51697],
+			"label": "Shiv",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Shiv",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3053,13 +3053,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1553, 51.51676],
+			"label": "Zen pharmacy & clinic",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Zen pharmacy & clinic",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3068,13 +3068,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14731, 51.51651],
+			"label": "Wigmore Medical",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Wigmore Medical",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3083,13 +3083,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14904, 51.51645],
+			"label": "John Bell & Croyden",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "John Bell & Croyden",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3098,13 +3098,13 @@
 		{
 			"type": "marker",
 			"point": [-0.2052, 51.51641],
+			"label": "Blenheim Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Blenheim Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3125,13 +3125,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16496, 51.5162],
+			"label": "Prince Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Prince Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3140,13 +3140,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17602, 51.51608],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3155,13 +3155,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1637, 51.51578],
+			"label": "Kings Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kings Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3170,13 +3170,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16407, 51.51556],
+			"label": "Bin-Seena Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bin-Seena Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3185,13 +3185,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19072, 51.51541],
+			"label": "Nashi Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Nashi Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3200,13 +3200,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12288, 51.51537],
+			"label": "Essentials",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Essentials",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3215,13 +3215,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16308, 51.51535],
+			"label": "Al Razi Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Al Razi Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3230,13 +3230,13 @@
 		{
 			"type": "marker",
 			"point": [-0.139, 51.51533],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3245,13 +3245,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24905, 51.51503],
+			"label": "Marcus Jones Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Marcus Jones Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3260,13 +3260,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20515, 51.51489],
+			"label": "Dr Evans Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dr Evans Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3275,13 +3275,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16283, 51.51474],
+			"label": "Al Farabi Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Al Farabi Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3290,13 +3290,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1321, 51.51466],
+			"label": "Watsons",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Watsons",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3305,13 +3305,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16666, 51.51462],
+			"label": "Hogg & Son Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hogg & Son Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3320,13 +3320,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05036, 51.51452],
+			"label": "Jaypharm Chemists",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Jaypharm Chemists",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3335,13 +3335,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09451, 51.51445],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3350,13 +3350,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18773, 51.51441],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3365,13 +3365,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08581, 51.51439],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3380,13 +3380,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14822, 51.51429],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3395,13 +3395,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09319, 51.51423],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3410,13 +3410,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05689, 51.51416],
+			"label": "DMB Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "DMB Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3425,13 +3425,13 @@
 		{
 			"type": "marker",
 			"point": [-0.2482, 51.51412],
+			"label": "Westway Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Westway Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3440,13 +3440,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20088, 51.5141],
+			"label": "Baywood Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Baywood Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3455,13 +3455,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14048, 51.51408],
+			"label": "The Organic Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "The Organic Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3470,13 +3470,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01477, 51.51406],
+			"label": "Lansbury Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lansbury Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3485,13 +3485,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1567, 51.51382],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3500,13 +3500,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09614, 51.5136],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3515,13 +3515,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05007, 51.51356],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3530,13 +3530,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07646, 51.51348],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3545,13 +3545,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15539, 51.51345],
+			"label": "Life",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Life",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3560,13 +3560,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17936, 51.51339],
+			"label": "Moore's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Moore's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3575,13 +3575,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0057, 51.5133],
+			"label": "Britannia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Britannia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3590,13 +3590,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1245, 51.51314],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3605,13 +3605,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06875, 51.51298],
+			"label": "Sai Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sai Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3620,13 +3620,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00542, 51.51287],
+			"label": "Britannia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Britannia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3635,13 +3635,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15054, 51.51273],
+			"label": "Nelsons Homeopathic Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Nelsons Homeopathic Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3650,13 +3650,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15348, 51.51254],
+			"label": "Gould Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Gould Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3665,13 +3665,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14335, 51.51252],
+			"label": "C. W. Andrew",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "C. W. Andrew",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3680,13 +3680,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02832, 51.51211],
+			"label": "Nash Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Nash Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3695,13 +3695,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0143, 51.51201],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3710,13 +3710,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23456, 51.51127],
+			"label": "Hamlins Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hamlins Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3725,13 +3725,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08966, 51.51125],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3740,13 +3740,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0564, 51.5112],
+			"label": "Ali's",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ali's",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3755,13 +3755,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12036, 51.51074],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3770,13 +3770,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13469, 51.51034],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3785,13 +3785,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23067, 51.51026],
+			"label": "Pestle & Mortar Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pestle & Mortar Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3800,13 +3800,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15172, 51.50977],
+			"label": "Audley Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Audley Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3815,13 +3815,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12365, 51.50967],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3830,13 +3830,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19705, 51.50944],
+			"label": "Notting Hill Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Notting Hill Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3845,13 +3845,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12388, 51.50918],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3860,13 +3860,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19753, 51.50911],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3875,13 +3875,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00979, 51.50891],
+			"label": "Britannia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Britannia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3890,13 +3890,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19628, 51.50889],
+			"label": "Calder Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Calder Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3905,13 +3905,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22202, 51.50856],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3920,13 +3920,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12471, 51.50834],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3935,13 +3935,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10619, 51.508],
+			"label": "osbon pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "osbon pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3950,13 +3950,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21618, 51.50773],
+			"label": "Faro Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Faro Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3965,13 +3965,13 @@
 		{
 			"type": "marker",
 			"point": [-0.2072, 51.50688],
+			"label": "Hillcrest Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hillcrest Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3980,13 +3980,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23903, 51.5066],
+			"label": "Jays Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Jays Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -3995,13 +3995,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23546, 51.50658],
+			"label": "Pestle & Mortar Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pestle & Mortar Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4010,13 +4010,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23306, 51.50656],
+			"label": "Bush Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bush Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4025,13 +4025,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14622, 51.50643],
+			"label": "The Pharmacy At Mayfair",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "The Pharmacy At Mayfair",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4040,13 +4040,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23753, 51.50631],
+			"label": "Jays Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Jays Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4055,13 +4055,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23044, 51.50604],
+			"label": "Babylon Health Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Babylon Health Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4070,13 +4070,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22771, 51.50587],
+			"label": "Green Light Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Green Light Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4085,13 +4085,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05827, 51.50541],
+			"label": "Tower Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Tower Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4100,13 +4100,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08966, 51.50487],
+			"label": "City Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "City Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4115,13 +4115,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01739, 51.50479],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4130,13 +4130,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22081, 51.50465],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4145,13 +4145,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07508, 51.50385],
+			"label": "Towerbridge Wellness Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Towerbridge Wellness Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4160,13 +4160,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21854, 51.50363],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4175,13 +4175,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24344, 51.50322],
+			"label": "Windwood Chemists",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Windwood Chemists",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4190,13 +4190,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22361, 51.50303],
+			"label": "Caregrange Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Caregrange Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4205,13 +4205,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11624, 51.50297],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4220,13 +4220,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01768, 51.50293],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4235,13 +4235,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15722, 51.50244],
+			"label": "Prince Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Prince Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4250,13 +4250,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22789, 51.5023],
+			"label": "Lime Grove Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lime Grove Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4265,13 +4265,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18832, 51.50227],
+			"label": "Prince Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Prince Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4280,13 +4280,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22874, 51.50214],
+			"label": "Fitness Fuel & Pharmacy on Wheels",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fitness Fuel & Pharmacy on Wheels",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4295,13 +4295,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11189, 51.50133],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4310,13 +4310,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1931, 51.5008],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4325,13 +4325,13 @@
 		{
 			"type": "marker",
 			"point": [0.00594, 51.50066],
+			"label": "Mangal Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Mangal Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4340,13 +4340,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22659, 51.5005],
+			"label": "Gate Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Gate Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4367,13 +4367,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22227, 51.49978],
+			"label": "Healthside Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Healthside Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4382,13 +4382,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1968, 51.49956],
+			"label": "The Pestle & Mortar",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "The Pestle & Mortar",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4397,13 +4397,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05282, 51.4995],
+			"label": "Albion Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Albion Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4412,13 +4412,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16468, 51.49889],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4427,13 +4427,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13373, 51.49888],
+			"label": "Dolphins Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dolphins Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4442,13 +4442,13 @@
 		{
 			"type": "marker",
 			"point": [0.09005, 51.49885],
+			"label": "First Care Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "First Care Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4457,13 +4457,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15783, 51.4987],
+			"label": "A. Moore & Co.",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "A. Moore & Co.",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4472,13 +4472,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02569, 51.49841],
+			"label": "Barkantine Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barkantine Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4487,13 +4487,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01077, 51.49832],
+			"label": "Allen's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Allen's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4502,13 +4502,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1666, 51.49831],
+			"label": "Alnoor Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Alnoor Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4517,13 +4517,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16624, 51.49809],
+			"label": "Hayatt Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hayatt Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4532,13 +4532,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07614, 51.49795],
+			"label": "Amadi Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Amadi Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4547,13 +4547,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16543, 51.49776],
+			"label": "Zen Pharmacy & Clinic",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Zen Pharmacy & Clinic",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4562,13 +4562,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21731, 51.49755],
+			"label": "Forrest Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Forrest Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4577,13 +4577,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16758, 51.49734],
+			"label": "Life Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Life Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4592,13 +4592,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14061, 51.49727],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4607,13 +4607,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11206, 51.4972],
+			"label": "Cam Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Cam Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4622,13 +4622,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06956, 51.49703],
+			"label": "Hobbs Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hobbs Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4637,13 +4637,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13737, 51.49701],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4652,13 +4652,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13365, 51.49698],
+			"label": "Star Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Star Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4667,13 +4667,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08248, 51.49669],
+			"label": "Harfleur Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Harfleur Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4682,13 +4682,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1926, 51.49665],
+			"label": "Kensington Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kensington Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4697,13 +4697,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20687, 51.49646],
+			"label": "H Lloyd Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "H Lloyd Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4712,13 +4712,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14726, 51.49632],
+			"label": "Keencare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Keencare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4727,13 +4727,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11191, 51.49601],
+			"label": "Lambeth Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lambeth Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4742,13 +4742,13 @@
 		{
 			"type": "marker",
 			"point": [-0.2083, 51.49586],
+			"label": "H. Lloyd Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "H. Lloyd Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4757,13 +4757,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14427, 51.49577],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4772,13 +4772,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04717, 51.49573],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4787,13 +4787,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10172, 51.49544],
+			"label": "St George's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "St George's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4802,13 +4802,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04656, 51.49497],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4817,13 +4817,13 @@
 		{
 			"type": "marker",
 			"point": [0.01341, 51.49488],
+			"label": "Amal Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Amal Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4832,13 +4832,13 @@
 		{
 			"type": "marker",
 			"point": [-0.183, 51.49472],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4847,13 +4847,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14596, 51.49446],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4862,13 +4862,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01234, 51.49408],
+			"label": "Britannia Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Britannia Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4877,13 +4877,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12726, 51.49403],
+			"label": "Victoria Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Victoria Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4892,13 +4892,13 @@
 		{
 			"type": "marker",
 			"point": [0.08281, 51.49401],
+			"label": "Vantage Pharmacy Whinchat Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Vantage Pharmacy Whinchat Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4907,13 +4907,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07469, 51.49395],
+			"label": "Cambelle Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Cambelle Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4922,13 +4922,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18198, 51.49376],
+			"label": "Bliss Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bliss Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4937,13 +4937,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15128, 51.49375],
+			"label": "Walden Chymist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Walden Chymist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4952,13 +4952,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15781, 51.49345],
+			"label": "Andrews Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Andrews Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4967,13 +4967,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17518, 51.49344],
+			"label": "Harleys Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Harleys Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4982,13 +4982,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13883, 51.49273],
+			"label": "Clinichem Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clinichem Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -4997,13 +4997,13 @@
 		{
 			"type": "marker",
 			"point": [-0.227, 51.49253],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5012,13 +5012,13 @@
 		{
 			"type": "marker",
 			"point": [0.07345, 51.49252],
+			"label": "Royal Arsenal Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Royal Arsenal Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5027,13 +5027,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17781, 51.49249],
+			"label": "Dajani Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dajani Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5042,13 +5042,13 @@
 		{
 			"type": "marker",
 			"point": [0.06426, 51.49249],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5057,13 +5057,13 @@
 		{
 			"type": "marker",
 			"point": [0.05563, 51.49242],
+			"label": "N S Warwick Ltd",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "N S Warwick Ltd",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5072,13 +5072,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20133, 51.4924],
+			"label": "Tesco Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Tesco Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5087,13 +5087,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13983, 51.49237],
+			"label": "Gees Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Gees Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5102,13 +5102,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06491, 51.49237],
+			"label": "Pyramid Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pyramid Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5117,13 +5117,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04611, 51.49237],
+			"label": "Surdock Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Surdock Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5132,13 +5132,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19298, 51.49202],
+			"label": "Earls Court Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Earls Court Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5147,13 +5147,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14028, 51.49196],
+			"label": "Warwick Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Warwick Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5162,13 +5162,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14048, 51.49183],
+			"label": "Bencrest Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bencrest Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5177,13 +5177,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19262, 51.49177],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5192,13 +5192,13 @@
 		{
 			"type": "marker",
 			"point": [0.06624, 51.4916],
+			"label": "Pyramid Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pyramid Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5207,13 +5207,13 @@
 		{
 			"type": "marker",
 			"point": [0.06668, 51.49146],
+			"label": "St James Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "St James Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5222,13 +5222,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16038, 51.49144],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5237,13 +5237,13 @@
 		{
 			"type": "marker",
 			"point": [0.06776, 51.49112],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5252,13 +5252,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02112, 51.4911],
+			"label": "Docklands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Docklands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5267,13 +5267,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16614, 51.49079],
+			"label": "Chelsea Green Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chelsea Green Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5282,13 +5282,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08081, 51.49071],
+			"label": "AR Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "AR Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5297,13 +5297,13 @@
 		{
 			"type": "marker",
 			"point": [0.06746, 51.49045],
+			"label": "Alpha Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Alpha Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5312,13 +5312,13 @@
 		{
 			"type": "marker",
 			"point": [0.06859, 51.49024],
+			"label": "Woolwich Late Night Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Woolwich Late Night Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5327,13 +5327,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21353, 51.49001],
+			"label": "Barons Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barons Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5342,13 +5342,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13499, 51.48968],
+			"label": "Portman Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Portman Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5357,13 +5357,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03501, 51.48958],
+			"label": "Pepys Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pepys Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5372,13 +5372,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20635, 51.4895],
+			"label": "North End Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "North End Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5387,13 +5387,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18998, 51.48942],
+			"label": "Zafash",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Zafash",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5402,13 +5402,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07855, 51.48937],
+			"label": "Lings Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lings Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5417,13 +5417,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09658, 51.48931],
+			"label": "Walworth Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Walworth Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5432,13 +5432,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16521, 51.48906],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5447,13 +5447,13 @@
 		{
 			"type": "marker",
 			"point": [0.02236, 51.48895],
+			"label": "Asda",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Asda",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5462,13 +5462,13 @@
 		{
 			"type": "marker",
 			"point": [0.0247, 51.48889],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5477,13 +5477,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0763, 51.48876],
+			"label": "Tesco Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Tesco Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5492,13 +5492,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0075, 51.48876],
+			"label": "Cubitt Town Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Cubitt Town Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5507,13 +5507,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13792, 51.48834],
+			"label": "Paxall Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Paxall Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5522,13 +5522,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09562, 51.48834],
+			"label": "Ridgway Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ridgway Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5537,13 +5537,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14143, 51.48765],
+			"label": "Simmonds Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Simmonds Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5552,13 +5552,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22029, 51.4873],
+			"label": "Rowlands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rowlands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5567,13 +5567,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1151, 51.48674],
+			"label": "Tesco Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Tesco Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5582,13 +5582,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06262, 51.48647],
+			"label": "Bonamy Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bonamy Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5609,13 +5609,13 @@
 		{
 			"type": "marker",
 			"point": [0.00766, 51.48616],
+			"label": "Pyramid Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pyramid Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5624,13 +5624,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17213, 51.4861],
+			"label": "I.T. Lloyds Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "I.T. Lloyds Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5639,13 +5639,13 @@
 		{
 			"type": "marker",
 			"point": [0.00691, 51.48586],
+			"label": "P.E. Logan Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "P.E. Logan Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5654,13 +5654,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0937, 51.48539],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5669,13 +5669,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18229, 51.48532],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5684,13 +5684,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22013, 51.48467],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5699,13 +5699,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06959, 51.48456],
+			"label": "Asda",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Asda",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5714,13 +5714,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18186, 51.48451],
+			"label": "CW Medicines",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "CW Medicines",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5729,13 +5729,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11048, 51.48424],
+			"label": "MedipharmacyGroup",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "MedipharmacyGroup",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5744,13 +5744,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03164, 51.48358],
+			"label": "Lockyer Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lockyer Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5759,13 +5759,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17806, 51.4827],
+			"label": "Medicine Chest",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Medicine Chest",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5774,13 +5774,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10276, 51.48251],
+			"label": "Maddock Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Maddock Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5789,13 +5789,13 @@
 		{
 			"type": "marker",
 			"point": [0.03648, 51.48182],
+			"label": "Village Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Village Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5804,13 +5804,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18067, 51.48175],
+			"label": "Worlds End Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Worlds End Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5819,13 +5819,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02082, 51.48083],
+			"label": "Rose Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rose Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5834,13 +5834,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18413, 51.48075],
+			"label": "Jhoots Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Jhoots Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5849,13 +5849,13 @@
 		{
 			"type": "marker",
 			"point": [0.06947, 51.48061],
+			"label": "Herbert Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Herbert Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5864,13 +5864,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11407, 51.48058],
+			"label": "Vitellow Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Vitellow Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5879,13 +5879,13 @@
 		{
 			"type": "marker",
 			"point": [0.03204, 51.47988],
+			"label": "Kevin's Charlton Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kevin's Charlton Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5894,13 +5894,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09981, 51.47964],
+			"label": "Sheel Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sheel Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5909,13 +5909,13 @@
 		{
 			"type": "marker",
 			"point": [0.0877, 51.47934],
+			"label": "Temple Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Temple Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5924,13 +5924,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11234, 51.47829],
+			"label": "Millennium Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Millennium Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5939,13 +5939,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01246, 51.47801],
+			"label": "Duncan's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Duncan's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5954,13 +5954,13 @@
 		{
 			"type": "marker",
 			"point": [0.01902, 51.47765],
+			"label": "Blackheath Standard Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Blackheath Standard Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5969,13 +5969,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1232, 51.47764],
+			"label": "Reena's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Reena's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5984,13 +5984,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0319, 51.47708],
+			"label": "New Cross Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "New Cross Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -5999,13 +5999,13 @@
 		{
 			"type": "marker",
 			"point": [0.02144, 51.47668],
+			"label": "Pyramid Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pyramid Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6014,13 +6014,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16865, 51.47666],
+			"label": "HealthChem",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "HealthChem",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6029,13 +6029,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10605, 51.4761],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6044,13 +6044,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21558, 51.47607],
+			"label": "Fulham Palace Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fulham Palace Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6071,13 +6071,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03192, 51.47606],
+			"label": "Station Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Station Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6098,13 +6098,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13219, 51.47486],
+			"label": "Halls Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Halls Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6113,13 +6113,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06871, 51.47485],
+			"label": "Lloyds Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lloyds Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6128,13 +6128,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02646, 51.47478],
+			"label": "Krisons",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Krisons",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6143,13 +6143,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09341, 51.47471],
+			"label": "Kembers & Lawrence",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kembers & Lawrence",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6158,13 +6158,13 @@
 		{
 			"type": "marker",
 			"point": [0.03416, 51.47463],
+			"label": "Masters Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Masters Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6173,13 +6173,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07517, 51.47443],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6188,13 +6188,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0466, 51.47438],
+			"label": "Hatcham Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hatcham Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6203,13 +6203,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15368, 51.47421],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6218,13 +6218,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06611, 51.47411],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6233,13 +6233,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09107, 51.47409],
+			"label": "Medibank Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Medibank Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6248,13 +6248,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09268, 51.47345],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6263,13 +6263,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09336, 51.47329],
+			"label": "Fourways Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fourways Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6278,13 +6278,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01491, 51.47322],
+			"label": "Geepharm Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Geepharm Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6293,13 +6293,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06854, 51.47317],
+			"label": "Morrisons Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Morrisons Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6308,13 +6308,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09295, 51.47313],
+			"label": "Butterfly Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Butterfly Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6335,13 +6335,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19147, 51.47284],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6350,13 +6350,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07013, 51.47233],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6365,13 +6365,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16593, 51.47215],
+			"label": "Krystal Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Krystal Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6380,13 +6380,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16642, 51.47203],
+			"label": "Jennings Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Jennings Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6395,13 +6395,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12252, 51.47201],
+			"label": "Harfleur Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Harfleur Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6410,13 +6410,13 @@
 		{
 			"type": "marker",
 			"point": [-0.02949, 51.47106],
+			"label": "Osborn Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Osborn Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6425,13 +6425,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08238, 51.47092],
+			"label": "V E Lettsom Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "V E Lettsom Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6440,13 +6440,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12457, 51.47075],
+			"label": "Pulse Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pulse Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6455,13 +6455,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09291, 51.46963],
+			"label": "King’s Outpatient Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "King’s Outpatient Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6470,13 +6470,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09724, 51.46947],
+			"label": "Peace Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Peace Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6485,13 +6485,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06734, 51.46846],
+			"label": "RoPharm Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "RoPharm Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6500,13 +6500,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17059, 51.46841],
+			"label": "Barkers (Chemist)",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barkers (Chemist)",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6515,13 +6515,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11859, 51.46778],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6530,13 +6530,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07227, 51.4677],
+			"label": "Bellenden Road Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bellenden Road Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6545,13 +6545,13 @@
 		{
 			"type": "marker",
 			"point": [0.02846, 51.46736],
+			"label": "Kidbrooke Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kidbrooke Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6560,13 +6560,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15043, 51.46732],
+			"label": "Fairlee Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fairlee Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6575,13 +6575,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15039, 51.46683],
+			"label": "Queen's",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Queen's",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6602,13 +6602,13 @@
 		{
 			"type": "marker",
 			"point": [0.00872, 51.46671],
+			"label": "Sogim Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sogim Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6617,13 +6617,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18208, 51.46583],
+			"label": "The Olde Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "The Olde Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6632,13 +6632,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10284, 51.46583],
+			"label": "Junction Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Junction Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6647,13 +6647,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01134, 51.46563],
+			"label": "Sheel Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sheel Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6662,13 +6662,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13613, 51.46553],
+			"label": "Kamsons Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kamsons Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6677,13 +6677,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15629, 51.46536],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6692,13 +6692,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05869, 51.4649],
+			"label": "Sheel Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sheel Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6707,13 +6707,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16626, 51.46487],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6734,13 +6734,13 @@
 		{
 			"type": "marker",
 			"point": [-0.23823, 51.46451],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6749,13 +6749,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13107, 51.46427],
+			"label": "Pearl Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pearl Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6764,13 +6764,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21486, 51.46422],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6779,13 +6779,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11406, 51.4642],
+			"label": "Kingshield Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Kingshield Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6794,13 +6794,13 @@
 		{
 			"type": "marker",
 			"point": [-0.25049, 51.46327],
+			"label": "R Walji Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "R Walji Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6809,13 +6809,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11539, 51.4632],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6824,13 +6824,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21572, 51.46276],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6839,13 +6839,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13596, 51.46268],
+			"label": "Orbis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Orbis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6854,13 +6854,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1371, 51.46236],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6869,13 +6869,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0092, 51.46224],
+			"label": "Lewis Grove",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lewis Grove",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6884,13 +6884,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12898, 51.46193],
+			"label": "Boss Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boss Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6899,13 +6899,13 @@
 		{
 			"type": "marker",
 			"point": [0.0272, 51.46124],
+			"label": "Chemcare",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Chemcare",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6914,13 +6914,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01103, 51.46119],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6929,13 +6929,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16315, 51.46084],
+			"label": "Robards Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Robards Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6944,13 +6944,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07559, 51.46062],
+			"label": "Vale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Vale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6971,13 +6971,13 @@
 		{
 			"type": "marker",
 			"point": [-0.21219, 51.45998],
+			"label": "Husbands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Husbands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -6986,13 +6986,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1664, 51.45992],
+			"label": "Goys the Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Goys the Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7001,13 +7001,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17887, 51.4597],
+			"label": "Clarke Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Clarke Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7016,13 +7016,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00257, 51.45896],
+			"label": "Baum Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Baum Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7031,13 +7031,13 @@
 		{
 			"type": "marker",
 			"point": [0.00543, 51.45859],
+			"label": "Lewisham Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lewisham Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7046,13 +7046,13 @@
 		{
 			"type": "marker",
 			"point": [-0.04099, 51.45822],
+			"label": "Cheltenham Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Cheltenham Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7061,13 +7061,13 @@
 		{
 			"type": "marker",
 			"point": [0.05938, 51.45772],
+			"label": "Dickinsons Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dickinsons Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7076,13 +7076,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1844, 51.45762],
+			"label": "East Hill Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "East Hill Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7091,13 +7091,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22641, 51.45735],
+			"label": "Ashburton Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ashburton Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7106,13 +7106,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0758, 51.45734],
+			"label": "Sogim pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sogim pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7121,13 +7121,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01381, 51.45721],
+			"label": "Sheel",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sheel",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7148,13 +7148,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19755, 51.4569],
+			"label": "Mansons",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Mansons",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7163,13 +7163,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09633, 51.45673],
+			"label": "Herne Hill Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Herne Hill Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7178,13 +7178,13 @@
 		{
 			"type": "marker",
 			"point": [0.01115, 51.45647],
+			"label": "Lords Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lords Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7193,13 +7193,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16531, 51.45589],
+			"label": "Northcote Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Northcote Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7208,13 +7208,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19441, 51.45584],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7223,13 +7223,13 @@
 		{
 			"type": "marker",
 			"point": [-0.22961, 51.455],
+			"label": "Ashburton Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Ashburton Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7238,13 +7238,13 @@
 		{
 			"type": "marker",
 			"point": [-0.11336, 51.45497],
+			"label": "Baba Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Baba Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7253,13 +7253,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03763, 51.45454],
+			"label": "Bentley's Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bentley's Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7268,13 +7268,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12027, 51.45424],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7283,13 +7283,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06284, 51.45398],
+			"label": "Foster & Sons",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Foster & Sons",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7298,13 +7298,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01691, 51.45379],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7313,13 +7313,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19184, 51.45356],
+			"label": "Wandsworth Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Wandsworth Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7328,13 +7328,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06205, 51.45336],
+			"label": "Wellcare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Wellcare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7343,13 +7343,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03807, 51.4533],
+			"label": "Crofton Park Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Crofton Park Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7358,13 +7358,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10054, 51.4531],
+			"label": "Brockwell Park Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Brockwell Park Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7373,13 +7373,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00121, 51.45282],
+			"label": "Rains Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rains Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7388,13 +7388,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10049, 51.45273],
+			"label": "Fourway Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fourway Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7403,13 +7403,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08547, 51.45097],
+			"label": "Rumsey Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rumsey Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7418,13 +7418,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00607, 51.45074],
+			"label": "Widdicombe Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Widdicombe Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7433,13 +7433,13 @@
 		{
 			"type": "marker",
 			"point": [0.0828, 51.45033],
+			"label": "Payden's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Payden's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7448,13 +7448,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00532, 51.45009],
+			"label": "Woodlands Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Woodlands Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7463,13 +7463,13 @@
 		{
 			"type": "marker",
 			"point": [0.05197, 51.45007],
+			"label": "Well Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Well Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7478,13 +7478,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24015, 51.45005],
+			"label": "East Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "East Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7493,13 +7493,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01816, 51.44951],
+			"label": "Rushey Green Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rushey Green Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7508,13 +7508,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24205, 51.44948],
+			"label": "Care Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Care Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7523,13 +7523,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24138, 51.44936],
+			"label": "Well Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Well Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7538,13 +7538,13 @@
 		{
 			"type": "marker",
 			"point": [0.0132, 51.44898],
+			"label": "Lee Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lee Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7553,13 +7553,13 @@
 		{
 			"type": "marker",
 			"point": [-0.07384, 51.44895],
+			"label": "Sadler's Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sadler's Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7568,13 +7568,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12417, 51.44847],
+			"label": "Hillrise Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Hillrise Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7583,13 +7583,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18926, 51.44843],
+			"label": "Barkers Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barkers Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7598,13 +7598,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01954, 51.44624],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7613,13 +7613,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16619, 51.44549],
+			"label": "Bellevue Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Bellevue Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7628,13 +7628,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20487, 51.44506],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7643,13 +7643,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20559, 51.44492],
+			"label": "Well Being Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Well Being Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7658,13 +7658,13 @@
 		{
 			"type": "marker",
 			"point": [-0.20606, 51.44464],
+			"label": "Cooks Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Cooks Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7673,13 +7673,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15243, 51.44424],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7688,13 +7688,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14496, 51.44411],
+			"label": "Pharmalite Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Pharmalite Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7703,13 +7703,13 @@
 		{
 			"type": "marker",
 			"point": [-0.1517, 51.44389],
+			"label": "Boots",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Boots",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7718,13 +7718,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12082, 51.44385],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7733,13 +7733,13 @@
 		{
 			"type": "marker",
 			"point": [0.01535, 51.44325],
+			"label": "Gokul Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Gokul Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7748,13 +7748,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15334, 51.44247],
+			"label": "Healthchem Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Healthchem Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7763,13 +7763,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14912, 51.44156],
+			"label": "Dexpharm",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dexpharm",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7778,13 +7778,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10651, 51.44087],
+			"label": "Deejay Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Deejay Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7793,13 +7793,13 @@
 		{
 			"type": "marker",
 			"point": [-0.19723, 51.44042],
+			"label": "Revelstoke Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Revelstoke Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7808,13 +7808,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15581, 51.44019],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7823,13 +7823,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18705, 51.43952],
+			"label": "Dumlers Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Dumlers Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7838,13 +7838,13 @@
 		{
 			"type": "marker",
 			"point": [-0.24557, 51.43933],
+			"label": "Asda",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Asda",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7853,13 +7853,13 @@
 		{
 			"type": "marker",
 			"point": [-0.03372, 51.43887],
+			"label": "Sparkes Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sparkes Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7868,13 +7868,13 @@
 		{
 			"type": "marker",
 			"point": [-0.18657, 51.43878],
+			"label": "Earlsfield Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Earlsfield Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7883,13 +7883,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10607, 51.43827],
+			"label": "Elmcourt Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Elmcourt Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7898,13 +7898,13 @@
 		{
 			"type": "marker",
 			"point": [-0.09477, 51.43721],
+			"label": "Rosendale Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Rosendale Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7913,13 +7913,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10408, 51.43582],
+			"label": "Adarshi Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Adarshi Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7928,13 +7928,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16085, 51.43527],
+			"label": "Nettles Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Nettles Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7943,13 +7943,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12844, 51.43523],
+			"label": "Westbury Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Westbury Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7958,13 +7958,13 @@
 		{
 			"type": "marker",
 			"point": [-0.10377, 51.43503],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -7985,13 +7985,13 @@
 		{
 			"type": "marker",
 			"point": [0.03064, 51.43177],
+			"label": "Brook Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Brook Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8000,13 +8000,13 @@
 		{
 			"type": "marker",
 			"point": [-0.06004, 51.4312],
+			"label": "Perfucare Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Perfucare Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8015,13 +8015,13 @@
 		{
 			"type": "marker",
 			"point": [-0.12983, 51.43055],
+			"label": "Touchwood Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Touchwood Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8030,13 +8030,13 @@
 		{
 			"type": "marker",
 			"point": [-0.15606, 51.43025],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8045,13 +8045,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16541, 51.43019],
+			"label": "Barkers Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barkers Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8060,13 +8060,13 @@
 		{
 			"type": "marker",
 			"point": [-0.01286, 51.42977],
+			"label": "Vantage Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Vantage Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8075,13 +8075,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17235, 51.42944],
+			"label": "Aukland Rogers Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Aukland Rogers Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8090,13 +8090,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08645, 51.42785],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8105,13 +8105,13 @@
 		{
 			"type": "marker",
 			"point": [0.01315, 51.42768],
+			"label": "Day Lewis",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8120,13 +8120,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05575, 51.42672],
+			"label": "Touchwood Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Touchwood Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8135,13 +8135,13 @@
 		{
 			"type": "marker",
 			"point": [-0.16975, 51.42663],
+			"label": "Lords Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Lords Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8150,13 +8150,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05087, 51.42621],
+			"label": "Superdrug",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Superdrug",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8165,13 +8165,13 @@
 		{
 			"type": "marker",
 			"point": [-0.05041, 51.42587],
+			"label": "Touchwood Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Touchwood Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8180,13 +8180,13 @@
 		{
 			"type": "marker",
 			"point": [-0.17111, 51.42491],
+			"label": "Barrons Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Barrons Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8195,13 +8195,13 @@
 		{
 			"type": "marker",
 			"point": [-0.0038, 51.42467],
+			"label": "Day Lewis Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Day Lewis Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8210,13 +8210,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14764, 51.42436],
+			"label": "C. Bradbury Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "C. Bradbury Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8225,13 +8225,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00332, 51.42395],
+			"label": "Brownes Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Brownes Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8252,13 +8252,13 @@
 		{
 			"type": "marker",
 			"point": [-0.00137, 51.4208],
+			"label": "Duncan's Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Duncan's Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8267,13 +8267,13 @@
 		{
 			"type": "marker",
 			"point": [-0.08279, 51.41984],
+			"label": "Sefgrove Chemist",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Sefgrove Chemist",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8282,13 +8282,13 @@
 		{
 			"type": "marker",
 			"point": [-0.14695, 51.41973],
+			"label": "Fairoak Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Fairoak Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"
@@ -8297,13 +8297,13 @@
 		{
 			"type": "marker",
 			"point": [-0.13632, 51.41783],
+			"label": "Watts Pharmacy",
 			"style": {
 				"color": "#009e73",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"halo": 2,
 				"symbol": "base:icon-pill",
-				"label": "Watts Pharmacy",
 				"labelPosition": "top",
 				"labelColor": "#00664a",
 				"font": "noto_sans_bold"

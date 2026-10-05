@@ -5,17 +5,18 @@ import { decodeState, encodeState, stateFromGeoJSON, stateFromKML, stateToGeoJSO
 // the text and the halo color of a marker's label
 const state: MapState = {
 	elements: [
-		{ type: 'marker', point: [13.4, 52.5], style: { label: 'A', labelColor: '#123456', haloColor: '#fedcba' } },
-		{ type: 'marker', point: [13.5, 52.5], style: { label: 'B' } }
+		{ type: 'marker', point: [13.4, 52.5], label: 'A', style: { labelColor: '#123456', haloColor: '#fedcba' } },
+		{ type: 'marker', point: [13.5, 52.5], label: 'B' }
 	]
 };
 
 describe('label colors', () => {
 	it('are kept in a link, and default to black text in a white halo', () => {
 		const decoded = decodeState(encodeState(state));
+		expect(decoded.elements).toStrictEqual(state.elements);
 		expect(decoded.elements.map((e) => e.style)).toStrictEqual([
-			{ label: 'A', labelColor: '#123456', haloColor: '#fedcba' },
-			{ label: 'B' }
+			{ labelColor: '#123456', haloColor: '#fedcba' },
+			undefined
 		]);
 	});
 
@@ -43,6 +44,6 @@ describe('label colors', () => {
 			'<kml><Document><Placemark><name>C</name><Style><LabelStyle><color>ff00ff00</color></LabelStyle></Style>' +
 				'<Point><coordinates>13.4,52.5</coordinates></Point></Placemark></Document></kml>'
 		);
-		expect(foreign.elements[0].style).toMatchObject({ label: 'C', labelColor: '#00ff00' });
+		expect(foreign.elements[0]).toMatchObject({ label: 'C', style: { labelColor: '#00ff00' } });
 	});
 });

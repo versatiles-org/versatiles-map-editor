@@ -71,10 +71,10 @@
 		{
 			"type": "marker",
 			"point": [35.82, 55.52],
+			"label": "Borodino",
 			"style": {
 				"color": "#d55e00",
 				"symbol": "extras:shape-star",
-				"label": "Borodino",
 				"labelPosition": "top",
 				"font": "noto_sans_bold"
 			},
@@ -83,10 +83,10 @@
 		{
 			"type": "marker",
 			"point": [28.36, 54.32],
+			"label": "Berezina",
 			"style": {
 				"color": "#d55e00",
 				"symbol": "extras:shape-star",
-				"label": "Berezina",
 				"labelPosition": "bottom",
 				"font": "noto_sans_bold"
 			},
@@ -95,10 +95,10 @@
 		{
 			"type": "marker",
 			"point": [37.62, 55.75],
+			"label": "Moscow",
 			"style": {
 				"color": "#000000",
 				"symbol": "extras:symbol-dot",
-				"label": "Moscow",
 				"labelPosition": "right",
 				"labelSize": 1.3,
 				"font": "noto_sans_bold"

@@ -15,7 +15,8 @@ const park = (color: string): StateElement => ({
 const cafe = (color: string, label = 'Cafe'): StateElement => ({
 	type: 'marker',
 	point: [0, 0],
-	style: { color, symbol: 'base:icon-cafe', label }
+	label,
+	style: { color, symbol: 'base:icon-cafe' }
 });
 const parks: StateLegendEntry = {
 	type: 'polygon',

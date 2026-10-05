@@ -180,7 +180,7 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 			legend: { entries: [{ type: 'polygon' as const, style: { color: '#00ff00' }, label: 'Park' }] }
 		},
 		elements: [
-			{ type: 'marker', point: [13.41, 52.51], style: { color: '#0000ff', label: 'Café' }, popup: { text: 'Open' } },
+			{ type: 'marker', point: [13.41, 52.51], label: 'Café', style: { color: '#0000ff' }, popup: { text: 'Open' } },
 			{
 				type: 'polygon',
 				points: [
@@ -250,7 +250,7 @@ test.describe('importing a table', () => {
 		await dialog.getByRole('button', { name: /^Done/ }).click();
 
 		await expect
-			.poll(async () => (await markers(page)).map((m) => [m.point, m.style?.label, m.popup?.text]))
+			.poll(async () => (await markers(page)).map((m) => [m.point, m.label, m.popup?.text]))
 			.toStrictEqual([
 				[[13.4, 52.5], 'Café', 'Open **daily**'],
 				[[13.41, 52.51], 'Shop', undefined]
@@ -290,7 +290,7 @@ test.describe('importing a table', () => {
 			'Row 3: Nirgendwo 5 — address not found'
 		);
 		await expect
-			.poll(async () => (await markers(page)).map((m) => [m.point, m.style?.label]))
+			.poll(async () => (await markers(page)).map((m) => [m.point, m.label]))
 			.toStrictEqual([[[13.4, 52.5], 'Bäckerei']]);
 	});
 

@@ -60,12 +60,12 @@
 		{
 			"type": "marker",
 			"point": [21.02774, 52.07428],
+			"label": "Piaseczno",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Piaseczno",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -76,12 +76,12 @@
 		{
 			"type": "marker",
 			"point": [20.80837, 52.16495],
+			"label": "Pruszków",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Pruszków",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -92,12 +92,12 @@
 		{
 			"type": "marker",
 			"point": [21.10955, 52.08601],
+			"label": "Konstancin-Jeziorna",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Konstancin-Jeziorna",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -108,12 +108,12 @@
 		{
 			"type": "marker",
 			"point": [20.91418, 52.37472],
+			"label": "Jabłonna",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Jabłonna",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -124,12 +124,12 @@
 		{
 			"type": "marker",
 			"point": [21.03337, 52.42016],
+			"label": "Nieporęt",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Nieporęt",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -140,12 +140,12 @@
 		{
 			"type": "marker",
 			"point": [20.72715, 52.12234],
+			"label": "Podkowa Leśna",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Podkowa Leśna",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -156,12 +156,12 @@
 		{
 			"type": "marker",
 			"point": [21.26181, 52.10819],
+			"label": "Otwock",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Otwock",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -172,12 +172,12 @@
 		{
 			"type": "marker",
 			"point": [20.75691, 52.11902],
+			"label": "Otrębusy",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Otrębusy",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -188,12 +188,12 @@
 		{
 			"type": "marker",
 			"point": [20.80766, 52.09256],
+			"label": "Nadarzyn",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Nadarzyn",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -204,12 +204,12 @@
 		{
 			"type": "marker",
 			"point": [20.61776, 52.19467],
+			"label": "Błonie",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Błonie",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -220,12 +220,12 @@
 		{
 			"type": "marker",
 			"point": [20.66858, 52.12441],
+			"label": "Milanówek",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Milanówek",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -236,12 +236,12 @@
 		{
 			"type": "marker",
 			"point": [21.05, 52.0995],
+			"label": "Józefosław",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Józefosław",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -252,12 +252,12 @@
 		{
 			"type": "marker",
 			"point": [21.2896, 52.24822],
+			"label": "Sulejówek",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Sulejówek",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -268,12 +268,12 @@
 		{
 			"type": "marker",
 			"point": [20.62823, 52.10871],
+			"label": "Grodzisk Mazowiecki",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Grodzisk Mazowiecki",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -284,12 +284,12 @@
 		{
 			"type": "marker",
 			"point": [21.07321, 52.5131],
+			"label": "Serock",
 			"style": {
 				"color": "#ff8000",
 				"size": 0.8,
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
-				"label": "Serock",
 				"labelColor": "#ff8000",
 				"font": "noto_sans_bold"
 			},
@@ -370,11 +370,11 @@
 		{
 			"type": "marker",
 			"point": [21.01168, 52.24797],
+			"label": "Old Town",
 			"style": {
 				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
-				"label": "Old Town",
 				"labelColor": "#ff4060",
 				"font": "noto_sans_bold"
 			},
@@ -385,11 +385,11 @@
 		{
 			"type": "marker",
 			"point": [21.0094, 52.231],
+			"label": "Plac Defilad",
 			"style": {
 				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
-				"label": "Plac Defilad",
 				"labelColor": "#ff4060",
 				"font": "noto_sans_bold"
 			},
@@ -400,11 +400,11 @@
 		{
 			"type": "marker",
 			"point": [21.00005, 52.22883],
+			"label": "Varso Tower",
 			"style": {
 				"color": "#ff4060",
 				"size": 1.2,
 				"symbol": "extras:shape-star",
-				"label": "Varso Tower",
 				"labelColor": "#ff4060",
 				"font": "noto_sans_bold"
 			},

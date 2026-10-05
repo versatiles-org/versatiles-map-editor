@@ -341,7 +341,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAMKEOYhCAAYawAAGGsAADDYAADDYABtAAEuCpAABNFf0xpTIdmrPp2XDeI_Ab93M5NNe6lH9S6iHqokVi0EJQHPaQkQABhqgAAGGqAzDY0N0RA'
+				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDggAw2AAAw2AaAMKEOYhCAAYawAAGGsAADDYAADDYADaAAJcFSAACaK_pjSmQ7NWfTsuG8R-A37uZyaa91KP6l1EPVRIrFoISgOe0hJAAGGqAAAYaoDMNjQ3RE'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -367,21 +367,17 @@ describe('StateReader', () => {
 				size: 2.5,
 				width: 2.3,
 				labelPosition: 'bottom',
-				label: 'test',
 				visible: false,
 				color: '#c400ff42'
 			};
 			const writer = new StateWriter();
 			// the palette of the colors, which the style refers to
 			writer.writePalette(['#c400ff42']);
-			// the table of the strings, which the label refers to
-			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQ0AbIQQJuFBDnghmIEQnCgk');
+			expect(writer.asBase64()).toBe('CYgB_0KgDZCCBNwoIc8EMxAiFBI');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
-			reader.readStringTable();
 			expect(reader.readStyle()).toStrictEqual(style);
 			expect(reader.ended()).toBe(true);
 		});
@@ -419,7 +415,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKCOcmY6AECdCRIdOxkBacNaQ7EEGwCAsO0AFBMglSA'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKEc5Mx0AIE6EiQ6djIC04a0h2IINgEBYdoAKCZBKk'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -447,19 +443,19 @@ describe('StateReader', () => {
 					},
 					{
 						point: [expect.closeTo(13.35139, 5), expect.closeTo(52.50655, 5)],
+						label: 'End',
 						style: {
 							labelPosition: 'left',
-							color: '#aa0000',
-							label: 'End'
+							color: '#aa0000'
 						},
 						type: 'marker'
 					},
 					{
 						point: [expect.closeTo(13.37097, 5), expect.closeTo(52.51871, 5)],
+						label: 'Start',
 						style: {
 							labelPosition: 'left',
-							color: '#aa0000',
-							label: 'Start'
+							color: '#aa0000'
 						},
 						type: 'marker'
 					},

@@ -166,18 +166,19 @@ describe('MapDocument', () => {
 		it('should create and restore marker', async () => {
 			const element = {
 				point: [12, 34] as GeoPoint,
-				style: { label: 'Test' },
-				type: 'marker'
+				label: 'Test',
+				type: 'marker',
+				style: undefined
 			};
 
 			const marker = addElement(doc, 'marker');
 			marker.point = element.point;
-			marker.layer.label = element.style.label;
+			marker.layer.label = element.label;
 
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IAQCqJMAdkk20LQSiEBEyFhQFjI4BxqAD4');
+			expect(hash).toBe('IAQCqJMAdkk20LQSiEBEyFhQFjI4BxqABg');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -322,7 +323,8 @@ describe('MapDocument', () => {
 				expect(copy.getState()).toStrictEqual({
 					type: 'marker',
 					point: [15, expect.closeTo(20)],
-					style: { label: 'Test' }
+					label: 'Test',
+					style: undefined
 				});
 				expect(marker.point).toStrictEqual([10, 20]);
 			});

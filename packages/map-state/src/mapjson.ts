@@ -74,7 +74,7 @@ export const MAPJSON_FIELDS = {
 	StateViewer: ['search', 'navigation', 'legend'],
 	StatePopup: ['text'],
 	StateStyle: STYLE_FIELDS.map((field) => field.name),
-	StateElementMarker: ['type', 'point', 'style', 'popup'],
+	StateElementMarker: ['type', 'point', 'label', 'style', 'popup'],
 	StateElementLine: ['type', 'points', 'smooth', 'style', 'popup'],
 	StateElementPolygon: ['type', 'points', 'smooth', 'style', 'strokeStyle', 'popup'],
 	StateElementCircle: ['type', 'point', 'radius', 'style', 'strokeStyle', 'popup']

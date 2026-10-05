@@ -644,7 +644,7 @@ test(
 						[13.4, 52.52]
 					]
 				},
-				{ type: 'marker', point: [13.3, 52.5], style: { label: 'Cafe' } }
+				{ type: 'marker', point: [13.3, 52.5], label: 'Cafe' }
 			]
 		};
 		await page.goto('/#' + encodeState(state));
@@ -878,7 +878,7 @@ test('a marker without symbol has no color, size or rotation of a symbol', async
 	const center: Point = [13.4, 52.5];
 	const state = (symbol?: string): MapState => ({
 		view: { center, radius: 10000 },
-		elements: [{ type: 'marker', point: center, style: { label: 'Text', ...(symbol === undefined ? {} : { symbol }) } }]
+		elements: [{ type: 'marker', point: center, label: 'Text', style: { ...(symbol === undefined ? {} : { symbol }) } }]
 	});
 	await page.goto('/#' + encodeState(state('')));
 	await waitForMapIsReady(page);
@@ -897,15 +897,15 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 			encodeState({
 				view: { center, radius: 10000 },
 				elements: [
-					{ type: 'marker', point: center, style: { label: 'A' } },
-					{ type: 'marker', point: center, style: { label: 'B' } }
+					{ type: 'marker', point: center, label: 'A' },
+					{ type: 'marker', point: center, label: 'B' }
 				]
 			})
 	);
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
 	const label = page.getByRole('textbox', { name: 'Label' });
-	const labels = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	const labels = async () => (await storedState(page)).elements.map((e) => (e.type === 'marker' ? e.label : undefined));
 	// a click selects the marker in front, the list shows it first
 	const clickMarker = () => page.mouse.click(x + 6, y - 8);
 
@@ -943,8 +943,8 @@ test('a marker without symbol is a letter in the color of its label in the list'
 			encodeState({
 				view: { center, radius: 10000 },
 				elements: [
-					{ type: 'marker', point: center, style: { color: '#00ff00', label: 'Pin' } },
-					{ type: 'marker', point: [13.41, 52.5], style: { symbol: '', label: 'Text', labelColor: '#0000ff' } }
+					{ type: 'marker', point: center, label: 'Pin', style: { color: '#00ff00' } },
+					{ type: 'marker', point: [13.41, 52.5], label: 'Text', style: { symbol: '', labelColor: '#0000ff' } }
 				]
 			})
 	);

@@ -344,8 +344,8 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 				encodeState({
 					view: { center: a, radius: 2000 },
 					elements: [
-						{ type: 'marker', point: a, style: { label: labelOfA, color: '#0000ff', size: 2, labelPosition: 'right' } },
-						{ type: 'marker', point: b, style: { label: 'B', color: '#ff0000', size: 2, labelPosition: 'right' } }
+						{ type: 'marker', point: a, label: labelOfA, style: { color: '#0000ff', size: 2, labelPosition: 'right' } },
+						{ type: 'marker', point: b, label: 'B', style: { color: '#ff0000', size: 2, labelPosition: 'right' } }
 					]
 				})
 		);
@@ -434,7 +434,7 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 		'/#' +
 			encodeState({
 				view: { center: point, radius: 3000 },
-				elements: [{ type: 'marker', point, style: { label: 'Cafe' }, popup: { text: 'A café' } }]
+				elements: [{ type: 'marker', point, label: 'Cafe', popup: { text: 'A café' } }]
 			})
 	);
 	await waitForMapIsReady(page);
@@ -603,15 +603,15 @@ test('with many labels, the marker in front keeps its label where labels overlap
 	const many = Array.from({ length: 220 }, (_, i) => ({
 		type: 'marker' as const,
 		point: [13.3 + (i % 20) * 0.002, 52.45 + Math.floor(i / 20) * 0.002] as [number, number],
-		style: { label: `L${i}` }
+		label: `L${i}`
 	}));
 	const state: MapState = {
 		view: { center: point, radius: 2000 },
 		meta: { labelOverlap: 'hide' },
 		elements: [
 			...many,
-			{ type: 'marker', point, style: { color: '#0000ff', label: 'Blue behind' } },
-			{ type: 'marker', point, style: { color: '#ff0000', label: 'Red in front' } }
+			{ type: 'marker', point, label: 'Blue behind', style: { color: '#0000ff' } },
+			{ type: 'marker', point, label: 'Red in front', style: { color: '#ff0000' } }
 		]
 	};
 	await page.goto('/view/#' + encodeState(state));

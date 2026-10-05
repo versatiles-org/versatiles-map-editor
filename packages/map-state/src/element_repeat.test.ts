@@ -12,9 +12,10 @@ function stylesRead(elements: StateElement[]): number {
 	return readStyle.mock.calls.length;
 }
 
-const marker = (lng: number, style?: StateElement['style']): StateElement => ({
+const marker = (lng: number, style?: StateElement['style'], label?: string): StateElement => ({
 	type: 'marker',
 	point: [lng, 52.5],
+	...(label !== undefined && { label }),
 	...(style && { style })
 });
 
@@ -25,10 +26,10 @@ describe('elements that repeat the one before', () => {
 
 	it('store their type and styles once, also with other labels', () => {
 		const elements = [
-			marker(13.1, { color: '#ff0000', size: 2, label: 'Boots' }),
-			marker(13.2, { color: '#ff0000', size: 2, label: 'Superdrug' }),
+			marker(13.1, { color: '#ff0000', size: 2 }, 'Boots'),
+			marker(13.2, { color: '#ff0000', size: 2 }, 'Superdrug'),
 			marker(13.3, { color: '#ff0000', size: 2 }),
-			marker(13.4, { color: '#ff0000', size: 2, label: 'Boots' })
+			marker(13.4, { color: '#ff0000', size: 2 }, 'Boots')
 		];
 		expect(roundTrip(elements)).toStrictEqual(elements);
 		expect(stylesRead(elements)).toBe(1);
@@ -82,41 +83,32 @@ describe('elements that repeat the one before', () => {
 		expect(stylesRead(elements)).toBe(6);
 	});
 
-	it('get copies of the styles, without the label of the one before', () => {
-		const [first, second] = roundTrip([marker(13.1, { size: 2, label: 'A' }), marker(13.2, { size: 2 })]);
-		expect(second.style).toStrictEqual({ size: 2 });
+	it('get copies of the styles, and not the label of the one before', () => {
+		const [first, second] = roundTrip([marker(13.1, { size: 2 }, 'A'), marker(13.2, { size: 2 })]);
+		expect(second).toStrictEqual(marker(13.2, { size: 2 }));
 		second.style!.size = 3;
-		expect(first.style).toStrictEqual({ size: 2, label: 'A' });
+		expect(first.style).toStrictEqual({ size: 2 });
 	});
 });
 
-describe('the label of an element', () => {
-	it('is kept, also when it is empty or the only field of the style', () => {
+describe('the label of a marker', () => {
+	it('is kept, also without a style; an empty one is none', () => {
 		const elements = [
-			marker(13.1, { label: '' }),
-			marker(13.2, { label: 'Only a label' }),
-			marker(13.3, { color: '#ff0000', label: 'Only a label' }),
+			marker(13.2, undefined, 'Only a label'),
+			marker(13.3, { color: '#ff0000' }, 'A'),
 			marker(13.4, {})
 		];
 		expect(roundTrip(elements)).toStrictEqual(elements);
+		expect(roundTrip([marker(13.1, undefined, '')])).toStrictEqual([marker(13.1)]);
 	});
 
-	it('is kept in the outline of an area, which has it inside', () => {
-		const elements: StateElement[] = [
-			{ type: 'circle', point: [13, 52], radius: 100, style: { label: 'Fill' }, strokeStyle: { label: 'Outline' } }
-		];
-		expect(roundTrip(elements)).toStrictEqual(elements);
-	});
-
-	it('is in the string table in the order of writing', () => {
+	it('is in the string table in the order of writing, before the popup', () => {
 		const state: MapState = {
-			elements: [
-				{ type: 'circle', point: [13, 52], radius: 100, style: { label: 'Fill' }, strokeStyle: { label: 'Outline' } }
-			]
+			elements: [{ type: 'marker', point: [13, 52], label: 'Label', popup: { text: 'Popup' } }]
 		};
 		const reader = StateReader.fromBase64(encodeState(state));
 		reader.readInteger(3);
 		reader.readPalette();
-		expect(reader.readStringTable()).toStrictEqual(['Outline', 'Fill']);
+		expect(reader.readStringTable()).toStrictEqual(['Label', 'Popup']);
 	});
 });

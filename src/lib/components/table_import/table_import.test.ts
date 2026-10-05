@@ -28,7 +28,8 @@ describe('importTable', () => {
 			{
 				type: 'marker',
 				point: [13.4, 52.5],
-				style: { color: '#0000ff', label: 'Café' },
+				label: 'Café',
+				style: { color: '#0000ff' },
 				popup: { text: 'Open **daily**' }
 			}
 		]);
@@ -59,7 +60,7 @@ describe('importTable', () => {
 			{ position: { address: { address: 0 } }, label: 1 },
 			{ geocoder, onProgress, language: 'de' }
 		);
-		expect(result.markers).toStrictEqual([{ type: 'marker', point: [10, 20], style: { label: 'A' } }]);
+		expect(result.markers).toStrictEqual([{ type: 'marker', point: [10, 20], label: 'A' }]);
 		expect(result.failed).toStrictEqual([
 			{ row: 3, value: '', reason: 'no address' },
 			{ row: 4, value: 'Nowhere', reason: 'address not found' },

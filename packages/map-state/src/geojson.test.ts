@@ -80,7 +80,8 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 			{
 				type: 'marker',
 				point: [1, 2],
-				style: { color: '#abcdef', symbol: 'icons:anchor', label: 'x', size: 2 },
+				label: 'x',
+				style: { color: '#abcdef', symbol: 'icons:anchor', size: 2 },
 				popup: { text: 'A **marker**' }
 			},
 			{
@@ -249,7 +250,7 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 	it('round-trips a document through base64 (stable fixed point + geometry preserved)', () => {
 		const doc = stateToGeoJSON({
 			elements: [
-				{ type: 'marker', point: [13.4, 52.5], style: { label: 'hello', symbol: 'base:icon-beer_mug' } },
+				{ type: 'marker', point: [13.4, 52.5], label: 'hello', style: { symbol: 'base:icon-beer_mug' } },
 				{
 					type: 'line',
 					points: [
@@ -393,7 +394,7 @@ describe('stateFromGeoJSON with foreign property values', () => {
 	});
 
 	it('coerces numeric strings, labels and boolean strings', () => {
-		expect(styleOf({ 'symbol-size': '2', 'symbol-label': 7 })).toMatchObject({ style: { size: 2, label: '7' } });
+		expect(styleOf({ 'symbol-size': '2', 'symbol-label': 7 })).toMatchObject({ label: '7', style: { size: 2 } });
 		expect(styleOf({ subType: 'Circle', radius: '50', 'stroke-visibility': 'false' })).toMatchObject({
 			radius: 50,
 			strokeStyle: { visible: false }

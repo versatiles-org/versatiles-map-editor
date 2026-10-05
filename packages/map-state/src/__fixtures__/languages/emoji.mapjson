@@ -11,9 +11,9 @@
 		{
 			"type": "marker",
 			"point": [13.4062, 52.5389],
+			"label": "☕ Bonanza Coffee",
 			"style": {
-				"color": "#0072b2",
-				"label": "☕ Bonanza Coffee"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "☕ Bonanza Coffee\nOderberger Str. 35\n⭐⭐⭐⭐⭐ Best flat white 🙌"
@@ -22,17 +22,17 @@
 		{
 			"type": "marker",
 			"point": [13.4017, 52.5306],
+			"label": "☕ The Barn",
 			"style": {
-				"color": "#0072b2",
-				"label": "☕ The Barn"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [13.4085, 52.5285],
+			"label": "🥐 Zeit für Brot",
 			"style": {
-				"color": "#0072b2",
-				"label": "🥐 Zeit für Brot"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "🥐 Zeit für Brot\nAlte Schönhauser Str. 4\nCinnamon rolls 🤤 — go early!"
@@ -41,25 +41,25 @@
 		{
 			"type": "marker",
 			"point": [13.417, 52.499],
+			"label": "🍰 Café Kreuzberg",
 			"style": {
-				"color": "#0072b2",
-				"label": "🍰 Café Kreuzberg"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [13.456, 52.51],
+			"label": "🌱 Vöner",
 			"style": {
-				"color": "#0072b2",
-				"label": "🌱 Vöner"
+				"color": "#0072b2"
 			}
 		},
 		{
 			"type": "marker",
 			"point": [13.418, 52.5465],
+			"label": "🍦 Hokey Pokey",
 			"style": {
-				"color": "#0072b2",
-				"label": "🍦 Hokey Pokey"
+				"color": "#0072b2"
 			},
 			"popup": {
 				"text": "🍦 Hokey Pokey\nStargarder Str. 73\nLong queue in summer 😅 but worth it 👍"
@@ -68,9 +68,9 @@
 		{
 			"type": "marker",
 			"point": [13.4205, 52.533],
+			"label": "🍕 Standard Serious Pizza",
 			"style": {
-				"color": "#0072b2",
-				"label": "🍕 Standard Serious Pizza"
+				"color": "#0072b2"
 			}
 		}
 	]

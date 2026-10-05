@@ -197,8 +197,9 @@ export async function importTable(
 	const marker = (row: string[], point: [number, number]): StateElementMarker => {
 		const element: StateElementMarker = { type: 'marker', point };
 		const label = mapping.label != null ? row[mapping.label].trim() : '';
+		if (label) element.label = label;
 		const category = mapping.category && mapping.category.styles[row[mapping.category.column].trim()];
-		const style = { ...mapping.style, ...category, ...(label ? { label } : {}) };
+		const style = { ...mapping.style, ...category };
 		if (Object.keys(style).length > 0) element.style = style;
 		const popup = mapping.popup != null ? row[mapping.popup].trim() : '';
 		if (popup) element.popup = { text: popup };

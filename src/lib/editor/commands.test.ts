@@ -188,7 +188,8 @@ describe('addToLegend', () => {
 		const cafe = doc.addElement({
 			type: 'marker',
 			point: [0, 0],
-			style: { color: '#0000ff', symbol: 'base:icon-cafe', label: 'Cafe', labelColor: '#000000', halo: 2 }
+			label: 'Cafe',
+			style: { color: '#0000ff', symbol: 'base:icon-cafe', labelColor: '#000000', halo: 2 }
 		});
 		const route = doc.addElement({ type: 'line', points, style: { color: '#d55e00', dash: 'dashed', width: 4 } });
 		route.popup = 'Bus 100\nevery 10 minutes';
@@ -229,7 +230,7 @@ describe('addToLegend', () => {
 
 	it('adds each look once, and none that the legend shows already', () => {
 		const markers = ['Boots', 'Boots', 'Superdrug'].map((label) =>
-			doc.addElement({ type: 'marker', point: [0, 0], style: { color: '#009e73', symbol: 'base:icon-pill', label } })
+			doc.addElement({ type: 'marker', point: [0, 0], label, style: { color: '#009e73', symbol: 'base:icon-pill' } })
 		);
 		doc.selection.selectElements(markers.slice(0, 2));
 		addToLegend(doc);
@@ -275,8 +276,8 @@ describe('pasteStyleToEntry', () => {
 	it('gives the entry the copied style and the type of its element, and keeps its text', () => {
 		expect(canPasteStyleToEntry(doc)).toBe(false);
 		// a marker: without its label, halo and the defaults
-		const style = { color: '#0000ff', symbol: 'icons:anchor', rotate: 0, label: 'X', labelColor: '#ff00ff', halo: 2 };
-		expect(paste({ type: 'marker', point: [0, 0], style })).toStrictEqual({
+		const style = { color: '#0000ff', symbol: 'icons:anchor', rotate: 0, labelColor: '#ff00ff', halo: 2 };
+		expect(paste({ type: 'marker', point: [0, 0], label: 'X', style })).toStrictEqual({
 			type: 'marker',
 			style: { color: '#0000ff', symbol: 'icons:anchor' },
 			label: 'Kept'
@@ -328,7 +329,8 @@ describe('takeStyleForEntry', () => {
 		const shop = doc.addElement({
 			type: 'marker',
 			point: [0, 0],
-			style: { color: '#0000ff', symbol: 'base:icon-shop', label: 'Aldi' }
+			label: 'Aldi',
+			style: { color: '#0000ff', symbol: 'base:icon-shop' }
 		});
 		doc.state.log();
 		takeStyleForEntry(doc, 0, shop);

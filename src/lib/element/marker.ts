@@ -71,17 +71,27 @@ export class MarkerElement extends AbstractElement {
 	}
 
 	getState(): StateElementMarker {
+		const label = this.layer.label;
 		return {
 			type: 'marker',
 			point: this.point,
+			...(label ? { label } : {}),
 			style: this.layer.getState(),
 			...this.getPopupState()
 		};
 	}
 
+	public updateFromState(state: StateElement): boolean {
+		if (!super.updateFromState(state)) return false;
+		// the label is a field of the marker, which its symbol layer draws
+		this.layer.label = (state as StateElementMarker).label ?? '';
+		return true;
+	}
+
 	static fromState(doc: ElementOwner, state: StateElementMarker) {
 		const element = new MarkerElement(doc, state.point);
 		element.layer.setState(state.style);
+		element.layer.label = state.label ?? '';
 		return element;
 	}
 }

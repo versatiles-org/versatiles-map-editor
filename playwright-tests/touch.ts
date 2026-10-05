@@ -188,7 +188,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 	const elements = Array.from({ length: 40 }, (_, i) => ({
 		type: 'marker' as const,
 		point: [13.3 + i * 0.005, 52.5] as Point,
-		style: { label: `M${i + 1}` }
+		label: `M${i + 1}`
 	}));
 	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements }));
 	await waitForMapIsReady(page);
@@ -196,7 +196,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 	const touch = await Touchscreen.create(page);
 	const list = page.getByRole('listbox', { name: 'Elements' });
 	const option = (label: string) => list.getByRole('option', { name: new RegExp(`: ${label}$`) });
-	const order = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	const order = async () => (await storedState(page)).elements.map((e) => (e.type === 'marker' ? e.label : undefined));
 	const box = async (label: string) => (await option(label).boundingBox())!;
 	const scrolled = () => list.evaluate((l) => l.closest('.content')!.scrollTop);
 

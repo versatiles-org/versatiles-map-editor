@@ -52,8 +52,7 @@ import {
 	STYLE_KEY_PARAMETER,
 	STYLE_REMOVE_KEY,
 	STYLE_REFERENCE_PARAMETER,
-	StyleHistory,
-	withoutLabel
+	StyleHistory
 } from './style_history.js';
 
 export class StateWriter {
@@ -234,13 +233,10 @@ export class StateWriter {
 		if (!repeat) this.writeInteger(ELEMENT_KEYS[element.type], 3);
 	}
 
-	/**
-	 * The styles of an element, unless it repeats those of the element before: the style without
-	 * its label, and for areas the outline.
-	 */
+	/** The styles of an element, unless it repeats those of the element before: the style, and for areas the outline. */
 	private writeElementStyles(element: StateElement, repeat: boolean) {
 		if (repeat) return;
-		this.writeOptionalStyle(element.style && withoutLabel(element.style));
+		this.writeOptionalStyle(element.style);
 		if (element.type === 'polygon' || element.type === 'circle') this.writeOptionalStyle(element.strokeStyle);
 	}
 
@@ -249,11 +245,10 @@ export class StateWriter {
 		if (style) this.writeStyle(style);
 	}
 
-	/** The label of the style of an element: a field of the element, since it differs more often than the style. */
-	private writeElementLabel(element: StateElement) {
-		const label = element.style?.label;
-		this.writeBit(label != null);
-		if (label != null) this.writeStringRef(label);
+	/** The label of a marker: 1 bit whether it has one, then the string. */
+	private writeMarkerLabel(element: StateElementMarker) {
+		this.writeBit(Boolean(element.label));
+		if (element.label) this.writeStringRef(element.label);
 	}
 
 	/** The frame: its south-west corner on the grid, and its width and height in steps of the grid. */
@@ -411,7 +406,7 @@ export class StateWriter {
 	writeElementMarker(element: StateElementMarker, repeat = false) {
 		this.writeElementPoint(element.point);
 		this.writeElementStyles(element, repeat);
-		this.writeElementLabel(element);
+		this.writeMarkerLabel(element);
 		this.writePopup(element.popup);
 	}
 
@@ -419,7 +414,6 @@ export class StateWriter {
 		this.writeElementPoints(element.points);
 		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
-		this.writeElementLabel(element);
 		this.writePopup(element.popup);
 	}
 
@@ -427,7 +421,6 @@ export class StateWriter {
 		this.writeElementPoints(element.points);
 		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
-		this.writeElementLabel(element);
 		this.writePopup(element.popup);
 	}
 
@@ -436,7 +429,6 @@ export class StateWriter {
 		// a circle smaller than 1 m, e.g. drawn by a short drag, is not 0 m
 		this.writeVarint(Math.max(1, Math.round(element.radius)));
 		this.writeElementStyles(element, repeat);
-		this.writeElementLabel(element);
 		this.writePopup(element.popup);
 	}
 
@@ -583,8 +575,6 @@ export class StateWriter {
 			case 'labelColor':
 			case 'haloColor':
 				return this.writeColorValue(style[name]!);
-			case 'label':
-				return this.writeStringRef(style.label!);
 			case 'symbol':
 				return this.writeStringRef(style.symbol!, true);
 			case 'font':
@@ -729,19 +719,11 @@ function collectFormatStrings(root: MapState): string[] {
  */
 export function collectStrings(root: MapState): string[] {
 	const strings: string[] = [];
-	const ofStyles = (item: { style?: StateStyle; strokeStyle?: StateStyle }) => {
-		for (const style of [item.style, item.strokeStyle]) if (style?.label != null) strings.push(style.label);
-	};
 	const meta = root.meta;
-	for (const entry of meta?.legend?.entries ?? []) {
-		ofStyles(entry);
-		if (entry.label) strings.push(entry.label);
-	}
+	for (const entry of meta?.legend?.entries ?? []) if (entry.label) strings.push(entry.label);
 	if (meta?.title) strings.push(meta.title);
 	for (const element of root.elements) {
-		// the label of the outline is written inside it, before the label of the element
-		if ('strokeStyle' in element && element.strokeStyle?.label != null) strings.push(element.strokeStyle.label);
-		if (element.style?.label != null) strings.push(element.style.label);
+		if (element.type === 'marker' && element.label) strings.push(element.label);
 		if (element.popup?.text) strings.push(element.popup.text);
 	}
 	return strings;
@@ -802,7 +784,7 @@ export function bestExpGolombParameter(values: number[]): number {
 function repeatKey(element: StateElement): string {
 	const key = (style: StateStyle | undefined) => (style ? canonical(style) : '-');
 	const strokeStyle = 'strokeStyle' in element ? element.strokeStyle : undefined;
-	return [element.type, key(element.style && withoutLabel(element.style)), key(strokeStyle)].join('|');
+	return [element.type, key(element.style), key(strokeStyle)].join('|');
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

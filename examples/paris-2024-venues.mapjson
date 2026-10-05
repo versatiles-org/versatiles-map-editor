@@ -35,12 +35,12 @@
 		{
 			"type": "marker",
 			"point": [2.3601, 48.9244],
+			"label": "Stade de France",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Stade de France",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -48,12 +48,12 @@
 		{
 			"type": "marker",
 			"point": [2.3542, 48.9204],
+			"label": "Aquatics Centre",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Aquatics Centre",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -61,12 +61,12 @@
 		{
 			"type": "marker",
 			"point": [2.229, 48.8955],
+			"label": "La Défense Arena",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "La Défense Arena",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -74,12 +74,12 @@
 		{
 			"type": "marker",
 			"point": [2.3786, 48.8387],
+			"label": "Bercy Arena",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Bercy Arena",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -87,12 +87,12 @@
 		{
 			"type": "marker",
 			"point": [2.3599, 48.8995],
+			"label": "Porte de La Chapelle Arena",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Porte de La Chapelle Arena",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -100,12 +100,12 @@
 		{
 			"type": "marker",
 			"point": [2.2873, 48.8319],
+			"label": "South Paris Arena",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "South Paris Arena",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -113,12 +113,12 @@
 		{
 			"type": "marker",
 			"point": [2.5155, 48.9727],
+			"label": "North Paris Arena",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "North Paris Arena",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -126,12 +126,12 @@
 		{
 			"type": "marker",
 			"point": [2.253, 48.8414],
+			"label": "Parc des Princes",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Parc des Princes",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -139,12 +139,12 @@
 		{
 			"type": "marker",
 			"point": [2.2481, 48.847],
+			"label": "Roland-Garros",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Roland-Garros",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -152,12 +152,12 @@
 		{
 			"type": "marker",
 			"point": [2.2476, 48.929],
+			"label": "Yves-du-Manoir Stadium",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Yves-du-Manoir Stadium",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -165,12 +165,12 @@
 		{
 			"type": "marker",
 			"point": [2.4271, 48.9361],
+			"label": "Le Bourget Climbing Venue",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Le Bourget Climbing Venue",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -178,12 +178,12 @@
 		{
 			"type": "marker",
 			"point": [2.0374, 48.7883],
+			"label": "Velodrome",
 			"style": {
 				"color": "#0072b2",
 				"size": 0.8,
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
-				"label": "Velodrome",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
 			}
@@ -198,10 +198,10 @@
 		{
 			"type": "marker",
 			"point": [2.1204, 48.8049],
+			"label": "Château de Versailles",
 			"style": {
 				"color": "#d55e00",
 				"symbol": "base:icon-monument",
-				"label": "Château de Versailles",
 				"labelColor": "#b33c00",
 				"font": "noto_sans_bold"
 			}
@@ -209,10 +209,10 @@
 		{
 			"type": "marker",
 			"point": [2.6393, 48.8659],
+			"label": "Vaires-sur-Marne Nautical Stadium",
 			"style": {
 				"color": "#009e73",
 				"symbol": "base:icon-outdoor",
-				"label": "Vaires-sur-Marne Nautical Stadium",
 				"labelColor": "#009e73",
 				"font": "noto_sans_bold"
 			}
@@ -220,10 +220,10 @@
 		{
 			"type": "marker",
 			"point": [1.9588, 48.7822],
+			"label": "Élancourt Hill",
 			"style": {
 				"color": "#009e73",
 				"symbol": "base:icon-outdoor",
-				"label": "Élancourt Hill",
 				"labelColor": "#009e73",
 				"font": "noto_sans_bold"
 			}
@@ -231,10 +231,10 @@
 		{
 			"type": "marker",
 			"point": [2.0745, 48.7543],
+			"label": "Le Golf National",
 			"style": {
 				"color": "#009e73",
 				"symbol": "base:icon-golf",
-				"label": "Le Golf National",
 				"labelColor": "#009e73",
 				"font": "noto_sans_bold"
 			}
@@ -242,13 +242,13 @@
 		{
 			"type": "marker",
 			"point": [2.331, 48.9115],
+			"label": "Olympic Village",
 			"style": {
 				"color": "#cc9900",
 				"size": 2,
 				"labelSize": 2,
 				"halo": 2,
 				"symbol": "base:icon-stadium",
-				"label": "Olympic Village",
 				"labelColor": "#cc9900",
 				"font": "noto_sans_bold"
 			}

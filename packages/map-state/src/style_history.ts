@@ -26,8 +26,6 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 15, name: 'rotate', encoded: (v: number) => Math.round(v) },
 	// only "false" is stored, "true" is the default
 	{ key: 16, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
-	// elements store their label by themselves, only legend entries from files can have one here
-	{ key: 18, name: 'label', encoded: (v: string) => v },
 	// the fill pattern of areas, rarer than the dashes of lines
 	{ key: 19, name: 'pattern', encoded: (v: string) => v },
 	// the size and the coverage of a pattern, only with one
@@ -62,12 +60,6 @@ export function encodedValue(style: StateStyle, field: (typeof STYLE_FIELDS)[num
 export function canonical(style: StateStyle): string {
 	const used = withoutUnusedFields(style);
 	return JSON.stringify(STYLE_FIELDS.map((field) => encodedValue(used, field)));
-}
-
-/** A style without its label, which an element stores by itself; a copy. */
-export function withoutLabel(style: StateStyle): StateStyle {
-	const { label: _label, ...rest } = style;
-	return rest;
 }
 
 /**

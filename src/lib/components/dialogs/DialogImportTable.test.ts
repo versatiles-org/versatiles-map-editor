@@ -121,7 +121,7 @@ describe('DialogImportTable', () => {
 		flushSync();
 
 		const markers = doc.addElements.mock.lastCall![0] as StateElementMarker[];
-		expect(markers.map((m) => [m.point, m.style?.label])).toStrictEqual([
+		expect(markers.map((m) => [m.point, m.label])).toStrictEqual([
 			[[13.4, 52.5], 'A'],
 			[[13.5, 52.6], 'B'],
 			[[13.6, 52.7], 'C']

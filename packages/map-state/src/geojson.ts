@@ -26,12 +26,13 @@ import {
 	linePropsFromStyle,
 	lineStyleFromProps,
 	strokeStyleFromProps,
+	labelOf,
 	symbolPropsFromStyle,
 	symbolStyleFromProps
 } from './profile.js';
 
 /**
- * A GeoJSON FeatureCollection extended with the editor's `map` camera (`center` + `radius` in
+ * A GeoJSON FeatureCollection extended with the editor's `view` (`center` + `radius` in
  * meters) and the `frame`, the visible area of the map (`[west, south, east, north]`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
@@ -62,7 +63,7 @@ function clean(properties: GeoJSON.GeoJsonProperties): GeoJSON.GeoJsonProperties
 function markerToFeature(el: StateElementMarker): GeoJSON.Feature {
 	return {
 		type: 'Feature',
-		properties: clean({ ...symbolPropsFromStyle(el.style), description: el.popup?.text }),
+		properties: clean({ ...symbolPropsFromStyle(el.style), 'symbol-label': el.label, description: el.popup?.text }),
 		geometry: { type: 'Point', coordinates: el.point }
 	};
 }
@@ -196,7 +197,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 					strokeStyle: strokeStyleFromProps(p)
 				};
 			}
-			return { type: 'marker', point, style: symbolStyleFromProps(p) };
+			return { type: 'marker', point, ...labelOf(p?.['symbol-label']), style: symbolStyleFromProps(p) };
 		}
 		case 'LineString': {
 			const points = sanitizePositions(g.coordinates);

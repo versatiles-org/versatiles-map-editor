@@ -17,18 +17,18 @@ describe('the string table', () => {
 	const state: MapState = {
 		meta: { title: 'Pharmacies', legend: { entries: [{ type: 'marker', label: 'Pharmacy' }] } },
 		elements: [
-			{ type: 'marker', point: [13.4, 52.5], style: { label: 'Boots' }, popup: { text: 'Pharmacy' } },
-			{ type: 'marker', point: [13.5, 52.5], style: { label: 'Boots', size: 2 } },
-			{ type: 'marker', point: [13.6, 52.5], style: { label: '' }, popup: { text: 'Open 24 h' } }
+			{ type: 'marker', point: [13.4, 52.5], label: 'Boots', popup: { text: 'Pharmacy' } },
+			{ type: 'marker', point: [13.5, 52.5], label: 'Boots', style: { size: 2 } },
+			{ type: 'marker', point: [13.6, 52.5], popup: { text: 'Open 24 h' } }
 		]
 	};
 
 	it('has the strings in the order they are written, each once', () => {
-		expect([...new Set(collectStrings(state))]).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', '', 'Open 24 h']);
+		expect([...new Set(collectStrings(state))]).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', 'Open 24 h']);
 		const reader = StateReader.fromBase64(encodeState(state));
 		reader.readInteger(3);
 		reader.readPalette();
-		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', '', 'Open 24 h']);
+		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', 'Open 24 h']);
 	});
 
 	it('has the words of the format first, then the other strings in the order they are written', () => {
@@ -47,7 +47,6 @@ describe('the string table', () => {
 			'Pharmacy',
 			'Pharmacies',
 			'Boots',
-			'',
 			'Open 24 h'
 		]);
 		expect(decodeState(encodeState(withMeta))).toStrictEqual(withMeta);
@@ -75,7 +74,7 @@ describe('the string table', () => {
 
 	it('can have a string in both sections, e.g. a label that is also the name of a symbol', () => {
 		const state: MapState = {
-			elements: [{ type: 'marker', point: [13, 52], style: { symbol: 'icons:anchor', label: 'icons:anchor' } }]
+			elements: [{ type: 'marker', point: [13, 52], label: 'icons:anchor', style: { symbol: 'icons:anchor' } }]
 		};
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
@@ -93,13 +92,12 @@ describe('the string table', () => {
 	it('counts the strings that the chosen encoding of a style refers to', () => {
 		// each style is written by trying several encodings; the second one refers to the first
 		const writer = new StateWriter();
-		writer.writeStringTable(['a', 'b', 'c']);
-		writer.writeStyle({ label: 'a', size: 2 });
-		writer.writeStyle({ label: 'b', size: 2 });
-		// so "c" is the next new string
-		expect(refBits(['c'], (w) => w.writeStringRef('c'))).toBe('1');
+		writer.writeStringTable([], ['a', 'b', 'c']);
+		writer.writeStyle({ font: 'a', size: 2 });
+		writer.writeStyle({ font: 'b', size: 2 });
+		// so "c" is the next new string of the words of the format
 		const start = writer.bits.length;
-		writer.writeStringRef('c');
+		writer.writeStringRef('c', true);
 		expect(writer.asBitString().slice(start)).toBe('1');
 	});
 

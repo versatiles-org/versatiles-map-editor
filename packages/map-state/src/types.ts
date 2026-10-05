@@ -40,6 +40,11 @@ export type StateElement = StateElementMarker | StateElementLine | StateElementP
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
+	/**
+	 * The text of the label next to the symbol; none if it is missing or "".
+	 * @default ""
+	 */
+	label?: string;
 	/** The symbol and its label (the style fields for markers). */
 	style?: StateStyle;
 	popup?: StatePopup;
@@ -214,11 +219,6 @@ export interface StateStyle {
 	 * @default "#ff0000"
 	 */
 	color?: HexColor;
-	/**
-	 * Markers: the text of the label; "" for none.
-	 * @default ""
-	 */
-	label?: string;
 	/**
 	 * Outlines: whether the outline is drawn.
 	 * @default true

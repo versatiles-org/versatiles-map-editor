@@ -34,8 +34,6 @@ export class StyleClipboard {
 			// arrowheads removes them
 			style[role] = completeStyle(role === 'stroke' ? 'line' : role, layer.getState());
 		}
-		// The label is content, not style
-		if (style.symbol) delete style.symbol.label;
 		this.style = style;
 	}
 

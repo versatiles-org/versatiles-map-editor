@@ -4,7 +4,7 @@ import { decodeState, encodeState, stateFromGeoJSON, stateFromKML, stateToGeoJSO
 
 const state: MapState = {
 	meta: { title: 'Cafés in Berlin – 2026' },
-	elements: [{ type: 'marker', point: [13.4, 52.5], style: { label: 'A' } }]
+	elements: [{ type: 'marker', point: [13.4, 52.5], label: 'A' }]
 };
 
 describe('title', () => {

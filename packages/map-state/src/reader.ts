@@ -52,8 +52,7 @@ import {
 	STYLE_KEY_PARAMETER,
 	STYLE_REFERENCE_PARAMETER,
 	STYLE_REMOVE_KEY,
-	StyleHistory,
-	withoutLabel
+	StyleHistory
 } from './style_history.js';
 
 export class StateReader {
@@ -385,7 +384,7 @@ export class StateReader {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			this.readElementStyles(element, previous);
-			this.readElementLabel(element);
+			if (this.readBit()) element.label = this.readStringRef();
 			const popup = this.readPopup();
 			if (popup) element.popup = popup;
 			return element;
@@ -400,7 +399,6 @@ export class StateReader {
 			if (element.points.length < 2) throw new Error('A line of fewer than 2 points');
 			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
-			this.readElementLabel(element);
 			const popup = this.readPopup();
 			if (popup) element.popup = popup;
 			return element;
@@ -415,7 +413,6 @@ export class StateReader {
 			if (element.points.length < 3) throw new Error('An area of fewer than 3 points');
 			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
-			this.readElementLabel(element);
 			const popup = this.readPopup();
 			if (popup) element.popup = popup;
 			return element;
@@ -431,7 +428,6 @@ export class StateReader {
 			if (radius < 1) throw new Error('A circle without a radius');
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			this.readElementStyles(element, previous);
-			this.readElementLabel(element);
 			const popup = this.readPopup();
 			if (popup) element.popup = popup;
 			return element;
@@ -442,12 +438,12 @@ export class StateReader {
 
 	/**
 	 * The styles of an element: those of the element before (`previous`), if it repeats them, else
-	 * read. Copies: a style is shared with the history, and the element gets its own label.
+	 * read. Copies: a style is shared with the history.
 	 */
 	private readElementStyles(element: StateElement, previous?: StateElement) {
 		const hasStroke = element.type === 'polygon' || element.type === 'circle';
 		if (previous) {
-			if (previous.style) element.style = withoutLabel(previous.style);
+			if (previous.style) element.style = { ...previous.style };
 			if (hasStroke && 'strokeStyle' in previous && previous.strokeStyle) {
 				element.strokeStyle = { ...previous.strokeStyle };
 			}
@@ -455,13 +451,6 @@ export class StateReader {
 		}
 		if (this.readBit()) element.style = { ...this.readStyle() };
 		if (hasStroke && this.readBit()) element.strokeStyle = { ...this.readStyle() };
-	}
-
-	/** See `StateWriter.writeElementLabel`. */
-	private readElementLabel(element: StateElement) {
-		if (!this.readBit()) return;
-		if (!element.style) throw new Error('A label without a style');
-		element.style.label = this.readStringRef();
 	}
 
 	readLegend(): StateLegend {
@@ -664,9 +653,6 @@ export class StateReader {
 				case 'labelColor':
 				case 'haloColor':
 					style[field.name] = this.readColorValue();
-					break;
-				case 'label':
-					style.label = this.readStringRef();
 					break;
 				case 'visible':
 					// the key alone means "false"

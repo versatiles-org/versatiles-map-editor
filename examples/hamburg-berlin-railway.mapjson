@@ -59,12 +59,12 @@
 		{
 			"type": "marker",
 			"point": [10.0069, 53.5528],
+			"label": "Hamburg Hbf",
 			"style": {
 				"color": "#000000",
 				"size": 1.3,
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
-				"label": "Hamburg Hbf",
 				"labelPosition": "top",
 				"font": "noto_sans_bold"
 			}
@@ -72,12 +72,12 @@
 		{
 			"type": "marker",
 			"point": [13.3695, 52.5251],
+			"label": "Berlin Hbf",
 			"style": {
 				"color": "#000000",
 				"size": 1.3,
 				"labelSize": 1.3,
 				"symbol": "base:icon-rail",
-				"label": "Berlin Hbf",
 				"labelPosition": "top",
 				"font": "noto_sans_bold"
 			}
@@ -85,10 +85,10 @@
 		{
 			"type": "marker",
 			"point": [11.4964, 53.3301],
+			"label": "Ludwigslust",
 			"style": {
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
-				"label": "Ludwigslust",
 				"labelPosition": "right",
 				"labelColor": "#d55e00",
 				"font": "noto_sans_bold"
@@ -97,10 +97,10 @@
 		{
 			"type": "marker",
 			"point": [11.7514, 52.9981],
+			"label": "Wittenberge",
 			"style": {
 				"color": "#d55e00",
 				"symbol": "base:icon-rail",
-				"label": "Wittenberge",
 				"labelPosition": "right",
 				"labelColor": "#d55e00",
 				"font": "noto_sans_bold"
@@ -109,10 +109,10 @@
 		{
 			"type": "marker",
 			"point": [10.562, 52.9674],
+			"label": "Uelzen",
 			"style": {
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
-				"label": "Uelzen",
 				"labelPosition": "left",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"
@@ -121,10 +121,10 @@
 		{
 			"type": "marker",
 			"point": [11.8554, 52.5946],
+			"label": "Stendal",
 			"style": {
 				"color": "#0072b2",
 				"symbol": "base:icon-rail",
-				"label": "Stendal",
 				"labelPosition": "left",
 				"labelColor": "#0072b2",
 				"font": "noto_sans_bold"

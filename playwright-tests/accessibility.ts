@@ -82,7 +82,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	const state = encodeState({
 		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
-			{ type: 'marker', point: [13.4, 52.5], style: { label: 'Berlin' } },
+			{ type: 'marker', point: [13.4, 52.5], label: 'Berlin' },
 			{
 				type: 'line',
 				points: [
@@ -247,7 +247,7 @@ test('the list of elements selects like lists of files', { tag: '@cross-browser'
 	const elements = Array.from({ length: 5 }, (_, i) => ({
 		type: 'marker' as const,
 		point: [13.38 + i * 0.01, 52.5] as [number, number],
-		style: { label: `M${i + 1}` }
+		label: `M${i + 1}`
 	}));
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements }));
 	await waitForMapIsReady(page);
@@ -293,14 +293,14 @@ test('dragging elements in the list changes the drawing order', { tag: '@cross-b
 	const elements = Array.from({ length: 4 }, (_, i) => ({
 		type: 'marker' as const,
 		point: [13.38 + i * 0.01, 52.5] as [number, number],
-		style: { label: `M${i + 1}` }
+		label: `M${i + 1}`
 	}));
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	const list = page.getByRole('listbox', { name: 'Elements' });
 	const option = (label: string) => list.getByRole('option', { name: new RegExp(`: ${label}$`) });
-	const order = async () => (await storedState(page)).elements.map((e) => e.style?.label);
+	const order = async () => (await storedState(page)).elements.map((e) => (e.type === 'marker' ? e.label : undefined));
 	/** Drag a row to the upper edge of another one. */
 	async function drag(from: string, to: string) {
 		const a = (await option(from).boundingBox())!;

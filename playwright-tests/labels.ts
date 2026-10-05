@@ -18,7 +18,7 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 		if (message.type() === 'error') errors.push(message.text());
 	});
 	const center: [number, number] = [13.4, 52.5];
-	const marker = { type: 'marker' as const, point: center, style: { label: 'Price {EUR}' } };
+	const marker = { type: 'marker' as const, point: center, label: 'Price {EUR}' };
 	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements: [marker] }));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
@@ -39,7 +39,7 @@ test('the text color and the halo color of a label', async ({ page }) => {
 		'/#' +
 			encodeState({
 				view: { center, radius: 10000 },
-				elements: [{ type: 'marker', point: center, style: { label: 'Cafe' } }]
+				elements: [{ type: 'marker', point: center, label: 'Cafe' }]
 			})
 	);
 	await waitForMapIsReady(page);
@@ -77,7 +77,8 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 					{
 						type: 'marker',
 						point: center,
-						style: { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0, labelPosition: 'right' }
+						label: 'MMM',
+						style: { color: '#0000ff', labelColor: '#ff0000', halo: 0, labelPosition: 'right' }
 					}
 				]
 			})
@@ -121,9 +122,13 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 
 test('a label at a corner of its symbol, and a label without symbol on the point', async ({ page }) => {
 	const center: Point = [13.4, 52.5];
-	const style = { color: '#0000ff', label: 'MMM', labelColor: '#ff0000', halo: 0 };
+	const style = { color: '#0000ff', labelColor: '#ff0000', halo: 0 };
 	await page.goto(
-		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center, style }] })
+		'/#' +
+			encodeState({
+				view: { center, radius: 10000 },
+				elements: [{ type: 'marker', point: center, label: 'MMM', style }]
+			})
 	);
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
@@ -176,8 +181,8 @@ test('a font for the label of each marker, else the one of the background map', 
 			encodeState({
 				view: { center: a, radius: 10000 },
 				elements: [
-					{ type: 'marker', point: a, style: { label: 'A' } },
-					{ type: 'marker', point: [13.45, 52.5], style: { label: 'B' } }
+					{ type: 'marker', point: a, label: 'A' },
+					{ type: 'marker', point: [13.45, 52.5], label: 'B' }
 				]
 			})
 	);
@@ -241,8 +246,8 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 			encodeState({
 				view: { center, radius: 10000 },
 				elements: [
-					{ type: 'marker', point: center, style: { label: 'A' } },
-					{ type: 'marker', point: center, style: { label: 'B' } }
+					{ type: 'marker', point: center, label: 'A' },
+					{ type: 'marker', point: center, label: 'B' }
 				]
 			})
 	);

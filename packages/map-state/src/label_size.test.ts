@@ -14,9 +14,9 @@ import { StateWriter } from './writer.js';
 // the size of a marker's label, apart from the size of its symbol
 const state: MapState = {
 	elements: [
-		{ type: 'marker', point: [13.4, 52.5], style: { label: 'A', size: 2, labelSize: 0.8 } },
-		{ type: 'marker', point: [13.5, 52.5], style: { label: 'B', size: 2 } },
-		{ type: 'marker', point: [13.6, 52.5], style: { label: 'C', labelSize: 1.5 } }
+		{ type: 'marker', point: [13.4, 52.5], label: 'A', style: { size: 2, labelSize: 0.8 } },
+		{ type: 'marker', point: [13.5, 52.5], label: 'B', style: { size: 2 } },
+		{ type: 'marker', point: [13.6, 52.5], label: 'C', style: { labelSize: 1.5 } }
 	]
 };
 

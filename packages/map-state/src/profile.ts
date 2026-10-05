@@ -60,17 +60,7 @@ export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> =
 	arrowSize: 3
 };
 export const SYMBOL_DEFAULTS: Defaults<
-	| 'color'
-	| 'rotate'
-	| 'size'
-	| 'halo'
-	| 'symbol'
-	| 'label'
-	| 'labelPosition'
-	| 'labelColor'
-	| 'labelSize'
-	| 'font'
-	| 'haloColor'
+	'color' | 'rotate' | 'size' | 'halo' | 'symbol' | 'labelPosition' | 'labelColor' | 'labelSize' | 'font' | 'haloColor'
 > = {
 	color: '#ff0000',
 	rotate: 0,
@@ -79,7 +69,6 @@ export const SYMBOL_DEFAULTS: Defaults<
 	halo: 1,
 	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
 	symbol: 'base:icon-embassy',
-	label: '',
 	labelPosition: 'auto',
 	labelColor: '#000000',
 	// the font of the labels of the background map
@@ -161,7 +150,6 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	if (labelSize) s.labelSize = labelSize;
 	set(s, 'width', sanitizeNumber(v.width, 0));
 	set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, v.labelPosition));
-	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
 	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
 	set(s, 'arrowEnd', oneOf(ARROW_NAMES, v.arrowEnd));
@@ -305,6 +293,12 @@ export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 
 // ----- symbol (marker) -----
 
+/** The label of a marker, as a field of the element: `{ label }`, or nothing for none. */
+export function labelOf(value: unknown): { label?: string } {
+	const label = sanitizeString(value);
+	return label ? { label } : {};
+}
+
 export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
 	const s = { ...SYMBOL_DEFAULTS, ...style };
 	return {
@@ -313,7 +307,6 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-rotate': s.rotate,
 		'symbol-size': s.size,
 		'symbol-pattern': s.symbol,
-		'symbol-label': s.label,
 		'symbol-label-position': s.labelPosition,
 		'symbol-label-color': s.labelColor,
 		'symbol-label-size': s.labelSize,
@@ -330,7 +323,6 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'halo', sanitizeNumber(p['symbol-halo-width'], 0));
 		set(s, 'rotate', sanitizeRotation(p['symbol-rotate']));
 		set(s, 'size', sanitizeNumber(p['symbol-size'], 0));
-		set(s, 'label', sanitizeString(p['symbol-label']));
 		set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, p['symbol-label-position']));
 		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));
 		const labelSize = sanitizeNumber(p['symbol-label-size'], 0);
@@ -548,7 +540,7 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 		case 'marker': {
 			const point = sanitizePosition(v.point);
 			if (!point) return undefined;
-			element = { type: 'marker', point, style: sanitizeStyle(v.style) };
+			element = { type: 'marker', point, ...labelOf(v.label), style: sanitizeStyle(v.style) };
 			break;
 		}
 		case 'line': {

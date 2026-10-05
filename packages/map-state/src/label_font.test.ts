@@ -15,9 +15,9 @@ import { StateWriter } from './writer.js';
 const state: MapState = {
 	meta: { background: { builder: 'osm', options: { text: { font: 'lato_regular' } } } },
 	elements: [
-		{ type: 'marker', point: [13.4, 52.5], style: { label: 'A', font: 'noto_sans_bold' } },
-		{ type: 'marker', point: [13.5, 52.5], style: { label: 'B', font: 'lato_italic' } },
-		{ type: 'marker', point: [13.6, 52.5], style: { label: 'C' } }
+		{ type: 'marker', point: [13.4, 52.5], label: 'A', style: { font: 'noto_sans_bold' } },
+		{ type: 'marker', point: [13.5, 52.5], label: 'B', style: { font: 'lato_italic' } },
+		{ type: 'marker', point: [13.6, 52.5], label: 'C' }
 	]
 };
 

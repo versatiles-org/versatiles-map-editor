@@ -24,11 +24,12 @@
 				],
 				style: { width: 5, color: '#aa0000' }
 			},
-			{ type: 'marker', point: [13.35139, 52.50655], style: { color: '#aa0000', labelPosition: 'left', label: 'End' } },
+			{ type: 'marker', point: [13.35139, 52.50655], label: 'End', style: { color: '#aa0000', labelPosition: 'left' } },
 			{
 				type: 'marker',
 				point: [13.37097, 52.51871],
-				style: { color: '#aa0000', labelPosition: 'left', label: 'Start' }
+				label: 'Start',
+				style: { color: '#aa0000', labelPosition: 'left' }
 			},
 			{
 				type: 'polygon',

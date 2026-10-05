@@ -61,7 +61,7 @@ describe('ElementRenderer', () => {
 					],
 					strokeStyle: { visible: false }
 				},
-				{ type: 'marker', point: [1, 2], style: { label: 'A' } }
+				{ type: 'marker', point: [1, 2], label: 'A' }
 			]
 		});
 		map.setStyle();
@@ -196,7 +196,7 @@ describe('ElementRenderer', () => {
 		/** Markers in drawing order, with these labels ("" for none). */
 		async function markers(labels: string[]) {
 			await doc.setState({
-				elements: labels.map((label, i) => ({ type: 'marker' as const, point: [i, 0], style: { label } }))
+				elements: labels.map((label, i) => ({ type: 'marker' as const, point: [i, 0], label }))
 			});
 			doc.view.renderer.flush();
 		}
