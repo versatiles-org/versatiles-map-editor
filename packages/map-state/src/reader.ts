@@ -1,19 +1,23 @@
 import { formatHex, parseColor } from './color.js';
-import type {
-	Bounds,
-	StateBackground,
-	StateElement,
-	StateElementCircle,
-	StateElementLine,
-	StateElementMarker,
-	StateElementPolygon,
-	StateMetadata,
-	StateLegend,
-	StateLegendEntry,
-	StatePopup,
-	MapState,
-	StateStyle,
-	StateViewer
+import {
+	LEGEND_ENTRY_TYPES,
+	LEGEND_FONTS,
+	LEGEND_LAYOUTS,
+	LEGEND_THEMES,
+	type Bounds,
+	type StateBackground,
+	type StateElement,
+	type StateElementCircle,
+	type StateElementLine,
+	type StateElementMarker,
+	type StateElementPolygon,
+	type StateMetadata,
+	type StateLegend,
+	type StateLegendEntry,
+	type StatePopup,
+	type MapState,
+	type StateStyle,
+	type StateViewer
 } from './types.js';
 import {
 	BASE64_CODE2BITS,
@@ -48,7 +52,6 @@ import {
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
-import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
 
 export class StateReader {
 	public bits: boolean[];

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { addLegendEntry } from '#lib/editor/index.js';
+	import { addLegendEntry, type MapDocumentInteractive } from '#lib/editor/index.js';
 	import StyleEditor from './StyleEditor.svelte';
 	import {
 		Icon,
@@ -18,8 +17,7 @@
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
 	import { elementIcon } from '#lib/components/common/index.js';
-	import { elementText } from '#lib/element/index.js';
-	import { countTypes, typeName } from '#lib/element/index.js';
+	import { elementText, countTypes, typeName } from '#lib/element/index.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a

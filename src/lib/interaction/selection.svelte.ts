@@ -1,6 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from '../element/index.js';
-import type { SelectionNode } from '../element/index.js';
+import type { AbstractElement, SelectionNode } from '../element/index.js';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import type { GeoPoint } from '../geometry.js';
 import { SelectionPointer } from './selection_pointer.js';

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import type { AbstractElement } from '#lib/element/index.js';
-	import { elementText } from '#lib/element/index.js';
+	import { elementText, type AbstractElement } from '#lib/element/index.js';
 
 	/** The name of an element in the list: its type, and its label or popup text as plain text. */
 	const { element, name }: { element: AbstractElement; name: string } = $props();

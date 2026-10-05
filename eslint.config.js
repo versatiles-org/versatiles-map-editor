@@ -19,6 +19,8 @@ export default [
 			}
 		},
 		rules: {
+			// one import statement per module, with its types inline: `import { a, type B } from …`
+			'no-duplicate-imports': 'error',
 			'no-unused-vars': 'off',
 			'@typescript-eslint/no-unused-vars': [
 				'error',

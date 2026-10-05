@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import type { AbstractElement } from '../element/index.js';
+import { elementFromState, type AbstractElement } from '../element/index.js';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import {
 	boundsOf,
@@ -14,7 +14,6 @@ import {
 	type StateMetadata,
 	type StateViewer
 } from '@versatiles/map-state';
-import { elementFromState } from '../element/index.js';
 import { MapView, type ElementIndex } from '../rendering/index.js';
 import { getSettings, sameBackground } from '../background/index.js';
 

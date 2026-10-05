@@ -21,7 +21,24 @@ import {
 	withoutUnusedFields
 } from './profile.js';
 import { encodeStrings } from './string_coder.js';
-import { LEGEND_ENTRY_TYPES, LEGEND_FONTS, LEGEND_LAYOUTS, LEGEND_THEMES } from './types.js';
+import {
+	LEGEND_ENTRY_TYPES,
+	LEGEND_FONTS,
+	LEGEND_LAYOUTS,
+	LEGEND_THEMES,
+	type Bounds,
+	type StateElement,
+	type StateElementCircle,
+	type StateElementLine,
+	type StateElementMarker,
+	type StateElementPolygon,
+	type StateMetadata,
+	type StateLegend,
+	type StatePopup,
+	type MapState,
+	type StateStyle,
+	type StateViewer
+} from './types.js';
 import { exponentForResolution, LocalGrid } from './grid.js';
 import {
 	canonical,
@@ -34,20 +51,6 @@ import {
 	StyleHistory,
 	withoutLabel
 } from './style_history.js';
-import type {
-	Bounds,
-	StateElement,
-	StateElementCircle,
-	StateElementLine,
-	StateElementMarker,
-	StateElementPolygon,
-	StateMetadata,
-	StateLegend,
-	StatePopup,
-	MapState,
-	StateStyle,
-	StateViewer
-} from './types.js';
 
 export class StateWriter {
 	bits: boolean[] = [];

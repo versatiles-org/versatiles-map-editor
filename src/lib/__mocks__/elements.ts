@@ -1,11 +1,14 @@
 import type { StateElement } from '@versatiles/map-state';
-import type { ElementOwner } from '../element/index.js';
+import {
+	elementFromState,
+	type ElementOwner,
+	type ElementType,
+	type CircleElement,
+	type LineElement,
+	type MarkerElement,
+	type PolygonElement
+} from '../element/index.js';
 import type { MapDocumentInteractive } from '../editor/index.js';
-import { elementFromState, type ElementType } from '../element/index.js';
-import type { CircleElement } from '../element/index.js';
-import type { LineElement } from '../element/index.js';
-import type { MarkerElement } from '../element/index.js';
-import type { PolygonElement } from '../element/index.js';
 
 interface ElementOfType {
 	marker: MarkerElement;

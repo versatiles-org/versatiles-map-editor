@@ -6,8 +6,7 @@ import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from 
 import { themeColor } from './theme_color.js';
 import { addArrowImage } from './arrow_heads.js';
 import { addFillPatternImage } from './fill_patterns.js';
-import { loadSymbols, spriteSheets } from '../background/index.js';
-import { configReady } from '../background/index.js';
+import { loadSymbols, spriteSheets, configReady } from '../background/index.js';
 
 /**
  * Loads the style of the map: the background map with the editor's layers, the font of the labels

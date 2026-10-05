@@ -2,8 +2,7 @@
 	import type { Bounds } from '@versatiles/map-state';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { Button } from '#lib/components/ui/index.js';
-	import { formatLength } from '#lib/components/common/index.js';
-	import { isOwnKeyTarget } from '#lib/components/common/index.js';
+	import { formatLength, isOwnKeyTarget } from '#lib/components/common/index.js';
 	import { NUDGE } from '#lib/interaction/index.js';
 
 	/**

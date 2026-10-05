@@ -4,9 +4,8 @@
 	import ElementName from './ElementName.svelte';
 	import { Icon, Hint } from '#lib/components/ui/index.js';
 	import { elementIcon } from '#lib/components/common/index.js';
-	import { typeName } from '#lib/element/index.js';
+	import { typeName, type AbstractElement } from '#lib/element/index.js';
 	import { isToggleClick, TOGGLE_KEY } from '#lib/interaction/index.js';
-	import type { AbstractElement } from '#lib/element/index.js';
 
 	/**
 	 * All elements of the map as a list, so they can also be chosen with the keyboard or a screen

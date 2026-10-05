@@ -1,17 +1,5 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
-import type {
-	Bounds,
-	MapState,
-	Position,
-	StateBackground,
-	StateElement,
-	StateLegend,
-	StateMetadata,
-	StatePopup,
-	StateStyle,
-	StateViewer
-} from './types.js';
 import {
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
@@ -19,7 +7,17 @@ import {
 	LEGEND_THEMES,
 	LEGEND_POSITIONS,
 	NAVIGATION_POSITIONS,
-	SEARCH_POSITIONS
+	SEARCH_POSITIONS,
+	type Bounds,
+	type MapState,
+	type Position,
+	type StateBackground,
+	type StateElement,
+	type StateLegend,
+	type StateMetadata,
+	type StatePopup,
+	type StateStyle,
+	type StateViewer
 } from './types.js';
 
 // ---------------------------------------------------------------------------
