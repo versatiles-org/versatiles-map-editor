@@ -609,8 +609,8 @@ export class StateReader {
 			const field = STYLE_FIELDS.find((f) => f.key === key);
 			if (!field) throw new Error(`Invalid state key: ${key}`);
 			switch (field.name) {
-				case 'halo':
-					style.halo = this.readVarint() / 10;
+				case 'haloWidth':
+					style.haloWidth = this.readVarint() / 10;
 					break;
 				case 'pattern':
 					style.pattern = this.readName(FILL_PATTERN_NAMES);
@@ -618,9 +618,9 @@ export class StateReader {
 				case 'dash':
 					style.dash = this.readName(STROKE_STYLE_NAMES);
 					break;
-				case 'rotate':
-					style.rotate = this.readVarint(true);
-					if (Math.abs(style.rotate) > 180) throw new Error(`Invalid rotation: ${style.rotate}`);
+				case 'rotation':
+					style.rotation = this.readVarint(true);
+					if (Math.abs(style.rotation) > 180) throw new Error(`Invalid rotation: ${style.rotation}`);
 					break;
 				case 'size':
 					style.size = this.readVarint() / 10;

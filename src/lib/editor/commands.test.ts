@@ -189,7 +189,7 @@ describe('addToLegend', () => {
 			type: 'marker',
 			point: [0, 0],
 			label: 'Cafe',
-			style: { color: '#0000ff', symbol: 'base:icon-cafe', labelColor: '#000000', halo: 2 }
+			style: { color: '#0000ff', symbol: 'base:icon-cafe', labelColor: '#000000', haloWidth: 2 }
 		});
 		const route = doc.addElement({ type: 'line', points, style: { color: '#d55e00', dash: 'dashed', width: 4 } });
 		route.popup = 'Bus 100\nevery 10 minutes';

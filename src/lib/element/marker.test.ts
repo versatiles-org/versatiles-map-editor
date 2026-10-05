@@ -34,7 +34,7 @@ describe('MarkerElement', () => {
 		// the color that stands for the marker: its symbol
 		expect(element.getColors('main')).toStrictEqual(['#0000ff']);
 		// without a halo
-		layer.halo = 0;
+		layer.haloWidth = 0;
 		expect(element.getColors()).toStrictEqual(['#0000ff', '#123456']);
 		// without a symbol: the label stands for it
 		layer.symbol = '';

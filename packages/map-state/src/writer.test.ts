@@ -150,7 +150,7 @@ describe('StateWriter', () => {
 				{
 					type: 'marker',
 					point: [3, 4],
-					style: { halo: 1.5, size: 0.8, color: '#ff0000' }
+					style: { haloWidth: 1.5, size: 0.8, color: '#ff0000' }
 				},
 				{
 					type: 'line',
@@ -158,7 +158,7 @@ describe('StateWriter', () => {
 						[5, 6],
 						[7, 8]
 					],
-					style: { halo: 1.5, size: 0.8, color: '#00ff00' }
+					style: { haloWidth: 1.5, size: 0.8, color: '#00ff00' }
 				},
 				{
 					type: 'polygon',
@@ -167,8 +167,8 @@ describe('StateWriter', () => {
 						[11, 12],
 						[13, 14]
 					],
-					style: { halo: 1.5, size: 0.8, color: '#0000ff' },
-					strokeStyle: { halo: 1.5, size: 0.8, color: '#ffff00' }
+					style: { haloWidth: 1.5, size: 0.8, color: '#0000ff' },
+					strokeStyle: { haloWidth: 1.5, size: 0.8, color: '#ffff00' }
 				},
 				{
 					type: 'circle',
@@ -201,9 +201,9 @@ describe('StateWriter', () => {
 		// the palette of the colors, which the style refers to
 		writer.writePalette(['#ff0000']);
 		writer.writeStyle({
-			halo: 1.5,
+			haloWidth: 1.5,
 			pattern: 'diagonal-down',
-			rotate: -45,
+			rotation: -45,
 			size: 2.5,
 			width: 2.3,
 			labelPosition: 'bottom',

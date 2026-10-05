@@ -104,8 +104,8 @@ export class SymbolStyle extends StylePart {
 	protected readonly defaults = SymbolStyle.defaultStyle;
 
 	#color: string = $state(SYMBOL_DEFAULTS.color);
-	#halo: number = $state(SYMBOL_DEFAULTS.halo);
-	#rotate: number = $state(SYMBOL_DEFAULTS.rotate);
+	#haloWidth: number = $state(SYMBOL_DEFAULTS.haloWidth);
+	#rotation: number = $state(SYMBOL_DEFAULTS.rotation);
 	#size: number = $state(SYMBOL_DEFAULTS.size);
 	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
@@ -123,20 +123,20 @@ export class SymbolStyle extends StylePart {
 		this.#color = value;
 		this.changed();
 	}
-	get halo(): number {
-		return this.#halo;
+	get haloWidth(): number {
+		return this.#haloWidth;
 	}
-	set halo(value: number) {
-		if (value === this.#halo) return;
-		this.#halo = value;
+	set haloWidth(value: number) {
+		if (value === this.#haloWidth) return;
+		this.#haloWidth = value;
 		this.changed();
 	}
-	get rotate(): number {
-		return this.#rotate;
+	get rotation(): number {
+		return this.#rotation;
 	}
-	set rotate(value: number) {
-		if (value === this.#rotate) return;
-		this.#rotate = value;
+	set rotation(value: number) {
+		if (value === this.#rotation) return;
+		this.#rotation = value;
 		this.changed();
 	}
 	/** The size of the symbol, as a factor. */
@@ -239,12 +239,12 @@ export class SymbolStyle extends StylePart {
 			...(info == null ? {} : { icon: info.name, anchor: info.anchor }),
 			color: symbol.color,
 			opacity: symbol.opacity,
-			rotate: this.rotate,
+			rotate: this.rotation,
 			size: this.size,
 			labelSize: this.labelSize,
 			// the label offsets around the symbol, in ems of the label, grow with the symbol
 			labelScale: info == null ? 1 : this.size / this.labelSize,
-			halo: this.halo,
+			halo: this.haloWidth,
 			label: this.label,
 			labelColor: text.color,
 			labelOpacity: text.opacity,
@@ -259,10 +259,10 @@ export class SymbolStyle extends StylePart {
 		return removeDefaultFields(
 			{
 				color: this.color,
-				rotate: this.rotate,
+				rotation: this.rotation,
 				size: this.size,
 				labelSize: this.labelSize,
-				halo: this.halo,
+				haloWidth: this.haloWidth,
 				symbol: this.symbol,
 				labelPosition: this.labelPosition,
 				labelColor: this.labelColor,
@@ -275,10 +275,10 @@ export class SymbolStyle extends StylePart {
 
 	patch(style: StateStyle) {
 		if (style.color != null) this.color = style.color;
-		if (style.rotate != null) this.rotate = style.rotate;
+		if (style.rotation != null) this.rotation = style.rotation;
 		if (style.size != null) this.size = style.size;
 		if (style.labelSize != null) this.labelSize = style.labelSize;
-		if (style.halo != null) this.halo = style.halo;
+		if (style.haloWidth != null) this.haloWidth = style.haloWidth;
 		if (style.symbol != null) this.symbol = style.symbol;
 		if (style.labelPosition != null) this.labelPosition = style.labelPosition;
 		if (style.labelColor != null) this.labelColor = style.labelColor;

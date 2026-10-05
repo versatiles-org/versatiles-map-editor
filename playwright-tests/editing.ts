@@ -712,9 +712,7 @@ test(
 		const rotation = page.getByRole('spinbutton', { name: 'Rotation' });
 		await rotation.fill('17');
 		await rotation.press('Enter');
-		await expect
-			.poll(async () => ((await storedState(page)).elements[1] as { style?: { rotate?: number } }).style?.rotate)
-			.toBe(17);
+		await expect.poll(async () => (await storedState(page)).elements[1].style?.rotation).toBe(17);
 	}
 );
 

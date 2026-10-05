@@ -24,8 +24,8 @@ const state: MapState = {
 				color: '#0000ff',
 				symbol: 'icons:anchor',
 				size: 2,
-				rotate: -45,
-				halo: 2,
+				rotation: -45,
+				haloWidth: 2,
 				labelPosition: 'top'
 			},
 			popup: { text: 'Line 1\n**bold** <b>not html</b> & [link](https://example.org)' }

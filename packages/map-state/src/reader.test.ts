@@ -314,7 +314,7 @@ describe('StateReader', () => {
 					{
 						type: 'marker',
 						point: [3, 4],
-						style: { halo: 1.2, size: 3.4, color: '#ff0000' }
+						style: { haloWidth: 1.2, size: 3.4, color: '#ff0000' }
 					},
 					{
 						type: 'line',
@@ -326,8 +326,8 @@ describe('StateReader', () => {
 					{
 						type: 'polygon',
 						points: path,
-						style: { halo: 1.5, width: 0.8, color: '#0000ff64' },
-						strokeStyle: { halo: 1.5, width: 0.8, color: '#ffff00' }
+						style: { haloWidth: 1.5, width: 0.8, color: '#0000ff64' },
+						strokeStyle: { haloWidth: 1.5, width: 0.8, color: '#ffff00' }
 					},
 					{
 						type: 'circle',
@@ -354,16 +354,16 @@ describe('StateReader', () => {
 			// no reference to an earlier style (Exp-Golomb: 1), then the halo (key 13, 0.1 as 1) and the end (key 0)
 			const reader = StateReader.fromBitString('1' + '0001110' + '000010' + '1');
 			const style = reader.readStyle();
-			expect(style).toStrictEqual({ halo: 0.1 });
+			expect(style).toStrictEqual({ haloWidth: 0.1 });
 			expect(reader.ended()).toBe(true);
 		});
 
 		it('should read a style correctly', () => {
 			const style: StateStyle = {
-				halo: 1.5,
+				haloWidth: 1.5,
 				dash: 'dashed',
 				pattern: 'diagonal-down',
-				rotate: -45,
+				rotation: -45,
 				size: 2.5,
 				width: 2.3,
 				labelPosition: 'bottom',
@@ -688,7 +688,7 @@ describe('invalid links', () => {
 
 	it('are refused with a rotation beyond 180°', () => {
 		const marker = (style: StateStyle): MapState => ({ elements: [{ type: 'marker', point: [0, 0], style }] });
-		expect(decodeError(marker({ rotate: 200 }))).toBe('Invalid rotation: 200');
+		expect(decodeError(marker({ rotation: 200 }))).toBe('Invalid rotation: 200');
 	});
 
 	it('keep a circle smaller than 1 m, as 1 m', () => {

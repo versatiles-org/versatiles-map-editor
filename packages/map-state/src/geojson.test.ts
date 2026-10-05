@@ -377,8 +377,8 @@ describe('stateFromGeoJSON with foreign property values', () => {
 	const styleOf = (properties: GeoJSON.GeoJsonProperties) => stateFromGeoJSON(point(properties)).elements[0];
 
 	it('rounds and normalizes symbol rotation', () => {
-		expect(styleOf({ 'symbol-rotate': 12.5 })).toMatchObject({ style: { rotate: 13 } });
-		expect(styleOf({ 'symbol-rotate': 270 })).toMatchObject({ style: { rotate: -90 } });
+		expect(styleOf({ 'symbol-rotation': 12.5 })).toMatchObject({ style: { rotation: 13 } });
+		expect(styleOf({ 'symbol-rotation': 270 })).toMatchObject({ style: { rotation: -90 } });
 	});
 
 	it('clamps negative sizes and out-of-range opacity', () => {
@@ -403,7 +403,7 @@ describe('stateFromGeoJSON with foreign property values', () => {
 
 	it('ignores invalid values', () => {
 		expect(
-			styleOf({ 'symbol-size': 'big', 'symbol-halo-width': null, 'symbol-label': {}, 'symbol-rotate': NaN })
+			styleOf({ 'symbol-size': 'big', 'symbol-halo-width': null, 'symbol-label': {}, 'symbol-rotation': NaN })
 		).toEqual({ type: 'marker', point: [13.4, 52.5] });
 	});
 
@@ -420,7 +420,7 @@ describe('stateFromGeoJSON with foreign property values', () => {
 
 	it('always produces encodable documents', () => {
 		for (const properties of [
-			{ 'symbol-rotate': 12.5 },
+			{ 'symbol-rotation': 12.5 },
 			{ subType: 'Circle', radius: 100.7, 'stroke-width': -1 },
 			{ 'symbol-color': 'notacolor' },
 			{ 'symbol-size': Infinity, 'symbol-halo-width': -3 }

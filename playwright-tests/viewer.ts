@@ -295,7 +295,7 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 test('a marker with an opacity fades together with its halo', async ({ page }) => {
 	const view = { center: [13.4, 52.5] as [number, number], radius: 3000 };
 	const marker = (color: string) =>
-		encodeState({ view, elements: [{ type: 'marker', point: view.center, style: { color, size: 4, halo: 2 } }] });
+		encodeState({ view, elements: [{ type: 'marker', point: view.center, style: { color, size: 4, haloWidth: 2 } }] });
 
 	/** The pixels around the marker, with the opacity of its symbols set to `opacity` if given. */
 	async function pixels(state: string, opacity?: number): Promise<number[]> {

@@ -60,7 +60,7 @@
 			style:width="{symbolSize}px"
 			style:height="{symbolSize}px"
 			style:opacity={opacityOf(color)}
-			style:rotate={entry.style?.rotate ? `${entry.style.rotate}deg` : undefined}
+			style:rotate={entry.style?.rotation ? `${entry.style.rotation}deg` : undefined}
 			use:drawSymbol={{ symbol, color }}
 		></canvas>
 	{:else}

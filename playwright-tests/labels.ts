@@ -78,7 +78,7 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 						type: 'marker',
 						point: center,
 						label: 'MMM',
-						style: { color: '#0000ff', labelColor: '#ff0000', halo: 0, labelPosition: 'right' }
+						style: { color: '#0000ff', labelColor: '#ff0000', haloWidth: 0, labelPosition: 'right' }
 					}
 				]
 			})

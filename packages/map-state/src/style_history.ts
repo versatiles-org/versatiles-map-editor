@@ -21,9 +21,9 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 10, name: 'arrowStart', encoded: (v: string) => v },
 	{ key: 11, name: 'arrowEnd', encoded: (v: string) => v },
 	{ key: 12, name: 'arrowSize', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 13, name: 'halo', encoded: (v: number) => Math.round(v * 10) },
+	{ key: 13, name: 'haloWidth', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 14, name: 'haloColor', encoded: (v: string) => colorKey(v) },
-	{ key: 15, name: 'rotate', encoded: (v: number) => Math.round(v) },
+	{ key: 15, name: 'rotation', encoded: (v: number) => Math.round(v) },
 	// only "false" is stored, "true" is the default
 	{ key: 16, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
 	// the fill pattern of areas, rarer than the dashes of lines

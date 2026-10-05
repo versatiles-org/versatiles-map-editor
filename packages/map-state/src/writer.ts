@@ -546,14 +546,14 @@ export class StateWriter {
 
 	private writeStyleValue(name: keyof StateStyle, style: StateStyle) {
 		switch (name) {
-			case 'halo':
-				return this.writeVarint(Math.round(style.halo! * 10));
+			case 'haloWidth':
+				return this.writeVarint(Math.round(style.haloWidth! * 10));
 			case 'pattern':
 				return this.writeName(FILL_PATTERN_NAMES, style.pattern!);
 			case 'dash':
 				return this.writeName(STROKE_STYLE_NAMES, style.dash!);
-			case 'rotate':
-				return this.writeVarint(Math.round(style.rotate!), true);
+			case 'rotation':
+				return this.writeVarint(Math.round(style.rotation!), true);
 			case 'size':
 				return this.writeVarint(Math.round(style.size! * 10));
 			case 'labelSize':

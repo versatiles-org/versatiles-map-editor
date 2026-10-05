@@ -16,12 +16,12 @@ describe('SymbolStyle', () => {
 		expect(keys).toStrictEqual([
 			'color',
 			'font',
-			'halo',
 			'haloColor',
+			'haloWidth',
 			'labelColor',
 			'labelPosition',
 			'labelSize',
-			'rotate',
+			'rotation',
 			'size',
 			'symbol'
 		]);
@@ -30,9 +30,9 @@ describe('SymbolStyle', () => {
 	it('should initialize layer with default values', () => {
 		expect(layer).toBeDefined();
 		expect(layer.color).toBe('#ff0000');
-		expect(layer.rotate).toBe(0);
+		expect(layer.rotation).toBe(0);
 		expect(layer.size).toBe(1);
-		expect(layer.halo).toBe(1);
+		expect(layer.haloWidth).toBe(1);
 		expect(layer.symbol).toBe('base:icon-embassy');
 		expect(layer.label).toBe('');
 	});
@@ -158,18 +158,18 @@ describe('SymbolStyle', () => {
 
 	it('should return correct state object', () => {
 		layer.color = '#00ff00';
-		layer.rotate = 45;
+		layer.rotation = 45;
 		layer.size = 2;
-		layer.halo = 3;
+		layer.haloWidth = 3;
 		layer.symbol = 'icons:anchor';
 		layer.label = 'Test Label';
 		layer.labelPosition = 'left';
 
 		expect(layer.getState()).toEqual({
 			color: '#00ff00',
-			rotate: 45,
+			rotation: 45,
 			size: 2,
-			halo: 3,
+			haloWidth: 3,
 			symbol: 'icons:anchor',
 			labelPosition: 'left'
 		});
@@ -178,28 +178,28 @@ describe('SymbolStyle', () => {
 	it('should restore state correctly', () => {
 		layer.setState({
 			color: '#0000ff',
-			rotate: 90,
+			rotation: 90,
 			size: 3,
-			halo: 2,
+			haloWidth: 2,
 			symbol: 'icons:anchor',
 			labelPosition: 'left'
 		});
 
 		expect(layer.color).toBe('#0000ff');
-		expect(layer.rotate).toBe(90);
+		expect(layer.rotation).toBe(90);
 		expect(layer.size).toBe(3);
-		expect(layer.halo).toBe(2);
+		expect(layer.haloWidth).toBe(2);
 		expect(layer.symbol).toBe('icons:anchor');
 		expect(layer.labelPosition).toBe('left');
 	});
 
 	it('gives the fields that a stored style leaves out their defaults', () => {
 		layer.label = 'Label';
-		layer.setState({ halo: 0, size: 2, symbol: 'icons:anchor' });
+		layer.setState({ haloWidth: 0, size: 2, symbol: 'icons:anchor' });
 		layer.setState({ color: '#00ff00' });
 
 		expect(layer.color).toBe('#00ff00');
-		expect(layer.halo).toBe(1);
+		expect(layer.haloWidth).toBe(1);
 		expect(layer.size).toBe(1);
 		// the label is a field of the marker, not of its style
 		expect(layer.label).toBe('Label');
@@ -208,11 +208,11 @@ describe('SymbolStyle', () => {
 	});
 
 	it('should restore falsy values', () => {
-		layer.patch({ halo: 0, rotate: 90, labelPosition: 'left' });
-		layer.patch({ rotate: 0, labelPosition: 'auto' });
+		layer.patch({ haloWidth: 0, rotation: 90, labelPosition: 'left' });
+		layer.patch({ rotation: 0, labelPosition: 'auto' });
 
-		expect(layer.halo).toBe(0);
-		expect(layer.rotate).toBe(0);
+		expect(layer.haloWidth).toBe(0);
+		expect(layer.rotation).toBe(0);
 		expect(layer.label).toBe('');
 		expect(layer.labelPosition).toBe('auto');
 	});

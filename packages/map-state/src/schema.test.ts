@@ -86,8 +86,8 @@ describe('the JSON Schema of .mapjson files', () => {
 						symbol: 'icons:anchor',
 						color: '#0000ff80',
 						size: 2,
-						rotate: -45,
-						halo: 2,
+						rotation: -45,
+						haloWidth: 2,
 						labelSize: 1.5,
 						font: 'noto_sans_bold',
 						labelPosition: 'top'

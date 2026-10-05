@@ -369,13 +369,13 @@ describe('MapDocument', () => {
 			polygon.fillLayer.color = '#ff000000';
 			polygon.strokeLayer.visible = false;
 			const marker = addElement(doc, 'marker');
-			marker.layer.halo = 0;
+			marker.layer.haloWidth = 0;
 
 			await doc.setState(decodeState(doc.state.getHash()));
 			const [restoredPolygon, restoredMarker] = doc.elements.map((e) => e.getState());
 			// an invisible fill
 			expect(restoredPolygon).toMatchObject({ style: { color: '#ff000000' }, strokeStyle: { visible: false } });
-			expect(restoredMarker).toMatchObject({ style: { halo: 0 } });
+			expect(restoredMarker).toMatchObject({ style: { haloWidth: 0 } });
 		});
 	});
 

@@ -13,8 +13,8 @@
 	const log = () => doc.state.log();
 	const symbol = $derived(group(layers, 'symbol'));
 	const color = $derived(group(layers, 'color'));
-	const rotate = $derived(group(layers, 'rotate'));
-	const halo = $derived(group(layers, 'halo'));
+	const rotation = $derived(group(layers, 'rotation'));
+	const haloWidth = $derived(group(layers, 'haloWidth'));
 	const label = $derived(group(layers, 'label'));
 	const labelPosition = $derived(group(layers, 'labelPosition'));
 	const labelColor = $derived(group(layers, 'labelColor'));
@@ -88,8 +88,8 @@
 			<Slider id="{uid}-size" min={0.5} max={3} step={0.1} bind:value={size.value} onchange={log} unit="×" />
 		</InputRow>
 
-		<InputRow id="{uid}-rotate" label="Rotation" mixed={rotate.mixed}>
-			<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotate.value} onchange={log} unit="°" />
+		<InputRow id="{uid}-rotate" label="Rotation" mixed={rotation.mixed}>
+			<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotation.value} onchange={log} unit="°" />
 		</InputRow>
 	{/if}
 </InspectorSection>
@@ -137,8 +137,8 @@
 
 <!-- around the symbol and the label -->
 <InspectorSection title="Halo">
-	<InputRow id="{uid}-halo" label="Halo" mixed={halo.mixed}>
-		<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={halo.value} onchange={log} unit="px" />
+	<InputRow id="{uid}-halo" label="Halo" mixed={haloWidth.mixed}>
+		<Slider id="{uid}-halo" min={0} max={3} step={0.5} bind:value={haloWidth.value} onchange={log} unit="px" />
 	</InputRow>
 
 	<InputRow id="{uid}-haloColor" label="Halo color" mixed={haloColor.mixed}>

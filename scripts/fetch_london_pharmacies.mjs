@@ -124,7 +124,7 @@ const state = {
 			color: COLOR,
 			size: 0.8,
 			labelSize: 0.8,
-			halo: 2,
+			haloWidth: 2,
 			symbol: SYMBOL,
 			// the label above the symbol
 			labelPosition: 'top',

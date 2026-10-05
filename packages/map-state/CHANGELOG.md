@@ -95,6 +95,8 @@ The first release.
   base64 string as its index; in GeoJSON `stroke-style` and `fill-pattern`.
 - The label of a marker is a field of the element, `label`, not of its style: a style is only the
   look, and legend entries have their own `label`.
+- The rotation of a marker's symbol is `rotation`, and the width of its halo `haloWidth`, as in
+  `@versatiles/style`; in GeoJSON `symbol-rotation` and `symbol-halo-width`.
 - `view` for the place where the author's editor looks (`center` and `radius`), also in GeoJSON
   (a member of the `FeatureCollection`) and KML (`versatiles:view`).
 - Rules for the names of the choices of a style (`types.ts`, `MAPJSON.md`): lowercase words joined

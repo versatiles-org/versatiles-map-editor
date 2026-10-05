@@ -60,13 +60,22 @@ export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> =
 	arrowSize: 3
 };
 export const SYMBOL_DEFAULTS: Defaults<
-	'color' | 'rotate' | 'size' | 'halo' | 'symbol' | 'labelPosition' | 'labelColor' | 'labelSize' | 'font' | 'haloColor'
+	| 'color'
+	| 'rotation'
+	| 'size'
+	| 'haloWidth'
+	| 'symbol'
+	| 'labelPosition'
+	| 'labelColor'
+	| 'labelSize'
+	| 'font'
+	| 'haloColor'
 > = {
 	color: '#ff0000',
-	rotate: 0,
+	rotation: 0,
 	size: 1,
 	labelSize: 1,
-	halo: 1,
+	haloWidth: 1,
 	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
 	symbol: 'base:icon-embassy',
 	labelPosition: 'auto',
@@ -138,12 +147,12 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'color', sanitizeColor(v.color));
 	set(s, 'labelColor', sanitizeColor(v.labelColor));
 	set(s, 'haloColor', sanitizeColor(v.haloColor));
-	set(s, 'halo', sanitizeNumber(v.halo, 0));
+	set(s, 'haloWidth', sanitizeNumber(v.haloWidth, 0));
 	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
 	set(s, 'patternScale', sanitizeNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
 	set(s, 'patternCoverage', sanitizeNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
 	set(s, 'dash', oneOf(STROKE_STYLE_NAMES, v.dash));
-	set(s, 'rotate', sanitizeRotation(v.rotate));
+	set(s, 'rotation', sanitizeRotation(v.rotation));
 	const size = sanitizeNumber(v.size, 0);
 	if (size) s.size = size;
 	const labelSize = sanitizeNumber(v.labelSize, 0);
@@ -303,8 +312,8 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 	const s = { ...SYMBOL_DEFAULTS, ...style };
 	return {
 		'symbol-color': s.color,
-		'symbol-halo-width': s.halo,
-		'symbol-rotate': s.rotate,
+		'symbol-halo-width': s.haloWidth,
+		'symbol-rotation': s.rotation,
 		'symbol-size': s.size,
 		'symbol-pattern': s.symbol,
 		'symbol-label-position': s.labelPosition,
@@ -320,8 +329,8 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 	const s: StateStyle = { ...SYMBOL_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['symbol-color']));
-		set(s, 'halo', sanitizeNumber(p['symbol-halo-width'], 0));
-		set(s, 'rotate', sanitizeRotation(p['symbol-rotate']));
+		set(s, 'haloWidth', sanitizeNumber(p['symbol-halo-width'], 0));
+		set(s, 'rotation', sanitizeRotation(p['symbol-rotation']));
 		set(s, 'size', sanitizeNumber(p['symbol-size'], 0));
 		set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, p['symbol-label-position']));
 		set(s, 'labelColor', sanitizeColor(p['symbol-label-color']));

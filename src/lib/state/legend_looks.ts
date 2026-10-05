@@ -7,7 +7,7 @@ import { type StateElement, type StateLegend, type StateLegendEntry, type StateS
  */
 
 /** The fields of a marker style that a legend entry keeps: not those of its label, whose text is the entry's. */
-const MARKER_FIELDS = ['color', 'symbol', 'rotate', 'size'] as const;
+const MARKER_FIELDS = ['color', 'symbol', 'rotation', 'size'] as const;
 
 export function markerLook(style: StateStyle | undefined): StateStyle | undefined {
 	const look: StateStyle = {};

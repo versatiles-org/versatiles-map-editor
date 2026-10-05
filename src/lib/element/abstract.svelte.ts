@@ -45,7 +45,7 @@ export abstract class AbstractElement {
 			const hasLabel = symbol.label.trim() !== '';
 			if (hasSymbol) colors.push(symbol.color);
 			if (hasLabel && (parts === 'all' || !hasSymbol)) colors.push(symbol.labelColor);
-			if (parts === 'all' && symbol.halo > 0 && (hasSymbol || hasLabel)) colors.push(symbol.haloColor);
+			if (parts === 'all' && symbol.haloWidth > 0 && (hasSymbol || hasLabel)) colors.push(symbol.haloColor);
 		}
 		if (fill) colors.push(fill.color);
 		// a hidden outline is not drawn (a line cannot be hidden)

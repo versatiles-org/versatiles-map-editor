@@ -247,7 +247,7 @@
 				"color": "#cc9900",
 				"size": 2,
 				"labelSize": 2,
-				"halo": 2,
+				"haloWidth": 2,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#cc9900",
 				"font": "noto_sans_bold"

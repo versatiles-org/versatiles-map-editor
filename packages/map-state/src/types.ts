@@ -155,7 +155,7 @@ export interface StateStyle {
 	 * @minimum 0
 	 * @default 1
 	 */
-	halo?: number;
+	haloWidth?: number;
 	/**
 	 * Areas: the pattern of the fill.
 	 * @default "solid"
@@ -189,7 +189,7 @@ export interface StateStyle {
 	 * @maximum 180
 	 * @default 0
 	 */
-	rotate?: number;
+	rotation?: number;
 	/**
 	 * Markers: the size of the symbol, as a factor.
 	 * @exclusiveMinimum 0

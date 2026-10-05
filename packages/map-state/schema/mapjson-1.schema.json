@@ -202,7 +202,7 @@
 		"StateStyle": {
 			"type": "object",
 			"properties": {
-				"halo": {
+				"haloWidth": {
 					"type": "number",
 					"description": "Markers: the width of the halo around the symbol and the label, in pixels.",
 					"minimum": 0,
@@ -232,7 +232,7 @@
 					"description": "Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.",
 					"default": "solid"
 				},
-				"rotate": {
+				"rotation": {
 					"type": "integer",
 					"description": "Markers: the rotation of the symbol, in whole degrees clockwise.",
 					"minimum": -180,

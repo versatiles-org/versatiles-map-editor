@@ -37,13 +37,13 @@ function checkPosition([lng, lat]: Position) {
 
 function checkStyle(style: StateStyle | undefined) {
 	if (!style) return;
-	for (const key of ['halo', 'size', 'labelSize', 'width'] as const) {
+	for (const key of ['haloWidth', 'size', 'labelSize', 'width'] as const) {
 		if (style[key] !== undefined) expect(Number.isFinite(style[key])).toBe(true);
 	}
 	if (style.pattern !== undefined) expect(FILL_PATTERN_NAMES).toContain(style.pattern);
 	if (style.dash !== undefined) expect(STROKE_STYLE_NAMES).toContain(style.dash);
 	if (style.labelPosition !== undefined) expect(LABEL_POSITION_NAMES).toContain(style.labelPosition);
-	if (style.rotate !== undefined) expect(Math.abs(style.rotate)).toBeLessThanOrEqual(180);
+	if (style.rotation !== undefined) expect(Math.abs(style.rotation)).toBeLessThanOrEqual(180);
 	for (const key of ['color', 'labelColor', 'haloColor'] as const) {
 		if (style[key] !== undefined) expect(parseColor(style[key])).toBeDefined();
 	}
