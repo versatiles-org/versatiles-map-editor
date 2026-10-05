@@ -37,7 +37,7 @@ its elements, on the editor's default background map.
 		"legend": {
 			"entries": [
 				{ "type": "marker", "style": { "color": "#0072b2", "symbol": "icons:anchor" }, "label": "Landing stage" },
-				{ "type": "line", "style": { "color": "#d55e00", "width": 4, "pattern": 1 }, "label": "Boat route" }
+				{ "type": "line", "style": { "color": "#d55e00", "width": 4, "dash": 1 }, "label": "Boat route" }
 			]
 		},
 		"viewer": { "search": "top-left", "legend": "top-right" }
@@ -59,7 +59,7 @@ its elements, on the editor's default background map.
 				[13.37, 52.505],
 				[13.41, 52.52]
 			],
-			"style": { "color": "#d55e00", "width": 4, "pattern": 1 }
+			"style": { "color": "#d55e00", "width": 4, "dash": 1 }
 		},
 		{
 			"type": "marker",
@@ -132,7 +132,8 @@ optional.
 | `font`       | the glyph font of the label, e.g. `"noto_sans_bold"`; default `""`, the font of the background map                                                             | –                                                                                             | –                                                             |
 | `align`      | the place of the label: 0 automatic (without a symbol: on the point), 1 right, 2 left, 3 top, 4 bottom, 5 top right, 6 top left, 7 bottom right, 8 bottom left | –                                                                                             | –                                                             |
 | `width`      | –                                                                                                                                                              | in pixels, default `2`                                                                        | –                                                             |
-| `pattern`    | –                                                                                                                                                              | 0 solid, 1 dashed, 2 dotted; default `0`                                                      | 0 solid, 1 diagonal lines, 2 thin diagonal lines; default `0` |
+| `dash`       | –                                                                                                                                                              | 0 solid, 1 dashed, 2 dotted; default `0`                                                      | –                                                             |
+| `pattern`    | –                                                                                                                                                              | –                                                                                             | 0 solid, 1 diagonal lines, 2 thin diagonal lines; default `0` |
 | `visible`    | –                                                                                                                                                              | outlines: whether one is drawn, default `true`                                                | –                                                             |
 | `arrowStart` | –                                                                                                                                                              | lines: the arrowhead at the first point: 0 none, 1 triangle, 2 chevron, 3 circle; default `0` | –                                                             |
 | `arrowEnd`   | –                                                                                                                                                              | lines: the arrowhead at the last point, as `arrowStart`; default `0`                          | –                                                             |

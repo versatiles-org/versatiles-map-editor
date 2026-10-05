@@ -21,7 +21,7 @@
 				{
 					"type": "polygon",
 					"style": { "color": "#e69f0040" },
-					"strokeStyle": { "color": "#e69f00", "pattern": 2, "width": 2.5 },
+					"strokeStyle": { "color": "#e69f00", "dash": 2, "width": 2.5 },
 					"label": "30 km exclusion zone"
 				}
 			],
@@ -36,7 +36,7 @@
 			"point": [30.099, 51.389],
 			"radius": 30000,
 			"style": { "color": "#e69f0040" },
-			"strokeStyle": { "color": "#e69f00", "pattern": 2, "width": 2.5 },
+			"strokeStyle": { "color": "#e69f00", "dash": 2, "width": 2.5 },
 			"popup": { "text": "**30 km exclusion zone**\nEvacuated after the disaster of 26 April 1986." }
 		},
 		{

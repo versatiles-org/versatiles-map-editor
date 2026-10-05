@@ -14,7 +14,7 @@
 		doc,
 		colorLabel = 'Color'
 	}: {
-		layers: Pick<LineStyle, 'color' | 'width' | 'dashed'>[];
+		layers: Pick<LineStyle, 'color' | 'width' | 'dash'>[];
 		doc: MapDocumentInteractive;
 		/** The name of the color, e.g. "Outline color" next to the color of a fill. */
 		colorLabel?: string;
@@ -23,7 +23,7 @@
 	const log = () => doc.state.log();
 	const color = $derived(group(layers, 'color'));
 	const width = $derived(group(layers, 'width'));
-	const dashed = $derived(group(layers, 'dashed'));
+	const dash = $derived(group(layers, 'dash'));
 	const styles = [...dashArrays].map(([index, { name }]) => ({ value: index, label: name }));
 
 	/** The dashes as in the map, for a line of this width in the preview. */
@@ -37,14 +37,14 @@
 	<ColorPicker id="{uid}-color" bind:value={color.value} onchange={log} palette={doc.colors} />
 </InputRow>
 
-<InputRow id="{uid}-dashed" label="Style" mixed={dashed.mixed} group>
+<InputRow id="{uid}-dash" label="Style" mixed={dash.mixed} group>
 	<ChoiceGroup
 		layout="pictures"
-		labelledby="{uid}-dashed-label"
-		value={dashed.value}
-		mixed={dashed.mixed}
+		labelledby="{uid}-dash-label"
+		value={dash.value}
+		mixed={dash.mixed}
 		onchange={(index) => {
-			dashed.value = index;
+			dash.value = index;
 			log();
 		}}
 		options={styles}

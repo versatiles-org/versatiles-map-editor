@@ -614,8 +614,10 @@ export class StateReader {
 					style.halo = this.readVarint() / 10;
 					break;
 				case 'pattern':
-					// of an area or of a line, which have as many
-					style.pattern = this.readIndex(Math.max(FILL_PATTERN_NAMES.length, STROKE_STYLE_NAMES.length));
+					style.pattern = this.readIndex(FILL_PATTERN_NAMES.length);
+					break;
+				case 'dash':
+					style.dash = this.readIndex(STROKE_STYLE_NAMES.length);
 					break;
 				case 'rotate':
 					style.rotate = this.readVarint(true);

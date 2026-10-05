@@ -33,9 +33,9 @@ import {
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
 export const FILL_DEFAULTS: Defaults<'color' | 'pattern'> = { color: '#ff0000', pattern: 0 };
-export const LINE_DEFAULTS: Defaults<'color' | 'pattern' | 'visible' | 'width'> = {
+export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
 	color: '#ff0000',
-	pattern: 0,
+	dash: 0,
 	visible: true,
 	width: 2
 };
@@ -163,7 +163,8 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'labelColor', sanitizeColor(v.labelColor));
 	set(s, 'haloColor', sanitizeColor(v.haloColor));
 	set(s, 'halo', sanitizeNumber(v.halo, 0));
-	set(s, 'pattern', sanitizeIndex(v.pattern, 0, 2));
+	set(s, 'pattern', sanitizeIndex(v.pattern, 0, FILL_PATTERN_NAMES.length - 1));
+	set(s, 'dash', sanitizeIndex(v.dash, 0, STROKE_STYLE_NAMES.length - 1));
 	set(s, 'rotate', sanitizeRotation(v.rotate));
 	const size = sanitizeNumber(v.size, 0);
 	if (size) s.size = size;
@@ -252,7 +253,7 @@ export function strokePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 	const s = { ...LINE_DEFAULTS, ...style };
 	return {
 		'stroke-color': s.color,
-		'stroke-style': nameOf(STROKE_STYLE_NAMES, s.pattern),
+		'stroke-style': nameOf(STROKE_STYLE_NAMES, s.dash),
 		'stroke-width': s.width,
 		'stroke-visibility': s.visible
 	};
@@ -262,7 +263,7 @@ export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 	const s: StateStyle = { ...LINE_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['stroke-color']));
-		set(s, 'pattern', indexOf(STROKE_STYLE_NAMES, p['stroke-style']));
+		set(s, 'dash', indexOf(STROKE_STYLE_NAMES, p['stroke-style']));
 		set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
 		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
 	}

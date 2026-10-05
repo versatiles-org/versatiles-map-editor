@@ -90,7 +90,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 1],
 					[2, 0]
 				],
-				style: { color: '#00ff00', pattern: 1, width: 5 },
+				style: { color: '#00ff00', dash: 1, width: 5 },
 				popup: { text: 'A line' }
 			},
 			{
@@ -109,7 +109,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 				point: [10, 20],
 				radius: 500,
 				style: { color: '#778899' },
-				strokeStyle: { pattern: 2 },
+				strokeStyle: { dash: 2 },
 				popup: { text: 'A circle' }
 			}
 		]
@@ -285,7 +285,7 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'monospace',
 					entries: [
-						{ type: 'line', style: { color: '#F00', width: '3', pattern: 7, size: -1, extra: 1 }, label: 5 },
+						{ type: 'line', style: { color: '#F00', width: '3', dash: 7, size: -1, extra: 1 }, label: 5 },
 						// only areas have an outline
 						{ type: 'marker', style: { symbol: 'flag' }, strokeStyle: { color: '#000' }, label: 'y' },
 						{ type: 'polygon', style: 'red', strokeStyle: { visible: false }, label: 'z' },

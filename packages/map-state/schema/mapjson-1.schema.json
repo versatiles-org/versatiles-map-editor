@@ -216,7 +216,14 @@
 				},
 				"pattern": {
 					"type": "integer",
-					"description": "Areas: 0 solid, 1 diagonal lines, 2 thin diagonal lines. Lines and outlines: 0 solid, 1 dashed, 2 dotted.",
+					"description": "Areas: the pattern of the fill: 0 solid, 1 diagonal lines, 2 thin diagonal lines.",
+					"minimum": 0,
+					"maximum": 2,
+					"default": 0
+				},
+				"dash": {
+					"type": "integer",
+					"description": "Lines and outlines: 0 solid, 1 dashed, 2 dotted.",
 					"minimum": 0,
 					"maximum": 2,
 					"default": 0
@@ -409,7 +416,7 @@
 				},
 				"style": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The line: `color`, `width`, `pattern` (solid, dashed, dotted)."
+					"description": "The line: `color`, `width`, `dash` (solid, dashed, dotted), the arrowheads."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -444,7 +451,7 @@
 				},
 				"strokeStyle": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted)."
+					"description": "The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -475,7 +482,7 @@
 				},
 				"strokeStyle": {
 					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted)."
+					"description": "The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted)."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"

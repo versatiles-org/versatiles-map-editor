@@ -167,7 +167,7 @@ test(
 		await expect.poll(inked).toBeGreaterThan(0);
 		const solid = await inked();
 		await entry.getByRole('radio', { name: 'dotted' }).check();
-		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff', pattern: 2 }, label: 'A' });
+		await expect.poll(stored).toStrictEqual({ type: 'line', style: { color: '#0000ff', dash: 2 }, label: 'A' });
 		// dots, with gaps between them
 		await expect.poll(inked).toBeLessThan(solid * 0.8);
 		await entry.getByRole('spinbutton', { name: 'Width' }).fill('3');
@@ -279,7 +279,7 @@ test('adding the look of an element to the legend', async ({ page }) => {
 			[13.41, 52.5]
 		] as [number, number][]
 	};
-	const elements = [{ ...route, style: { color: '#d55e00', pattern: 1, width: 4 } }];
+	const elements = [{ ...route, style: { color: '#d55e00', dash: 1, width: 4 } }];
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
@@ -294,7 +294,7 @@ test('adding the look of an element to the legend', async ({ page }) => {
 	);
 	await expect
 		.poll(async () => (await storedState(page)).meta?.legend?.entries)
-		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', pattern: 1, width: 4 }, label: 'Bus 100' }]);
+		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', dash: 1, width: 4 }, label: 'Bus 100' }]);
 	await expect(page.getByRole('list', { name: 'Legend' }).getByRole('listitem')).toHaveText(['Bus 100']);
 
 	// once
@@ -311,7 +311,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 		[13.41, 52.5]
 	];
 	const legend = { entries: [{ type: 'marker' as const, style: { color: '#0000ff' }, label: 'Route' }] };
-	const elements = [{ type: 'line' as const, points, style: { color: '#d55e00', pattern: 1, width: 4 } }];
+	const elements = [{ type: 'line' as const, points, style: { color: '#d55e00', dash: 1, width: 4 } }];
 	await page.goto('/#' + encodeState({ map: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -330,7 +330,7 @@ test('pasting the style of an element onto a legend entry', async ({ page }) => 
 	await paste.click();
 	await expect
 		.poll(async () => (await storedState(page)).meta?.legend?.entries)
-		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', pattern: 1, width: 4 }, label: 'Route' }]);
+		.toStrictEqual([{ type: 'line', style: { color: '#d55e00', dash: 1, width: 4 }, label: 'Route' }]);
 	// the controls of a line
 	await expect(page.getByRole('group', { name: 'Entry 1' }).getByRole('radio', { name: 'Line' })).toBeChecked();
 });

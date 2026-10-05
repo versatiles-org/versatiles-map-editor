@@ -4,7 +4,7 @@ import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import { drawnElements, storedState, trackServerRequests, waitForMapIsReady, sidebar } from './lib/utils.js';
 
 const mapUrl =
-	'/#ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKCOcmY6AECdCRIdOxkBacNaQ7EEGwCAsO0AKEyCVI';
+	'/#ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKCOcmY6AECdCRIdOxkBacNaQ7EEGwCAsO0AFBMglSA';
 
 // The controls of the top bar, the tools and the sidebar at the start, in this order. Only names and states
 // are compared, so e.g. a separator or an icon does not matter.

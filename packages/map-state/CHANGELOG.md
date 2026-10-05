@@ -79,6 +79,9 @@ The first release.
   chevron, circle) and `arrowSize`, their width as a factor of the line width, which is only stored
   with an arrowhead (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
   `stroke-arrow-size`.
+- Two fields instead of one `pattern`: `dash` for lines and outlines (`STROKE_STYLE_NAMES`: solid,
+  dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`: solid, diagonal, diagonal-thin),
+  each with its own style key; in GeoJSON `stroke-style` and `fill-pattern`, as before.
 - Legend entries like elements: a `type` (`LEGEND_ENTRY_TYPES`: marker, line, polygon), a `style`
   and for polygons a `strokeStyle`, like those of an element of that type, and a `label`. Their
   styles are written like those of elements, which can refer to them.

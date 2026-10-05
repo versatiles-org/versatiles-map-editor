@@ -32,7 +32,7 @@ export class LineStyle extends StylePart {
 	readonly role: StyleRole;
 
 	#color: string = $state(LINE_DEFAULTS.color);
-	#dashed: number = $state(LINE_DEFAULTS.pattern);
+	#dash: number = $state(LINE_DEFAULTS.dash);
 	#visible: boolean = $state(LINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
 	#arrowStart: number = $state(ROLE_DEFAULTS.line.arrowStart);
@@ -59,12 +59,13 @@ export class LineStyle extends StylePart {
 		this.#color = value;
 		this.changed();
 	}
-	get dashed(): number {
-		return this.#dashed;
+	/** Solid, dashed or dotted: an index of `STROKE_STYLE_NAMES`. */
+	get dash(): number {
+		return this.#dash;
 	}
-	set dashed(value: number) {
-		if (value === this.#dashed) return;
-		this.#dashed = value;
+	set dash(value: number) {
+		if (value === this.#dash) return;
+		this.#dash = value;
 		this.changed();
 	}
 	get visible(): boolean {
@@ -133,12 +134,12 @@ export class LineStyle extends StylePart {
 			color: cssColor(this.color),
 			width: this.width,
 			// the layer looks up the dash array by the stroke style
-			dash: this.dashed
+			dash: this.dash
 		};
 	}
 
 	getState(): StateStyle | undefined {
-		const style: StateStyle = { color: this.color, pattern: this.dashed, visible: this.visible, width: this.width };
+		const style: StateStyle = { color: this.color, dash: this.dash, visible: this.visible, width: this.width };
 		if (this.canHaveArrows) {
 			style.arrowStart = this.arrowStart;
 			style.arrowEnd = this.arrowEnd;
@@ -150,7 +151,7 @@ export class LineStyle extends StylePart {
 
 	patch(state: StateStyle) {
 		if (state.color != null) this.color = state.color;
-		if (state.pattern != null) this.dashed = state.pattern;
+		if (state.dash != null) this.dash = state.dash;
 		if (state.visible != null) this.visible = state.visible;
 		if (state.width != null) this.width = state.width;
 		if (state.arrowStart != null) this.arrowStart = state.arrowStart;

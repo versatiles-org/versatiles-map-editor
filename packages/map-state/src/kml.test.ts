@@ -28,7 +28,7 @@ const state: MapState = {
 				[13.3, 52.4],
 				[13.35, 52.45]
 			],
-			style: { color: '#00ff00', width: 4, pattern: 1 }
+			style: { color: '#00ff00', width: 4, dash: 1 }
 		},
 		{
 			type: 'polygon',

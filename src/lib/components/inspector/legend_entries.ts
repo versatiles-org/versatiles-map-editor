@@ -97,12 +97,11 @@ export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'sty
 		set pattern(value: number) {
 			set('pattern', value);
 		},
-		// the name of the pattern of lines in LineStyle
-		get dashed() {
-			return get().pattern!;
+		get dash() {
+			return get().dash!;
 		},
-		set dashed(value: number) {
-			set('pattern', value);
+		set dash(value: number) {
+			set('dash', value);
 		},
 		get width() {
 			return get().width!;

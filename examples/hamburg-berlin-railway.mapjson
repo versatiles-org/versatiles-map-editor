@@ -11,7 +11,7 @@
 			"entries": [
 				{
 					"type": "line",
-					"style": { "color": "#d55e00", "pattern": 2, "width": 3 },
+					"style": { "color": "#d55e00", "dash": 2, "width": 3 },
 					"label": "Closed for renovation, Aug 2025 – Apr 2026"
 				},
 				{ "type": "line", "style": { "color": "#0072b2", "width": 3 }, "label": "Detour of long-distance trains" }
@@ -35,7 +35,7 @@
 				[13.1974, 52.5344],
 				[13.3695, 52.5251]
 			],
-			"style": { "color": "#d55e00", "pattern": 2, "width": 3 },
+			"style": { "color": "#d55e00", "dash": 2, "width": 3 },
 			"popup": {
 				"text": "**Hamburg–Berlin railway**\nClosed for a general renovation by Deutsche Bahn from August 2025 to April 2026."
 			}

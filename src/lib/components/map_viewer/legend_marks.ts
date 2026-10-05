@@ -17,8 +17,8 @@ export const MAX_PATTERNED_WIDTH = 2.5;
 export const MAX_ARROW_WIDTH = 12;
 
 /** The width of a line or an outline in the legend, see `MAX_LINE_WIDTH`. */
-function drawnWidth({ width, pattern }: { width: number; pattern: number }, max: number): number {
-	return Math.min(width, max, pattern === 0 ? Infinity : MAX_PATTERNED_WIDTH);
+function drawnWidth({ width, dash }: { width: number; dash: number }, max: number): number {
+	return Math.min(width, max, dash === 0 ? Infinity : MAX_PATTERNED_WIDTH);
 }
 
 /**
@@ -35,8 +35,8 @@ export function textColor(entry: StateLegendEntry): string {
 }
 
 /** Set the dashes of a line as on the map: in multiples of its width, with round ends. */
-function setDashes(context: CanvasRenderingContext2D, pattern: number, width: number) {
-	const array = dashArrays.get(pattern)?.array;
+function setDashes(context: CanvasRenderingContext2D, dash: number, width: number) {
+	const array = dashArrays.get(dash)?.array;
 	context.setLineDash(array && array.length > 1 ? array.map((v) => v * width) : []);
 	context.lineCap = 'round';
 	context.lineJoin = 'round';
@@ -71,7 +71,7 @@ export function drawLine(canvas: HTMLCanvasElement, style: StateStyle | undefine
 	const y = MARK_HEIGHT / 2;
 	context.strokeStyle = line.color;
 	context.lineWidth = width;
-	setDashes(context, line.pattern, width);
+	setDashes(context, line.dash, width);
 	context.beginPath();
 	context.moveTo(x0, y);
 	context.lineTo(x1, y);
@@ -119,7 +119,7 @@ export function drawArea(
 	const width = drawnWidth(outline, MAX_OUTLINE_WIDTH);
 	context.strokeStyle = outline.color;
 	context.lineWidth = width;
-	setDashes(context, outline.pattern, width);
+	setDashes(context, outline.dash, width);
 	// on the edge of the area, as on the map
 	context.strokeRect(box.x, box.y, box.width, box.height);
 }

@@ -361,6 +361,7 @@ describe('StateReader', () => {
 		it('should read a style correctly', () => {
 			const style: StateStyle = {
 				halo: 1.5,
+				dash: 1,
 				pattern: 2,
 				rotate: -45,
 				size: 2.5,
@@ -376,7 +377,7 @@ describe('StateReader', () => {
 			// the table of the strings, which the label refers to
 			writer.writeStringTable(['test']);
 			writer.writeStyle(style);
-			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQ0AbIQQJuFCDnghmIEQng');
+			expect(writer.asBase64()).toBe('CYgB_0IIBh3yzZQ0AbIQQJuFBDnghmIEQnCgk');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -418,7 +419,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKCOcmY6AECdCRIdOxkBacNaQ7EEGwCAsO0AKEyCVI'
+				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOE0Ekg4oy5SodrrPg3njXInA8NvM4NZk6VH8TKkHo_xV7QAmUKCOcmY6AECdCRIdOxkBacNaQ7EEGwCAsO0AFBMglSA'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -579,7 +580,7 @@ describe('legend', () => {
 					entries: [
 						{ type: 'polygon', style: { color: '#ff0000', pattern: 1 }, strokeStyle: { width: 3 }, label: 'Red area' },
 						{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor', size: 1.5 }, label: 'Blue marker' },
-						{ type: 'line', style: { color: '#00ff00', pattern: 2 }, label: '' },
+						{ type: 'line', style: { color: '#00ff00', dash: 2 }, label: '' },
 						// all defaults
 						{ type: 'marker', label: 'Flag' }
 					]
@@ -593,7 +594,7 @@ describe('legend', () => {
 						[13, 52],
 						[13.1, 52]
 					],
-					style: { color: '#00ff00', pattern: 2 }
+					style: { color: '#00ff00', dash: 2 }
 				}
 			]
 		};

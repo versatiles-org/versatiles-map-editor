@@ -17,7 +17,7 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	{ key: 6, name: 'labelSize', encoded: (v: number) => Math.round(v * 10) },
 	{ key: 7, name: 'align', encoded: (v: number) => Math.round(v) },
 	{ key: 8, name: 'width', encoded: (v: number) => Math.round(v * 10) },
-	{ key: 9, name: 'pattern', encoded: (v: number) => Math.round(v) },
+	{ key: 9, name: 'dash', encoded: (v: number) => Math.round(v) },
 	{ key: 10, name: 'arrowStart', encoded: (v: number) => Math.round(v) },
 	{ key: 11, name: 'arrowEnd', encoded: (v: number) => Math.round(v) },
 	{ key: 12, name: 'arrowSize', encoded: (v: number) => Math.round(v * 10) },
@@ -27,7 +27,9 @@ export const STYLE_FIELDS: { key: number; name: keyof StateStyle; encoded: (valu
 	// only "false" is stored, "true" is the default
 	{ key: 16, name: 'visible', encoded: (v: boolean) => (v === false ? false : undefined) },
 	// elements store their label by themselves, only legend entries from files can have one here
-	{ key: 18, name: 'label', encoded: (v: string) => v }
+	{ key: 18, name: 'label', encoded: (v: string) => v },
+	// the fill pattern of areas, rarer than the dashes of lines
+	{ key: 19, name: 'pattern', encoded: (v: number) => Math.round(v) }
 ];
 
 /**

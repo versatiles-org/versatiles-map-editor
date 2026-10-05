@@ -547,6 +547,8 @@ export class StateWriter {
 				return this.writeVarint(Math.round(style.halo! * 10));
 			case 'pattern':
 				return this.writeVarint(Math.round(style.pattern!));
+			case 'dash':
+				return this.writeVarint(Math.round(style.dash!));
 			case 'rotate':
 				return this.writeVarint(Math.round(style.rotate!), true);
 			case 'size':

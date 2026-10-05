@@ -55,7 +55,7 @@ export interface StateElementLine {
 	 * @default false
 	 */
 	smooth?: boolean;
-	/** The line: `color`, `width`, `pattern` (solid, dashed, dotted). */
+	/** The line: `color`, `width`, `dash` (solid, dashed, dotted), the arrowheads. */
 	style?: StateStyle;
 	popup?: StatePopup;
 }
@@ -72,7 +72,7 @@ export interface StateElementPolygon {
 	smooth?: boolean;
 	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
 	style?: StateStyle;
-	/** The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted). */
+	/** The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }
@@ -88,7 +88,7 @@ export interface StateElementCircle {
 	radius: number;
 	/** The area: `color` (with its opacity), `pattern` (solid, diagonal, diagonal-thin). */
 	style?: StateStyle;
-	/** The outline: `visible`, `color`, `width`, `pattern` (solid, dashed, dotted). */
+	/** The outline: `visible`, `color`, `width`, `dash` (solid, dashed, dotted). */
 	strokeStyle?: StateStyle;
 	popup?: StatePopup;
 }
@@ -105,14 +105,21 @@ export interface StateStyle {
 	 */
 	halo?: number;
 	/**
-	 * Areas: 0 solid, 1 diagonal lines, 2 thin diagonal lines. Lines and outlines: 0 solid,
-	 * 1 dashed, 2 dotted.
+	 * Areas: the pattern of the fill: 0 solid, 1 diagonal lines, 2 thin diagonal lines.
 	 * @asType integer
 	 * @minimum 0
 	 * @maximum 2
 	 * @default 0
 	 */
 	pattern?: number;
+	/**
+	 * Lines and outlines: 0 solid, 1 dashed, 2 dotted.
+	 * @asType integer
+	 * @minimum 0
+	 * @maximum 2
+	 * @default 0
+	 */
+	dash?: number;
 	/**
 	 * Markers: the rotation of the symbol, in whole degrees clockwise.
 	 * @asType integer
