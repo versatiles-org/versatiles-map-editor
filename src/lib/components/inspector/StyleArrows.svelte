@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ARROW_NAMES } from '@versatiles/map-state';
+	import { ARROW_NAMES, type ArrowName } from '@versatiles/map-state';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import type { LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
@@ -19,15 +19,15 @@
 	const end = $derived(group(layers, 'arrowEnd'));
 	const size = $derived(group(layers, 'arrowSize'));
 	// the size only counts with an arrowhead
-	const anyArrow = $derived(layers.some((layer) => layer.arrowStart || layer.arrowEnd));
+	const anyArrow = $derived(layers.some((layer) => layer.arrowStart !== 'none' || layer.arrowEnd !== 'none'));
 
-	const NAMES: Record<string, string> = {
+	const NAMES: Record<ArrowName, string> = {
 		none: 'None',
 		triangle: 'Triangle',
 		chevron: 'Chevron',
 		circle: 'Circle'
 	};
-	const options = ARROW_NAMES.map((name, index) => ({ value: index, label: NAMES[name] ?? name }));
+	const options = ARROW_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 
 	/** Put each line's arrowhead of the start at its end, and the other way round. */
 	function swap() {
@@ -37,13 +37,13 @@
 </script>
 
 <!-- a short line with the arrowhead at its start (left) or end (right) -->
-{#snippet arrowPicture(index: number, atEnd: boolean)}
+{#snippet arrowPicture(arrow: ArrowName, atEnd: boolean)}
 	<svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true">
 		<g transform={atEnd ? undefined : 'matrix(-1 0 0 1 26 0)'}>
-			<line x1="3" y1="6" x2={index === 1 ? 17 : 21} y2="6" stroke="currentColor" stroke-width="2" />
-			{#if ARROW_NAMES[index] === 'triangle'}
+			<line x1="3" y1="6" x2={arrow === 'triangle' ? 17 : 21} y2="6" stroke="currentColor" stroke-width="2" />
+			{#if arrow === 'triangle'}
 				<path d="M24 6L16 1.5V10.5z" fill="currentColor" />
-			{:else if ARROW_NAMES[index] === 'chevron'}
+			{:else if arrow === 'chevron'}
 				<path
 					d="M18 2.5L21.5 6L18 9.5"
 					fill="none"
@@ -52,7 +52,7 @@
 					stroke-linecap="round"
 					stroke-linejoin="round"
 				/>
-			{:else if ARROW_NAMES[index] === 'circle'}
+			{:else if arrow === 'circle'}
 				<circle cx="21" cy="6" r="3.5" fill="currentColor" />
 			{/if}
 		</g>
@@ -67,13 +67,13 @@
 			labelledby="{uid}-start-label"
 			value={start.value}
 			mixed={start.mixed}
-			onchange={(index) => {
-				start.value = index;
+			onchange={(arrow) => {
+				start.value = arrow;
 				log();
 			}}
 			{options}
 		>
-			{#snippet picture(index)}{@render arrowPicture(index, false)}{/snippet}
+			{#snippet picture(arrow)}{@render arrowPicture(arrow, false)}{/snippet}
 		</ChoiceGroup>
 		<span class="caption" id="{uid}-end-label">End</span>
 		<ChoiceGroup
@@ -81,13 +81,13 @@
 			labelledby="{uid}-end-label"
 			value={end.value}
 			mixed={end.mixed}
-			onchange={(index) => {
-				end.value = index;
+			onchange={(arrow) => {
+				end.value = arrow;
 				log();
 			}}
 			{options}
 		>
-			{#snippet picture(index)}{@render arrowPicture(index, true)}{/snippet}
+			{#snippet picture(arrow)}{@render arrowPicture(arrow, true)}{/snippet}
 		</ChoiceGroup>
 		<span class="swap">
 			<IconButton icon="swap" label="Swap the arrowheads of start and end" size="sm" onclick={swap} />

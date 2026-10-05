@@ -216,10 +216,10 @@ describe('addToLegend', () => {
 
 	it('adds lines with and without arrowheads as entries of their own', () => {
 		const plain = doc.addElement({ type: 'line', points });
-		const arrowed = doc.addElement({ type: 'line', points, style: { arrowEnd: 1 } });
+		const arrowed = doc.addElement({ type: 'line', points, style: { arrowEnd: 'triangle' } });
 		doc.selection.selectElements([plain, arrowed]);
 		expect(addToLegend(doc)).toBe(2);
-		expect(doc.legend?.entries.map((entry) => entry.style)).toStrictEqual([undefined, { arrowEnd: 1 }]);
+		expect(doc.legend?.entries.map((entry) => entry.style)).toStrictEqual([undefined, { arrowEnd: 'triangle' }]);
 	});
 
 	it('adds each look once, and none that the legend shows already', () => {
@@ -290,9 +290,9 @@ describe('pasteStyleToEntry', () => {
 	});
 
 	it('gives a line entry the arrowheads, with their size only if there are any', () => {
-		expect(paste({ type: 'line', points, style: { arrowEnd: 2, arrowSize: 4 } })).toStrictEqual({
+		expect(paste({ type: 'line', points, style: { arrowEnd: 'chevron', arrowSize: 4 } })).toStrictEqual({
 			type: 'line',
-			style: { arrowEnd: 2, arrowSize: 4 },
+			style: { arrowEnd: 'chevron', arrowSize: 4 },
 			label: 'Kept'
 		});
 		expect(paste({ type: 'line', points, style: { arrowSize: 4 } })).toStrictEqual({ type: 'line', label: 'Kept' });
@@ -336,12 +336,12 @@ describe('reverseLines', () => {
 	];
 
 	it('reverses the points of the selected lines, which keep their arrowheads, in one undo step', () => {
-		const line = doc.addElement({ type: 'line', points, style: { arrowEnd: 1 } });
+		const line = doc.addElement({ type: 'line', points, style: { arrowEnd: 'triangle' } });
 		const polygon = doc.addElement({ type: 'polygon', points });
 		doc.state.log();
 		doc.selection.selectElements([line, polygon]);
 		reverseLines(doc);
-		expect(line.getState()).toMatchObject({ points: [...points].reverse(), style: { arrowEnd: 1 } });
+		expect(line.getState()).toMatchObject({ points: [...points].reverse(), style: { arrowEnd: 'triangle' } });
 		expect(polygon.getState()).toMatchObject({ points });
 
 		doc.state.undo();

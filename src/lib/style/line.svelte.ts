@@ -1,6 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type StateStyle, ARROW_NAMES, LINE_DEFAULTS, STROKE_STYLE_NAMES, hasArrow } from '@versatiles/map-state';
+import { type ArrowName, type StateStyle, LINE_DEFAULTS, STROKE_STYLE_NAMES, hasArrow } from '@versatiles/map-state';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
 // Dash array per stroke style index; the names come from the codec
@@ -16,9 +16,9 @@ export const dashArrays = new Map<number, { name: string; array: number[] | unde
 
 /** The arrowheads of a line, which the layer of the arrowheads draws, see `arrowHeadFeatures`. */
 export interface ArrowProperties {
-	/** The names of the arrowheads (see `ARROW_NAMES`), "none" for none. */
-	start: string;
-	end: string;
+	/** The arrowheads, "none" for none. */
+	start: ArrowName;
+	end: ArrowName;
 	/** The width of the arrowheads across the line, as a factor of `width`. */
 	size: number;
 	width: number;
@@ -35,8 +35,8 @@ export class LineStyle extends StylePart {
 	#dash: number = $state(LINE_DEFAULTS.dash);
 	#visible: boolean = $state(LINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
-	#arrowStart: number = $state(ROLE_DEFAULTS.line.arrowStart);
-	#arrowEnd: number = $state(ROLE_DEFAULTS.line.arrowEnd);
+	#arrowStart: ArrowName = $state(ROLE_DEFAULTS.line.arrowStart);
+	#arrowEnd: ArrowName = $state(ROLE_DEFAULTS.line.arrowEnd);
 	#arrowSize: number = $state(ROLE_DEFAULTS.line.arrowSize);
 	/** Whether it can be hidden: the outline of an area can, a line cannot (it would be invisible). */
 	readonly canHide: boolean;
@@ -87,20 +87,20 @@ export class LineStyle extends StylePart {
 		this.changed();
 	}
 
-	/** The arrowhead at the first point, an index of `ARROW_NAMES` (0: none). */
-	get arrowStart(): number {
+	/** The arrowhead at the first point, "none" for none. */
+	get arrowStart(): ArrowName {
 		return this.#arrowStart;
 	}
-	set arrowStart(value: number) {
+	set arrowStart(value: ArrowName) {
 		if (!this.canHaveArrows || value === this.#arrowStart) return;
 		this.#arrowStart = value;
 		this.changed();
 	}
-	/** The arrowhead at the last point, an index of `ARROW_NAMES` (0: none). */
-	get arrowEnd(): number {
+	/** The arrowhead at the last point, "none" for none. */
+	get arrowEnd(): ArrowName {
 		return this.#arrowEnd;
 	}
-	set arrowEnd(value: number) {
+	set arrowEnd(value: ArrowName) {
 		if (!this.canHaveArrows || value === this.#arrowEnd) return;
 		this.#arrowEnd = value;
 		this.changed();
@@ -119,8 +119,8 @@ export class LineStyle extends StylePart {
 	getArrowProperties(): ArrowProperties | undefined {
 		if (!hasArrow({ arrowStart: this.arrowStart, arrowEnd: this.arrowEnd })) return undefined;
 		return {
-			start: ARROW_NAMES[this.arrowStart] ?? 'none',
-			end: ARROW_NAMES[this.arrowEnd] ?? 'none',
+			start: this.arrowStart,
+			end: this.arrowEnd,
 			size: this.arrowSize,
 			width: this.width,
 			color: cssColor(this.color)

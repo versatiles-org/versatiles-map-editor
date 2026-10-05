@@ -75,9 +75,10 @@ The first release.
 - Smooth lines and polygons: `smooth: true` on a line or polygon draws it as a smooth curve through
   its points, which stay as they are; 1 bit per line and polygon in the base64 string, `smooth` in
   GeoJSON.
-- Arrowheads of lines: `arrowStart` and `arrowEnd` in the style (`ARROW_NAMES`: none, triangle,
-  chevron, circle) and `arrowSize`, their width as a factor of the line width, which is only stored
-  with an arrowhead (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
+- Arrowheads of lines: `arrowStart` and `arrowEnd` in the style, by name (`ARROW_NAMES`, type
+  `ArrowName`: none, triangle, chevron, circle; in the base64 string as their index), and
+  `arrowSize`, their width as a factor of the line width, which is only stored with an arrowhead
+  (`withoutUnusedFields`); in GeoJSON `stroke-arrow-start`, `stroke-arrow-end` and
   `stroke-arrow-size`.
 - Two fields instead of one `pattern`: `dash` for lines and outlines (`STROKE_STYLE_NAMES`: solid,
   dashed, dotted) and `pattern` for areas (`FILL_PATTERN_NAMES`: solid, diagonal, diagonal-thin),

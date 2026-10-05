@@ -11,12 +11,12 @@
 			"entries": [
 				{
 					"type": "line",
-					"style": { "color": "#e69f00", "width": 8, "arrowStart": 3, "arrowEnd": 1, "arrowSize": 2.5 },
+					"style": { "color": "#e69f00", "width": 8, "arrowStart": "circle", "arrowEnd": "triangle", "arrowSize": 2.5 },
 					"label": "Advance, June – September 1812"
 				},
 				{
 					"type": "line",
-					"style": { "color": "#000000", "width": 3, "arrowEnd": 2 },
+					"style": { "color": "#000000", "width": 3, "arrowEnd": "chevron" },
 					"label": "Retreat, October – December 1812"
 				},
 				{ "type": "marker", "style": { "color": "#d55e00", "symbol": "extras:shape-star" }, "label": "Battle" }
@@ -40,7 +40,7 @@
 				[37.42, 55.74]
 			],
 			"smooth": true,
-			"style": { "color": "#e69f00", "width": 8, "arrowStart": 3, "arrowEnd": 1, "arrowSize": 2.5 },
+			"style": { "color": "#e69f00", "width": 8, "arrowStart": "circle", "arrowEnd": "triangle", "arrowSize": 2.5 },
 			"popup": {
 				"text": "**Advance**\nAbout 420,000 soldiers crossed the Niemen at Kowno on 24 June 1812. About 100,000 reached Moscow on 14 September."
 			}
@@ -63,7 +63,7 @@
 				[24.05, 54.76]
 			],
 			"smooth": true,
-			"style": { "color": "#000000", "width": 3, "arrowEnd": 2 },
+			"style": { "color": "#000000", "width": 3, "arrowEnd": "chevron" },
 			"popup": {
 				"text": "**Retreat**\nThe army left Moscow on 19 October. About 10,000 soldiers crossed the Niemen again in December."
 			}

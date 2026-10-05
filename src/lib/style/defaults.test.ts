@@ -3,7 +3,7 @@ import { completeStyle, ROLE_DEFAULTS, storedStyle } from './defaults.js';
 
 describe('the defaults of the roles of styles', () => {
 	it('give a line arrowheads, but not an outline', () => {
-		expect(ROLE_DEFAULTS.line).toMatchObject({ arrowStart: 0, arrowEnd: 0, arrowSize: 3, width: 2 });
+		expect(ROLE_DEFAULTS.line).toMatchObject({ arrowStart: 'none', arrowEnd: 'none', arrowSize: 3, width: 2 });
 		expect('arrowStart' in ROLE_DEFAULTS.outline).toBe(false);
 	});
 
@@ -18,8 +18,11 @@ describe('the defaults of the roles of styles', () => {
 		expect(storedStyle('fill', completeStyle('fill'))).toBeUndefined();
 		// the size of arrowheads, without one
 		expect(storedStyle('line', { arrowSize: 5, color: '#00ff00' })).toStrictEqual({ color: '#00ff00' });
-		expect(storedStyle('line', { arrowEnd: 1, arrowSize: 5 })).toStrictEqual({ arrowEnd: 1, arrowSize: 5 });
+		expect(storedStyle('line', { arrowEnd: 'triangle', arrowSize: 5 })).toStrictEqual({
+			arrowEnd: 'triangle',
+			arrowSize: 5
+		});
 		// an outline has no ends
-		expect(storedStyle('outline', { arrowEnd: 1, arrowSize: 5, width: 1 })).toStrictEqual({ width: 1 });
+		expect(storedStyle('outline', { arrowEnd: 'triangle', arrowSize: 5, width: 1 })).toStrictEqual({ width: 1 });
 	});
 });

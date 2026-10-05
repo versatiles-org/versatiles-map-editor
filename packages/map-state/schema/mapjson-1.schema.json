@@ -276,18 +276,14 @@
 					"default": true
 				},
 				"arrowStart": {
-					"type": "integer",
-					"description": "Lines: the arrowhead at the first point: 0 none, 1 triangle, 2 chevron, 3 circle.",
-					"minimum": 0,
-					"maximum": 3,
-					"default": 0
+					"$ref": "#/definitions/ArrowName",
+					"description": "Lines: the arrowhead at the first point.",
+					"default": "none"
 				},
 				"arrowEnd": {
-					"type": "integer",
-					"description": "Lines: the arrowhead at the last point: 0 none, 1 triangle, 2 chevron, 3 circle.",
-					"minimum": 0,
-					"maximum": 3,
-					"default": 0
+					"$ref": "#/definitions/ArrowName",
+					"description": "Lines: the arrowhead at the last point.",
+					"default": "none"
 				},
 				"arrowSize": {
 					"type": "number",
@@ -322,6 +318,10 @@
 			"type": "string",
 			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
 			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+		},
+		"ArrowName": {
+			"type": "string",
+			"enum": ["none", "triangle", "chevron", "circle"]
 		},
 		"StateViewer": {
 			"type": "object",

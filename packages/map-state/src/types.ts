@@ -93,6 +93,10 @@ export interface StateElementCircle {
 	popup?: StatePopup;
 }
 
+/** The arrowheads at the ends of a line; "none" is a plain end. */
+export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'] as const;
+export type ArrowName = (typeof ARROW_NAMES)[number];
+
 /**
  * The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which
  * fields count depends on what it styles (see the elements); missing fields have their default.
@@ -171,21 +175,15 @@ export interface StateStyle {
 	 */
 	visible?: boolean;
 	/**
-	 * Lines: the arrowhead at the first point: 0 none, 1 triangle, 2 chevron, 3 circle.
-	 * @asType integer
-	 * @minimum 0
-	 * @maximum 3
-	 * @default 0
+	 * Lines: the arrowhead at the first point.
+	 * @default "none"
 	 */
-	arrowStart?: number;
+	arrowStart?: ArrowName;
 	/**
-	 * Lines: the arrowhead at the last point: 0 none, 1 triangle, 2 chevron, 3 circle.
-	 * @asType integer
-	 * @minimum 0
-	 * @maximum 3
-	 * @default 0
+	 * Lines: the arrowhead at the last point.
+	 * @default "none"
 	 */
-	arrowEnd?: number;
+	arrowEnd?: ArrowName;
 	/**
 	 * Lines: the width of the arrowheads across the line, as a factor of the width of the line.
 	 * Only with an arrowhead.

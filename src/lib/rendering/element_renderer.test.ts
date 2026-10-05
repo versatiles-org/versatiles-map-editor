@@ -141,7 +141,7 @@ describe('ElementRenderer', () => {
 		];
 		await doc.setState({
 			elements: [
-				{ type: 'line', points, style: { arrowStart: 3, arrowEnd: 1, color: '#0000ff' } },
+				{ type: 'line', points, style: { arrowStart: 'circle', arrowEnd: 'triangle', color: '#0000ff' } },
 				{ type: 'line', points }
 			]
 		});
@@ -164,8 +164,8 @@ describe('ElementRenderer', () => {
 		expect(diff.add).toHaveLength(2);
 
 		// without arrowheads, the layers are planned again
-		line.layer.arrowStart = 0;
-		line.layer.arrowEnd = 0;
+		line.layer.arrowStart = 'none';
+		line.layer.arrowEnd = 'none';
 		await Promise.resolve();
 		expect(lastFeatures('arrow')).toStrictEqual([]);
 		expect(layerIdsOf(line)).toStrictEqual(['elements_stroke']);

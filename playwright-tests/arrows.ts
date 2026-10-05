@@ -48,20 +48,20 @@ test('the arrowheads of a line are chosen for its start and its end, and swapped
 	await expect(size).toHaveCount(0);
 
 	await end.getByRole('radio', { name: 'Triangle' }).check();
-	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 1 });
+	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 'triangle' });
 	await expect.poll(() => drawnArrowheads(page)).toStrictEqual(['arrow-triangle']);
 	await size.fill('5');
 	await size.press('Enter');
-	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 1, arrowSize: 5 });
+	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 'triangle', arrowSize: 5 });
 
 	await page.getByRole('button', { name: 'Swap the arrowheads of start and end' }).click();
 	await expect(start.getByRole('radio', { name: 'Triangle' })).toBeChecked();
 	await expect(end.getByRole('radio', { name: 'None' })).toBeChecked();
-	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowStart: 1, arrowSize: 5 });
+	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowStart: 'triangle', arrowSize: 5 });
 
 	// one undo step per change
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 1, arrowSize: 5 });
+	await expect.poll(lineStyle).toStrictEqual({ width: 4, arrowEnd: 'triangle', arrowSize: 5 });
 	await page.getByRole('button', { name: 'Redo' }).click();
 	// undo and redo end the selection
 	await page.mouse.click(...(await project(page, [13.4, 52.5])));
@@ -87,7 +87,7 @@ test('a line is reversed in the inspector, so its arrowheads point the other way
 		'/#' +
 			encodeState({
 				map: { center: [13.4, 52.5], radius: 3000 },
-				elements: [{ type: 'line', points, style: { arrowEnd: 1 } }]
+				elements: [{ type: 'line', points, style: { arrowEnd: 'triangle' } }]
 			})
 	);
 	await waitForMapIsReady(page);
@@ -97,7 +97,7 @@ test('a line is reversed in the inspector, so its arrowheads point the other way
 	await page.getByRole('button', { name: 'Reverse line' }).click();
 	await expect.poll(async () => (await line()).points).toStrictEqual([...points].reverse());
 	// the style keeps its start and its end
-	expect((await line()).style).toStrictEqual({ arrowEnd: 1 });
+	expect((await line()).style).toStrictEqual({ arrowEnd: 'triangle' });
 
 	// one undo step
 	await page.getByRole('button', { name: 'Undo' }).click();
@@ -136,7 +136,7 @@ test(
 		near(plain.across, 4);
 
 		await test.step('a triangle, with its tip so far beyond the end that the round end is within it', async () => {
-			const triangle = await measure(true, { arrowEnd: 1 });
+			const triangle = await measure(true, { arrowEnd: 'triangle' });
 			expect(triangle.beyond).toBeGreaterThan(plain.beyond);
 			// its half angle has a sine of 1/√5, so its tip is 2 · √5 pixels beyond the end
 			near(triangle.beyond, 2 * Math.sqrt(5), 2.5);
@@ -144,16 +144,16 @@ test(
 		});
 
 		await test.step('a chevron and a circle on the end point', async () => {
-			const chevron = await measure(true, { arrowEnd: 2 });
+			const chevron = await measure(true, { arrowEnd: 'chevron' });
 			near(chevron.beyond, 2);
 			near(chevron.across, 12);
-			const circle = await measure(true, { arrowEnd: 3, arrowSize: 5 });
+			const circle = await measure(true, { arrowEnd: 'circle', arrowSize: 5 });
 			near(circle.beyond, 10);
 			near(circle.across, 20);
 		});
 
 		await test.step('at the start, pointing the other way', async () => {
-			const triangle = await measure(false, { arrowStart: 1, arrowSize: 4 });
+			const triangle = await measure(false, { arrowStart: 'triangle', arrowSize: 4 });
 			near(triangle.beyond, 2 * Math.sqrt(5), 2.5);
 			near(triangle.across, 16, 2.5);
 		});

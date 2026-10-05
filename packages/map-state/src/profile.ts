@@ -1,6 +1,7 @@
 import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
 import {
+	ARROW_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -41,8 +42,8 @@ export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
 };
 /** The arrowheads of lines, apart from `LINE_DEFAULTS`, which outlines share. */
 export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> = {
-	arrowStart: 0,
-	arrowEnd: 0,
+	arrowStart: 'none',
+	arrowEnd: 'none',
 	arrowSize: 3
 };
 export const SYMBOL_DEFAULTS: Defaults<
@@ -76,7 +77,6 @@ export const SYMBOL_DEFAULTS: Defaults<
 // index -> name enum tables (the numeric index lives in State, the name in GeoJSON)
 export const FILL_PATTERN_NAMES = ['solid', 'diagonal', 'diagonal-thin'];
 export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted'];
-export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'];
 export const LABEL_ALIGN_NAMES = [
 	'auto',
 	'right',
@@ -97,6 +97,10 @@ function indexOf(table: string[], name: unknown): number | undefined {
 	if (typeof name !== 'string') return undefined;
 	const index = table.indexOf(name);
 	return index < 0 ? undefined : index;
+}
+/** The value, if it is one of the names of the table; undefined for anything else. */
+function oneOf<T extends string>(table: readonly T[], value: unknown): T | undefined {
+	return (table as readonly unknown[]).includes(value) ? (value as T) : undefined;
 }
 
 // ----- sanitizers for foreign GeoJSON property values -----
@@ -174,8 +178,8 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	set(s, 'align', sanitizeIndex(v.align, 0, LABEL_ALIGN_NAMES.length - 1));
 	set(s, 'label', sanitizeString(v.label));
 	set(s, 'visible', sanitizeBoolean(v.visible));
-	set(s, 'arrowStart', sanitizeIndex(v.arrowStart, 0, ARROW_NAMES.length - 1));
-	set(s, 'arrowEnd', sanitizeIndex(v.arrowEnd, 0, ARROW_NAMES.length - 1));
+	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
+	set(s, 'arrowEnd', oneOf(ARROW_NAMES, v.arrowEnd));
 	const arrowSize = sanitizeNumber(v.arrowSize, 0);
 	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
@@ -186,7 +190,7 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 
 /** Whether a style has an arrowhead at an end of the line. */
 export function hasArrow(style: StateStyle | undefined): boolean {
-	return Boolean(style?.arrowStart || style?.arrowEnd);
+	return (style?.arrowStart ?? 'none') !== 'none' || (style?.arrowEnd ?? 'none') !== 'none';
 }
 
 /** A style without the fields that have no effect: the size of arrowheads, without one. */
@@ -276,8 +280,8 @@ export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 	const s = { ...ARROW_DEFAULTS, ...style };
 	return {
 		...strokePropsFromStyle(style),
-		'stroke-arrow-start': nameOf(ARROW_NAMES, s.arrowStart),
-		'stroke-arrow-end': nameOf(ARROW_NAMES, s.arrowEnd),
+		'stroke-arrow-start': s.arrowStart,
+		'stroke-arrow-end': s.arrowEnd,
 		// only with an arrowhead
 		'stroke-arrow-size': hasArrow(s) ? s.arrowSize : undefined
 	};
@@ -286,8 +290,8 @@ export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
 	const s: StateStyle = { ...strokeStyleFromProps(p) };
 	if (p) {
-		set(s, 'arrowStart', indexOf(ARROW_NAMES, p['stroke-arrow-start']));
-		set(s, 'arrowEnd', indexOf(ARROW_NAMES, p['stroke-arrow-end']));
+		set(s, 'arrowStart', oneOf(ARROW_NAMES, p['stroke-arrow-start']));
+		set(s, 'arrowEnd', oneOf(ARROW_NAMES, p['stroke-arrow-end']));
 		const arrowSize = sanitizeNumber(p['stroke-arrow-size'], 0);
 		if (arrowSize) s.arrowSize = arrowSize;
 	}

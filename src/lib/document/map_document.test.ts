@@ -220,7 +220,7 @@ describe('MapDocument', () => {
 						[0, 0],
 						[1, 1]
 					],
-					style: { arrowEnd: 1 }
+					style: { arrowEnd: 'triangle' }
 				}
 			]
 		});

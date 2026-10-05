@@ -47,7 +47,7 @@ describe('the mark of a line', () => {
 	});
 
 	it('has its arrowheads within the mark, pointing outwards', () => {
-		const calls = draw({ width: 2, arrowStart: 3, arrowEnd: 1 });
+		const calls = draw({ width: 2, arrowStart: 'circle', arrowEnd: 'triangle' });
 		// a circle as wide as 3 times the line, centered on the start, and the triangle's tip at the end
 		expect(calls).toContain('moveTo 4,9');
 		expect(calls).toContain(`translate ${MARK_WIDTH - 1 - 2.2},9`);
@@ -59,7 +59,7 @@ describe('the mark of a line', () => {
 	});
 
 	it('has arrowheads no wider than the mark allows', () => {
-		const calls = draw({ width: 6, arrowEnd: 3, arrowSize: 8 });
+		const calls = draw({ width: 6, arrowEnd: 'circle', arrowSize: 8 });
 		// a circle 12 pixels wide at most
 		expect(calls).toContain(`lineTo ${MARK_WIDTH - 1 - 6},9`);
 	});

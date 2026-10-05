@@ -36,7 +36,6 @@ export {
 	SYMBOL_DEFAULTS,
 	FILL_PATTERN_NAMES,
 	STROKE_STYLE_NAMES,
-	ARROW_NAMES,
 	hasArrow,
 	withoutUnusedFields,
 	LABEL_ALIGN_NAMES,

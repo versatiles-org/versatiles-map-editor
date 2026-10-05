@@ -1,4 +1,4 @@
-import { ARROW_NAMES, parseColor, formatHex, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
+import { parseColor, type ArrowName, formatHex, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
 import { completeStyle, dashArrays } from '../../style/index.js';
 import { drawArrowHead, fillPatternPixels, headReach, PATTERN_SIZE } from '../../rendering/index.js';
 
@@ -64,9 +64,9 @@ export function drawLine(canvas: HTMLCanvasElement, style: StateStyle | undefine
 	const line = completeStyle('line', style);
 	const width = drawnWidth(line, MAX_LINE_WIDTH);
 	const headWidth = Math.min(line.arrowSize * width, MAX_ARROW_WIDTH);
-	const [start, end] = [line.arrowStart, line.arrowEnd].map((index) => ARROW_NAMES[index] ?? 'none');
+	const [start, end] = [line.arrowStart, line.arrowEnd];
 	// the end points: inside the mark by the round cap of the line, or by the arrowhead
-	const inset = (arrow: string) => 1 + (arrow === 'none' ? width / 2 : headReach(arrow, headWidth, width));
+	const inset = (arrow: ArrowName) => 1 + (arrow === 'none' ? width / 2 : headReach(arrow, headWidth, width));
 	const [x0, x1] = [inset(start), MARK_WIDTH - inset(end)];
 	const y = MARK_HEIGHT / 2;
 	context.strokeStyle = line.color;

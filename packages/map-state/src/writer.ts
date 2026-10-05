@@ -22,6 +22,7 @@ import {
 } from './profile.js';
 import { encodeStrings } from './string_coder.js';
 import {
+	ARROW_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -536,6 +537,13 @@ export class StateWriter {
 		this.writeStyleKey(END_KEY);
 	}
 
+	/** A name of the table, as its index. */
+	private writeName(table: readonly string[], name: string) {
+		const index = table.indexOf(name);
+		if (index < 0) throw new Error(`Invalid name: ${name}`);
+		this.writeVarint(index);
+	}
+
 	/** The key of a style field, see `STYLE_KEY_PARAMETER`. */
 	private writeStyleKey(key: number) {
 		this.writeExpGolomb(key, STYLE_KEY_PARAMETER);
@@ -561,7 +569,7 @@ export class StateWriter {
 				return this.writeVarint(Math.round(style.align!));
 			case 'arrowStart':
 			case 'arrowEnd':
-				return this.writeVarint(Math.round(style[name]!));
+				return this.writeName(ARROW_NAMES, style[name]!);
 			case 'arrowSize':
 				return this.writeVarint(Math.round(style.arrowSize! * 10));
 			case 'color':

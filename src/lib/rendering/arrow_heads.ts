@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { ARROW_NAMES } from '@versatiles/map-state';
+import { ARROW_NAMES, type ArrowName } from '@versatiles/map-state';
 import { lat2mercator, type GeoPath, type GeoPoint } from '../geometry.js';
 import type { ArrowProperties } from '../style/index.js';
 
@@ -47,7 +47,7 @@ const CHEVRON: GeoPoint[] = [
 const IMAGE_PREFIX = 'arrow-';
 
 /** The name of the image of an arrowhead, e.g. "arrow-triangle". */
-export function arrowImageName(arrow: string): string {
+export function arrowImageName(arrow: ArrowName): string {
 	return IMAGE_PREFIX + arrow;
 }
 
@@ -59,7 +59,7 @@ function segmentDistance([px, py]: GeoPoint, [ax, ay]: GeoPoint, [bx, by]: GeoPo
 }
 
 /** The signed distance from the edge of a head (negative inside), in pixels of the map, from its point on the end point. */
-function headDistance(arrow: string, point: GeoPoint): number {
+function headDistance(arrow: ArrowName, point: GeoPoint): number {
 	switch (arrow) {
 		case 'triangle': {
 			const corners = TRIANGLE;
@@ -81,7 +81,7 @@ function headDistance(arrow: string, point: GeoPoint): number {
 }
 
 /** The pixels of the image of an arrowhead: only the alpha channel counts, the distance field. */
-export function arrowImage(arrow: string): { width: number; height: number; data: Uint8Array } {
+export function arrowImage(arrow: ArrowName): { width: number; height: number; data: Uint8Array } {
 	const width = IMAGE_WIDTH * PIXEL_RATIO;
 	const height = IMAGE_HEIGHT * PIXEL_RATIO;
 	const data = new Uint8Array(width * height * 4);
@@ -105,8 +105,8 @@ export function arrowImage(arrow: string): { width: number; height: number; data
  */
 export function addArrowImage(map: maplibregl.Map, name: string): boolean {
 	if (!name.startsWith(IMAGE_PREFIX)) return false;
-	const arrow = name.slice(IMAGE_PREFIX.length);
-	if (arrow === 'none' || !ARROW_NAMES.includes(arrow)) return false;
+	const arrow = ARROW_NAMES.find((arrow) => name === IMAGE_PREFIX + arrow);
+	if (arrow === undefined || arrow === 'none') return false;
 	if (!map.hasImage(name)) map.addImage(name, arrowImage(arrow), { sdf: true, pixelRatio: PIXEL_RATIO });
 	return true;
 }
@@ -115,12 +115,12 @@ export function addArrowImage(map: maplibregl.Map, name: string): boolean {
  * How far a head lies beyond the end point of its line, in pixels: the tip of the triangle so far
  * that the round cap of the line is within it; the others on the end point.
  */
-function headShift(arrow: string, lineWidth: number): number {
+function headShift(arrow: ArrowName, lineWidth: number): number {
 	return arrow === 'triangle' ? lineWidth / 2 / TRIANGLE_SINE : 0;
 }
 
 /** How far a head reaches beyond the end point of its line, in pixels, e.g. to fit it into a box. */
-export function headReach(arrow: string, headWidth: number, lineWidth: number): number {
+export function headReach(arrow: ArrowName, headWidth: number, lineWidth: number): number {
 	switch (arrow) {
 		case 'triangle':
 			return headShift(arrow, lineWidth);
@@ -139,7 +139,12 @@ export function headReach(arrow: string, headWidth: number, lineWidth: number): 
  * at the end point of a line `lineWidth` wide, which is the origin of the context, pointing along
  * its x axis. In the color of `fillStyle`.
  */
-export function drawArrowHead(context: CanvasRenderingContext2D, arrow: string, headWidth: number, lineWidth: number) {
+export function drawArrowHead(
+	context: CanvasRenderingContext2D,
+	arrow: ArrowName,
+	headWidth: number,
+	lineWidth: number
+) {
 	const scale = headWidth / HEAD_WIDTH;
 	context.save();
 	context.translate(headShift(arrow, lineWidth), 0);

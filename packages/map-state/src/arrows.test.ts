@@ -22,9 +22,9 @@ const points: [number, number][] = [
 // arrowheads at the start, the end, both ends, and none
 const state: MapState = {
 	elements: [
-		{ type: 'line', points, style: { arrowEnd: 1 } },
-		{ type: 'line', points, style: { arrowStart: 3, arrowEnd: 2, arrowSize: 1.5 } },
-		{ type: 'line', points, style: { arrowStart: 1, width: 4 } },
+		{ type: 'line', points, style: { arrowEnd: 'triangle' } },
+		{ type: 'line', points, style: { arrowStart: 'circle', arrowEnd: 'chevron', arrowSize: 1.5 } },
+		{ type: 'line', points, style: { arrowStart: 'triangle', width: 4 } },
 		{ type: 'line', points, style: { color: '#0000ff' } }
 	]
 };
@@ -34,15 +34,15 @@ describe('arrowheads', () => {
 	it('are kept in a link, with the size in tenths', () => {
 		expect(decodeState(encodeState(state)).elements.map((e) => e.style)).toStrictEqual(styles);
 		const rounded = decodeState(
-			encodeState({ elements: [{ type: 'line', points, style: { arrowEnd: 1, arrowSize: 2.34 } }] })
+			encodeState({ elements: [{ type: 'line', points, style: { arrowEnd: 'triangle', arrowSize: 2.34 } }] })
 		);
-		expect(rounded.elements[0].style).toStrictEqual({ arrowEnd: 1, arrowSize: 2.3 });
+		expect(rounded.elements[0].style).toStrictEqual({ arrowEnd: 'triangle', arrowSize: 2.3 });
 	});
 
 	it('have neighbouring keys', () => {
 		const writer = new StateWriter();
-		writer.writeStylePatch({}, { arrowStart: 1, arrowEnd: 2, arrowSize: 2 });
-		// keys 10, 11 and 12 in 7 bits each, with their varints (1, 2, 20), then the end
+		writer.writeStylePatch({}, { arrowStart: 'triangle', arrowEnd: 'chevron', arrowSize: 2 });
+		// keys 10, 11 and 12 in 7 bits each, with their varints (the indexes 1 and 2, and 20), then the end
 		expect(writer.asBitString()).toBe('0001011' + '000010' + '0001100' + '000100' + '0001101' + '101000' + '1');
 	});
 
@@ -76,6 +76,9 @@ describe('arrowheads', () => {
 		expect(() => new StateReader(writer.bits).readStyle()).toThrow(
 			expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid index: 4 of 4' }) })
 		);
+		// and the writer does not write one
+		const style = { arrowEnd: 'star' } as unknown as StateStyle;
+		expect(() => encodeState({ elements: [{ type: 'line', points, style }] })).toThrow('Invalid name: star');
 	});
 
 	it('are properties of lines in GeoJSON, by name', () => {
@@ -105,14 +108,14 @@ describe('arrowheads', () => {
 	});
 
 	it('ignore invalid values in files', () => {
-		expect(sanitizeStyle({ arrowStart: 4, arrowEnd: 1.5, arrowSize: 0 })).toBeUndefined();
-		expect(sanitizeStyle({ arrowStart: 2, arrowSize: -1 })).toStrictEqual({ arrowStart: 2 });
+		expect(sanitizeStyle({ arrowStart: 'star', arrowEnd: 2, arrowSize: 0 })).toBeUndefined();
+		expect(sanitizeStyle({ arrowStart: 'chevron', arrowSize: -1 })).toStrictEqual({ arrowStart: 'chevron' });
 		const doc = stateToGeoJSON({ elements: [{ type: 'line', points }] });
 		doc.features[0].properties = {
 			'stroke-arrow-start': 'star',
 			'stroke-arrow-end': 'circle',
 			'stroke-arrow-size': 'x'
 		};
-		expect(stateFromGeoJSON(doc).elements[0].style).toStrictEqual({ arrowEnd: 3 });
+		expect(stateFromGeoJSON(doc).elements[0].style).toStrictEqual({ arrowEnd: 'circle' });
 	});
 });

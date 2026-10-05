@@ -1,5 +1,6 @@
 import { formatHex, parseColor } from './color.js';
 import {
+	ARROW_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -37,7 +38,6 @@ import {
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
 	STROKE_STYLE_NAMES,
-	ARROW_NAMES,
 	hasArrow,
 	VIEWER_CHOICES
 } from './profile.js';
@@ -595,6 +595,11 @@ export class StateReader {
 		return index;
 	}
 
+	/** A name of the table, stored as its index. */
+	readName<T extends string>(table: readonly T[]): T {
+		return table[this.readIndex(table.length)];
+	}
+
 	readStylePatch(style: StateStyle): StateStyle {
 		while (true) {
 			const key = this.readStyleKey();
@@ -634,7 +639,7 @@ export class StateReader {
 					break;
 				case 'arrowStart':
 				case 'arrowEnd':
-					style[field.name] = this.readIndex(ARROW_NAMES.length);
+					style[field.name] = this.readName(ARROW_NAMES);
 					break;
 				case 'arrowSize':
 					style.arrowSize = this.readVarint() / 10;

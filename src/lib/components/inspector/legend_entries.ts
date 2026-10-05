@@ -1,4 +1,11 @@
-import { formatHex, parseColor, type StateLegend, type StateLegendEntry, type StateStyle } from '@versatiles/map-state';
+import {
+	formatHex,
+	parseColor,
+	type ArrowName,
+	type StateLegend,
+	type StateLegendEntry,
+	type StateStyle
+} from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../../editor/index.js';
 import { completeStyle, ROLE_DEFAULTS, storedStyle, type StyleRole } from '../../style/index.js';
 
@@ -117,15 +124,15 @@ export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'sty
 		},
 		// the arrowheads of a line
 		get arrowStart() {
-			return get().arrowStart ?? 0;
+			return get().arrowStart ?? ROLE_DEFAULTS.line.arrowStart;
 		},
-		set arrowStart(value: number) {
+		set arrowStart(value: ArrowName) {
 			set('arrowStart', value);
 		},
 		get arrowEnd() {
-			return get().arrowEnd ?? 0;
+			return get().arrowEnd ?? ROLE_DEFAULTS.line.arrowEnd;
 		},
-		set arrowEnd(value: number) {
+		set arrowEnd(value: ArrowName) {
 			set('arrowEnd', value);
 		},
 		get arrowSize() {

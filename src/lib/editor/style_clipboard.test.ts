@@ -88,10 +88,10 @@ describe('StyleClipboard', () => {
 
 	it('transfers the arrowheads between lines, also none, but not onto an outline', () => {
 		const arrowed = newLine(doc);
-		arrowed.layer.patch({ arrowStart: 3, arrowEnd: 1, arrowSize: 2 });
+		arrowed.layer.patch({ arrowStart: 'circle', arrowEnd: 'triangle', arrowSize: 2 });
 		const line = newLine(doc);
 		copyAndPaste(arrowed, line);
-		expect(line.getState().style).toStrictEqual({ arrowStart: 3, arrowEnd: 1, arrowSize: 2 });
+		expect(line.getState().style).toStrictEqual({ arrowStart: 'circle', arrowEnd: 'triangle', arrowSize: 2 });
 
 		// a line without arrowheads removes them
 		copyAndPaste(newLine(doc), line);
