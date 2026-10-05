@@ -1,7 +1,7 @@
 import type { StateLegendEntry, StateStyle } from '@versatiles/map-state';
 import { elementText, LineElement, type AbstractElement } from '../element/index.js';
 import type { MapDocumentInteractive } from './map_document_interactive.js';
-import { legendEntryOf, lookOf, markerLook } from '../state/index.js';
+import { legendEntryOf, lookOf, markerLook, withoutEmptyStyles } from '../state/index.js';
 import { storedStyle, type StyleRole } from '../style/index.js';
 
 /*
@@ -115,9 +115,8 @@ export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): v
 					label
 				}
 			: { type: 'line', style: style('line', copied.stroke), label };
-	if (!entry.style) delete entry.style;
-	if (!entry.strokeStyle) delete entry.strokeStyle;
-	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? entry : e)) };
+	const stored = withoutEmptyStyles(entry);
+	doc.legend = { ...doc.legend, entries: entries.map((e, i) => (i === index ? stored : e)) };
 	doc.state.log();
 }
 

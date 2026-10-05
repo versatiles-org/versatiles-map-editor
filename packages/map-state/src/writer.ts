@@ -472,7 +472,7 @@ export class StateWriter {
 				this.writeInteger(LEGEND_ENTRY_KEYS.style, 4);
 				this.writeStyle(entry.style);
 			}
-			if (entry.strokeStyle) {
+			if ('strokeStyle' in entry && entry.strokeStyle) {
 				this.writeInteger(LEGEND_ENTRY_KEYS.strokeStyle, 4);
 				this.writeStyle(entry.strokeStyle);
 			}
@@ -701,7 +701,7 @@ function collectFormatStrings(root: MapState): string[] {
 		(value): value is string => !!value
 	);
 	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
-		const styles = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
+		const styles: (StateStyle | undefined)[] = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
 		for (const style of styles) {
 			// in the order of the keys of the style
 			if (style?.symbol != null) strings.push(style.symbol);

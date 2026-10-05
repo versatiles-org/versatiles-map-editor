@@ -96,6 +96,10 @@ The first release.
   look, and legend entries have their own `label`.
 - The rotation of a marker's symbol is `rotation`, and the width of its halo `haloWidth`, as in
   `@versatiles/style`; in GeoJSON `symbol-rotation` and `symbol-halo-width`.
+- A style type per role: `MarkerStyle`, `LineStyle`, `AreaStyle` and `OutlineStyle` (fields in
+  `STYLE_ROLE_FIELDS`), used by the elements and by the legend entries (`StateLegendMarker`,
+  `StateLegendLine`, `StateLegendArea`); `StateStyle` has the fields of all. A field of another
+  role is unknown: left out by `sanitizeStyle(role, …)` and reported by `unknownMapJSONFields`.
 - `view` for the place where the author's editor looks (`center` and `radius`), also in GeoJSON
   (a member of the `FeatureCollection`) and KML (`versatiles:view`).
 - Rules for the names of the choices of a style (`types.ts`, `MAPJSON.md`): lowercase words joined

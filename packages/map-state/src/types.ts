@@ -45,8 +45,8 @@ export interface StateElementMarker {
 	 * @default ""
 	 */
 	label?: string;
-	/** The symbol and its label (the style fields for markers). */
-	style?: StateStyle;
+	/** The symbol and the look of the label. */
+	style?: MarkerStyle;
 	popup?: StatePopup;
 }
 
@@ -60,8 +60,8 @@ export interface StateElementLine {
 	 * @default false
 	 */
 	smooth?: boolean;
-	/** The line: its color, width and dashes, and the arrowheads (the style fields for lines). */
-	style?: StateStyle;
+	/** The line: its color, width and dashes, and the arrowheads. */
+	style?: LineStyle;
 	popup?: StatePopup;
 }
 
@@ -75,10 +75,10 @@ export interface StateElementPolygon {
 	 * @default false
 	 */
 	smooth?: boolean;
-	/** The area: its color (with its opacity) and pattern (the style fields for areas). */
-	style?: StateStyle;
-	/** The outline: whether it is drawn, its color, width and dashes (the style fields for outlines). */
-	strokeStyle?: StateStyle;
+	/** The area: its color (with its opacity) and pattern. */
+	style?: AreaStyle;
+	/** The outline: whether it is drawn, its color, width and dashes. */
+	strokeStyle?: OutlineStyle;
 	popup?: StatePopup;
 }
 
@@ -91,10 +91,10 @@ export interface StateElementCircle {
 	 * @exclusiveMinimum 0
 	 */
 	radius: number;
-	/** The area: its color (with its opacity) and pattern (the style fields for areas). */
-	style?: StateStyle;
-	/** The outline: whether it is drawn, its color, width and dashes (the style fields for outlines). */
-	strokeStyle?: StateStyle;
+	/** The area: its color (with its opacity) and pattern. */
+	style?: AreaStyle;
+	/** The outline: whether it is drawn, its color, width and dashes. */
+	strokeStyle?: OutlineStyle;
 	popup?: StatePopup;
 }
 
@@ -145,45 +145,23 @@ export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
 export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted', 'long-dash', 'dash-dot'] as const;
 export type DashName = (typeof STROKE_STYLE_NAMES)[number];
 
-/**
- * The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which
- * fields count depends on what it styles (see the elements); missing fields have their default.
- */
-export interface StateStyle {
+/** The style of a marker: its symbol, and the look of its label. Missing fields have their default. */
+export interface MarkerStyle {
+	/** The image of the symbol, e.g. "icons:anchor", or "" for none. Default: a flag. */
+	symbol?: string;
 	/**
-	 * Markers: the width of the halo around the symbol and the label, in pixels.
-	 * @minimum 0
+	 * The color of the symbol, with its opacity.
+	 * @default "#ff0000"
+	 */
+	color?: HexColor;
+	/**
+	 * The size of the symbol, as a factor.
+	 * @exclusiveMinimum 0
 	 * @default 1
 	 */
-	haloWidth?: number;
+	size?: number;
 	/**
-	 * Areas: the pattern of the fill.
-	 * @default "solid"
-	 */
-	pattern?: FillPatternName;
-	/**
-	 * Areas with a pattern: its size, as a factor; at 1 the lines (across them) or the dots are 8
-	 * pixels apart. Only with a pattern.
-	 * @minimum 0.5
-	 * @maximum 4
-	 * @default 1
-	 */
-	patternScale?: number;
-	/**
-	 * Areas with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95.
-	 * Only with a pattern.
-	 * @minimum 0.05
-	 * @maximum 0.95
-	 * @default 0.5
-	 */
-	patternCoverage?: number;
-	/**
-	 * Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.
-	 * @default "solid"
-	 */
-	dash?: DashName;
-	/**
-	 * Markers: the rotation of the symbol, in whole degrees clockwise.
+	 * The rotation of the symbol, in whole degrees clockwise.
 	 * @asType integer
 	 * @minimum -180
 	 * @maximum 180
@@ -191,75 +169,162 @@ export interface StateStyle {
 	 */
 	rotation?: number;
 	/**
-	 * Markers: the size of the symbol, as a factor.
-	 * @exclusiveMinimum 0
+	 * The width of the halo around the symbol and the label, in pixels.
+	 * @minimum 0
 	 * @default 1
 	 */
-	size?: number;
+	haloWidth?: number;
 	/**
-	 * Markers: the size of the label, as a factor of 16 pixels.
+	 * The color of the halo around the symbol and the label.
+	 * @default "#ffffff"
+	 */
+	haloColor?: HexColor;
+	/**
+	 * The color of the text of the label.
+	 * @default "#000000"
+	 */
+	labelColor?: HexColor;
+	/**
+	 * The size of the label, as a factor of 16 pixels.
 	 * @exclusiveMinimum 0
 	 * @default 1
 	 */
 	labelSize?: number;
 	/**
-	 * Lines and outlines: the width, in pixels.
+	 * The glyph font of the label, e.g. "noto_sans_bold"; "" for the font of the labels of the
+	 * background map.
+	 * @default ""
+	 */
+	font?: string;
+	/**
+	 * The position of the label around the symbol; "auto" where it fits, or on the point without a
+	 * symbol.
+	 * @default "auto"
+	 */
+	labelPosition?: LabelPositionName;
+}
+
+/** The style of a line: its color, width and dashes, and its arrowheads. Missing fields have their default. */
+export interface LineStyle {
+	/**
+	 * The color of the line, with its opacity.
+	 * @default "#ff0000"
+	 */
+	color?: HexColor;
+	/**
+	 * The width, in pixels.
 	 * @minimum 0
 	 * @default 2
 	 */
 	width?: number;
 	/**
-	 * Markers: the position of the label around the symbol; "auto" where it fits, or on the point
-	 * without a symbol.
-	 * @default "auto"
+	 * Solid, dashed, dotted, long dashes, or dashes and dots.
+	 * @default "solid"
 	 */
-	labelPosition?: LabelPositionName;
+	dash?: DashName;
 	/**
-	 * The color of the symbol, the line, or the area, with its opacity.
-	 * @default "#ff0000"
-	 */
-	color?: HexColor;
-	/**
-	 * Outlines: whether the outline is drawn.
-	 * @default true
-	 */
-	visible?: boolean;
-	/**
-	 * Lines: the arrowhead at the first point.
+	 * The arrowhead at the first point.
 	 * @default "none"
 	 */
 	arrowStart?: ArrowName;
 	/**
-	 * Lines: the arrowhead at the last point.
+	 * The arrowhead at the last point.
 	 * @default "none"
 	 */
 	arrowEnd?: ArrowName;
 	/**
-	 * Lines: the width of the arrowheads across the line, as a factor of the width of the line.
-	 * Only with an arrowhead.
+	 * The width of the arrowheads across the line, as a factor of the width of the line. Only with
+	 * an arrowhead.
 	 * @exclusiveMinimum 0
 	 * @default 3
 	 */
 	arrowSize?: number;
-	/** The symbol of a marker: the name of its image, e.g. "icons:anchor", or "" for none. */
-	symbol?: string;
-	/**
-	 * Markers: the glyph font of the label, e.g. "noto_sans_bold"; "" for the font of the labels of
-	 * the background map.
-	 * @default ""
-	 */
-	font?: string;
-	/**
-	 * Markers: the color of the text of the label.
-	 * @default "#000000"
-	 */
-	labelColor?: HexColor;
-	/**
-	 * Markers: the color of the halo around the symbol and the label.
-	 * @default "#ffffff"
-	 */
-	haloColor?: HexColor;
 }
+
+/** The style of an area (of a polygon or a circle): its color and pattern. Missing fields have their default. */
+export interface AreaStyle {
+	/**
+	 * The color of the area, with its opacity.
+	 * @default "#ff0000"
+	 */
+	color?: HexColor;
+	/**
+	 * The pattern of the fill.
+	 * @default "solid"
+	 */
+	pattern?: FillPatternName;
+	/**
+	 * The size of the pattern, as a factor; at 1 the lines (across them) or the dots are 8 pixels
+	 * apart. Only with a pattern.
+	 * @minimum 0.5
+	 * @maximum 4
+	 * @default 1
+	 */
+	patternScale?: number;
+	/**
+	 * The share of the area that the lines or dots of the pattern cover, from 0.05 to 0.95. Only
+	 * with a pattern.
+	 * @minimum 0.05
+	 * @maximum 0.95
+	 * @default 0.5
+	 */
+	patternCoverage?: number;
+}
+
+/** The style of the outline of an area. Missing fields have their default. */
+export interface OutlineStyle {
+	/**
+	 * Whether the outline is drawn.
+	 * @default true
+	 */
+	visible?: boolean;
+	/**
+	 * The color of the outline, with its opacity.
+	 * @default "#ff0000"
+	 */
+	color?: HexColor;
+	/**
+	 * The width, in pixels.
+	 * @minimum 0
+	 * @default 2
+	 */
+	width?: number;
+	/**
+	 * Solid, dashed, dotted, long dashes, or dashes and dots.
+	 * @default "solid"
+	 */
+	dash?: DashName;
+}
+
+/** All fields of the styles of all roles, e.g. for the codec, which writes any style alike. */
+export type StateStyle = MarkerStyle & LineStyle & AreaStyle & OutlineStyle;
+
+/** What a style styles: a marker, a line, an area, or the outline of an area. */
+export type StyleRoleName = 'marker' | 'line' | 'area' | 'outline';
+
+/** The fields of the style of each role, e.g. to check the style of a file (a test compares them with the types). */
+export const STYLE_ROLE_FIELDS = {
+	marker: [
+		'symbol',
+		'color',
+		'size',
+		'rotation',
+		'haloWidth',
+		'haloColor',
+		'labelColor',
+		'labelSize',
+		'font',
+		'labelPosition'
+	],
+	line: ['color', 'width', 'dash', 'arrowStart', 'arrowEnd', 'arrowSize'],
+	area: ['color', 'pattern', 'patternScale', 'patternCoverage'],
+	outline: ['visible', 'color', 'width', 'dash']
+} as const satisfies {
+	marker: readonly (keyof MarkerStyle)[];
+	line: readonly (keyof LineStyle)[];
+	area: readonly (keyof AreaStyle)[];
+	outline: readonly (keyof OutlineStyle)[];
+};
 
 export interface StateMetadata {
 	/** The background map. Without it, the map has the editor's default background. */
@@ -353,14 +418,32 @@ export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'area'] as const;
 
 /**
  * A row of the legend: a small copy of an element, and a text. Its styles are those of an element
- * of its type, with the same defaults (see the elements); the label of a marker style is not shown.
+ * of its kind, with the same defaults (see the elements).
  */
-export interface StateLegendEntry {
-	type: (typeof LEGEND_ENTRY_TYPES)[number];
-	/** Markers: the symbol. Lines: the line. Areas: the area. */
-	style?: StateStyle;
-	/** Areas: the outline. */
-	strokeStyle?: StateStyle;
+export type StateLegendEntry = StateLegendMarker | StateLegendLine | StateLegendArea;
+
+/** A legend entry with a marker. */
+export interface StateLegendMarker {
+	type: 'marker';
+	style?: MarkerStyle;
+	/** The text next to it. */
+	label: string;
+}
+
+/** A legend entry with a line. */
+export interface StateLegendLine {
+	type: 'line';
+	style?: LineStyle;
+	/** The text next to it. */
+	label: string;
+}
+
+/** A legend entry with an area, e.g. of a polygon or a circle. */
+export interface StateLegendArea {
+	type: 'area';
+	style?: AreaStyle;
+	/** The outline of the area. */
+	strokeStyle?: OutlineStyle;
 	/** The text next to it. */
 	label: string;
 }

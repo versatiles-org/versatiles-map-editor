@@ -1,6 +1,5 @@
 import { sanitizeView, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
-import { STYLE_FIELDS } from './style_history.js';
-import type { MapState, StateElement } from './types.js';
+import { STYLE_ROLE_FIELDS, type MapState, type StateElement, type StateLegendEntry } from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
 export const MAPJSON_VERSION = 1;
@@ -62,10 +61,15 @@ export const MAPJSON_FIELDS = {
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
 	StateBackground: ['builder', 'options'],
 	StateLegend: ['layout', 'font', 'bold', 'italic', 'theme', 'entries'],
-	StateLegendEntry: ['type', 'style', 'strokeStyle', 'label'],
+	StateLegendMarker: ['type', 'style', 'label'],
+	StateLegendLine: ['type', 'style', 'label'],
+	StateLegendArea: ['type', 'style', 'strokeStyle', 'label'],
 	StateViewer: ['search', 'navigation', 'legend'],
 	StatePopup: ['text'],
-	StateStyle: STYLE_FIELDS.map((field) => field.name),
+	MarkerStyle: STYLE_ROLE_FIELDS.marker,
+	LineStyle: STYLE_ROLE_FIELDS.line,
+	AreaStyle: STYLE_ROLE_FIELDS.area,
+	OutlineStyle: STYLE_ROLE_FIELDS.outline,
 	StateElementMarker: ['type', 'point', 'label', 'style', 'popup'],
 	StateElementLine: ['type', 'points', 'smooth', 'style', 'popup'],
 	StateElementPolygon: ['type', 'points', 'smooth', 'style', 'strokeStyle', 'popup'],
@@ -77,6 +81,12 @@ const ELEMENT_FIELDS: Record<StateElement['type'], readonly string[]> = {
 	line: MAPJSON_FIELDS.StateElementLine,
 	polygon: MAPJSON_FIELDS.StateElementPolygon,
 	circle: MAPJSON_FIELDS.StateElementCircle
+};
+
+const LEGEND_ENTRY_FIELDS: Record<StateLegendEntry['type'], readonly string[]> = {
+	marker: MAPJSON_FIELDS.StateLegendMarker,
+	line: MAPJSON_FIELDS.StateLegendLine,
+	area: MAPJSON_FIELDS.StateLegendArea
 };
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -97,9 +107,11 @@ export function unknownMapJSONFields(json: unknown): string[] {
 		for (const key of Object.keys(value)) if (!known.includes(key)) unknown.push(path ? `${path}.${key}` : key);
 		return value;
 	};
+	/** The styles of an element or a legend entry, by its type. */
 	const checkStyles = (owner: Record<string, unknown>, path: string) => {
-		check(owner.style, MAPJSON_FIELDS.StateStyle, `${path}.style`);
-		check(owner.strokeStyle, MAPJSON_FIELDS.StateStyle, `${path}.strokeStyle`);
+		const role = owner.type === 'marker' ? 'marker' : owner.type === 'line' ? 'line' : 'area';
+		check(owner.style, STYLE_ROLE_FIELDS[role], `${path}.style`);
+		if (role === 'area') check(owner.strokeStyle, STYLE_ROLE_FIELDS.outline, `${path}.strokeStyle`);
 	};
 
 	const root = check(json, MAPJSON_FIELDS.MapJSON, '');
@@ -114,7 +126,10 @@ export function unknownMapJSONFields(json: unknown): string[] {
 		if (legend && Array.isArray(legend.entries)) {
 			legend.entries.forEach((value, index) => {
 				const path = `meta.legend.entries[${index}]`;
-				const entry = check(value, MAPJSON_FIELDS.StateLegendEntry, path);
+				const known = isObject(value) ? LEGEND_ENTRY_FIELDS[value.type as StateLegendEntry['type']] : undefined;
+				// e.g. a type of a newer version: the entry is left out
+				if (!known) return void unknown.push(path);
+				const entry = check(value, known, path);
 				if (entry) checkStyles(entry, path);
 			});
 		}

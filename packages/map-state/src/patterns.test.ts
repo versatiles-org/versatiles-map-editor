@@ -55,11 +55,11 @@ describe('the size and the coverage of patterns', () => {
 		const style: StateStyle = { color: '#0000ff', patternScale: 2, patternCoverage: 0.25 };
 		const decoded = decodeState(encodeState({ elements: [{ type: 'polygon', points, style }] }));
 		expect(decoded.elements[0].style).toStrictEqual({ color: '#0000ff' });
-		expect(sanitizeStyle(style)).toStrictEqual({ color: '#0000ff' });
+		expect(sanitizeStyle('area', style)).toStrictEqual({ color: '#0000ff' });
 	});
 
 	it('are limited to their ranges in files', () => {
-		expect(sanitizeStyle({ pattern: 'dots', patternScale: 100, patternCoverage: 0 })).toStrictEqual({
+		expect(sanitizeStyle('area', { pattern: 'dots', patternScale: 100, patternCoverage: 0 })).toStrictEqual({
 			pattern: 'dots',
 			patternScale: 4,
 			patternCoverage: 0.05

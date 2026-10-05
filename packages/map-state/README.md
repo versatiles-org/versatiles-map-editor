@@ -90,7 +90,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 
 `MapState` is the canonical model: a viewport, map properties (`meta`) and a list of typed
 elements whose styles omit default values. The types are exported too (`StateElement`,
-`StateStyle`, `StateLegend`, …).
+`MarkerStyle`, `LineStyle`, `AreaStyle`, `OutlineStyle`, `StateLegend`, …).
 
 ## Representations
 
@@ -100,7 +100,7 @@ which are internal: only the exports above are the public API.
 
 | Representation | Source                      | Notes                                                                              |
 | -------------- | --------------------------- | ---------------------------------------------------------------------------------- |
-| `MapState`     | canonical                   | view (`center` + `radius` m), `meta`, `elements[]` with `StateStyle`               |
+| `MapState`     | canonical                   | view (`center` + `radius` m), `meta`, `elements[]` with a style per role           |
 | `.mapjson`     | `mapjson.ts`                | the map state as JSON, the file format of the editor; see [MAPJSON.md](MAPJSON.md) |
 | base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                               |
 | GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `view` and `meta` foreign members                            |

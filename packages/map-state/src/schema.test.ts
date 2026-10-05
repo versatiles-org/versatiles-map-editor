@@ -123,9 +123,10 @@ describe('the JSON Schema of .mapjson files', () => {
 			file([{ type: 'line', points: [[0, 0]] }]),
 			file([
 				{
-					type: 'line',
+					type: 'polygon',
 					points: [
 						[0, 0],
+						[1, 0],
 						[1, 1]
 					],
 					style: { pattern: 3 }

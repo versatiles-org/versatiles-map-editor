@@ -134,4 +134,30 @@ describe('.mapjson files', () => {
 		}
 		expect(unknownMapJSONFields('no map')).toStrictEqual([]);
 	});
+
+	it('report and drop the style fields of other roles, e.g. an arrowhead of a marker', () => {
+		const json = {
+			elements: [
+				{ type: 'marker', point: [1, 2], style: { color: '#0000ff', arrowStart: 'triangle' } },
+				{
+					type: 'polygon',
+					points: [
+						[0, 0],
+						[1, 0],
+						[1, 1]
+					],
+					style: { width: 3 },
+					strokeStyle: { pattern: 'dots' }
+				}
+			]
+		};
+		expect(unknownMapJSONFields(json)).toStrictEqual([
+			'elements[0].style.arrowStart',
+			'elements[1].style.width',
+			'elements[1].strokeStyle.pattern'
+		]);
+		const state = stateFromMapJSON(json);
+		expect(state.elements[0].style).toStrictEqual({ color: '#0000ff' });
+		expect(state.elements[1]).toStrictEqual({ type: 'polygon', points: json.elements[1].points });
+	});
 });

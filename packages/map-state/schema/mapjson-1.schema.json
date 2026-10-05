@@ -165,19 +165,28 @@
 			"required": ["entries"]
 		},
 		"StateLegendEntry": {
+			"anyOf": [
+				{
+					"$ref": "#/definitions/StateLegendMarker"
+				},
+				{
+					"$ref": "#/definitions/StateLegendLine"
+				},
+				{
+					"$ref": "#/definitions/StateLegendArea"
+				}
+			],
+			"description": "A row of the legend: a small copy of an element, and a text. Its styles are those of an element of its kind, with the same defaults (see the elements)."
+		},
+		"StateLegendMarker": {
 			"type": "object",
 			"properties": {
 				"type": {
 					"type": "string",
-					"enum": ["marker", "line", "area"]
+					"const": "marker"
 				},
 				"style": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "Markers: the symbol. Lines: the line. Areas: the area."
-				},
-				"strokeStyle": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "Areas: the outline."
+					"$ref": "#/definitions/MarkerStyle"
 				},
 				"label": {
 					"type": "string",
@@ -185,118 +194,192 @@
 				}
 			},
 			"required": ["type", "label"],
-			"description": "A row of the legend: a small copy of an element, and a text. Its styles are those of an element of its type, with the same defaults (see the elements); the label of a marker style is not shown."
+			"description": "A legend entry with a marker."
 		},
-		"StateStyle": {
+		"MarkerStyle": {
 			"type": "object",
 			"properties": {
+				"symbol": {
+					"type": "string",
+					"description": "The image of the symbol, e.g. \"icons:anchor\", or \"\" for none. Default: a flag."
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the symbol, with its opacity.",
+					"default": "#ff0000"
+				},
+				"size": {
+					"type": "number",
+					"description": "The size of the symbol, as a factor.",
+					"exclusiveMinimum": 0,
+					"default": 1
+				},
+				"rotation": {
+					"type": "integer",
+					"description": "The rotation of the symbol, in whole degrees clockwise.",
+					"minimum": -180,
+					"maximum": 180,
+					"default": 0
+				},
 				"haloWidth": {
 					"type": "number",
-					"description": "Markers: the width of the halo around the symbol and the label, in pixels.",
+					"description": "The width of the halo around the symbol and the label, in pixels.",
 					"minimum": 0,
 					"default": 1
 				},
+				"haloColor": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the halo around the symbol and the label.",
+					"default": "#ffffff"
+				},
+				"labelColor": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the text of the label.",
+					"default": "#000000"
+				},
+				"labelSize": {
+					"type": "number",
+					"description": "The size of the label, as a factor of 16 pixels.",
+					"exclusiveMinimum": 0,
+					"default": 1
+				},
+				"font": {
+					"type": "string",
+					"description": "The glyph font of the label, e.g. \"noto_sans_bold\"; \"\" for the font of the labels of the background map.",
+					"default": ""
+				},
+				"labelPosition": {
+					"$ref": "#/definitions/LabelPositionName",
+					"description": "The position of the label around the symbol; \"auto\" where it fits, or on the point without a symbol.",
+					"default": "auto"
+				}
+			},
+			"description": "The style of a marker: its symbol, and the look of its label. Missing fields have their default."
+		},
+		"HexColor": {
+			"type": "string",
+			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
+			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
+		},
+		"LabelPositionName": {
+			"type": "string",
+			"enum": ["auto", "right", "left", "top", "bottom", "top-right", "top-left", "bottom-right", "bottom-left"]
+		},
+		"StateLegendLine": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "line"
+				},
+				"style": {
+					"$ref": "#/definitions/LineStyle"
+				},
+				"label": {
+					"type": "string",
+					"description": "The text next to it."
+				}
+			},
+			"required": ["type", "label"],
+			"description": "A legend entry with a line."
+		},
+		"LineStyle": {
+			"type": "object",
+			"properties": {
+				"color": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the line, with its opacity.",
+					"default": "#ff0000"
+				},
+				"width": {
+					"type": "number",
+					"description": "The width, in pixels.",
+					"minimum": 0,
+					"default": 2
+				},
+				"dash": {
+					"$ref": "#/definitions/DashName",
+					"description": "Solid, dashed, dotted, long dashes, or dashes and dots.",
+					"default": "solid"
+				},
+				"arrowStart": {
+					"$ref": "#/definitions/ArrowName",
+					"description": "The arrowhead at the first point.",
+					"default": "none"
+				},
+				"arrowEnd": {
+					"$ref": "#/definitions/ArrowName",
+					"description": "The arrowhead at the last point.",
+					"default": "none"
+				},
+				"arrowSize": {
+					"type": "number",
+					"description": "The width of the arrowheads across the line, as a factor of the width of the line. Only with an arrowhead.",
+					"exclusiveMinimum": 0,
+					"default": 3
+				}
+			},
+			"description": "The style of a line: its color, width and dashes, and its arrowheads. Missing fields have their default."
+		},
+		"DashName": {
+			"type": "string",
+			"enum": ["solid", "dashed", "dotted", "long-dash", "dash-dot"]
+		},
+		"ArrowName": {
+			"type": "string",
+			"enum": ["none", "triangle", "chevron", "circle"]
+		},
+		"StateLegendArea": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"const": "area"
+				},
+				"style": {
+					"$ref": "#/definitions/AreaStyle"
+				},
+				"strokeStyle": {
+					"$ref": "#/definitions/OutlineStyle",
+					"description": "The outline of the area."
+				},
+				"label": {
+					"type": "string",
+					"description": "The text next to it."
+				}
+			},
+			"required": ["type", "label"],
+			"description": "A legend entry with an area, e.g. of a polygon or a circle."
+		},
+		"AreaStyle": {
+			"type": "object",
+			"properties": {
+				"color": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the area, with its opacity.",
+					"default": "#ff0000"
+				},
 				"pattern": {
 					"$ref": "#/definitions/FillPatternName",
-					"description": "Areas: the pattern of the fill.",
+					"description": "The pattern of the fill.",
 					"default": "solid"
 				},
 				"patternScale": {
 					"type": "number",
-					"description": "Areas with a pattern: its size, as a factor; at 1 the lines (across them) or the dots are 8 pixels apart. Only with a pattern.",
+					"description": "The size of the pattern, as a factor; at 1 the lines (across them) or the dots are 8 pixels apart. Only with a pattern.",
 					"minimum": 0.5,
 					"maximum": 4,
 					"default": 1
 				},
 				"patternCoverage": {
 					"type": "number",
-					"description": "Areas with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95. Only with a pattern.",
+					"description": "The share of the area that the lines or dots of the pattern cover, from 0.05 to 0.95. Only with a pattern.",
 					"minimum": 0.05,
 					"maximum": 0.95,
 					"default": 0.5
-				},
-				"dash": {
-					"$ref": "#/definitions/DashName",
-					"description": "Lines and outlines: solid, dashed, dotted, long dashes, or dashes and dots.",
-					"default": "solid"
-				},
-				"rotation": {
-					"type": "integer",
-					"description": "Markers: the rotation of the symbol, in whole degrees clockwise.",
-					"minimum": -180,
-					"maximum": 180,
-					"default": 0
-				},
-				"size": {
-					"type": "number",
-					"description": "Markers: the size of the symbol, as a factor.",
-					"exclusiveMinimum": 0,
-					"default": 1
-				},
-				"labelSize": {
-					"type": "number",
-					"description": "Markers: the size of the label, as a factor of 16 pixels.",
-					"exclusiveMinimum": 0,
-					"default": 1
-				},
-				"width": {
-					"type": "number",
-					"description": "Lines and outlines: the width, in pixels.",
-					"minimum": 0,
-					"default": 2
-				},
-				"labelPosition": {
-					"$ref": "#/definitions/LabelPositionName",
-					"description": "Markers: the position of the label around the symbol; \"auto\" where it fits, or on the point without a symbol.",
-					"default": "auto"
-				},
-				"color": {
-					"$ref": "#/definitions/HexColor",
-					"description": "The color of the symbol, the line, or the area, with its opacity.",
-					"default": "#ff0000"
-				},
-				"visible": {
-					"type": "boolean",
-					"description": "Outlines: whether the outline is drawn.",
-					"default": true
-				},
-				"arrowStart": {
-					"$ref": "#/definitions/ArrowName",
-					"description": "Lines: the arrowhead at the first point.",
-					"default": "none"
-				},
-				"arrowEnd": {
-					"$ref": "#/definitions/ArrowName",
-					"description": "Lines: the arrowhead at the last point.",
-					"default": "none"
-				},
-				"arrowSize": {
-					"type": "number",
-					"description": "Lines: the width of the arrowheads across the line, as a factor of the width of the line. Only with an arrowhead.",
-					"exclusiveMinimum": 0,
-					"default": 3
-				},
-				"symbol": {
-					"type": "string",
-					"description": "The symbol of a marker: the name of its image, e.g. \"icons:anchor\", or \"\" for none."
-				},
-				"font": {
-					"type": "string",
-					"description": "Markers: the glyph font of the label, e.g. \"noto_sans_bold\"; \"\" for the font of the labels of the background map.",
-					"default": ""
-				},
-				"labelColor": {
-					"$ref": "#/definitions/HexColor",
-					"description": "Markers: the color of the text of the label.",
-					"default": "#000000"
-				},
-				"haloColor": {
-					"$ref": "#/definitions/HexColor",
-					"description": "Markers: the color of the halo around the symbol and the label.",
-					"default": "#ffffff"
 				}
 			},
-			"description": "The style of a marker, of a line, or of the area or the outline of a polygon or a circle. Which fields count depends on what it styles (see the elements); missing fields have their default."
+			"description": "The style of an area (of a polygon or a circle): its color and pattern. Missing fields have their default."
 		},
 		"FillPatternName": {
 			"type": "string",
@@ -312,22 +395,32 @@
 				"diagonal-dots"
 			]
 		},
-		"DashName": {
-			"type": "string",
-			"enum": ["solid", "dashed", "dotted", "long-dash", "dash-dot"]
-		},
-		"LabelPositionName": {
-			"type": "string",
-			"enum": ["auto", "right", "left", "top", "bottom", "top-right", "top-left", "bottom-right", "bottom-left"]
-		},
-		"HexColor": {
-			"type": "string",
-			"description": "A color as hex code: \"#rrggbb\", or \"#rrggbbaa\" with its opacity (alpha). Written in lower case.",
-			"pattern": "^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
-		},
-		"ArrowName": {
-			"type": "string",
-			"enum": ["none", "triangle", "chevron", "circle"]
+		"OutlineStyle": {
+			"type": "object",
+			"properties": {
+				"visible": {
+					"type": "boolean",
+					"description": "Whether the outline is drawn.",
+					"default": true
+				},
+				"color": {
+					"$ref": "#/definitions/HexColor",
+					"description": "The color of the outline, with its opacity.",
+					"default": "#ff0000"
+				},
+				"width": {
+					"type": "number",
+					"description": "The width, in pixels.",
+					"minimum": 0,
+					"default": 2
+				},
+				"dash": {
+					"$ref": "#/definitions/DashName",
+					"description": "Solid, dashed, dotted, long dashes, or dashes and dots.",
+					"default": "solid"
+				}
+			},
+			"description": "The style of the outline of an area. Missing fields have their default."
 		},
 		"StateViewer": {
 			"type": "object",
@@ -406,8 +499,8 @@
 					"default": ""
 				},
 				"style": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The symbol and its label (the style fields for markers)."
+					"$ref": "#/definitions/MarkerStyle",
+					"description": "The symbol and the look of the label."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -447,8 +540,8 @@
 					"default": false
 				},
 				"style": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The line: its color, width and dashes, and the arrowheads (the style fields for lines)."
+					"$ref": "#/definitions/LineStyle",
+					"description": "The line: its color, width and dashes, and the arrowheads."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -477,12 +570,12 @@
 					"default": false
 				},
 				"style": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The area: its color (with its opacity) and pattern (the style fields for areas)."
+					"$ref": "#/definitions/AreaStyle",
+					"description": "The area: its color (with its opacity) and pattern."
 				},
 				"strokeStyle": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: whether it is drawn, its color, width and dashes (the style fields for outlines)."
+					"$ref": "#/definitions/OutlineStyle",
+					"description": "The outline: whether it is drawn, its color, width and dashes."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"
@@ -507,12 +600,12 @@
 					"exclusiveMinimum": 0
 				},
 				"style": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The area: its color (with its opacity) and pattern (the style fields for areas)."
+					"$ref": "#/definitions/AreaStyle",
+					"description": "The area: its color (with its opacity) and pattern."
 				},
 				"strokeStyle": {
-					"$ref": "#/definitions/StateStyle",
-					"description": "The outline: whether it is drawn, its color, width and dashes (the style fields for outlines)."
+					"$ref": "#/definitions/OutlineStyle",
+					"description": "The outline: whether it is drawn, its color, width and dashes."
 				},
 				"popup": {
 					"$ref": "#/definitions/StatePopup"

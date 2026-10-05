@@ -1,7 +1,15 @@
 import { expect, test } from './lib/test.js';
 import type { GeoJSONSource } from 'maplibre-gl';
 import { encodeState, type MapState, type StateElement } from '../packages/map-state/src/index.js';
-import { type MapWindow, project, waitForMapIsReady, storedState, sidebar } from './lib/utils.js';
+import {
+	type MapWindow,
+	project,
+	waitForMapIsReady,
+	storedState,
+	sidebar,
+	strokeStyleOf,
+	styleOf
+} from './lib/utils.js';
 
 // The legend: its entries, their looks and their order, and how it is shown.
 
@@ -170,7 +178,7 @@ test(
 		await expect.poll(inked).toBeLessThan(solid * 0.8);
 		await entry.getByRole('spinbutton', { name: 'Width' }).fill('3');
 		await entry.getByRole('spinbutton', { name: 'Width' }).press('Enter');
-		await expect.poll(async () => (await stored())?.style?.width).toBe(3);
+		await expect.poll(async () => styleOf(await stored())?.width).toBe(3);
 
 		// an area without an outline, then with one in the color of the fill
 		await entry.getByRole('radio', { name: 'Area' }).check();
@@ -190,7 +198,7 @@ test(
 
 		// each change is one undo step: the outline is gone again
 		await page.getByRole('button', { name: 'Undo' }).click();
-		await expect.poll(async () => (await stored())?.strokeStyle).toStrictEqual({ visible: false });
+		await expect.poll(async () => strokeStyleOf(await stored())).toStrictEqual({ visible: false });
 	}
 );
 

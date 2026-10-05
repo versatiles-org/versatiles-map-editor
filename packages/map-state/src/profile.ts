@@ -18,7 +18,14 @@ import {
 	type StateBackground,
 	type StateElement,
 	type StateLabels,
+	type AreaStyle,
+	type LineStyle,
+	type MarkerStyle,
+	type OutlineStyle,
+	STYLE_ROLE_FIELDS,
 	type StateLegend,
+	type StateLegendEntry,
+	type StyleRoleName,
 	type StateMetadata,
 	type StatePopup,
 	type StateStyle,
@@ -137,11 +144,20 @@ export function sanitizeBoolean(value: unknown): boolean | undefined {
 	return undefined;
 }
 
+/** The type of the style of each role. */
+export interface RoleStyles {
+	marker: MarkerStyle;
+	line: LineStyle;
+	area: AreaStyle;
+	outline: OutlineStyle;
+}
+
 /**
- * A style as JSON has it (e.g. of a legend entry in GeoJSON): only its valid fields, or undefined
- * if none is.
+ * A style of the role as JSON has it (e.g. of a legend entry in GeoJSON): only its valid fields
+ * of that role, or undefined if none is. Fields of other roles are left out, e.g. `arrowStart` of
+ * a marker.
  */
-export function sanitizeStyle(value: unknown): StateStyle | undefined {
+export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown): RoleStyles[R] | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const v = value as Record<string, unknown>;
 	const s: StateStyle = {};
@@ -167,8 +183,10 @@ export function sanitizeStyle(value: unknown): StateStyle | undefined {
 	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
 	set(s, 'font', sanitizeString(v.font));
-	const used = withoutUnusedFields(s);
-	return Object.keys(used).length > 0 ? used : undefined;
+	const fields: readonly string[] = STYLE_ROLE_FIELDS[role];
+	const own: StateStyle = Object.fromEntries(Object.entries(s).filter(([key]) => fields.includes(key)));
+	const used = withoutUnusedFields(own);
+	return Object.keys(used).length > 0 ? (used as RoleStyles[R]) : undefined;
 }
 
 /** Whether a style has an arrowhead at an end of the line. */
@@ -380,6 +398,28 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
  * The values of a legend that are not stored: entries below each other, a sans-serif font,
  * neither bold nor italic. Its position is one of the viewer, see `VIEWER_DEFAULTS`.
  */
+/** A legend entry of the type, with the valid fields of its styles. */
+function sanitizeLegendEntry(
+	type: StateLegendEntry['type'],
+	style: unknown,
+	strokeStyle: unknown,
+	label: string
+): StateLegendEntry {
+	const styles = (s: unknown, role: StyleRoleName) => {
+		const sanitized = sanitizeStyle(role, s);
+		return sanitized ? { [role === 'outline' ? 'strokeStyle' : 'style']: sanitized } : {};
+	};
+	switch (type) {
+		case 'marker':
+			return { type, ...styles(style, 'marker'), label };
+		case 'line':
+			return { type, ...styles(style, 'line'), label };
+		case 'area':
+			// only areas have an outline
+			return { type, ...styles(style, 'area'), ...styles(strokeStyle, 'outline'), label };
+	}
+}
+
 export const LEGEND_DEFAULTS = {
 	layout: 'vertical',
 	font: 'sans-serif',
@@ -424,10 +464,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		const label = sanitizeString(e.label) ?? '';
 		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
 		if (!type) continue;
-		const style = sanitizeStyle(e.style);
-		// only areas have an outline
-		const strokeStyle = type === 'area' ? sanitizeStyle(e.strokeStyle) : undefined;
-		legend.entries.push({ type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label });
+		legend.entries.push(sanitizeLegendEntry(type, e.style, e.strokeStyle, label));
 	}
 	return removeLegendDefaults(legend);
 }
@@ -560,20 +597,25 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 		case 'marker': {
 			const point = sanitizePosition(v.point);
 			if (!point) return undefined;
-			element = { type: 'marker', point, ...labelOf(v.label), style: sanitizeStyle(v.style) };
+			element = { type: 'marker', point, ...labelOf(v.label), style: sanitizeStyle('marker', v.style) };
 			break;
 		}
 		case 'line': {
 			const points = sanitizePositions(v.points);
 			if (!points || points.length < 2) return undefined;
-			element = { type: 'line', points, style: sanitizeStyle(v.style) };
+			element = { type: 'line', points, style: sanitizeStyle('line', v.style) };
 			if (sanitizeBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
 		case 'polygon': {
 			const points = sanitizePositions(v.points);
 			if (!points || points.length < 3) return undefined;
-			element = { type: 'polygon', points, style: sanitizeStyle(v.style), strokeStyle: sanitizeStyle(v.strokeStyle) };
+			element = {
+				type: 'polygon',
+				points,
+				style: sanitizeStyle('area', v.style),
+				strokeStyle: sanitizeStyle('outline', v.strokeStyle)
+			};
 			if (sanitizeBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
@@ -585,8 +627,8 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 				type: 'circle',
 				point,
 				radius,
-				style: sanitizeStyle(v.style),
-				strokeStyle: sanitizeStyle(v.strokeStyle)
+				style: sanitizeStyle('area', v.style),
+				strokeStyle: sanitizeStyle('outline', v.strokeStyle)
 			};
 			break;
 		}

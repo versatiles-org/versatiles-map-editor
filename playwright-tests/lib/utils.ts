@@ -1,6 +1,12 @@
 import { type JSHandle, type Locator, type Page } from '@playwright/test';
 import type { Map as MaplibreMap } from 'maplibre-gl';
-import { decodeState, type MapState } from '../../packages/map-state/src/index.js';
+import {
+	decodeState,
+	type MapState,
+	type StateElement,
+	type StateLegendEntry,
+	type StateStyle
+} from '../../packages/map-state/src/index.js';
 import { createHash, randomBytes } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -411,4 +417,14 @@ function writeFileAtomically(path: string, data: string | Buffer): void {
 	const temporary = `${path}.${process.pid}.${randomBytes(4).toString('hex')}.tmp`;
 	writeFileSync(temporary, data);
 	renameSync(temporary, path);
+}
+
+/** The style of an element or a legend entry, with the fields of all roles, e.g. to read one in a test. */
+export function styleOf(item: StateElement | StateLegendEntry | undefined): StateStyle | undefined {
+	return item?.style;
+}
+
+/** The outline of an area or of an area entry of the legend. */
+export function strokeStyleOf(item: StateElement | StateLegendEntry | undefined): StateStyle | undefined {
+	return item && 'strokeStyle' in item ? item.strokeStyle : undefined;
 }

@@ -53,7 +53,7 @@ describe('arrowheads', () => {
 		expect(stateToGeoJSON({ elements: [{ type: 'line', points, style }] }).features[0].properties).not.toHaveProperty(
 			'stroke-arrow-size'
 		);
-		expect(sanitizeStyle(style)).toStrictEqual({ color: '#0000ff' });
+		expect(sanitizeStyle('line', style)).toStrictEqual({ color: '#0000ff' });
 	});
 
 	it('reject a size without an arrowhead in a link', () => {
@@ -108,8 +108,8 @@ describe('arrowheads', () => {
 	});
 
 	it('ignore invalid values in files', () => {
-		expect(sanitizeStyle({ arrowStart: 'star', arrowEnd: 2, arrowSize: 0 })).toBeUndefined();
-		expect(sanitizeStyle({ arrowStart: 'chevron', arrowSize: -1 })).toStrictEqual({ arrowStart: 'chevron' });
+		expect(sanitizeStyle('line', { arrowStart: 'star', arrowEnd: 2, arrowSize: 0 })).toBeUndefined();
+		expect(sanitizeStyle('line', { arrowStart: 'chevron', arrowSize: -1 })).toStrictEqual({ arrowStart: 'chevron' });
 		const doc = stateToGeoJSON({ elements: [{ type: 'line', points }] });
 		doc.features[0].properties = {
 			'stroke-arrow-start': 'star',

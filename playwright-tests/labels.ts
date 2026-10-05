@@ -7,7 +7,8 @@ import {
 	blueAndRedAround,
 	waitForMapIsReady,
 	waitForMapIsIdle,
-	storedState
+	storedState,
+	styleOf
 } from './lib/utils.js';
 
 // The labels of markers: their text, colors, size, font, position, and which are shown.
@@ -133,7 +134,7 @@ test('a label at a corner of its symbol, and a label without symbol on the point
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
 	const positions = page.getByRole('radiogroup', { name: 'Label position' });
-	const labelPosition = async () => (await storedState(page)).elements[0].style?.labelPosition;
+	const labelPosition = async () => styleOf((await storedState(page)).elements[0])?.labelPosition;
 	const middle = (box: { left: number; right: number; top: number; bottom: number }) => ({
 		x: (box.left + box.right) / 2,
 		y: (box.top + box.bottom) / 2
@@ -194,7 +195,7 @@ test('a font for the label of each marker, else the one of the background map', 
 	});
 	const symbolFont = () =>
 		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
-	const fonts = async () => (await storedState(page)).elements.map((e) => e.style?.font);
+	const fonts = async () => (await storedState(page)).elements.map((e) => styleOf(e)?.font);
 	const label = page.getByRole('region', { name: 'Label', exact: true });
 	const background = page.getByRole('region', { name: 'Background labels' });
 	const [x, y] = await project(page, a);

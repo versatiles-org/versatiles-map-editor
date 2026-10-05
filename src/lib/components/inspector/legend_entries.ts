@@ -9,6 +9,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../../editor/index.js';
+import { entryStyleOf } from '../../state/index.js';
 import { completeStyle, ROLE_DEFAULTS, storedStyle, type StyleRole } from '../../style/index.js';
 
 // Editing the legend and its entries in the inspector. The changes are not logged unless said, so
@@ -66,7 +67,7 @@ export function setEntryOutline(doc: MapDocumentInteractive, index: number, visi
 	const entry = legendOf(doc).entries[index];
 	if (!entry) return;
 	const outline = entryStyle(doc, index, 'strokeStyle', 'outline');
-	if (visible && !entry.strokeStyle?.color) {
+	if (visible && !entryStyleOf(entry, 'strokeStyle')?.color) {
 		const fill = parseColor(colorOf(entry));
 		if (fill) outline.color = formatHex({ ...fill, alpha: 1 });
 	}
@@ -76,10 +77,10 @@ export function setEntryOutline(doc: MapDocumentInteractive, index: number, visi
 
 /** The entry with the style (`style` or `strokeStyle`), without it if it is undefined. */
 function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style: StateStyle | undefined) {
-	const result = { ...entry };
+	const result: Record<string, unknown> = { ...entry };
 	if (style) result[key] = style;
 	else delete result[key];
-	return result;
+	return result as unknown as StateLegendEntry;
 }
 
 /**
@@ -88,7 +89,7 @@ function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style:
  * `storedStyle`.
  */
 export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'style' | 'strokeStyle', role: StyleRole) {
-	const get = (): StateStyle => completeStyle(role, legendOf(doc).entries[index]?.[key]);
+	const get = (): StateStyle => completeStyle(role, entryStyleOf(legendOf(doc).entries[index], key));
 	const set = (field: keyof StateStyle, value: unknown) => {
 		const style = storedStyle(role, { ...get(), [field]: value });
 		replaceEntry(doc, index, (entry) => withStyle(entry, key, style));

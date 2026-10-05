@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { LineElement } from './line.js';
 import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner } from './types.js';
-import type { StateElementLine } from '@versatiles/map-state';
+import type { StateElementLine, StateStyle } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
 
 describe('LineElement', () => {
@@ -85,7 +85,8 @@ describe('LineElement', () => {
 				[1, 2],
 				[3, 4]
 			],
-			style: { visible: false, color: '#00ff00' }
+			// any field, as a link can have it
+			style: { visible: false, color: '#00ff00' } as StateStyle
 		});
 		expect(line.layer.getProperties()).toBeDefined();
 		expect(line.getState().style).toStrictEqual({ color: '#00ff00' });

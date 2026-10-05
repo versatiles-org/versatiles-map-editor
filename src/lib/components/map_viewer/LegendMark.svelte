@@ -24,7 +24,9 @@
 	/** Draw the line or the area of an entry, as on the map. */
 	const drawMark: Action<HTMLCanvasElement, StateLegendEntry> = (canvas, entry) => {
 		const draw = (e: StateLegendEntry) =>
-			e.type === 'line' ? drawLine(canvas, e.style) : drawArea(canvas, e.style, e.strokeStyle);
+			e.type === 'line'
+				? drawLine(canvas, e.style)
+				: drawArea(canvas, e.style, 'strokeStyle' in e ? e.strokeStyle : undefined);
 		draw(entry);
 		return { update: draw };
 	};

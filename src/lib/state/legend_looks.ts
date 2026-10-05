@@ -23,9 +23,24 @@ export function legendEntryOf(state: StateElement): StateLegendEntry {
 			: state.type === 'line'
 				? { type: 'line', style: state.style, label: '' }
 				: { type: 'area', style: state.style, strokeStyle: state.strokeStyle, label: '' };
-	if (!entry.style) delete entry.style;
-	if (!entry.strokeStyle) delete entry.strokeStyle;
-	return entry;
+	return withoutEmptyStyles(entry);
+}
+
+/** The entry without its styles that are undefined. */
+export function withoutEmptyStyles<T extends StateLegendEntry>(entry: T): T {
+	const result: Record<string, unknown> = { ...entry };
+	if (!result.style) delete result.style;
+	if (!result.strokeStyle) delete result.strokeStyle;
+	return result as T;
+}
+
+/** The style (`style`) or the outline (`strokeStyle`, only of an area) of an entry. */
+export function entryStyleOf(
+	entry: StateLegendEntry | undefined,
+	key: 'style' | 'strokeStyle'
+): StateStyle | undefined {
+	if (!entry) return undefined;
+	return key === 'style' ? entry.style : 'strokeStyle' in entry ? entry.strokeStyle : undefined;
 }
 
 /** A style with its fields in one order, so equal styles give the same text. */
@@ -33,8 +48,8 @@ const sorted = (style: StateStyle | undefined) =>
 	style && Object.fromEntries(Object.entries(style).sort(([a], [b]) => (a < b ? -1 : 1)));
 
 /** What an entry shows, without its text, e.g. to find entries that look the same. */
-export function lookOf({ type, style, strokeStyle }: StateLegendEntry): string {
-	return JSON.stringify([type, sorted(style), sorted(strokeStyle)]);
+export function lookOf(entry: StateLegendEntry): string {
+	return JSON.stringify([entry.type, sorted(entry.style), sorted(entryStyleOf(entry, 'strokeStyle'))]);
 }
 
 /** The look of an element, see `lookOf`. */
