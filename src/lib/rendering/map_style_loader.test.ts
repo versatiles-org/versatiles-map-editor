@@ -102,7 +102,9 @@ describe('MapStyleLoader', () => {
 			resolver('base:icon-airfield');
 			expect(map.addImage).not.toHaveBeenCalled();
 			resolver('fill-pattern:diagonal:#ff0000');
-			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:diagonal:#ff0000', expect.anything());
+			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:diagonal:#ff0000', expect.anything(), {
+				pixelRatio: 2
+			});
 		});
 	});
 

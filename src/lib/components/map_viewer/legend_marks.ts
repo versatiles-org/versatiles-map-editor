@@ -7,7 +7,7 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import { completeStyle, dashArrays } from '../../style/index.js';
-import { drawArrowHead, fillPatternPixels, headReach, PATTERN_SIZE } from '../../rendering/index.js';
+import { drawArrowHead, fillPatternImage, headReach } from '../../rendering/index.js';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
 export const MARK_WIDTH = 28;
@@ -99,8 +99,8 @@ export function drawLine(canvas: HTMLCanvasElement, style: StateStyle | undefine
 }
 
 /**
- * Draw a small area in the style of a polygon, as on the map: its fill with its pattern, one
- * pixel of the pattern per CSS pixel, and its outline, if it has one.
+ * Draw a small area in the style of a polygon, as on the map: its fill with its pattern, as large
+ * as on the map, and its outline, if it has one.
  */
 export function drawArea(
 	canvas: HTMLCanvasElement,
@@ -112,11 +112,15 @@ export function drawArea(
 	const { color, pattern } = completeStyle('fill', fill);
 	const box = { x: 2, y: 3, width: MARK_WIDTH - 4, height: MARK_HEIGHT - 6 };
 
+	const image = fillPatternImage(pattern, color);
 	const tile = document.createElement('canvas');
-	tile.width = tile.height = PATTERN_SIZE;
-	tile.getContext('2d')?.putImageData(new ImageData(fillPatternPixels(pattern, color), PATTERN_SIZE), 0, 0);
+	[tile.width, tile.height] = [image.width, image.height];
+	tile.getContext('2d')?.putImageData(new ImageData(image.data, image.width), 0, 0);
 	const filling = context.createPattern(tile, 'repeat');
 	if (filling) {
+		// the pixels of the image per CSS pixel, as on the map
+		const scale = 1 / image.pixelRatio;
+		filling.setTransform(new DOMMatrix([scale, 0, 0, scale, 0, 0]));
 		context.fillStyle = filling;
 		context.fillRect(box.x, box.y, box.width, box.height);
 	}
