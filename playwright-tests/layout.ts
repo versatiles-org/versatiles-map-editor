@@ -433,7 +433,8 @@ test('the icons of the editor are on whole pixels', { tag: '@cross-browser' }, a
 
 test('fullscreen with F or from the menu, and back', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.goto('/');
-	await waitForMapIsReady(page);
+	// Firefox warns that fullscreen cancels pending permission requests, which the editor makes none of
+	await waitForMapIsReady(page, { expectedMessages: [/Canceled pending permission requests/] });
 	const isFullscreen = () => page.evaluate(() => document.fullscreenElement !== null);
 
 	await page.keyboard.press('f');

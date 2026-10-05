@@ -192,16 +192,45 @@ const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', '.request-
 // Console messages that a test triggers on purpose, per page
 const expectedConsoleMessages = new WeakMap<Page, RegExp[]>();
 
+// The pages whose test is over: what they log while they close (e.g. fetches that the browser
+// cancels, or that fail when the routes of the request cache are removed) is not the test's
+const finishedPages = new WeakSet<Page>();
+
+/** The test of the page is over: its console messages from now on are not printed. */
+export function finishConsoleMessages(page: Page): void {
+	finishedPages.add(page);
+}
+
 /**
- * Print the console messages of the page, except expected ones. Called once per page by the
- * test fixture, so every message is printed once, from the start.
+ * Print the console messages of the page, except expected ones, with the test they come from.
+ * Called once per page by the test fixture, so every message is printed once, from the start.
  */
-export function printConsoleMessages(page: Page): void {
+export function printConsoleMessages(page: Page, test = ''): void {
 	expectedConsoleMessages.set(page, []);
+	// When a frame goes away, e.g. the preview of the share dialog closes or loads again, or the test
+	// calls page.goto or page.reload, the browser aborts its requests. The errors of the fetches that
+	// are cancelled so are not the test's: they come at most a moment after the abort.
+	let lastAbort = -Infinity;
+	page.on('requestfailed', (request) => {
+		if (/ABORTED/.test(request.failure()?.errorText ?? '')) lastAbort = Date.now();
+	});
 	page.on('console', async (msg) => {
+		if (finishedPages.has(page)) return;
+		if (msg.type() === 'error' || msg.type() === 'warning') {
+			// the abort may be reported after the message
+			await new Promise((resolve) => setTimeout(resolve, 200));
+			if (Date.now() - lastAbort < 1000) return;
+		}
 		let text = msg.text();
+		const values = await Promise.all(msg.args().map(describeValue));
+		// the frame of the message is gone in the meantime: it navigated away (e.g. by page.goto or
+		// page.reload) or was removed (e.g. the preview of the share dialog); its messages are about
+		// the work that was cancelled with it
+		if (values.includes(undefined)) return;
 		// Firefox shows objects, e.g. errors, only as "JSHandle@object", so they are described here
-		if (text.includes('JSHandle@')) text = (await Promise.all(msg.args().map(describeValue))).join(' ');
+		if (text.includes('JSHandle@')) text = values.join(' ');
+		// the description of a value may come after the end of the test
+		if (finishedPages.has(page)) return;
 		if (expectedConsoleMessages.get(page)?.some((pattern) => pattern.test(text))) return;
 		if (text.includes('[JavaScript Warning: "WebGL warning: texImage:')) return;
 		if (text.includes('GPU stall due to ReadPixels')) return;
@@ -210,18 +239,18 @@ export function printConsoleMessages(page: Page): void {
 		if (text.includes('Multiple readback operations using getImageData are faster with the willReadFrequently')) return;
 		// Firefox, when the map measures its container while the page's styles are still loading
 		if (text.includes('Layout was forced before the page was fully loaded')) return;
-		console.log(process.platform + ': ' + text);
+		console.log(`${process.platform} [${test}]: ${text}`);
 	});
 }
 
 /** A logged value as text, e.g. "SyntaxError: Unexpected token" for an error. */
-function describeValue(handle: JSHandle): Promise<string> {
+function describeValue(handle: JSHandle): Promise<string | undefined> {
 	return handle
 		.evaluate((value) => {
 			if (value instanceof Error) return `${value.name}: ${value.message}`;
 			return typeof value === 'object' ? JSON.stringify(value) : String(value);
 		})
-		.catch(() => '(unavailable)'); // e.g. the page was closed
+		.catch(() => undefined); // e.g. the page was closed
 }
 
 /**

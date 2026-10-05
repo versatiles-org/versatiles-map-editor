@@ -651,7 +651,8 @@ test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
 				await page.goto(
 					'/view/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] })
 				);
-				await waitForMapIsReady(page);
+				// at four times the resolution, the canvas of the map is too large for MapLibre
+				await waitForMapIsReady(page, { expectedMessages: [/The canvas is larger than maxCanvasSize/] });
 				const rows = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
 				for (const [i, kind] of ['swatch', 'symbol'].entries()) {
 					const row = rows.nth(i);
