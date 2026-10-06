@@ -3,6 +3,16 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			// Every page is the index.html of a folder, with paths relative to it. Opened without the
+			// slash at the end, e.g. "/editor" instead of "/editor/", as some web servers and CDNs serve
+			// it, those paths would point to the folder above, and the page would not start.
+			if (!location.pathname.endsWith('/') && !location.pathname.split('/').pop().includes('.')) {
+				// not the rest of this page, which would load its scripts from the folder above
+				window.stop();
+				location.replace(location.pathname + '/' + location.search + location.hash);
+			}
+		</script>
 		%sveltekit.head%
 		<style>
 			.wrapper {

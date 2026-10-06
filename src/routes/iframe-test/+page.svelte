@@ -51,7 +51,8 @@
 			}
 		]
 	};
-	const src = 'view/#' + encodeState(state);
+	// the viewer next to this page's folder
+	const src = '../view/#' + encodeState(state);
 </script>
 
 <table>

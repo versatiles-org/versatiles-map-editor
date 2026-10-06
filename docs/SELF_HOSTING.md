@@ -25,7 +25,9 @@ geocoder.
 
 The editor is then at `https://example.org/map-editor/`, and the viewer of shared maps at
 `https://example.org/map-editor/view/`. Links of shared maps look like
-`https://example.org/map-editor/view/#…`, where the part after `#` is the map itself.
+`https://example.org/map-editor/view/#…`, where the part after `#` is the map itself. Opened
+without the slash at the end of its folder, e.g. `https://example.org/map-editor`, as some web
+servers and CDNs serve it, the editor goes on to the address with the slash.
 
 To try it on your computer, run a small web server in the folder, e.g.
 `npx serve versatiles-map-editor` or `python3 -m http.server --directory versatiles-map-editor`,

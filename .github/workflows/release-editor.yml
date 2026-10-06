@@ -74,7 +74,7 @@ jobs:
           mkdir release
           cp -r build release/versatiles-map-editor
           # the page of the Playwright tests of embedded maps, not for a web server of the editor
-          rm release/versatiles-map-editor/iframe-test.html
+          rm -r release/versatiles-map-editor/iframe-test
           (cd release && zip -r -q "versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
 
       # "npm run release" creates the release with its notes right after pushing the tag, so usually
