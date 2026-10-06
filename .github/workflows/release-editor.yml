@@ -54,6 +54,8 @@ jobs:
         run: |
           mkdir release
           cp -r build release/versatiles-map-editor
+          # the page of the Playwright tests of embedded maps, not for a web server of the editor
+          rm release/versatiles-map-editor/iframe-test.html
           (cd release && zip -r -q "versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
 
       - name: Publish the release

@@ -1,6 +1,6 @@
 {
 	"title": "VersaTiles map (.mapjson), format version 1",
-	"description": "A map of the VersaTiles map editor: its view, visible area, properties and elements. See packages/map-state/MAPJSON.md.",
+	"description": "A map of the VersaTiles map editor: its view, visible area, properties and elements. See https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/MAPJSON.md",
 	"$id": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$ref": "#/definitions/MapJSON",

@@ -18,12 +18,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      # No npm cache: a tag runs with the rights of the repository, here also the right to publish, so
+      # it does not use a cache that other runs have written (cache poisoning).
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
           # npm 11.5.1 or newer is needed for trusted publishing
           node-version: 24
-          cache: npm
+          package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
       - name: Check that the tag matches the package version

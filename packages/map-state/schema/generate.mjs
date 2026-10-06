@@ -30,7 +30,7 @@ export function mapJsonSchema() {
 	return {
 		title: 'VersaTiles map (.mapjson), format version 1',
 		description:
-			'A map of the VersaTiles map editor: its view, visible area, properties and elements. See packages/map-state/MAPJSON.md.',
+			'A map of the VersaTiles map editor: its view, visible area, properties and elements. See https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/MAPJSON.md',
 		...schema
 	};
 }
