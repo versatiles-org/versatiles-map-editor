@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * "npm run release": releases what changed since its last release, without questions. Run it on
- * `main`, with everything committed, the GitHub CLI logged in. `--dry-run` shows what it would
- * release, and changes nothing.
+ * "npm run release": releases what changed since its last release. It decides what to release, shows
+ * it, and asks for confirmation before it changes anything. Run it on `main`, with everything
+ * committed, the GitHub CLI logged in. `--dry-run` shows what it would release, and changes
+ * nothing; `--yes` releases it without asking, e.g. where no one can answer.
  *
  * - The editor: the commits since the tag of its version ("v…"). The tag starts the workflow
  *   release-editor.yml, which adds the ZIP archive to the GitHub release.
@@ -19,6 +20,8 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+import { stdin, stdout } from 'node:process';
+import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { generateChangelogEntry, updateChangelog } from '@versatiles/release-tool/dist/lib/changelog.js';
 import { MAP_STATE_PATHS, nextVersion, parseLog } from './release/plan.mjs';
@@ -28,6 +31,7 @@ const PACKAGE_DIR = resolve(ROOT, 'packages/map-state');
 const PACKAGE = '@versatiles/map-state';
 const REPO_URL = 'https://github.com/versatiles-org/versatiles-map-editor';
 const dryRun = process.argv.includes('--dry-run') || process.argv.includes('-n');
+const yes = process.argv.includes('--yes') || process.argv.includes('-y');
 
 /** Stops the release with a message. */
 function fail(message) {
@@ -149,6 +153,17 @@ for (const release of releases) {
 if (dryRun) {
 	console.log('Dry run: nothing was changed');
 	process.exit(0);
+}
+if (!yes) {
+	if (!stdin.isTTY) fail('no one can confirm the release here; release it with --yes');
+	const prompt = createInterface({ input: stdin, output: stdout });
+	// no answer, e.g. the input ended (Ctrl+D), is no
+	const answer = await prompt.question(`Release ${releases.map((r) => r.title).join(' and ')}? [y/N] `).catch(() => '');
+	prompt.close();
+	if (!/^y(es)?$/i.test(answer.trim())) {
+		console.log('Nothing was released');
+		process.exit(0);
+	}
 }
 
 run('npm', ['run', 'check']);

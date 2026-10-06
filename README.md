@@ -198,9 +198,10 @@ its changes. The version is in `package.json`, and the editor shows it as the to
 and in the `generator` of its pages.
 
 To release, run `npm run release` on `main`, with everything committed and the
-[GitHub CLI](https://cli.github.com) logged in. It needs no answers: `scripts/release.mjs` decides
-what to release, from the [conventional commits](https://www.conventionalcommits.org) since the
-release before (`npm run release -- --dry-run` shows it, and changes nothing):
+[GitHub CLI](https://cli.github.com) logged in. `scripts/release.mjs` decides what to release, from
+the [conventional commits](https://www.conventionalcommits.org) since the release before, shows it
+with the changes, and asks for confirmation before it changes anything (`--dry-run` only shows it,
+`--yes` releases it without asking, e.g. `npm run release -- --yes`):
 
 1. The editor is released if a commit since the tag of its version is a feature (`feat`), a bug
    fix (`fix`), faster code (`perf`), a revert or a breaking change (`!`). Documentation, tests,
