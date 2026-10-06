@@ -201,20 +201,24 @@ another web server, it has releases: each is a ZIP archive of the build on the
 its changes. The version is in `package.json`, and the editor shows it as the tooltip of its title
 and in the `generator` of its pages.
 
-To release a new version of the editor:
+To release a new version of the editor, run `npm run release` on `main`, with everything committed
+and the [GitHub CLI](https://cli.github.com) logged in. It uses
+[`vrt release-npm`](https://github.com/versatiles-org/node-release-tool):
 
-1. Raise the version in `package.json` (and with `npm install` in `package-lock.json`). Commit this
-   and push it to `main`.
-2. Tag the commit with `editor-v` and the version, and push the tag, e.g.
-   `git tag editor-v1.1.0 && git push origin editor-v1.1.0`.
-3. The workflow `release-editor.yml` checks that the tag matches the version, runs the unit tests,
-   builds the editor, and publishes `versatiles-map-editor-<version>.zip` in a GitHub release, with
-   the notes since the release before.
+1. It asks for the new version, and suggests one from the
+   [conventional commits](https://www.conventionalcommits.org) since the release before.
+2. It runs `npm run check`, raises the version in `package.json` and `package-lock.json`, and
+   writes the changes into `CHANGELOG.md`.
+3. It commits this, tags it with `v` and the version, e.g. `v3.1.0`, pushes both, and creates the
+   GitHub release with the notes of the changes. The editor is not published to npm.
+4. The tag starts the workflow `release-editor.yml`, which checks that the tag matches the version,
+   runs the unit tests, builds the editor, and adds `versatiles-map-editor-<version>.zip` to the
+   release.
 
 The package `@versatiles/map-state` has releases of its own, with its own
-[changelog](packages/map-state/CHANGELOG.md), see above. The tags `v2.x.x` come from the history of
-[`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte), from which the
-editor was extracted.
+[changelog](packages/map-state/CHANGELOG.md) and tags, see above. The editor continues the
+versions of [`node-versatiles-svelte`](https://github.com/versatiles-org/node-versatiles-svelte), from
+which it was extracted: its tags `v1.x.x` and `v2.x.x` come from there, and release no editor.
 
 ## License
 

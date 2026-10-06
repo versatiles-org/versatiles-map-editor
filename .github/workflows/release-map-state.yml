@@ -1,7 +1,7 @@
 name: Release @versatiles/map-state
 
 # Publishes the package when a tag like "map-state-v1.2.3" is pushed. The tag must match the
-# version in packages/map-state/package.json. ("v1.2.3" tags belong to the editor's history.)
+# version in packages/map-state/package.json. ("v1.2.3" tags release the editor.)
 on:
   push:
     tags: ['map-state-v*']

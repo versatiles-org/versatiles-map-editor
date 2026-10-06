@@ -1,6 +1,6 @@
 {
   "name": "versatiles-map-editor",
-  "version": "1.0.0",
+  "version": "2.2.2",
   "description": "Standalone, embeddable map editor for VersaTiles.",
   "license": "MIT",
   "private": true,
@@ -24,7 +24,9 @@
     "format": "prettier --write --log-level warn .",
     "format:check": "prettier --check .",
     "lint": "eslint --color . && stylelint --color \"**/*.{css,scss,svelte}\"",
+    "prepack": "npm run build",
     "preview": "vite preview",
+    "release": "vrt release-npm",
     "test-coverage": "vitest run --coverage --testTimeout 10000",
     "test-playwright": "playwright test",
     "test-playwright-all": "ALL_TESTS=1 playwright test",
