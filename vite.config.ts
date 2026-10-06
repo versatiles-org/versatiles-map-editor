@@ -141,7 +141,7 @@ export default defineConfig({
 	},
 	test: {
 		environment: 'happy-dom',
-		include: ['src/**/*.{test,spec}.{js,ts}', 'packages/*/src/**/*.{test,spec}.{js,ts}'],
+		include: ['src/**/*.{test,spec}.{js,ts}', 'packages/*/src/**/*.{test,spec}.{js,ts}', 'scripts/**/*.test.mjs'],
 		setupFiles: ['src/vitest.setup.ts'],
 		coverage: {
 			provider: 'v8',
