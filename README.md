@@ -153,9 +153,10 @@ The file format of the editor, `.mapjson`, is explained in
 To release a new version of the package:
 
 1. Raise the version in `packages/map-state/package.json` and move the entries under
-   _Unreleased_ in `packages/map-state/CHANGELOG.md` to it. Commit this and push it to `main`.
-2. Tag the commit with `map-state-v` and the version, and push the tag, e.g.
-   `git tag map-state-v1.1.0 && git push origin map-state-v1.1.0`.
+   _Unreleased_ in `packages/map-state/CHANGELOG.md` to it. Commit this.
+2. Run `npm run release` (see [Versions](#versions)), which releases the editor and then, since the
+   version of the package is not on npm yet, tags the release commit with `map-state-v` and the
+   version, e.g. `map-state-v1.1.0`, and pushes the tag.
 3. The workflow `release-map-state.yml` checks that the tag matches the version, runs the tests of
    the package and publishes it to npm with provenance.
 
@@ -202,7 +203,8 @@ its changes. The version is in `package.json`, and the editor shows it as the to
 and in the `generator` of its pages.
 
 To release a new version of the editor, run `npm run release` on `main`, with everything committed
-and the [GitHub CLI](https://cli.github.com) logged in. It uses
+and the [GitHub CLI](https://cli.github.com) logged in (`npm run release -- --dry-run` shows what it
+would do). It runs `scripts/release.sh`, which uses
 [`vrt release-npm`](https://github.com/versatiles-org/node-release-tool):
 
 1. It asks for the new version, and suggests one from the
@@ -213,7 +215,10 @@ and the [GitHub CLI](https://cli.github.com) logged in. It uses
    GitHub release with the notes of the changes. The editor is not published to npm.
 4. The tag starts the workflow `release-editor.yml`, which checks that the tag matches the version,
    runs the unit tests, builds the editor, and adds `versatiles-map-editor-<version>.zip` to the
-   release.
+   release. If no workflow started, e.g. as more than three tags were pushed at once, it can be
+   started by hand for the tag: `gh workflow run release-editor.yml -f tag=v3.1.0`.
+5. If the version of `@versatiles/map-state` is not on npm yet, it releases the package too, see
+   above.
 
 The package `@versatiles/map-state` has releases of its own, with its own
 [changelog](packages/map-state/CHANGELOG.md) and tags, see above. The editor continues the

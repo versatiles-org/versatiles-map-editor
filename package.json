@@ -26,7 +26,7 @@
     "lint": "eslint --color . && stylelint --color \"**/*.{css,scss,svelte}\"",
     "prepack": "npm run build",
     "preview": "vite preview",
-    "release": "vrt release-npm",
+    "release": "scripts/release.sh",
     "test-coverage": "vitest run --coverage --testTimeout 10000",
     "test-playwright": "playwright test",
     "test-playwright-all": "ALL_TESTS=1 playwright test",
