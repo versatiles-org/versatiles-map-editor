@@ -34,14 +34,14 @@
     "upgrade": "vrt deps-upgrade"
   },
   "dependencies": {
-    "@versatiles/style": "^6.1.1",
+    "@versatiles/style": "^6.2.0",
     "maplibre-gl": "^6.12.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@sveltejs/adapter-static": "^4.0.0",
-    "@sveltejs/kit": "^3.0.0",
+    "@sveltejs/kit": "^3.0.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^26.6.4",
@@ -68,8 +68,8 @@
     "svelte-check": "^4.7.6",
     "ts-json-schema-generator": "^2.9.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.0",
-    "vite": "^8.3.2",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^8.3.3",
     "vitest": "^5.0.3"
   },
   "allowScripts": {
