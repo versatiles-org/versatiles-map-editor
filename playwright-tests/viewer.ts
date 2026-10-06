@@ -8,6 +8,7 @@ import {
 	waitForMapIsIdle,
 	waitForMapIsReady,
 	type MapWindow,
+	PREVIEW_TIMEOUT,
 	sidebar
 } from './lib/utils.js';
 
@@ -455,10 +456,12 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	const preview = page.frameLocator('iframe[title="Preview of the shared map"]');
 	await expect(preview.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 	await expect
-		.poll(() =>
-			page
-				.locator('iframe[title="Preview of the shared map"]')
-				.evaluate((f: HTMLIFrameElement) => (f.contentWindow as unknown as MapWindow).map?.loaded() === true)
+		.poll(
+			() =>
+				page
+					.locator('iframe[title="Preview of the shared map"]')
+					.evaluate((f: HTMLIFrameElement) => (f.contentWindow as unknown as MapWindow).map?.loaded() === true),
+			{ timeout: PREVIEW_TIMEOUT }
 		)
 		.toBe(true);
 

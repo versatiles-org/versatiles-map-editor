@@ -254,6 +254,13 @@ function describeValue(handle: JSHandle): Promise<string | undefined> {
 }
 
 /**
+ * How long a test waits for the map of a preview to load: a second map, over the editor. In CI,
+ * Firefox renders on the CPU (the macOS runners have no GPU), where it took up to 25 s, and often
+ * more than the 5 to 10 s the tests waited before; locally, 2 to 5 s.
+ */
+export const PREVIEW_TIMEOUT = 30_000;
+
+/**
  * Wait until `count` maps (in the page and its iframes) are ready. The page sets `window.mapReady`,
  * which is polled, so the moment cannot be missed, e.g. when it happens before `page.goto` returns.
  * `expectedMessages` are console messages that the test triggers on purpose, which are not printed.

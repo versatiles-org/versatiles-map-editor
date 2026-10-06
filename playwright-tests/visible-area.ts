@@ -1,7 +1,15 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
-import { menuItem, project, storedState, waitForMapIsReady, type MapWindow, sidebar } from './lib/utils.js';
+import {
+	menuItem,
+	project,
+	storedState,
+	waitForMapIsReady,
+	type MapWindow,
+	PREVIEW_TIMEOUT,
+	sidebar
+} from './lib/utils.js';
 
 // The visible area (frame) of a map: what a shared or embedded map shows completely.
 
@@ -204,6 +212,8 @@ test('the share dialog tells that an empty map without a visible area shows the 
 });
 
 test('the preview of the share dialog shows the frame completely in all three aspect ratios', async ({ page }) => {
+	// the preview loads three times, which may take longer than the timeout of a test (see PREVIEW_TIMEOUT)
+	test.slow();
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
@@ -240,7 +250,7 @@ test('the preview of the share dialog shows the frame completely in all three as
 					const fills = shown.right - shown.left > shown.width - 50 || shown.bottom - shown.top > shown.height - 50;
 					return inside && fills;
 				},
-				{ message: ratio, timeout: 10_000 }
+				{ message: ratio, timeout: PREVIEW_TIMEOUT }
 			)
 			.toBe(true);
 	}
