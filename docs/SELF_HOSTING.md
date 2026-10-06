@@ -73,9 +73,9 @@ Every field is optional. A field with an invalid value gets its default, and the
 
 | Field                   | What it does                                                                                                                                                                         | Default                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
-| `tileServer`            | The tile server of the background map, the satellite imagery, the symbols and the fonts (see below).                                                                                 | `"https://tiles.versatiles.org"`         |
+| `tileServer`            | The tile server of the background map, the satellite imagery, the symbols and the fonts (see below), absolute or relative.                                                           | `"https://tiles.versatiles.org"`         |
 | `landcover`             | Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The vector tiles must have it (see below); `false` for tiles that do not.                           | `true`                                   |
-| `geocoder`              | The geocoder of the address search (see below).                                                                                                                                      | `"https://geocode.versatiles.org/api"`   |
+| `geocoder`              | The geocoder of the address search (see below), absolute or relative.                                                                                                                | `"https://geocode.versatiles.org/api"`   |
 | `startView`             | What a new map shows: `[west, south, east, north]` in degrees.                                                                                                                       | the country of the user*, else the world |
 | `startBackground`       | The background of a new map, as in `.mapjson` files: `{ "builder": "osm" or "satellite", "options": { … } }` with the options of `@versatiles/style`.                                | the vector map                           |
 | `defaultLanguage`       | The language of the labels of the background of a new map, unless `startBackground` sets one: `"user"` (of the browser), `"local"` (local names) or a code, e.g. `"de"`.             | `"user"`                                 |
@@ -129,7 +129,18 @@ The tile server must offer the same as `tiles.versatiles.org`, from its address 
 - `assets/sprites/index.json` and the sprite sheets it names, for the symbols of markers;
 - `assets/glyphs/font_families.json` and the glyphs of the fonts, for the labels.
 
-On another domain than the editor, it must allow requests from the editor's pages (CORS). A
+Its address can be relative to the configuration file, which the browser resolves, so the editor
+does not need to know its own address, e.g. behind a CDN. With the editor at
+`https://maps.example.org/editor/`:
+
+| `tileServer`      | Is                                      |
+| ----------------- | --------------------------------------- |
+| `"/"`             | `https://maps.example.org`              |
+| `"/tiles-server"` | `https://maps.example.org/tiles-server` |
+| `"../tiles"`      | `https://maps.example.org/tiles`        |
+
+The same holds for the `geocoder`. On another domain than the editor, the tile server must allow
+requests from the editor's pages (CORS). A
 [VersaTiles](https://versatiles.org) server with the VersaTiles tiles and its frontend assets offers
 all of this; see the [VersaTiles documentation](https://docs.versatiles.org) for running your own.
 

@@ -23,7 +23,8 @@ export const DEFAULT_GEOCODER = 'https://geocode.versatiles.org/api';
 export interface ConfigFile {
 	/**
 	 * The tile server: vector tiles, satellite imagery, sprites and glyphs, like
-	 * tiles.versatiles.org. Without a slash at the end.
+	 * tiles.versatiles.org. Absolute, or relative to the configuration file, e.g. "/" for the host
+	 * of the editor; the checked file has it absolute, without a slash at the end.
 	 */
 	tileServer?: string;
 	/**
@@ -31,7 +32,7 @@ export interface ConfigFile {
 	 * vector tiles of the tile server must have, like those of tiles.versatiles.org.
 	 */
 	landcover?: boolean;
-	/** The URL of the geocoder of the address search, like geocode.versatiles.org/api. */
+	/** The URL of the geocoder of the address search, like geocode.versatiles.org/api; also relative, as `tileServer`. */
 	geocoder?: string;
 	/** What a new map shows: [west, south, east, north]. Without it, the country of the user, if known. */
 	startView?: Bounds;
@@ -93,8 +94,9 @@ let ready: Promise<ConfigFile> | undefined;
  */
 export function configReady(): Promise<ConfigFile> {
 	// the root of the app, also in a subfolder, also from the viewer in view/
-	ready ??= loadFile(new URL(asset(CONFIG_URL), location.href).href).then((file) => {
-		const checked = checkConfig(file ?? {});
+	const url = new URL(asset(CONFIG_URL), location.href).href;
+	ready ??= loadFile(url).then((file) => {
+		const checked = checkConfig(file ?? {}, url);
 		config.current = buildConfig(checked);
 		return checked;
 	});
@@ -107,7 +109,7 @@ export function configReady(): Promise<ConfigFile> {
  * (valid) file, the defaults. `url`: another file than the one next to the page, e.g. in tests.
  */
 export async function loadConfig(url?: string): Promise<void> {
-	const file = url ? checkConfig((await loadFile(url)) ?? {}) : await configReady();
+	const file = url ? checkConfig((await loadFile(url)) ?? {}, url) : await configReady();
 	const fonts = await loadFonts(buildConfig(file).tileServer);
 	config.current = buildConfig(file, fonts);
 }
@@ -152,15 +154,19 @@ const FIELDS: (keyof ConfigFile)[] = [
 
 /**
  * Check the file and merge it with the defaults. `fonts`: the faces of the tile server, if its list
- * could be loaded. A field that is invalid gets its default, with a warning in the console, so one
+ * could be loaded. `url`: the address of the file, which relative URLs in it are resolved against.
+ * A field that is invalid gets its default, with a warning in the console, so one
  * mistake does not discard the whole file.
  */
-export function resolveConfig(file: unknown, fonts?: FontFace[]): EditorConfig {
-	return buildConfig(checkConfig(file), fonts);
+export function resolveConfig(file: unknown, fonts?: FontFace[], url?: string): EditorConfig {
+	return buildConfig(checkConfig(file, url), fonts);
 }
 
-/** The valid fields of the file, with a warning in the console for each other one. */
-function checkConfig(file: unknown): ConfigFile {
+/**
+ * The valid fields of the file, with a warning in the console for each other one. `url`: the
+ * address of the file, which relative URLs in it are resolved against.
+ */
+function checkConfig(file: unknown, url?: string): ConfigFile {
 	if (typeof file !== 'object' || file === null || Array.isArray(file)) {
 		console.warn('The editor configuration is not an object and is ignored');
 		file = {};
@@ -180,6 +186,7 @@ function checkConfig(file: unknown): ConfigFile {
 		}
 	}
 
+	const checkUrl = (value: unknown) => resolveUrl(value, url);
 	const checked: ConfigFile = {
 		tileServer: read('tileServer', checkUrl),
 		landcover: read('landcover', checkBoolean),
@@ -231,17 +238,23 @@ function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
 	};
 }
 
-/** An absolute http(s) URL, without a slash at its end, e.g. "https://tiles.example.org". */
-function checkUrl(value: unknown): string {
-	if (typeof value !== 'string') throw new Error('must be a URL like "https://example.org"');
+/**
+ * An absolute http(s) URL, without a slash at its end, e.g. "https://tiles.example.org". A relative
+ * URL, e.g. "/" or "../tiles", is resolved against `base`, the address of the configuration file,
+ * so a server need not know its own address, e.g. behind a CDN.
+ */
+function resolveUrl(value: unknown, base: string | undefined): string {
+	if (typeof value !== 'string' || value === '') {
+		throw new Error('must be a URL like "https://example.org", or one relative to the configuration file, like "/"');
+	}
 	let url: URL;
 	try {
-		url = new URL(value);
+		url = new URL(value, base);
 	} catch {
-		throw new Error(`"${value}" is not a URL like "https://example.org"`);
+		throw new Error(`"${value}" is not a URL like "https://example.org", or one relative to the configuration file`);
 	}
 	if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`"${value}" is not an http(s) URL`);
-	return value.replace(/\/+$/, '');
+	return url.href.replace(/\/+$/, '');
 }
 
 function checkStartView(value: unknown): Bounds {

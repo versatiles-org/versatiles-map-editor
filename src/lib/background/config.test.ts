@@ -121,12 +121,31 @@ describe('resolveConfig', () => {
 		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"landcover"'), expect.anything());
 	});
 
+	it('resolves relative URLs of the servers against the address of the file', () => {
+		const file = 'https://maps.example.org/editor/map-editor.config.jsonc';
+		const tileServer = (value: string) => resolveConfig({ tileServer: value }, undefined, file).tileServer;
+		// the host of the editor, e.g. behind a CDN, where the server does not know it
+		expect(tileServer('/')).toBe('https://maps.example.org');
+		expect(tileServer('/tiles-server/')).toBe('https://maps.example.org/tiles-server');
+		expect(tileServer('../tiles')).toBe('https://maps.example.org/tiles');
+		expect(tileServer('tiles')).toBe('https://maps.example.org/editor/tiles');
+		expect(tileServer('//tiles.example.org')).toBe('https://tiles.example.org');
+		// absolute ones as they are
+		expect(tileServer('http://localhost:8080/')).toBe('http://localhost:8080');
+		const geocoder = resolveConfig({ geocoder: '/geocoder/api' }, undefined, file).geocoder;
+		expect(geocoder).toBe('https://maps.example.org/geocoder/api');
+	});
+
 	it('ignores servers that are no http(s) URLs', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-		for (const tileServer of ['tiles.example.org', 'ftp://tiles.example.org', 42, '']) {
+		// relative ones only with the address of the file
+		for (const tileServer of ['tiles.example.org', '/', 'ftp://tiles.example.org', 42, '']) {
 			expect(resolveConfig({ tileServer }).tileServer).toBe(DEFAULT_TILE_SERVER);
 		}
-		expect(warn).toHaveBeenCalledTimes(4);
+		expect(resolveConfig({ tileServer: '' }, undefined, 'https://example.org/c.jsonc').tileServer).toBe(
+			DEFAULT_TILE_SERVER
+		);
+		expect(warn).toHaveBeenCalledTimes(6);
 	});
 
 	it('takes the start view, and ignores an invalid one', () => {
@@ -265,6 +284,13 @@ describe('loadConfig', () => {
 		await loadConfig('https://example.org/map-editor.config.jsonc');
 		expect(fetchFontFaces).toHaveBeenLastCalledWith({ base: 'https://tiles.example.org' });
 		expect(config.current.tileServer).toBe('https://tiles.example.org');
+	});
+
+	it('resolves relative URLs against the address of the file it loads', async () => {
+		respond(new Response('{ "tileServer": "/" }'));
+		await loadConfig('https://maps.example.org/editor/map-editor.config.jsonc');
+		expect(config.current.tileServer).toBe('https://maps.example.org');
+		expect(fetchFontFaces).toHaveBeenLastCalledWith({ base: 'https://maps.example.org' });
 	});
 
 	it('loads the file next to the page once, for the editor and the viewer', async () => {

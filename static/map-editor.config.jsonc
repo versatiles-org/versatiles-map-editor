@@ -5,6 +5,10 @@
 {
 	// ---- Servers ----------------------------------------------------------------------------
 
+	// Their addresses are absolute, or relative to this file, which the browser resolves: e.g.
+	// "/" is the host of the editor, "../geocoder/api" a folder next to the editor's. So this file
+	// works under any address, e.g. behind a CDN.
+
 	// The tile server: vector tiles, satellite imagery, symbols (sprites) and fonts (glyphs).
 	// It must serve the same as tiles.versatiles.org: Shortbread vector tiles and its assets/.
 	// Default: "https://tiles.versatiles.org"
