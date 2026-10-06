@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-10-06
+
+### Features
+
+- **tests:** introduce PREVIEW_TIMEOUT constant for consistent timeout handling in map preview tests ([52ce55e](https://github.com/versatiles-org/versatiles-map-editor/commit/52ce55eac35c40e6f23326d93e4fd966522b0cb4))
+- **release:** enhance release workflow with manual trigger and tag validation ([93756ee](https://github.com/versatiles-org/versatiles-map-editor/commit/93756ee2a54d3a6505b1a6e2ed40f24c8b0345b2))
+- **release:** update release process to use custom script for npm releases ([b83e9b9](https://github.com/versatiles-org/versatiles-map-editor/commit/b83e9b91a9f6f3df5541d76b5ba9fa24b4e97b99))
+- **config:** resolve relative URLs of the tile server and geocoder against the address of the configuration file ([fbf5fda](https://github.com/versatiles-org/versatiles-map-editor/commit/fbf5fda095c3b9b72395ca95282cc6fb09a79e7f))
+
+### Build System
+
+- **release:** release the editor and @versatiles/map-state automatically, by the conventional commits since their last release ([a1b1ca4](https://github.com/versatiles-org/versatiles-map-editor/commit/a1b1ca45a5bf5a7ce40c2e458b575b01db32ab1c))
+- **release:** ask for confirmation before releasing, unless --yes ([fd980b6](https://github.com/versatiles-org/versatiles-map-editor/commit/fd980b67c65356b34696a3eab517ee72384068a0))
+
 ## [3.0.0] - 2026-10-06
 
 ### Breaking Changes
