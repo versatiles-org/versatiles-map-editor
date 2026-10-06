@@ -113,6 +113,14 @@ describe('resolveConfig', () => {
 		expect(resolveConfig({})).toMatchObject({ tileServer: DEFAULT_TILE_SERVER, geocoder: DEFAULT_GEOCODER });
 	});
 
+	it('shows the landcover of low zoom levels, unless it is turned off', () => {
+		expect(resolveConfig({}).landcover).toBe(true);
+		expect(resolveConfig({ landcover: false }).landcover).toBe(false);
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		expect(resolveConfig({ landcover: 'no' }).landcover).toBe(true);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"landcover"'), expect.anything());
+	});
+
 	it('ignores servers that are no http(s) URLs', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		for (const tileServer of ['tiles.example.org', 'ftp://tiles.example.org', 42, '']) {
@@ -191,6 +199,7 @@ describe('the default configuration file', () => {
 		const uncommented = text.replace(/^(\s*)\/\/ ("\w+":.*)$/gm, '$1$2');
 		expect(Object.keys(parseJsonc(uncommented) as object)).toStrictEqual([
 			'tileServer',
+			'landcover',
 			'geocoder',
 			'startView',
 			'startBackground',

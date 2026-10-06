@@ -12,15 +12,17 @@ describe('src/lib/background/map_style.ts', () => {
 
 	describe('getMapStyle', () => {
 		const fixed = { urls: { base: 'https://tiles.versatiles.org' }, projection: 'mercator' };
+		// the vector map, with the landcover of low zoom levels by default
+		const vector = { features: { landcover: true }, ...fixed };
 
 		it('builds the default background with labels in the browser language', () => {
 			getMapStyle();
-			expect(osm).toHaveBeenCalledWith({ text: { language: 'user' }, ...fixed });
+			expect(osm).toHaveBeenCalledWith({ text: { language: 'user' }, ...vector });
 		});
 
 		it('builds the stored background', () => {
 			getMapStyle({ builder: 'osm', options: { theme: 'gray' } });
-			expect(osm).toHaveBeenCalledWith({ theme: 'gray', ...fixed });
+			expect(osm).toHaveBeenCalledWith({ theme: 'gray', ...vector });
 			getMapStyle({ builder: 'satellite', options: { osmOverlay: false } });
 			expect(satellite).toHaveBeenCalledWith({ osmOverlay: false, ...fixed });
 		});
@@ -45,7 +47,23 @@ describe('src/lib/background/map_style.ts', () => {
 			config.current = { ...DEFAULT_CONFIG, tileServer: 'https://tiles.example.org' };
 			try {
 				getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.com' } } });
-				expect(osm).toHaveBeenLastCalledWith({ ...fixed, urls: { base: 'https://tiles.example.org' } });
+				expect(osm).toHaveBeenLastCalledWith({ ...vector, urls: { base: 'https://tiles.example.org' } });
+			} finally {
+				config.current = DEFAULT_CONFIG;
+			}
+		});
+
+		it('shows the landcover of low zoom levels as the configuration says, not the options', () => {
+			const landcoverFrom0 = (style: ReturnType<typeof getMapStyle>) =>
+				style.layers.filter((layer) => layer.id.startsWith('land-') && layer.minzoom === undefined).length;
+			const withLandcover = getMapStyle({ builder: 'osm', options: { features: { landcover: false } } });
+			expect(osm).toHaveBeenLastCalledWith(vector);
+			config.current = { ...DEFAULT_CONFIG, landcover: false };
+			try {
+				const without = getMapStyle({ builder: 'osm', options: { features: { landcover: true } } });
+				expect(osm).toHaveBeenLastCalledWith({ ...fixed, features: { landcover: false } });
+				// the fills of the landcover from zoom level 0
+				expect(landcoverFrom0(withLandcover)).toBeGreaterThan(landcoverFrom0(without));
 			} finally {
 				config.current = DEFAULT_CONFIG;
 			}
@@ -53,14 +71,14 @@ describe('src/lib/background/map_style.ts', () => {
 
 		it('never takes the tile server from the options', () => {
 			getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.org' }, projection: 'globe' } });
-			expect(osm).toHaveBeenCalledWith(fixed);
+			expect(osm).toHaveBeenCalledWith(vector);
 		});
 
 		it('falls back to the default background for invalid options', () => {
 			const error = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const style = getMapStyle({ builder: 'osm', options: { theme: 'no such theme' } });
 			expect(error).toHaveBeenCalled();
-			expect(osm).toHaveBeenLastCalledWith({ text: { language: 'user' }, ...fixed });
+			expect(osm).toHaveBeenLastCalledWith({ text: { language: 'user' }, ...vector });
 			expect(style.layers.length).toBeGreaterThan(0);
 		});
 	});

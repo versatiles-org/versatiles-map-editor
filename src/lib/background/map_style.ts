@@ -19,20 +19,23 @@ function overlayOf(options: SatelliteOptions): SatelliteOptions['osmOverlay'] {
 /**
  * The style of the background map. The tile server (of the configuration, see `configReady`) and the
  * projection are set by the editor, never by the (shared) options, so a map cannot load tiles or
- * fonts from other servers; so is the
- * way the overlay of the imagery is drawn (see `overlayOf`).
+ * fonts from other servers; so are the
+ * way the overlay of the imagery is drawn (see `overlayOf`), and whether the vector map shows the
+ * landcover of low zoom levels, which depends on the tiles of the server.
  */
 export function getMapStyle(background: StateBackground = DEFAULT_BACKGROUND): StyleSpecification {
 	const fixed = { urls: { base: config.current.tileServer }, projection: 'mercator' as const };
+	const { landcover } = config.current;
+	const vector = (options: OsmOptions) => osm({ ...options, features: { ...options.features, landcover }, ...fixed });
 	try {
 		if (background.builder === 'satellite') {
 			const options = background.options as SatelliteOptions;
 			return satellite({ ...options, osmOverlay: overlayOf(options), ...fixed });
 		}
-		return osm({ ...(background.options as OsmOptions), ...fixed });
+		return vector(background.options as OsmOptions);
 	} catch (error) {
 		// e.g. options of a newer version of @versatiles/style
 		console.error('Invalid background map options', error);
-		return osm({ ...(DEFAULT_BACKGROUND.options as OsmOptions), ...fixed });
+		return vector(DEFAULT_BACKGROUND.options as OsmOptions);
 	}
 }

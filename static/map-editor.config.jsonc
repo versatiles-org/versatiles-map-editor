@@ -10,6 +10,12 @@
 	// Default: "https://tiles.versatiles.org"
 	// "tileServer": "https://tiles.versatiles.org",
 
+	// Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The vector
+	// tiles of the tile server must have it, like those of tiles.versatiles.org; turn it off for
+	// tiles that do not.
+	// Default: true
+	// "landcover": true,
+
 	// The geocoder of the address search, with the API of Photon.
 	// Default: "https://geocode.versatiles.org/api"
 	// "geocoder": "https://geocode.versatiles.org/api",
