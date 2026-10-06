@@ -4,9 +4,18 @@ name: Release the editor
 # ZIP archive to its GitHub release, for others to run on their own web server. The tag must match
 # the version in package.json. ("map-state-v…" tags release the package; the tags v1.x and v2.x
 # come from the history of node-versatiles-svelte, before the editor was extracted.)
+#
+# It can also be started by hand for a tag, e.g. when the push of the tag started no workflow:
+# GitHub starts none for a push of more than three tags at once.
 on:
   push:
     tags: ['v*', '!v1.*', '!v2.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag of the release, e.g. "v3.0.0"'
+        required: true
+        type: string
 
 jobs:
   release:
@@ -15,9 +24,22 @@ jobs:
     permissions:
       # to create the release
       contents: write
+    env:
+      # the pushed tag, or the one given by hand; only used through the environment, as it is typed
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
+      - name: Check the tag
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::\"$TAG\" is no tag like v3.0.0"
+            exit 1
+          fi
+
+      # the code of the tag, also when started by hand from another branch
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ env.TAG }}
 
       # No npm cache: a tag runs with the rights of the repository, so it does not use a cache that
       # other runs have written (cache poisoning).
@@ -30,8 +52,8 @@ jobs:
       - name: Check that the tag matches the version
         run: |
           version="$(node -p "require('./package.json').version")"
-          if [ "${GITHUB_REF_NAME#v}" != "$version" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match version $version in package.json"
+          if [ "${TAG#v}" != "$version" ]; then
+            echo "::error::Tag $TAG does not match version $version in package.json"
             exit 1
           fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
@@ -61,8 +83,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if ! gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release create "$GITHUB_REF_NAME" --verify-tag --notes ""
+          if ! gh release view "$TAG" > /dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --notes ""
           fi
-          gh release edit "$GITHUB_REF_NAME" --title "Map Editor $VERSION"
-          gh release upload "$GITHUB_REF_NAME" "release/versatiles-map-editor-$VERSION.zip" --clobber
+          gh release edit "$TAG" --title "Map Editor $VERSION"
+          gh release upload "$TAG" "release/versatiles-map-editor-$VERSION.zip" --clobber
