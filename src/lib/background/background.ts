@@ -16,10 +16,8 @@ export interface BackgroundSettings {
 	streets: boolean;
 	/** Whether the satellite map shows the borders of countries and states. The vector map always does. */
 	borders: boolean;
-	/** Color preset of the vector map, e.g. "gray", light or `dark`. */
+	/** The theme of the vector map, e.g. "gray", "gray-dark" or "positrino". */
 	theme: string;
-	/** Whether the vector map has the dark theme of its color preset, e.g. "gray-dark". */
-	dark: boolean;
 	font: string;
 	/** "user" (browser language), "local" (local names) or a language code. */
 	language: string;
@@ -55,23 +53,15 @@ export const DEFAULT_COLORS: MapColors = { saturation: 0, black: 0, white: 1 };
 /** The editor's default: the vector map with labels in the browser language. */
 export const DEFAULT_BACKGROUND: StateBackground = { builder: 'osm', options: { text: { language: 'user' } } };
 
-export const THEMES = [
-	{ id: 'colorful', name: 'Colorful' },
-	{ id: 'natural', name: 'Natural' },
-	{ id: 'muted', name: 'Muted' },
-	{ id: 'gray', name: 'Gray' },
-	{ id: 'toner', name: 'Toner' }
-];
-
-/** The suffix of the dark theme of a color preset of `@versatiles/style`, e.g. "gray-dark". */
-const DARK_SUFFIX = '-dark';
-
-/** The color preset of a theme and whether it is its dark theme. Unknown themes are kept as they are. */
-function splitTheme(theme: string): { theme: string; dark: boolean } {
-	const preset = theme.slice(0, -DARK_SUFFIX.length);
-	if (theme.endsWith(DARK_SUFFIX) && THEMES.some((t) => t.id === preset)) return { theme: preset, dark: true };
-	return { theme, dark: false };
-}
+/**
+ * All themes of `@versatiles/style`, in its order, so a dark theme follows its light one: the color
+ * presets, e.g. "gray" and "gray-dark", and the lookalikes of other maps, e.g. "positrino". The name
+ * is the id in words, e.g. "Gray Dark".
+ */
+export const THEMES: { id: string; name: string }[] = osm.palettes.map((id) => ({
+	id,
+	name: id.replace(/(^|-)(\w)/g, (_, dash: string, letter: string) => (dash ? ' ' : '') + letter.toUpperCase())
+}));
 
 // Languages of the names in the OSM tiles of tiles.versatiles.org
 export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
@@ -119,7 +109,7 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 		base,
 		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
 		borders: background.builder !== 'satellite' || (!imageryAlone && layers.boundaries !== false),
-		...splitTheme(typeof overlay.theme === 'string' ? overlay.theme : 'colorful'),
+		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
 		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
 		language: typeof text.language === 'string' ? text.language : 'local',
 		labels,
@@ -348,12 +338,7 @@ function setText(overlay: Options, change: Partial<BackgroundSettings>) {
 	if (!isObject(overlay.text)) overlay.text = {};
 	const text = overlay.text as Options;
 
-	if (change.theme || change.dark !== undefined) {
-		// the color preset and light or dark: a change of one keeps the other
-		const current = splitTheme(typeof overlay.theme === 'string' ? overlay.theme : 'colorful');
-		const dark = change.dark ?? current.dark;
-		overlay.theme = (change.theme || current.theme) + (dark ? DARK_SUFFIX : '');
-	}
+	if (change.theme) overlay.theme = change.theme;
 
 	if (change.font) text.font = change.font;
 	if (change.labelSize !== undefined) text.scale = change.labelSize;

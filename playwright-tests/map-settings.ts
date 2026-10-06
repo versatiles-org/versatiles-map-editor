@@ -73,7 +73,7 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(mapContent).toStrictEqual(deselected);
 
 	// the dark theme of the same color preset: a dark background, and light again
-	const mode = page.getByRole('radiogroup', { name: 'Mode' });
+	const theme = page.getByRole('combobox', { name: 'Theme' });
 	// the mean of the channels of the background color, e.g. "rgb(39,39,39)", from 0 to 255
 	const lightness = () =>
 		page.evaluate(() => {
@@ -83,12 +83,12 @@ test('styling the background map', async ({ page }) => {
 			const channels = color?.match(/\d+/g)?.slice(0, 3).map(Number) ?? [];
 			return channels.reduce((sum, value) => sum + value, 0) / channels.length;
 		});
-	await mode.getByRole('radio', { name: 'Dark' }).check();
+	await theme.selectOption('Gray Dark');
 	await expect
 		.poll(background)
 		.toStrictEqual({ builder: 'osm', options: { theme: 'gray-dark', text: { language: 'user' } } });
 	await expect.poll(lightness).toBeLessThan(80);
-	await mode.getByRole('radio', { name: 'Light' }).check();
+	await theme.selectOption('Gray');
 	await expect
 		.poll(background)
 		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });

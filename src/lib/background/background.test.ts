@@ -5,8 +5,22 @@ import {
 	getSettings,
 	minimizeBackground,
 	sameBackground,
-	pushLevels
+	pushLevels,
+	THEMES
 } from './background.js';
+
+describe('THEMES', () => {
+	it('lists all themes of @versatiles/style, named in words', () => {
+		expect(THEMES).toContainEqual({ id: 'colorful', name: 'Colorful' });
+		expect(THEMES).toContainEqual({ id: 'gray-dark', name: 'Gray Dark' });
+		// a lookalike, and one that is dark without the suffix
+		expect(THEMES).toContainEqual({ id: 'positrino-dark', name: 'Positrino Dark' });
+		expect(THEMES).toContainEqual({ id: 'fnord', name: 'Fnord' });
+		// the dark theme right after its light one
+		const ids = THEMES.map((theme) => theme.id);
+		expect(ids.indexOf('gray-dark')).toBe(ids.indexOf('gray') + 1);
+	});
+});
 
 describe('getSettings', () => {
 	it('reads the editor default', () => {
@@ -15,7 +29,6 @@ describe('getSettings', () => {
 			streets: true,
 			borders: true,
 			theme: 'colorful',
-			dark: false,
 			font: 'noto_sans_regular',
 			language: 'user',
 			labels: 'normal',
@@ -36,7 +49,6 @@ describe('getSettings', () => {
 			streets: true,
 			borders: true,
 			theme: 'gray',
-			dark: false,
 			font: 'lato_regular',
 			language: 'local',
 			labels: 'fewer',
@@ -51,26 +63,15 @@ describe('getSettings', () => {
 });
 
 describe('changeSettings', () => {
-	it('sets the color preset and light or dark independently', () => {
-		const dark = changeSettings(undefined, { dark: true });
-		expect(dark?.options.theme).toBe('colorful-dark');
-		expect(getSettings(dark)).toMatchObject({ theme: 'colorful', dark: true });
-		const grayDark = changeSettings(dark, { theme: 'gray' });
+	it('sets the theme, dark ones and lookalikes too', () => {
+		const grayDark = changeSettings(undefined, { theme: 'gray-dark' });
 		expect(grayDark?.options.theme).toBe('gray-dark');
-		expect(getSettings(grayDark)).toMatchObject({ theme: 'gray', dark: true });
-		expect(changeSettings(grayDark, { dark: false })?.options.theme).toBe('gray');
-		expect(changeSettings(dark, { dark: false })).toBeUndefined();
+		expect(getSettings(grayDark)).toMatchObject({ theme: 'gray-dark' });
+		expect(changeSettings(grayDark, { theme: 'fnord' })?.options.theme).toBe('fnord');
 	});
 
 	it('keeps unknown themes as they are', () => {
-		expect(getSettings({ builder: 'osm', options: { theme: 'neon-dark' } })).toMatchObject({
-			theme: 'neon-dark',
-			dark: false
-		});
-		expect(getSettings({ builder: 'osm', options: { theme: 'toner-dark' } })).toMatchObject({
-			theme: 'toner',
-			dark: true
-		});
+		expect(getSettings({ builder: 'osm', options: { theme: 'neon-dark' } })).toMatchObject({ theme: 'neon-dark' });
 	});
 
 	it('returns undefined for the editor default', () => {
