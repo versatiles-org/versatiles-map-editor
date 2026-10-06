@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-10-06
+
+### Bug Fixes
+
+- **app:** start also without the slash at the end of the editor's folder, e.g. /editor ([894ff8d](https://github.com/versatiles-org/versatiles-map-editor/commit/894ff8d0eb89032adf52d75bb451b6e6669e1f3a))
+
 ## [3.1.0] - 2026-10-06
 
 ### Features
