@@ -21,7 +21,7 @@ export default defineConfig({
 		// Types are checked by "npm run check", so a plain vite build is enough here
 		command: 'npx vite build && npx vite preview',
 		port: 4173,
-		reuseExistingServer: !process.env.CI,
+		reuseExistingServer: false,
 		// The build takes a few seconds, but it took over a minute on a machine busy with other work
 		// (load average 200); the default of 60 s then fails the whole run before any test
 		timeout: 300_000
