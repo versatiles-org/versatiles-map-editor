@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Bounds } from '@versatiles/map-state';
-import { fitTurned, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
+import { fitTurned, overlapsBox, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 const area: Bounds = [13.3, 52.45, 13.5, 52.55];
 const corners: [number, number][] = [
@@ -57,6 +57,30 @@ describe('projectTurned', () => {
 		expect(farEast[0] - 400).toBeLessThan(nearEast[0] - 400);
 		// far behind the viewer: not shown
 		expect(projectTurned([13.4, 40], camera, tilted)).toBeUndefined();
+	});
+});
+
+describe('overlapsBox', () => {
+	// a diamond around (100, 100), 100 pixels to each side
+	const diamond: [number, number][] = [
+		[100, 0],
+		[200, 100],
+		[100, 200],
+		[0, 100]
+	];
+
+	it('is true for a rectangle that reaches into the shape', () => {
+		expect(overlapsBox(diamond, { left: 80, top: 80, right: 120, bottom: 120 })).toBe(true);
+		expect(overlapsBox(diamond, { left: 150, top: 90, right: 300, bottom: 110 })).toBe(true);
+		// around all of it
+		expect(overlapsBox(diamond, { left: -10, top: -10, right: 210, bottom: 210 })).toBe(true);
+	});
+
+	it('is false for a rectangle in an empty corner of the rectangle around the shape', () => {
+		expect(overlapsBox(diamond, { left: 0, top: 0, right: 40, bottom: 40 })).toBe(false);
+		expect(overlapsBox(diamond, { left: 160, top: 160, right: 200, bottom: 200 })).toBe(false);
+		// and beside it
+		expect(overlapsBox(diamond, { left: 210, top: 0, right: 300, bottom: 200 })).toBe(false);
 	});
 });
 

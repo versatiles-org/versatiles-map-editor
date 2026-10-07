@@ -109,6 +109,17 @@ describe('MapView', () => {
 			view.setCovered({ left: 0, top: 0, right: 400, bottom: 600 });
 			expect(camera().zoom).toBeLessThan(free);
 		});
+
+		it('stays as large next to a covered part that the turned area does not reach', () => {
+			// rotated by an eighth turn, the area is a diamond in the window, with empty corners
+			view.fitArea(area, [], { keep: true, turn: { bearing: 45 } });
+			const free = camera().zoom;
+			view.setCovered({ left: 0, top: 540, right: 80, bottom: 600 });
+			expect(camera().zoom).toBe(free);
+			// but not next to one that it reaches
+			view.setCovered({ left: 0, top: 200, right: 300, bottom: 600 });
+			expect(camera().zoom).toBeLessThan(free);
+		});
 	});
 
 	describe('fitArea', () => {

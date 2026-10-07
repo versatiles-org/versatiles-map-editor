@@ -10,7 +10,7 @@ function roleOf(id: string): Role | undefined {
 }
 
 import { MapStyleLoader } from './map_style_loader.js';
-import { fitTurned, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
+import { fitTurned, overlapsBox, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
 export type Viewport = NonNullable<MapState['view']>;
@@ -297,18 +297,15 @@ export class MapView {
 			[area[2], area[3]],
 			[area[0], area[3]]
 		];
-		/** The rectangle of the area in the window, undefined if a corner is not shown. */
-		const shownBox = (camera: { center: GeoPoint; zoom: number }): Box | undefined => {
+		/** Whether the area reaches under a part of the window: as it is shown, which is no rectangle on a turned map. */
+		const reachesUnder = (camera: { center: GeoPoint; zoom: number }, part: Box): boolean => {
 			const points = corners.map((corner) => projectTurned(corner, camera, window));
-			if (points.some((point) => !point)) return undefined;
-			const [xs, ys] = [points.map((point) => point![0]), points.map((point) => point![1])];
-			return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) };
+			return points.every((point) => point !== undefined) && overlapsBox(points, part);
 		};
 
 		let camera = fitTurned(area, window, whole, limits);
 		const covered = this.#covered;
-		const shown = shownBox(camera);
-		if (covered && shown && overlaps(shown, covered)) {
+		if (covered && reachesUnder(camera, covered)) {
 			// beside the covered part, and above or below it
 			const parts: Box[] = [];
 			if (covered.right <= width / 2) parts.push({ ...whole, left: Math.max(whole.left, covered.right + padding) });

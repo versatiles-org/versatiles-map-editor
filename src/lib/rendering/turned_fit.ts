@@ -92,6 +92,34 @@ export function projectTurned(point: GeoPoint, camera: TurnedCamera, window: Tur
 	return show(toWorld(point), toWorld(camera.center), camera.zoom, window);
 }
 
+/**
+ * Whether a convex shape in the window, by its corners in order, overlaps a rectangle: e.g. an
+ * area on a tilted map, which is no rectangle there, and the legend. They do not if a line along a
+ * side of one of them separates them.
+ */
+export function overlapsBox(corners: Point[], box: Box): boolean {
+	const rect: Point[] = [
+		[box.left, box.top],
+		[box.right, box.top],
+		[box.right, box.bottom],
+		[box.left, box.bottom]
+	];
+	// the directions across the sides of the rectangle and of the shape
+	const across: Point[] = [
+		[1, 0],
+		[0, 1],
+		...corners.map((corner, i): Point => {
+			const next = corners[(i + 1) % corners.length];
+			return [corner[1] - next[1], next[0] - corner[0]];
+		})
+	];
+	return across.every(([x, y]) => {
+		const shape = corners.map((corner) => corner[0] * x + corner[1] * y);
+		const other = rect.map((corner) => corner[0] * x + corner[1] * y);
+		return Math.max(...shape) > Math.min(...other) && Math.max(...other) > Math.min(...shape);
+	});
+}
+
 /** The rectangle around the points in the window; undefined if one is not shown. */
 function boxOf(points: Point[], center: Point, zoom: number, window: TurnedWindow): Box | undefined {
 	const box: Box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
