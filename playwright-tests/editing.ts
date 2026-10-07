@@ -698,7 +698,7 @@ test(
 		await expect(field).toHaveValue('2.3');
 		await field.fill('150');
 		await field.press('Enter');
-		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(10);
+		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(20);
 		await expect(field).toHaveValue('20');
 
 		// the label of a marker, at its place around the symbol
