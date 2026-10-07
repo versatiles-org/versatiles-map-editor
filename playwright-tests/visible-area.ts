@@ -116,6 +116,92 @@ test('a shared map opens rotated and tilted, with its frame completely in the wi
 		.toStrictEqual({ bounds: frame, bearing: 40, pitch: 50 });
 });
 
+test('visitors rotate and tilt a shared map, back with the compass, unless the author locked it', async ({ page }) => {
+	const camera = async () => {
+		const { bearing, pitch } = await page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			return { bearing: map.getBearing(), pitch: map.getPitch() };
+		});
+		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
+	};
+	/** Drag with the right mouse button, which turns the map: sideways rotates, up and down tilts. */
+	const turn = async (dx: number, dy: number) => {
+		await page.mouse.move(400, 300);
+		await page.mouse.down({ button: 'right' });
+		await page.mouse.move(400 + dx, 300 + dy, { steps: 5 });
+		await page.mouse.up({ button: 'right' });
+	};
+	const open = async (frame: MapState['frame']) => {
+		await page.goto('about:blank');
+		await page.goto('/view/#' + encodeState({ frame, elements }));
+		await waitForMapIsReady(page);
+	};
+	const compass = page.getByRole('button', { name: 'Reset rotation and tilt' });
+	await page.setViewportSize({ width: 800, height: 600 });
+
+	await test.step('free: the map turns, and the compass turns it back to how it opened', async () => {
+		await open({ bounds: frame, bearing: 30, pitch: 20 });
+		expect(await camera()).toStrictEqual({ bearing: 30, pitch: 20 });
+		await turn(120, -60);
+		const turned = await camera();
+		expect(turned.bearing).not.toBe(30);
+		expect(turned.pitch).toBeGreaterThan(20);
+		// not steeper than the largest tilt
+		await turn(0, -400);
+		expect((await camera()).pitch).toBeLessThanOrEqual(60);
+		await compass.click();
+		await expect.poll(camera).toStrictEqual({ bearing: 30, pitch: 20 });
+	});
+
+	await test.step('a map that is not turned can be turned too', async () => {
+		await open({ bounds: frame });
+		await turn(120, -60);
+		const turned = await camera();
+		expect(turned.bearing).not.toBe(0);
+		expect(turned.pitch).toBeGreaterThan(0);
+		await compass.click();
+		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
+	});
+
+	await test.step('locked rotation: only the tilt changes', async () => {
+		await open({ bounds: frame, bearing: 30, lockBearing: true });
+		await turn(120, -60);
+		const turned = await camera();
+		expect(turned.bearing).toBe(30);
+		expect(turned.pitch).toBeGreaterThan(0);
+	});
+
+	await test.step('locked tilt: only the rotation changes', async () => {
+		await open({ bounds: frame, pitch: 40, lockPitch: true });
+		await turn(120, -60);
+		const turned = await camera();
+		expect(turned.bearing).not.toBe(0);
+		expect(turned.pitch).toBe(40);
+	});
+
+	await test.step('both locked: the map stays, with a compass only if it is turned', async () => {
+		await open({ bounds: frame, bearing: -45, lockBearing: true, lockPitch: true });
+		await turn(120, -60);
+		expect(await camera()).toStrictEqual({ bearing: -45, pitch: 0 });
+		await expect(compass).toBeVisible();
+		await open({ bounds: frame, lockBearing: true, lockPitch: true });
+		await turn(120, -60);
+		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+		await expect(compass).toHaveCount(0);
+	});
+
+	await test.step('the editor is not turned', async () => {
+		await page.setViewportSize({ width: 1280, height: 720 });
+		await page.goto('about:blank');
+		await page.goto('/#' + encodeState({ frame: { bounds: frame, bearing: 30 }, elements }));
+		await waitForMapIsReady(page);
+		await turn(120, -60);
+		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
+		await expect(compass).toHaveCount(0);
+	});
+});
+
 test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 	// a window of the shape of the frame, so the frame would fill it, also under the legend
 	await page.setViewportSize({ width: 600, height: 500 });

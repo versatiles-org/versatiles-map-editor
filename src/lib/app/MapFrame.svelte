@@ -38,7 +38,7 @@
 		type LegendPosition,
 		type StackSize
 	} from './overlay_layout.js';
-	import { VIEWER_DEFAULTS, type StateLegend } from '@versatiles/map-state';
+	import { MAX_PITCH, VIEWER_DEFAULTS, type StateLegend } from '@versatiles/map-state';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -213,12 +213,36 @@
 		return addAttribution(m, corner);
 	});
 
-	// the buttons for zooming
+	// How the map of the viewer is turned when it opens, and whether its visitors can turn it. The
+	// editor is not turned. By its values, so the same frame does not set it up again.
+	const turn = $derived.by(() => {
+		if (editor || !mapDocument) return undefined;
+		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = mapDocument.frameTurn ?? {};
+		return { bearing, pitch, lockBearing, lockPitch };
+	});
+	const turnKey = $derived(JSON.stringify(turn));
+
+	// a locked rotation or tilt stays as the author set it
 	$effect(() => {
+		void turnKey;
+		const view = mapDocument?.view;
+		if (!view || !turn) return;
+		view.holdTurn({
+			...(turn.lockBearing ? { bearing: turn.bearing } : {}),
+			...(turn.lockPitch ? { pitch: turn.pitch } : {})
+		});
+	});
+
+	// the buttons for zooming, and in the viewer a compass, unless its map is neither turned nor can be
+	$effect(() => {
+		void turnKey;
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
-		return addNavigation(m, corner);
+		const compass = turn && !(turn.lockBearing && turn.lockPitch && !turn.bearing && !turn.pitch);
+		// back to how the map opened
+		const reset = () => m.easeTo({ bearing: turn!.bearing, pitch: turn!.pitch });
+		return addNavigation(m, corner, compass ? reset : undefined);
 	});
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
@@ -269,7 +293,9 @@
 		map = new maplibre.Map({
 			container,
 			renderWorldCopies: false,
-			dragRotate: false,
+			// only the map of the viewer can be turned, with the right mouse button or Ctrl
+			dragRotate: !editor,
+			maxPitch: MAX_PITCH,
 			attributionControl: false,
 			fadeDuration: 0
 		});

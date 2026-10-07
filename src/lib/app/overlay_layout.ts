@@ -92,12 +92,41 @@ function addOrdered(map: maplibre.Map, control: maplibre.IControl, corner: Corne
 	};
 }
 
+/** The label of the compass, which turns the map back. */
+export const COMPASS_LABEL = 'Reset rotation and tilt';
+
 /**
- * Add the buttons for zooming in and out in a corner. Without a compass, since the map is not
- * rotated. Returns a function that removes them again.
+ * Add the buttons for zooming in and out in a corner. With `reset` also a compass, for a map that
+ * can be turned or is turned: it shows the rotation and the tilt, and a click calls `reset`, e.g.
+ * to turn the map back to where it started. Returns a function that removes them again.
  */
-export function addNavigation(map: maplibre.Map, corner: Corner): () => void {
-	return addOrdered(map, new maplibre.NavigationControl({ showCompass: false }), corner, CONTROL_ORDER.navigation);
+export function addNavigation(map: maplibre.Map, corner: Corner, reset?: () => void): () => void {
+	const control = new maplibre.NavigationControl({ showCompass: !!reset, visualizePitch: true });
+	if (!reset) return addOrdered(map, control, corner, CONTROL_ORDER.navigation);
+	const withReset: maplibre.IControl = {
+		onAdd(map) {
+			const element = control.onAdd(map);
+			const compass = element.querySelector<HTMLButtonElement>('.maplibregl-ctrl-compass');
+			if (compass) {
+				compass.title = COMPASS_LABEL;
+				compass.setAttribute('aria-label', COMPASS_LABEL);
+				// before the button's own click, which would turn the map to the north
+				compass.addEventListener(
+					'click',
+					(event) => {
+						event.stopPropagation();
+						reset();
+					},
+					{ capture: true }
+				);
+			}
+			return element;
+		},
+		onRemove() {
+			control.onRemove();
+		}
+	};
+	return addOrdered(map, withReset, corner, CONTROL_ORDER.navigation);
 }
 
 /** Add the attribution of the map in a bottom corner. Returns a function that removes it again. */

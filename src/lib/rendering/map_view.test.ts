@@ -38,6 +38,37 @@ describe('MapView', () => {
 		});
 	});
 
+	describe('holdTurn', () => {
+		const next = { bearing: 77, pitch: 33 };
+		const asked = () => (map.transformCameraUpdate as unknown as (next: object) => object)(next);
+
+		it('keeps the rotation and/or the tilt, whatever moves the map', () => {
+			view.holdTurn({ bearing: 30 });
+			expect(map.jumpTo).toHaveBeenLastCalledWith({ bearing: 30 });
+			expect(asked()).toStrictEqual({ bearing: 30 });
+			view.holdTurn({ pitch: 0 });
+			expect(asked()).toStrictEqual({ pitch: 0 });
+			view.holdTurn({ bearing: -20, pitch: 45 });
+			expect(map.jumpTo).toHaveBeenLastCalledWith({ bearing: -20, pitch: 45 });
+			expect(asked()).toStrictEqual({ bearing: -20, pitch: 45 });
+		});
+
+		it('lets the map turn freely again', () => {
+			view.holdTurn({ bearing: 30 });
+			view.holdTurn({});
+			expect(map.transformCameraUpdate).toBeNull();
+		});
+
+		it('lets an area be shown turned', () => {
+			view.holdTurn({ bearing: 0, pitch: 0 });
+			let whileFitting: object | undefined;
+			map.jumpTo.mockImplementationOnce(() => (whileFitting = asked()));
+			view.fitArea([13.3, 52.45, 13.5, 52.55], [], { turn: { bearing: 90, pitch: 45 } });
+			expect(whileFitting).toStrictEqual({});
+			expect(asked()).toStrictEqual({ bearing: 0, pitch: 0 });
+		});
+	});
+
 	describe('fitArea on a turned map', () => {
 		const area: [number, number, number, number] = [13.3, 52.45, 13.5, 52.55];
 		const camera = () => map.jumpTo.mock.lastCall![0] as { center: [number, number]; zoom: number };

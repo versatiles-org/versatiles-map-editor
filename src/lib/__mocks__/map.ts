@@ -75,6 +75,11 @@ export class MockMap {
 	});
 	fitBounds = vi.fn();
 	jumpTo = vi.fn();
+	easeTo = vi.fn();
+	transformCameraUpdate: (() => object) | null = null;
+	setTransformCameraUpdate = vi.fn((value: (() => object) | null) => {
+		this.transformCameraUpdate = value;
+	});
 	cameraForBounds = vi.fn(
 		(
 			_bounds: maplibre.LngLatBoundsLike,

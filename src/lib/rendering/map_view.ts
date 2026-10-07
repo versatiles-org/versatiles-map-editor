@@ -87,6 +87,31 @@ export class MapView {
 		});
 	}
 
+	/**
+	 * Keep the rotation and/or the tilt of the map at a value, whatever moves the map, e.g. the
+	 * gestures of a visitor who may not turn it; undefined lets it turn freely. Showing an area
+	 * (`fitArea`) turns the map anyway.
+	 */
+	public holdTurn(held: Turn) {
+		const { bearing, pitch } = held;
+		if (bearing === undefined && pitch === undefined) {
+			this.map.setTransformCameraUpdate(null);
+			return;
+		}
+		// MapLibre asks before every change of the camera
+		this.map.setTransformCameraUpdate(() => {
+			if (this.#fitting) return {};
+			return { ...(bearing === undefined ? {} : { bearing }), ...(pitch === undefined ? {} : { pitch }) };
+		});
+		this.#fitting = true;
+		try {
+			// what is held now
+			this.map.jumpTo({ ...(bearing === undefined ? {} : { bearing }), ...(pitch === undefined ? {} : { pitch }) });
+		} finally {
+			this.#fitting = false;
+		}
+	}
+
 	/** Stop pending work, e.g. loading a style. */
 	public destroy() {
 		this.style.destroy();
@@ -185,6 +210,8 @@ export class MapView {
 		const limit = frame ? {} : { maxZoom: MAX_ZOOM };
 		this.#fitting = true;
 		try {
+			// e.g. after a map that was turned
+			if (this.map.getBearing?.() || this.map.getPitch?.()) this.map.jumpTo({ bearing: 0, pitch: 0 });
 			this.map.fitBounds(target, { animate: false, padding, ...limit });
 			const clear = this.#clearOfCovered(target, padding, limit);
 			if (clear) this.map.fitBounds(target, { animate: false, padding: clear, ...limit });
