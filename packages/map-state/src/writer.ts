@@ -31,6 +31,7 @@ import {
 	LEGEND_LAYOUTS,
 	LEGEND_THEMES,
 	type Bounds,
+	type StateFrame,
 	type StateElement,
 	type StateElementCircle,
 	type StateElementLine,
@@ -154,8 +155,15 @@ export class StateWriter {
 
 		// the camera, with its own center
 		this.writeView(root.view);
-		const frame = sanitizeFrame(root.frame);
-		this.writeGrid(root, frame);
+		// as links keep it: the rotation and the tilt in whole degrees
+		const frame = sanitizeFrame(
+			root.frame && {
+				...root.frame,
+				bearing: Math.round(root.frame.bearing ?? 0),
+				pitch: Math.round(root.frame.pitch ?? 0)
+			}
+		);
+		this.writeGrid(root, frame?.bounds);
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta);
 		this.hasPopups = root.elements.some((element) => !!element.popup?.text);
@@ -258,17 +266,36 @@ export class StateWriter {
 		if (element.label) this.writeStringRef(element.label);
 	}
 
-	/** The frame: its south-west corner on the grid, and its width and height in steps of the grid. */
-	writeFrame(frame: Bounds | undefined) {
+	/**
+	 * The frame, each part only if the map has it. Its area: the south-west corner on the grid, and
+	 * the width and height in steps of the grid. How the map is turned: the rotation (9 bits, whole
+	 * degrees from 0 to 359) and the tilt (6 bits, whole degrees), and 1 bit each whether viewers
+	 * cannot rotate and cannot tilt it.
+	 */
+	writeFrame(frame: StateFrame | undefined) {
 		if (!frame) return this.writeBit(false);
 		this.writeBit(true);
-		const [x0, y0] = this.elementGrid.toGrid([frame[0], frame[1]]);
-		const [x1, y1] = this.elementGrid.toGrid([frame[2], frame[3]]);
-		this.writeVarint(x0, true);
-		this.writeVarint(y0, true);
-		// at least one step, so a frame never becomes empty
-		this.writeVarint(Math.max(1, x1 - x0));
-		this.writeVarint(Math.max(1, y1 - y0));
+
+		const bounds = frame.bounds;
+		this.writeBit(!!bounds);
+		if (bounds) {
+			const [x0, y0] = this.elementGrid.toGrid([bounds[0], bounds[1]]);
+			const [x1, y1] = this.elementGrid.toGrid([bounds[2], bounds[3]]);
+			this.writeVarint(x0, true);
+			this.writeVarint(y0, true);
+			// at least one step, so an area never becomes empty
+			this.writeVarint(Math.max(1, x1 - x0));
+			this.writeVarint(Math.max(1, y1 - y0));
+		}
+
+		const turned = !!(frame.bearing || frame.pitch || frame.lockBearing || frame.lockPitch);
+		this.writeBit(turned);
+		if (turned) {
+			this.writeInteger((((frame.bearing ?? 0) % 360) + 360) % 360, 9);
+			this.writeInteger(frame.pitch ?? 0, 6);
+			this.writeBit(frame.lockBearing === true);
+			this.writeBit(frame.lockPitch === true);
+		}
 	}
 
 	/** Returns the center as the reader decodes it, or undefined without a map. */

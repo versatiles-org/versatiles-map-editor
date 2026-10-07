@@ -17,7 +17,7 @@ export {
 	MAX_EXPONENT
 } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
-export { sanitizeFrame } from './profile.js';
+export { sanitizeBounds, sanitizeFrame } from './profile.js';
 export {
 	MAPJSON_SCHEMA_URL,
 	MAPJSON_VERSION,

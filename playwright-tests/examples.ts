@@ -90,7 +90,7 @@ test('the examples open from the menu', async ({ page }) => {
 	expect((await storedState(page)).meta).toStrictEqual(state.meta);
 	await expect(menu).toBeHidden();
 	// the visible area of the example, whatever the window
-	const [west, south, east, north] = state.frame!;
+	const [west, south, east, north] = state.frame!.bounds!;
 	const bounds = await page.evaluate(() => (window as unknown as MapWindow).map.getBounds().toArray().flat());
 	expect(bounds[0]).toBeLessThanOrEqual(west);
 	expect(bounds[1]).toBeLessThanOrEqual(south);

@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { Bounds, MapState } from './types.js';
+import type { Bounds, MapState, StateFrame } from './types.js';
 import {
 	boundsOf,
 	centerOf,
 	decodeState,
 	encodeState,
+	sanitizeBounds,
 	sanitizeFrame,
 	stateFromGeoJSON,
 	stateFromKML,
@@ -12,7 +13,8 @@ import {
 	stateToKML
 } from './index.js';
 
-const frame: Bounds = [13.3, 52.45, 13.5, 52.55];
+const bounds: Bounds = [13.3, 52.45, 13.5, 52.55];
+const frame: StateFrame = { bounds };
 const state: MapState = {
 	frame,
 	elements: [
@@ -32,10 +34,11 @@ describe('frame', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 		// about 1 km: steps of 0.01024°, within half a step
 		const coarse = decodeState(
-			encodeState({ ...state, frame: [13.30004, 52.45004, 13.50004, 52.55004] }, { resolution: 1000 })
+			encodeState({ ...state, frame: { bounds: [13.30004, 52.45004, 13.50004, 52.55004] } }, { resolution: 1000 })
 		);
-		coarse.frame!.forEach((value, i) => expect(Math.abs(value - frame[i])).toBeLessThanOrEqual(0.00512 + 1e-4));
-		expect(coarse.frame!.every((value) => Number(value.toFixed(5)) === value)).toBe(true);
+		const area = coarse.frame!.bounds!;
+		area.forEach((value, i) => expect(Math.abs(value - bounds[i])).toBeLessThanOrEqual(0.00512 + 1e-4));
+		expect(area.every((value) => Number(value.toFixed(5)) === value)).toBe(true);
 	});
 
 	it('is kept next to the camera, which has a center of its own', () => {
@@ -47,10 +50,13 @@ describe('frame', () => {
 	});
 
 	it('is never empty, and an invalid one is left out', () => {
-		const tiny = decodeState(encodeState({ elements: [], frame: [13.4, 52.5, 13.400001, 52.500001] }));
-		expect(tiny.frame![2]).toBeGreaterThan(tiny.frame![0]);
-		expect(tiny.frame![3]).toBeGreaterThan(tiny.frame![1]);
-		expect(decodeState(encodeState({ elements: [], frame: [13.5, 52.5, 13.4, 52.6] })).frame).toBeUndefined();
+		const tiny = decodeState(encodeState({ elements: [], frame: { bounds: [13.4, 52.5, 13.400001, 52.500001] } }));
+		const area = tiny.frame!.bounds!;
+		expect(area[2]).toBeGreaterThan(area[0]);
+		expect(area[3]).toBeGreaterThan(area[1]);
+		expect(
+			decodeState(encodeState({ elements: [], frame: { bounds: [13.5, 52.5, 13.4, 52.6] } })).frame
+		).toBeUndefined();
 	});
 
 	it('makes links short without a camera: the coordinates start near the elements', () => {
@@ -83,21 +89,84 @@ describe('frame', () => {
 
 	it('is checked when it is read from a file', () => {
 		const doc = { type: 'FeatureCollection', features: [] };
-		expect(stateFromGeoJSON({ ...doc, frame: [1, 2, 3] } as never).frame).toBeUndefined();
-		expect(stateFromGeoJSON({ ...doc, frame: [1, 2, 3, 'x'] } as never).frame).toBeUndefined();
-		expect(stateFromGeoJSON({ ...doc, frame: [1, 2, 3, 4] } as never).frame).toStrictEqual([1, 2, 3, 4]);
+		expect(stateFromGeoJSON({ ...doc, frame: { bounds: [1, 2, 3] } } as never).frame).toBeUndefined();
+		expect(stateFromGeoJSON({ ...doc, frame: { bounds: [1, 2, 3, 'x'] } } as never).frame).toBeUndefined();
+		expect(stateFromGeoJSON({ ...doc, frame: { bounds: [1, 2, 3, 4] } } as never).frame).toStrictEqual({
+			bounds: [1, 2, 3, 4]
+		});
+		// an area alone, as before the frame had other parts, is none
+		expect(stateFromGeoJSON({ ...doc, frame: [1, 2, 3, 4] } as never).frame).toBeUndefined();
+	});
+});
+
+describe('frame: how the map is turned', () => {
+	const turned: StateFrame = { bounds, bearing: -120, pitch: 45, lockBearing: true, lockPitch: true };
+
+	it('is kept in a link, with and without an area', () => {
+		expect(decodeState(encodeState({ ...state, frame: turned })).frame).toStrictEqual(turned);
+		for (const frame of [
+			{ bearing: 90 },
+			{ pitch: 60 },
+			{ bearing: 180, pitch: 1 },
+			{ lockBearing: true },
+			{ lockPitch: true },
+			{ bounds, lockPitch: true }
+		] as StateFrame[]) {
+			expect(decodeState(encodeState({ ...state, frame })).frame).toStrictEqual(frame);
+		}
+	});
+
+	it('is kept in whole degrees in a link', () => {
+		const frame = decodeState(encodeState({ ...state, frame: { bearing: 29.6, pitch: 12.4 } })).frame;
+		expect(frame).toStrictEqual({ bearing: 30, pitch: 12 });
+		// too little to be turned at all
+		expect(decodeState(encodeState({ ...state, frame: { bearing: 0.2, pitch: 0.4 } })).frame).toBeUndefined();
+		expect(decodeState(encodeState({ ...state, frame: { bearing: 359.8 } })).frame).toBeUndefined();
+	});
+
+	it('makes a link three characters longer at most', () => {
+		const plain = encodeState(state);
+		expect(encodeState({ ...state, frame: turned }).length - plain.length).toBeLessThanOrEqual(3);
+	});
+
+	it('is kept in GeoJSON, KML and .mapjson files', () => {
+		expect(stateFromGeoJSON(stateToGeoJSON({ ...state, frame: turned })).frame).toStrictEqual(turned);
+		expect(stateFromKML(stateToKML({ ...state, frame: turned })).frame).toStrictEqual(turned);
+		// KML looks at the area, and at the camera without one
+		expect(stateToKML({ ...state, frame: { bearing: 90 } })).not.toContain('<LookAt>');
+	});
+});
+
+describe('sanitizeBounds', () => {
+	it('accepts only an area within the latitudes and longitudes of the map', () => {
+		expect(sanitizeBounds([-10, -20, 10, 20])).toStrictEqual([-10, -20, 10, 20]);
+		expect(sanitizeBounds([10, -20, -10, 20])).toBeUndefined();
+		expect(sanitizeBounds([-10, 20, 10, -20])).toBeUndefined();
+		expect(sanitizeBounds([-10, -95, 10, 20])).toBeUndefined();
+		expect(sanitizeBounds([-190, -20, 10, 20])).toBeUndefined();
+		expect(sanitizeBounds([0, 0, NaN, 1])).toBeUndefined();
+		expect(sanitizeBounds(undefined)).toBeUndefined();
 	});
 });
 
 describe('sanitizeFrame', () => {
-	it('accepts only an area within the latitudes and longitudes of the map', () => {
-		expect(sanitizeFrame([-10, -20, 10, 20])).toStrictEqual([-10, -20, 10, 20]);
-		expect(sanitizeFrame([10, -20, -10, 20])).toBeUndefined();
-		expect(sanitizeFrame([-10, 20, 10, -20])).toBeUndefined();
-		expect(sanitizeFrame([-10, -95, 10, 20])).toBeUndefined();
-		expect(sanitizeFrame([-190, -20, 10, 20])).toBeUndefined();
-		expect(sanitizeFrame([0, 0, NaN, 1])).toBeUndefined();
+	it('keeps the valid parts, without those that have their default value', () => {
+		expect(sanitizeFrame({ bounds: [-10, -20, 10, 20] })).toStrictEqual({ bounds: [-10, -20, 10, 20] });
+		expect(sanitizeFrame({ bounds: [10, -20, -10, 20], bearing: 45 })).toStrictEqual({ bearing: 45 });
+		expect(sanitizeFrame({ bearing: 0, pitch: 0, lockBearing: false, lockPitch: false })).toBeUndefined();
+		expect(sanitizeFrame({ bearing: 'east', pitch: null, lockPitch: 'yes' })).toBeUndefined();
+		expect(sanitizeFrame({})).toBeUndefined();
+		expect(sanitizeFrame([-10, -20, 10, 20])).toBeUndefined();
 		expect(sanitizeFrame(undefined)).toBeUndefined();
+	});
+
+	it('normalizes the rotation to (-180°, 180°] and limits the tilt', () => {
+		expect(sanitizeFrame({ bearing: 270 })).toStrictEqual({ bearing: -90 });
+		expect(sanitizeFrame({ bearing: -180 })).toStrictEqual({ bearing: 180 });
+		expect(sanitizeFrame({ bearing: 360 })).toBeUndefined();
+		expect(sanitizeFrame({ bearing: 12.5, pitch: 33.3 })).toStrictEqual({ bearing: 12.5, pitch: 33.3 });
+		expect(sanitizeFrame({ pitch: 80 })).toStrictEqual({ pitch: 60 });
+		expect(sanitizeFrame({ pitch: -5 })).toBeUndefined();
 	});
 });
 

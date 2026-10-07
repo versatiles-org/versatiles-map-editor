@@ -11,11 +11,22 @@ import {
 	type StateLegend,
 	type MapState,
 	type StateElement,
+	type StateFrame,
 	type StateMetadata,
 	type StateViewer
 } from '@versatiles/map-state';
 import { MapView, type ElementIndex } from '../rendering/index.js';
 import { getSettings, sameBackground } from '../background/index.js';
+
+/** How a shared map is turned and whether viewers can turn it: a frame without its area. */
+export type FrameTurn = Omit<StateFrame, 'bounds'>;
+
+/** The turn of a frame, or undefined if it has none, e.g. only an area. */
+export function turnOf(frame: StateFrame | undefined): FrameTurn | undefined {
+	if (!frame) return undefined;
+	const { bounds: _bounds, ...turn } = frame;
+	return Object.keys(turn).length > 0 ? turn : undefined;
+}
 
 export class MapDocument {
 	// replaced as a whole, never changed in place, so it needs no deep reactivity
@@ -50,6 +61,12 @@ export class MapDocument {
 	 * the elements. Part of the history, so a change can be undone.
 	 */
 	public frame: Bounds | undefined = $state.raw(undefined);
+	/**
+	 * How a shared or embedded map is turned when it opens, and whether its viewers can turn it: the
+	 * frame of the map state without its area. Undefined for north at the top, seen from straight
+	 * above, free to turn. Part of the history, like the visible area.
+	 */
+	public frameTurn: FrameTurn | undefined = $state.raw(undefined);
 	/**
 	 * The legend of the map, if it has one. Replaced as a whole on every change. Without the fields
 	 * that have their default value, as links store it, so a legend is the same in a link, a file
@@ -240,7 +257,7 @@ export class MapDocument {
 		this.clear();
 		const camera = this.isInteractive() ? state.view : undefined;
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
-		if (!camera && !keepView) this.view.fitArea(state.frame, state.elements, { keep: !this.isInteractive() });
+		if (!camera && !keepView) this.view.fitArea(state.frame?.bounds, state.elements, { keep: !this.isInteractive() });
 		await this.setState({ ...state, view: camera });
 	}
 
@@ -261,7 +278,8 @@ export class MapDocument {
 		this.deselectAll();
 
 		if (state.view) this.view.fitViewport(state.view);
-		this.frame = state.frame;
+		this.frame = state.frame?.bounds;
+		this.frameTurn = turnOf(state.frame);
 		this.applyMetadata(state.meta);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
 		if (!sameBackground(state.meta?.background, this.#background)) {

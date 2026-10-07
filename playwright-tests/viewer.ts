@@ -105,7 +105,7 @@ test('precision of a shared map', async ({ page }) => {
 			encodeState({
 				view: { center: [13.4, 52.5], radius: 10000 },
 				// about 11 × 11 km
-				frame: [13.33, 52.45, 13.49, 52.55],
+				frame: { bounds: [13.33, 52.45, 13.49, 52.55] },
 				elements: [{ type: 'marker', point }]
 			})
 	);

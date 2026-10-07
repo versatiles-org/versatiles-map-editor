@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 import { elementFromState, type AbstractElement } from '../element/index.js';
-import { MapDocument } from '../document/index.js';
+import { MapDocument, turnOf } from '../document/index.js';
 import { Cursor, DrawingHandler, SelectionHandler, StylePickerMode, VisibleAreaMode } from '../interaction/index.js';
 import { StateManager, legendColors } from '../state/index.js';
 import { ColorPalette } from './color_palette.svelte.js';
@@ -136,7 +136,9 @@ export class MapDocumentInteractive extends MapDocument {
 		if (Object.keys(labels).length > 0) meta.labels = labels;
 		return {
 			view: this.view.getViewport(),
-			...(this.frame ? { frame: this.frame } : {}),
+			...(this.frame || this.frameTurn
+				? { frame: { ...(this.frame ? { bounds: this.frame } : {}), ...this.frameTurn } }
+				: {}),
 			...(Object.keys(meta).length > 0 ? { meta } : {}),
 			elements: this.elements.map((element) => element.getState())
 		};
@@ -152,8 +154,12 @@ export class MapDocumentInteractive extends MapDocument {
 	 */
 	public addState(state: MapState) {
 		if (state.view) this.view.fitViewport(state.view);
-		// both frames: one that covers both; else the one there is
-		if (state.frame) this.frame = this.frame ? unionOf(this.frame, state.frame) : state.frame;
+		// both visible areas: one that covers both; else the one there is
+		const bounds = state.frame?.bounds;
+		if (bounds) this.frame = this.frame ? unionOf(this.frame, bounds) : bounds;
+		// how the map is turned, like the other properties of the map
+		const turn = turnOf(state.frame);
+		if (turn) this.frameTurn = turn;
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
 		if (meta.legend) this.legend = meta.legend;

@@ -10,11 +10,44 @@ export type Position = [longitude: number, latitude: number];
  */
 export type HexColor = string;
 
+/** The largest tilt of a map, in degrees from looking straight down. */
+export const MAX_PITCH = 60;
+
+/**
+ * What a shared or embedded map shows when it opens: an area, seen from a direction, and whether
+ * its viewers can turn and tilt it from there.
+ */
+export interface StateFrame {
+	/**
+	 * The visible area: what the map shows completely, whatever the size and the shape of the
+	 * window. Without it, the bounds of the elements are shown.
+	 */
+	bounds?: Bounds;
+	/**
+	 * The rotation of the map: the compass direction at the top of the window, in degrees
+	 * clockwise from north, e.g. 90 with east at the top. Default: 0, north at the top.
+	 * @minimum -180
+	 * @maximum 180
+	 */
+	bearing?: number;
+	/**
+	 * The tilt of the map, in degrees: 0 looks straight down, more looks towards the horizon.
+	 * Default: 0.
+	 * @minimum 0
+	 * @maximum 60
+	 */
+	pitch?: number;
+	/** Viewers cannot rotate the map. Default: false. */
+	lockBearing?: boolean;
+	/** Viewers cannot tilt the map. Default: false. */
+	lockPitch?: boolean;
+}
+
 /** A map: its viewport, its properties and its elements. */
 export interface MapState {
 	/**
 	 * The camera: where the author's editor looks, e.g. after a reload. Links for sharing and
-	 * embedding leave it out; they show the `frame`, else the elements.
+	 * embedding leave it out; they show the `frame`.
 	 */
 	view?: {
 		center: Position;
@@ -24,11 +57,8 @@ export interface MapState {
 		 */
 		radius: number;
 	};
-	/**
-	 * The visible area: what a shared or embedded map shows completely, whatever the size and
-	 * the shape of the window. Without it, the bounds of the elements are shown.
-	 */
-	frame?: Bounds;
+	/** What a shared or embedded map shows when it opens, and how its viewers can turn it. */
+	frame?: StateFrame;
 	meta?: StateMetadata;
 	/** The elements, in drawing order: the first one at the back, the last one in front. */
 	elements: StateElement[];

@@ -68,8 +68,11 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `import schema from '@versatiles/map-state/schema/mapjson-1.schema.json' with { type: 'json' }`.
   The site of the editor publishes it at its `$schema` address,
   `https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json`.
-- `frame` in the state is the visible area of a shared map, `[west, south, east, north]` (the type
-  `Bounds`), which it shows completely whatever the size of its window. `sanitizeFrame` checks one;
+- `frame` in the state is what a shared map shows when it opens (the type `StateFrame`): its
+  visible area `bounds`, `[west, south, east, north]` (the type `Bounds`), which it shows completely
+  whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees; and
+  `lockBearing` and `lockPitch`, with which viewers cannot rotate or tilt the map. `sanitizeFrame`
+  checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
   `centerOf(bounds)` their center.
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`,
@@ -118,7 +121,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
 - viewport → `view: { center, radius }` (mirrors the state; lossless round-trip)
-- visible area → `frame: [west, south, east, north]`
+- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
   minimized options, stored as JSON in the string table of the base64, so any current or future
@@ -172,7 +175,7 @@ The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`),
 this version is read; a later version can be told apart by it. Then come the palette, the string
 table, the view (`view`, optional: where the author's editor looks), the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
-relative, the frame (optional: the visible area of a shared map), the metadata, 1 bit whether an
+relative, the frame (optional: the visible area of a shared map, and how it is turned), the metadata, 1 bit whether an
 element has a popup (without one, the elements have no bit for it) and the elements.
 To keep hashes short:
 

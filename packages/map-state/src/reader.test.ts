@@ -718,12 +718,12 @@ describe('invalid links', () => {
 	});
 
 	it('keep frames up to the edges of the map', () => {
-		for (const frame of [
+		for (const bounds of [
 			[-180, -90, 180, 90],
 			[-180, -85.0511, 180, 85.0511],
 			[179.99999, 0, 180, 1]
 		] as [number, number, number, number][]) {
-			expect(decodeState(encodeState({ frame, elements: [] })).frame).toStrictEqual(frame);
+			expect(decodeState(encodeState({ frame: { bounds }, elements: [] })).frame).toStrictEqual({ bounds });
 		}
 	});
 });

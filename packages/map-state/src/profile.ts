@@ -12,7 +12,9 @@ import {
 	NAVIGATION_POSITIONS,
 	SEARCH_POSITIONS,
 	STROKE_STYLE_NAMES,
+	MAX_PITCH,
 	type Bounds,
+	type StateFrame,
 	type MapState,
 	type Position,
 	type StateBackground,
@@ -372,13 +374,41 @@ export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undef
 
 // ----- visible area -----
 
-/** A valid frame: four numbers, west < east and south < north, within the latitudes of the map. */
-export function sanitizeFrame(value: unknown): Bounds | undefined {
+/** A valid area: four numbers, west < east and south < north, within the latitudes of the map. */
+export function sanitizeBounds(value: unknown): Bounds | undefined {
 	if (!Array.isArray(value) || value.length !== 4) return undefined;
 	const [west, south, east, north] = value;
 	if (![west, south, east, north].every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined;
 	if (!(west < east && south < north && south >= -90 && north <= 90 && west >= -180 && east <= 180)) return undefined;
 	return [west, south, east, north];
+}
+
+/** A rotation of the map in degrees, normalized to (-180, 180]. */
+export function sanitizeBearing(value: unknown): number | undefined {
+	const n = sanitizeNumber(value);
+	if (n === undefined) return undefined;
+	const bearing = ((n % 360) + 360) % 360;
+	return bearing > 180 ? bearing - 360 : bearing;
+}
+
+/**
+ * A valid frame, with its valid parts: without an invalid area, and without the parts that have
+ * their default value (north at the top, looking straight down, viewers can turn the map).
+ * Undefined if nothing is left, which is the frame of a map without one.
+ */
+export function sanitizeFrame(value: unknown): StateFrame | undefined {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+	const v = value as Record<string, unknown>;
+	const frame: StateFrame = {};
+	const bounds = sanitizeBounds(v.bounds);
+	if (bounds) frame.bounds = bounds;
+	const bearing = sanitizeBearing(v.bearing);
+	if (bearing) frame.bearing = bearing;
+	const pitch = sanitizeNumber(v.pitch, 0, MAX_PITCH);
+	if (pitch) frame.pitch = pitch;
+	if (sanitizeBoolean(v.lockBearing)) frame.lockBearing = true;
+	if (sanitizeBoolean(v.lockPitch)) frame.lockPitch = true;
+	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 
 // ----- background map -----

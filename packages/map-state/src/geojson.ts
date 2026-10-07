@@ -7,7 +7,7 @@ import type {
 	StateElementMarker,
 	StateElementPolygon,
 	StateMetadata,
-	Bounds
+	StateFrame
 } from './types.js';
 import {
 	fillPropsFromStyle,
@@ -33,11 +33,11 @@ import {
 
 /**
  * A GeoJSON FeatureCollection extended with the editor's `view` (`center` + `radius` in
- * meters) and the `frame`, the visible area of the map (`[west, south, east, north]`).
+ * meters) and the `frame`: what a shared map shows, e.g. its visible area (`bounds`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	view?: { center: [number, number]; radius: number };
-	frame?: Bounds;
+	frame?: StateFrame;
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
 };

@@ -8,7 +8,7 @@ import {
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
 	LEGEND_THEMES,
-	type Bounds,
+	type StateFrame,
 	type StateBackground,
 	type StateElement,
 	type StateElementCircle,
@@ -41,6 +41,7 @@ import {
 	PATTERN_COVERAGE_RANGE,
 	PATTERN_SCALE_RANGE,
 	sanitizeBackground,
+	sanitizeBounds,
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
 	VIEWER_CHOICES
@@ -302,20 +303,31 @@ export class StateReader {
 	}
 
 	/** See `StateWriter.writeFrame`. */
-	readFrame(): Bounds | undefined {
+	readFrame(): StateFrame | undefined {
 		try {
 			if (!this.readBit()) return undefined;
-			const x0 = this.readVarint(true);
-			const y0 = this.readVarint(true);
-			const width = this.readVarint();
-			const height = this.readVarint();
-			if (width < 1 || height < 1) throw new Error('Invalid size of the frame');
-			const [west, south] = this.elementGrid.fromGrid([x0, y0]);
-			const [east, north] = this.elementGrid.fromGrid([x0 + width, y0 + height]);
-			// as the writer writes it
-			const frame = sanitizeFrame([west, south, east, north]);
-			if (!frame) throw new Error('Frame beyond the map');
-			return frame;
+			const frame: StateFrame = {};
+			if (this.readBit()) {
+				const x0 = this.readVarint(true);
+				const y0 = this.readVarint(true);
+				const width = this.readVarint();
+				const height = this.readVarint();
+				if (width < 1 || height < 1) throw new Error('Invalid size of the frame');
+				const [west, south] = this.elementGrid.fromGrid([x0, y0]);
+				const [east, north] = this.elementGrid.fromGrid([x0 + width, y0 + height]);
+				// as the writer writes it
+				const bounds = sanitizeBounds([west, south, east, north]);
+				if (!bounds) throw new Error('Frame beyond the map');
+				frame.bounds = bounds;
+			}
+			if (this.readBit()) {
+				frame.bearing = this.readInteger(9);
+				frame.pitch = this.readInteger(6);
+				frame.lockBearing = this.readBit();
+				frame.lockPitch = this.readBit();
+			}
+			// without the parts that have their default value, and with the rotation up to 180°
+			return sanitizeFrame(frame);
 		} catch (cause) {
 			throw new Error(`Error reading frame`, { cause });
 		}

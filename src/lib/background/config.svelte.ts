@@ -4,7 +4,7 @@ import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { parseJsonc } from './jsonc.js';
 import { startingBackground } from './background.js';
-import { sanitizeFrame, type Bounds, type StateBackground } from '@versatiles/map-state';
+import { sanitizeBounds, type Bounds, type StateBackground } from '@versatiles/map-state';
 
 /**
  * An optional configuration file of an editor instance, in its root folder (next to the editor's
@@ -258,7 +258,7 @@ function resolveUrl(value: unknown, base: string | undefined): string {
 }
 
 function checkStartView(value: unknown): Bounds {
-	const bounds = sanitizeFrame(value);
+	const bounds = sanitizeBounds(value);
 	if (!bounds) throw new Error('must be [west, south, east, north] in degrees, with west < east and south < north');
 	return bounds;
 }

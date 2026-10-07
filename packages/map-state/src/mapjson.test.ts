@@ -46,7 +46,7 @@ describe('.mapjson files', () => {
 	it('keep only what is valid, since they may contain anything', () => {
 		const json = {
 			view: { center: [13.4, 'north'], radius: 1000 },
-			frame: [10, 50, 5, 55],
+			frame: { bounds: [10, 50, 5, 55], pitch: 'steep' },
 			meta: { title: 'Map', viewer: { search: 'middle' }, labels: { minZoom: 99 }, background: 'osm' },
 			elements: [
 				{

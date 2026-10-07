@@ -25,7 +25,7 @@ type Point = [number, number];
 // Export
 // ---------------------------------------------------------------------------
 
-/** The center of a frame, and the radius (in meters) that shows all of it. */
+/** The center of the area of a frame, and the radius (in meters) that shows all of it. */
 function viewOfFrame([west, south, east, north]: Bounds): { center: [number, number]; radius: number } {
 	const center: [number, number] = [(west + east) / 2, (south + north) / 2];
 	const meters = 111320;
@@ -42,8 +42,8 @@ export function stateToKML(state: MapState): string {
 	if (doc.frame) documentData[FRAME_DATA] = JSON.stringify(doc.frame);
 	if (doc.meta) documentData[META_DATA] = JSON.stringify(doc.meta);
 
-	// where Google Earth looks: at the frame, else at the camera
-	const view = doc.frame ? viewOfFrame(doc.frame) : doc.view;
+	// where Google Earth looks: at the area of the frame, else at the camera
+	const view = doc.frame?.bounds ? viewOfFrame(doc.frame.bounds) : doc.view;
 	const content = [
 		xml('name', state.meta?.title || 'Map'),
 		view &&

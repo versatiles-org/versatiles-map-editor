@@ -61,7 +61,7 @@ describe('the JSON Schema of .mapjson files', () => {
 	it('fits what the editor writes, with every kind of element and property', () => {
 		const state: MapState = {
 			view: { center: [13.4, 52.5], radius: 1200 },
-			frame: [13.3, 52.4, 13.5, 52.6],
+			frame: { bounds: [13.3, 52.4, 13.5, 52.6], bearing: -30, pitch: 45, lockBearing: true, lockPitch: true },
 			meta: {
 				background: { builder: 'satellite', options: { osmOverlay: false } },
 				legend: {

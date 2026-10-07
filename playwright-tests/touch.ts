@@ -159,7 +159,7 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 
 test('dragging a handle of the visible area with a finger, a bit off the handle', async ({ page }) => {
 	const frame: [number, number, number, number] = [13.35, 52.47, 13.45, 52.53];
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, frame, elements: [] }));
+	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, frame: { bounds: frame }, elements: [] }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 	const touch = await Touchscreen.create(page);
@@ -168,8 +168,8 @@ test('dragging a handle of the visible area with a finger, a bit off the handle'
 	const [x, y] = await project(page, [frame[2], frame[3]]);
 	const viewCenter = await mapCenter(page);
 	await touch.drag([x + 7, y - 7], [x + 87, y - 67]);
-	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
-	const dragged = (await storedState(page)).frame!;
+	await expect.poll(async () => (await storedState(page)).frame?.bounds?.[2]).toBeGreaterThan(frame[2]);
+	const dragged = (await storedState(page)).frame!.bounds!;
 	expect(dragged[0]).toBeCloseTo(frame[0], 4);
 	expect(dragged[1]).toBeCloseTo(frame[1], 4);
 	expect(dragged[3]).toBeGreaterThan(frame[3]);
@@ -180,7 +180,7 @@ test('dragging a handle of the visible area with a finger, a bit off the handle'
 	await touch.drag([x - 200, y + 150], [x - 100, y + 150]);
 	await waitForMapIsIdle(page);
 	expect((await mapCenter(page))[0]).toBeLessThan(viewCenter[0]);
-	expect((await settledStoredState(page)).frame).toStrictEqual(dragged);
+	expect((await settledStoredState(page)).frame?.bounds).toStrictEqual(dragged);
 });
 
 test('dragging elements in the list with a finger, by their handles', async ({ page }) => {

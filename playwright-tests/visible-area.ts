@@ -38,7 +38,7 @@ async function settledPosition(page: Page, point: [number, number]): Promise<[nu
 test('a shared map shows its frame completely, in the viewer and in the editor', async ({ page }) => {
 	// the viewer, in a window of another shape
 	await page.setViewportSize({ width: 500, height: 800 });
-	await page.goto('/view/#' + encodeState({ frame, elements }));
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 	let shown = await frameOnPage(page, frame);
 	expect(shown.left).toBeGreaterThanOrEqual(9);
@@ -50,7 +50,7 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 
 	// the editor, between its bars: the top bar, the tools, the sidebar and the status line
 	await page.setViewportSize({ width: 1280, height: 720 });
-	await page.goto('/#' + encodeState({ frame, elements }));
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 	shown = await frameOnPage(page, frame);
 	expect(shown.top).toBeGreaterThanOrEqual(44 + 9);
@@ -58,7 +58,7 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 	expect(shown.right).toBeLessThanOrEqual(1280 - 250 + 1);
 	expect(shown.bottom).toBeLessThanOrEqual(720 - 26 + 1);
 	// the frame is kept, and the editor has a camera of its own from now on
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(frame);
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual(frame);
 });
 
 test('a shared map keeps its frame clear of the legend', async ({ page }) => {
@@ -69,7 +69,7 @@ test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 		style: { color: '#ff0000' },
 		label
 	}));
-	await page.goto('/view/#' + encodeState({ frame, elements, meta: { legend: { entries } } }));
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements, meta: { legend: { entries } } }));
 	await waitForMapIsReady(page);
 	const legend = (await page.getByRole('list', { name: 'Legend' }).boundingBox())!;
 	await expect
@@ -107,7 +107,7 @@ test('an empty shared map without a frame shows the whole world', async ({ page 
 
 test('the viewer shows the frame again when its size changes, until the visitor moves the map', async ({ page }) => {
 	await page.setViewportSize({ width: 1000, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame, elements }));
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 
 	// e.g. a rotated phone: the frame fits the new, narrower width, and fills it (without the padding
@@ -146,15 +146,15 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	// the current view becomes the frame
 	await bar.getByRole('button', { name: 'Use current view' }).click();
 	await expect(bar).toContainText(/^Visible area: [\d.,]+ km × [\d.,]+ km/);
-	await expect.poll(async () => (await storedState(page)).frame).toBeDefined();
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeDefined();
 	await expect(shared).toContainText('Shared maps show the visible area that you set');
 
 	// back to the elements, and undo
 	await bar.getByRole('button', { name: 'Fit to elements' }).click();
-	await expect.poll(async () => (await storedState(page)).frame).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeUndefined();
 	await expect(bar.getByRole('button', { name: 'Fit to elements' })).toBeDisabled();
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(async () => (await storedState(page)).frame).toBeDefined();
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeDefined();
 
 	// Escape ends it, and so does Done, after opening it from the menu
 	await page.keyboard.press('Escape');
@@ -182,7 +182,9 @@ test('the share dialog warns about elements outside the visible area, and edits 
 			]
 		}
 	];
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements: outside }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements: outside })
+	);
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -200,7 +202,7 @@ test('the share dialog warns about elements outside the visible area, and edits 
 	// all elements instead: no warning any more
 	await dialog.getByRole('button', { name: 'Fit to elements' }).click();
 	await expect(dialog).not.toContainText('outside the visible area');
-	await expect.poll(async () => (await storedState(page)).frame).toBeUndefined();
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeUndefined();
 });
 
 test('the share dialog tells that an empty map without a visible area shows the whole world', async ({ page }) => {
@@ -214,7 +216,9 @@ test('the share dialog tells that an empty map without a visible area shows the 
 test('the preview of the share dialog shows the frame completely in all three aspect ratios', async ({ page }) => {
 	// the preview loads three times, which may take longer than the timeout of a test (see PREVIEW_TIMEOUT)
 	test.slow();
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements })
+	);
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -258,7 +262,9 @@ test('the preview of the share dialog shows the frame completely in all three as
 
 test('dragging a handle changes the frame, one undo step per drag', async ({ page }) => {
 	// a view with the whole frame, left of the sidebar
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
+	);
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 
@@ -268,19 +274,21 @@ test('dragging a handle changes the frame, one undo step per drag', async ({ pag
 	await page.mouse.down();
 	await page.mouse.move(x + 80, y - 60, { steps: 5 });
 	await page.mouse.up();
-	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
-	const dragged = (await storedState(page)).frame!;
+	await expect.poll(async () => (await storedState(page)).frame?.bounds?.[2]).toBeGreaterThan(frame[2]);
+	const dragged = (await storedState(page)).frame!.bounds!;
 	// only the dragged sides
 	expect(dragged[0]).toBeCloseTo(frame[0], 4);
 	expect(dragged[1]).toBeCloseTo(frame[1], 4);
 	expect(dragged[3]).toBeGreaterThan(frame[3]);
 
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(frame);
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual(frame);
 });
 
 test('the keyboard moves the sides of the frame, one undo step per key', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame, elements }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
+	);
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Visible area…')).click();
 	const size = page.getByRole('group', { name: 'Visible area' }).getByRole('status');
@@ -291,23 +299,25 @@ test('the keyboard moves the sides of the frame, one undo step per key', async (
 	await page.keyboard.press('Shift+ArrowRight');
 	await page.keyboard.press('Shift+ArrowRight');
 	await expect(size).not.toHaveText(before!);
-	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeGreaterThan(frame[2]);
-	const moved = (await storedState(page)).frame!;
+	await expect.poll(async () => (await storedState(page)).frame?.bounds?.[2]).toBeGreaterThan(frame[2]);
+	const moved = (await storedState(page)).frame!.bounds!;
 	expect(moved[0]).toBeCloseTo(frame[0], 4);
 	expect(await page.evaluate(() => (window as unknown as { map: { getBearing(): number } }).map.getBearing())).toBe(0);
 
 	// inwards again
 	await page.keyboard.press('Alt+Shift+ArrowRight');
-	await expect.poll(async () => (await storedState(page)).frame?.[2]).toBeLessThan(moved[2]);
+	await expect.poll(async () => (await storedState(page)).frame?.bounds?.[2]).toBeLessThan(moved[2]);
 
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual(moved);
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual(moved);
 });
 
 test('importing a file with a frame gives a frame that covers both', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame, elements }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements })
+	);
 	await waitForMapIsReady(page);
-	const file = { type: 'FeatureCollection', features: [], frame: [13.45, 52.5, 13.6, 52.6] };
+	const file = { type: 'FeatureCollection', features: [], frame: { bounds: [13.45, 52.5, 13.6, 52.6] } };
 	const importGeoJSON = await menuItem(page, 'Import', 'GeoJSON…');
 	const [chooser] = await Promise.all([page.waitForEvent('filechooser'), importGeoJSON.click()]);
 	await chooser.setFiles({
@@ -315,7 +325,7 @@ test('importing a file with a frame gives a frame that covers both', async ({ pa
 		mimeType: 'application/geo+json',
 		buffer: Buffer.from(JSON.stringify(file))
 	});
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual([13.3, 52.45, 13.6, 52.6]);
+	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual([13.3, 52.45, 13.6, 52.6]);
 });
 
 test("the editor's marks on the map have the accent of the theme", { tag: '@cross-browser' }, async ({ page }) => {

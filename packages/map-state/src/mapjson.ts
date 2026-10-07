@@ -57,6 +57,7 @@ export const MAPJSON_FIELDS = {
 	MapJSON: ['$schema', 'view', 'frame', 'meta', 'elements'],
 	// the view, which has no definition of its own
 	view: ['center', 'radius'],
+	StateFrame: ['bounds', 'bearing', 'pitch', 'lockBearing', 'lockPitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
 	StateBackground: ['builder', 'options'],
@@ -117,6 +118,7 @@ export function unknownMapJSONFields(json: unknown): string[] {
 	const root = check(json, MAPJSON_FIELDS.MapJSON, '');
 	if (!root) return unknown;
 	check(root.view, MAPJSON_FIELDS.view, 'view');
+	check(root.frame, MAPJSON_FIELDS.StateFrame, 'frame');
 	const meta = check(root.meta, MAPJSON_FIELDS.StateMetadata, 'meta');
 	if (meta) {
 		check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');

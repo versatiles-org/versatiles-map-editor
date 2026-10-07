@@ -32,7 +32,7 @@ its elements, on the editor's default background map.
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"view": { "center": [13.39, 52.51], "radius": 2500 },
-	"frame": [13.36, 52.5, 13.42, 52.525],
+	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
 	"meta": {
 		"title": "A walk through Berlin",
 		"background": { "builder": "osm", "options": { "theme": "gray" } },
@@ -77,7 +77,7 @@ its elements, on the editor's default background map.
 ## Basics
 
 - **Coordinates** are `[longitude, latitude]` in degrees (WGS 84), like in GeoJSON: first east,
-  then north. Areas (`frame`) are `[west, south, east, north]`.
+  then north. Areas (the `bounds` of the `frame`) are `[west, south, east, north]`.
 - **Colors** are hex codes: `"#rrggbb"`, or `"#rrggbbaa"` with an opacity (alpha), e.g.
   `"#009e7380"` is half transparent. The editor writes them in lower case.
 - **Distances** are in meters (the radius of a circle and of the view), **widths** and **halos**
@@ -96,9 +96,22 @@ its elements, on the editor's default background map.
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                                                                                |
 | `view`     | The view of the author: `center` (a position) and `radius` (in meters, the largest circle in the window). The editor opens the map there. Shared maps leave it out. Optional. |
-| `frame`    | The visible area: what shared and embedded maps show completely, on any screen. Without it, they show all elements. Optional.                                                 |
+| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.                                                                                     |
 | `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                                                                           |
 | `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                                                                           |
+
+### The frame
+
+What a shared or embedded map shows when it opens, and how its viewers can turn it. All fields are
+optional.
+
+| Field         | Description                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bounds`      | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.           |
+| `bearing`     | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top. |
+| `pitch`       | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                     |
+| `lockBearing` | `true`: viewers cannot rotate the map. Default: `false`.                                                                                   |
+| `lockPitch`   | `true`: viewers cannot tilt the map. Default: `false`.                                                                                     |
 
 ## Elements
 

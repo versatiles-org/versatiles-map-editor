@@ -21,11 +21,11 @@
 						}
 					},
 					"required": ["center", "radius"],
-					"description": "The camera: where the author's editor looks, e.g. after a reload. Links for sharing and embedding leave it out; they show the `frame`, else the elements."
+					"description": "The camera: where the author's editor looks, e.g. after a reload. Links for sharing and embedding leave it out; they show the `frame`."
 				},
 				"frame": {
-					"$ref": "#/definitions/Bounds",
-					"description": "The visible area: what a shared or embedded map shows completely, whatever the size and the shape of the window. Without it, the bounds of the elements are shown."
+					"$ref": "#/definitions/StateFrame",
+					"description": "What a shared or embedded map shows when it opens, and how its viewers can turn it."
 				},
 				"meta": {
 					"$ref": "#/definitions/StateMetadata"
@@ -60,6 +60,36 @@
 			],
 			"maxItems": 2,
 			"description": "A position on the map: longitude and latitude, in degrees (WGS 84)."
+		},
+		"StateFrame": {
+			"type": "object",
+			"properties": {
+				"bounds": {
+					"$ref": "#/definitions/Bounds",
+					"description": "The visible area: what the map shows completely, whatever the size and the shape of the window. Without it, the bounds of the elements are shown."
+				},
+				"bearing": {
+					"type": "number",
+					"description": "The rotation of the map: the compass direction at the top of the window, in degrees clockwise from north, e.g. 90 with east at the top. Default: 0, north at the top.",
+					"minimum": -180,
+					"maximum": 180
+				},
+				"pitch": {
+					"type": "number",
+					"description": "The tilt of the map, in degrees: 0 looks straight down, more looks towards the horizon. Default: 0.",
+					"minimum": 0,
+					"maximum": 60
+				},
+				"lockBearing": {
+					"type": "boolean",
+					"description": "Viewers cannot rotate the map. Default: false."
+				},
+				"lockPitch": {
+					"type": "boolean",
+					"description": "Viewers cannot tilt the map. Default: false."
+				}
+			},
+			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and whether its viewers can turn and tilt it from there."
 		},
 		"Bounds": {
 			"type": "array",
