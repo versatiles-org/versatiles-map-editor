@@ -1,7 +1,9 @@
 name: Release @versatiles/map-state
 
 # Publishes the package when a tag like "map-state-v1.2.3" is pushed. The tag must match the
-# version in packages/map-state/package.json. ("v1.2.3" tags release the editor.)
+# version in packages/map-state/package.json. ("v1.2.3" tags release the editor.) A release
+# candidate, e.g. "map-state-v2.0.0-rc.1", is published under the npm tag "next", so "latest" stays
+# the last release.
 on:
   push:
     tags: ['map-state-v*']
@@ -43,4 +45,10 @@ jobs:
         run: npm test --workspace packages/map-state
 
       - name: Publish
-        run: npm publish --workspace packages/map-state --provenance --access public
+        run: |
+          version="$(node -p "require('./packages/map-state/package.json').version")"
+          case "$version" in
+            *-*) tag=next ;;
+            *) tag=latest ;;
+          esac
+          npm publish --workspace packages/map-state --provenance --access public --tag "$tag"

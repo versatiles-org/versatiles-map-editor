@@ -3,7 +3,10 @@
  * "npm run release": releases what changed since its last release. It decides what to release, shows
  * it, and asks for confirmation before it changes anything. Run it on `main`, with everything
  * committed, the GitHub CLI logged in. `--dry-run` shows what it would release, and changes
- * nothing; `--yes` releases it without asking, e.g. where no one can answer.
+ * nothing; `--yes` releases it without asking, e.g. where no one can answer. `--rc` releases
+ * release candidates, e.g. "4.0.0-rc.1": the package on npm under the tag "next" instead of
+ * "latest", the editor as a prerelease on GitHub. A release without `--rc` after candidates is
+ * their version.
  *
  * - The editor: the commits since the tag of its version ("v…"). The tag starts the workflow
  *   release-editor.yml, which adds the ZIP archive to the GitHub release.
@@ -24,7 +27,7 @@ import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { generateChangelogEntry, updateChangelog } from '@versatiles/release-tool/dist/lib/changelog.js';
-import { MAP_STATE_PATHS, nextVersion, parseLog } from './release/plan.mjs';
+import { MAP_STATE_PATHS, isCandidate, nextVersion, parseLog } from './release/plan.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGE_DIR = resolve(ROOT, 'packages/map-state');
@@ -32,6 +35,7 @@ const PACKAGE = '@versatiles/map-state';
 const REPO_URL = 'https://github.com/versatiles-org/versatiles-map-editor';
 const dryRun = process.argv.includes('--dry-run') || process.argv.includes('-n');
 const yes = process.argv.includes('--yes') || process.argv.includes('-y');
+const candidate = process.argv.includes('--rc');
 
 /** Stops the release with a message. */
 function fail(message) {
@@ -106,30 +110,32 @@ if (!published) {
 	console.warn('workflow release-map-state.yml as trusted publisher in the package settings on npmjs.com:');
 	console.warn('  npm publish --workspace packages/map-state --access public');
 } else {
-	const base = tagExists(`map-state-v${published}`)
-		? `map-state-v${published}`
-		: npmView([`${PACKAGE}@${published}`, 'gitHead']);
-	if (!base) fail(`neither the tag map-state-v${published} nor npm knows the commit of ${PACKAGE} ${published}`);
+	// its last release: the version in its package.json, if it has a tag, e.g. a release candidate,
+	// which npm does not name as the latest version; else the latest version on npm
+	const own = versionOf(PACKAGE_DIR);
+	const last = tagExists(`map-state-v${own}`) ? own : published;
+	const base = tagExists(`map-state-v${last}`) ? `map-state-v${last}` : npmView([`${PACKAGE}@${last}`, 'gitHead']);
+	if (!base) fail(`neither the tag map-state-v${last} nor npm knows the commit of ${PACKAGE} ${last}`);
 	const commits = commitsSince(base, MAP_STATE_PATHS);
-	const version = nextVersion(published, commits);
+	const version = nextVersion(last, commits, { candidate });
 	if (version) {
 		releases.push({
 			name: PACKAGE,
 			dir: PACKAGE_DIR,
 			tag: `map-state-v${version}`,
 			title: `${PACKAGE} ${version}`,
-			from: published,
+			from: last,
 			to: version,
 			commits
 		});
-	} else console.log(`${PACKAGE} ${published}: nothing to release`);
+	} else console.log(`${PACKAGE} ${last}: nothing to release`);
 }
 
 // the editor: since the tag of its version
 const editorVersion = versionOf(ROOT);
 if (!tagExists(`v${editorVersion}`)) fail(`the tag v${editorVersion} of the version in package.json does not exist`);
 const editorCommits = commitsSince(`v${editorVersion}`);
-const nextEditor = nextVersion(editorVersion, editorCommits);
+const nextEditor = nextVersion(editorVersion, editorCommits, { candidate });
 if (nextEditor) {
 	releases.unshift({
 		name: 'the editor',
@@ -195,8 +201,10 @@ for (const release of releases) {
 		/^## .*\n+/,
 		''
 	);
-	const latest = release.dir === ROOT ? 'true' : 'false';
-	const options = ['--title', release.title, '--notes', notes, `--latest=${latest}`];
+	// a release candidate is a prerelease, and never the latest release
+	const prerelease = isCandidate(release.to);
+	const latest = release.dir === ROOT && !prerelease ? 'true' : 'false';
+	const options = ['--title', release.title, '--notes', notes, `--latest=${latest}`, `--prerelease=${prerelease}`];
 	// e.g. created by the workflow, if it was faster
 	let exists = true;
 	try {

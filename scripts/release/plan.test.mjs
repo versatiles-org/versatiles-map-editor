@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { MAP_STATE_PATHS, isReleaseCommit, nextVersion, parseLog } from './plan.mjs';
+import { MAP_STATE_PATHS, isCandidate, isReleaseCommit, nextVersion, parseLog } from './plan.mjs';
 
 const commit = (message) => parseLog(`0123456\x1f${message}\x1e`)[0];
 
@@ -48,6 +48,34 @@ describe('nextVersion', () => {
 	it('is undefined without commits that change what is released', () => {
 		expect(nextVersion('3.0.0', [])).toBeUndefined();
 		expect(nextVersion('3.0.0', [commit('docs: a'), commit('test: b')])).toBeUndefined();
+	});
+
+	it('makes release candidates of that version, counted from 1', () => {
+		const candidate = { candidate: true };
+		expect(nextVersion('3.1.1', [commit('feat!: a')], candidate)).toBe('4.0.0-rc.1');
+		expect(nextVersion('3.1.1', [commit('feat: a')], candidate)).toBe('3.2.0-rc.1');
+		expect(nextVersion('3.1.1', [commit('fix: a')], candidate)).toBe('3.1.2-rc.1');
+		expect(nextVersion('3.1.1', [commit('docs: a')], candidate)).toBeUndefined();
+		// the next candidate of the same version, whatever the commits ask for, if it is not more
+		expect(nextVersion('4.0.0-rc.1', [commit('fix: a')], candidate)).toBe('4.0.0-rc.2');
+		expect(nextVersion('4.0.0-rc.9', [commit('feat!: a')], candidate)).toBe('4.0.0-rc.10');
+		expect(nextVersion('4.0.0-rc.1', [commit('docs: a')], candidate)).toBeUndefined();
+		// more than the candidate raised: a candidate of the higher version
+		expect(nextVersion('3.2.0-rc.3', [commit('fix: a')], candidate)).toBe('3.2.0-rc.4');
+		expect(nextVersion('3.2.0-rc.3', [commit('feat!: a')], candidate)).toBe('4.0.0-rc.1');
+		expect(nextVersion('3.1.2-rc.1', [commit('feat: a')], candidate)).toBe('3.2.0-rc.1');
+	});
+
+	it('releases the version of the candidates after them, also without new commits', () => {
+		expect(nextVersion('4.0.0-rc.3', [])).toBe('4.0.0');
+		expect(nextVersion('4.0.0-rc.3', [commit('fix: a'), commit('feat!: b')])).toBe('4.0.0');
+		expect(nextVersion('3.2.0-rc.1', [commit('docs: a')])).toBe('3.2.0');
+	});
+
+	it('knows a release candidate by its version', () => {
+		expect(isCandidate('4.0.0-rc.1')).toBe(true);
+		expect(isCandidate('4.0.0-rc.12')).toBe(true);
+		expect(isCandidate('4.0.0')).toBe(false);
 	});
 
 	it('refuses an invalid version', () => {

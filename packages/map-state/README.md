@@ -13,6 +13,13 @@ It has no runtime dependencies (`@types/geojson` only provides the TypeScript ty
 module and works in browsers and in Node.js 18 or newer, e.g. to render shared maps in other apps
 or to create links on a server.
 
+> **Release candidate.** The formats of this package (the base64 string and `.mapjson`) may still
+> change, and a later version may not read the maps of an earlier one. Version 1.0.0 was published
+> before they were settled. Candidates are published under the npm tag `next`:
+> `npm install @versatiles/map-state@next`. From the first release after them, the formats stay
+> readable: a change of the base64 string raises its format version, and newer versions of the
+> package read the strings of older ones.
+
 ```sh
 npm install @versatiles/map-state
 ```

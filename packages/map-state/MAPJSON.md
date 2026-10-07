@@ -295,6 +295,10 @@ const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this 
 
 ## Versions
 
+The format is a release candidate: it may still change without a new version, and the editor may
+not open a file of an earlier candidate completely. From the first release of the editor after
+its candidates, the rules below hold.
+
 The version of the format is in the name of the schema in `$schema`: `mapjson-1.schema.json` is
 version 1. A file without `$schema` is read as version 1. A file of a newer version than the editor
 knows is refused, instead of being read wrongly.
