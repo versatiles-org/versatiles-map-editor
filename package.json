@@ -3,6 +3,14 @@
   "version": "3.1.1",
   "description": "Standalone, embeddable map editor for VersaTiles.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/versatiles-org/versatiles-map-editor.git"
+  },
+  "homepage": "https://github.com/versatiles-org/versatiles-map-editor#readme",
+  "bugs": {
+    "url": "https://github.com/versatiles-org/versatiles-map-editor/issues"
+  },
   "private": true,
   "type": "module",
   "imports": {

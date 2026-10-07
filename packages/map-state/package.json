@@ -10,6 +10,9 @@
     "directory": "packages/map-state"
   },
   "homepage": "https://github.com/versatiles-org/versatiles-map-editor/tree/main/packages/map-state#readme",
+  "bugs": {
+    "url": "https://github.com/versatiles-org/versatiles-map-editor/issues"
+  },
   "keywords": [
     "versatiles",
     "map",
