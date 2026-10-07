@@ -61,6 +61,61 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual(frame);
 });
 
+test('a shared map opens rotated and tilted, with its frame completely in the window', async ({ page }) => {
+	/** The rectangle around the corners of the frame on the page, as the map shows them. */
+	const corners = async () => {
+		const points = await Promise.all(
+			[
+				[frame[0], frame[1]],
+				[frame[2], frame[1]],
+				[frame[2], frame[3]],
+				[frame[0], frame[3]]
+			].map((corner) => project(page, corner as [number, number]))
+		);
+		const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
+		return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) };
+	};
+	const camera = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			return { bearing: map.getBearing(), pitch: map.getPitch() };
+		});
+
+	for (const [width, height] of [
+		[900, 500],
+		[400, 700]
+	]) {
+		await test.step(`in a window of ${width} × ${height}`, async () => {
+			await page.setViewportSize({ width, height });
+			await page.goto('about:blank');
+			await page.goto('/view/#' + encodeState({ frame: { bounds: frame, bearing: 40, pitch: 50 }, elements }));
+			await waitForMapIsReady(page);
+			expect(await camera()).toStrictEqual({ bearing: 40, pitch: 50 });
+			// within the padding of the map and of the frame (10 px each), and as large as possible: it
+			// reaches two edges
+			const shown = await corners();
+			expect(shown.left).toBeGreaterThanOrEqual(19);
+			expect(shown.top).toBeGreaterThanOrEqual(19);
+			expect(shown.right).toBeLessThanOrEqual(width - 19);
+			expect(shown.bottom).toBeLessThanOrEqual(height - 19);
+			expect(Math.min(shown.left, shown.top)).toBeLessThan(21);
+			// in the middle
+			expect(Math.abs(shown.left - (width - shown.right))).toBeLessThan(2);
+			expect(Math.abs(shown.top - (height - shown.bottom))).toBeLessThan(2);
+		});
+	}
+
+	// the editor stays north-up and seen from straight above, and keeps how the shared map is turned
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ frame: { bounds: frame, bearing: 40, pitch: 50 }, elements }));
+	await waitForMapIsReady(page);
+	expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
+	await expect
+		.poll(async () => (await storedState(page)).frame)
+		.toStrictEqual({ bounds: frame, bearing: 40, pitch: 50 });
+});
+
 test('a shared map keeps its frame clear of the legend', async ({ page }) => {
 	// a window of the shape of the frame, so the frame would fill it, also under the legend
 	await page.setViewportSize({ width: 600, height: 500 });

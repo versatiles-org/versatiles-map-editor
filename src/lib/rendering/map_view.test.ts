@@ -38,6 +38,48 @@ describe('MapView', () => {
 		});
 	});
 
+	describe('fitArea on a turned map', () => {
+		const area: [number, number, number, number] = [13.3, 52.45, 13.5, 52.55];
+		const camera = () => map.jumpTo.mock.lastCall![0] as { center: [number, number]; zoom: number };
+
+		it('rotates and tilts the map, and looks at the area', () => {
+			view.fitArea(area, [], { turn: { bearing: 90, pitch: 45 } });
+			expect(map.fitBounds).not.toHaveBeenCalled();
+			expect(map.jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: 90, pitch: 45 }));
+			const { center, zoom } = camera();
+			expect(center[0]).toBeGreaterThan(area[0]);
+			expect(center[0]).toBeLessThan(area[2]);
+			expect(center[1]).toBeGreaterThan(area[1]);
+			expect(center[1]).toBeLessThan(area[3]);
+			expect(zoom).toBeGreaterThan(8);
+			expect(zoom).toBeLessThan(14);
+		});
+
+		it('stays as before on a map that is not turned', () => {
+			view.fitArea(area, [], { turn: { bearing: 0, pitch: 0 } });
+			expect(map.jumpTo).not.toHaveBeenCalled();
+			expect(map.fitBounds).toHaveBeenCalled();
+		});
+
+		it('shows the elements not closer than the maximum zoom, and is kept when the map is resized', () => {
+			view.fitArea(undefined, [{ type: 'marker', point: [5, 6] }], { keep: true, turn: { bearing: 30 } });
+			expect(camera().zoom).toBe(15);
+			expect(camera().center[0]).toBeCloseTo(5);
+			expect(camera().center[1]).toBeCloseTo(6);
+			map.jumpTo.mockClear();
+			map.emit('resize');
+			expect(map.jumpTo).toHaveBeenLastCalledWith(expect.objectContaining({ bearing: 30, pitch: 0 }));
+		});
+
+		it('keeps the area clear of the covered part, e.g. the legend', () => {
+			view.fitArea(area, [], { keep: true, turn: { pitch: 30 } });
+			const free = camera().zoom;
+			// the left half of the window
+			view.setCovered({ left: 0, top: 0, right: 400, bottom: 600 });
+			expect(camera().zoom).toBeLessThan(free);
+		});
+	});
+
 	describe('fitArea', () => {
 		it('shows the frame with a small padding, the elements with a larger one and a maximum zoom', () => {
 			view.fitArea([1, 2, 3, 4], []);

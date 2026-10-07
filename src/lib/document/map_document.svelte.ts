@@ -257,7 +257,11 @@ export class MapDocument {
 		this.clear();
 		const camera = this.isInteractive() ? state.view : undefined;
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
-		if (!camera && !keepView) this.view.fitArea(state.frame?.bounds, state.elements, { keep: !this.isInteractive() });
+		if (!camera && !keepView) {
+			// only the viewer turns the map; the editor stays north-up and seen from straight above
+			const turn = this.isInteractive() ? {} : { bearing: state.frame?.bearing, pitch: state.frame?.pitch };
+			this.view.fitArea(state.frame?.bounds, state.elements, { keep: !this.isInteractive(), turn });
+		}
 		await this.setState({ ...state, view: camera });
 	}
 

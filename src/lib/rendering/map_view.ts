@@ -10,6 +10,7 @@ function roleOf(id: string): Role | undefined {
 }
 
 import { MapStyleLoader } from './map_style_loader.js';
+import { fitTurned, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
 export type Viewport = NonNullable<MapState['view']>;
@@ -37,13 +38,16 @@ const ELEMENTS_PADDING = 30;
 /** The closest zoom for elements all at one place, e.g. a single marker (like the table import). */
 const MAX_ZOOM = 15;
 
-/** A rectangle on the map, in pixels from its top left corner. */
-export interface Box {
-	left: number;
-	top: number;
-	right: number;
-	bottom: number;
+export type { Box };
+
+/** How the map is turned when it shows an area: rotated and tilted, in degrees. Not at all by default. */
+export interface Turn {
+	bearing?: number;
+	pitch?: number;
 }
+
+/** The field of view of MapLibre's camera in degrees, if the map does not tell it. */
+const DEFAULT_FOV = 36.87;
 
 /**
  * The map on the screen: it draws the elements over the background map, and knows where things
@@ -56,7 +60,7 @@ export class MapView {
 	/** The background map and the font of the labels, and loading their style. */
 	public readonly style: MapStyleLoader;
 	/** The area that is shown again when the size of the map changes, until the map is moved. */
-	#kept: { frame: Bounds | undefined; elements: StateElement[] } | undefined;
+	#kept: { frame: Bounds | undefined; elements: StateElement[]; turn: Turn } | undefined;
 	/** Whether the view itself moves the map, which does not end keeping the area. */
 	#fitting = false;
 	/** The part of the map that e.g. the legend covers, which a fitted area keeps clear of. */
@@ -79,7 +83,7 @@ export class MapView {
 		map.on('resize', () => {
 			resized = true;
 			queueMicrotask(() => (resized = false));
-			if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements);
+			if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements, this.#kept.turn);
 		});
 	}
 
@@ -150,20 +154,28 @@ export class MapView {
 	 * legend) if the area would reach under it. With `keep`, e.g. in the viewer, the area is shown
 	 * again whenever the size of the map or its covered part changes, until the map is moved.
 	 */
-	public fitArea(frame: Bounds | undefined, elements: StateElement[], { keep = false } = {}) {
-		this.#fit(frame, elements);
-		this.#kept = keep ? { frame, elements } : undefined;
+	public fitArea(
+		frame: Bounds | undefined,
+		elements: StateElement[],
+		{ keep = false, turn = {} }: { keep?: boolean; turn?: Turn } = {}
+	) {
+		this.#fit(frame, elements, turn);
+		this.#kept = keep ? { frame, elements, turn } : undefined;
 	}
 
 	/** The part of the map that e.g. the legend covers, undefined without one. A kept area is shown again. */
 	public setCovered(box: Box | undefined) {
 		if (JSON.stringify(box) === JSON.stringify(this.#covered)) return;
 		this.#covered = box;
-		if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements);
+		if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements, this.#kept.turn);
 	}
 
-	#fit(frame: Bounds | undefined, elements: StateElement[]) {
+	#fit(frame: Bounds | undefined, elements: StateElement[], turn: Turn) {
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
+		if (turn.bearing || turn.pitch) {
+			const area: Bounds = [bounds[0], clampLatitude(bounds[1]), bounds[2], clampLatitude(bounds[3])];
+			return this.#fitTurned(area, turn, frame ? FRAME_PADDING : ELEMENTS_PADDING, frame ? undefined : MAX_ZOOM);
+		}
 		const target: [[number, number], [number, number]] = [
 			[bounds[0], clampLatitude(bounds[1])],
 			[bounds[2], clampLatitude(bounds[3])]
@@ -176,6 +188,72 @@ export class MapView {
 			this.map.fitBounds(target, { animate: false, padding, ...limit });
 			const clear = this.#clearOfCovered(target, padding, limit);
 			if (clear) this.map.fitBounds(target, { animate: false, padding: clear, ...limit });
+		} catch (error) {
+			// the elements must be shown anyway
+			console.error('Failed to show the area of the map', error);
+		} finally {
+			this.#fitting = false;
+		}
+	}
+
+	/**
+	 * Show an area completely on the map rotated and tilted, see `fitTurned`: within the padding, and
+	 * clear of the covered part, beside it or above or below it, whichever shows the area larger.
+	 */
+	#fitTurned(area: Bounds, turn: Turn, padding: number, maxZoom: number | undefined) {
+		const map = this.map;
+		const { clientWidth: width, clientHeight: height } = map.getContainer();
+		const { top = 0, right = 0, bottom = 0, left = 0 } = map.getPadding();
+		const window: TurnedWindow = {
+			bearing: turn.bearing ?? 0,
+			pitch: turn.pitch ?? 0,
+			fov: map.getVerticalFieldOfView?.() ?? DEFAULT_FOV,
+			height,
+			focus: [(left + width - right) / 2, (top + height - bottom) / 2]
+		};
+		const limits = { minZoom: map.getMinZoom?.() ?? 0, ...(maxZoom === undefined ? {} : { maxZoom }) };
+		// the part of the window for the area: without the padding of the map (e.g. its bars) and of the area
+		const whole: Box = {
+			left: left + padding,
+			top: top + padding,
+			right: width - right - padding,
+			bottom: height - bottom - padding
+		};
+		const corners: GeoPoint[] = [
+			[area[0], area[1]],
+			[area[2], area[1]],
+			[area[2], area[3]],
+			[area[0], area[3]]
+		];
+		/** The rectangle of the area in the window, undefined if a corner is not shown. */
+		const shownBox = (camera: { center: GeoPoint; zoom: number }): Box | undefined => {
+			const points = corners.map((corner) => projectTurned(corner, camera, window));
+			if (points.some((point) => !point)) return undefined;
+			const [xs, ys] = [points.map((point) => point![0]), points.map((point) => point![1])];
+			return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) };
+		};
+
+		let camera = fitTurned(area, window, whole, limits);
+		const covered = this.#covered;
+		const shown = shownBox(camera);
+		if (covered && shown && overlaps(shown, covered)) {
+			// beside the covered part, and above or below it
+			const parts: Box[] = [];
+			if (covered.right <= width / 2) parts.push({ ...whole, left: Math.max(whole.left, covered.right + padding) });
+			else if (covered.left >= width / 2)
+				parts.push({ ...whole, right: Math.min(whole.right, covered.left - padding) });
+			if (covered.bottom <= height / 2) parts.push({ ...whole, top: Math.max(whole.top, covered.bottom + padding) });
+			else if (covered.top >= height / 2)
+				parts.push({ ...whole, bottom: Math.min(whole.bottom, covered.top - padding) });
+			const cameras = parts
+				.filter((part) => part.right > part.left && part.bottom > part.top)
+				.map((part) => fitTurned(area, window, part, limits));
+			if (cameras.length > 0) camera = cameras.reduce((best, next) => (next.zoom > best.zoom ? next : best));
+		}
+
+		this.#fitting = true;
+		try {
+			map.jumpTo({ center: camera.center, zoom: camera.zoom, bearing: window.bearing, pitch: window.pitch });
 		} catch (error) {
 			// the elements must be shown anyway
 			console.error('Failed to show the area of the map', error);

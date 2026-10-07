@@ -74,6 +74,7 @@ export class MockMap {
 		return bounds;
 	});
 	fitBounds = vi.fn();
+	jumpTo = vi.fn();
 	cameraForBounds = vi.fn(
 		(
 			_bounds: maplibre.LngLatBoundsLike,
