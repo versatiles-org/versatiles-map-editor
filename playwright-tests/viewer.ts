@@ -95,6 +95,46 @@ test.describe('viewer', () => {
 	});
 });
 
+test('the attribution starts as its button alone where its text would cover the legend', async ({ page }) => {
+	const entries: NonNullable<NonNullable<MapState['meta']>['legend']>['entries'] = [
+		{ type: 'marker', label: 'A place' },
+		{ type: 'line', label: 'A route' }
+	];
+	const state: MapState = { meta: { legend: { entries } }, elements: [{ type: 'marker', point: [13.4, 52.5] }] };
+	const attribution = page.locator('.maplibregl-ctrl-attrib');
+	const legend = page.getByRole('list', { name: 'Legend' });
+	const overlap = async () => {
+		const [a, b] = [(await attribution.boundingBox())!, (await legend.boundingBox())!];
+		return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+	};
+
+	await test.step('a narrow map: the text would reach the legend in the other corner', async () => {
+		await page.setViewportSize({ width: 420, height: 700 });
+		await page.goto('/view/#' + encodeState(state));
+		await waitForMapIsReady(page);
+		await expect(attribution).not.toContainClass('maplibregl-compact-show');
+		expect(await overlap()).toBe(false);
+		// its button shows the text, which then stays, as its reader wants it
+		await attribution.locator('summary').click();
+		await expect(attribution).toContainClass('maplibregl-compact-show');
+		await expect(attribution).toContainText('OpenStreetMap');
+		await page.setViewportSize({ width: 410, height: 700 });
+		await waitForMapIsIdle(page);
+		await expect(attribution).toContainClass('maplibregl-compact-show');
+	});
+
+	await test.step('a wide map: the text is shown, as before', async () => {
+		await page.setViewportSize({ width: 1000, height: 700 });
+		await page.goto('about:blank');
+		await page.goto('/view/#' + encodeState(state));
+		await waitForMapIsReady(page);
+		await waitForMapIsIdle(page);
+		await expect(attribution).toContainClass('maplibregl-compact-show');
+		await expect(attribution).toContainText('OpenStreetMap');
+		expect(await overlap()).toBe(false);
+	});
+});
+
 test('precision of a shared map', async ({ page }) => {
 	const point: [number, number] = [13.412341, 52.512341];
 	// the point in steps of 0.00008° (automatic) and of 0.00064°

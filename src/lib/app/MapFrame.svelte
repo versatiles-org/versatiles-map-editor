@@ -210,7 +210,8 @@
 		const corner = attributionCorner;
 		const m = mapDocument?.view.map;
 		if (!m) return;
-		return addAttribution(m, corner);
+		// as its button alone if its text would cover the legend, e.g. on a narrow map
+		return addAttribution(m, corner, () => m.getContainer().closest('.page')?.querySelector('.legend'));
 	});
 
 	// How the map of the viewer is turned when it opens, and whether its visitors can turn it. The

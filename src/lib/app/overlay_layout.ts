@@ -129,9 +129,60 @@ export function addNavigation(map: maplibre.Map, corner: Corner, reset?: () => v
 	return addOrdered(map, withReset, corner, CONTROL_ORDER.navigation);
 }
 
-/** Add the attribution of the map in a bottom corner. Returns a function that removes it again. */
-export function addAttribution(map: maplibre.Map, corner: AttributionCorner): () => void {
-	return addOrdered(map, new maplibre.AttributionControl({ compact: true }), corner, CONTROL_ORDER.attribution);
+/**
+ * Add the attribution of the map in a bottom corner. Returns a function that removes it again.
+ *
+ * MapLibre shows its text at first, and only its button once the map is moved. On a narrow map the
+ * text can reach from its corner to what is in the other one: so it starts as the button alone
+ * whenever its text would cover the element that `beside` returns, e.g. the legend. A click on the
+ * button still shows the text, which then stays as its reader left it.
+ */
+export function addAttribution(
+	map: maplibre.Map,
+	corner: AttributionCorner,
+	beside?: () => Element | null | undefined
+): () => void {
+	const control = new maplibre.AttributionControl({ compact: true });
+	if (!beside) return addOrdered(map, control, corner, CONTROL_ORDER.attribution);
+
+	let element: HTMLElement | undefined;
+	// whether the reader opened or closed the text, which is then left alone
+	let chosen = false;
+	const choose = () => (chosen = true);
+	const check = () => {
+		const other = beside();
+		if (chosen || !element || !other || !element.classList.contains('maplibregl-compact-show')) return;
+		const [a, b] = [element.getBoundingClientRect(), other.getBoundingClientRect()];
+		const covers = a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+		if (!covers) return;
+		// as MapLibre does when the map is moved
+		element.classList.remove('maplibregl-compact-show');
+		element.removeAttribute('open');
+	};
+	const remove = addOrdered(
+		map,
+		{
+			onAdd(map) {
+				element = control.onAdd(map);
+				element.addEventListener('click', choose);
+				return element;
+			},
+			onRemove() {
+				element?.removeEventListener('click', choose);
+				control.onRemove();
+			}
+		},
+		corner,
+		CONTROL_ORDER.attribution
+	);
+	// the text comes with the sources of the map, and the map can get narrower
+	map.on('idle', check);
+	map.on('resize', check);
+	return () => {
+		map.off('idle', check);
+		map.off('resize', check);
+		remove();
+	};
 }
 
 /**
