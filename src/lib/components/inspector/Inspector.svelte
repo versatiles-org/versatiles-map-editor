@@ -7,6 +7,7 @@
 		type IconName,
 		Button,
 		ButtonGroup,
+		Checkbox,
 		ChoiceGroup,
 		Hint,
 		InputRow,
@@ -126,6 +127,14 @@
 			</Hint>
 			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit visible area…</Button></ButtonGroup>
 			<Hint>The address search, the zoom buttons and the place of the legend are set in “Share”.</Hint>
+			<!-- the editor's own map, not what shared maps show -->
+			<Checkbox
+				checked={doc.turnable}
+				onchange={(e) => doc.setTurnable(e.currentTarget.checked)}
+				title="Turn the map with the right mouse button (or Ctrl), or with two fingers; the compass turns it back"
+			>
+				Rotate and tilt the map while editing
+			</Checkbox>
 		</InspectorSection>
 		<!-- its sections: the background map, its colors and its labels -->
 		<PanelBackground {doc} />

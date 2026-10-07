@@ -1019,6 +1019,81 @@ test('typing the radius or the area of circles', async ({ page }) => {
 	});
 });
 
+test('the tools work on a map that its author has rotated and tilted', async ({ page }) => {
+	const view = { center: [13.4, 52.5] as [number, number], radius: 6000, turnable: true, bearing: 50, pitch: 45 };
+	await page.goto('/#' + encodeState({ view, elements: [] }));
+	await waitForMapIsReady(page);
+	/** The place on the map at a pixel. */
+	const placeAt = (x: number, y: number) =>
+		page.evaluate(([x, y]) => (window as unknown as MapWindow).map.unproject([x, y]).toArray(), [x, y]);
+	const stored = async () => (await storedState(page)).elements;
+	const close = (point: number[] | undefined, expected: number[]) =>
+		!!point && Math.abs(point[0] - expected[0]) < 2e-4 && Math.abs(point[1] - expected[1]) < 2e-4;
+
+	await test.step('a marker is where it is clicked, and is dragged to where it is dropped', async () => {
+		const place = await placeAt(400, 300);
+		await drawElement(page, 'Marker', [[400, 300]]);
+		await expect
+			.poll(async () => {
+				const marker = (await stored())[0];
+				return close(marker?.type === 'marker' ? marker.point : undefined, place);
+			})
+			.toBe(true);
+		// the new marker is selected: its node is rendered asynchronously, and dragged once it is visible
+		await page.getByRole('button', { name: 'Select', exact: true }).click();
+		await page.mouse.click(406, 292);
+		await waitForMapIsIdle(page);
+		const target = await placeAt(520, 420);
+		await page.mouse.move(400, 300);
+		await page.mouse.down();
+		await page.mouse.move(520, 420, { steps: 8 });
+		await page.mouse.up();
+		await expect
+			.poll(async () => {
+				const marker = (await stored())[0];
+				return close(marker?.type === 'marker' ? marker.point : undefined, target);
+			})
+			.toBe(true);
+	});
+
+	await test.step('a line goes through the clicked places', async () => {
+		const places = [await placeAt(300, 500), await placeAt(450, 560), await placeAt(600, 480)];
+		await drawElement(page, 'Line', [
+			[300, 500],
+			[450, 560],
+			[600, 480]
+		]);
+		await expect
+			.poll(async () => {
+				const line = (await stored())[1];
+				return line?.type === 'line' && line.points.length === 3 && line.points.every((p, i) => close(p, places[i]));
+			})
+			.toBe(true);
+		await page.keyboard.press('Escape');
+	});
+
+	await test.step('a circle is around the place where its drag starts, as far as it is dragged', async () => {
+		const center = await placeAt(700, 250);
+		await drawElement(page, 'Circle', [
+			[700, 250],
+			[760, 250]
+		]);
+		await expect
+			.poll(async () => {
+				const circle = (await stored())[2];
+				return circle?.type === 'circle' && close(circle.point, center) && circle.radius > 100;
+			})
+			.toBe(true);
+	});
+
+	// the map is still turned as before
+	const camera = await page.evaluate(() => {
+		const { map } = window as unknown as MapWindow;
+		return [Math.round(map.getBearing()), Math.round(map.getPitch())];
+	});
+	expect(camera).toStrictEqual([50, 45]);
+});
+
 test('Shift-drag on the map zooms to a box', async ({ page }) => {
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);

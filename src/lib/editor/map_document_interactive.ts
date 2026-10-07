@@ -25,8 +25,6 @@ export class MapDocumentInteractive extends MapDocument {
 	public readonly state: StateManager;
 	/** Editing the visible area (the frame), in which drawing and selecting are off. */
 	public readonly visibleArea: VisibleAreaMode;
-	/** How the author turned the map of the editor, if it is `turnable`. */
-	#turn: Turn = {};
 	/** Picking the style of an element with a click, e.g. for an entry of the legend. */
 	public readonly stylePicker: StylePickerMode;
 	public readonly styleClipboard = new StyleClipboard();
@@ -124,16 +122,33 @@ export class MapDocumentInteractive extends MapDocument {
 	public getCamera(): Viewport {
 		const viewport = this.view.getViewport();
 		if (!this.turnable) return viewport;
-		const { bearing, pitch } = this.#turn;
+		// while the visible area is edited, the map shows how a shared map is turned
+		const { bearing, pitch } = this.visibleArea.active ? this.visibleArea.turnBefore : this.view.getTurn();
 		return { ...viewport, turnable: true, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
 	}
 
 	protected override applyCamera(camera: MapState['view']) {
 		super.applyCamera(camera);
 		this.turnable = camera?.turnable === true;
-		this.#turn = this.turnable ? { bearing: camera?.bearing, pitch: camera?.pitch } : {};
-		// the visible area mode shows how a shared map is turned, until it ends
-		if (!this.visibleArea?.active) this.view.setTurn(this.#turn);
+		this.#turn(this.turnable ? { bearing: camera?.bearing, pitch: camera?.pitch } : {});
+	}
+
+	/** Turn the editor's map; while the visible area is edited, which shows how a shared map is turned, when that ends. */
+	#turn(turn: Turn) {
+		if (this.visibleArea?.active) this.visibleArea.turnBefore = turn;
+		else this.view.setTurn(turn);
+	}
+
+	/**
+	 * Let the author rotate and tilt the map of the editor, or not: then it is shown with north at
+	 * the top, seen from straight above. Kept with the camera of the map, not in its history.
+	 */
+	public setTurnable(turnable: boolean) {
+		if (turnable === this.turnable) return;
+		this.turnable = turnable;
+		if (!turnable) this.#turn({});
+		// the camera is stored when the map has moved
+		this.view.map.fire?.('moveend');
 	}
 
 	public getGeoJSON(): GeoJSONDocument {

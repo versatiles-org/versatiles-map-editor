@@ -666,6 +666,29 @@ describe('MapDocument', () => {
 			expect(mockMap.getBearing()).toBe(0);
 		});
 
+		it('can be turned by its author if that is switched on, and is not turned any more when it is switched off', async () => {
+			await doc.loadState({ view: { center: [13.4, 52.5], radius: 1000 }, elements });
+			doc.setTurnable(true);
+			expect(doc.getCamera()).toMatchObject({ turnable: true });
+			// e.g. with the right mouse button
+			mockMap.jumpTo({ bearing: 70, pitch: 20 });
+			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 70, pitch: 20 });
+			// the visible area mode turns the map like the shared map, and back when it ends
+			doc.frameTurn = { pitch: 55 };
+			doc.visibleArea.open();
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 55]);
+			expect(doc.getCamera()).toMatchObject({ bearing: 70, pitch: 20 });
+			doc.visibleArea.close();
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([70, 20]);
+
+			// switched off while the mode is open: flat when it ends
+			doc.visibleArea.open();
+			doc.setTurnable(false);
+			expect(doc.getCamera()).not.toHaveProperty('turnable');
+			doc.visibleArea.close();
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 0]);
+		});
+
 		it('is next to the bounds of the elements', () => {
 			expect(doc.getBounds()).toBeUndefined();
 			addElement(doc, 'marker');

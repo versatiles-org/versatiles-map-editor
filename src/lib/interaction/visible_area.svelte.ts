@@ -1,6 +1,6 @@
 import { sanitizeFrame, type Bounds } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
-import { HANDLES, handlePosition, type Handle } from '../rendering/index.js';
+import { HANDLES, handlePosition, type Handle, type Turn } from '../rendering/index.js';
 import { lat2mercator, MAX_LATITUDE, mercator2lat } from '../geometry.js';
 import type { FrameTurn } from '../document/index.js';
 import {
@@ -54,6 +54,8 @@ export class VisibleAreaMode {
 	#onDone: (() => void) | undefined;
 	/** Whether the keyboard moved a side since the last undo step. */
 	#nudged = false;
+	/** How the editor's map was turned before the mode turned it like a shared map, to turn it back. */
+	public turnBefore: Turn = {};
 
 	constructor(doc: MapDocumentInteractive) {
 		this.#doc = doc;
@@ -154,6 +156,7 @@ export class VisibleAreaMode {
 		doc.stylePicker.close();
 		doc.drawing.setTool('select');
 		doc.selection.selectElement();
+		this.turnBefore = doc.view.getTurn();
 		this.active = true;
 		// e.g. undo, or a change of the elements, whose bounds are shown without a frame
 		this.#onChange = doc.state.events.on('change', () => this.render());
@@ -174,8 +177,8 @@ export class VisibleAreaMode {
 		this.#onChange = undefined;
 		this.#doc.cursor.setResize(undefined);
 		this.#doc.view.hideVisibleArea();
-		// the editor itself is not turned
-		this.#doc.view.setTurn();
+		// back to how the author turned the editor's map, if at all
+		this.#doc.view.setTurn(this.#doc.turnable ? this.turnBefore : {});
 		if (returning) onDone?.();
 	}
 

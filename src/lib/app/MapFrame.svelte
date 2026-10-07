@@ -233,15 +233,45 @@
 		});
 	});
 
-	// the buttons for zooming, and in the viewer a compass, unless its map is neither turned nor can be
+	/**
+	 * Whether the author turns the map of the editor now: if it can be turned, and not while the
+	 * visible area is edited, which shows how a shared map is turned, by its sliders.
+	 */
+	const authorTurns = $derived(
+		editor && !!mapDocument?.turnable && !(mapDocument.isInteractive() && mapDocument.visibleArea.active)
+	);
+
+	// the right mouse button (or Ctrl), two fingers, and Shift with the arrow keys
+	$effect(() => {
+		const m = mapDocument?.view.map;
+		if (m && editor) setTurnGestures(m, authorTurns);
+	});
+
+	/** Whether the map can be rotated and tilted with the mouse, two fingers and the keyboard. */
+	function setTurnGestures(m: MaplibreMapType, on: boolean) {
+		if (on) {
+			m.dragRotate.enable();
+			m.touchZoomRotate.enableRotation();
+			m.touchPitch.enable();
+			m.keyboard.enableRotation();
+		} else {
+			m.dragRotate.disable();
+			m.touchZoomRotate.disableRotation();
+			m.touchPitch.disable();
+			m.keyboard.disableRotation();
+		}
+	}
+
+	// the buttons for zooming, and a compass: in the viewer unless its map is neither turned nor can
+	// be, in the editor while its author turns the map
 	$effect(() => {
 		void turnKey;
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
-		const compass = turn && !(turn.lockBearing && turn.lockPitch && !turn.bearing && !turn.pitch);
-		// back to how the map opened
-		const reset = () => m.easeTo({ bearing: turn!.bearing, pitch: turn!.pitch });
+		const compass = turn ? !(turn.lockBearing && turn.lockPitch && !turn.bearing && !turn.pitch) : authorTurns;
+		// back to how the map opened; in the editor to north at the top, seen from straight above
+		const reset = () => m.easeTo({ bearing: turn?.bearing ?? 0, pitch: turn?.pitch ?? 0 });
 		return addNavigation(m, corner, compass ? reset : undefined);
 	});
 
@@ -293,20 +323,13 @@
 		map = new maplibre.Map({
 			container,
 			renderWorldCopies: false,
-			// only the map of the viewer can be turned, with the right mouse button or Ctrl
-			dragRotate: !editor,
 			maxPitch: MAX_PITCH,
 			attributionControl: false,
 			fadeDuration: 0
 		});
 		symbolLibrary.map = map;
-		if (editor) {
-			// neither with two fingers nor with Shift and the arrow keys: the editor turns its map only
-			// while the visible area is edited, by its sliders
-			map.touchZoomRotate.disableRotation();
-			map.touchPitch.disable();
-			map.keyboard.disableRotation();
-		}
+		// the editor's map is turned only if its author switched that on, see below
+		if (editor) setTurnGestures(map, false);
 
 		void onMapInit(map);
 

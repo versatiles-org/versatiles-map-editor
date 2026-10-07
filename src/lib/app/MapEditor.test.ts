@@ -10,9 +10,10 @@ vi.mock('maplibre-gl', async (importOriginal) => {
 	class Map {
 		getCanvasContainer = vi.fn(() => document.createElement('div'));
 		boxZoom = { disable: vi.fn() };
-		touchZoomRotate = { disableRotation: vi.fn() };
-		touchPitch = { disable: vi.fn() };
-		keyboard = { disableRotation: vi.fn() };
+		dragRotate = { enable: vi.fn(), disable: vi.fn() };
+		touchZoomRotate = { enableRotation: vi.fn(), disableRotation: vi.fn() };
+		touchPitch = { enable: vi.fn(), disable: vi.fn() };
+		keyboard = { enableRotation: vi.fn(), disableRotation: vi.fn() };
 		setMissingStyleImageResolver = vi.fn();
 		getCenter = vi.fn(() => new original.LngLat(0, 0));
 		getZoom = vi.fn(() => 5);
