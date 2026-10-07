@@ -62,17 +62,17 @@ describe('the coder of the string table', () => {
 	});
 
 	it('codes the words of the format with a model that learned them before', () => {
-		const background =
-			'{"builder":"satellite","options":{"raster":{"brightnessMin":0.2},"osmOverlay":{"theme":"gray"}}}';
-		const primed = encodeStrings([background, 'noto_sans_bold'], 2).length;
-		const empty = encodeStrings([background, 'noto_sans_bold']).length;
+		// options of the background map that its settings cannot say, and a font
+		const options = '{"features":{"terrain":{"exaggeration":1.5}},"sun":{"azimuth":300},"sky":false}';
+		const primed = encodeStrings([options, 'noto_sans_bold'], 2).length;
+		const empty = encodeStrings([options, 'noto_sans_bold']).length;
 		expect(primed).toBeLessThan(empty / 2);
 		// a change of the primer changes these bits: links written before cannot be read
-		expect(primed).toMatchInlineSnapshot(`105`);
+		expect(primed).toMatchInlineSnapshot(`139`);
 	});
 
 	it('keeps the words of the format and the other strings', () => {
-		const strings = ['{"builder":"osm","options":{}}', 'okabe-ito', 'Москва 🧸', '', 'noto_sans_bold'];
+		const strings = ['{"sky":false}', 'okabe-ito', 'Москва 🧸', '', 'noto_sans_bold'];
 		for (const formatCount of [0, 1, 2, 5]) {
 			expect(decodeStrings(encodeStrings(strings, formatCount), strings.length, formatCount)).toStrictEqual(strings);
 		}
@@ -81,8 +81,8 @@ describe('the coder of the string table', () => {
 	it('codes the other strings with an empty model, which the words of the format do not make worse', () => {
 		const text = ['Площадь Революции', 'Маяковская'];
 		const alone = encodeStrings(text).length;
-		const after = encodeStrings(['{"builder":"osm","options":{"theme":"gray"}}', ...text], 1).length;
-		const format = encodeStrings(['{"builder":"osm","options":{"theme":"gray"}}'], 1).length;
+		const after = encodeStrings(['{"sky":false}', ...text], 1).length;
+		const format = encodeStrings(['{"sky":false}'], 1).length;
 		// the bits of both parts, give or take the few of the end of the coder
 		expect(Math.abs(after - format - alone)).toBeLessThanOrEqual(3);
 	});
