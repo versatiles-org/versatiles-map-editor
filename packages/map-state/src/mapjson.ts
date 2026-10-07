@@ -56,7 +56,7 @@ export function stateFromMapJSON(json: unknown): MapState {
 export const MAPJSON_FIELDS = {
 	MapJSON: ['$schema', 'view', 'frame', 'meta', 'elements'],
 	// the view, which has no definition of its own
-	view: ['center', 'radius'],
+	view: ['center', 'radius', 'turnable', 'bearing', 'pitch'],
 	StateFrame: ['bounds', 'bearing', 'pitch', 'lockBearing', 'lockPitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],

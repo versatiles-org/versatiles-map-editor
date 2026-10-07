@@ -92,13 +92,25 @@ its elements, on the editor's default background map.
 
 ## The map
 
-| Field      | Description                                                                                                                                                                   |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                                                                                |
-| `view`     | The view of the author: `center` (a position) and `radius` (in meters, the largest circle in the window). The editor opens the map there. Shared maps leave it out. Optional. |
-| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.                                                                                     |
-| `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                                                                           |
-| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                                                                           |
+| Field      | Description                                                                                                            |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                         |
+| `view`     | The view of the author, see [The view](#the-view). The editor opens the map there. Shared maps leave it out. Optional. |
+| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.                              |
+| `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                    |
+| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                    |
+
+### The view
+
+Where the author's editor looks. `center` and `radius` are required.
+
+| Field      | Description                                                                                                                                     |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `center`   | A position.                                                                                                                                     |
+| `radius`   | In meters: the largest circle in the window.                                                                                                    |
+| `turnable` | `true`: the author can rotate and tilt the map in the editor, which else shows it with north at the top, from straight above. Default: `false`. |
+| `bearing`  | The rotation of the editor's map, if it is `turnable`, in degrees clockwise from north (-180 to 180). Default: 0.                               |
+| `pitch`    | The tilt of the editor's map, if it is `turnable`, in degrees from straight above (0 to 60). Default: 0.                                        |
 
 ### The frame
 

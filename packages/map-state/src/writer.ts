@@ -31,6 +31,7 @@ import {
 	LEGEND_LAYOUTS,
 	LEGEND_THEMES,
 	type Bounds,
+	MAX_PITCH,
 	type StateFrame,
 	type StateElement,
 	type StateElementCircle,
@@ -315,7 +316,13 @@ export class StateWriter {
 		// effective resolution of coordinates is 1000 times the visible radius
 		this.writePoint(map.center, radius / 1e3);
 
-		this.writeBit(false); // additional map data not supported yet
+		// whether the author can turn the map in the editor, and then how it is turned: the rotation
+		// (9 bits, whole degrees from 0 to 359) and the tilt (6 bits, whole degrees)
+		this.writeBit(map.turnable === true);
+		if (map.turnable) {
+			this.writeInteger(((Math.round(map.bearing ?? 0) % 360) + 360) % 360, 9);
+			this.writeInteger(Math.min(MAX_PITCH, Math.max(0, Math.round(map.pitch ?? 0))), 6);
+		}
 
 		const scale = Math.round(1e5 / Math.max(1, radius / 1e3));
 		return [Math.round(map.center[0] * scale) / scale, Math.round(map.center[1] * scale) / scale];

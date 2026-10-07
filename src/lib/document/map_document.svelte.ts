@@ -68,6 +68,11 @@ export class MapDocument {
 	 */
 	public frameTurn: FrameTurn | undefined = $state.raw(undefined);
 	/**
+	 * Whether the author can rotate and tilt the map in the editor, which else shows it with north
+	 * at the top, seen from straight above. Kept with the camera, so it is not part of the history.
+	 */
+	public turnable = $state(false);
+	/**
 	 * The legend of the map, if it has one. Replaced as a whole on every change. Without the fields
 	 * that have their default value, as links store it, so a legend is the same in a link, a file
 	 * and the editor.
@@ -256,6 +261,8 @@ export class MapDocument {
 	public async loadState(state: MapState, { keepView = false } = {}) {
 		this.clear();
 		const camera = this.isInteractive() ? state.view : undefined;
+		// a map without a camera is not turned by one
+		if (!camera) this.applyCamera(undefined);
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
 		if (!camera && !keepView) {
 			// only the viewer turns the map; the editor stays north-up and seen from straight above
@@ -281,7 +288,7 @@ export class MapDocument {
 
 		this.deselectAll();
 
-		if (state.view) this.view.fitViewport(state.view);
+		if (state.view) this.applyCamera(state.view);
 		this.frame = state.frame?.bounds;
 		this.frameTurn = turnOf(state.frame);
 		this.applyMetadata(state.meta);
@@ -313,6 +320,11 @@ export class MapDocument {
 		const kept = new Set(next);
 		current.filter((element) => !kept.has(element)).forEach((element) => element.destroy());
 		this.elements = next;
+	}
+
+	/** Look where the camera of a map looks; the editor also turns its map like it, see there. */
+	protected applyCamera(camera: MapState['view']) {
+		if (camera) this.view.fitViewport(camera);
 	}
 
 	/** Take the properties of the map from the state, e.g. its legend. */

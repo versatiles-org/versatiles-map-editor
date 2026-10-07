@@ -16,6 +16,7 @@ import {
 	type Bounds
 } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
+import type { Turn, Viewport } from '../rendering/index.js';
 
 export class MapDocumentInteractive extends MapDocument {
 	public readonly selection: SelectionHandler;
@@ -24,6 +25,8 @@ export class MapDocumentInteractive extends MapDocument {
 	public readonly state: StateManager;
 	/** Editing the visible area (the frame), in which drawing and selecting are off. */
 	public readonly visibleArea: VisibleAreaMode;
+	/** How the author turned the map of the editor, if it is `turnable`. */
+	#turn: Turn = {};
 	/** Picking the style of an element with a click, e.g. for an entry of the legend. */
 	public readonly stylePicker: StylePickerMode;
 	public readonly styleClipboard = new StyleClipboard();
@@ -114,6 +117,25 @@ export class MapDocumentInteractive extends MapDocument {
 		return element;
 	}
 
+	/**
+	 * Where the editor looks, and how its map is turned if the author can turn it: the view of the
+	 * map state. Not as a shared map is turned, which the map shows while the visible area is edited.
+	 */
+	public getCamera(): Viewport {
+		const viewport = this.view.getViewport();
+		if (!this.turnable) return viewport;
+		const { bearing, pitch } = this.#turn;
+		return { ...viewport, turnable: true, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
+	}
+
+	protected override applyCamera(camera: MapState['view']) {
+		super.applyCamera(camera);
+		this.turnable = camera?.turnable === true;
+		this.#turn = this.turnable ? { bearing: camera?.bearing, pitch: camera?.pitch } : {};
+		// the visible area mode shows how a shared map is turned, until it ends
+		if (!this.visibleArea?.active) this.view.setTurn(this.#turn);
+	}
+
 	public getGeoJSON(): GeoJSONDocument {
 		return stateToGeoJSON(this.getState());
 	}
@@ -135,7 +157,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.mapLabelsOnTop) labels.mapOnTop = true;
 		if (Object.keys(labels).length > 0) meta.labels = labels;
 		return {
-			view: this.view.getViewport(),
+			view: this.getCamera(),
 			...(this.frame || this.frameTurn
 				? { frame: { ...(this.frame ? { bounds: this.frame } : {}), ...this.frameTurn } }
 				: {}),
@@ -153,7 +175,7 @@ export class MapDocumentInteractive extends MapDocument {
 	 * properties it has (e.g. the background) replace the current ones.
 	 */
 	public addState(state: MapState) {
-		if (state.view) this.view.fitViewport(state.view);
+		if (state.view) this.applyCamera(state.view);
 		// both visible areas: one that covers both; else the one there is
 		const bounds = state.frame?.bounds;
 		if (bounds) this.frame = this.frame ? unionOf(this.frame, bounds) : bounds;

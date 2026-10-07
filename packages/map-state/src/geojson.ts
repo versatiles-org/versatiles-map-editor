@@ -33,10 +33,10 @@ import {
 
 /**
  * A GeoJSON FeatureCollection extended with the editor's `view` (`center` + `radius` in
- * meters) and the `frame`: what a shared map shows, e.g. its visible area (`bounds`).
+ * meters, and how the author turned the map) and the `frame`: what a shared map shows, e.g. its visible area (`bounds`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
-	view?: { center: [number, number]; radius: number };
+	view?: MapState['view'];
 	frame?: StateFrame;
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
@@ -119,7 +119,8 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	});
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
-	if (state.view) doc.view = { center: state.view.center, radius: state.view.radius };
+	const view = sanitizeView(state.view);
+	if (view) doc.view = view;
 	const frame = sanitizeFrame(state.frame);
 	if (frame) doc.frame = frame;
 	const meta: StateMetadata = {};

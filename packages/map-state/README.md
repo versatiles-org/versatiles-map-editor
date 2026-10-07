@@ -120,7 +120,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- viewport → `view: { center, radius }` (mirrors the state; lossless round-trip)
+- viewport → `view: { center, radius, turnable, bearing, pitch }` (mirrors the state; lossless round-trip)
 - what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
@@ -173,7 +173,8 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
 this version is read; a later version can be told apart by it. Then come the palette, the string
-table, the view (`view`, optional: where the author's editor looks), the resolution, the origin
+table, the view (`view`, optional: where the author's editor looks, and how its map is turned if
+the author can turn it), the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
 relative, the frame (optional: the visible area of a shared map, and how it is turned), the metadata, 1 bit whether an
 element has a popup (without one, the elements have no bit for it) and the elements.

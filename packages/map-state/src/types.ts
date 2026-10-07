@@ -56,6 +56,25 @@ export interface MapState {
 		 * @exclusiveMinimum 0
 		 */
 		radius: number;
+		/**
+		 * The author can rotate and tilt the map in the editor, which else shows it with north at the
+		 * top, seen from straight above. Default: false.
+		 */
+		turnable?: boolean;
+		/**
+		 * The rotation of the editor's map, if it is `turnable`: the compass direction at the top of
+		 * the window, in degrees clockwise from north. Default: 0.
+		 * @minimum -180
+		 * @maximum 180
+		 */
+		bearing?: number;
+		/**
+		 * The tilt of the editor's map, if it is `turnable`, in degrees: 0 looks straight down.
+		 * Default: 0.
+		 * @minimum 0
+		 * @maximum 60
+		 */
+		pitch?: number;
 	};
 	/** What a shared or embedded map shows when it opens, and how its viewers can turn it. */
 	frame?: StateFrame;

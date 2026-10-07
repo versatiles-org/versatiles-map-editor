@@ -320,7 +320,7 @@ export class SessionSync {
 		if (!store || !doc) return;
 		const encoded = encodeStep(state);
 		if (!this.#id) {
-			const id = store.create(this.#first ?? encoded, { camera: doc.view.getViewport() });
+			const id = store.create(this.#first ?? encoded, { camera: doc.getCamera() });
 			this.#setSession(id);
 			if (this.#first === undefined) return this.#storeTitle(state.meta?.title);
 		}
@@ -371,7 +371,7 @@ export class SessionSync {
 
 	#onMove = () => {
 		const doc = this.#doc;
-		if (this.#id && doc && !this.#loading) this.#store?.setCamera(this.#id, doc.view.getViewport());
+		if (this.#id && doc && !this.#loading) this.#store?.setCamera(this.#id, doc.getCamera());
 	};
 
 	// the links of the address bar, one after the other, so a link opens one session only

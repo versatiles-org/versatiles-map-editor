@@ -18,6 +18,22 @@
 							"type": "number",
 							"description": "The radius of the largest circle that the window shows, in meters.",
 							"exclusiveMinimum": 0
+						},
+						"turnable": {
+							"type": "boolean",
+							"description": "The author can rotate and tilt the map in the editor, which else shows it with north at the top, seen from straight above. Default: false."
+						},
+						"bearing": {
+							"type": "number",
+							"description": "The rotation of the editor's map, if it is `turnable`: the compass direction at the top of the window, in degrees clockwise from north. Default: 0.",
+							"minimum": -180,
+							"maximum": 180
+						},
+						"pitch": {
+							"type": "number",
+							"description": "The tilt of the editor's map, if it is `turnable`, in degrees: 0 looks straight down. Default: 0.",
+							"minimum": 0,
+							"maximum": 60
 						}
 					},
 					"required": ["center", "radius"],

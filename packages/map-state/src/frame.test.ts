@@ -137,6 +137,42 @@ describe('frame: how the map is turned', () => {
 	});
 });
 
+describe('view: how the author turned the map in the editor', () => {
+	const view = { center: [10, 50] as [number, number], radius: 1024 };
+
+	it('is kept in a link, in whole degrees, if the map can be turned', () => {
+		const turned = { ...view, turnable: true, bearing: -75, pitch: 40 };
+		expect(decodeState(encodeState({ ...state, view: turned })).view).toStrictEqual(turned);
+		expect(decodeState(encodeState({ ...state, view: { ...view, turnable: true } })).view).toStrictEqual({
+			...view,
+			turnable: true
+		});
+		const rounded = decodeState(encodeState({ ...state, view: { ...view, turnable: true, bearing: 29.6, pitch: 99 } }));
+		expect(rounded.view).toStrictEqual({ ...view, turnable: true, bearing: 30, pitch: 60 });
+	});
+
+	it('is left out of a map that cannot be turned, which costs a link nothing', () => {
+		const flat = encodeState({ ...state, view });
+		expect(encodeState({ ...state, view: { ...view, bearing: 30, pitch: 20 } })).toBe(flat);
+		expect(decodeState(flat).view).toStrictEqual(view);
+		expect(
+			encodeState({ ...state, view: { ...view, turnable: true, bearing: 30 } }).length - flat.length
+		).toBeLessThanOrEqual(3);
+	});
+
+	it('is kept in GeoJSON and KML, next to the frame, which is turned on its own', () => {
+		const both: MapState = {
+			...state,
+			view: { ...view, turnable: true, bearing: 10 },
+			frame: { bounds, bearing: -120, pitch: 45 }
+		};
+		expect(stateFromGeoJSON(stateToGeoJSON(both)).view).toStrictEqual(both.view);
+		expect(stateFromGeoJSON(stateToGeoJSON(both)).frame).toStrictEqual(both.frame);
+		expect(stateFromKML(stateToKML(both)).view).toStrictEqual(both.view);
+		expect(decodeState(encodeState(both))).toStrictEqual(both);
+	});
+});
+
 describe('sanitizeBounds', () => {
 	it('accepts only an area within the latitudes and longitudes of the map', () => {
 		expect(sanitizeBounds([-10, -20, 10, 20])).toStrictEqual([-10, -20, 10, 20]);

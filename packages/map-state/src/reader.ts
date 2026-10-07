@@ -44,6 +44,7 @@ import {
 	sanitizeBounds,
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
+	sanitizeView,
 	VIEWER_CHOICES
 } from './profile.js';
 import { LocalGrid } from './grid.js';
@@ -341,9 +342,11 @@ export class StateReader {
 			// effective resolution of coordinates is 1000 times the visible radius
 			const center = checkLatitude(this.readPoint(radius / 1e3));
 
-			if (this.readBit()) throw new Error('Additional map metadata is not supported yet');
-
-			return { radius, center };
+			// see `StateWriter.writeView`
+			if (!this.readBit()) return { radius, center };
+			const [bearing, pitch] = [this.readInteger(9), this.readInteger(6)];
+			// without the parts that have their default value, and with the rotation up to 180°
+			return sanitizeView({ radius, center, turnable: true, bearing, pitch });
 		} catch (cause) {
 			throw new Error(`Error reading map`, { cause });
 		}

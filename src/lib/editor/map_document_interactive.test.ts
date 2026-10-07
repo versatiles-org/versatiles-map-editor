@@ -635,6 +635,37 @@ describe('MapDocument', () => {
 			expect(doc.frameTurn).toStrictEqual({ bearing: -90 });
 		});
 
+		it('is turned on its own: the editor keeps how the author turned its map, if it can be turned', async () => {
+			const view = { center: [13.4, 52.5] as [number, number], radius: 1000 };
+			await doc.loadState({
+				view: { ...view, turnable: true, bearing: 25, pitch: 40 },
+				frame: { bearing: -90 },
+				elements
+			});
+			expect(doc.turnable).toBe(true);
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([25, 40]);
+			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
+			expect(doc.getState().view).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
+			expect(doc.getState().frame).toStrictEqual({ bearing: -90 });
+			// the visible area mode shows how the shared map is turned; the camera keeps the editor's turn
+			doc.visibleArea.open();
+			expect(mockMap.getBearing()).toBe(-90);
+			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
+			doc.visibleArea.close();
+
+			// a map that cannot be turned is not, whatever its view says
+			await doc.loadState({ view: { ...view, bearing: 25, pitch: 40 }, elements });
+			expect(doc.turnable).toBe(false);
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 0]);
+			expect(doc.getState().view).not.toHaveProperty('turnable');
+			expect(doc.getState().view).not.toHaveProperty('bearing');
+			// and neither is a map without a camera, e.g. of a share link
+			await doc.loadState({ view: { ...view, turnable: true, bearing: 25 }, elements });
+			await doc.loadState({ elements });
+			expect(doc.turnable).toBe(false);
+			expect(mockMap.getBearing()).toBe(0);
+		});
+
 		it('is next to the bounds of the elements', () => {
 			expect(doc.getBounds()).toBeUndefined();
 			addElement(doc, 'marker');
