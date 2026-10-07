@@ -3,7 +3,7 @@ import type { ExpressionSpecification, LayerSpecification, SourceSpecification }
 import type { AbstractElement, StyleLayers } from '../element/index.js';
 import { dashArrays, LABEL_PLACES, labelPlaceTable } from '../style/index.js';
 import { allSymbols } from '../background/index.js';
-import { arrowHeads } from './arrow_heads.js';
+import { arrowHeads, ROTATE_ZOOMS, rotateProperty } from './arrow_heads.js';
 
 /**
  * The parts of a style that elements have, each drawn by one layer for all elements, and the
@@ -178,6 +178,19 @@ function anchorLayer(id: string): LayerSpecification {
 }
 
 /**
+ * The direction of an arrowhead: along the line at its end point, or the one of the zoom level
+ * where the line bends within the head, see `arrowHeads`.
+ */
+const ARROW_ROTATE = [
+	'step',
+	['zoom'],
+	...Array.from({ length: ROTATE_ZOOMS }, (_, zoom) => [
+		...(zoom > 0 ? [zoom] : []),
+		['coalesce', ['get', rotateProperty(zoom)], ['get', 'rotate']]
+	]).flat()
+] as ExpressionSpecification;
+
+/**
  * A layer of a role, see `planLayers`: it draws the features that name it. Markers with the glyph
  * font of their labels.
  */
@@ -227,7 +240,7 @@ function elementLayer(role: Role, id: string, font: string): LayerSpecification 
 						['literal', [1000, 0]]
 					],
 					// turned with the map, so it points along the line
-					'icon-rotate': ['get', 'rotate'],
+					'icon-rotate': ARROW_ROTATE,
 					'icon-rotation-alignment': 'map',
 					'icon-pitch-alignment': 'map',
 					'icon-allow-overlap': true,

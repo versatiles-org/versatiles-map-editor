@@ -37,9 +37,9 @@ const lerp = (a: Point, b: Point, ta: number, tb: number, t: number): Point => {
 
 /**
  * The node before the start (`step` -1) or after the end (`step` 1) of a segment, at another place
- * than that end: of a closed path around its first node, of an open one mirrored at its end.
+ * than that end: of a closed path around its first node; undefined beyond the end of an open one.
  */
-function neighbor(points: Point[], closed: boolean, index: number, step: -1 | 1, other: Point): Point {
+function neighbor(points: Point[], closed: boolean, index: number, step: -1 | 1): Point | undefined {
 	const n = points.length;
 	const end = points[index];
 	for (let i = 1; i < n; i++) {
@@ -48,8 +48,21 @@ function neighbor(points: Point[], closed: boolean, index: number, step: -1 | 1,
 		const point = points[((j % n) + n) % n];
 		if (!same(point, end)) return point;
 	}
-	// beyond the end of the line: straight on, as far as the segment is long
-	return [2 * end[0] - other[0], 2 * end[1] - other[1]];
+	return undefined;
+}
+
+/**
+ * A point mirrored at the middle of the segment a–b, to its other end: the node that the curve of
+ * an end segment of a line lacks. So this curve is symmetric and bends on as it came, like an arc
+ * (e.g. along the circle that the nodes lie on), instead of running straight at the end of the
+ * line, which an arrowhead there would follow.
+ */
+function mirrored(point: Point, a: Point, b: Point): Point {
+	const length = dist(a, b);
+	const [ux, uy] = [(b[0] - a[0]) / length, (b[1] - a[1]) / length];
+	// how far the point is along the segment, from its middle
+	const along = (point[0] - (a[0] + b[0]) / 2) * ux + (point[1] - (a[1] + b[1]) / 2) * uy;
+	return [point[0] - 2 * along * ux, point[1] - 2 * along * uy];
 }
 
 /**
@@ -60,8 +73,11 @@ function segmentCurve(points: Point[], closed: boolean, i: number): ((t: number)
 	const p1 = points[i];
 	const p2 = points[(i + 1) % points.length];
 	if (same(p1, p2)) return undefined;
-	const p0 = neighbor(points, closed, i, -1, p2);
-	const p3 = neighbor(points, closed, (i + 1) % points.length, 1, p1);
+	const before = neighbor(points, closed, i, -1);
+	const after = neighbor(points, closed, (i + 1) % points.length, 1);
+	// beyond the end of a line: the node at the other side, mirrored; straight on for a single segment
+	const p0 = before ?? (after ? mirrored(after, p1, p2) : ([2 * p1[0] - p2[0], 2 * p1[1] - p2[1]] as Point));
+	const p3 = after ?? (before ? mirrored(before, p1, p2) : ([2 * p2[0] - p1[0], 2 * p2[1] - p1[1]] as Point));
 	// the knots of the centripetal parameterization (Barry and Goldman's pyramid)
 	const t0 = 0;
 	const t1 = t0 + dist(p0, p1) ** ALPHA;

@@ -169,6 +169,17 @@ export function drawArrowHead(
 	context.restore();
 }
 
+/**
+ * The zoom levels at which a head can point another way, from 0: MapLibre lays out the symbols once
+ * per whole zoom level, so the direction of a head is set per level, see `headDirection`.
+ */
+export const ROTATE_ZOOMS = 25;
+
+/** The name of the property with the direction of a head from a zoom level on, e.g. "rotate12". */
+export function rotateProperty(zoom: number): `rotate${number}` {
+	return `rotate${zoom}`;
+}
+
 /** An arrowhead as the layer of the arrowheads draws it: at the end point, see `arrowHeadFeatures`. */
 export interface ArrowHead {
 	point: GeoPoint;
@@ -176,8 +187,10 @@ export interface ArrowHead {
 	end: boolean;
 	properties: {
 		icon: string;
-		/** Clockwise in degrees, from pointing east. */
+		/** Clockwise in degrees, from pointing east: along the line at its end point. */
 		rotate: number;
+		/** The direction at the zoom levels where it is another one, see `rotateProperty`. */
+		[rotateAtZoom: `rotate${number}`]: number;
 		size: number;
 		/** Of the image along the line (it points east), in its pixels: the triangle lies beyond the end point. */
 		offset: number;
@@ -203,6 +216,61 @@ export function endDirection(path: GeoPath, end: boolean): number | undefined {
 	return (Math.atan2(y0 - other[1], x0 - other[0]) * 180) / Math.PI;
 }
 
+/**
+ * How far a head reaches back along its line from the end point, in pixels: to the base of the
+ * triangle, or to the ends of the chevron's arms. A circle looks the same in every direction.
+ */
+function headLength(arrow: ArrowName, headWidth: number, lineWidth: number): number {
+	const scale = headWidth / HEAD_WIDTH;
+	switch (arrow) {
+		case 'triangle':
+			return TRIANGLE_LENGTH * scale - headShift(arrow, lineWidth);
+		case 'chevron':
+			return CHEVRON_ARM * scale;
+		default:
+			return 0;
+	}
+}
+
+/** The size of a pixel at a zoom level, as `screenPoint` measures: the world is 512 pixels wide at zoom 0. */
+function pixelSize(zoom: number): number {
+	return (2 * Math.PI) / (512 * 2 ** zoom);
+}
+
+/**
+ * The direction of a head that reaches `length` back from the first point (`end` false) or the last
+ * point of the path, with `length` as `screenPoint` measures: from where the path enters the head
+ * to the end point, so the head sits straight on a line that bends within it, e.g. a smooth curve
+ * or a short last segment. From the other end of a path that is shorter than the head. Clockwise in
+ * degrees from east; undefined if all points are at one place.
+ */
+export function headDirection(path: GeoPath, end: boolean, length: number): number | undefined {
+	if (!(length > 0)) return endDirection(path, end);
+	const points = (end ? [...path].reverse() : path).map(screenPoint);
+	const [x0, y0] = points[0];
+	const distance = ([x, y]: GeoPoint) => Math.hypot(x - x0, y - y0);
+	let entry: GeoPoint | undefined;
+	for (let i = 1; i < points.length; i++) {
+		const [before, after] = [distance(points[i - 1]), distance(points[i])];
+		if (after > 0) entry = points[i];
+		if (after < length) continue;
+		// where the piece from the point before, within the head, is `length` away from the end point
+		const [ax, ay] = [points[i - 1][0] - x0, points[i - 1][1] - y0];
+		const [dx, dy] = [points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]];
+		const [a, b, c] = [dx * dx + dy * dy, ax * dx + ay * dy, before * before - length * length];
+		const t = (-b + Math.sqrt(Math.max(0, b * b - a * c))) / a;
+		entry = [x0 + ax + dx * t, y0 + ay + dy * t];
+		break;
+	}
+	if (!entry) return undefined;
+	return (Math.atan2(y0 - entry[1], x0 - entry[0]) * 180) / Math.PI;
+}
+
+/** The difference of two directions in degrees, from 0 to 180. */
+function turned(a: number, b: number): number {
+	return Math.abs(((((a - b) % 360) + 540) % 360) - 180);
+}
+
 /** The arrowheads of a line with its arrow properties, see `LineStyle.getArrowProperties`. */
 export function arrowHeads(path: GeoPath, arrows: ArrowProperties): ArrowHead[] {
 	const size = (arrows.size * arrows.width) / HEAD_WIDTH;
@@ -213,12 +281,20 @@ export function arrowHeads(path: GeoPath, arrows: ArrowProperties): ArrowHead[] 
 		if (arrow === 'none' || rotate === undefined) return [];
 		// in pixels of the image, which `icon-size` scales
 		const offset = headShift(arrow, arrows.width) / size;
-		return [
-			{
-				point: path[end ? path.length - 1 : 0],
-				end,
-				properties: { icon: arrowImageName(arrow), rotate, size, offset, color: arrows.color }
-			}
-		];
+		const properties: ArrowHead['properties'] = {
+			icon: arrowImageName(arrow),
+			rotate,
+			size,
+			offset,
+			color: arrows.color
+		};
+		const length = headLength(arrow, arrows.size * arrows.width, arrows.width);
+		for (let zoom = 0; length > 0 && zoom < ROTATE_ZOOMS; zoom++) {
+			// in the middle of the zoom level, between the sizes that the line has within it
+			const direction = headDirection(path, end, length * pixelSize(zoom + 0.5));
+			// only where the line bends within the head
+			if (direction !== undefined && turned(direction, rotate) > 0.01) properties[rotateProperty(zoom)] = direction;
+		}
+		return [{ point: path[end ? path.length - 1 : 0], end, properties }];
 	});
 }

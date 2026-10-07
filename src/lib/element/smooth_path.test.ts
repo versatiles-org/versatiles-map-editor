@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lat2mercator, type GeoPath, type GeoPoint } from '../geometry.js';
+import { lat2mercator, mercator2lat, type GeoPath, type GeoPoint } from '../geometry.js';
 import { curvePoint, smoothPath } from './smooth_path.js';
 
 /** Whether the curve has a point at the place, within a tiny rounding error. */
@@ -80,6 +80,29 @@ describe('smoothPath', () => {
 		expect(curve.flat().every(Number.isFinite)).toBe(true);
 		expect(passesThrough(curve, zigzag[2])).toBe(true);
 		expect(smoothPath([zigzag[0], zigzag[0]], false).flat().every(Number.isFinite)).toBe(true);
+	});
+
+	it('bends on to the ends of a line like an arc, where an arrowhead points along it', () => {
+		// nodes on a circle as the map shows it (Mercator), a quarter turn apart, counterclockwise from east
+		const radius = 0.001;
+		const y0 = lat2mercator(52.5);
+		const onCircle = (angle: number): GeoPoint => [
+			13.4 + (radius * Math.cos(angle) * 180) / Math.PI,
+			mercator2lat(y0 + radius * Math.sin(angle))
+		];
+		for (const count of [3, 4]) {
+			const angles = Array.from({ length: count }, (_, i) => (i * Math.PI) / 2);
+			const pieces = directions(smoothPath(angles.map(onCircle), false));
+			// along the circle at both ends: a quarter turn ahead of the direction from its center
+			const turn = (angle: number, expected: number) => Math.abs(Math.sin(angle - expected));
+			expect(turn(pieces[0], angles[0] + Math.PI / 2)).toBeLessThan(0.03);
+			expect(turn(pieces[pieces.length - 1], angles[count - 1] + Math.PI / 2)).toBeLessThan(0.03);
+		}
+	});
+
+	it('keeps a line of two nodes straight', () => {
+		const curve = smoothPath(zigzag.slice(0, 2), false);
+		expect(curve).toHaveLength(2);
 	});
 
 	it('is a new array, since paths are shared', () => {

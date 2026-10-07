@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import type { ArrowProperties } from '../style/index.js';
-import { addArrowImage, arrowHeads, arrowImage, endDirection, HEAD_WIDTH } from './arrow_heads.js';
+import {
+	addArrowImage,
+	arrowHeads,
+	arrowImage,
+	endDirection,
+	headDirection,
+	HEAD_WIDTH,
+	ROTATE_ZOOMS,
+	rotateProperty
+} from './arrow_heads.js';
 
 const arrows = (properties: Partial<ArrowProperties>): ArrowProperties => ({
 	start: 'none',
@@ -64,6 +73,35 @@ describe('endDirection', () => {
 	});
 });
 
+describe('headDirection', () => {
+	// at the equator, where a degree is as long to the north as to the east: east, then a short piece north
+	const bent: [number, number][] = [
+		[0, 0],
+		[1, 0],
+		[1, 0.001]
+	];
+	const degrees = (value: number) => (value * Math.PI) / 180;
+
+	it('is the direction at the end point if the head is shorter than the last piece', () => {
+		expect(headDirection(bent, true, degrees(0.0005))).toBeCloseTo(-90);
+		expect(headDirection(bent, false, degrees(0.5))).toBeCloseTo(180);
+		expect(headDirection(bent, true, 0)).toBeCloseTo(-90);
+	});
+
+	it('is the direction from where the line enters a longer head', () => {
+		// the head reaches back around the corner: 0.001° north of a point 0.001° west
+		const direction = headDirection(bent, true, degrees(0.001 * Math.SQRT2));
+		expect(direction).toBeCloseTo(-45, 1);
+		// much longer than the last piece: nearly along the long one
+		expect(headDirection(bent, true, degrees(0.5))).toBeCloseTo(-0.11, 1);
+	});
+
+	it('is the direction from the other end of a line that is shorter than the head', () => {
+		expect(headDirection(bent, true, degrees(10))).toBeCloseTo(-0.06, 1);
+		expect(headDirection([bent[0], bent[0]], true, degrees(10))).toBeUndefined();
+	});
+});
+
 describe('arrowHeads', () => {
 	const path: [number, number][] = [
 		[0, 0],
@@ -95,6 +133,39 @@ describe('arrowHeads', () => {
 			// the sides of the triangle touch the cap (radius 2): its half angle has a sine of 1/√5
 			expect(beyond * (1 / Math.sqrt(5))).toBeCloseTo(2);
 		}
+	});
+});
+
+describe('arrowHeads at the zoom levels', () => {
+	const zooms = (properties: object) => Object.keys(properties).filter((key) => /^rotate\d+$/.test(key));
+
+	it('has one direction on a straight line, and for a circle', () => {
+		const straight: [number, number][] = [
+			[0, 0],
+			[1, 0],
+			[2, 0]
+		];
+		const [head] = arrowHeads(straight, arrows({ end: 'triangle' }));
+		expect(zooms(head.properties)).toStrictEqual([]);
+		const bent: [number, number][] = [...straight, [2, 0.001]];
+		expect(zooms(arrowHeads(bent, arrows({ end: 'circle' }))[0].properties)).toStrictEqual([]);
+	});
+
+	it('has other directions where the line bends within the head: when zoomed out', () => {
+		// east, then 0.001° north, about 111 m: longer than the head (7.5 pixels behind the end point) from zoom 12 on
+		const bent: [number, number][] = [
+			[0, 0],
+			[1, 0],
+			[1, 0.001]
+		];
+		const { properties } = arrowHeads(bent, arrows({ end: 'triangle', size: 3, width: 4 }))[0];
+		expect(properties.rotate).toBeCloseTo(-90);
+		expect(zooms(properties)).toStrictEqual(Array.from({ length: 12 }, (_, zoom) => rotateProperty(zoom)));
+		// nearly along the long piece when zoomed far out, turning to the short one
+		expect(properties.rotate0).toBeCloseTo(0, 0);
+		expect(properties.rotate11).toBeLessThan(-20);
+		expect(properties.rotate11).toBeGreaterThan(-90);
+		expect(ROTATE_ZOOMS).toBeGreaterThan(22);
 	});
 });
 
