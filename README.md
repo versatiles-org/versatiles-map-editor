@@ -171,7 +171,7 @@ An organisation running the editor can use its own tile server and geocoder, sta
 	"tileServer": "https://tiles.example.org",
 	"geocoder": "https://geocode.example.org/api",
 	"startView": [9.73, 53.39, 10.33, 53.74],
-	"startBackground": { "builder": "osm", "options": { "theme": "gray" } },
+	"startBackground": { "theme": "gray" },
 	"defaultLanguage": "de",
 	"defaultColorScheme": "corporate",
 	"colorSchemes": [{ "id": "corporate", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
@@ -182,7 +182,7 @@ An organisation running the editor can use its own tile server and geocoder, sta
 ```
 
 - `tileServer` (default `https://tiles.versatiles.org`) serves the background map, the satellite imagery, the symbols (sprites) and the fonts (glyphs), with the same vector tiles (Shortbread) and `assets/` as tiles.versatiles.org. `geocoder` (default `https://geocode.versatiles.org/api`) is the address search, with the API of [Photon](https://github.com/komoot/photon). Both apply to the editor and the viewer, and only this file sets them, never a shared map.
-- `startView` (`[west, south, east, north]`) is what a new map shows, instead of the country of the user (guessed from the time zone, in the EU and the US) or the whole world. `startBackground` is the background of a new map, as in `.mapjson` files, and `defaultLanguage` the language of its labels (`"user"`: of the browser, the default; `"local"`; or a code like `"de"`), unless the starting background sets one. A new map stores its background like a chosen one (unless it is the editor's default), so its links look the same on every server.
+- `startView` (`[west, south, east, north]`) is what a new map shows, instead of the country of the user (guessed from the time zone, in the EU and the US) or the whole world. `startBackground` is the background of a new map, its settings as in `.mapjson` files (e.g. `{ "theme": "gray" }` or `{ "base": "satellite" }`), and `defaultLanguage` the language of its labels (`"user"`: of the browser, the default; `"local"`; or a code like `"de"`), unless the starting background sets one. A new map stores its background like a chosen one (unless it is the editor's default), so its links look the same on every server.
 - `defaultColorScheme` is the `id` of the scheme that the color picker offers by default (one of the configured or predefined schemes); without it, the first one.
 - `colorSchemes` are offered in the color picker before the predefined schemes. Each `id` may be used once; a scheme with the `id` of a predefined one replaces it. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
 - The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and of each marker. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.

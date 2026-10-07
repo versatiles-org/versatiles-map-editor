@@ -239,8 +239,8 @@ npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-per
 ```
 
 Without files, it analyses the examples. The tree shows each string of the string table with its
-bits, e.g. how much the background costs. It encodes at the precision of the share dialog
+bits, e.g. how much a label costs. It encodes at the precision of the share dialog
 (`resolutionForArea`), or at `--resolution <m>`. `--summary` prints a line per map instead: its bits
-and the shares of strings, coordinates, styles, colors and so on. `--json` prints both as JSON, e.g.
+and the shares of strings, coordinates, styles, colors, the background map and so on. `--json` prints both as JSON, e.g.
 to compare two versions of the format with `diff`. Test maps with labels and popups in other
 languages and scripts are in `src/__fixtures__/languages/`.
