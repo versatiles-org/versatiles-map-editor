@@ -58,6 +58,26 @@ describe('the relief', () => {
 	});
 });
 
+describe('3D buildings', () => {
+	it('are raised on the vector map, next to the relief, and flat by default', () => {
+		const raised = changeSettings(undefined, { buildings3d: true })!;
+		expect(raised.options.features).toStrictEqual({ buildings: 'extruded' });
+		expect(getSettings(raised).buildings3d).toBe(true);
+		const shaded = changeSettings(raised, { hillshade: true })!;
+		expect(shaded.options.features).toStrictEqual({ buildings: 'extruded', hillshade: true });
+		expect(changeSettings(shaded, { buildings3d: false })!.options.features).toStrictEqual({ hillshade: true });
+		expect(changeSettings(raised, { buildings3d: false })).toBeUndefined();
+	});
+
+	it('are not on the satellite map, which has no buildings of its own', () => {
+		const raised = changeSettings(changeSettings(undefined, { buildings3d: true }), { hillshade: true });
+		const satellite = changeSettings(raised, { base: 'satellite' })!;
+		expect(satellite.options.features).toStrictEqual({ hillshade: true });
+		expect(getSettings(satellite).buildings3d).toBe(false);
+		expect(changeSettings(satellite, { buildings3d: true })!.options.features).toStrictEqual({ hillshade: true });
+	});
+});
+
 describe('getSettings', () => {
 	it('reads the editor default', () => {
 		expect(getSettings()).toStrictEqual({
@@ -72,7 +92,8 @@ describe('getSettings', () => {
 			haloWidth: 2,
 			colors: DEFAULT_COLORS,
 			hillshade: false,
-			terrain: false
+			terrain: false,
+			buildings3d: false
 		});
 	});
 
@@ -94,7 +115,8 @@ describe('getSettings', () => {
 			haloWidth: 2,
 			colors: DEFAULT_COLORS,
 			hillshade: false,
-			terrain: false
+			terrain: false,
+			buildings3d: false
 		});
 		expect(getSettings({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } })).toMatchObject(
 			{ base: 'satellite', labels: 'none' }

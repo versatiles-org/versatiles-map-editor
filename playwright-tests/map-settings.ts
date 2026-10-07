@@ -168,6 +168,36 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 	await waitForMapIsIdle(page);
 });
 
+test('the buildings of the vector map are raised to their heights', async ({ page }) => {
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.52], radius: 400 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const features = async () =>
+		((await storedState(page)).meta?.background?.options as { features?: object } | undefined)?.features;
+	/** The kinds of the layers that draw the buildings. */
+	const buildingLayers = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			const layers = map.getStyle().layers.filter((layer) => layer.id.startsWith('building'));
+			return [...new Set(layers.map((layer) => layer.type))].sort();
+		});
+	const buildings = page.getByRole('checkbox', { name: '3D buildings' });
+
+	await expect(buildings).not.toBeChecked();
+	expect(await buildingLayers()).toStrictEqual(['fill']);
+	await buildings.check();
+	await expect.poll(features).toStrictEqual({ buildings: 'extruded' });
+	await expect.poll(buildingLayers).toStrictEqual(['fill-extrusion']);
+
+	// the satellite map has none
+	await page.getByRole('radio', { name: 'Satellite' }).click();
+	await expect(buildings).toHaveCount(0);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(buildingLayers).toStrictEqual(['fill-extrusion']);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(buildingLayers).toStrictEqual(['fill']);
+	await waitForMapIsIdle(page);
+});
+
 test('the satellite imagery without streets, borders and labels', async ({ page }) => {
 	const state: MapState = {
 		view: { center: [13.4, 52.5], radius: 10000 },

@@ -32,6 +32,11 @@ export interface BackgroundSettings {
 	hillshade: boolean;
 	/** Whether the map has the heights of its terrain, which a tilted map shows as hills and mountains. */
 	terrain: boolean;
+	/**
+	 * Whether the vector map raises its buildings to their heights, which a tilted map shows when
+	 * zoomed in. The satellite map has no buildings of its own.
+	 */
+	buildings3d: boolean;
 }
 
 /**
@@ -123,7 +128,8 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 		colors: getColors(background),
 		// `true`, or an object with their options
 		hillshade: !!features.hillshade,
-		terrain: !!features.terrain
+		terrain: !!features.terrain,
+		buildings3d: base === 'vector' && features.buildings === 'extruded'
 	};
 }
 
@@ -276,6 +282,14 @@ export function changeSettings(
 
 	if (change.colors) setColors(builder, options, change.colors);
 	setRelief(options, change);
+	if (builder === 'osm' && change.buildings3d !== undefined) {
+		const features: Options = isObject(options.features) ? options.features : {};
+		// flat buildings are the default
+		if (change.buildings3d) features.buildings = 'extruded';
+		else delete features.buildings;
+		if (Object.keys(features).length > 0) options.features = features;
+		else delete options.features;
+	}
 
 	const overlay = overlayFor(builder, options, change);
 	// the imagery alone, which stays so

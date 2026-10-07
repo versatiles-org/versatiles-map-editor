@@ -105,6 +105,18 @@
 		</InputRow>
 	{/if}
 
+	{#if settings.base === 'vector'}
+		<!-- raised to their heights, which a tilted map shows when zoomed in -->
+		<InputRow id="{uid}-buildings3d" label="3D buildings">
+			<Checkbox
+				id="{uid}-buildings3d"
+				title="Raise the buildings to their heights, which a tilted map shows when zoomed in"
+				checked={settings.buildings3d}
+				onchange={(e) => change('buildings3d', e.currentTarget.checked)}
+			/>
+		</InputRow>
+	{/if}
+
 	{#if settings.base === 'satellite'}
 		<!-- streets (with the symbols of points of interest) and borders; the labels are set below, independently -->
 		<InputRow id="{uid}-streets" label="Streets">
