@@ -52,17 +52,26 @@ function neighbor(points: Point[], closed: boolean, index: number, step: -1 | 1)
 }
 
 /**
- * A point mirrored at the middle of the segment a–b, to its other end: the node that the curve of
- * an end segment of a line lacks. So this curve is symmetric and bends on as it came, like an arc
- * (e.g. along the circle that the nodes lie on), instead of running straight at the end of the
- * line, which an arrowhead there would follow.
+ * The node that the curve of an end segment of a line lacks, beyond its end: the path `before` →
+ * `inner` → `end`, continued. As the node `before` mirrored at the middle of the end segment, so
+ * the curve of this segment is symmetric and bends on as it came, like an arc (e.g. along the
+ * circle that the nodes lie on), instead of running straight at the end of the line, which an
+ * arrowhead there would follow. That is for a path that turns by a quarter turn at most at `inner`:
+ * a sharper turn is a corner, not an arc, and bends on less, a hairpin not at all, so the line
+ * ends straight after it and not in a curl.
  */
-function mirrored(point: Point, a: Point, b: Point): Point {
-	const length = dist(a, b);
-	const [ux, uy] = [(b[0] - a[0]) / length, (b[1] - a[1]) / length];
-	// how far the point is along the segment, from its middle
-	const along = (point[0] - (a[0] + b[0]) / 2) * ux + (point[1] - (a[1] + b[1]) / 2) * uy;
-	return [point[0] - 2 * along * ux, point[1] - 2 * along * uy];
+function beyondEnd(before: Point, inner: Point, end: Point): Point {
+	const [ax, ay] = [inner[0] - before[0], inner[1] - before[1]];
+	const [bx, by] = [end[0] - inner[0], end[1] - inner[1]];
+	// how far the path turns at the inner node, from -π to π
+	const turn = Math.atan2(ax * by - ay * bx, ax * bx + ay * by);
+	const size = Math.abs(turn);
+	// the same turn again, up to a quarter turn; then less, down to none after a hairpin
+	const angle = Math.sign(turn) * (size <= Math.PI / 2 ? size : Math.PI - size);
+	// as far from the end as the node before is from the inner node, like the mirrored node
+	const scale = Math.hypot(ax, ay) / Math.hypot(bx, by);
+	const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+	return [end[0] + (bx * cos - by * sin) * scale, end[1] + (bx * sin + by * cos) * scale];
 }
 
 /**
@@ -75,9 +84,9 @@ function segmentCurve(points: Point[], closed: boolean, i: number): ((t: number)
 	if (same(p1, p2)) return undefined;
 	const before = neighbor(points, closed, i, -1);
 	const after = neighbor(points, closed, (i + 1) % points.length, 1);
-	// beyond the end of a line: the node at the other side, mirrored; straight on for a single segment
-	const p0 = before ?? (after ? mirrored(after, p1, p2) : ([2 * p1[0] - p2[0], 2 * p1[1] - p2[1]] as Point));
-	const p3 = after ?? (before ? mirrored(before, p1, p2) : ([2 * p2[0] - p1[0], 2 * p2[1] - p1[1]] as Point));
+	// beyond the end of a line: the path continued, see `beyondEnd`; straight on for a single segment
+	const p0 = before ?? (after ? beyondEnd(after, p2, p1) : ([2 * p1[0] - p2[0], 2 * p1[1] - p2[1]] as Point));
+	const p3 = after ?? (before ? beyondEnd(before, p1, p2) : ([2 * p2[0] - p1[0], 2 * p2[1] - p1[1]] as Point));
 	// the knots of the centripetal parameterization (Barry and Goldman's pyramid)
 	const t0 = 0;
 	const t1 = t0 + dist(p0, p1) ** ALPHA;

@@ -100,6 +100,20 @@ describe('smoothPath', () => {
 		}
 	});
 
+	it('ends straight after a hairpin, and not in a curl', () => {
+		// east, and back west just below: the line turns by nearly a half turn at its second node
+		const hairpin: GeoPath = [
+			[13.3, 52.5],
+			[13.5, 52.5],
+			[13.3, 52.49]
+		];
+		const pieces = directions(smoothPath(hairpin, false));
+		// both ends along their segments: east, and west a little south
+		expect(Math.abs(pieces[0])).toBeLessThan(0.1);
+		const last = Math.atan2(lat2mercator(52.49) - lat2mercator(52.5), (-0.2 * Math.PI) / 180);
+		expect(Math.abs(Math.sin(pieces[pieces.length - 1] - last))).toBeLessThan(0.1);
+	});
+
 	it('keeps a line of two nodes straight', () => {
 		const curve = smoothPath(zigzag.slice(0, 2), false);
 		expect(curve).toHaveLength(2);

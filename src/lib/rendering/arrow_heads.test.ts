@@ -74,24 +74,24 @@ describe('endDirection', () => {
 });
 
 describe('headDirection', () => {
-	// at the equator, where a degree is as long to the north as to the east: east, then a short piece north
+	// at the equator, where a degree is as long to the north as to the east: east, then a short piece north-east
 	const bent: [number, number][] = [
 		[0, 0],
 		[1, 0],
-		[1, 0.001]
+		[1.001, 0.001]
 	];
 	const degrees = (value: number) => (value * Math.PI) / 180;
 
 	it('is the direction at the end point if the head is shorter than the last piece', () => {
-		expect(headDirection(bent, true, degrees(0.0005))).toBeCloseTo(-90);
+		expect(headDirection(bent, true, degrees(0.0005))).toBeCloseTo(-45);
 		expect(headDirection(bent, false, degrees(0.5))).toBeCloseTo(180);
-		expect(headDirection(bent, true, 0)).toBeCloseTo(-90);
+		expect(headDirection(bent, true, 0)).toBeCloseTo(-45);
 	});
 
 	it('is the direction from where the line enters a longer head', () => {
-		// the head reaches back around the corner: 0.001° north of a point 0.001° west
-		const direction = headDirection(bent, true, degrees(0.001 * Math.SQRT2));
-		expect(direction).toBeCloseTo(-45, 1);
+		// the head reaches back around the corner: 0.001° north and 0.002° east of a point on the long piece
+		const direction = headDirection(bent, true, degrees(Math.hypot(0.001, 0.002)));
+		expect(direction).toBeCloseTo(-26.57, 1);
 		// much longer than the last piece: nearly along the long one
 		expect(headDirection(bent, true, degrees(0.5))).toBeCloseTo(-0.11, 1);
 	});
@@ -99,6 +99,40 @@ describe('headDirection', () => {
 	it('is the direction from the other end of a line that is shorter than the head', () => {
 		expect(headDirection(bent, true, degrees(10))).toBeCloseTo(-0.06, 1);
 		expect(headDirection([bent[0], bent[0]], true, degrees(10))).toBeUndefined();
+	});
+});
+
+describe('headDirection around a sharp bend', () => {
+	const degrees = (value: number) => (value * Math.PI) / 180;
+
+	it('is along the last piece if the line turns by more than 60° before it, however long the head is', () => {
+		// east, then a short piece north: a corner of 90°
+		const corner: [number, number][] = [
+			[0, 0],
+			[1, 0],
+			[1, 0.001]
+		];
+		for (const length of [0.0005, 0.002, 0.5, 5]) expect(headDirection(corner, true, degrees(length))).toBeCloseTo(-90);
+	});
+});
+
+describe('headDirection of a hook', () => {
+	const degrees = (value: number) => (value * Math.PI) / 180;
+	// west, then back east below it: the path ends in a hook that points east
+	const hook: [number, number][] = [
+		[1, 0.001],
+		[0, 0.001],
+		[0, 0],
+		[0.002, 0]
+	];
+
+	it('is not from where the path leads away from the end point, however long the head is', () => {
+		// a head shorter than the last piece, as long as the hook, and much longer
+		for (const length of [0.001, 0.002, 0.01, 0.5, 5]) {
+			const direction = headDirection(hook, true, degrees(length))!;
+			// east, turned a little to where the hook begins: never west
+			expect(Math.abs(direction)).toBeLessThan(30);
+		}
 	});
 });
 
@@ -152,19 +186,19 @@ describe('arrowHeads at the zoom levels', () => {
 	});
 
 	it('has other directions where the line bends within the head: when zoomed out', () => {
-		// east, then 0.001° north, about 111 m: longer than the head (7.5 pixels behind the end point) from zoom 12 on
+		// east, then 0.001° north-east, about 157 m: longer than the head (7.5 pixels behind the end point) from zoom 12 on
 		const bent: [number, number][] = [
 			[0, 0],
 			[1, 0],
-			[1, 0.001]
+			[1.001, 0.001]
 		];
 		const { properties } = arrowHeads(bent, arrows({ end: 'triangle', size: 3, width: 4 }))[0];
-		expect(properties.rotate).toBeCloseTo(-90);
+		expect(properties.rotate).toBeCloseTo(-45);
 		expect(zooms(properties)).toStrictEqual(Array.from({ length: 12 }, (_, zoom) => rotateProperty(zoom)));
 		// nearly along the long piece when zoomed far out, turning to the short one
 		expect(properties.rotate0).toBeCloseTo(0, 0);
 		expect(properties.rotate11).toBeLessThan(-20);
-		expect(properties.rotate11).toBeGreaterThan(-90);
+		expect(properties.rotate11).toBeGreaterThan(-45);
 		expect(ROTATE_ZOOMS).toBeGreaterThan(22);
 	});
 });

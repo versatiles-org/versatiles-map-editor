@@ -274,20 +274,37 @@ function pixelSize(zoom: number): number {
 }
 
 /**
+ * How far the path may have turned where it enters a head, from its direction at the end point, in
+ * degrees: a head on a tighter bend points along the last part of the bend, up to this turn.
+ */
+const MAX_TURN = 60;
+const MAX_TURN_COSINE = Math.cos((MAX_TURN * Math.PI) / 180);
+
+/**
  * The direction of a head that reaches `length` back from the first point (`end` false) or the last
  * point of the path, with `length` as `screenPoint` measures: from where the path enters the head
  * to the end point, so the head sits straight on a line that bends within it, e.g. a smooth curve
- * or a short last segment. From the other end of a path that is shorter than the head. Clockwise in
- * degrees from east; undefined if all points are at one place.
+ * or a short last segment. From the other end of a path that is shorter than the head, or from
+ * where the path has turned by `MAX_TURN` before that. Clockwise in degrees from east; undefined
+ * if all points are at one place.
  */
 export function headDirection(path: GeoPath, end: boolean, length: number): number | undefined {
 	if (!(length > 0)) return endDirection(path, end);
 	const points = (end ? [...path].reverse() : path).map(screenPoint);
 	const [x0, y0] = points[0];
 	const distance = ([x, y]: GeoPoint) => Math.hypot(x - x0, y - y0);
+	// the direction in which the path reaches the end point
+	const other = points.find(([x, y]) => x !== x0 || y !== y0);
+	if (!other) return undefined;
+	const [ex, ey] = [x0 - other[0], y0 - other[1]];
 	let entry: GeoPoint | undefined;
 	for (let i = 1; i < points.length; i++) {
 		const [before, after] = [distance(points[i - 1]), distance(points[i])];
+		// no further back than where the path runs in quite another direction than at its end, e.g. a
+		// hook or a loop smaller than the head: beyond it, the path does not lead to the end point
+		// any more, and the head would point across it, or backwards
+		const [vx, vy] = [points[i - 1][0] - points[i][0], points[i - 1][1] - points[i][1]];
+		if (vx * ex + vy * ey < MAX_TURN_COSINE * Math.hypot(vx, vy) * Math.hypot(ex, ey)) break;
 		if (after > 0) entry = points[i];
 		if (after < length) continue;
 		// where the piece from the point before, within the head, is `length` away from the end point
