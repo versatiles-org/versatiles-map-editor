@@ -461,13 +461,35 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 		expect(await camera()).toStrictEqual(own);
 	});
 
-	await test.step('the visible area mode shows the turn of the shared map, then the own one again', async () => {
+	await test.step('in the visible area mode, turning the map turns the shared map, then the own turn is back', async () => {
 		await (await menuItem(page, 'Visible area…')).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 0 });
-		// here the sliders turn the map
-		await expect(compass).toHaveCount(0);
+		const rotation = bar.getByRole('spinbutton', { name: 'Rotation' });
+		const tilt = bar.getByRole('spinbutton', { name: 'Tilt' });
+		await expect(rotation).toHaveValue('40');
+		// by hand: the sliders follow, in whole degrees, and the shared map is stored
 		await turn(120, -60);
-		expect(await camera()).toStrictEqual({ bearing: 40, pitch: 0 });
+		const shared = await camera();
+		expect(shared.bearing).not.toBe(40);
+		expect(shared.pitch).toBeGreaterThan(0);
+		await expect(rotation).toHaveValue(String(shared.bearing));
+		await expect(tilt).toHaveValue(String(shared.pitch));
+		await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, ...shared });
+		// "Use current view" takes the area that the turned map shows, and keeps the turn
+		await bar.getByRole('button', { name: 'Use current view' }).click();
+		await expect.poll(async () => (await storedState(page)).frame?.bounds).not.toStrictEqual(frame);
+		expect(await storedState(page)).toMatchObject({ frame: shared });
+		await page.getByRole('button', { name: 'Undo' }).click();
+		// one undo step for the turn by hand
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
+		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 0 });
+		// the compass turns the shared map back to north at the top
+		await compass.click();
+		await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame });
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
+
 		await bar.getByRole('button', { name: 'Done' }).click();
 		await expect.poll(camera).toStrictEqual(own);
 		expect((await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });

@@ -234,12 +234,10 @@
 	});
 
 	/**
-	 * Whether the author turns the map of the editor now: if it can be turned, and not while the
-	 * visible area is edited, which shows how a shared map is turned, by its sliders.
+	 * Whether the author can turn the map of the editor. While the visible area is edited, that
+	 * turns the shared map, see `VisibleAreaMode`.
 	 */
-	const authorTurns = $derived(
-		editor && !!mapDocument?.turnable && !(mapDocument.isInteractive() && mapDocument.visibleArea.active)
-	);
+	const authorTurns = $derived(editor && !!mapDocument?.turnable);
 
 	// the right mouse button (or Ctrl), two fingers, and Shift with the arrow keys
 	$effect(() => {
@@ -270,7 +268,8 @@
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
 		const compass = turn ? !(turn.lockBearing && turn.lockPitch && !turn.bearing && !turn.pitch) : authorTurns;
-		// back to how the map opened; in the editor to north at the top, seen from straight above
+		// back to how the map opened; in the editor to north at the top, seen from straight above,
+		// which while the visible area is edited is how the shared map opens then
 		const reset = () => m.easeTo({ bearing: turn?.bearing ?? 0, pitch: turn?.pitch ?? 0 });
 		return addNavigation(m, corner, compass ? reset : undefined);
 	});

@@ -39,8 +39,9 @@ export function handleCursor(handle: Handle, bearing = 0): string {
  * graphics software: a veil outside the frame, its border and 8 handles, or without a frame the
  * bounds of the elements, dashed, whose handles turn them into a frame. Corners move two sides,
  * edges one; each drag is one undo step. Drawing and selecting are off meanwhile; the map can
- * still be moved. The map is rotated and tilted like a shared map opens (see `turn`), as a preview,
- * and only in this mode.
+ * still be moved. The map is rotated and tilted like a shared map opens (see `turn`), as a preview:
+ * by the sliders of the mode, and by the author who can turn the editor's map (`turnable`), whose
+ * turns of the map in this mode turn the shared map.
  *
  * Created before the drawing and the selection, so its listeners run first and can claim the
  * events of the map.
@@ -54,6 +55,8 @@ export class VisibleAreaMode {
 	#onDone: (() => void) | undefined;
 	/** Whether the keyboard moved a side since the last undo step. */
 	#nudged = false;
+	/** Whether the author turned the map in this mode since the last undo step, see `#followMap`. */
+	#turnedByHand = false;
 	/** How the editor's map was turned before the mode turned it like a shared map, to turn it back. */
 	public turnBefore: Turn = {};
 
@@ -74,6 +77,16 @@ export class VisibleAreaMode {
 		// the bounds of the elements have a size in pixels
 		map.on('zoom', () => {
 			if (this.active && !doc.frame) this.render();
+		});
+		// an author who can turn the map turns the shared map here, e.g. with the right mouse button
+		map.on('rotate', () => this.#followMap());
+		map.on('pitch', () => this.#followMap());
+		map.on('moveend', () => {
+			if (!this.#turnedByHand) return;
+			this.#turnedByHand = false;
+			// one undo step per gesture, and the map exactly as the shared map opens
+			this.log();
+			this.render();
 		});
 	}
 
@@ -141,6 +154,23 @@ export class VisibleAreaMode {
 		const { bounds: _bounds, ...turn } = sanitizeFrame({ ...this.turn, ...change }) ?? {};
 		this.#doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
 		this.render();
+	}
+
+	/**
+	 * The shared map is turned like the map, in whole degrees, when its author turned the map in
+	 * this mode: by hand, or back with the compass. Not when the mode itself turned the map, e.g. by
+	 * a slider, since the map is then turned like the shared map already.
+	 */
+	#followMap() {
+		if (!this.active || !this.#doc.turnable) return;
+		const map = this.#doc.view.getTurn();
+		const [bearing, pitch] = [Math.round(map.bearing), Math.round(map.pitch)];
+		const now = this.turn;
+		if (bearing === Math.round(now.bearing) && pitch === Math.round(now.pitch)) return;
+		const { bounds: _bounds, ...turn } = sanitizeFrame({ ...now, bearing, pitch }) ?? {};
+		// without turning the map, which its author is turning
+		this.#doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+		this.#turnedByHand = true;
 	}
 
 	/** An undo step for the changes of `setTurn`. */

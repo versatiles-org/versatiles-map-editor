@@ -9,7 +9,8 @@
 	 * A bar at the bottom of the map while the visible area is edited: its size, and buttons to
 	 * take the current view, to go back to the elements, and to end the mode (also Escape). Below
 	 * them how a shared map is turned when it opens, its rotation and its tilt, which the map shows
-	 * at once, and whether its visitors can change them.
+	 * at once, and whether its visitors can change them. An author who can turn the editor's map
+	 * also turns the map itself here, and the sliders follow.
 	 * Shift and an arrow key move that side of the area outwards, with Alt too inwards.
 	 * `left` and `right` keep it centered in the part of the map between the bars.
 	 */
