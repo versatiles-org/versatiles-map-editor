@@ -194,7 +194,7 @@ const color = (style, text) => styleText(style, text);
 
 /** The resolution of the share dialog: fine enough for the frame, else the elements; 1 m without either. */
 function automaticResolution(state) {
-	const area = state.frame ?? boundsOf(state.elements);
+	const area = state.frame?.bounds ?? boundsOf(state.elements);
 	return (area && resolutionForArea(area)) || 1;
 }
 
