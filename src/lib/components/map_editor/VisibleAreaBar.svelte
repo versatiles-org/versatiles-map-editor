@@ -76,7 +76,7 @@
 		ArrowLeft: 'w'
 	};
 
-	/** Shift and an arrow key; before the map, which would rotate or tilt with them. */
+	/** Shift and an arrow key; before the map, which would move with the arrow key. */
 	function onNudge(e: KeyboardEvent) {
 		const side = SIDES[e.key];
 		if (!mode.active || !side || !e.shiftKey || e.metaKey || e.ctrlKey || isOwnKeyTarget(e)) return;

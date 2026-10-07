@@ -300,6 +300,13 @@
 			fadeDuration: 0
 		});
 		symbolLibrary.map = map;
+		if (editor) {
+			// neither with two fingers nor with Shift and the arrow keys: the editor turns its map only
+			// while the visible area is edited, by its sliders
+			map.touchZoomRotate.disableRotation();
+			map.touchPitch.disable();
+			map.keyboard.disableRotation();
+		}
 
 		void onMapInit(map);
 

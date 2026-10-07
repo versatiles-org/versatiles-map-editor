@@ -142,6 +142,71 @@ test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 	expect(await linePoints(page)).toStrictEqual(points);
 });
 
+test('two fingers and the keyboard turn the map of the viewer, not the one of the editor', async ({ page }) => {
+	const camera = async () => {
+		const { bearing, pitch } = await page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			return { bearing: map.getBearing(), pitch: map.getPitch() };
+		});
+		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
+	};
+	const [x, y] = [400, 400];
+	/** Two fingers turning around the point between them, by a quarter turn. */
+	const rotate = (touch: Touchscreen) =>
+		touch.gesture(
+			[
+				[x - 100, y],
+				[x + 100, y]
+			],
+			[
+				[x, y - 100],
+				[x, y + 100]
+			],
+			10
+		);
+	/** Two fingers side by side, moving up. */
+	const tilt = (touch: Touchscreen) =>
+		touch.gesture(
+			[
+				[x - 30, y + 100],
+				[x + 30, y + 100]
+			],
+			[
+				[x - 30, y - 100],
+				[x + 30, y - 100]
+			],
+			10
+		);
+
+	await test.step('the viewer', async () => {
+		await page.goto('/view/#' + encodeState(line));
+		await waitForMapIsReady(page);
+		const touch = await Touchscreen.create(page);
+		await rotate(touch);
+		await expect.poll(async () => (await camera()).bearing).not.toBe(0);
+		await tilt(touch);
+		await expect.poll(async () => (await camera()).pitch).toBeGreaterThan(0);
+	});
+
+	await test.step('the editor', async () => {
+		await page.goto('about:blank');
+		await page.goto('/#' + encodeState(line));
+		await waitForMapIsReady(page);
+		const touch = await Touchscreen.create(page);
+		const zoom = await page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+		await rotate(touch);
+		await tilt(touch);
+		await page.locator('.maplibregl-canvas').focus();
+		await page.keyboard.press('Shift+ArrowLeft');
+		await page.keyboard.press('Shift+ArrowUp');
+		await waitForMapIsIdle(page);
+		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
+		// two fingers still zoom the map, and nothing was changed
+		expect(await page.evaluate(() => (window as unknown as MapWindow).map.getZoom())).toBeCloseTo(zoom, 0);
+		expect(await linePoints(page)).toStrictEqual(points);
+	});
+});
+
 test('drawing a line with taps and the Finish button', async ({ page }) => {
 	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
