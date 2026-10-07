@@ -1,7 +1,8 @@
-import type { Bounds } from '@versatiles/map-state';
+import { sanitizeFrame, type Bounds } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import { HANDLES, handlePosition, type Handle } from '../rendering/index.js';
-import { MAX_LATITUDE } from '../geometry.js';
+import { lat2mercator, MAX_LATITUDE, mercator2lat } from '../geometry.js';
+import type { FrameTurn } from '../document/index.js';
 import {
 	claimEvent,
 	isClaimed,
@@ -22,24 +23,24 @@ const MIN_BOUNDS = 40;
 /** How far a side moves with each press of a key, in pixels. */
 export const NUDGE = 10;
 
-/** The cursor over a handle: in the direction that it moves. */
-const CURSORS: Record<Handle, string> = {
-	nw: 'nwse-resize',
-	se: 'nwse-resize',
-	ne: 'nesw-resize',
-	sw: 'nesw-resize',
-	n: 'ns-resize',
-	s: 'ns-resize',
-	e: 'ew-resize',
-	w: 'ew-resize'
-};
+/** The handles clockwise from north, and the cursors of these directions on the screen, from the top. */
+const CLOCKWISE: Handle[] = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+const CURSORS = ['ns-resize', 'nesw-resize', 'ew-resize', 'nwse-resize'];
+
+/** The cursor over a handle: in the direction that it moves on the screen, on a map rotated by `bearing`. */
+export function handleCursor(handle: Handle, bearing = 0): string {
+	// the map turns against its bearing: with east at the top, the northern handle is on the left
+	const eighths = CLOCKWISE.indexOf(handle) - Math.round(bearing / 45);
+	return CURSORS[((eighths % 4) + 4) % 4];
+}
 
 /**
  * The mode in which the visible area (the frame) of the map is edited, like the page setup of
  * graphics software: a veil outside the frame, its border and 8 handles, or without a frame the
  * bounds of the elements, dashed, whose handles turn them into a frame. Corners move two sides,
  * edges one; each drag is one undo step. Drawing and selecting are off meanwhile; the map can
- * still be moved.
+ * still be moved. The map is rotated and tilted like a shared map opens (see `turn`), as a preview,
+ * and only in this mode.
  *
  * Created before the drawing and the selection, so its listeners run first and can claim the
  * events of the map.
@@ -66,7 +67,7 @@ export class VisibleAreaMode {
 		map.on('mousemove', (e) => {
 			if (!this.active) return;
 			const handle = this.#handleAt(e.point, MOUSE_TOLERANCE);
-			doc.cursor.setResize(handle && CURSORS[handle]);
+			doc.cursor.setResize(handle && handleCursor(handle, doc.view.getTurn().bearing));
 		});
 		// the bounds of the elements have a size in pixels
 		map.on('zoom', () => {
@@ -87,6 +88,11 @@ export class VisibleAreaMode {
 		const bounds = this.#doc.getBounds();
 		if (!bounds) return undefined;
 		const map = this.#doc.view.map;
+		if (this.#doc.view.turned) {
+			// on a turned map, the pixels are those of the map seen from straight above
+			const [width, height] = this.#flatSize(bounds);
+			return this.#grown(bounds, Math.max(0, MIN_BOUNDS - width) / 2, Math.max(0, MIN_BOUNDS - height) / 2);
+		}
 		const southWest = map.project([bounds[0], bounds[1]]);
 		const northEast = map.project([bounds[2], bounds[3]]);
 		const growX = Math.max(0, MIN_BOUNDS - (northEast.x - southWest.x)) / 2;
@@ -101,6 +107,43 @@ export class VisibleAreaMode {
 			north = map.unproject([northEast.x, northEast.y - growY]).lat;
 		}
 		return withinMap([west, south, east, north]);
+	}
+
+	/** The width and the height of an area in pixels, on the map seen from straight above. */
+	#flatSize([west, south, east, north]: Bounds): [number, number] {
+		const degrees = this.#doc.view.degreesPerPixel();
+		return [(east - west) / degrees, ((lat2mercator(north) - lat2mercator(south)) * 180) / Math.PI / degrees];
+	}
+
+	/** An area with its sides moved outwards by pixels of the map seen from straight above. */
+	#grown([west, south, east, north]: Bounds, x: number, y: number): Bounds {
+		const degrees = this.#doc.view.degreesPerPixel();
+		const shift = (lat: number, pixels: number) => mercator2lat(lat2mercator(lat) + (pixels * degrees * Math.PI) / 180);
+		return withinMap([west - x * degrees, shift(south, -y), east + x * degrees, shift(north, y)]);
+	}
+
+	/**
+	 * How a shared map is turned when it opens, and whether its viewers can turn it, with the
+	 * defaults: north at the top, seen from straight above, free to turn.
+	 */
+	public get turn(): Required<FrameTurn> {
+		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = this.#doc.frameTurn ?? {};
+		return { bearing, pitch, lockBearing, lockPitch };
+	}
+
+	/**
+	 * Change how a shared map is turned, e.g. its rotation while a slider is dragged; the map shows
+	 * it at once. `log` makes the changes since the last one an undo step.
+	 */
+	public setTurn(change: FrameTurn) {
+		const { bounds: _bounds, ...turn } = sanitizeFrame({ ...this.turn, ...change }) ?? {};
+		this.#doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+		this.render();
+	}
+
+	/** An undo step for the changes of `setTurn`. */
+	public log() {
+		this.#doc.state.log();
 	}
 
 	/** Start editing the visible area. `onDone` is called when it ends with Done or Escape. */
@@ -131,6 +174,8 @@ export class VisibleAreaMode {
 		this.#onChange = undefined;
 		this.#doc.cursor.setResize(undefined);
 		this.#doc.view.hideVisibleArea();
+		// the editor itself is not turned
+		this.#doc.view.setTurn();
 		if (returning) onDone?.();
 	}
 
@@ -156,6 +201,20 @@ export class VisibleAreaMode {
 	public nudge(side: 'n' | 'e' | 's' | 'w', pixels: number) {
 		const area = this.#area;
 		if (!this.active || !area) return;
+		if (this.#doc.view.turned) {
+			const [x, y] = side === 'n' || side === 's' ? [0, pixels] : [pixels, 0];
+			const grown = this.#grown(area, x, y);
+			// only this side, and not past the other one
+			const index = { w: 0, s: 1, e: 2, n: 3 }[side];
+			const next: Bounds = [...area];
+			next[index] = grown[index];
+			const [width, height] = this.#flatSize(next);
+			if (width < MIN_SIZE || height < MIN_SIZE) return;
+			this.#doc.frame = next;
+			this.#nudged = true;
+			this.render();
+			return;
+		}
 		const { x, y } = this.#doc.view.map.project(handlePosition(area, side));
 		const [dx, dy] = { n: [0, -pixels], e: [pixels, 0], s: [0, pixels], w: [-pixels, 0] }[side];
 		this.#doc.frame = this.#resized(area, side, { x: x + dx, y: y + dy });
@@ -174,6 +233,10 @@ export class VisibleAreaMode {
 	public render() {
 		if (!this.active) return;
 		const doc = this.#doc;
+		// as a shared map opens, e.g. after a change of the sliders or an undo; before the bounds of
+		// the elements, which have a size in pixels
+		const { bearing, pitch } = this.turn;
+		doc.view.setTurn({ bearing, pitch });
 		doc.view.showVisibleArea(doc.frame, doc.frame ? undefined : this.#elementBounds());
 	}
 
@@ -226,6 +289,21 @@ export class VisibleAreaMode {
 	 */
 	#resized(area: Bounds, handle: Handle, point: { x: number; y: number }): Bounds {
 		const map = this.#doc.view.map;
+		if (this.#doc.view.turned) {
+			// on a turned map, the sides do not run along the edges of the window: to the place under
+			// the pointer, with the smallest size in pixels of the map seen from straight above
+			const { lng, lat } = map.unproject([point.x, point.y]);
+			const degrees = this.#doc.view.degreesPerPixel();
+			const least = MIN_SIZE * degrees;
+			const shift = (from: number, pixels: number) =>
+				mercator2lat(lat2mercator(from) + (pixels * degrees * Math.PI) / 180);
+			let [west, south, east, north] = area;
+			if (handle.includes('w')) west = Math.min(lng, east - least);
+			if (handle.includes('e')) east = Math.max(lng, west + least);
+			if (handle.includes('n')) north = Math.max(lat, shift(south, MIN_SIZE));
+			if (handle.includes('s')) south = Math.min(lat, shift(north, -MIN_SIZE));
+			return withinMap([west, south, east, north]);
+		}
 		const topLeft = map.project([area[0], area[3]]);
 		const bottomRight = map.project([area[2], area[1]]);
 		let [west, south, east, north] = area;

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
 import { LngLat, MockMap, Point, type MaplibreMap } from '../__mocks__/map.js';
 import { handlePosition, type Handle } from '../rendering/index.js';
+import { handleCursor } from './visible_area.svelte.js';
 import type { Bounds } from '@versatiles/map-state';
 import { addElement } from '../__mocks__/elements.js';
 
@@ -20,6 +21,65 @@ describe('VisibleAreaMode', () => {
 		setData = vi.fn();
 		map.getSource.mockReturnValue({ setData, updateData: vi.fn() } as never);
 		doc = new MapDocumentInteractive(map as unknown as MaplibreMap);
+	});
+
+	describe('how a shared map is turned', () => {
+		it('is set in the mode, shown by the map at once, and an undo step when it is logged', async () => {
+			doc.frame = [1, 2, 3, 4];
+			doc.visibleArea.open();
+			expect(doc.visibleArea.turn).toStrictEqual({ bearing: 0, pitch: 0, lockBearing: false, lockPitch: false });
+			doc.visibleArea.setTurn({ bearing: 30 });
+			doc.visibleArea.setTurn({ bearing: 40 });
+			doc.visibleArea.log();
+			expect(doc.frameTurn).toStrictEqual({ bearing: 40 });
+			expect(map.getBearing()).toBe(40);
+			doc.visibleArea.setTurn({ pitch: 50, lockPitch: true });
+			doc.visibleArea.log();
+			expect(doc.getState().frame).toStrictEqual({ bounds: [1, 2, 3, 4], bearing: 40, pitch: 50, lockPitch: true });
+			expect(map.getPitch()).toBe(50);
+
+			// one step per logged change, and the map follows
+			await doc.state.undo();
+			expect(doc.frameTurn).toStrictEqual({ bearing: 40 });
+			expect(map.getPitch()).toBe(0);
+			await doc.state.undo();
+			expect(doc.frameTurn).toBeUndefined();
+			expect(map.getBearing()).toBe(0);
+		});
+
+		it('is kept without its defaults, and within its limits', () => {
+			doc.visibleArea.open();
+			doc.visibleArea.setTurn({ bearing: 270, pitch: 99, lockBearing: true });
+			expect(doc.frameTurn).toStrictEqual({ bearing: -90, pitch: 60, lockBearing: true });
+			doc.visibleArea.setTurn({ bearing: 0, pitch: 0, lockBearing: false });
+			expect(doc.frameTurn).toBeUndefined();
+		});
+
+		it('turns the map only in the mode: as the frame says when it opens, back when it closes', () => {
+			doc.frameTurn = { bearing: -20, pitch: 30 };
+			expect(map.getBearing()).toBe(0);
+			doc.visibleArea.open();
+			expect([map.getBearing(), map.getPitch()]).toStrictEqual([-20, 30]);
+			doc.visibleArea.close();
+			expect([map.getBearing(), map.getPitch()]).toStrictEqual([0, 0]);
+			// the frame keeps it
+			expect(doc.frameTurn).toStrictEqual({ bearing: -20, pitch: 30 });
+		});
+	});
+
+	describe('handleCursor', () => {
+		it('points in the direction that the handle moves on the screen', () => {
+			expect(handleCursor('n')).toBe('ns-resize');
+			expect(handleCursor('ne')).toBe('nesw-resize');
+			expect(handleCursor('w')).toBe('ew-resize');
+			expect(handleCursor('se')).toBe('nwse-resize');
+			// east at the top: the northern handle is at the left
+			expect(handleCursor('n', 90)).toBe('ew-resize');
+			expect(handleCursor('ne', 90)).toBe('nwse-resize');
+			expect(handleCursor('n', -45)).toBe('nesw-resize');
+			expect(handleCursor('n', 180)).toBe('ns-resize');
+			expect(handleCursor('e', 20)).toBe('ew-resize');
+		});
 	});
 
 	it('shows the frame with a veil, or without one the bounds of the elements', () => {
@@ -152,6 +212,20 @@ describe('VisibleAreaMode', () => {
 			// the east edge far over the west edge
 			drag(handle('e'), pixel(-100, 0));
 			expect(doc.frame).toStrictEqual([-50, -50, -30, 50]);
+		});
+
+		it('move a side to the place under the pointer on a turned map', () => {
+			doc.visibleArea.close();
+			doc.frame = frame;
+			doc.frameTurn = { bearing: 90 };
+			doc.visibleArea.open();
+			drag(handle('e'), pixel(70, 0));
+			expect(doc.frame![2]).toBeCloseTo(70);
+			expect([doc.frame![0], doc.frame![1], doc.frame![3]]).toStrictEqual([-50, -50, 50]);
+			// not past the other side
+			drag(handle('n'), pixel(0, -80));
+			expect(doc.frame![3]).toBeGreaterThan(-50);
+			expect(doc.frame![3]).toBeLessThan(-40);
 		});
 
 		it('keep the frame within the latitudes of the map', () => {

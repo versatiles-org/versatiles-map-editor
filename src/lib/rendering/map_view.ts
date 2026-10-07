@@ -146,6 +146,12 @@ export class MapView {
 	/** The part of the map that is shown. */
 	public getViewport(): Viewport {
 		const center = this.map.getCenter();
+		if (this.turned) {
+			// as seen from straight above at this zoom: the bounds of a turned map are larger
+			const { clientWidth: width, clientHeight: height } = this.map.getContainer();
+			const degrees = (Math.min(width, height) / 2) * this.degreesPerPixel() * Math.cos((center.lat * Math.PI) / 180);
+			return { center: [center.lng, center.lat], radius: EARTH_CIRCUMFERENCE * (degrees / 360) };
+		}
 		const bounds = this.map.getBounds();
 		const radiusDegrees =
 			Math.min(
@@ -223,6 +229,51 @@ export class MapView {
 		}
 	}
 
+	/** The window of the map, turned, for `fitTurned`. */
+	#window(turn: Turn): TurnedWindow {
+		const { clientWidth: width, clientHeight: height } = this.map.getContainer();
+		const { top = 0, right = 0, bottom = 0, left = 0 } = this.map.getPadding();
+		return {
+			bearing: turn.bearing ?? 0,
+			pitch: turn.pitch ?? 0,
+			fov: this.map.getVerticalFieldOfView?.() ?? DEFAULT_FOV,
+			height,
+			focus: [(left + width - right) / 2, (top + height - bottom) / 2]
+		};
+	}
+
+	/** How the map is turned now. */
+	public getTurn(): Required<Turn> {
+		return { bearing: this.map.getBearing?.() ?? 0, pitch: this.map.getPitch?.() ?? 0 };
+	}
+
+	/** Whether the map is rotated or tilted now. */
+	public get turned(): boolean {
+		const { bearing, pitch } = this.getTurn();
+		return bearing !== 0 || pitch !== 0;
+	}
+
+	/**
+	 * Rotate and tilt the map around its center, e.g. to preview how a shared map opens; without a
+	 * turn, back to north at the top, seen from straight above.
+	 */
+	public setTurn(turn: Turn = {}) {
+		const { bearing = 0, pitch = 0 } = turn;
+		const now = this.getTurn();
+		if (now.bearing === bearing && now.pitch === pitch) return;
+		this.#fitting = true;
+		try {
+			this.map.jumpTo({ bearing, pitch });
+		} finally {
+			this.#fitting = false;
+		}
+	}
+
+	/** The degrees of longitude per pixel at the zoom of the map, seen from straight above. */
+	public degreesPerPixel(): number {
+		return 360 / (512 * 2 ** this.map.getZoom());
+	}
+
 	/**
 	 * Show an area completely on the map rotated and tilted, see `fitTurned`: within the padding, and
 	 * clear of the covered part, beside it or above or below it, whichever shows the area larger.
@@ -231,13 +282,7 @@ export class MapView {
 		const map = this.map;
 		const { clientWidth: width, clientHeight: height } = map.getContainer();
 		const { top = 0, right = 0, bottom = 0, left = 0 } = map.getPadding();
-		const window: TurnedWindow = {
-			bearing: turn.bearing ?? 0,
-			pitch: turn.pitch ?? 0,
-			fov: map.getVerticalFieldOfView?.() ?? DEFAULT_FOV,
-			height,
-			focus: [(left + width - right) / 2, (top + height - bottom) / 2]
-		};
+		const window = this.#window(turn);
 		const limits = { minZoom: map.getMinZoom?.() ?? 0, ...(maxZoom === undefined ? {} : { maxZoom }) };
 		// the part of the window for the area: without the padding of the map (e.g. its bars) and of the area
 		const whole: Box = {
@@ -335,10 +380,51 @@ export class MapView {
 		return best;
 	}
 
-	/** The part of the map that is shown, without the padding of the map, e.g. its bars. */
+	/**
+	 * The part of the map that is shown, without the padding of the map, e.g. its bars. On a turned
+	 * map, where that part is no area with north at the top: the largest area around the center of
+	 * the map that is shown completely, in the shape of the map seen from straight above.
+	 */
 	public viewBounds(): Bounds {
 		const { clientWidth: width, clientHeight: height } = this.map.getContainer();
 		const { top = 0, right = 0, bottom = 0, left = 0 } = this.map.getPadding();
+		if (this.turned) {
+			const center = this.map.getCenter();
+			const camera = { center: [center.lng, center.lat] as GeoPoint, zoom: this.map.getZoom() };
+			const window = this.#window(this.getTurn());
+			const rect: Box = { left, top, right: width - right, bottom: height - bottom };
+			// the area seen from straight above, larger or smaller by a factor
+			const halfWidth = ((rect.right - rect.left) / 2) * this.degreesPerPixel();
+			const halfHeight = ((rect.bottom - rect.top) / 2) * this.degreesPerPixel() * (Math.PI / 180);
+			const y = lat2mercator(center.lat);
+			const area = (factor: number): Bounds => [
+				Math.max(-180, center.lng - factor * halfWidth),
+				Math.max(-MAX_LATITUDE, mercator2lat(y - factor * halfHeight)),
+				Math.min(180, center.lng + factor * halfWidth),
+				Math.min(MAX_LATITUDE, mercator2lat(y + factor * halfHeight))
+			];
+			/** Whether all corners of an area are shown, within the part of the window. */
+			const shown = ([west, south, east, north]: Bounds) =>
+				[
+					[west, south],
+					[east, south],
+					[east, north],
+					[west, north]
+				].every((corner) => {
+					const point = projectTurned(corner as GeoPoint, camera, window);
+					return (
+						point && point[0] >= rect.left && point[0] <= rect.right && point[1] >= rect.top && point[1] <= rect.bottom
+					);
+				});
+			// the largest factor at which the area is shown completely
+			let [small, large] = [0.01, 2];
+			for (let i = 0; i < 30; i++) {
+				const factor = (small + large) / 2;
+				if (shown(area(factor))) small = factor;
+				else large = factor;
+			}
+			return area(small);
+		}
 		const topLeft = this.map.unproject([left, top]);
 		const bottomRight = this.map.unproject([width - right, height - bottom]);
 		return [

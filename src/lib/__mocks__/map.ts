@@ -74,7 +74,14 @@ export class MockMap {
 		return bounds;
 	});
 	fitBounds = vi.fn();
-	jumpTo = vi.fn();
+	private bearing = 0;
+	private pitch = 0;
+	getBearing = vi.fn(() => this.bearing);
+	getPitch = vi.fn(() => this.pitch);
+	jumpTo = vi.fn((camera: { bearing?: number; pitch?: number }) => {
+		this.bearing = camera.bearing ?? this.bearing;
+		this.pitch = camera.pitch ?? this.pitch;
+	});
 	easeTo = vi.fn();
 	transformCameraUpdate: (() => object) | null = null;
 	setTransformCameraUpdate = vi.fn((value: (() => object) | null) => {

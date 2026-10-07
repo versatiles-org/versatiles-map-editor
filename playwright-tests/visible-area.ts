@@ -311,6 +311,105 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await expect(bar).toBeHidden();
 });
 
+test('the rotation and the tilt of a shared map are set in the visible area mode, with a preview', async ({ page }) => {
+	await page.goto(
+		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
+	);
+	await waitForMapIsReady(page);
+	const camera = async () => {
+		const { bearing, pitch } = await page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			return { bearing: map.getBearing(), pitch: map.getPitch() };
+		});
+		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
+	};
+	const stored = async () => (await storedState(page)).frame;
+	const bar = page.getByRole('group', { name: 'Visible area' });
+	await (await menuItem(page, 'Visible area…')).click();
+
+	await test.step('the sliders turn the map at once, and are stored', async () => {
+		const rotation = bar.getByRole('spinbutton', { name: 'Rotation' });
+		await rotation.fill('40');
+		await rotation.press('Enter');
+		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 0 });
+		const tilt = bar.getByRole('spinbutton', { name: 'Tilt' });
+		await tilt.fill('50');
+		await tilt.press('Enter');
+		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
+		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50 });
+		// not steeper than the largest tilt
+		await tilt.fill('85');
+		await tilt.press('Enter');
+		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 60 });
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50 });
+		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
+	});
+
+	await test.step('visitors can be kept from rotating and tilting', async () => {
+		const rotate = bar.getByRole('checkbox', { name: 'Visitors can rotate' });
+		const tilt = bar.getByRole('checkbox', { name: 'Visitors can tilt' });
+		await expect(rotate).toBeChecked();
+		await rotate.uncheck();
+		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true });
+		await tilt.uncheck();
+		await expect
+			.poll(stored)
+			.toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true, lockPitch: true });
+		await tilt.check();
+		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true });
+	});
+
+	await test.step('a handle moves its side on the turned map', async () => {
+		const [x, y] = await project(page, [frame[2], (frame[1] + frame[3]) / 2]);
+		const [tx, ty] = await project(page, [frame[2] + 0.05, (frame[1] + frame[3]) / 2]);
+		await page.mouse.move(x, y);
+		await page.mouse.down();
+		await page.mouse.move(tx, ty, { steps: 5 });
+		await page.mouse.up();
+		await expect.poll(async () => (await stored())?.bounds?.[2]).toBeCloseTo(frame[2] + 0.05, 2);
+		const dragged = (await stored())!.bounds!;
+		expect(dragged[0]).toBeCloseTo(frame[0], 4);
+		expect(dragged[1]).toBeCloseTo(frame[1], 4);
+		expect(dragged[3]).toBeCloseTo(frame[3], 4);
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(async () => (await stored())?.bounds).toStrictEqual(frame);
+	});
+
+	await test.step('"Use current view" takes an area around the center of the turned map', async () => {
+		const center = await page.evaluate(() => (window as unknown as MapWindow).map.getCenter().toArray());
+		await bar.getByRole('button', { name: 'Use current view' }).click();
+		await expect.poll(async () => (await stored())?.bounds).not.toStrictEqual(frame);
+		const [west, south, east, north] = (await stored())!.bounds!;
+		expect((west + east) / 2).toBeCloseTo(center[0], 2);
+		expect(south).toBeLessThan(center[1]);
+		expect(north).toBeGreaterThan(center[1]);
+		// all of it is in the window
+		for (const corner of [
+			[west, south],
+			[east, south],
+			[east, north],
+			[west, north]
+		] as [number, number][]) {
+			const [px, py] = await project(page, corner);
+			expect(px).toBeGreaterThanOrEqual(48);
+			expect(px).toBeLessThanOrEqual(1280 - 250);
+			expect(py).toBeGreaterThanOrEqual(44);
+			expect(py).toBeLessThanOrEqual(720 - 26);
+		}
+	});
+
+	await test.step('the editor is turned only in this mode', async () => {
+		await bar.getByRole('button', { name: 'Done' }).click();
+		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
+		expect(await stored()).toMatchObject({ bearing: 40, pitch: 50, lockBearing: true });
+		await (await menuItem(page, 'Visible area…')).click();
+		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
+		await expect(bar.getByRole('spinbutton', { name: 'Rotation' })).toHaveValue('40');
+		await expect(bar.getByRole('checkbox', { name: 'Visitors can rotate' })).not.toBeChecked();
+	});
+});
+
 test('the share dialog warns about elements outside the visible area, and edits it', async ({ page }) => {
 	const outside: MapState['elements'] = [
 		{ type: 'marker', point: [13.4, 52.5] },
