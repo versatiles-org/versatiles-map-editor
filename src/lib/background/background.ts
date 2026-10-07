@@ -28,6 +28,10 @@ export interface BackgroundSettings {
 	haloWidth: number;
 	/** Changes of the colors of the vector map or the satellite imagery. */
 	colors: MapColors;
+	/** Whether the relief is shaded: hills and mountains with light and shadow, also seen from above. */
+	hillshade: boolean;
+	/** Whether the map has the heights of its terrain, which a tilted map shows as hills and mountains. */
+	terrain: boolean;
 }
 
 /**
@@ -101,6 +105,7 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 	const layers = isObject(overlay.layers) ? overlay.layers : {};
 	const base = background.builder === 'satellite' ? 'satellite' : 'vector';
 	const imageryAlone = base === 'satellite' && background.options.osmOverlay === false;
+	const features = isObject(background.options.features) ? background.options.features : {};
 	let labels: BackgroundSettings['labels'] = 'normal';
 	if (imageryAlone || layers.labels === false) labels = 'none';
 	else if (typeof text.spacing === 'number' && text.spacing > 1) labels = 'fewer';
@@ -115,7 +120,10 @@ export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): B
 		labels,
 		labelSize: number(text.scale, 1),
 		haloWidth: inherited(text, HALO_GROUPS[0], 'haloWidth') ?? DEFAULT_HALO_WIDTH[base],
-		colors: getColors(background)
+		colors: getColors(background),
+		// `true`, or an object with their options
+		hillshade: !!features.hillshade,
+		terrain: !!features.terrain
 	};
 }
 
@@ -267,6 +275,7 @@ export function changeSettings(
 	}
 
 	if (change.colors) setColors(builder, options, change.colors);
+	setRelief(options, change);
 
 	const overlay = overlayFor(builder, options, change);
 	// the imagery alone, which stays so
@@ -299,7 +308,11 @@ function switchBuilder(background: StateBackground, builder: StateBackground['bu
 		else delete kept.layers;
 	}
 	const colors = getColors(background);
-	const options = builder === 'osm' ? kept : { osmOverlay: kept };
+	const options: Options = builder === 'osm' ? kept : { osmOverlay: kept };
+	// the relief is one of the map, not of its streets and labels
+	const features = isObject(background.options.features) ? background.options.features : {};
+	const relief = Object.fromEntries(RELIEF.filter((key) => features[key]).map((key) => [key, features[key]]));
+	if (Object.keys(relief).length > 0) options.features = relief;
 	if (JSON.stringify(colors) !== JSON.stringify(DEFAULT_COLORS)) setColors(builder, options, colors);
 	return options;
 }
@@ -331,6 +344,22 @@ function overlayFor(
 	}
 	if (!isObject(options.osmOverlay)) options.osmOverlay = {};
 	return options.osmOverlay as Options;
+}
+
+/** The features of both maps that show the relief, by the elevation tiles of the tile server. */
+const RELIEF = ['hillshade', 'terrain'] as const;
+
+/** The shading of the relief and the heights of the terrain, on or off; their own options are kept. */
+function setRelief(options: Options, change: Partial<BackgroundSettings>) {
+	for (const key of RELIEF) {
+		const on = change[key];
+		if (on === undefined) continue;
+		const features: Options = isObject(options.features) ? options.features : {};
+		if (!on) delete features[key];
+		else if (!features[key]) features[key] = true;
+		if (Object.keys(features).length > 0) options.features = features;
+		else delete options.features;
+	}
 }
 
 /** The theme and the labels: their font, size, halo, language and how many. */

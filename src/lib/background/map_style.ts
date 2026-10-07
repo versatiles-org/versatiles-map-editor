@@ -21,16 +21,20 @@ function overlayOf(options: SatelliteOptions): SatelliteOptions['osmOverlay'] {
  * projection are set by the editor, never by the (shared) options, so a map cannot load tiles or
  * fonts from other servers; so are the
  * way the overlay of the imagery is drawn (see `overlayOf`), and whether the vector map shows the
- * landcover of low zoom levels, which depends on the tiles of the server.
+ * landcover of low zoom levels, which depends on the tiles of the server. A server without
+ * elevation tiles shows no relief, whatever the options say.
  */
 export function getMapStyle(background: StateBackground = DEFAULT_BACKGROUND): StyleSpecification {
 	const fixed = { urls: { base: config.current.tileServer }, projection: 'mercator' as const };
-	const { landcover } = config.current;
-	const vector = (options: OsmOptions) => osm({ ...options, features: { ...options.features, landcover }, ...fixed });
+	const { landcover, elevation } = config.current;
+	const flat = elevation ? {} : { terrain: false, hillshade: false };
+	const vector = (options: OsmOptions) =>
+		osm({ ...options, features: { ...options.features, landcover, ...flat }, ...fixed });
 	try {
 		if (background.builder === 'satellite') {
 			const options = background.options as SatelliteOptions;
-			return satellite({ ...options, osmOverlay: overlayOf(options), ...fixed });
+			const features = elevation ? {} : { features: { ...options.features, ...flat } };
+			return satellite({ ...options, ...features, osmOverlay: overlayOf(options), ...fixed });
 		}
 		return vector(background.options as OsmOptions);
 	} catch (error) {

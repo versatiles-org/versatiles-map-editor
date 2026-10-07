@@ -77,6 +77,7 @@ Every field is optional. A field with an invalid value gets its default, and the
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | `tileServer`            | The tile server of the background map, the satellite imagery, the symbols and the fonts (see below), absolute or relative.                                                           | `"https://tiles.versatiles.org"`         |
 | `landcover`             | Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The vector tiles must have it (see below); `false` for tiles that do not.                           | `true`                                   |
+| `elevation`             | Whether the background map can show its relief: shaded, and as terrain on a tilted map. The tile server must have elevation tiles (see below); `false` for a server without them.    | `true`                                   |
 | `geocoder`              | The geocoder of the address search (see below), absolute or relative.                                                                                                                | `"https://geocode.versatiles.org/api"`   |
 | `startView`             | What a new map shows: `[west, south, east, north]` in degrees.                                                                                                                       | the country of the user*, else the world |
 | `startBackground`       | The background of a new map, as in `.mapjson` files: `{ "builder": "osm" or "satellite", "options": { … } }` with the options of `@versatiles/style`.                                | the vector map                           |
@@ -128,6 +129,8 @@ The tile server must offer the same as `tiles.versatiles.org`, from its address 
   schema, for the background map, with the landcover of low zoom levels of the VersaTiles tiles
   (or `"landcover": false` in the configuration);
 - `tiles/satellite/tiles.json` and its raster tiles, for the satellite background;
+- `tiles/elevation/tiles.json` and its elevation tiles, for the shaded relief and the terrain (or
+  `"elevation": false` in the configuration);
 - `assets/sprites/index.json` and the sprite sheets it names, for the symbols of markers;
 - `assets/glyphs/font_families.json` and the glyphs of the fonts, for the labels.
 

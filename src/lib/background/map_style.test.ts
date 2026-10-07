@@ -69,6 +69,30 @@ describe('src/lib/background/map_style.ts', () => {
 			}
 		});
 
+		it('shows the relief only if the tile server has elevation tiles, as the configuration says', () => {
+			const relief = { terrain: true, hillshade: true };
+			const shaded = getMapStyle({ builder: 'osm', options: { features: relief } });
+			expect(osm).toHaveBeenLastCalledWith({ ...fixed, features: { ...relief, landcover: true } });
+			expect(shaded.terrain).toBeDefined();
+			expect(shaded.layers.some((layer) => layer.type === 'hillshade')).toBe(true);
+			getMapStyle({ builder: 'satellite', options: { features: relief } });
+			expect(satellite).toHaveBeenLastCalledWith(expect.objectContaining({ features: relief }));
+
+			config.current = { ...DEFAULT_CONFIG, elevation: false };
+			try {
+				const flat = { terrain: false, hillshade: false };
+				const vectorMap = getMapStyle({ builder: 'osm', options: { features: relief } });
+				expect(osm).toHaveBeenLastCalledWith({ ...fixed, features: { landcover: true, ...flat } });
+				expect(vectorMap.terrain).toBeUndefined();
+				expect(vectorMap.layers.some((layer) => layer.type === 'hillshade')).toBe(false);
+				const imagery = getMapStyle({ builder: 'satellite', options: { features: relief } });
+				expect(satellite).toHaveBeenLastCalledWith(expect.objectContaining({ features: flat }));
+				expect(imagery.terrain).toBeUndefined();
+			} finally {
+				config.current = DEFAULT_CONFIG;
+			}
+		});
+
 		it('never takes the tile server from the options', () => {
 			getMapStyle({ builder: 'osm', options: { urls: { base: 'https://example.org' }, projection: 'globe' } });
 			expect(osm).toHaveBeenCalledWith(vector);

@@ -22,6 +22,42 @@ describe('THEMES', () => {
 	});
 });
 
+describe('the relief', () => {
+	it('is shaded, and raised as terrain, on both maps; its own options are kept', () => {
+		const shaded = changeSettings(undefined, { hillshade: true })!;
+		expect(shaded.options.features).toStrictEqual({ hillshade: true });
+		expect(getSettings(shaded)).toMatchObject({ hillshade: true, terrain: false });
+		const raised = changeSettings(shaded, { terrain: true })!;
+		expect(raised.options.features).toStrictEqual({ hillshade: true, terrain: true });
+		// off again: nothing is left of it
+		const flat = changeSettings(changeSettings(raised, { hillshade: false }), { terrain: false });
+		expect(flat).toBeUndefined();
+
+		// options that the editor does not offer, e.g. of a file
+		const exaggerated = { builder: 'osm' as const, options: { features: { terrain: { exaggeration: 2 } } } };
+		expect(getSettings(exaggerated).terrain).toBe(true);
+		expect(changeSettings(exaggerated, { terrain: true })!.options.features).toStrictEqual({
+			terrain: { exaggeration: 2 }
+		});
+		expect(changeSettings(exaggerated, { hillshade: true })!.options.features).toStrictEqual({
+			terrain: { exaggeration: 2 },
+			hillshade: true
+		});
+	});
+
+	it('is kept when the base map changes', () => {
+		const vector = changeSettings(changeSettings(undefined, { hillshade: true }), { terrain: true });
+		const satellite = changeSettings(vector, { base: 'satellite' })!;
+		expect(satellite.builder).toBe('satellite');
+		expect(getSettings(satellite)).toMatchObject({ hillshade: true, terrain: true });
+		const back = changeSettings(satellite, { base: 'vector' })!;
+		expect(getSettings(back)).toMatchObject({ base: 'vector', hillshade: true, terrain: true });
+		// and so is the imagery alone
+		const alone = changeSettings({ builder: 'satellite', options: { osmOverlay: false } }, { hillshade: true })!;
+		expect(alone.options).toMatchObject({ osmOverlay: false, features: { hillshade: true } });
+	});
+});
+
 describe('getSettings', () => {
 	it('reads the editor default', () => {
 		expect(getSettings()).toStrictEqual({
@@ -34,7 +70,9 @@ describe('getSettings', () => {
 			labels: 'normal',
 			labelSize: 1,
 			haloWidth: 2,
-			colors: DEFAULT_COLORS
+			colors: DEFAULT_COLORS,
+			hillshade: false,
+			terrain: false
 		});
 	});
 
@@ -54,7 +92,9 @@ describe('getSettings', () => {
 			labels: 'fewer',
 			labelSize: 1,
 			haloWidth: 2,
-			colors: DEFAULT_COLORS
+			colors: DEFAULT_COLORS,
+			hillshade: false,
+			terrain: false
 		});
 		expect(getSettings({ builder: 'satellite', options: { osmOverlay: { layers: { labels: false } } } })).toMatchObject(
 			{ base: 'satellite', labels: 'none' }

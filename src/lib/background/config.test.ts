@@ -113,6 +113,11 @@ describe('resolveConfig', () => {
 		expect(resolveConfig({})).toMatchObject({ tileServer: DEFAULT_TILE_SERVER, geocoder: DEFAULT_GEOCODER });
 	});
 
+	it('can show the relief of the map, unless the tile server has no elevation tiles', () => {
+		expect(resolveConfig({}).elevation).toBe(true);
+		expect(resolveConfig({ elevation: false }).elevation).toBe(false);
+	});
+
 	it('shows the landcover of low zoom levels, unless it is turned off', () => {
 		expect(resolveConfig({}).landcover).toBe(true);
 		expect(resolveConfig({ landcover: false }).landcover).toBe(false);
@@ -219,6 +224,7 @@ describe('the default configuration file', () => {
 		expect(Object.keys(parseJsonc(uncommented) as object)).toStrictEqual([
 			'tileServer',
 			'landcover',
+			'elevation',
 			'geocoder',
 			'startView',
 			'startBackground',

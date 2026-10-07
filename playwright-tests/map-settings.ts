@@ -124,6 +124,50 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(labelsInGerman).toBe(true);
 });
 
+test('the relief of the background map: shaded, and raised as terrain, on both maps', async ({ page }) => {
+	// the Alps around the Zugspitze
+	await page.goto('/#' + encodeState({ view: { center: [10.98, 47.42], radius: 10000 }, elements: [] }));
+	await waitForMapIsReady(page);
+	const features = async () =>
+		((await storedState(page)).meta?.background?.options as { features?: object } | undefined)?.features;
+	/** What the map draws of the relief. */
+	const relief = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			return {
+				hillshade: map.getStyle().layers.some((layer) => layer.type === 'hillshade'),
+				terrain: !!map.getTerrain()
+			};
+		});
+	const hillshade = page.getByRole('checkbox', { name: 'Hillshade' });
+	const terrain = page.getByRole('checkbox', { name: 'Terrain' });
+
+	await expect(hillshade).not.toBeChecked();
+	await expect(terrain).not.toBeChecked();
+	expect(await relief()).toStrictEqual({ hillshade: false, terrain: false });
+
+	await hillshade.check();
+	await expect.poll(features).toStrictEqual({ hillshade: true });
+	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: false });
+	await terrain.check();
+	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
+	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
+
+	// the satellite map keeps it
+	await page.getByRole('radio', { name: 'Satellite' }).click();
+	await expect.poll(async () => (await storedState(page)).meta?.background?.builder).toBe('satellite');
+	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
+	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
+	await expect(hillshade).toBeChecked();
+
+	// each is an undo step
+	await terrain.uncheck();
+	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: false });
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
+	await waitForMapIsIdle(page);
+});
+
 test('the satellite imagery without streets, borders and labels', async ({ page }) => {
 	const state: MapState = {
 		view: { center: [13.4, 52.5], radius: 10000 },

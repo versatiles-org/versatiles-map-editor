@@ -20,6 +20,12 @@
 	// Default: true
 	// "landcover": true,
 
+	// Whether the background map can show its relief: shaded, and as terrain on a tilted map. The
+	// tile server must have elevation tiles, like those of tiles.versatiles.org; turn it off for a
+	// server without them.
+	// Default: true
+	// "elevation": true,
+
 	// The geocoder of the address search, with the API of Photon.
 	// Default: "https://geocode.versatiles.org/api"
 	// "geocoder": "https://geocode.versatiles.org/api",

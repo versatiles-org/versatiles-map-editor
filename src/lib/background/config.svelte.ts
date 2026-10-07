@@ -32,6 +32,11 @@ export interface ConfigFile {
 	 * vector tiles of the tile server must have, like those of tiles.versatiles.org.
 	 */
 	landcover?: boolean;
+	/**
+	 * Whether the background map can show its relief, shaded or as terrain, which needs the
+	 * elevation tiles of the tile server, like those of tiles.versatiles.org.
+	 */
+	elevation?: boolean;
 	/** The URL of the geocoder of the address search, like geocode.versatiles.org/api; also relative, as `tileServer`. */
 	geocoder?: string;
 	/** What a new map shows: [west, south, east, north]. Without it, the country of the user, if known. */
@@ -59,6 +64,8 @@ export interface EditorConfig {
 	tileServer: string;
 	/** Whether the vector map shows the landcover of low zoom levels, see `ConfigFile`. */
 	landcover: boolean;
+	/** Whether the background map can show its relief, see `ConfigFile`. */
+	elevation: boolean;
 	geocoder: string;
 	/** What a new map shows, see `ConfigFile`. */
 	startView: Bounds | undefined;
@@ -73,6 +80,7 @@ export interface EditorConfig {
 export const DEFAULT_CONFIG: EditorConfig = {
 	tileServer: DEFAULT_TILE_SERVER,
 	landcover: true,
+	elevation: true,
 	geocoder: DEFAULT_GEOCODER,
 	startView: undefined,
 	startBackground: undefined,
@@ -141,6 +149,7 @@ async function loadFonts(tileServer: string): Promise<FontFace[] | undefined> {
 const FIELDS: (keyof ConfigFile)[] = [
 	'tileServer',
 	'landcover',
+	'elevation',
 	'geocoder',
 	'startView',
 	'startBackground',
@@ -190,6 +199,7 @@ function checkConfig(file: unknown, url?: string): ConfigFile {
 	const checked: ConfigFile = {
 		tileServer: read('tileServer', checkUrl),
 		landcover: read('landcover', checkBoolean),
+		elevation: read('elevation', checkBoolean),
 		geocoder: read('geocoder', checkUrl),
 		startView: read('startView', checkStartView),
 		startBackground: read('startBackground', checkBackground),
@@ -226,6 +236,7 @@ function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
 	return {
 		tileServer: file.tileServer ?? DEFAULT_TILE_SERVER,
 		landcover: file.landcover ?? true,
+		elevation: file.elevation ?? true,
 		geocoder: file.geocoder ?? DEFAULT_GEOCODER,
 		startView: file.startView,
 		// the vector map, in the language of the browser: the editor's default background

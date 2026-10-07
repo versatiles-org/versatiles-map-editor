@@ -2,6 +2,7 @@
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import {
 		changeSettings,
+		config,
 		DEFAULT_COLORS,
 		getSettings,
 		LANGUAGES,
@@ -118,6 +119,26 @@
 				id="{uid}-borders"
 				checked={settings.borders}
 				onchange={(e) => change('borders', e.currentTarget.checked)}
+			/>
+		</InputRow>
+	{/if}
+
+	{#if config.current.elevation}
+		<!-- the relief, by the elevation tiles of the tile server -->
+		<InputRow id="{uid}-hillshade" label="Hillshade">
+			<Checkbox
+				id="{uid}-hillshade"
+				title="Shade hills and mountains with light and shadow"
+				checked={settings.hillshade}
+				onchange={(e) => change('hillshade', e.currentTarget.checked)}
+			/>
+		</InputRow>
+		<InputRow id="{uid}-terrain" label="Terrain">
+			<Checkbox
+				id="{uid}-terrain"
+				title="Raise hills and mountains, which a tilted map shows"
+				checked={settings.terrain}
+				onchange={(e) => change('terrain', e.currentTarget.checked)}
 			/>
 		</InputRow>
 	{/if}
