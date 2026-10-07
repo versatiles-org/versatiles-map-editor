@@ -298,6 +298,11 @@
 					"$ref": "#/definitions/LabelPositionName",
 					"description": "The position of the label around the symbol; \"auto\" where it fits, or on the point without a symbol.",
 					"default": "auto"
+				},
+				"flat": {
+					"type": "boolean",
+					"description": "The marker lies flat on the map, its symbol and its label: on a map that is rotated or tilted, it turns and tilts with the map, so e.g. an arrow keeps its compass direction, and the positions of the label are compass directions. Else it stands upright and faces the viewer, however the map is turned.",
+					"default": false
 				}
 			},
 			"description": "The style of a marker: its symbol, and the look of its label. Missing fields have their default."

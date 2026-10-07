@@ -4,7 +4,7 @@
 	import { LABEL_POSITION_NAMES, type LabelPositionName } from '@versatiles/map-state';
 	import { SymbolStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
-	import { InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
+	import { Checkbox, InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
 	import { ColorPicker, FontSelect, SymbolSelector } from '#lib/components/pickers/index.js';
 
 	/** The symbol layers of all selected markers, which are edited together. */
@@ -14,6 +14,7 @@
 	const symbol = $derived(group(layers, 'symbol'));
 	const color = $derived(group(layers, 'color'));
 	const rotation = $derived(group(layers, 'rotation'));
+	const flat = $derived(group(layers, 'flat'));
 	const haloWidth = $derived(group(layers, 'haloWidth'));
 	const label = $derived(group(layers, 'label'));
 	const labelPosition = $derived(group(layers, 'labelPosition'));
@@ -92,6 +93,16 @@
 			<Slider id="{uid}-rotate" min={-180} max={180} step={15} bind:value={rotation.value} onchange={log} unit="°" />
 		</InputRow>
 	{/if}
+
+	<!-- the whole marker, its symbol and its label; it shows on a map that is rotated or tilted -->
+	<InputRow id="{uid}-flat" label="Flat on the map" mixed={flat.mixed}>
+		<Checkbox
+			id="{uid}-flat"
+			title="Lay the symbol and the label flat on the map, so they turn and tilt with it; else they face the viewer"
+			bind:checked={flat.value}
+			onchange={log}
+		/>
+	</InputRow>
 </InspectorSection>
 
 <InspectorSection title="Label">

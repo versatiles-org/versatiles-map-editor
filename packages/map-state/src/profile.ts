@@ -80,6 +80,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	| 'labelSize'
 	| 'font'
 	| 'haloColor'
+	| 'flat'
 > = {
 	color: '#ff0000',
 	rotation: 0,
@@ -92,7 +93,9 @@ export const SYMBOL_DEFAULTS: Defaults<
 	labelColor: '#000000',
 	// the font of the labels of the background map
 	font: '',
-	haloColor: '#ffffff'
+	haloColor: '#ffffff',
+	// upright, facing the viewer
+	flat: false
 };
 
 /** The value, if it is one of the names of the table; undefined for anything else. */
@@ -179,6 +182,7 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	set(s, 'width', sanitizeNumber(v.width, 0));
 	set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, v.labelPosition));
 	set(s, 'visible', sanitizeBoolean(v.visible));
+	set(s, 'flat', sanitizeBoolean(v.flat));
 	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
 	set(s, 'arrowEnd', oneOf(ARROW_NAMES, v.arrowEnd));
 	const arrowSize = sanitizeNumber(v.arrowSize, 0);
@@ -342,7 +346,9 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-label-size': s.labelSize,
 		// none: the font of the labels of the background map
 		'symbol-label-font': s.font || undefined,
-		'symbol-halo-color': s.haloColor
+		'symbol-halo-color': s.haloColor,
+		// only of a flat marker
+		'symbol-flat': s.flat || undefined
 	};
 }
 
@@ -360,6 +366,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
 		set(s, 'symbol', sanitizeSymbol(p['symbol-pattern']));
 		set(s, 'font', sanitizeString(p['symbol-label-font']));
+		set(s, 'flat', sanitizeBoolean(p['symbol-flat']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);
 }

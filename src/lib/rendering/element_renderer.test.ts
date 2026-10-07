@@ -232,6 +232,41 @@ describe('ElementRenderer', () => {
 			]);
 		});
 
+		it('are drawn by layers of their own if they lie flat on the map, since a layer draws all its markers alike', async () => {
+			await doc.setState({
+				elements: [
+					{ type: 'marker', point: [0, 0] },
+					{ type: 'marker', point: [1, 0], style: { flat: true } },
+					{ type: 'marker', point: [2, 0], style: { flat: true } },
+					{ type: 'marker', point: [3, 0] }
+				]
+			});
+			doc.view.renderer.flush();
+			expect(lastFeatures('symbol').map((f) => [f.properties?.flat, f.properties?.layer])).toStrictEqual([
+				[undefined, 'elements_symbol'],
+				[true, 'elements_symbol_1'],
+				[true, 'elements_symbol_1'],
+				[undefined, 'elements_symbol_2']
+			]);
+			// the layer of the flat ones turns and tilts with the map, its symbols and its labels
+			const aligned = map.setLayoutProperty.mock.calls.filter(([, key]) => String(key).endsWith('-alignment'));
+			expect(aligned).toStrictEqual([
+				['elements_symbol_1', 'icon-rotation-alignment', 'map'],
+				['elements_symbol_1', 'icon-pitch-alignment', 'map'],
+				['elements_symbol_1', 'text-rotation-alignment', 'map'],
+				['elements_symbol_1', 'text-pitch-alignment', 'map']
+			]);
+
+			// upright again: one layer for all, and the layer that stays draws upright markers
+			map.getLayoutProperty.mockImplementation((id, key) =>
+				id === 'elements_symbol_1' && key?.endsWith('-alignment') ? 'map' : undefined
+			);
+			const flat = doc.elements.filter((_, i) => i === 1 || i === 2) as MarkerElement[];
+			flat.forEach((marker) => (marker.layer.flat = false));
+			doc.view.renderer.flush();
+			expect(lastFeatures('symbol').map((f) => f.properties?.layer)).toStrictEqual(Array(4).fill('elements_symbol'));
+		});
+
 		it('need fewer layers when labels are removed, and more when one is added', async () => {
 			await markers(['A', '', 'B', '']);
 			expect(doc.view.renderer.layerIds('symbol')).toHaveLength(3);
@@ -425,6 +460,31 @@ describe('planLayers', () => {
 				});
 			}
 		}
+	});
+
+	it('keeps flat markers and upright ones apart, in their order', () => {
+		const flat: Drawn = { roles: ['symbol'], label: false, flat: true };
+		const plan = planLayers([marker, flat, flat, marker, flat]);
+		expect(plan.layers).toStrictEqual([
+			{ role: 'symbol', elements: [0] },
+			{ role: 'symbol', elements: [1, 2], flat: true },
+			{ role: 'symbol', elements: [3] },
+			{ role: 'symbol', elements: [4], flat: true }
+		]);
+		expect(plan).not.toHaveProperty('flatLabels');
+		// only markers are flat
+		expect(planLayers([{ ...line, flat: true }, line]).layers).toStrictEqual([{ role: 'stroke', elements: [0, 1] }]);
+	});
+
+	it('gives the labels of flat markers a layer of their own if the labels share layers', () => {
+		const flatLabeled: Drawn = { roles: ['symbol'], label: true, flat: true };
+		const many = Array.from({ length: MAX_LAYERS + 1 }, () => labeled);
+		expect(planLayers(many)).toMatchObject({ sharedLabels: true });
+		expect(planLayers(many)).not.toHaveProperty('flatLabels');
+		expect(planLayers([...many, flatLabeled])).toMatchObject({ sharedLabels: true, flatLabels: true });
+		// not for a flat marker without a label, nor while every marker has its label in its layer
+		expect(planLayers([...many, { ...flatLabeled, label: false }])).not.toHaveProperty('flatLabels');
+		expect(planLayers([labeled, flatLabeled])).not.toHaveProperty('flatLabels');
 	});
 
 	it('draws with fewer layers if there are too many, step by step', () => {

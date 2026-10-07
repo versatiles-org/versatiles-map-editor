@@ -15,6 +15,7 @@ describe('SymbolStyle', () => {
 		const keys = Object.keys(SymbolStyle.defaultStyle).sort();
 		expect(keys).toStrictEqual([
 			'color',
+			'flat',
 			'font',
 			'haloColor',
 			'haloWidth',

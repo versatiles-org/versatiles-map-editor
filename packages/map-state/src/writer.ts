@@ -628,6 +628,9 @@ export class StateWriter {
 			case 'visible':
 				// the key alone means "false"
 				return;
+			case 'flat':
+				// the key alone means "true"
+				return;
 		}
 	}
 

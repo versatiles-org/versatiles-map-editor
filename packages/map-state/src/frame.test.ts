@@ -173,6 +173,44 @@ describe('view: how the author turned the map in the editor', () => {
 	});
 });
 
+describe('flat markers', () => {
+	const marker = (style?: object): MapState => ({ elements: [{ type: 'marker', point: [13.4, 52.5], style }] });
+
+	it('are kept in a link, and upright ones cost nothing', () => {
+		expect(decodeState(encodeState(marker({ flat: true }))).elements[0].style).toStrictEqual({ flat: true });
+		expect(decodeState(encodeState(marker({ flat: true, rotation: 45 }))).elements[0].style).toStrictEqual({
+			flat: true,
+			rotation: 45
+		});
+		// upright is the default
+		expect(encodeState(marker({ flat: false }))).toHaveLength(encodeState(marker()).length);
+		expect(decodeState(encodeState(marker({ flat: false }))).elements[0].style?.flat).toBeUndefined();
+	});
+
+	it('are flat again after an upright one, e.g. in a list of markers', () => {
+		const state: MapState = {
+			elements: [
+				{ type: 'marker', point: [13.4, 52.5], style: { flat: true } },
+				{ type: 'marker', point: [13.5, 52.5] },
+				{ type: 'marker', point: [13.6, 52.5], style: { flat: true, size: 2 } }
+			]
+		};
+		expect(decodeState(encodeState(state)).elements.map((element) => element.style)).toStrictEqual([
+			{ flat: true },
+			undefined,
+			{ flat: true, size: 2 }
+		]);
+	});
+
+	it('are kept in GeoJSON and KML', () => {
+		const state = marker({ flat: true });
+		expect(stateToGeoJSON(state).features[0].properties?.['symbol-flat']).toBe(true);
+		expect(stateToGeoJSON(marker()).features[0].properties).not.toHaveProperty('symbol-flat');
+		expect(stateFromGeoJSON(stateToGeoJSON(state)).elements[0].style).toStrictEqual({ flat: true });
+		expect(stateFromKML(stateToKML(state)).elements[0].style).toStrictEqual({ flat: true });
+	});
+});
+
 describe('sanitizeBounds', () => {
 	it('accepts only an area within the latitudes and longitudes of the map', () => {
 		expect(sanitizeBounds([-10, -20, 10, 20])).toStrictEqual([-10, -20, 10, 20]);

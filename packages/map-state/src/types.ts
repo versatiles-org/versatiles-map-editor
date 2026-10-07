@@ -251,6 +251,14 @@ export interface MarkerStyle {
 	 * @default "auto"
 	 */
 	labelPosition?: LabelPositionName;
+	/**
+	 * The marker lies flat on the map, its symbol and its label: on a map that is rotated or
+	 * tilted, it turns and tilts with the map, so e.g. an arrow keeps its compass direction, and
+	 * the positions of the label are compass directions. Else it stands upright and faces the
+	 * viewer, however the map is turned.
+	 * @default false
+	 */
+	flat?: boolean;
 }
 
 /** The style of a line: its color, width and dashes, and its arrowheads. Missing fields have their default. */
@@ -363,7 +371,8 @@ export const STYLE_ROLE_FIELDS = {
 		'labelColor',
 		'labelSize',
 		'font',
-		'labelPosition'
+		'labelPosition',
+		'flat'
 	],
 	line: ['color', 'width', 'dash', 'arrowStart', 'arrowEnd', 'arrowSize'],
 	area: ['color', 'pattern', 'patternScale', 'patternCoverage'],

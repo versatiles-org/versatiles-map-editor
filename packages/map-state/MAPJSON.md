@@ -163,6 +163,7 @@ other kinds are unknown fields (see [Basics](#basics)).
 | `labelSize`     | a factor of the label (16 pixels), default `1`                                                                                                                                                                                |
 | `font`          | the glyph font of the label, e.g. `"noto_sans_bold"`; default `""`, the font of the background map                                                                                                                            |
 | `labelPosition` | the place of the label: `"auto"` (beside the symbol where it fits, without a symbol on the point), `"right"`, `"left"`, `"top"`, `"bottom"`, `"top-right"`, `"top-left"`, `"bottom-right"`, `"bottom-left"`; default `"auto"` |
+| `flat`          | `true`: the marker lies flat on the map, its symbol and its label, and turns and tilts with a rotated or tilted map; else it stands upright and faces the viewer. Default `false`                                             |
 
 **Lines** (`style` of a line):
 

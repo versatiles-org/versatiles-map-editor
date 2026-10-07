@@ -43,27 +43,34 @@ export const ELEMENTS_TOP = 'elements_top';
  */
 export const MAX_LAYERS = 200;
 
-/** What an element draws: the roles of its style, and whether it has a label. */
+/**
+ * What an element draws: the roles of its style, whether it has a label, and whether it is a
+ * marker that lies flat on the map, which a layer of its own kind draws (see `symbolAlignment`).
+ */
 export interface Drawn {
 	roles: Role[];
 	label: boolean;
+	flat?: boolean;
 }
 
 /** The layers that draw the elements, in drawing order, see `planLayers`. */
 export interface LayerPlan {
-	/** Each layer with the elements (their indices) that it draws. */
-	layers: { role: Role; elements: number[] }[];
+	/** Each layer with the elements (their indices) that it draws; `flat` for one of flat markers. */
+	layers: { role: Role; elements: number[]; flat?: true }[];
 	/** Whether the markers are drawn over all areas and lines. */
 	markersOnTop: boolean;
 	/** Whether the labels of all markers are drawn by one layer over all markers, see `LABELS_LAYER`. */
 	sharedLabels: boolean;
+	/** Whether flat markers have labels then, which a layer of their own draws, see `FLAT_LABELS_LAYER`. */
+	flatLabels?: true;
 }
 
 /**
  * The layers that draw the elements (in drawing order). It starts with the layers of each element:
  * its area, its outline or line, its marker. Then it merges each layer into the one before it if
  * they draw the same, e.g. two lines in a row: within a layer, the elements keep their order, so
- * this draws exactly the same with fewer layers. Only a marker after a label stays apart: MapLibre
+ * this draws exactly the same with fewer layers. Flat markers and upright ones stay apart, since
+ * a layer draws its markers all alike. And a marker after a label stays apart: MapLibre
  * draws the symbols of a layer before all its labels (maplibre-gl-js issue #49). The arrowheads of
  * lines are drawn over the lines of their layer: a line after a line with arrowheads joins the
  * layer of that line, under its arrowheads, so lines in a row keep one layer.
@@ -101,28 +108,30 @@ function mergeLayers(
 		ROLES.filter((role) => drawn.roles.includes(role)).map((role) => ({
 			role,
 			element,
-			label: role === 'symbol' && drawn.label && !sharedLabels
+			label: role === 'symbol' && drawn.label && !sharedLabels,
+			flat: role === 'symbol' && drawn.flat === true
 		}))
 	);
 	const markers = single.filter((layer) => layer.role === 'symbol');
 	if (markersOnTop) single = [...single.filter((layer) => layer.role !== 'symbol'), ...markers];
 	if (mergeAreas) single = [...ROLES.flatMap((role) => single.filter((layer) => layer.role === role))];
-	const merged: { role: Role; elements: number[]; label: boolean }[] = [];
-	for (const { role, element, label } of single) {
+	const merged: { role: Role; elements: number[]; label: boolean; flat: boolean }[] = [];
+	for (const { role, element, label, flat } of single) {
 		// a line under the arrowheads of the lines before it
 		const lines = role === 'stroke' && merged.at(-1)?.role === 'arrow' ? merged.at(-2) : undefined;
 		const last = lines?.role === 'stroke' ? lines : merged.at(-1);
-		if (last && last.role === role && !last.label) {
+		if (last && last.role === role && !last.label && last.flat === flat) {
 			last.elements.push(element);
 			last.label = label;
 		} else {
-			merged.push({ role, elements: [element], label });
+			merged.push({ role, elements: [element], label, flat });
 		}
 	}
 	return {
-		layers: merged.map(({ role, elements }) => ({ role, elements })),
+		layers: merged.map(({ role, elements, flat }) => ({ role, elements, ...(flat ? { flat: true as const } : {}) })),
 		markersOnTop: markersOnTop || mergeAreas,
-		sharedLabels
+		sharedLabels,
+		...(sharedLabels && elements.some((drawn) => drawn.flat && drawn.label) ? { flatLabels: true as const } : {})
 	};
 }
 
@@ -285,22 +294,45 @@ export function labelLayout({ overlap, minZoom }: LabelOptions) {
  * hidden where they overlap still avoid each other, but may cover the symbols of other markers.
  */
 export const LABELS_LAYER = 'elements_labels';
+/** The layer of the labels of the flat markers then, which lie on the map, over the other labels. */
+export const FLAT_LABELS_LAYER = 'elements_labels_flat';
+const LABELS_LAYERS = [LABELS_LAYER, FLAT_LABELS_LAYER];
 
-/** The layer of the labels of the markers, see `LABELS_LAYER`: their texts without the symbols. */
-function labelsLayer(font: string): LayerSpecification {
-	const markers = symbolLayer(font, LABELS_LAYER) as {
+/**
+ * A layer of the labels of the markers, see `LABELS_LAYER`: their texts without the symbols, of
+ * the upright markers or of the flat ones.
+ */
+function labelsLayer(font: string, flat: boolean): LayerSpecification {
+	const id = flat ? FLAT_LABELS_LAYER : LABELS_LAYER;
+	const markers = symbolLayer(font, id) as {
 		layout: Record<string, unknown>;
 		paint: Record<string, unknown>;
 	};
 	const text = (properties: Record<string, unknown>) =>
 		Object.fromEntries(Object.entries(properties).filter(([key]) => key.startsWith('text-')));
 	return {
-		id: LABELS_LAYER,
+		id,
 		source: ELEMENT_LAYERS.symbol,
 		type: 'symbol',
-		layout: { ...text(markers.layout), 'symbol-sort-key': ['get', 'order'] },
+		filter: [flat ? '==' : '!=', ['get', 'flat'], true],
+		layout: { ...text(markers.layout), ...symbolAlignment(flat), 'symbol-sort-key': ['get', 'order'] },
 		paint: text(markers.paint)
 	} as LayerSpecification;
+}
+
+/**
+ * How a layer draws its markers on a map that is rotated or tilted: flat on the map, the symbols
+ * and the labels, so they turn and tilt with it; else upright, facing the viewer. MapLibre sets
+ * that per layer, not per marker.
+ */
+export function symbolAlignment(flat: boolean) {
+	const alignment = flat ? ('map' as const) : ('auto' as const);
+	return {
+		'icon-rotation-alignment': alignment,
+		'icon-pitch-alignment': alignment,
+		'text-rotation-alignment': alignment,
+		'text-pitch-alignment': alignment
+	};
 }
 
 /** The layout properties of the labels of markers that each layer of markers has alike. */
@@ -395,6 +427,8 @@ export class ElementRenderer {
 	private markersOnTop = false;
 	/** The layers of the areas and lines that have a place of their own (with the markers on top), and the others, in drawing order. */
 	private planned: { areas: string[]; others: string[] } = { areas: [], others: [...Object.values(ELEMENT_LAYERS)] };
+	/** The layers of the plan that draw flat markers, or their labels. */
+	private flatLayers = new Set<string>();
 	/** The layers of the elements that the map style has. */
 	private present = new Set<string>(Object.values(ELEMENT_LAYERS));
 	/** How the labels of markers are shown, see `LabelOptions`. */
@@ -418,12 +452,17 @@ export class ElementRenderer {
 
 	/** What the element draws, for the layers. */
 	private static drawnOf(element: AbstractElement): Drawn {
-		const label = element.getStyleLayers().symbol?.getProperties().label;
-		return { roles: rolesOf(element), label: typeof label === 'string' && label.trim() !== '' };
+		const symbol = element.getStyleLayers().symbol;
+		const label = symbol?.getProperties().label;
+		return {
+			roles: rolesOf(element),
+			label: typeof label === 'string' && label.trim() !== '',
+			...(symbol?.flat ? { flat: true } : {})
+		};
 	}
 
-	private static key({ roles, label }: Drawn): string {
-		return `${roles.join()}${label ? ' label' : ''}`;
+	private static key({ roles, label, flat }: Drawn): string {
+		return `${roles.join()}${label ? ' label' : ''}${flat ? ' flat' : ''}`;
 	}
 
 	/**
@@ -435,10 +474,12 @@ export class ElementRenderer {
 		const plan = planLayers(drawn, this.markersOnTop);
 		const count: Partial<Record<Role, number>> = {};
 		this.layerOf = new Map(this.elements.map((element) => [element, {}]));
-		const ids = plan.layers.map(({ role, elements }) => {
+		this.flatLayers = new Set(plan.flatLabels ? [FLAT_LABELS_LAYER] : []);
+		const ids = plan.layers.map(({ role, elements, flat }) => {
 			const n = (count[role] = (count[role] ?? -1) + 1);
 			const id = n === 0 ? ELEMENT_LAYERS[role] : `${ELEMENT_LAYERS[role]}_${n}`;
 			for (const i of elements) this.layerOf.get(this.elements[i])![role] = id;
+			if (flat) this.flatLayers.add(id);
 			return id;
 		});
 		// every map style has the first layer of each role, also if it draws nothing
@@ -446,7 +487,11 @@ export class ElementRenderer {
 		const isArea = (id: string) => plan.markersOnTop && !id.startsWith(ELEMENT_LAYERS.symbol);
 		this.planned = {
 			areas: all.filter(isArea),
-			others: [...all.filter((id) => !isArea(id)), ...(plan.sharedLabels ? [LABELS_LAYER] : [])]
+			others: [
+				...all.filter((id) => !isArea(id)),
+				...(plan.sharedLabels ? [LABELS_LAYER] : []),
+				...(plan.flatLabels ? [FLAT_LABELS_LAYER] : [])
+			]
 		};
 		this.drawn = new Map(this.elements.map((element, i) => [element, ElementRenderer.key(drawn[i])]));
 	}
@@ -466,8 +511,8 @@ export class ElementRenderer {
 	public layerIds(role: Role): string[] {
 		const ids = [...this.planned.areas, ...this.planned.others];
 		const own = ids.filter((id) => id === ELEMENT_LAYERS[role] || id.startsWith(`${ELEMENT_LAYERS[role]}_`));
-		// the labels of the markers, if they have a layer of their own
-		return role === 'symbol' && ids.includes(LABELS_LAYER) ? [...own, LABELS_LAYER] : own;
+		// the labels of the markers, if they have layers of their own
+		return role === 'symbol' ? [...own, ...LABELS_LAYERS.filter((id) => ids.includes(id))] : own;
 	}
 
 	/** Show the labels of the markers all, or without those that overlap, and from a zoom level. */
@@ -488,14 +533,16 @@ export class ElementRenderer {
 		const own = this.present.has(LABELS_LAYER);
 		for (const id of this.layerIds('symbol')) {
 			for (const [key, value] of Object.entries(layout)) {
-				const label = id === LABELS_LAYER || !own;
+				const label = LABELS_LAYERS.includes(id) || !own;
 				map.setLayoutProperty(id, key as keyof typeof layout, key === 'text-field' && !label ? '' : value);
 			}
 		}
 		if (own) {
 			const order: ExpressionSpecification = ['get', 'order'];
 			const front = this.labels.overlap === 'hide';
-			map.setLayoutProperty(LABELS_LAYER, 'symbol-sort-key', front ? ['-', 0, order] : order);
+			for (const id of LABELS_LAYERS) {
+				if (this.present.has(id)) map.setLayoutProperty(id, 'symbol-sort-key', front ? ['-', 0, order] : order);
+			}
 		}
 	}
 
@@ -561,17 +608,27 @@ export class ElementRenderer {
 			if (this.present.has(id)) continue;
 			const role = ROLES.find((role) => id.startsWith(ELEMENT_LAYERS[role]))!;
 			map.addLayer(
-				id === LABELS_LAYER ? labelsLayer('noto_sans_regular') : elementLayer(role, id, 'noto_sans_regular'),
+				LABELS_LAYERS.includes(id)
+					? labelsLayer('noto_sans_regular', id === FLAT_LABELS_LAYER)
+					: elementLayer(role, id, 'noto_sans_regular'),
 				ELEMENTS_TOP
 			);
 			// the font like that of the first layer of markers
-			if (id !== LABELS_LAYER && role !== 'symbol') continue;
+			if (!LABELS_LAYERS.includes(id) && role !== 'symbol') continue;
 			for (const key of LABEL_LAYOUT_KEYS) {
 				const value = map.getLayoutProperty(ELEMENT_LAYERS.symbol, key);
 				if (value !== undefined) map.setLayoutProperty(id, key, value);
 			}
 		}
 		this.present = wanted;
+		// the layers of the markers draw other markers than before: flat ones, or upright ones
+		for (const id of this.layerIds('symbol')) {
+			const alignment = symbolAlignment(this.flatLayers.has(id));
+			for (const key of Object.keys(alignment) as (keyof typeof alignment)[]) {
+				const value = alignment[key];
+				if ((map.getLayoutProperty(id, key) ?? 'auto') !== value) map.setLayoutProperty(id, key, value);
+			}
+		}
 		// from the top down, each right under the one above it
 		for (const [ids, top] of [
 			[areas, AREAS_TOP],

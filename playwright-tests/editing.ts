@@ -1094,6 +1094,48 @@ test('the tools work on a map that its author has rotated and tilted', async ({ 
 	expect(camera).toStrictEqual([50, 45]);
 });
 
+test('a marker is laid flat on the map in its style, its symbol and its label', async ({ page }) => {
+	const elements: MapState['elements'] = [
+		{ type: 'marker', point: [13.38, 52.5], label: 'A' },
+		{ type: 'marker', point: [13.42, 52.5], label: 'B' }
+	];
+	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, elements }));
+	await waitForMapIsReady(page);
+	const styles = async () => (await storedState(page)).elements.map((element) => element.style);
+	/** How the layers of the markers draw them: "map" for flat ones, by the layer of each marker. */
+	const alignments = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			const keys = [
+				'icon-rotation-alignment',
+				'icon-pitch-alignment',
+				'text-rotation-alignment',
+				'text-pitch-alignment'
+			];
+			const features = map.querySourceFeatures('elements_symbol');
+			const layerOf = (label: string) =>
+				features.find((feature) => feature.properties.label === label)?.properties.layer;
+			return ['A', 'B'].map((label) =>
+				keys.map((key) => map.getLayoutProperty(layerOf(label), key as 'icon-pitch-alignment') ?? 'auto').join()
+			);
+		});
+	const upright = 'auto,auto,auto,auto';
+	const flat = page.getByRole('checkbox', { name: 'Flat on the map' });
+
+	// the first marker: its symbol is above its point
+	const [x, y] = await project(page, [13.38, 52.5]);
+	await page.mouse.click(x + 6, y - 8);
+	await expect(flat).not.toBeChecked();
+	await flat.check();
+	await expect.poll(styles).toStrictEqual([{ flat: true }, undefined]);
+	// a layer of its own, which draws its symbol and its label on the map
+	await expect.poll(alignments).toStrictEqual(['map,map,map,map', upright]);
+
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(styles).toStrictEqual([undefined, undefined]);
+	await expect.poll(alignments).toStrictEqual([upright, upright]);
+});
+
 test('Shift-drag on the map zooms to a box', async ({ page }) => {
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);

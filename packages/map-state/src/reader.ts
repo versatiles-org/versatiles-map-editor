@@ -682,6 +682,10 @@ export class StateReader {
 					// the key alone means "false"
 					style.visible = false;
 					break;
+				case 'flat':
+					// the key alone means "true"
+					style.flat = true;
+					break;
 				case 'symbol':
 					style.symbol = this.readStringRef(true);
 					break;

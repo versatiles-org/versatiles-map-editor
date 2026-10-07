@@ -106,6 +106,7 @@ export class SymbolStyle extends StylePart {
 	#color: string = $state(SYMBOL_DEFAULTS.color);
 	#haloWidth: number = $state(SYMBOL_DEFAULTS.haloWidth);
 	#rotation: number = $state(SYMBOL_DEFAULTS.rotation);
+	#flat: boolean = $state(SYMBOL_DEFAULTS.flat);
 	#size: number = $state(SYMBOL_DEFAULTS.size);
 	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
 	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
@@ -131,6 +132,16 @@ export class SymbolStyle extends StylePart {
 		this.#haloWidth = value;
 		this.changed();
 	}
+	/** Whether the marker lies flat on the map, its symbol and its label; else it faces the viewer. */
+	get flat(): boolean {
+		return this.#flat;
+	}
+	set flat(value: boolean) {
+		if (value === this.#flat) return;
+		this.#flat = value;
+		this.changed();
+	}
+
 	get rotation(): number {
 		return this.#rotation;
 	}
@@ -251,7 +262,9 @@ export class SymbolStyle extends StylePart {
 			// none: the font of the background map, see `ElementRenderer.applyFonts`
 			...(this.font ? { font: this.font } : {}),
 			haloColor: cssColor(this.haloColor),
-			place: this.getPlace()
+			place: this.getPlace(),
+			// only of a flat marker, for the layer of its label if the labels have layers of their own
+			...(this.flat ? { flat: true } : {})
 		};
 	}
 
@@ -267,7 +280,8 @@ export class SymbolStyle extends StylePart {
 				labelPosition: this.labelPosition,
 				labelColor: this.labelColor,
 				font: this.font,
-				haloColor: this.haloColor
+				haloColor: this.haloColor,
+				flat: this.flat
 			},
 			SymbolStyle.defaultStyle
 		);
@@ -284,5 +298,6 @@ export class SymbolStyle extends StylePart {
 		if (style.labelColor != null) this.labelColor = style.labelColor;
 		if (style.font != null) this.font = style.font;
 		if (style.haloColor != null) this.haloColor = style.haloColor;
+		if (style.flat != null) this.flat = style.flat;
 	}
 }

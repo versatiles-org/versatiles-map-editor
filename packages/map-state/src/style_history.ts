@@ -21,6 +21,8 @@ const ENCODED: { [K in keyof StateStyle]-?: (value: NonNullable<StateStyle[K]>) 
 	rotation: (v) => Math.round(v),
 	// only "false" is stored, "true" is the default
 	visible: (v) => (v === false ? false : undefined),
+	// only "true" is stored, "false" is the default
+	flat: (v) => (v === true ? true : undefined),
 	pattern: (v) => v,
 	patternScale: (v) => Math.round(v * 10),
 	patternCoverage: (v) => Math.round(v * 100)
@@ -51,7 +53,8 @@ export const STYLE_KEYS: {
 		'haloWidth',
 		'haloColor',
 		STYLE_REMOVE,
-		'rotation'
+		'rotation',
+		'flat'
 	],
 	line: ['color', 'width', 'dash', 'arrowStart', 'arrowEnd', 'arrowSize', STYLE_REMOVE],
 	area: ['color', 'pattern', 'patternScale', 'patternCoverage', STYLE_REMOVE],
