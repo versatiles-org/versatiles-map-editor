@@ -63,7 +63,22 @@ describe('the JSON Schema of .mapjson files', () => {
 			view: { center: [13.4, 52.5], radius: 1200, turnable: true, bearing: 15, pitch: 30 },
 			frame: { bounds: [13.3, 52.4, 13.5, 52.6], bearing: -30, pitch: 45, lockBearing: true, lockPitch: true },
 			meta: {
-				background: { builder: 'satellite', options: { osmOverlay: false } },
+				background: {
+					base: 'satellite',
+					theme: 'gray',
+					streets: false,
+					borders: false,
+					labels: 'fewer',
+					language: 'de',
+					font: 'lato_regular',
+					labelSize: 1.5,
+					haloWidth: 0.5,
+					colors: { saturation: -0.5, black: 0.2, white: 0.9 },
+					hillshade: true,
+					terrain: true,
+					buildings: 'extruded',
+					options: { features: { terrain: { exaggeration: 2 } } }
+				},
 				legend: {
 					layout: 'inline',
 					font: 'serif',

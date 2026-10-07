@@ -2,6 +2,9 @@ import type * as GeoJSON from 'geojson';
 import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
+	BACKGROUND_BASES,
+	BACKGROUND_BUILDINGS,
+	BACKGROUND_LABELS,
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
 	LEGEND_ENTRY_TYPES,
@@ -18,6 +21,7 @@ import {
 	type MapState,
 	type Position,
 	type StateBackground,
+	type StateBackgroundColors,
 	type StateElement,
 	type StateLabels,
 	type AreaStyle,
@@ -420,13 +424,75 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 
 // ----- background map -----
 
-/** A valid background, or undefined. The options are not checked, since they belong to `@versatiles/style`. */
+/** The width of the halo of the labels of each base map, if the background does not set one. */
+export const BACKGROUND_HALO_WIDTHS = { vector: 2, satellite: 1 } as const;
+
+/** The settings of the background map that have the same default on both base maps. */
+export const BACKGROUND_DEFAULTS = {
+	base: 'vector',
+	theme: 'colorful',
+	streets: true,
+	borders: true,
+	labels: 'normal',
+	language: 'user',
+	font: 'noto_sans_regular',
+	labelSize: 1,
+	hillshade: false,
+	terrain: false,
+	buildings: 'flat'
+} as const;
+
+/** The colors of the background map as they are: no change. */
+export const BACKGROUND_COLOR_DEFAULTS = { saturation: 0, black: 0, white: 1 } as const;
+
+/**
+ * A valid background with its valid settings, without those that have their default value.
+ * Undefined if nothing is left, which is the default background. The `options` are not checked,
+ * since they belong to `@versatiles/style`.
+ */
 export function sanitizeBackground(value: unknown): StateBackground | undefined {
-	if (typeof value !== 'object' || value === null) return undefined;
-	const { builder, options } = value as Record<string, unknown>;
-	if (builder !== 'osm' && builder !== 'satellite') return undefined;
-	if (typeof options !== 'object' || options === null || Array.isArray(options)) return undefined;
-	return { builder, options: options as Record<string, unknown> };
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+	const v = value as Record<string, unknown>;
+	const background: StateBackground = {};
+	const D = BACKGROUND_DEFAULTS;
+
+	const base = oneOf(BACKGROUND_BASES, v.base) ?? D.base;
+	if (base !== D.base) background.base = base;
+	const theme = sanitizeString(v.theme);
+	if (theme && theme !== D.theme) background.theme = theme;
+	if (sanitizeBoolean(v.streets) === false) background.streets = false;
+	if (sanitizeBoolean(v.borders) === false) background.borders = false;
+	const labels = oneOf(BACKGROUND_LABELS, v.labels);
+	if (labels && labels !== D.labels) background.labels = labels;
+	const language = sanitizeString(v.language);
+	if (language && language !== D.language) background.language = language;
+	const font = sanitizeString(v.font);
+	if (font && font !== D.font) background.font = font;
+	const labelSize = sanitizeNumber(v.labelSize, 0);
+	if (labelSize && labelSize !== D.labelSize) background.labelSize = labelSize;
+	const haloWidth = sanitizeNumber(v.haloWidth, 0);
+	if (haloWidth !== undefined && haloWidth !== BACKGROUND_HALO_WIDTHS[base]) background.haloWidth = haloWidth;
+
+	if (typeof v.colors === 'object' && v.colors !== null) {
+		const c = v.colors as Record<string, unknown>;
+		const colors: StateBackgroundColors = {};
+		const saturation = sanitizeNumber(c.saturation, -1, 1);
+		if (saturation) colors.saturation = saturation;
+		const black = sanitizeNumber(c.black, -1, 1);
+		if (black) colors.black = black;
+		const white = sanitizeNumber(c.white, 0, 2);
+		if (white !== undefined && white !== BACKGROUND_COLOR_DEFAULTS.white) colors.white = white;
+		if (Object.keys(colors).length > 0) background.colors = colors;
+	}
+
+	if (sanitizeBoolean(v.hillshade)) background.hillshade = true;
+	if (sanitizeBoolean(v.terrain)) background.terrain = true;
+	if (oneOf(BACKGROUND_BUILDINGS, v.buildings) === 'extruded') background.buildings = 'extruded';
+
+	if (typeof v.options === 'object' && v.options !== null && !Array.isArray(v.options)) {
+		if (Object.keys(v.options).length > 0) background.options = v.options as Record<string, unknown>;
+	}
+	return Object.keys(background).length > 0 ? background : undefined;
 }
 
 // ----- legend -----

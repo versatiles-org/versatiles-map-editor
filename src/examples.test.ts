@@ -11,15 +11,15 @@ import {
 } from '@versatiles/map-state';
 
 // The example maps in /examples: what each contains, so a change of a file is noticed
-const EXAMPLES: Record<string, { types: Record<string, number>; legend: number; builder: 'osm' | 'satellite' }> = {
-	'paris-2024-venues': { types: { marker: 24 }, legend: 4, builder: 'osm' },
-	'hamburg-berlin-railway': { types: { line: 2, marker: 6 }, legend: 2, builder: 'osm' },
+const EXAMPLES: Record<string, { types: Record<string, number>; legend: number; base: 'vector' | 'satellite' }> = {
+	'paris-2024-venues': { types: { marker: 24 }, legend: 4, base: 'vector' },
+	'hamburg-berlin-railway': { types: { line: 2, marker: 6 }, legend: 2, base: 'vector' },
 	// without a legend: a label on the map names the zone
-	'berlin-low-emission-zone': { types: { polygon: 3, marker: 1 }, legend: 0, builder: 'osm' },
-	'chernobyl-exclusion-zone': { types: { circle: 2, marker: 4 }, legend: 2, builder: 'satellite' },
-	'london-pharmacies': { types: { marker: 557 }, legend: 1, builder: 'osm' },
-	'warsaw-christmas-markets-2025': { types: { marker: 23 }, legend: 3, builder: 'osm' },
-	'napoleon-russia-1812': { types: { line: 2, marker: 3 }, legend: 3, builder: 'osm' }
+	'berlin-low-emission-zone': { types: { polygon: 3, marker: 1 }, legend: 0, base: 'vector' },
+	'chernobyl-exclusion-zone': { types: { circle: 2, marker: 4 }, legend: 2, base: 'satellite' },
+	'london-pharmacies': { types: { marker: 557 }, legend: 1, base: 'vector' },
+	'warsaw-christmas-markets-2025': { types: { marker: 23 }, legend: 3, base: 'vector' },
+	'napoleon-russia-1812': { types: { line: 2, marker: 3 }, legend: 3, base: 'vector' }
 };
 
 const read = (name: string): MapState => JSON.parse(readFileSync(`examples/${name}.mapjson`, 'utf-8'));
@@ -34,7 +34,7 @@ describe('example maps', () => {
 				for (const element of state.elements) types[element.type] = (types[element.type] ?? 0) + 1;
 				expect(types).toStrictEqual(expected.types);
 				expect(state.meta?.legend?.entries ?? []).toHaveLength(expected.legend);
-				expect(state.meta?.background?.builder).toBe(expected.builder);
+				expect(state.meta?.background?.base ?? 'vector').toBe(expected.base);
 				expect(state.view).toBeDefined();
 			});
 

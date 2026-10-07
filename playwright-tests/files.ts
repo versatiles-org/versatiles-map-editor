@@ -176,7 +176,7 @@ test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) 
 	const state: MapState = {
 		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
-			background: { builder: 'osm', options: { theme: 'gray' } },
+			background: { theme: 'gray' },
 			legend: { entries: [{ type: 'area' as const, style: { color: '#00ff00' }, label: 'Park' }] }
 		},
 		elements: [

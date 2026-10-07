@@ -2,20 +2,7 @@
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"view": { "center": [13.378944999999959, 52.50300238942748], "radius": 6437.163848928544 },
 	"meta": {
-		"background": {
-			"builder": "osm",
-			"options": {
-				"theme": "gray",
-				"text": {
-					"spacing": 2,
-					"boundaries": { "haloWidth": 1.5 },
-					"places": { "haloWidth": 1.5 },
-					"streets": { "names": { "haloWidth": 1.5 } },
-					"water": { "haloWidth": 1.5 },
-					"pois": { "transit": { "haloWidth": 1.5 } }
-				}
-			}
-		},
+		"background": { "theme": "gray", "labels": "fewer", "language": "local", "haloWidth": 1.5 },
 		"title": "Berlin low-emission zone",
 		"labels": { "mapOnTop": true }
 	},

@@ -149,7 +149,7 @@ describe('MapStyleLoader', () => {
 		it('builds the next style in this order', async () => {
 			loader.setMapLabelsOnTop(true);
 			map.setStyle.mockClear();
-			await loader.setBackground({ builder: 'osm', options: { theme: 'gray' } }, 'noto_sans_regular');
+			await loader.setBackground({ theme: 'gray' }, 'noto_sans_regular');
 			const style = (map.setStyle.mock.lastCall as unknown[])[0] as { layers: { id: string; type: string }[] };
 			const ids = style.layers.map((layer) => layer.id);
 			// the arrowheads of lines are symbols too, under the labels

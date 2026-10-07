@@ -60,7 +60,23 @@ export const MAPJSON_FIELDS = {
 	StateFrame: ['bounds', 'bearing', 'pitch', 'lockBearing', 'lockPitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
-	StateBackground: ['builder', 'options'],
+	StateBackground: [
+		'base',
+		'theme',
+		'streets',
+		'borders',
+		'labels',
+		'language',
+		'font',
+		'labelSize',
+		'haloWidth',
+		'colors',
+		'hillshade',
+		'terrain',
+		'buildings',
+		'options'
+	],
+	StateBackgroundColors: ['saturation', 'black', 'white'],
 	StateLegend: ['layout', 'font', 'bold', 'italic', 'theme', 'entries'],
 	StateLegendMarker: ['type', 'style', 'label'],
 	StateLegendLine: ['type', 'style', 'label'],
@@ -97,7 +113,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * The fields of the content of a .mapjson file that this version does not know, by their path, e.g.
  * `elements[3].style.shadow`; and elements of an unknown type, e.g. `elements[4]`. They are allowed
  * (e.g. from a newer version, which may add fields), but `stateFromMapJSON` does not keep them, so
- * the editor warns about them. The options of the background map are those of `@versatiles/style`,
+ * the editor warns about them. The `options` of the background map are those of `@versatiles/style`,
  * which are not checked here.
  */
 export function unknownMapJSONFields(json: unknown): string[] {
@@ -121,7 +137,8 @@ export function unknownMapJSONFields(json: unknown): string[] {
 	check(root.frame, MAPJSON_FIELDS.StateFrame, 'frame');
 	const meta = check(root.meta, MAPJSON_FIELDS.StateMetadata, 'meta');
 	if (meta) {
-		check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');
+		const background = check(meta.background, MAPJSON_FIELDS.StateBackground, 'meta.background');
+		if (background) check(background.colors, MAPJSON_FIELDS.StateBackgroundColors, 'meta.background.colors');
 		check(meta.viewer, MAPJSON_FIELDS.StateViewer, 'meta.viewer');
 		check(meta.labels, MAPJSON_FIELDS.StateLabels, 'meta.labels');
 		const legend = check(meta.legend, MAPJSON_FIELDS.StateLegend, 'meta.legend');

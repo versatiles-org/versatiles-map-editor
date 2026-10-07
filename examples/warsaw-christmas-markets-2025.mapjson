@@ -5,19 +5,7 @@
 		"radius": 29551.411955597407
 	},
 	"meta": {
-		"background": {
-			"builder": "osm",
-			"options": {
-				"text": {
-					"spacing": 2
-				},
-				"recolor": {
-					"saturate": -0.2,
-					"brightness": 0.15,
-					"contrast": 0.7
-				}
-			}
-		},
+		"background": { "labels": "fewer", "language": "local", "colors": { "saturation": -0.2, "black": 0.3 } },
 		"legend": {
 			"entries": [
 				{

@@ -45,7 +45,11 @@ export {
 	removeLegendDefaults,
 	VIEWER_DEFAULTS,
 	VIEWER_CHOICES,
-	removeViewerDefaults
+	removeViewerDefaults,
+	BACKGROUND_DEFAULTS,
+	BACKGROUND_COLOR_DEFAULTS,
+	BACKGROUND_HALO_WIDTHS,
+	sanitizeBackground
 } from './profile.js';
 
 /**

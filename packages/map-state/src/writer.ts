@@ -15,6 +15,7 @@ import { boundsOf, centerOf } from './bounds.js';
 import {
 	LEGEND_DEFAULTS,
 	removeViewerDefaults,
+	sanitizeBackground,
 	sanitizeFrame,
 	sanitizeLabels,
 	VIEWER_CHOICES,
@@ -390,7 +391,7 @@ export class StateWriter {
 		// only the fields that are stored count, e.g. not `search: false`
 		const stored =
 			metadata &&
-			(metadata.background ||
+			(sanitizeBackground(metadata.background) ||
 				metadata.legend ||
 				metadata.colorScheme ||
 				removeViewerDefaults(metadata.viewer) ||
@@ -402,10 +403,10 @@ export class StateWriter {
 
 		this.writeBit(true);
 		// first the words of the format, as they are first in the string table
-		if (metadata.background) {
+		const background = backgroundJson(metadata);
+		if (background) {
 			this.writeInteger(METADATA_KEYS.background, 6);
-			// as JSON, so any option of @versatiles/style can be stored
-			this.writeStringRef(JSON.stringify(metadata.background), true);
+			this.writeStringRef(background, true);
 		}
 		if (metadata.colorScheme) {
 			this.writeInteger(METADATA_KEYS.colorScheme, 6);
@@ -741,6 +742,12 @@ function allStyles(root: MapState): StateStyle[] {
 	]);
 }
 
+/** The background of a map as JSON, with only its valid settings; undefined for the default background. */
+function backgroundJson(meta: StateMetadata | undefined): string | undefined {
+	const background = sanitizeBackground(meta?.background);
+	return background && JSON.stringify(background);
+}
+
 /**
  * The words of the format in the string table, in the order the writer writes them: the
  * background as JSON, the color scheme, the label font, and the names of the symbols of the
@@ -748,9 +755,7 @@ function allStyles(root: MapState): StateStyle[] {
  */
 function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
-	const strings = [meta?.background && JSON.stringify(meta.background), meta?.colorScheme].filter(
-		(value): value is string => !!value
-	);
+	const strings = [backgroundJson(meta), meta?.colorScheme].filter((value): value is string => !!value);
 	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
 		const styles: (StateStyle | undefined)[] = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
 		for (const style of styles) {

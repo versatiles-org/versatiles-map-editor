@@ -146,7 +146,7 @@ describe('MapDocument', () => {
 			// the background of the older state loads slowly
 			let resolve!: (style: StyleSpecification) => void;
 			vi.mocked(inlineSources).mockImplementationOnce(() => new Promise((r) => (resolve = r)));
-			const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
+			const gray = { theme: 'gray' };
 
 			const older = mapDocument.setState({
 				meta: { background: gray },
@@ -237,7 +237,7 @@ describe('MapDocument', () => {
 	});
 
 	describe('background', () => {
-		const gray = { builder: 'osm' as const, options: { theme: 'gray' } };
+		const gray = { theme: 'gray' };
 
 		it('is set by the state', async () => {
 			map.setStyle();

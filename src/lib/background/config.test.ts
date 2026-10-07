@@ -167,25 +167,30 @@ describe('resolveConfig', () => {
 		// the editor's default background is not stored
 		expect(start({})).toBeUndefined();
 		expect(start({ defaultLanguage: 'user' })).toBeUndefined();
-		expect(start({ defaultLanguage: 'de' })).toStrictEqual({ builder: 'osm', options: { text: { language: 'de' } } });
-		expect(start({ startBackground: { builder: 'osm', options: { theme: 'gray' } } })).toStrictEqual({
-			builder: 'osm',
-			options: { theme: 'gray', text: { language: 'user' } }
+		expect(start({ defaultLanguage: 'de' })).toStrictEqual({ language: 'de' });
+		expect(start({ startBackground: { theme: 'gray' } })).toStrictEqual({ theme: 'gray' });
+		expect(start({ startBackground: { theme: 'gray' }, defaultLanguage: 'de' })).toStrictEqual({
+			theme: 'gray',
+			language: 'de'
 		});
-		const french = { builder: 'osm', options: { text: { language: 'fr' } } };
+		const french = { language: 'fr' };
 		expect(start({ startBackground: french, defaultLanguage: 'de' })).toStrictEqual(french);
-		// the imagery alone has no labels
-		const imagery = { builder: 'satellite', options: { osmOverlay: false } };
-		expect(start({ startBackground: imagery, defaultLanguage: 'de' })).toStrictEqual(imagery);
+		// also the language of the browser, which is the default: the background names it
+		expect(start({ startBackground: { theme: 'gray', language: 'user' }, defaultLanguage: 'de' })).toStrictEqual({
+			theme: 'gray'
+		});
+		const imagery = { base: 'satellite', streets: false, borders: false, labels: 'none' };
+		expect(start({ startBackground: imagery })).toStrictEqual(imagery);
 	});
 
 	it('ignores a starting background or a language that the map cannot have', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		for (const startBackground of [
 			'gray',
-			{ builder: 'google', options: {} },
-			{ builder: 'osm', options: [] },
-			{ builder: 'osm', options: { theme: 'no such theme' } }
+			// as before the background had settings
+			{ builder: 'osm', options: { theme: 'gray' } },
+			['gray'],
+			{ options: { theme: 'no such theme' } }
 		]) {
 			expect(resolveConfig({ startBackground }).startBackground).toBeUndefined();
 		}

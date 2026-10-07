@@ -163,17 +163,108 @@
 		"StateBackground": {
 			"type": "object",
 			"properties": {
-				"builder": {
+				"base": {
 					"type": "string",
-					"enum": ["osm", "satellite"]
+					"enum": ["vector", "satellite"],
+					"description": "The vector map of OpenStreetMap, or satellite imagery.",
+					"default": "vector"
+				},
+				"theme": {
+					"type": "string",
+					"description": "The theme of the vector map, one of `@versatiles/style`, e.g. \"gray\" or \"gray-dark\".",
+					"default": "colorful"
+				},
+				"streets": {
+					"type": "boolean",
+					"description": "Whether the satellite map shows streets, railways and the symbols of points of interest over the imagery. The vector map always does.",
+					"default": true
+				},
+				"borders": {
+					"type": "boolean",
+					"description": "Whether the satellite map shows the borders of countries and states over the imagery. The vector map always does.",
+					"default": true
+				},
+				"labels": {
+					"type": "string",
+					"enum": ["normal", "fewer", "none"],
+					"description": "How many labels the map shows: all, fewer (with more space between them), or none.",
+					"default": "normal"
+				},
+				"language": {
+					"type": "string",
+					"description": "The language of the labels: \"user\" (of the browser), \"local\" (the local names), or a language code, e.g. \"de\".",
+					"default": "user"
+				},
+				"font": {
+					"type": "string",
+					"description": "The glyph font of the labels.",
+					"default": "noto_sans_regular"
+				},
+				"labelSize": {
+					"type": "number",
+					"description": "The size of the labels, as a factor.",
+					"exclusiveMinimum": 0,
+					"default": 1
+				},
+				"haloWidth": {
+					"type": "number",
+					"description": "The width of the halo around the labels, in pixels. Default: 2 on the vector map, 1 over the imagery.",
+					"minimum": 0
+				},
+				"colors": {
+					"$ref": "#/definitions/StateBackgroundColors",
+					"description": "Changes of the colors of the map."
+				},
+				"hillshade": {
+					"type": "boolean",
+					"description": "The relief shaded: hills and mountains with light and shadow.",
+					"default": false
+				},
+				"terrain": {
+					"type": "boolean",
+					"description": "The terrain raised to its heights, which a tilted map shows.",
+					"default": false
+				},
+				"buildings": {
+					"type": "string",
+					"enum": ["flat", "extruded"],
+					"description": "The buildings of the vector map: \"flat\", or \"extruded\" to their heights, which a tilted map shows when zoomed in.",
+					"default": "flat"
 				},
 				"options": {
 					"type": "object",
-					"additionalProperties": {}
+					"additionalProperties": {},
+					"description": "Options of `@versatiles/style` for what the settings cannot say, e.g. `{ \"features\": { \"terrain\": { \"exaggeration\": 2 } } }`: of `osm()` for the vector map, of `satellite()` for the imagery. They are laid over the options that the editor builds from the settings, so they win where both say something. The editor does not write them itself."
 				}
 			},
-			"required": ["builder", "options"],
-			"description": "A background map built with `@versatiles/style`: the builder and its options, minimized (e.g. with `osm.minimizeOptions`). Storing the options instead of a preset keeps every current and future option of `@versatiles/style` available."
+			"description": "The background map, as its author set it: the base map, its theme, its labels, its colors and its relief. The editor builds the map from these settings, with `@versatiles/style`. Missing fields have their default; the background with only defaults is not stored at all."
+		},
+		"StateBackgroundColors": {
+			"type": "object",
+			"properties": {
+				"saturation": {
+					"type": "number",
+					"description": "From -1 (gray) to 1.",
+					"minimum": -1,
+					"maximum": 1,
+					"default": 0
+				},
+				"black": {
+					"type": "number",
+					"description": "The lightness that black becomes, where 0 is black and 1 white.",
+					"minimum": -1,
+					"maximum": 1,
+					"default": 0
+				},
+				"white": {
+					"type": "number",
+					"description": "The lightness that white becomes.",
+					"minimum": 0,
+					"maximum": 2,
+					"default": 1
+				}
+			},
+			"description": "Changes of the colors of the background map; without them, its colors are as they are."
 		},
 		"StateLegend": {
 			"type": "object",

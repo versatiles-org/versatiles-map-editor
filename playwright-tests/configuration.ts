@@ -48,7 +48,7 @@ test('a new map starts in the configured view, with the starting background and 
 		route.fulfill({
 			body: `{
 				"startView": [9.73, 53.39, 10.33, 53.74], // Hamburg
-				"startBackground": { "builder": "osm", "options": { "theme": "gray" } },
+				"startBackground": { "theme": "gray" },
 				"defaultLanguage": "de",
 				"defaultColorScheme": "dark2"
 			}`
@@ -63,7 +63,7 @@ test('a new map starts in the configured view, with the starting background and 
 
 	// the background of the map, stored with it, e.g. for a shared link
 	await drawElement(page, 'Marker');
-	const background = { builder: 'osm', options: { theme: 'gray', text: { language: 'de' } } };
+	const background = { theme: 'gray', language: 'de' };
 	expect((await settledStoredState(page)).meta?.background).toStrictEqual(background);
 
 	await page.getByLabel('Color').first().click();

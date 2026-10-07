@@ -506,14 +506,173 @@ export interface StateLegendArea {
 	label: string;
 }
 
+/** The base maps: the vector map of OpenStreetMap, or satellite imagery. */
+export const BACKGROUND_BASES = ['vector', 'satellite'] as const;
+
 /**
- * A background map built with `@versatiles/style`: the builder and its options, minimized
- * (e.g. with `osm.minimizeOptions`). Storing the options instead of a preset keeps every
- * current and future option of `@versatiles/style` available.
+ * The themes of the vector map, as `@versatiles/style` names them. A link stores a theme as its
+ * index here, so new ones are added at the end; a theme that is not listed is stored as text.
+ */
+export const BACKGROUND_THEMES = [
+	'colorful',
+	'colorful-dark',
+	'natural',
+	'natural-dark',
+	'muted',
+	'muted-dark',
+	'gray',
+	'gray-dark',
+	'toner',
+	'toner-dark',
+	'positrino',
+	'positrino-dark',
+	'fnord',
+	'protocol',
+	'protocol-dark',
+	'protostar',
+	'protostar-dark',
+	'protozoa',
+	'classic',
+	'googol',
+	'freedom',
+	'macbob',
+	'mactaylor',
+	'bingo'
+] as const;
+
+/** How many labels the background map shows. */
+export const BACKGROUND_LABELS = ['normal', 'fewer', 'none'] as const;
+
+/**
+ * The languages of the labels of the background map: of the browser ("user"), the local names
+ * ("local"), or a language of the names in the tiles. A link stores a language as its index here;
+ * one that is not listed is stored as text.
+ */
+export const BACKGROUND_LANGUAGES = [
+	'user',
+	'local',
+	'ar',
+	'de',
+	'el',
+	'en',
+	'es',
+	'fr',
+	'it',
+	'nl',
+	'pl',
+	'pt',
+	'uk'
+] as const;
+
+/** The buildings of the vector map: their outlines, or raised to their heights. */
+export const BACKGROUND_BUILDINGS = ['flat', 'extruded'] as const;
+
+/**
+ * The background map, as its author set it: the base map, its theme, its labels, its colors and
+ * its relief. The editor builds the map from these settings, with `@versatiles/style`. Missing
+ * fields have their default; the background with only defaults is not stored at all.
  */
 export interface StateBackground {
-	builder: 'osm' | 'satellite';
-	options: Record<string, unknown>;
+	/**
+	 * The vector map of OpenStreetMap, or satellite imagery.
+	 * @default "vector"
+	 */
+	base?: (typeof BACKGROUND_BASES)[number];
+	/**
+	 * The theme of the vector map, one of `@versatiles/style`, e.g. "gray" or "gray-dark".
+	 * @default "colorful"
+	 */
+	theme?: string;
+	/**
+	 * Whether the satellite map shows streets, railways and the symbols of points of interest over
+	 * the imagery. The vector map always does.
+	 * @default true
+	 */
+	streets?: boolean;
+	/**
+	 * Whether the satellite map shows the borders of countries and states over the imagery. The
+	 * vector map always does.
+	 * @default true
+	 */
+	borders?: boolean;
+	/**
+	 * How many labels the map shows: all, fewer (with more space between them), or none.
+	 * @default "normal"
+	 */
+	labels?: (typeof BACKGROUND_LABELS)[number];
+	/**
+	 * The language of the labels: "user" (of the browser), "local" (the local names), or a
+	 * language code, e.g. "de".
+	 * @default "user"
+	 */
+	language?: string;
+	/**
+	 * The glyph font of the labels.
+	 * @default "noto_sans_regular"
+	 */
+	font?: string;
+	/**
+	 * The size of the labels, as a factor.
+	 * @exclusiveMinimum 0
+	 * @default 1
+	 */
+	labelSize?: number;
+	/**
+	 * The width of the halo around the labels, in pixels. Default: 2 on the vector map, 1 over the
+	 * imagery.
+	 * @minimum 0
+	 */
+	haloWidth?: number;
+	/** Changes of the colors of the map. */
+	colors?: StateBackgroundColors;
+	/**
+	 * The relief shaded: hills and mountains with light and shadow.
+	 * @default false
+	 */
+	hillshade?: boolean;
+	/**
+	 * The terrain raised to its heights, which a tilted map shows.
+	 * @default false
+	 */
+	terrain?: boolean;
+	/**
+	 * The buildings of the vector map: "flat", or "extruded" to their heights, which a tilted map
+	 * shows when zoomed in.
+	 * @default "flat"
+	 */
+	buildings?: (typeof BACKGROUND_BUILDINGS)[number];
+	/**
+	 * Options of `@versatiles/style` for what the settings cannot say, e.g.
+	 * `{ "features": { "terrain": { "exaggeration": 2 } } }`: of `osm()` for the vector map, of
+	 * `satellite()` for the imagery. They are laid over the options that the editor builds from the
+	 * settings, so they win where both say something. The editor does not write them itself.
+	 */
+	options?: Record<string, unknown>;
+}
+
+/** Changes of the colors of the background map; without them, its colors are as they are. */
+export interface StateBackgroundColors {
+	/**
+	 * From -1 (gray) to 1.
+	 * @minimum -1
+	 * @maximum 1
+	 * @default 0
+	 */
+	saturation?: number;
+	/**
+	 * The lightness that black becomes, where 0 is black and 1 white.
+	 * @minimum -1
+	 * @maximum 1
+	 * @default 0
+	 */
+	black?: number;
+	/**
+	 * The lightness that white becomes.
+	 * @minimum 0
+	 * @maximum 2
+	 * @default 1
+	 */
+	white?: number;
 }
 
 /** A popup that opens when the element is clicked or tapped in the viewer. */

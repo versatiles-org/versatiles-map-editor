@@ -111,8 +111,8 @@
 			<Checkbox
 				id="{uid}-buildings3d"
 				title="Raise the buildings to their heights, which a tilted map shows when zoomed in"
-				checked={settings.buildings3d}
-				onchange={(e) => change('buildings3d', e.currentTarget.checked)}
+				checked={settings.buildings === 'extruded'}
+				onchange={(e) => change('buildings', e.currentTarget.checked ? 'extruded' : 'flat')}
 			/>
 		</InputRow>
 	{/if}

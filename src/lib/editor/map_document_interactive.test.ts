@@ -49,7 +49,7 @@ describe('MapDocument', () => {
 		expect(doc.getState().meta).toBeUndefined();
 
 		// a new background: the others follow its font
-		void doc.setBackground({ builder: 'osm', options: { text: { font: 'open_sans_regular' } } });
+		void doc.setBackground({ font: 'open_sans_regular' });
 		await vi.waitFor(() => expect(doc.font).toBe('open_sans_regular'));
 		mockMap.emit('style.load');
 		expect(textFont()).toStrictEqual([

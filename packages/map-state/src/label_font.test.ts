@@ -13,7 +13,7 @@ import { StateWriter } from './writer.js';
 
 // the fonts of the labels of markers, each its own; without one, the font of the background map
 const state: MapState = {
-	meta: { background: { builder: 'osm', options: { text: { font: 'lato_regular' } } } },
+	meta: { background: { font: 'lato_regular' } },
 	elements: [
 		{ type: 'marker', point: [13.4, 52.5], label: 'A', style: { font: 'noto_sans_bold' } },
 		{ type: 'marker', point: [13.5, 52.5], label: 'B', style: { font: 'lato_italic' } },

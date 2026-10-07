@@ -271,7 +271,7 @@ describe('encodeGeoJSON / decodeGeoJSON', () => {
 });
 
 describe('background', () => {
-	const background = { builder: 'osm' as const, options: { theme: 'gray' } };
+	const background = { theme: 'gray' };
 
 	it('round-trips as the meta member', () => {
 		const doc = stateToGeoJSON({ meta: { background }, elements: [] });
@@ -280,7 +280,7 @@ describe('background', () => {
 	});
 
 	it('ignores invalid backgrounds', () => {
-		const doc = { type: 'FeatureCollection', features: [], meta: { background: { builder: 'x', options: {} } } };
+		const doc = { type: 'FeatureCollection', features: [], meta: { background: { base: 'moon', labels: 'many' } } };
 		expect(stateFromGeoJSON(doc as GeoJSONDocument)).toStrictEqual({ elements: [] });
 	});
 });

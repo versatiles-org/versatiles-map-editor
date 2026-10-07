@@ -103,10 +103,7 @@ const state = {
 	frame: { bounds: frame },
 	meta: {
 		// a faded gray map, so the markers stand out
-		background: {
-			builder: 'osm',
-			options: { theme: 'gray', text: { spacing: 2 }, recolor: { brightness: 0.15, contrast: 0.7 } }
-		},
+		background: { theme: 'gray', labels: 'fewer', language: 'local', colors: { black: 0.3 } },
 		// the legend is kept in the map, but not shown
 		legend: { entries: [{ type: 'marker', style: { color: COLOR, symbol: SYMBOL }, label: 'Pharmacy' }] },
 		viewer: { search: 'top-left', legend: 'none' },

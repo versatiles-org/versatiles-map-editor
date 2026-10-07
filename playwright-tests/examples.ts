@@ -48,9 +48,7 @@ for (const name of EXAMPLES) {
 			const sources = await page.evaluate(() =>
 				Object.keys((window as unknown as MapWindow).map.getStyle()?.sources ?? {})
 			);
-			expect(sources).toContain(
-				state.meta?.background?.builder === 'satellite' ? 'satellite' : 'versatiles-shortbread'
-			);
+			expect(sources).toContain(state.meta?.background?.base === 'satellite' ? 'satellite' : 'versatiles-shortbread');
 			// nothing of the editor covers the legend
 			if (legend.length > 0) expect(await coveredPoints(overlay)).toStrictEqual([]);
 			expect(pageErrors).toStrictEqual([]);

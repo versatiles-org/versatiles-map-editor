@@ -7,7 +7,7 @@ import type { MapState } from './types.js';
 const state: MapState = {
 	view: { center: [13.4, 52.5], radius: 12345 },
 	meta: {
-		background: { builder: 'osm', options: { theme: 'gray' } },
+		background: { theme: 'gray' },
 		legend: {
 			entries: [{ type: 'marker', style: { color: '#ff0000', symbol: 'icons:anchor' }, label: 'Cafés & <shops>' }]
 		},

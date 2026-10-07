@@ -37,11 +37,11 @@
 	// else the whole world
 	// "startView": [-180, -85, 180, 85],
 
-	// The background of a new map, as in .mapjson files: the builder "osm" (the vector map) or
-	// "satellite", and the options of @versatiles/style, e.g. { "theme": "gray" }. Once chosen,
-	// it is the map's own background, which shared links keep on every server.
-	// Default: { "builder": "osm", "options": {} }
-	// "startBackground": { "builder": "osm", "options": {} },
+	// The background of a new map, as in .mapjson files: its settings, e.g. { "theme": "gray" } or
+	// { "base": "satellite", "labels": "fewer" }. Once chosen, it is the map's own background,
+	// which shared links keep on every server.
+	// Default: {}, the vector map
+	// "startBackground": {},
 
 	// The language of the labels of the background map of a new map, unless the starting
 	// background sets one: "user" (the language of the browser), "local" (local names) or a

@@ -224,8 +224,8 @@ test('a font for the label of each marker, else the one of the background map', 
 	await page.keyboard.press('Escape');
 	await background.getByRole('combobox', { name: 'Font' }).selectOption('Open Sans');
 	await expect
-		.poll(async () => (await storedState(page)).meta?.background?.options)
-		.toMatchObject({ text: { font: 'open_sans_regular' } });
+		.poll(async () => (await storedState(page)).meta?.background)
+		.toMatchObject({ font: 'open_sans_regular' });
 	await expect.poll(symbolFont).toStrictEqual(own('open_sans_regular'));
 
 	// kept in the map, e.g. when it is opened again

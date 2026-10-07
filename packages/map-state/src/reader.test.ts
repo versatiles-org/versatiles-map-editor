@@ -551,12 +551,24 @@ describe('popups', () => {
 });
 
 describe('background', () => {
-	it('round-trips any options', () => {
+	it('round-trips its settings, and any options of @versatiles/style', () => {
 		const state: MapState = {
 			meta: {
 				background: {
-					builder: 'satellite',
-					options: { osmOverlay: { text: { language: 'de', spacing: 1.5 }, layers: { labels: false } } }
+					base: 'satellite',
+					theme: 'gray-dark',
+					streets: false,
+					borders: false,
+					labels: 'fewer',
+					language: 'de',
+					font: 'lato_regular',
+					labelSize: 1.5,
+					haloWidth: 0.5,
+					colors: { saturation: -0.5, black: 0.2, white: 0.9 },
+					hillshade: true,
+					terrain: true,
+					buildings: 'extruded',
+					options: { osmOverlay: { text: { spacing: 1.5 } }, features: { terrain: { exaggeration: 2 } } }
 				}
 			},
 			elements: []
@@ -564,8 +576,41 @@ describe('background', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
+	it('is stored without the settings that have their default, and not at all with only those', () => {
+		const defaults: MapState = {
+			meta: {
+				background: {
+					base: 'vector',
+					theme: 'colorful',
+					streets: true,
+					borders: true,
+					labels: 'normal',
+					language: 'user',
+					font: 'noto_sans_regular',
+					labelSize: 1,
+					haloWidth: 2,
+					colors: { saturation: 0, black: 0, white: 1 },
+					hillshade: false,
+					terrain: false,
+					buildings: 'flat',
+					options: {}
+				}
+			},
+			elements: []
+		};
+		expect(encodeState(defaults)).toBe(encodeState({ elements: [] }));
+		const some: MapState = {
+			meta: { background: { ...defaults.meta!.background, theme: 'gray', haloWidth: 1 } },
+			elements: []
+		};
+		expect(decodeState(encodeState(some)).meta).toStrictEqual({ background: { theme: 'gray', haloWidth: 1 } });
+		// the halo of the labels over the imagery is 1 pixel wide by default
+		const imagery: MapState = { meta: { background: { base: 'satellite', haloWidth: 1 } }, elements: [] };
+		expect(decodeState(encodeState(imagery)).meta).toStrictEqual({ background: { base: 'satellite' } });
+	});
+
 	it('rejects invalid backgrounds', () => {
-		for (const json of ['{"builder":"other","options":{}}', '{"builder":"osm","options":[]}', 'null', '{']) {
+		for (const json of ['{"base":"moon"}', '{"builder":"osm","options":[]}', '[]', 'null', '{']) {
 			const writer = new StateWriter();
 			writer.writeStringTable([], [json]);
 			writer.writeBit(true);

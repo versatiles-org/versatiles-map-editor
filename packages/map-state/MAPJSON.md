@@ -35,7 +35,7 @@ its elements, on the editor's default background map.
 	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
 	"meta": {
 		"title": "A walk through Berlin",
-		"background": { "builder": "osm", "options": { "theme": "gray" } },
+		"background": { "theme": "gray", "labels": "fewer", "colors": { "black": 0.2 } },
 		"legend": {
 			"entries": [
 				{ "type": "marker", "style": { "color": "#0072b2", "symbol": "icons:anchor" }, "label": "Landing stage" },
@@ -241,12 +241,35 @@ shown.
 
 ### Background map
 
-`{ "builder": "osm" | "satellite", "options": { … } }`: the `builder` is the vector map of
-OpenStreetMap (`"osm"`) or the satellite imagery (`"satellite"`), and `options` are the options of the style builders of
-[`@versatiles/style`](https://github.com/versatiles-org/versatiles-style), e.g.
-`{ "theme": "gray" }`, `{ "recolor": { "contrast": 0.7 } }` or `{ "text": { "language": "de" } }`.
-Only options that differ from the defaults of the builder are stored. The editor keeps options it
-does not offer itself.
+The background map as its author set it, e.g. `{ "theme": "gray", "labels": "fewer" }`. The editor
+builds the map from these settings with
+[`@versatiles/style`](https://github.com/versatiles-org/versatiles-style). All fields are optional.
+
+| Field       | Values                                                                                                               | Default               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `base`      | `"vector"` (the map of OpenStreetMap), `"satellite"` (imagery)                                                       | `"vector"`            |
+| `theme`     | the theme of the vector map, one of `@versatiles/style`, e.g. `"gray"`, `"gray-dark"`; an unknown one is the default | `"colorful"`          |
+| `streets`   | `false`: no streets, railways and symbols of points of interest over the imagery; the vector map always has them     | `true`                |
+| `borders`   | `false`: no borders of countries and states over the imagery; the vector map always has them                         | `true`                |
+| `labels`    | `"normal"`, `"fewer"` (more space between them), `"none"`                                                            | `"normal"`            |
+| `language`  | of the labels: `"user"` (the language of the browser), `"local"` (the local names), or a language code, e.g. `"de"`  | `"user"`              |
+| `font`      | the glyph font of the labels, e.g. `"lato_regular"`                                                                  | `"noto_sans_regular"` |
+| `labelSize` | a factor of the size of the labels                                                                                   | `1`                   |
+| `haloWidth` | of the halo around the labels, in pixels                                                                             | `2`, over imagery `1` |
+| `colors`    | changes of the colors, see below                                                                                     | none                  |
+| `hillshade` | `true`: the relief shaded, hills and mountains with light and shadow                                                 | `false`               |
+| `terrain`   | `true`: the terrain raised to its heights, which a tilted map shows                                                  | `false`               |
+| `buildings` | of the vector map: `"flat"`, or `"extruded"` to their heights, which a tilted map shows when zoomed in               | `"flat"`              |
+| `options`   | options of `@versatiles/style` for what the settings cannot say, see below                                           | none                  |
+
+`colors` is `{ "saturation", "black", "white" }`: the `saturation` from −1 (gray) to 1, default 0;
+and the lightness that `black` (−1 to 1, default 0) and `white` (0 to 2, default 1) become, where 0
+is black and 1 white. E.g. `{ "black": 0.3 }` fades the map with white.
+
+`options` are options of the style builders of `@versatiles/style` (`osm()` for the vector map,
+`satellite()` for the imagery), e.g. `{ "features": { "terrain": { "exaggeration": 2 } } }`. They
+are laid over the options that the editor builds from the settings, so they win where both say
+something. The editor keeps them, but does not write them itself.
 
 ### Legend
 

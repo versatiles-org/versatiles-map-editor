@@ -1,6 +1,6 @@
 import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpecification } from '@versatiles/style';
 import type { StateBackground } from '@versatiles/map-state';
-import { DEFAULT_BACKGROUND } from './background.js';
+import { backgroundOptions } from './background.js';
 import { config } from './config.svelte.js';
 
 /**
@@ -24,22 +24,23 @@ function overlayOf(options: SatelliteOptions): SatelliteOptions['osmOverlay'] {
  * landcover of low zoom levels, which depends on the tiles of the server. A server without
  * elevation tiles shows no relief, whatever the options say.
  */
-export function getMapStyle(background: StateBackground = DEFAULT_BACKGROUND): StyleSpecification {
+export function getMapStyle(background?: StateBackground): StyleSpecification {
 	const fixed = { urls: { base: config.current.tileServer }, projection: 'mercator' as const };
 	const { landcover, elevation } = config.current;
 	const flat = elevation ? {} : { terrain: false, hillshade: false };
 	const vector = (options: OsmOptions) =>
 		osm({ ...options, features: { ...options.features, landcover, ...flat }, ...fixed });
 	try {
-		if (background.builder === 'satellite') {
-			const options = background.options as SatelliteOptions;
+		const built = backgroundOptions(background);
+		if (built.builder === 'satellite') {
+			const options = built.options as SatelliteOptions;
 			const features = elevation ? {} : { features: { ...options.features, ...flat } };
 			return satellite({ ...options, ...features, osmOverlay: overlayOf(options), ...fixed });
 		}
-		return vector(background.options as OsmOptions);
+		return vector(built.options as OsmOptions);
 	} catch (error) {
-		// e.g. options of a newer version of @versatiles/style
+		// e.g. `options` of the background that this version of @versatiles/style does not have
 		console.error('Invalid background map options', error);
-		return vector(DEFAULT_BACKGROUND.options as OsmOptions);
+		return vector(backgroundOptions().options as OsmOptions);
 	}
 }

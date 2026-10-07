@@ -314,7 +314,7 @@ describe('SessionSync', () => {
 		});
 
 		it('starts a new map in the current view, with the starting background of the configuration', async () => {
-			const background = { builder: 'osm' as const, options: { theme: 'gray', text: { language: 'de' } } };
+			const background = { theme: 'gray', language: 'de' };
 			config.current = { ...DEFAULT_CONFIG, startBackground: background };
 			try {
 				await sync.attach(doc, await sync.prepare(''));

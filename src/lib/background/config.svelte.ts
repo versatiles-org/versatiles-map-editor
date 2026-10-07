@@ -3,8 +3,8 @@ import { fetchFontFaces, osm, satellite, type OsmOptions, type SatelliteOptions 
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { parseJsonc } from './jsonc.js';
-import { startingBackground } from './background.js';
-import { sanitizeBounds, type Bounds, type StateBackground } from '@versatiles/map-state';
+import { backgroundOptions, startingBackground } from './background.js';
+import { sanitizeBackground, sanitizeBounds, type Bounds, type StateBackground } from '@versatiles/map-state';
 
 /**
  * An optional configuration file of an editor instance, in its root folder (next to the editor's
@@ -240,10 +240,7 @@ function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
 		geocoder: file.geocoder ?? DEFAULT_GEOCODER,
 		startView: file.startView,
 		// the vector map, in the language of the browser: the editor's default background
-		startBackground: startingBackground(
-			file.startBackground ?? { builder: 'osm', options: {} },
-			file.defaultLanguage ?? 'user'
-		),
+		startBackground: startingBackground(file.startBackground, file.defaultLanguage ?? 'user'),
 		colorSchemes: first ? [first, ...offered.filter((scheme) => scheme !== first)] : offered,
 		fonts: resolveFonts(configuredFonts, replaceFonts, fonts)
 	};
@@ -274,19 +271,24 @@ function checkStartView(value: unknown): Bounds {
 	return bounds;
 }
 
-/** A background as in .mapjson files, which @versatiles/style can build. */
+/**
+ * A background as in .mapjson files: its settings. With the language it names, also the default
+ * one, which `sanitizeBackground` would leave out: the configuration's `defaultLanguage` is for a
+ * background that names none.
+ */
 function checkBackground(value: unknown): StateBackground {
 	if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error('must be an object');
-	const { builder, options = {} } = value as Record<string, unknown>;
-	if (builder !== 'osm' && builder !== 'satellite') throw new Error('"builder" must be "osm" or "satellite"');
-	if (typeof options !== 'object' || options === null || Array.isArray(options)) {
-		throw new Error('"options" must be an object');
-	}
-	const background: StateBackground = { builder, options: options as Record<string, unknown> };
+	if ('builder' in value) throw new Error('has the settings of the background now, e.g. { "theme": "gray" }');
+	const language = (value as Record<string, unknown>).language;
+	const background: StateBackground = {
+		...sanitizeBackground(value),
+		...(typeof language === 'string' ? { language } : {})
+	};
 	try {
-		// as getMapStyle builds it, which fails e.g. for an unknown theme
-		if (builder === 'osm') osm(background.options as OsmOptions);
-		else satellite(background.options as SatelliteOptions);
+		// as getMapStyle builds it, which fails e.g. for `options` that @versatiles/style does not have
+		const { builder, options } = backgroundOptions(background);
+		if (builder === 'osm') osm(options as OsmOptions);
+		else satellite(options as SatelliteOptions);
 	} catch (error) {
 		throw new Error(`invalid options: ${(error as Error).message}`, { cause: error });
 	}

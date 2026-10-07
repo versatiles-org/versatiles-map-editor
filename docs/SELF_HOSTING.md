@@ -80,7 +80,7 @@ Every field is optional. A field with an invalid value gets its default, and the
 | `elevation`             | Whether the background map can show its relief: shaded, and as terrain on a tilted map. The tile server must have elevation tiles (see below); `false` for a server without them.    | `true`                                   |
 | `geocoder`              | The geocoder of the address search (see below), absolute or relative.                                                                                                                | `"https://geocode.versatiles.org/api"`   |
 | `startView`             | What a new map shows: `[west, south, east, north]` in degrees.                                                                                                                       | the country of the user*, else the world |
-| `startBackground`       | The background of a new map, as in `.mapjson` files: `{ "builder": "osm" or "satellite", "options": { … } }` with the options of `@versatiles/style`.                                | the vector map                           |
+| `startBackground`       | The background of a new map, as in `.mapjson` files: its settings, e.g. `{ "theme": "gray" }` or `{ "base": "satellite" }`.                                                          | the vector map                           |
 | `defaultLanguage`       | The language of the labels of the background of a new map, unless `startBackground` sets one: `"user"` (of the browser), `"local"` (local names) or a code, e.g. `"de"`.             | `"user"`                                 |
 | `colorSchemes`          | Color schemes offered in the color picker, before the predefined ones: `[{ "id": …, "name": …, "colors": ["#rrggbb", …] }]`. A scheme with the `id` of a predefined one replaces it. | none                                     |
 | `replaceDefaultSchemes` | `true`: only the color schemes above are offered.                                                                                                                                    | `false`                                  |
@@ -107,7 +107,7 @@ labels, and offers its colors first:
 
 	// new maps: the city, in gray, with German labels
 	"startView": [9.73, 53.39, 10.33, 53.74],
-	"startBackground": { "builder": "osm", "options": { "theme": "gray" } },
+	"startBackground": { "theme": "gray" },
 	"defaultLanguage": "de",
 
 	// the colors of the city first, and as the default

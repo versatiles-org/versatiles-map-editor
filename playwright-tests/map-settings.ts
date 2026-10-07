@@ -65,9 +65,7 @@ test('styling the background map', async ({ page }) => {
 	await expect.poll(mapContent).toStrictEqual(deselected);
 
 	await page.getByRole('combobox', { name: 'Theme' }).selectOption('Gray');
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });
+	await expect.poll(background).toStrictEqual({ theme: 'gray' });
 	// the elements and their patterns survive the new style
 	await waitForMapIsIdle(page);
 	await expect.poll(mapContent).toStrictEqual(deselected);
@@ -84,30 +82,24 @@ test('styling the background map', async ({ page }) => {
 			return channels.reduce((sum, value) => sum + value, 0) / channels.length;
 		});
 	await theme.selectOption('Gray Dark');
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'osm', options: { theme: 'gray-dark', text: { language: 'user' } } });
+	await expect.poll(background).toStrictEqual({ theme: 'gray-dark' });
 	await expect.poll(lightness).toBeLessThan(80);
 	await theme.selectOption('Gray');
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'osm', options: { theme: 'gray', text: { language: 'user' } } });
+	await expect.poll(background).toStrictEqual({ theme: 'gray' });
 	await expect.poll(lightness).toBeGreaterThan(180);
 	await waitForMapIsIdle(page);
 
 	await page.getByRole('combobox', { name: 'Language' }).selectOption('German');
 	await page.getByRole('radiogroup', { name: 'Labels' }).getByRole('radio', { name: 'Fewer' }).check();
 	await page.getByRole('radiogroup', { name: 'Base map' }).getByRole('radio', { name: 'Satellite' }).check();
-	// the colors of the vector map do not apply to the satellite map, the labels are kept
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'satellite', options: { osmOverlay: { text: { language: 'de', spacing: 2 } } } });
+	// the theme of the vector map does not apply to the satellite map, the labels are kept
+	await expect.poll(background).toStrictEqual({ base: 'satellite', labels: 'fewer', language: 'de' });
 	await expect(page.getByRole('combobox', { name: 'Theme' })).toBeHidden();
 	await waitForMapIsIdle(page);
 	await expect.poll(mapContent).toStrictEqual({ ...deselected, satellite: true });
 
 	// undoable: back to the gray map with fewer German labels
-	const undone = { builder: 'osm', options: { theme: 'gray', text: { language: 'de', spacing: 2 } } };
+	const undone = { theme: 'gray', labels: 'fewer', language: 'de' };
 	await page.getByRole('button', { name: 'Undo' }).click();
 	// the URL is written throttled, so wait for the final state before reloading
 	await expect.poll(background).toStrictEqual(undone);
@@ -128,8 +120,10 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 	// the Alps around the Zugspitze
 	await page.goto('/#' + encodeState({ view: { center: [10.98, 47.42], radius: 10000 }, elements: [] }));
 	await waitForMapIsReady(page);
-	const features = async () =>
-		((await storedState(page)).meta?.background?.options as { features?: object } | undefined)?.features;
+	const features = async () => {
+		const { hillshade, terrain } = (await storedState(page)).meta?.background ?? {};
+		return { hillshade, terrain };
+	};
 	/** What the map draws of the relief. */
 	const relief = () =>
 		page.evaluate(() => {
@@ -147,7 +141,7 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 	expect(await relief()).toStrictEqual({ hillshade: false, terrain: false });
 
 	await hillshade.check();
-	await expect.poll(features).toStrictEqual({ hillshade: true });
+	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: undefined });
 	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: false });
 	await terrain.check();
 	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
@@ -155,7 +149,7 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 
 	// the satellite map keeps it
 	await page.getByRole('radio', { name: 'Satellite' }).click();
-	await expect.poll(async () => (await storedState(page)).meta?.background?.builder).toBe('satellite');
+	await expect.poll(async () => (await storedState(page)).meta?.background?.base).toBe('satellite');
 	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
 	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
 	await expect(hillshade).toBeChecked();
@@ -171,8 +165,7 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 test('the buildings of the vector map are raised to their heights', async ({ page }) => {
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.52], radius: 400 }, elements: [] }));
 	await waitForMapIsReady(page);
-	const features = async () =>
-		((await storedState(page)).meta?.background?.options as { features?: object } | undefined)?.features;
+	const stored = async () => (await storedState(page)).meta?.background;
 	/** The kinds of the layers that draw the buildings. */
 	const buildingLayers = () =>
 		page.evaluate(() => {
@@ -185,7 +178,7 @@ test('the buildings of the vector map are raised to their heights', async ({ pag
 	await expect(buildings).not.toBeChecked();
 	expect(await buildingLayers()).toStrictEqual(['fill']);
 	await buildings.check();
-	await expect.poll(features).toStrictEqual({ buildings: 'extruded' });
+	await expect.poll(stored).toStrictEqual({ buildings: 'extruded' });
 	await expect.poll(buildingLayers).toStrictEqual(['fill-extrusion']);
 
 	// the satellite map has none
@@ -221,9 +214,7 @@ test('the satellite imagery without streets, borders and labels', async ({ page 
 
 	// the labels and borders without the streets and their points of interest
 	await streets.uncheck();
-	await expect
-		.poll(async () => (await background())?.options.osmOverlay)
-		.toMatchObject({ layers: { roads: false, transit: false, markings: false, pois: false } });
+	await expect.poll(background).toStrictEqual({ base: 'satellite', streets: false });
 	await expect.poll(() => has('street-')).toBe(false);
 	expect(await has('poi-')).toBe(false);
 	expect(await has('boundary-')).toBe(true);
@@ -236,7 +227,7 @@ test('the satellite imagery without streets, borders and labels', async ({ page 
 
 	// none of them: only the imagery and the elements, which are still drawn
 	await labels.getByRole('radio', { name: 'None' }).check();
-	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: { osmOverlay: false } });
+	await expect.poll(background).toStrictEqual({ base: 'satellite', streets: false, borders: false, labels: 'none' });
 	await expect.poll(sources).not.toContain('versatiles-shortbread');
 	expect(await sources()).toContain('satellite');
 	await waitForMapIsIdle(page);
@@ -246,10 +237,7 @@ test('the satellite imagery without streets, borders and labels', async ({ page 
 
 	// the streets without the borders and labels
 	await streets.check();
-	await expect.poll(background).toStrictEqual({
-		builder: 'satellite',
-		options: { osmOverlay: { layers: { boundaries: false, labels: false } } }
-	});
+	await expect.poll(background).toStrictEqual({ base: 'satellite', borders: false, labels: 'none' });
 	await expect.poll(sources).toContain('versatiles-shortbread');
 	await expect.poll(async () => (await layerIds()).some((id) => id.startsWith('street-'))).toBe(true);
 	expect((await layerIds()).some((id) => id.startsWith('label-place'))).toBe(false);
@@ -257,7 +245,7 @@ test('the satellite imagery without streets, borders and labels', async ({ page 
 	// and all again
 	await borders.check();
 	await labels.getByRole('radio', { name: 'Normal' }).check();
-	await expect.poll(background).toStrictEqual({ builder: 'satellite', options: {} });
+	await expect.poll(background).toStrictEqual({ base: 'satellite' });
 	await expect(page.getByRole('combobox', { name: 'Language' })).toBeVisible();
 });
 
@@ -287,8 +275,8 @@ test('the size and the halo of the labels of both maps', async ({ page }) => {
 	await expect.poll(async () => (await cityLabel()).halo).toBe(3);
 	expect((await cityLabel()).size).not.toStrictEqual(before.size);
 	await expect
-		.poll(async () => (await storedState(page)).meta?.background?.options.text)
-		.toMatchObject({ scale: 1.5, places: { haloWidth: 3 } });
+		.poll(async () => (await storedState(page)).meta?.background)
+		.toStrictEqual({ labelSize: 1.5, haloWidth: 3 });
 
 	// the satellite map keeps them
 	await page.getByRole('radio', { name: 'Satellite' }).check();
@@ -315,15 +303,13 @@ test('changing the colors of the vector map and of the satellite imagery', async
 
 	// the vector map in gray
 	await page.getByRole('slider', { name: 'Saturation' }).fill('-1');
-	await expect
-		.poll(background)
-		.toStrictEqual({ builder: 'osm', options: { recolor: { saturate: -1 }, text: { language: 'user' } } });
+	await expect.poll(background).toStrictEqual({ colors: { saturation: -1 } });
 	await expect.poll(water).not.toStrictEqual(colored);
 	await expect(page.getByRole('spinbutton', { name: 'Saturation' })).toHaveValue('-100');
 
 	// the satellite imagery keeps the change, as a property of its raster layer
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await expect.poll(async () => (await background())?.options.raster).toStrictEqual({ saturation: -1 });
+	await expect.poll(background).toStrictEqual({ base: 'satellite', colors: { saturation: -1 } });
 	await expect.poll(() => paint('satellite', 'raster-saturation')).toBe(-1);
 	// darker: white becomes gray
 	await page.getByRole('slider', { name: 'White becomes' }).fill('0.8');
@@ -332,21 +318,12 @@ test('changing the colors of the vector map and of the satellite imagery', async
 	await page.getByRole('spinbutton', { name: 'Black becomes' }).fill('90');
 	await page.getByRole('spinbutton', { name: 'Black becomes' }).press('Enter');
 	await expect(page.getByRole('spinbutton', { name: 'White becomes' })).toHaveValue('90');
-	await expect
-		.poll(async () => (await background())?.options.raster)
-		.toStrictEqual({
-			saturation: -1,
-			brightnessMin: 0.9,
-			brightnessMax: 0.9
-		});
-	// the streets and labels over the imagery get the same colors
-	expect((await background())?.options.osmOverlay).toMatchObject({
-		recolor: { saturate: -1, brightness: 0.4, contrast: 0 }
-	});
+	await expect.poll(async () => (await background())?.colors).toStrictEqual({ saturation: -1, black: 0.9, white: 0.9 });
+	await expect.poll(() => paint('satellite', 'raster-brightness-min')).toBeCloseTo(0.9);
 
 	// all back
 	await page.getByRole('button', { name: 'Reset colors' }).click();
-	await expect.poll(async () => (await background())?.options.raster).toBeUndefined();
+	await expect.poll(async () => (await background())?.colors).toBeUndefined();
 	await expect(page.getByRole('button', { name: 'Reset colors' })).toBeDisabled();
 });
 
@@ -455,7 +432,7 @@ test('the labels of the background map over areas and lines, those of markers al
 	await expect(checkbox).toBeChecked();
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
 	await page.getByRole('radio', { name: 'Satellite' }).check();
-	await expect.poll(async () => (await storedState(page)).meta?.background?.builder).toBe('satellite');
+	await expect.poll(async () => (await storedState(page)).meta?.background?.base).toBe('satellite');
 	await waitForMapIsIdle(page);
 	await expect.poll(order).toStrictEqual({ fill: -1, stroke: -1, symbol: 1 });
 
@@ -622,9 +599,7 @@ test('color schemes and fonts of an organisation', async ({ page }) => {
 	await expect(face).toHaveValue('lato_regular');
 	await face.selectOption('Bold');
 	await expect.poll(symbolFont).toStrictEqual(['literal', ['lato_bold']]);
-	await expect
-		.poll(async () => (await storedState(page)).meta?.background?.options)
-		.toMatchObject({ text: { font: 'lato_bold' } });
+	await expect.poll(async () => (await storedState(page)).meta?.background).toMatchObject({ font: 'lato_bold' });
 
 	// and another family keeps the bold face
 	await family.selectOption('Open Sans');

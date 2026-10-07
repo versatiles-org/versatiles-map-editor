@@ -95,7 +95,7 @@ describe('.mapjson files', () => {
 			meta: {
 				title: 'T',
 				theme: 'x',
-				background: { builder: 'osm', options: { anything: 1 } },
+				background: { theme: 'gray', options: { anything: 1 }, colors: { black: 0.2, gamma: 2 }, glow: true },
 				legend: { entries: [{ type: 'line', label: 'A', icon: 'x', style: { glow: 2 } }] },
 				viewer: { scale: 'top-left' }
 			},
@@ -119,6 +119,8 @@ describe('.mapjson files', () => {
 			'future',
 			'view.tilt',
 			'meta.theme',
+			'meta.background.glow',
+			'meta.background.colors.gamma',
 			'meta.viewer.scale',
 			'meta.legend.entries[0].icon',
 			'meta.legend.entries[0].style.glow',

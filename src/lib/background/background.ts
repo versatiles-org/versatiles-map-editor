@@ -1,10 +1,16 @@
-import { osm, satellite, type OsmOptions, type SatelliteOptions } from '@versatiles/style';
-import type { StateBackground } from '@versatiles/map-state';
+import { osm } from '@versatiles/style';
+import {
+	BACKGROUND_COLOR_DEFAULTS,
+	BACKGROUND_DEFAULTS,
+	BACKGROUND_HALO_WIDTHS,
+	BACKGROUND_LANGUAGES,
+	sanitizeBackground,
+	type StateBackground
+} from '@versatiles/map-state';
 
 /**
- * The few background options the editor offers, as a view on the `@versatiles/style` options of
- * the map. Changing a setting keeps all other options, so maps can use options the editor does
- * not offer (yet).
+ * The settings of the background map, each with a value: those of the map (`StateBackground`),
+ * and the defaults of the others. The sidebar shows and changes them.
  */
 export interface BackgroundSettings {
 	base: 'vector' | 'satellite';
@@ -33,10 +39,10 @@ export interface BackgroundSettings {
 	/** Whether the map has the heights of its terrain, which a tilted map shows as hills and mountains. */
 	terrain: boolean;
 	/**
-	 * Whether the vector map raises its buildings to their heights, which a tilted map shows when
-	 * zoomed in. The satellite map has no buildings of its own.
+	 * The buildings of the vector map: flat, or raised to their heights, which a tilted map shows
+	 * when zoomed in. The satellite map has no buildings of its own.
 	 */
-	buildings3d: boolean;
+	buildings: 'flat' | 'extruded';
 }
 
 /**
@@ -57,10 +63,7 @@ export interface MapColors {
 	white: number;
 }
 
-export const DEFAULT_COLORS: MapColors = { saturation: 0, black: 0, white: 1 };
-
-/** The editor's default: the vector map with labels in the browser language. */
-export const DEFAULT_BACKGROUND: StateBackground = { builder: 'osm', options: { text: { language: 'user' } } };
+export const DEFAULT_COLORS: MapColors = { ...BACKGROUND_COLOR_DEFAULTS };
 
 /**
  * All themes of `@versatiles/style`, in its order, so a dark theme follows its light one: the color
@@ -72,8 +75,10 @@ export const THEMES: { id: string; name: string }[] = osm.palettes.map((id) => (
 	name: id.replace(/(^|-)(\w)/g, (_, dash: string, letter: string) => (dash ? ' ' : '') + letter.toUpperCase())
 }));
 
-// Languages of the names in the OSM tiles of tiles.versatiles.org
-export const LANGUAGES = ['ar', 'de', 'el', 'en', 'es', 'fr', 'it', 'nl', 'pl', 'pt', 'uk'];
+/** The languages of the names in the OSM tiles of tiles.versatiles.org, next to "user" and "local". */
+export const LANGUAGES: string[] = BACKGROUND_LANGUAGES.filter(
+	(language) => language !== 'user' && language !== 'local'
+);
 
 /** The layer groups of the streets over the imagery, hidden, with the symbols of points of interest along them. */
 const STREETS_HIDDEN = (): Options => ({ roads: false, transit: false, markings: false, pois: false });
@@ -86,8 +91,6 @@ const BORDERS_HIDDEN = (): Options => ({ boundaries: false });
  * numbers on road shields of the vector map.
  */
 const HALO_GROUPS = [['places'], ['boundaries'], ['streets', 'names'], ['water'], ['pois', 'transit']];
-/** The halo of these labels: 2 pixels on the vector map, 1 over the imagery. */
-const DEFAULT_HALO_WIDTH = { vector: 2, satellite: 1 };
 
 // Fewer labels by keeping more space between them
 const FEWER_LABELS_SPACING = 2;
@@ -98,100 +101,25 @@ function isObject(value: unknown): value is Options {
 	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** The options of the OSM layers: the root for the vector map, the overlay for the satellite map. */
-function overlayOf({ builder, options }: StateBackground): Options {
-	if (builder === 'osm') return options;
-	return isObject(options.osmOverlay) ? options.osmOverlay : {};
-}
-
-export function getSettings(background: StateBackground = DEFAULT_BACKGROUND): BackgroundSettings {
-	const overlay = overlayOf(background);
-	const text = isObject(overlay.text) ? overlay.text : {};
-	const layers = isObject(overlay.layers) ? overlay.layers : {};
-	const base = background.builder === 'satellite' ? 'satellite' : 'vector';
-	const imageryAlone = base === 'satellite' && background.options.osmOverlay === false;
-	const features = isObject(background.options.features) ? background.options.features : {};
-	let labels: BackgroundSettings['labels'] = 'normal';
-	if (imageryAlone || layers.labels === false) labels = 'none';
-	else if (typeof text.spacing === 'number' && text.spacing > 1) labels = 'fewer';
-
+/** The settings of a background, each with a value: its own, else the default. */
+export function getSettings(background?: StateBackground): BackgroundSettings {
+	const own = sanitizeBackground(background) ?? {};
+	const base = own.base ?? BACKGROUND_DEFAULTS.base;
+	const { options: _options, ...settings } = own;
 	return {
+		...BACKGROUND_DEFAULTS,
+		haloWidth: BACKGROUND_HALO_WIDTHS[base],
+		...settings,
 		base,
-		streets: background.builder !== 'satellite' || (!imageryAlone && layers.roads !== false),
-		borders: background.builder !== 'satellite' || (!imageryAlone && layers.boundaries !== false),
-		theme: typeof overlay.theme === 'string' ? overlay.theme : 'colorful',
-		font: typeof text.font === 'string' ? text.font : 'noto_sans_regular',
-		language: typeof text.language === 'string' ? text.language : 'local',
-		labels,
-		labelSize: number(text.scale, 1),
-		haloWidth: inherited(text, HALO_GROUPS[0], 'haloWidth') ?? DEFAULT_HALO_WIDTH[base],
-		colors: getColors(background),
-		// `true`, or an object with their options
-		hillshade: !!features.hillshade,
-		terrain: !!features.terrain,
-		buildings3d: base === 'vector' && features.buildings === 'extruded'
+		colors: { ...DEFAULT_COLORS, ...own.colors },
+		// what only one of the base maps has
+		...(base === 'vector' ? { streets: true, borders: true } : { buildings: 'flat' as const })
 	};
-}
-
-const number = (value: unknown, fallback: number) => (typeof value === 'number' ? value : fallback);
-
-/**
- * A number set at a path or at one of its parents, the nearest one, e.g. `text.places.haloWidth`
- * or else `text.haloWidth`: minimized options can keep a value shared by all labels at the root.
- */
-function inherited(options: Options, path: string[], key: string): number | undefined {
-	let value: number | undefined;
-	let current: unknown = options;
-	for (const step of [undefined, ...path]) {
-		if (step !== undefined) current = isObject(current) ? current[step] : undefined;
-		if (isObject(current) && typeof current[key] === 'number') value = current[key];
-	}
-	return value;
-}
-
-/** The options at a path, e.g. `text.streets.names`; `create` adds the missing ones. */
-function childOf(options: Options, path: string[], create = false): Options {
-	let current = options;
-	for (const key of path) {
-		if (!isObject(current[key])) {
-			if (!create) return {};
-			current[key] = {};
-		}
-		current = current[key] as Options;
-	}
-	return current;
 }
 
 /** Rounded, e.g. to keep 0.3 from becoming 0.30000000000000004 in a link. */
 const round = (value: number) => Math.round(value * 10000) / 10000 + 0;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-
-/**
- * The colors of a map. The vector map scales the colors around mid-gray (`contrast`, a factor), then
- * adds a lightness (`brightness`), without clipping in between: black becomes
- * `brightness + (1 − contrast) / 2`, white that plus `contrast`. The imagery works the same way
- * with a contrast factor (from `contrast`), then `brightnessMin` and `brightnessMax`, see
- * rasterLevels.
- */
-function getColors({ builder, options }: StateBackground): MapColors {
-	if (builder === 'osm') {
-		const recolor = isObject(options.recolor) ? options.recolor : {};
-		const contrast = number(recolor.contrast, 1);
-		const black = number(recolor.brightness, 0) + (1 - contrast) / 2;
-		return levels(number(recolor.saturate, 0), black, black + contrast);
-	}
-	const raster = isObject(options.raster) ? options.raster : {};
-	const min = number(raster.brightnessMin, 0);
-	const span = number(raster.brightnessMax, 1) - min;
-	const factor = contrastFactor(number(raster.contrast, 0));
-	const black = min + (span * (1 - factor)) / 2;
-	return levels(number(raster.saturation, 0), black, black + span * factor);
-}
-
-function levels(saturation: number, black: number, white: number): MapColors {
-	const b = clamp(black, -1, 1);
-	return { saturation, black: round(b), white: round(clamp(Math.max(b, white), 0, 2)) };
-}
 
 /**
  * Black and white after one of them changed, as the map can show them: black is never lighter
@@ -208,11 +136,6 @@ export function pushLevels(colors: MapColors, changed: 'black' | 'white', base: 
 		if (base === 'satellite') black = clamp(black, -white, 2 - white);
 	}
 	return { ...colors, black: round(clamp(black, -1, 1)), white: round(clamp(white, 0, 2)) };
-}
-
-/** The factor of MapLibre's `raster-contrast`, from -1 (all gray) to 1 (infinite). */
-function contrastFactor(contrast: number): number {
-	return contrast > 0 ? 1 / (1 - contrast) : 1 + contrast;
 }
 
 /** The smallest distance of `brightnessMin` and `brightnessMax`, which keeps the contrast finite. */
@@ -239,207 +162,141 @@ function rasterLevels(black: number, white: number) {
 	return { brightnessMin: min, brightnessMax: max, contrast: round(1 - (max - min) / range) };
 }
 
-/** The options of `@versatiles/style` for the colors; other options of the builder are kept. */
-function setColors(builder: StateBackground['builder'], options: Options, colors: MapColors) {
-	if (builder === 'osm') {
-		setRecolor(options, colors);
-		return;
-	}
-	const { saturation, black, white } = colors;
-	const raster = isObject(options.raster) ? options.raster : {};
-	options.raster = { ...raster, saturation, ...rasterLevels(black, white) };
-	// the streets and labels over the imagery get the same colors (`true` or none: the default overlay)
-	if (options.osmOverlay !== false) {
-		const overlay = isObject(options.osmOverlay) ? options.osmOverlay : {};
-		setRecolor(overlay, colors);
-		options.osmOverlay = overlay;
-	}
-}
-
-/** `recolor` of the vector map or of the overlay of the imagery, see getColors. */
-function setRecolor(options: Options, { saturation, black, white }: MapColors) {
-	const recolor = isObject(options.recolor) ? options.recolor : {};
-	const contrast = round(white - black);
-	options.recolor = { ...recolor, saturate: saturation, brightness: round((black + white - 1) / 2), contrast };
+/**
+ * `recolor` of the vector map or of the overlay of the imagery. The vector map scales the colors
+ * around mid-gray (`contrast`, a factor), then adds a lightness (`brightness`), without clipping
+ * in between: black becomes `brightness + (1 − contrast) / 2`, white that plus `contrast`.
+ */
+function recolor({ saturation, black, white }: MapColors): Options {
+	return { saturate: saturation, brightness: round((black + white - 1) / 2), contrast: round(white - black) };
 }
 
 /**
- * Apply changed settings to the background. Returns undefined for the editor's default
- * background, which is not stored.
+ * The background with changed settings. Returns undefined for the editor's default background,
+ * which is not stored.
  */
 export function changeSettings(
-	background: StateBackground = DEFAULT_BACKGROUND,
+	background: StateBackground | undefined,
 	change: Partial<BackgroundSettings>
 ): StateBackground | undefined {
-	let builder = background.builder;
-	let options: Options = structuredClone(background.options);
-
-	const newBuilder = change.base === 'satellite' ? 'satellite' : change.base === 'vector' ? 'osm' : builder;
-	if (newBuilder !== builder) {
-		options = switchBuilder({ builder, options }, newBuilder);
-		builder = newBuilder;
+	const changed: StateBackground = { ...background, ...change };
+	// what the other base map has is not kept, e.g. the theme of the vector map
+	if ((changed.base ?? BACKGROUND_DEFAULTS.base) === 'satellite') {
+		delete changed.theme;
+		delete changed.buildings;
+	} else {
+		delete changed.streets;
+		delete changed.borders;
 	}
-
-	if (change.colors) setColors(builder, options, change.colors);
-	setRelief(options, change);
-	if (builder === 'osm' && change.buildings3d !== undefined) {
-		const features: Options = isObject(options.features) ? options.features : {};
-		// flat buildings are the default
-		if (change.buildings3d) features.buildings = 'extruded';
-		else delete features.buildings;
-		if (Object.keys(features).length > 0) options.features = features;
-		else delete options.features;
-	}
-
-	const overlay = overlayFor(builder, options, change);
-	// the imagery alone, which stays so
-	if (!overlay) return minimizeBackground({ builder, options });
-	setText(overlay, change);
-	if (builder === 'satellite') {
-		setSatelliteLayers(overlay, change);
-		// neither streets nor borders nor labels: the imagery alone
-		const { streets, borders, labels } = getSettings({ builder, options });
-		if (!streets && !borders && labels === 'none') options.osmOverlay = false;
-	}
-
-	return minimizeBackground({ builder, options });
-}
-
-/**
- * The options of the other builder. The labels and the changes of the colors are kept. The theme
- * of the vector map does not apply to the satellite map.
- */
-function switchBuilder(background: StateBackground, builder: StateBackground['builder']): Options {
-	const overlay = overlayOf(background);
-	const kept: Options = {};
-	if (overlay.text !== undefined) kept.text = overlay.text;
-	if (overlay.layers !== undefined) kept.layers = overlay.layers;
-	// the vector map always has its streets and borders, which only the satellite map can hide
-	if (builder === 'osm' && isObject(kept.layers)) {
-		const layers: Options = { ...kept.layers };
-		for (const group of Object.keys({ ...STREETS_HIDDEN(), ...BORDERS_HIDDEN() })) delete layers[group];
-		if (Object.keys(layers).length > 0) kept.layers = layers;
-		else delete kept.layers;
-	}
-	const colors = getColors(background);
-	const options: Options = builder === 'osm' ? kept : { osmOverlay: kept };
-	// the relief is one of the map, not of its streets and labels
-	const features = isObject(background.options.features) ? background.options.features : {};
-	const relief = Object.fromEntries(RELIEF.filter((key) => features[key]).map((key) => [key, features[key]]));
-	if (Object.keys(relief).length > 0) options.features = relief;
-	if (JSON.stringify(colors) !== JSON.stringify(DEFAULT_COLORS)) setColors(builder, options, colors);
-	return options;
-}
-
-/**
- * The options of the streets, borders and labels: of the vector map itself, or of the overlay of
- * the imagery. Undefined for the imagery alone that the change does not give any of them again.
- */
-function overlayFor(
-	builder: StateBackground['builder'],
-	options: Options,
-	change: Partial<BackgroundSettings>
-): Options | undefined {
-	if (builder !== 'satellite') return options;
-	if (options.osmOverlay === false) {
-		// the imagery alone: showing streets, borders or labels again starts the overlay with its
-		// defaults, and with the colors of the imagery, but only with what is shown
-		const labels = change.labels !== undefined && change.labels !== 'none';
-		if (!change.streets && !change.borders && !labels) return undefined;
-		const colors = getColors({ builder, options });
-		options.osmOverlay = {
-			layers: {
-				...(change.streets ? {} : STREETS_HIDDEN()),
-				...(change.borders ? {} : BORDERS_HIDDEN()),
-				...(labels ? {} : { labels: false })
-			}
-		};
-		setColors(builder, options, colors);
-	}
-	if (!isObject(options.osmOverlay)) options.osmOverlay = {};
-	return options.osmOverlay as Options;
-}
-
-/** The features of both maps that show the relief, by the elevation tiles of the tile server. */
-const RELIEF = ['hillshade', 'terrain'] as const;
-
-/** The shading of the relief and the heights of the terrain, on or off; their own options are kept. */
-function setRelief(options: Options, change: Partial<BackgroundSettings>) {
-	for (const key of RELIEF) {
-		const on = change[key];
-		if (on === undefined) continue;
-		const features: Options = isObject(options.features) ? options.features : {};
-		if (!on) delete features[key];
-		else if (!features[key]) features[key] = true;
-		if (Object.keys(features).length > 0) options.features = features;
-		else delete options.features;
-	}
-}
-
-/** The theme and the labels: their font, size, halo, language and how many. */
-function setText(overlay: Options, change: Partial<BackgroundSettings>) {
-	if (!isObject(overlay.text)) overlay.text = {};
-	const text = overlay.text as Options;
-
-	if (change.theme) overlay.theme = change.theme;
-
-	if (change.font) text.font = change.font;
-	if (change.labelSize !== undefined) text.scale = change.labelSize;
-	if (change.haloWidth !== undefined) {
-		for (const path of HALO_GROUPS) childOf(text, path, true).haloWidth = change.haloWidth;
-	}
-	if (change.language) text.language = change.language;
-	if (change.labels) {
-		if (!isObject(overlay.layers)) overlay.layers = {};
-		const layers = overlay.layers as Options;
-		if (change.labels === 'none') layers.labels = false;
-		else delete layers.labels;
-		if (change.labels === 'fewer') text.spacing = FEWER_LABELS_SPACING;
-		else delete text.spacing;
-	}
-}
-
-/** The streets and the borders over the imagery, shown or hidden. */
-function setSatelliteLayers(overlay: Options, change: Partial<BackgroundSettings>) {
-	for (const [shown, hidden] of [
-		[change.streets, STREETS_HIDDEN()],
-		[change.borders, BORDERS_HIDDEN()]
-	] as const) {
-		if (shown === undefined) continue;
-		if (!isObject(overlay.layers)) overlay.layers = {};
-		const layers = overlay.layers as Options;
-		for (const [group, value] of Object.entries(hidden)) {
-			if (shown) delete layers[group];
-			else layers[group] = value;
-		}
-	}
+	return sanitizeBackground(changed);
 }
 
 /**
  * The background of a new map, e.g. of the configuration of this editor instance: `base` with the
- * labels in `language`, unless `base` sets a language itself. Undefined for the editor's default
+ * labels in `language`, unless `base` names a language itself. Undefined for the editor's default
  * background, which is not stored.
  */
-export function startingBackground(
-	base: StateBackground = DEFAULT_BACKGROUND,
-	language?: string
-): StateBackground | undefined {
-	const text = overlayOf(base).text;
-	if (!language || (isObject(text) && typeof text.language === 'string')) return minimizeBackground(base);
-	return changeSettings(base, { language });
-}
-
-/** The smallest options that build the same map, or undefined for the editor's default background. */
-export function minimizeBackground({ builder, options }: StateBackground): StateBackground | undefined {
-	const minimized =
-		builder === 'osm'
-			? osm.minimizeOptions(options as OsmOptions)
-			: satellite.minimizeOptions(options as SatelliteOptions);
-	const result: StateBackground = { builder, options: minimized as Options };
-	return JSON.stringify(result) === JSON.stringify(DEFAULT_BACKGROUND) ? undefined : result;
+export function startingBackground(base: StateBackground = {}, language?: string): StateBackground | undefined {
+	if (!language || typeof base.language === 'string') return sanitizeBackground(base);
+	return sanitizeBackground({ ...base, language });
 }
 
 /** Whether both are the same background map, e.g. to keep the style that shows it. */
 export function sameBackground(a: StateBackground | undefined, b: StateBackground | undefined): boolean {
-	return JSON.stringify(a) === JSON.stringify(b);
+	// with their settings in the same order, and without those that have their default
+	return JSON.stringify(sanitizeBackground(a) ?? {}) === JSON.stringify(sanitizeBackground(b) ?? {});
+}
+
+/** The builder of `@versatiles/style` that draws a background, and its options. */
+export interface BackgroundOptions {
+	builder: 'osm' | 'satellite';
+	options: Options;
+}
+
+/**
+ * The options of `@versatiles/style` that draw a background: built from its settings, with its own
+ * `options` laid over them, which win where both say something.
+ */
+export function backgroundOptions(background?: StateBackground): BackgroundOptions {
+	const settings = getSettings(background);
+	const built = settings.base === 'satellite' ? satelliteOptions(settings) : vectorOptions(settings);
+	const own = sanitizeBackground(background)?.options;
+	return { builder: settings.base === 'satellite' ? 'satellite' : 'osm', options: own ? merged(built, own) : built };
+}
+
+/** Options with others laid over them: objects are merged, everything else is replaced. */
+function merged(options: Options, over: Options): Options {
+	const result: Options = { ...options };
+	for (const [key, value] of Object.entries(over)) {
+		const below = result[key];
+		result[key] = isObject(value) && isObject(below) ? merged(below, value) : value;
+	}
+	return result;
+}
+
+/**
+ * The streets, borders and labels: the options of the vector map itself, or of the overlay of the
+ * imagery. Their theme is that of the vector map; the overlay keeps the one of `@versatiles/style`.
+ */
+function overlayOptions(settings: BackgroundSettings): Options {
+	const text: Options = { language: settings.language, scale: settings.labelSize };
+	// only another font: the default one is the family of the library, with its bold and italic faces
+	if (settings.font !== BACKGROUND_DEFAULTS.font) text.font = settings.font;
+	// more space between the labels: fewer of them
+	if (settings.labels === 'fewer') text.spacing = FEWER_LABELS_SPACING;
+	if (settings.haloWidth !== BACKGROUND_HALO_WIDTHS[settings.base]) {
+		for (const path of HALO_GROUPS) {
+			let group = text;
+			for (const key of path) group = (group[key] ??= {}) as Options;
+			group.haloWidth = settings.haloWidth;
+		}
+	}
+	const options: Options = { text };
+	const layers: Options = {};
+	if (settings.labels === 'none') layers.labels = false;
+	if (settings.base === 'satellite') {
+		if (!settings.streets) Object.assign(layers, STREETS_HIDDEN());
+		if (!settings.borders) Object.assign(layers, BORDERS_HIDDEN());
+	}
+	if (Object.keys(layers).length > 0) options.layers = layers;
+	if (changesColors(settings.colors)) options.recolor = recolor(settings.colors);
+	return options;
+}
+
+function changesColors(colors: MapColors): boolean {
+	return JSON.stringify(colors) !== JSON.stringify(DEFAULT_COLORS);
+}
+
+/** The relief of both maps: shaded, and raised as terrain. */
+function reliefOf(settings: BackgroundSettings): Options {
+	return { ...(settings.hillshade ? { hillshade: true } : {}), ...(settings.terrain ? { terrain: true } : {}) };
+}
+
+/** The options of `osm()` for the vector map. A theme that `@versatiles/style` does not have is the default one. */
+function vectorOptions(settings: BackgroundSettings): Options {
+	let theme = settings.theme;
+	if (!(osm.palettes as readonly string[]).includes(theme)) {
+		// e.g. renamed or removed by a newer version of the library, or misspelled in a file
+		console.warn(`The theme "${theme}" of the background map is unknown, so "${BACKGROUND_DEFAULTS.theme}" is shown`);
+		theme = BACKGROUND_DEFAULTS.theme;
+	}
+	const features = { ...reliefOf(settings), ...(settings.buildings === 'extruded' ? { buildings: 'extruded' } : {}) };
+	return { ...overlayOptions(settings), theme, ...(Object.keys(features).length > 0 ? { features } : {}) };
+}
+
+/**
+ * The options of `satellite()` for the imagery, with its streets, borders and labels over it;
+ * without all of them, the imagery alone.
+ */
+function satelliteOptions(settings: BackgroundSettings): Options {
+	const options: Options = {};
+	const alone = !settings.streets && !settings.borders && settings.labels === 'none';
+	options.osmOverlay = alone ? false : overlayOptions(settings);
+	if (changesColors(settings.colors)) {
+		const { saturation, black, white } = settings.colors;
+		options.raster = { saturation, ...rasterLevels(black, white) };
+	}
+	const features = reliefOf(settings);
+	if (Object.keys(features).length > 0) options.features = features;
+	return options;
 }

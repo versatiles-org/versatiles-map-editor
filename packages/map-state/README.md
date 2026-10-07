@@ -130,9 +130,9 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - viewport → `view: { center, radius, turnable, bearing, pitch }` (mirrors the state; lossless round-trip)
 - what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
-- map metadata → `meta` (e.g. `meta.background`: the `@versatiles/style` builder and its
-  minimized options, stored as JSON in the string table of the base64, so any current or future
-  option fits;
+- map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
+  map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say,
+  stored as JSON in the string table of the base64;
   `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
