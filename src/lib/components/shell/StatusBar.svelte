@@ -28,7 +28,7 @@
 	const hint = $derived.by(() => {
 		if (doc.stylePicker.active) return 'Click an element on the map to take its style. Escape cancels.';
 		if (doc.visibleArea.active) {
-			return 'Drag the handles to set the area that shared maps show completely. Escape or Done ends.';
+			return 'Drag the handles to set the area that shared maps show completely. Escape ends.';
 		}
 		switch (drawing.tool) {
 			case 'marker':

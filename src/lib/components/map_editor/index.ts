@@ -6,4 +6,3 @@
 export { default as DrawBar } from './DrawBar.svelte';
 export { default as NodeDeleteButton } from './NodeDeleteButton.svelte';
 export { default as SelectionBar } from './SelectionBar.svelte';
-export { default as VisibleAreaBar } from './VisibleAreaBar.svelte';

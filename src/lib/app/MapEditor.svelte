@@ -17,7 +17,7 @@
 		ToolRail,
 		TopBar
 	} from '#lib/components/shell/index.js';
-	import { DrawBar, NodeDeleteButton, SelectionBar, VisibleAreaBar } from '#lib/components/map_editor/index.js';
+	import { DrawBar, NodeDeleteButton, SelectionBar } from '#lib/components/map_editor/index.js';
 	import { newMarkerState } from '#lib/element/index.js';
 	import { loadConfig } from '#lib/background/index.js';
 	import { SessionSync } from '#lib/sessions/index.js';
@@ -55,11 +55,16 @@
 		});
 	}
 
+	let mapDocument: MapDocument | undefined = $state();
+
 	// the sidebar can be collapsed, to see more of the map
 	let sidebarOpen = $state(true);
 	const SIDEBAR_WIDTH = 250;
+	// While the shared map is edited, its settings are in the sidebar, which is shown then
+	const sharing = $derived(mapDocument?.isInteractive() === true && mapDocument.visibleArea.active);
+	const sidebarShown = $derived(sidebarOpen || sharing);
 	// the width of the map that the sidebar covers
-	const sidebarWidth = $derived(sidebarOpen ? SIDEBAR_WIDTH : 0);
+	const sidebarWidth = $derived(sidebarShown ? SIDEBAR_WIDTH : 0);
 	// the height of the map that the top bar covers
 	const TOPBAR_HEIGHT = 44;
 	// the width of the map that the tools at the left cover
@@ -76,8 +81,6 @@
 
 	const insets: Insets = $derived({ top: TOPBAR_HEIGHT, right: sidebarWidth, bottom: STATUS_HEIGHT, left: RAIL_WIDTH });
 	const covered: Insets = $derived({ ...insets, left: coveredLeft });
-
-	let mapDocument: MapDocument | undefined = $state();
 
 	// the file commands of the menu and the status line, with the dialog that asks for a file name
 	let dialogFile: DialogFile | undefined = $state();
@@ -144,7 +147,6 @@
 		{#if mapDocument?.isInteractive()}
 			<NodeDeleteButton {mapDocument} />
 			<DrawBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
-			<VisibleAreaBar doc={mapDocument} left={coveredLeft} right={sidebarWidth} />
 			<SelectionBar
 				doc={mapDocument}
 				top={TOPBAR_HEIGHT}
@@ -164,14 +166,17 @@
 				<ElementsDrawer doc={mapDocument} onclose={() => (drawerOpen = false)} />
 			</div>
 			<!-- hidden, not removed, so the sidebar keeps e.g. its scroll position -->
-			<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarOpen}>
+			<div id="sidebar" style:top="{TOPBAR_HEIGHT}px" style:bottom="{STATUS_HEIGHT}px" hidden={!sidebarShown}>
 				<Sidebar {mapDocument} />
 			</div>
-			<SidebarToggle
-				bind:open={sidebarOpen}
-				top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
-				right={sidebarWidth}
-			/>
+			<!-- not while the shared map is edited, whose settings are in the sidebar -->
+			{#if !sharing}
+				<SidebarToggle
+					bind:open={sidebarOpen}
+					top="calc(50% + {(TOPBAR_HEIGHT - STATUS_HEIGHT) / 2}px)"
+					right={sidebarWidth}
+				/>
+			{/if}
 			<!-- over all of the editor but its top bar -->
 			<Preview doc={mapDocument} bind:open={previewing} top={TOPBAR_HEIGHT} />
 		{/if}

@@ -226,7 +226,7 @@ test('dragging a handle of the visible area with a finger, a bit off the handle'
 	const frame: [number, number, number, number] = [13.35, 52.47, 13.45, 52.53];
 	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, frame: { bounds: frame }, elements: [] }));
 	await waitForMapIsReady(page);
-	await (await menuItem(page, 'Visible area…')).click();
+	await (await menuItem(page, 'Shared map…')).click();
 	const touch = await Touchscreen.create(page);
 
 	// 10 pixels off the north-east corner: too far for the mouse, near enough for a finger

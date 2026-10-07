@@ -393,7 +393,7 @@
 			{@render item('KML (Google Earth)', () => files.exportKML())}
 		{/snippet}
 		{@render group('export', 'Export', exportItems)}
-		{@render item('Visible area…', () => doc.visibleArea.open())}
+		{@render item('Shared map…', () => doc.visibleArea.open())}
 		{#if fullscreen.available}
 			{@render item(fullscreen.active ? 'Exit fullscreen' : 'Fullscreen', () => fullscreen.toggle(), {
 				keys: ['F', 'F', 'F']

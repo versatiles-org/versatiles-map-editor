@@ -60,11 +60,11 @@
 			]
 		},
 		{
-			title: 'Visible area',
+			title: 'Shared map',
 			keys: [
 				['Move a side outwards', `${shift}← → ↑ ↓`],
 				['Move a side inwards', `${alt}${shift}← → ↑ ↓`],
-				['Done', 'Escape']
+				['Back to the map', 'Escape']
 			]
 		},
 		{

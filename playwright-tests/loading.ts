@@ -29,7 +29,7 @@ const sidebarAria = `
 - region "Map":
   - heading "Map" [level=3]
   - textbox "Title"
-  - paragraph: /set in “Share”/
+  - paragraph: /what visitors see over it/
 - region "Background map":
   - heading "Background map" [level=3]
   - radiogroup "Base map"

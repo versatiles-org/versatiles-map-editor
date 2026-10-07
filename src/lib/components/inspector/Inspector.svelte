@@ -17,12 +17,14 @@
 	import InspectorSection from './InspectorSection.svelte';
 	import PanelBackground from './PanelBackground.svelte';
 	import PanelLegend from './PanelLegend.svelte';
+	import PanelSharedMap from './PanelSharedMap.svelte';
 	import { elementIcon } from '#lib/components/common/index.js';
 	import { elementText, countTypes, typeName } from '#lib/element/index.js';
 
 	/**
 	 * The properties of what is selected: the style of the selected elements, the legend after a
-	 * click on it, or the properties of the map when nothing is selected.
+	 * click on it, or the properties of the map when nothing is selected. And while the shared map is
+	 * edited (the mode of the visible area), what it shows.
 	 */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
@@ -30,9 +32,12 @@
 	const selection = $derived(doc.selection);
 	const elements = $derived(selection.selectedElements);
 	const legend = $derived(doc.legend);
+	/** Whether the shared map is edited: its visible area on the map, the rest here. */
+	const sharing = $derived(doc.visibleArea.active);
 
 	// the name as in the list of elements, e.g. "Marker", and its label or popup text
 	const header = $derived.by((): { icon: IconName; title: string; subtitle: string } => {
+		if (sharing) return { icon: 'share', title: 'Shared map', subtitle: 'What visitors see' };
 		if (selection.legendSelected && legend) return { icon: 'legend', title: 'Legend', subtitle: 'Part of the map' };
 		if (elements.length === 0) return { icon: 'map', title: 'Map', subtitle: 'Nothing selected' };
 		const types = elements.map((e) => e.getState().type);
@@ -92,7 +97,15 @@
 			<h2>{header.title}</h2>
 			{#if header.subtitle}<span class="subtitle">{header.subtitle}</span>{/if}
 		</span>
-		{#if selection.legendSelected && legend}
+		{#if sharing}
+			<IconButton
+				icon="close"
+				label="Back to the map"
+				title="Back to the map (Escape)"
+				size="sm"
+				onclick={() => doc.visibleArea.close()}
+			/>
+		{:else if selection.legendSelected && legend}
 			<IconButton
 				icon="close"
 				label="Back to the map"
@@ -103,7 +116,9 @@
 		{/if}
 	</div>
 
-	{#if selection.legendSelected && legend}
+	{#if sharing}
+		<PanelSharedMap {doc} />
+	{:else if selection.legendSelected && legend}
 		<PanelLegend {doc} />
 	{:else if elements.length > 0}
 		<StyleEditor {elements} {doc} />
@@ -125,8 +140,11 @@
 					? 'Shared maps show the visible area that you set, on every screen.'
 					: 'Shared maps show all elements. You can set the area that they show.'}
 			</Hint>
-			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit visible area…</Button></ButtonGroup>
-			<Hint>The address search, the zoom buttons and the place of the legend are set in “Share”.</Hint>
+			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit shared map…</Button></ButtonGroup>
+			<Hint
+				>Its visible area, its rotation and tilt, and what visitors see over it: the search, the zoom buttons, the
+				legend.</Hint
+			>
 			<!-- the editor's own map, not what shared maps show -->
 			<Checkbox
 				checked={doc.turnable}

@@ -276,20 +276,20 @@ test('the viewer shows the frame again when its size changes, until the visitor 
 test('the visible area is edited in a mode of its own, from the menu or the Map panel', async ({ page }) => {
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, elements }));
 	await waitForMapIsReady(page);
-	const bar = page.getByRole('group', { name: 'Visible area' });
+	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
 	const shared = sidebar(page).getByRole('region', { name: 'Map', exact: true });
 	await expect(shared).toContainText('Shared maps show all elements.');
 
-	// from the Map panel; without a frame, the bar shows the elements (a single marker has no size)
-	await shared.getByRole('button', { name: 'Edit visible area…' }).click();
+	// from the Map panel; without a frame, the panel shows the elements (a single marker has no size)
+	await shared.getByRole('button', { name: 'Edit shared map…' }).click();
 	await expect(bar).toContainText('The elements: 0 m × 0 m');
 	await expect(page.locator('.statusbar')).toContainText('Drag the handles');
 
 	// the current view becomes the frame
 	await bar.getByRole('button', { name: 'Use current view' }).click();
-	await expect(bar).toContainText(/^Visible area: [\d.,]+ km × [\d.,]+ km/);
+	await expect(bar.getByRole('status')).toHaveText(/^[\d.,]+ km × [\d.,]+ km$/);
 	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeDefined();
-	await expect(shared).toContainText('Shared maps show the visible area that you set');
+	await expect(bar).toContainText('Shared maps show this area completely');
 
 	// back to the elements, and undo
 	await bar.getByRole('button', { name: 'Fit to elements' }).click();
@@ -298,16 +298,17 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(async () => (await storedState(page)).frame?.bounds).toBeDefined();
 
-	// Escape ends it, and so does Done, after opening it from the menu
+	// Escape ends it, and so does the button of the panel, after opening it from the menu
 	await page.keyboard.press('Escape');
 	await expect(bar).toBeHidden();
-	await (await menuItem(page, 'Visible area…')).click();
+	await expect(shared).toContainText('Shared maps show the visible area that you set');
+	await (await menuItem(page, 'Shared map…')).click();
 	await expect(bar).toBeVisible();
-	await bar.getByRole('button', { name: 'Done' }).click();
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(bar).toBeHidden();
 
 	// a tool ends it too
-	await (await menuItem(page, 'Visible area…')).click();
+	await (await menuItem(page, 'Shared map…')).click();
 	await page.getByRole('button', { name: 'Marker', exact: true }).click();
 	await expect(bar).toBeHidden();
 });
@@ -325,15 +326,15 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
 	};
 	const stored = async () => (await storedState(page)).frame;
-	const bar = page.getByRole('group', { name: 'Visible area' });
-	await (await menuItem(page, 'Visible area…')).click();
+	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
+	await (await menuItem(page, 'Shared map…')).click();
 
 	await test.step('the sliders turn the map at once, and are stored', async () => {
-		const rotation = bar.getByRole('spinbutton', { name: 'Rotation' });
+		const rotation = sidebar(page).getByRole('spinbutton', { name: 'Rotation' });
 		await rotation.fill('40');
 		await rotation.press('Enter');
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 0 });
-		const tilt = bar.getByRole('spinbutton', { name: 'Tilt' });
+		const tilt = sidebar(page).getByRole('spinbutton', { name: 'Tilt' });
 		await tilt.fill('50');
 		await tilt.press('Enter');
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
@@ -348,8 +349,8 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 	});
 
 	await test.step('visitors can be kept from rotating and tilting', async () => {
-		const rotate = bar.getByRole('checkbox', { name: 'Visitors can rotate' });
-		const tilt = bar.getByRole('checkbox', { name: 'Visitors can tilt' });
+		const rotate = sidebar(page).getByRole('checkbox', { name: 'Visitors can rotate' });
+		const tilt = sidebar(page).getByRole('checkbox', { name: 'Visitors can tilt' });
 		await expect(rotate).toBeChecked();
 		await rotate.uncheck();
 		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true });
@@ -401,13 +402,13 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 	});
 
 	await test.step('the editor is turned only in this mode', async () => {
-		await bar.getByRole('button', { name: 'Done' }).click();
+		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
 		expect(await stored()).toMatchObject({ bearing: 40, pitch: 50, lockBearing: true });
-		await (await menuItem(page, 'Visible area…')).click();
+		await (await menuItem(page, 'Shared map…')).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
-		await expect(bar.getByRole('spinbutton', { name: 'Rotation' })).toHaveValue('40');
-		await expect(bar.getByRole('checkbox', { name: 'Visitors can rotate' })).not.toBeChecked();
+		await expect(sidebar(page).getByRole('spinbutton', { name: 'Rotation' })).toHaveValue('40');
+		await expect(sidebar(page).getByRole('checkbox', { name: 'Visitors can rotate' })).not.toBeChecked();
 	});
 });
 
@@ -434,7 +435,7 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 	};
 	const turnable = page.getByRole('checkbox', { name: 'Rotate and tilt the map while editing' });
 	const compass = page.getByRole('button', { name: 'Reset rotation and tilt' });
-	const bar = page.getByRole('group', { name: 'Visible area' });
+	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
 	let own = { bearing: 0, pitch: 0 };
 
 	await test.step('off: the map stays, without a compass', async () => {
@@ -462,10 +463,10 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 	});
 
 	await test.step('in the visible area mode, turning the map turns the shared map, then the own turn is back', async () => {
-		await (await menuItem(page, 'Visible area…')).click();
+		await (await menuItem(page, 'Shared map…')).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 0 });
-		const rotation = bar.getByRole('spinbutton', { name: 'Rotation' });
-		const tilt = bar.getByRole('spinbutton', { name: 'Tilt' });
+		const rotation = sidebar(page).getByRole('spinbutton', { name: 'Rotation' });
+		const tilt = sidebar(page).getByRole('spinbutton', { name: 'Tilt' });
 		await expect(rotation).toHaveValue('40');
 		// by hand: the sliders follow, in whole degrees, and the shared map is stored
 		await turn(120, -60);
@@ -490,7 +491,7 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 		await page.getByRole('button', { name: 'Undo' }).click();
 		await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
 
-		await bar.getByRole('button', { name: 'Done' }).click();
+		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 		await expect.poll(camera).toStrictEqual(own);
 		expect((await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
 	});
@@ -531,11 +532,11 @@ test('the share dialog warns about elements outside the visible area, and edits 
 	// the precision follows the size of the frame (about 14 × 11 km), not the camera
 	await expect(dialog.getByRole('slider', { name: 'Precision' })).toHaveAttribute('aria-valuetext', '18 m');
 
-	// editing the visible area, and back with Done
+	// editing the visible area, and back with the button of the panel
 	await dialog.getByRole('button', { name: 'Edit visible area' }).click();
 	await expect(dialog).toBeHidden();
-	const bar = page.getByRole('group', { name: 'Visible area' });
-	await bar.getByRole('button', { name: 'Done' }).click();
+	await expect(sidebar(page).getByRole('region', { name: 'Visible area' })).toBeVisible();
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(dialog).toBeVisible();
 
 	// all elements instead: no warning any more
@@ -605,7 +606,7 @@ test('dragging a handle changes the frame, one undo step per drag', async ({ pag
 		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
 	);
 	await waitForMapIsReady(page);
-	await (await menuItem(page, 'Visible area…')).click();
+	await (await menuItem(page, 'Shared map…')).click();
 
 	// the north-east corner, 80 pixels to the east and 60 to the north
 	const [x, y] = await project(page, [frame[2], frame[3]]);
@@ -629,8 +630,8 @@ test('the keyboard moves the sides of the frame, one undo step per key', async (
 		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
 	);
 	await waitForMapIsReady(page);
-	await (await menuItem(page, 'Visible area…')).click();
-	const size = page.getByRole('group', { name: 'Visible area' }).getByRole('status');
+	await (await menuItem(page, 'Shared map…')).click();
+	const size = sidebar(page).getByRole('region', { name: 'Visible area' }).getByRole('status');
 	const before = await size.textContent();
 
 	// focus on the map, which would rotate with Shift and an arrow key
