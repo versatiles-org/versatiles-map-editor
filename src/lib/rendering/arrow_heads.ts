@@ -28,27 +28,54 @@ const IMAGE_HEIGHT = HEAD_WIDTH + 2 * PADDING;
 const TRIANGLE_LENGTH = HEAD_WIDTH;
 /** The sine of the half angle of the triangle's tip. */
 const TRIANGLE_SINE = HEAD_WIDTH / 2 / Math.hypot(TRIANGLE_LENGTH, HEAD_WIDTH / 2);
-/** The chevron as thick as the line at the default size (3), its arms at 45°, together as wide as the head. */
-const CHEVRON_THICKNESS = HEAD_WIDTH / 3;
-const CHEVRON_ARM = (HEAD_WIDTH - CHEVRON_THICKNESS) / 2;
+/** The size of the head (times the width of the line) of the images without a size of their own, and its default. */
+const DEFAULT_SIZE = 3;
 
-/** The corners of the triangle and the middle line of the chevron, from the end point. */
+/**
+ * The chevron of a head `size` times as wide as its line, in an image `HEAD_WIDTH` wide: as thick
+ * as the line, whatever the size, so it is one stroke with the line; its arms at 45°, together as
+ * wide as the head, and the middle of its round tip on the end point, where the round cap of the
+ * line is. `arm` is how far the middle line of an arm reaches back and to the side.
+ */
+function chevronShape(size: number): { thickness: number; arm: number } {
+	const thickness = HEAD_WIDTH / Math.max(1, size);
+	return { thickness, arm: (HEAD_WIDTH - thickness) / 2 };
+}
+
+/** The corners of the triangle, from the end point. */
 const TRIANGLE: GeoPoint[] = [
 	[0, 0],
 	[-TRIANGLE_LENGTH, -HEAD_WIDTH / 2],
 	[-TRIANGLE_LENGTH, HEAD_WIDTH / 2]
 ];
-const CHEVRON: GeoPoint[] = [
-	[-CHEVRON_ARM, -CHEVRON_ARM],
-	[0, 0],
-	[-CHEVRON_ARM, CHEVRON_ARM]
-];
+/** The middle line of a chevron, from the end point. */
+function chevronLine(arm: number): GeoPoint[] {
+	return [
+		[-arm, -arm],
+		[0, 0],
+		[-arm, arm]
+	];
+}
 
 const IMAGE_PREFIX = 'arrow-';
 
-/** The name of the image of an arrowhead, e.g. "arrow-triangle". */
-export function arrowImageName(arrow: ArrowName): string {
-	return IMAGE_PREFIX + arrow;
+/**
+ * The name of the image of an arrowhead, e.g. "arrow-triangle". A chevron has one per size of the
+ * head, e.g. "arrow-chevron-2.5", since its thickness is that of the line, not a part of the head.
+ */
+export function arrowImageName(arrow: ArrowName, size: number): string {
+	return IMAGE_PREFIX + arrow + (arrow === 'chevron' ? '-' + Math.round(size * 100) / 100 : '');
+}
+
+/** The arrowhead of an image name and the size of its head, or undefined for other images. */
+function parseImageName(name: string): { arrow: ArrowName; size: number } | undefined {
+	if (!name.startsWith(IMAGE_PREFIX)) return undefined;
+	const [arrow, size, ...rest] = name.slice(IMAGE_PREFIX.length).split('-');
+	if (rest.length > 0 || arrow === 'none' || !ARROW_NAMES.includes(arrow as ArrowName)) return undefined;
+	// only a chevron has a size, a number as `arrowImageName` writes it
+	if ((arrow === 'chevron') !== (size !== undefined)) return undefined;
+	if (size !== undefined && !/^\d+(\.\d+)?$/.test(size)) return undefined;
+	return { arrow: arrow as ArrowName, size: size === undefined ? DEFAULT_SIZE : Number(size) };
 }
 
 /** The distance from the segment a–b. */
@@ -59,7 +86,7 @@ function segmentDistance([px, py]: GeoPoint, [ax, ay]: GeoPoint, [bx, by]: GeoPo
 }
 
 /** The signed distance from the edge of a head (negative inside), in pixels of the map, from its point on the end point. */
-function headDistance(arrow: ArrowName, point: GeoPoint): number {
+function headDistance(arrow: ArrowName, point: GeoPoint, size: number): number {
 	switch (arrow) {
 		case 'triangle': {
 			const corners = TRIANGLE;
@@ -70,8 +97,11 @@ function headDistance(arrow: ArrowName, point: GeoPoint): number {
 			return inside ? -edge : edge;
 		}
 		case 'chevron': {
-			const [a, tip, b] = CHEVRON;
-			return Math.min(segmentDistance(point, tip, a), segmentDistance(point, tip, b)) - CHEVRON_THICKNESS / 2;
+			const { thickness, arm } = chevronShape(size);
+			const [a, tip, b] = chevronLine(arm);
+			// a dot if the head is as wide as the line
+			if (arm <= 0) return Math.hypot(...point) - thickness / 2;
+			return Math.min(segmentDistance(point, tip, a), segmentDistance(point, tip, b)) - thickness / 2;
 		}
 		case 'circle':
 			return Math.hypot(...point) - HEAD_WIDTH / 2;
@@ -80,8 +110,11 @@ function headDistance(arrow: ArrowName, point: GeoPoint): number {
 	}
 }
 
-/** The pixels of the image of an arrowhead: only the alpha channel counts, the distance field. */
-export function arrowImage(arrow: ArrowName): { width: number; height: number; data: Uint8Array } {
+/**
+ * The pixels of the image of an arrowhead: only the alpha channel counts, the distance field. Of a
+ * head `size` times as wide as its line, which only the chevron depends on.
+ */
+export function arrowImage(arrow: ArrowName, size = DEFAULT_SIZE): { width: number; height: number; data: Uint8Array } {
 	const width = IMAGE_WIDTH * PIXEL_RATIO;
 	const height = IMAGE_HEIGHT * PIXEL_RATIO;
 	const data = new Uint8Array(width * height * 4);
@@ -92,7 +125,7 @@ export function arrowImage(arrow: ArrowName): { width: number; height: number; d
 				(column + 0.5) / PIXEL_RATIO - IMAGE_WIDTH / 2,
 				(row + 0.5) / PIXEL_RATIO - IMAGE_HEIGHT / 2
 			];
-			const value = SDF_EDGE - (headDistance(arrow, point) * PIXEL_RATIO) / SDF_RADIUS;
+			const value = SDF_EDGE - (headDistance(arrow, point, size) * PIXEL_RATIO) / SDF_RADIUS;
 			data[(row * width + column) * 4 + 3] = Math.round(255 * Math.max(0, Math.min(1, value)));
 		}
 	}
@@ -104,10 +137,11 @@ export function arrowImage(arrow: ArrowName): { width: number; height: number; d
  * Returns false for other images.
  */
 export function addArrowImage(map: maplibregl.Map, name: string): boolean {
-	if (!name.startsWith(IMAGE_PREFIX)) return false;
-	const arrow = ARROW_NAMES.find((arrow) => name === IMAGE_PREFIX + arrow);
-	if (arrow === undefined || arrow === 'none') return false;
-	if (!map.hasImage(name)) map.addImage(name, arrowImage(arrow), { sdf: true, pixelRatio: PIXEL_RATIO });
+	const image = parseImageName(name);
+	if (!image) return false;
+	if (!map.hasImage(name)) {
+		map.addImage(name, arrowImage(image.arrow, image.size), { sdf: true, pixelRatio: PIXEL_RATIO });
+	}
 	return true;
 }
 
@@ -125,8 +159,8 @@ export function headReach(arrow: ArrowName, headWidth: number, lineWidth: number
 		case 'triangle':
 			return headShift(arrow, lineWidth);
 		case 'chevron':
-			// the round corner of the chevron's tip
-			return ((headWidth / HEAD_WIDTH) * CHEVRON_THICKNESS) / 2;
+			// the round corner of the chevron's tip, as thick as the line
+			return Math.min(lineWidth, headWidth) / 2;
 		case 'circle':
 			return headWidth / 2;
 		default:
@@ -155,10 +189,12 @@ export function drawArrowHead(
 		context.closePath();
 		context.fill();
 	} else if (arrow === 'chevron') {
-		for (const [x, y] of CHEVRON) context.lineTo(x, y);
+		// as thick as the line, also where the head is drawn smaller than on the map
+		const { thickness, arm } = chevronShape(headWidth / lineWidth);
+		for (const [x, y] of chevronLine(arm)) context.lineTo(x, y);
 		context.setLineDash([]);
 		context.strokeStyle = context.fillStyle;
-		context.lineWidth = CHEVRON_THICKNESS;
+		context.lineWidth = thickness;
 		context.lineCap = 'round';
 		context.lineJoin = 'round';
 		context.stroke();
@@ -226,7 +262,7 @@ function headLength(arrow: ArrowName, headWidth: number, lineWidth: number): num
 		case 'triangle':
 			return TRIANGLE_LENGTH * scale - headShift(arrow, lineWidth);
 		case 'chevron':
-			return CHEVRON_ARM * scale;
+			return chevronShape(headWidth / lineWidth).arm * scale;
 		default:
 			return 0;
 	}
@@ -282,7 +318,7 @@ export function arrowHeads(path: GeoPath, arrows: ArrowProperties): ArrowHead[] 
 		// in pixels of the image, which `icon-size` scales
 		const offset = headShift(arrow, arrows.width) / size;
 		const properties: ArrowHead['properties'] = {
-			icon: arrowImageName(arrow),
+			icon: arrowImageName(arrow, arrows.size),
 			rotate,
 			size,
 			offset,

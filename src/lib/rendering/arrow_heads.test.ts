@@ -113,7 +113,7 @@ describe('arrowHeads', () => {
 		const heads = arrowHeads(path, arrows({ start: 'circle', end: 'chevron' }));
 		expect(heads.map(({ point, end, properties }) => [point, end, properties.icon])).toStrictEqual([
 			[[0, 0], false, 'arrow-circle'],
-			[[1, 0], true, 'arrow-chevron']
+			[[1, 0], true, 'arrow-chevron-3']
 		]);
 		expect(heads[0].properties.rotate).toBeCloseTo(180);
 		expect(heads.map((head) => head.properties.offset)).toStrictEqual([0, 0]);
@@ -190,15 +190,45 @@ describe('arrowImage', () => {
 		expect(alphaAt(arrowImage('chevron'), -HEAD_WIDTH / 2, 0)).toBe(0);
 	});
 
+	it('has a chevron as thick as the line, whatever the size of the head', () => {
+		// half of it: from the middle line of an arm outwards, away from the other arm, to its edge
+		const thickness = (size: number) => {
+			const image = arrowImage('chevron', size);
+			let inside = 0;
+			// in steps of a quarter pixel of the image, from 4 pixels up and left of the end point
+			for (let step = 0; step <= 80; step++) {
+				const d = step / 4 / Math.SQRT2;
+				if (alphaAt(image, -4 + d, -4 - d) >= 191) inside++;
+			}
+			// in pixels of the map: the image is drawn `size * width / HEAD_WIDTH` times as large
+			return ((2 * inside) / 4) * (size / HEAD_WIDTH);
+		};
+		// of a line 1 pixel wide
+		for (const size of [2, 3, 4, 6]) expect(Math.abs(thickness(size) - 1)).toBeLessThan(0.15);
+		// the arms together as wide as the head
+		const wide = arrowImage('chevron', 6);
+		expect(alphaAt(wide, -9, -9)).toBe(255);
+		expect(alphaAt(wide, -9, 9)).toBe(255);
+		expect(alphaAt(wide, -9, 0)).toBe(0);
+	});
+
 	it('is added to the map as an SDF image when the map asks for it', () => {
 		const map = new MockMap();
 		expect(addArrowImage(map as unknown as MaplibreMap, 'fill-pattern:diagonal:#ff0000')).toBe(false);
 		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-none')).toBe(false);
 		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-star')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron')).toBe(true);
-		expect(map.addImage).toHaveBeenCalledWith('arrow-chevron', expect.objectContaining({ width: 112, height: 64 }), {
-			sdf: true,
-			pixelRatio: 2
-		});
+		// a chevron only with the size of its head
+		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron')).toBe(false);
+		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron-x')).toBe(false);
+		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-triangle-3')).toBe(false);
+		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron-2.5')).toBe(true);
+		expect(map.addImage).toHaveBeenCalledWith(
+			'arrow-chevron-2.5',
+			expect.objectContaining({ width: 112, height: 64 }),
+			{
+				sdf: true,
+				pixelRatio: 2
+			}
+		);
 	});
 });
