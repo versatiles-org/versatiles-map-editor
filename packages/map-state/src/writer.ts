@@ -1,5 +1,9 @@
 import { parseColor } from './color.js';
 import {
+	BACKGROUND_KEYS,
+	BACKGROUND_LANGUAGE_TEXT,
+	BACKGROUND_STEPS,
+	BACKGROUND_THEME_TEXT,
 	bitsToBase64,
 	CODEC_VERSION,
 	ELEMENT_KEYS,
@@ -24,6 +28,9 @@ import {
 import { encodeStrings } from './string_coder.js';
 import {
 	ARROW_NAMES,
+	BACKGROUND_LABELS,
+	BACKGROUND_LANGUAGES,
+	BACKGROUND_THEMES,
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
 	STROKE_STYLE_NAMES,
@@ -33,6 +40,7 @@ import {
 	LEGEND_THEMES,
 	type Bounds,
 	MAX_PITCH,
+	type StateBackground,
 	type StateFrame,
 	type StateElement,
 	type StateElementCircle,
@@ -391,7 +399,7 @@ export class StateWriter {
 		// only the fields that are stored count, e.g. not `search: false`
 		const stored =
 			metadata &&
-			(sanitizeBackground(metadata.background) ||
+			(linkBackground(metadata.background) ||
 				metadata.legend ||
 				metadata.colorScheme ||
 				removeViewerDefaults(metadata.viewer) ||
@@ -403,10 +411,10 @@ export class StateWriter {
 
 		this.writeBit(true);
 		// first the words of the format, as they are first in the string table
-		const background = backgroundJson(metadata);
+		const background = linkBackground(metadata.background);
 		if (background) {
 			this.writeInteger(METADATA_KEYS.background, 6);
-			this.writeStringRef(background, true);
+			this.writeBackground(background);
 		}
 		if (metadata.colorScheme) {
 			this.writeInteger(METADATA_KEYS.colorScheme, 6);
@@ -440,6 +448,72 @@ export class StateWriter {
 			this.writeViewer(viewer);
 		}
 		this.writeInteger(END_KEY, 6);
+	}
+
+	/**
+	 * The settings of the background map that differ from their defaults, as key/value pairs, in the
+	 * order of `backgroundStrings`: a flag is its key alone, a theme and a language their index in
+	 * the lists of the format (or their name), and the numbers are stored in the steps of their
+	 * sliders (`BACKGROUND_STEPS`), of the colors only those that change something.
+	 */
+	writeBackground(background: StateBackground) {
+		const key = (name: keyof typeof BACKGROUND_KEYS) => this.writeInteger(BACKGROUND_KEYS[name], 4);
+		/** The index of a name in its list, or the index that says its name follows, and the name. */
+		const name = (list: readonly string[], value: string, bits: number, text: number) => {
+			const index = list.indexOf(value);
+			this.writeInteger(index >= 0 && index < text ? index : text, bits);
+			if (index < 0 || index >= text) this.writeStringRef(value, true);
+		};
+		const { labelSize, haloWidth, colors } = BACKGROUND_STEPS;
+
+		if (background.base === 'satellite') key('satellite');
+		if (background.theme !== undefined) {
+			key('theme');
+			name(BACKGROUND_THEMES, background.theme, 5, BACKGROUND_THEME_TEXT);
+		}
+		if (background.streets === false) key('noStreets');
+		if (background.borders === false) key('noBorders');
+		if (background.labels !== undefined) {
+			key('labels');
+			this.writeInteger(BACKGROUND_LABELS.indexOf(background.labels), 2);
+		}
+		if (background.language !== undefined) {
+			key('language');
+			name(BACKGROUND_LANGUAGES, background.language, 4, BACKGROUND_LANGUAGE_TEXT);
+		}
+		if (background.font !== undefined) {
+			key('font');
+			this.writeStringRef(background.font, true);
+		}
+		if (background.labelSize !== undefined) {
+			key('labelSize');
+			this.writeVarint(Math.max(1, Math.round(background.labelSize * labelSize)));
+		}
+		if (background.haloWidth !== undefined) {
+			key('haloWidth');
+			this.writeVarint(Math.round(background.haloWidth * haloWidth));
+		}
+		if (background.colors) {
+			key('colors');
+			// 1 bit each whether it is changed, then from its lowest value in steps, in 6 bits
+			const { saturation, black, white } = background.colors;
+			for (const [value, lowest] of [
+				[saturation, -1],
+				[black, -1],
+				[white, 0]
+			] as const) {
+				this.writeBit(value !== undefined);
+				if (value !== undefined) this.writeInteger(Math.round((value - lowest) * colors), 6);
+			}
+		}
+		if (background.hillshade) key('hillshade');
+		if (background.terrain) key('terrain');
+		if (background.buildings === 'extruded') key('extruded');
+		if (background.options) {
+			key('options');
+			this.writeStringRef(JSON.stringify(background.options), true);
+		}
+		this.writeInteger(END_KEY, 4);
 	}
 
 	/** `repeat`: the element has the type and the styles of the element before, which are not written. */
@@ -660,7 +734,7 @@ export class StateWriter {
 	/**
 	 * The strings of the map, each once in its section, in the order they are written, and
 	 * afterwards only a reference (see `writeStringRef`). 2 sections: the words of the format
-	 * (`formatStrings`: the background as JSON, the color scheme, the label font, the names of
+	 * (`formatStrings`: the words of the background, the color scheme, the label font, the names of
 	 * symbols), then the others (titles, labels, popups). Their number, and unless 0, the number of
 	 * words of the format and the block (see `encodeStrings`), whose length the reader knows from
 	 * decoding it.
@@ -742,20 +816,57 @@ function allStyles(root: MapState): StateStyle[] {
 	]);
 }
 
-/** The background of a map as JSON, with only its valid settings; undefined for the default background. */
-function backgroundJson(meta: StateMetadata | undefined): string | undefined {
-	const background = sanitizeBackground(meta?.background);
-	return background && JSON.stringify(background);
+/**
+ * The background as a link stores it: its numbers in the steps of their sliders
+ * (`BACKGROUND_STEPS`), and without the settings that have their default value then, e.g. a label
+ * size of 1.01. Undefined if nothing is left.
+ */
+function linkBackground(background: StateBackground | undefined): StateBackground | undefined {
+	const valid = sanitizeBackground(background);
+	if (!valid) return undefined;
+	const steps = (value: number | undefined, per: number) =>
+		value === undefined ? undefined : Math.round((Math.round(value * per) / per) * 1e4) / 1e4;
+	const { labelSize, haloWidth, colors } = BACKGROUND_STEPS;
+	return sanitizeBackground({
+		...valid,
+		labelSize: steps(valid.labelSize, labelSize),
+		haloWidth: steps(valid.haloWidth, haloWidth),
+		colors: valid.colors && {
+			saturation: steps(valid.colors.saturation, colors),
+			black: steps(valid.colors.black, colors),
+			white: steps(valid.colors.white, colors)
+		}
+	});
+}
+
+/**
+ * The words of the background of a map in the string table, in the order `writeBackground` writes
+ * them: a theme and a language that the lists of the format do not have, the font of the labels,
+ * and the options of `@versatiles/style` as JSON.
+ */
+function backgroundStrings(meta: StateMetadata | undefined): string[] {
+	const background = linkBackground(meta?.background);
+	if (!background) return [];
+	const unlisted = (list: readonly string[], value: string | undefined, text: number) => {
+		const index = value === undefined ? 0 : list.indexOf(value);
+		return index < 0 || index >= text ? value : undefined;
+	};
+	return [
+		unlisted(BACKGROUND_THEMES, background.theme, BACKGROUND_THEME_TEXT),
+		unlisted(BACKGROUND_LANGUAGES, background.language, BACKGROUND_LANGUAGE_TEXT),
+		background.font,
+		background.options && JSON.stringify(background.options)
+	].filter((value): value is string => value !== undefined);
 }
 
 /**
  * The words of the format in the string table, in the order the writer writes them: the
- * background as JSON, the color scheme, the label font, and the names of the symbols of the
+ * words of the background, the color scheme, the label font, and the names of the symbols of the
  * legend and of the elements.
  */
 function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
-	const strings = [backgroundJson(meta), meta?.colorScheme].filter((value): value is string => !!value);
+	const strings = [...backgroundStrings(meta), ...(meta?.colorScheme ? [meta.colorScheme] : [])];
 	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
 		const styles: (StateStyle | undefined)[] = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
 		for (const style of styles) {

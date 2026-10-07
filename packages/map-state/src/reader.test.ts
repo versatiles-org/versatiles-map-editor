@@ -609,25 +609,90 @@ describe('background', () => {
 		expect(decodeState(encodeState(imagery)).meta).toStrictEqual({ background: { base: 'satellite' } });
 	});
 
+	it('stores a theme and a language of its lists as their index, others as text', () => {
+		const strings = (background: MapState['meta'] & object) => {
+			const reader = StateReader.fromBase64(encodeState({ meta: background, elements: [] }));
+			reader.readInteger(3);
+			reader.readPalette();
+			return reader.readStringTable();
+		};
+		expect(strings({ background: { theme: 'gray-dark', language: 'de', labels: 'fewer' } })).toStrictEqual([]);
+		// e.g. of a newer version of @versatiles/style, and a language that the tiles may have
+		const newer: MapState = { meta: { background: { theme: 'solar', language: 'ja' } }, elements: [] };
+		expect(strings(newer.meta!)).toStrictEqual(['solar', 'ja']);
+		expect(decodeState(encodeState(newer))).toStrictEqual(newer);
+		// with a font and options: the words of the format, in the order they are written
+		const all = { theme: 'solar', language: 'ja', font: 'lato_regular', options: { sky: false } };
+		expect(strings({ background: all, colorScheme: 'okabe-ito' })).toStrictEqual([
+			'solar',
+			'ja',
+			'lato_regular',
+			'{"sky":false}',
+			'okabe-ito'
+		]);
+	});
+
+	it('stores its numbers in the steps of their sliders', () => {
+		const exact: MapState = {
+			meta: { background: { labelSize: 0.55, haloWidth: 4.75, colors: { saturation: -1, black: -0.95, white: 2 } } },
+			elements: []
+		};
+		expect(decodeState(encodeState(exact))).toStrictEqual(exact);
+		const between: MapState = {
+			meta: { background: { labelSize: 1.234, haloWidth: 1.6, colors: { saturation: 0.33, black: 0.175 } } },
+			elements: []
+		};
+		expect(decodeState(encodeState(between)).meta?.background).toStrictEqual({
+			labelSize: 1.25,
+			haloWidth: 1.5,
+			colors: { saturation: 0.35, black: 0.2 }
+		});
+		// a change so small that nothing is left of it is none
+		const tiny: MapState = { meta: { background: { labelSize: 1.01, colors: { black: 0.01 } } }, elements: [] };
+		expect(decodeState(encodeState(tiny)).meta).toBeUndefined();
+	});
+
 	it('rejects invalid backgrounds', () => {
-		for (const json of ['{"base":"moon"}', '{"builder":"osm","options":[]}', '[]', 'null', '{']) {
+		const read = (write: (writer: StateWriter) => void, strings: string[] = []) => {
 			const writer = new StateWriter();
-			writer.writeStringTable([], [json]);
+			writer.writeStringTable([], strings);
 			writer.writeBit(true);
 			writer.writeInteger(2, 6); // the background
-			writer.writeStringRef(json, true);
-			writer.writeInteger(0, 6);
+			write(writer);
 			const reader = new StateReader(writer.bits);
 			reader.readStringTable();
-			// the JSON cannot be parsed, or it is not a background
-			expect(() => reader.readMetadata()).toThrow(
-				expect.objectContaining({
-					message: 'Error reading metadata',
-					cause: expect.objectContaining({
-						message: json === '{' ? expect.stringContaining('JSON') : 'Invalid background'
-					})
+			return () => reader.readMetadata();
+		};
+		const error = (message: unknown) =>
+			expect.objectContaining({
+				message: 'Error reading metadata',
+				cause: expect.objectContaining({
+					message: 'Error reading background',
+					cause: expect.objectContaining({ message })
 				})
-			);
+			});
+		// a key that the format does not have
+		expect(read((writer) => writer.writeInteger(15, 4))).toThrow(error('Invalid background key: 15'));
+		// a theme beyond its list
+		expect(
+			read((writer) => {
+				writer.writeInteger(2, 4);
+				writer.writeInteger(30, 5);
+			})
+		).toThrow(error('Invalid index: 30 of 24'));
+		// no setting at all
+		expect(read((writer) => writer.writeInteger(0, 4))).toThrow(error('A background without settings'));
+		// options that are no JSON, or no object
+		for (const json of ['{', '[]', 'null']) {
+			expect(
+				read(
+					(writer) => {
+						writer.writeInteger(14, 4);
+						writer.writeStringRef(json, true);
+					},
+					[json]
+				)
+			).toThrow(error(json === '{' ? expect.stringContaining('JSON') : 'Invalid options of the background'));
 		}
 	});
 });

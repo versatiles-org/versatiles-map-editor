@@ -33,7 +33,7 @@ describe('the string table', () => {
 
 	it('has the words of the format first, then the other strings in the order they are written', () => {
 		const meta: MapState['meta'] = {
-			background: { theme: 'gray' },
+			background: { theme: 'gray', font: 'lato_regular' },
 			colorScheme: 'okabe-ito',
 			title: 'Pharmacies'
 		};
@@ -42,7 +42,7 @@ describe('the string table', () => {
 		reader.readInteger(3);
 		reader.readPalette();
 		expect(reader.readStringTable()).toStrictEqual([
-			'{"theme":"gray"}',
+			'lato_regular',
 			'okabe-ito',
 			'Pharmacy',
 			'Pharmacies',

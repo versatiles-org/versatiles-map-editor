@@ -1,6 +1,9 @@
 import { formatHex, parseColor } from './color.js';
 import {
 	ARROW_NAMES,
+	BACKGROUND_LABELS,
+	BACKGROUND_LANGUAGES,
+	BACKGROUND_THEMES,
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
 	STROKE_STYLE_NAMES,
@@ -25,6 +28,10 @@ import {
 	type StateViewer
 } from './types.js';
 import {
+	BACKGROUND_KEYS,
+	BACKGROUND_LANGUAGE_TEXT,
+	BACKGROUND_STEPS,
+	BACKGROUND_THEME_TEXT,
 	BASE64_CODE2BITS,
 	CODEC_VERSION,
 	ELEMENT_KEYS,
@@ -334,6 +341,96 @@ export class StateReader {
 		}
 	}
 
+	/** See `StateWriter.writeBackground`. */
+	readBackground(): StateBackground {
+		try {
+			const background: StateBackground = {};
+			/** A name by its index in its list, or the name that follows. */
+			const name = (list: readonly string[], bits: number, text: number) => {
+				const index = this.readInteger(bits);
+				if (index === text) return this.readStringRef(true);
+				if (index >= list.length) throw new Error(`Invalid index: ${index} of ${list.length}`);
+				return list[index];
+			};
+			const { labelSize, haloWidth, colors } = BACKGROUND_STEPS;
+			const steps = (value: number, per: number) => Math.round((value / per) * 1e4) / 1e4;
+			while (true) {
+				const key = this.readInteger(4);
+				switch (key) {
+					case END_KEY: {
+						// without the settings that have their default value, as the writer writes it
+						const valid = sanitizeBackground(background);
+						if (!valid) throw new Error('A background without settings');
+						return valid;
+					}
+					case BACKGROUND_KEYS.satellite:
+						background.base = 'satellite';
+						break;
+					case BACKGROUND_KEYS.theme:
+						background.theme = name(BACKGROUND_THEMES, 5, BACKGROUND_THEME_TEXT);
+						break;
+					case BACKGROUND_KEYS.noStreets:
+						background.streets = false;
+						break;
+					case BACKGROUND_KEYS.noBorders:
+						background.borders = false;
+						break;
+					case BACKGROUND_KEYS.labels: {
+						const labels = BACKGROUND_LABELS[this.readInteger(2)];
+						if (!labels) throw new Error('Invalid labels of the background');
+						background.labels = labels;
+						break;
+					}
+					case BACKGROUND_KEYS.language:
+						background.language = name(BACKGROUND_LANGUAGES, 4, BACKGROUND_LANGUAGE_TEXT);
+						break;
+					case BACKGROUND_KEYS.font:
+						background.font = this.readStringRef(true);
+						break;
+					case BACKGROUND_KEYS.labelSize:
+						background.labelSize = steps(this.readVarint(), labelSize);
+						break;
+					case BACKGROUND_KEYS.haloWidth:
+						background.haloWidth = steps(this.readVarint(), haloWidth);
+						break;
+					case BACKGROUND_KEYS.colors: {
+						// 1 bit each whether it is changed, then from its lowest value in steps
+						const read = (lowest: number) =>
+							this.readBit() ? steps(this.readInteger(6) + lowest * colors, colors) : undefined;
+						const [saturation, black, white] = [read(-1), read(-1), read(0)];
+						background.colors = {
+							...(saturation === undefined ? {} : { saturation }),
+							...(black === undefined ? {} : { black }),
+							...(white === undefined ? {} : { white })
+						};
+						break;
+					}
+					case BACKGROUND_KEYS.hillshade:
+						background.hillshade = true;
+						break;
+					case BACKGROUND_KEYS.terrain:
+						background.terrain = true;
+						break;
+					case BACKGROUND_KEYS.extruded:
+						background.buildings = 'extruded';
+						break;
+					case BACKGROUND_KEYS.options: {
+						const options: unknown = JSON.parse(this.readStringRef(true));
+						if (typeof options !== 'object' || options === null || Array.isArray(options)) {
+							throw new Error('Invalid options of the background');
+						}
+						background.options = options as Record<string, unknown>;
+						break;
+					}
+					default:
+						throw new Error(`Invalid background key: ${key}`);
+				}
+			}
+		} catch (cause) {
+			throw new Error(`Error reading background`, { cause });
+		}
+	}
+
 	readView(): MapState['view'] {
 		try {
 			if (!this.readBit()) return undefined;
@@ -363,7 +460,7 @@ export class StateReader {
 					case END_KEY:
 						return metadata;
 					case METADATA_KEYS.background:
-						metadata.background = parseBackground(this.readStringRef(true));
+						metadata.background = this.readBackground();
 						break;
 					case METADATA_KEYS.legend:
 						metadata.legend = this.readLegend();
@@ -787,12 +884,6 @@ export class StateReader {
 }
 
 /** The keys of the element types. */
-
-function parseBackground(json: string): StateBackground {
-	const background = sanitizeBackground(JSON.parse(json));
-	if (!background) throw new Error('Invalid background');
-	return background;
-}
 
 /** A position whose latitude is on the map, as the writer writes it, which MapLibre needs. */
 function checkLatitude(position: [number, number]): [number, number] {

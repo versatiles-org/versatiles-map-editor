@@ -268,7 +268,7 @@ class Decoder {
 
 /**
  * The strings as one block of bits; `decodeStringBlock` needs their number. The first `formatCount`
- * are words of the format, e.g. the options of the background map as JSON: a model that has
+ * are words of the format, e.g. the font of the labels of the background map: a model that has
  * learned `STRING_PRIMER` codes them. The others, e.g. labels in any language, get an empty model,
  * which the words of the format would only make worse at text. The decoder refuses a string
  * twice in its section, which the writer never writes, and more than `MAX_SYMBOLS` symbols.

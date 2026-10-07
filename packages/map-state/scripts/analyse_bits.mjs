@@ -49,7 +49,8 @@ const KINDS = {
 	readElementStyles: 'styles',
 	readPalette: 'colors',
 	readView: 'view & frame',
-	readFrame: 'view & frame'
+	readFrame: 'view & frame',
+	readBackground: 'background'
 };
 const KIND_NAMES = [...new Set(Object.values(KINDS)), 'structure'];
 

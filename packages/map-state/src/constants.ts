@@ -58,6 +58,35 @@ export const METADATA_KEYS = {
 	labelMinZoom: 12
 } as const;
 
+/**
+ * The fields of the background map, in 4 bits; 15 is free. A key alone is a flag: the satellite
+ * map, no streets or no borders over the imagery, the relief shaded, the terrain raised, the
+ * buildings extruded.
+ */
+export const BACKGROUND_KEYS = {
+	satellite: 1,
+	theme: 2,
+	noStreets: 3,
+	noBorders: 4,
+	labels: 5,
+	language: 6,
+	font: 7,
+	labelSize: 8,
+	haloWidth: 9,
+	colors: 10,
+	hillshade: 11,
+	terrain: 12,
+	extruded: 13,
+	options: 14
+} as const;
+
+/** A theme of the background map is its index in `BACKGROUND_THEMES` in 5 bits; this one is followed by its name. */
+export const BACKGROUND_THEME_TEXT = 31;
+/** A language of the labels is its index in `BACKGROUND_LANGUAGES` in 4 bits; this one is followed by its name. */
+export const BACKGROUND_LANGUAGE_TEXT = 15;
+/** The steps of the numbers of the background map in a link, as its sliders have them: per 1. */
+export const BACKGROUND_STEPS = { labelSize: 20, haloWidth: 4, colors: 20 } as const;
+
 /** The fields of the legend, in 4 bits; 1 is free. */
 export const LEGEND_KEYS = { layout: 2, entries: 3, font: 4, bold: 5, italic: 6, theme: 7 } as const;
 

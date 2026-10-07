@@ -131,8 +131,9 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
 - what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
-  map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say,
-  stored as JSON in the string table of the base64;
+  map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say;
+  in the base64 as key/value pairs, a theme and a language as their index in the lists
+  `BACKGROUND_THEMES` and `BACKGROUND_LANGUAGES`, the numbers in the steps of the editor's sliders;
   `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
@@ -191,7 +192,8 @@ To keep hashes short:
   and referenced by index (#5); a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
   or white as its index there in 6 bits instead of 24;
 - the strings are stored once in a string table of 2 sections, each in the order they are written:
-  the words of the format (the background as JSON, the color scheme, the names of the symbols and
+  the words of the format (the font, the options and an unlisted theme or language of the
+  background, the color scheme, the names of the symbols and
   the label fonts), then the others (the title, the labels, the legend labels, the popups). A field
   refers to a string of its section by 1 bit for the next new one, else by its index. The table is
   one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
