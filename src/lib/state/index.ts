@@ -5,3 +5,4 @@
 export * from './history.svelte.js';
 export * from './legend_looks.js';
 export * from './manager.js';
+export * from './shared_state.js';

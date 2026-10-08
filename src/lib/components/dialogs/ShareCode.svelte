@@ -55,7 +55,10 @@
 
 <section>
 	<h3><label for="{uid}-link">Link</label></h3>
-	<Hint>Anyone with the link can view the map, but not change it.</Hint>
+	<Hint>
+		Anyone with the link can view the map, but not change it. To pass the map on for editing, download it as a file (☰
+		→ Download…).
+	</Hint>
 	<div class="row">
 		<TextField id="{uid}-link" class="code" readonly value={link} onfocus={(e) => e.currentTarget.select()} />
 		<Button variant="primary" class="copy" bind:element={btnLink} onclick={() => copy(link, 'link')}>Copy link</Button>

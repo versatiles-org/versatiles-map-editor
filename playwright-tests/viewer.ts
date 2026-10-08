@@ -1084,3 +1084,27 @@ test('a shared map can show where its visitor is, and follow them until that is 
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	await expect(dialog.getByLabel('Embed code')).toHaveValue(/ allow="fullscreen; geolocation"><\/iframe>$/);
 });
+
+test('a share link is for viewing: without the title, the color scheme and a legend that is not shown', async ({
+	page
+}) => {
+	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
+	const meta = { title: 'A walk', colorScheme: 'okabe-ito', legend, viewer: { legend: 'none' as const } };
+	await page.goto('/#' + encodeState({ meta, elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Berlin' }] }));
+	await waitForMapIsReady(page);
+	// the editor has all of it
+	await expect.poll(async () => (await storedState(page)).meta).toStrictEqual(meta);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	const link = await dialog.getByLabel('Link', { exact: true }).inputValue();
+	const shared = decodeState(new URL(link).hash.slice(1));
+	expect(shared.meta).toBeUndefined();
+	expect(shared.elements).toHaveLength(1);
+	// the dialog says what a link is for, and how a map is passed on
+	await expect(dialog).toContainText('To pass the map on for editing, download it as a file');
+	// the viewer has the name of the page in its tab
+	await page.goto('about:blank');
+	await page.goto(link);
+	await waitForMapIsReady(page);
+	await expect(page).toHaveTitle('VersaTiles Map');
+});
