@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { StateViewer } from '@versatiles/map-state';
-	import type { StateManager } from '#lib/state/index.js';
+	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { Checkbox, ChoiceGroup, Hint } from '#lib/components/ui/index.js';
 	import { defaultPlace, PLACES } from '#lib/components/common/index.js';
 
-	/** What visitors see over the shared map, and where. `onchange`: after a change, which is logged. */
-	const { state: stateManager, onchange }: { state: StateManager; onchange: () => void } = $props();
+	/** What visitors see over the shared map, and where. */
+	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 
@@ -22,16 +22,14 @@
 
 	/** Show a control of the viewer at a place, or hide it ("none"); one undo step. */
 	function setControl<K extends keyof StateViewer>(key: K, place: NonNullable<StateViewer[K]>) {
-		const doc = stateManager.mapDocument;
 		doc.viewer = { ...doc.viewer, [key]: place };
-		stateManager.log();
-		onchange();
+		doc.state.log();
 	}
 </script>
 
 {#each CONTROLS as { key, label, hint, layout } (key)}
-	{#if key !== 'legend' || stateManager.mapDocument.legend?.entries.length}
-		{@const place = stateManager.mapDocument.controls[key]}
+	{#if key !== 'legend' || doc.legend?.entries.length}
+		{@const place = doc.controls[key]}
 		<div class="control">
 			<Checkbox
 				checked={place !== 'none'}

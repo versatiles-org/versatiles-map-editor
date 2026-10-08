@@ -58,11 +58,16 @@
 		log();
 	}
 
-	// where shared maps show the legend, or "none"; the same setting as in "Share"
+	// where shared maps show the legend, or "none"; the same setting as in the panel of the shared map
 	const place = $derived(doc.controls.legend);
 	function setPlace(legend: NonNullable<StateViewer['legend']>) {
 		doc.viewer = { ...doc.viewer, legend };
 		log();
+	}
+
+	/** The other settings of shared maps, on the map; and back to the legend when that is done. */
+	function editSharedMap() {
+		doc.visibleArea.open({ onDone: () => doc.selection.selectLegend() });
 	}
 
 	// the entry whose style is picked on the map now, see `pickStyle`
@@ -186,7 +191,7 @@
 </script>
 
 {#if legend.entries.length > 0}
-	<!-- where shared maps show it; the same setting as in "Share" -->
+	<!-- where shared maps show it; the same setting as in the panel of the shared map -->
 	<InspectorSection title="In shared maps">
 		<InputRow id="{uid}-shown" label="Shown">
 			<Checkbox
@@ -206,7 +211,8 @@
 				/>
 			</InputRow>
 		{/if}
-		<Hint>Also set in “Share”, with the other controls of shared maps.</Hint>
+		<ButtonGroup><Button onclick={editSharedMap}>Edit shared map…</Button></ButtonGroup>
+		<Hint>With the other controls of shared maps, and their visible area.</Hint>
 	</InspectorSection>
 
 	<!-- how all entries look -->

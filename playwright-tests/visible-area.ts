@@ -533,7 +533,7 @@ test('the share dialog warns about elements outside the visible area, and edits 
 	await expect(dialog.getByRole('slider', { name: 'Precision' })).toHaveAttribute('aria-valuetext', '18 m');
 
 	// editing the visible area, and back with the button of the panel
-	await dialog.getByRole('button', { name: 'Edit visible area' }).click();
+	await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
 	await expect(dialog).toBeHidden();
 	await expect(sidebar(page).getByRole('region', { name: 'Visible area' })).toBeVisible();
 	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();

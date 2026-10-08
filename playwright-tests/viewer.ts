@@ -297,8 +297,7 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 		for (const control of [
 			dialog.getByRole('button', { name: 'Copy embed code' }),
 			dialog.getByRole('slider', { name: 'Precision' }),
-			dialog.getByRole('checkbox', { name: 'Address search' }),
-			dialog.getByRole('checkbox', { name: 'Zoom buttons' }),
+			dialog.getByRole('button', { name: 'Edit shared map…' }),
 			dialog.getByRole('button', { name: 'Reload' })
 		]) {
 			await control.scrollIntoViewIfNeeded();
@@ -419,22 +418,28 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	const preview = page.frameLocator('iframe[title=preview]');
+	const shown = sidebar(page).getByRole('region', { name: 'Controls' }).getByRole('checkbox', { name: 'Legend' });
 	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
 
-	await dialog.getByRole('checkbox', { name: 'Legend' }).uncheck();
+	// hidden in the panel of the shared map, to which the dialog leads, and from which it comes back
+	await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
+	await shown.uncheck();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ legend: 'none' });
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(preview.getByRole('list', { name: 'Legend' })).toHaveCount(0);
 	await page.keyboard.press('Escape');
 	await expect(page.getByRole('list', { name: 'Legend' })).toBeVisible();
 
 	// shown again at its default place
 	await page.getByRole('button', { name: /^Share/ }).click();
-	await dialog.getByRole('checkbox', { name: 'Legend' }).check();
+	await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
+	await shown.check();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toBeUndefined();
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(preview.getByRole('list', { name: 'Legend' })).toBeVisible();
 });
 
-test('the place of the legend is set in its panel and in Share alike', async ({ page }) => {
+test('the place of the legend is set in its panel and in the panel of the shared map alike', async ({ page }) => {
 	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
 	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
 	await waitForMapIsReady(page);
@@ -446,15 +451,15 @@ test('the place of the legend is set in its panel and in Share alike', async ({ 
 	await expect(shown).toBeChecked();
 	await expect(panel.getByRole('radio', { name: 'Bottom left' })).toBeChecked();
 
-	// set in the panel, shown in Share
+	// set in the panel, shown in the one of the shared map
 	await panel.getByRole('radio', { name: 'Top right' }).check();
 	await expect.poll(viewer).toStrictEqual({ legend: 'top-right' });
-	await page.getByRole('button', { name: /^Share/ }).click();
-	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
-	await expect(dialog.getByRole('radio', { name: 'Top right' }).last()).toBeChecked();
+	await panel.getByRole('button', { name: 'Edit shared map…' }).click();
+	const place = panel.getByRole('radiogroup', { name: 'Place of the legend' });
+	await expect(place.getByRole('radio', { name: 'Top right' })).toBeChecked();
 
-	// set in Share, shown in the panel
-	await dialog.getByRole('radio', { name: 'Bottom', exact: true }).check();
+	// set there, shown in the panel of the legend, which is selected as before
+	await place.getByRole('radio', { name: 'Bottom', exact: true }).check();
 	await page.keyboard.press('Escape');
 	await expect(panel.getByRole('radio', { name: 'Bottom', exact: true })).toBeChecked();
 

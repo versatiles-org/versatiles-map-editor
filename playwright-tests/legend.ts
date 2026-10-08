@@ -461,15 +461,12 @@ test('editing the legend', async ({ page }) => {
 	await page.getByRole('button', { name: 'Café', exact: true }).click();
 
 	await page.getByRole('radiogroup', { name: 'Layout' }).getByRole('radio', { name: 'Horizontal' }).check();
-	// the position is a setting of the viewer, in the share dialog
-	await page.getByRole('button', { name: /^Share/ }).click();
-	const share = page.getByRole('dialog', { name: 'Share or embed the map' });
-	await share
-		.getByRole('radiogroup', { name: 'Place of the legend' })
-		.getByRole('radio', { name: 'Top right' })
-		.check();
+	// the position is a setting of the viewer, also in the panel of the shared map
+	await sidebar(page).getByRole('button', { name: 'Edit shared map…' }).click();
+	const place = sidebar(page).getByRole('radiogroup', { name: 'Place of the legend' });
+	await place.getByRole('radio', { name: 'Top right' }).check();
 	await page.keyboard.press('Escape');
-	await expect(share).toBeHidden();
+	await expect(place).toBeHidden();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ legend: 'top-right' });
 	await expect.poll(legendInUrl).toMatchObject({
 		layout: 'horizontal',

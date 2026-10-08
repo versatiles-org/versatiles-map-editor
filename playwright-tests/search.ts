@@ -1,6 +1,14 @@
 import { expect, test } from './lib/test.js';
 import { decodeState, encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { boxesOverlap, mapCenter, storedState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import {
+	boxesOverlap,
+	mapCenter,
+	menuItem,
+	sidebar,
+	storedState,
+	waitForMapIsReady,
+	type MapWindow
+} from './lib/utils.js';
 
 test('searching a place', { tag: '@cross-browser' }, async ({ page }) => {
 	const requests: URLSearchParams[] = [];
@@ -98,33 +106,38 @@ test('Enter searches at once and goes to the first result', async ({ page }) => 
 });
 
 test.describe('address search in the viewer', () => {
-	test('is set in the share dialog, with the other controls of the viewer', async ({ page }) => {
+	test('is set in the panel of the shared map, with the other controls of the viewer', async ({ page }) => {
 		await page.goto('/');
 		await waitForMapIsReady(page, { count: 1 });
-		await page.getByRole('button', { name: /^Share/ }).click();
+		await (await menuItem(page, 'Shared map…')).click();
+		const controls = sidebar(page).getByRole('region', { name: 'Controls' });
 		const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 		const preview = page.frameLocator('iframe[title=preview]');
 		const viewer = async () => (await storedState(page)).meta?.viewer;
 
 		// off by default; on at the top left, then at the top right
-		const option = dialog.getByRole('checkbox', { name: 'Address search' });
+		const option = controls.getByRole('checkbox', { name: 'Address search' });
 		await expect(option).not.toBeChecked();
 		await option.check();
 		await expect.poll(viewer).toStrictEqual({ search: 'top-left' });
-		await dialog
+		await controls
 			.getByRole('radiogroup', { name: 'Place of the address search' })
 			.getByRole('radio', { name: 'Top right' })
 			.check();
 		await expect.poll(viewer).toStrictEqual({ search: 'top-right' });
+
+		// the share dialog has it in its link; its preview is the embedded viewer, with the search
+		await page.getByRole('button', { name: /^Share/ }).click();
 		const link = await dialog.getByLabel('Link', { exact: true }).inputValue();
 		expect(decodeState(new URL(link).hash.slice(1)).meta?.viewer?.search).toBe('top-right');
-		// the preview is the embedded viewer, with the search
 		await expect(preview.getByRole('combobox', { name: 'Search address or place' })).toBeVisible();
-
-		// the zoom buttons are on by default, and can be hidden
 		await expect(preview.getByRole('button', { name: 'Zoom in' })).toBeVisible();
-		await dialog.getByRole('checkbox', { name: 'Zoom buttons' }).uncheck();
+
+		// the zoom buttons are on by default, and can be hidden: the dialog leads to the panel, and back
+		await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
+		await controls.getByRole('checkbox', { name: 'Zoom buttons' }).uncheck();
 		await expect.poll(viewer).toStrictEqual({ search: 'top-right', navigation: 'none' });
+		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 		await expect(preview.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
 
 		// one undo step each

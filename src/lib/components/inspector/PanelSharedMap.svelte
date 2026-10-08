@@ -4,8 +4,8 @@
 	import { Button, ButtonGroup, Checkbox, Hint, InputRow, Slider } from '#lib/components/ui/index.js';
 	import { formatLength, isOwnKeyTarget } from '#lib/components/common/index.js';
 	import { NUDGE } from '#lib/interaction/index.js';
-	import ShareControls from '#lib/components/dialogs/ShareControls.svelte';
 	import InspectorSection from './InspectorSection.svelte';
+	import SharedMapControls from './SharedMapControls.svelte';
 
 	/**
 	 * What a shared map shows, while it is edited on the map (see `VisibleAreaMode`): its visible
@@ -64,8 +64,15 @@
 		}
 	};
 
+	/** Whether Escape belongs to where it was pressed: not to a checkbox or a choice of this panel. */
+	function ownsEscape(e: KeyboardEvent): boolean {
+		const target = e.target as HTMLElement | null;
+		if (target?.matches?.('input[type="checkbox"], input[type="radio"]')) return false;
+		return isOwnKeyTarget(e);
+	}
+
 	function onKeydown(e: KeyboardEvent) {
-		if (!mode.active || e.key !== 'Escape' || isOwnKeyTarget(e)) return;
+		if (!mode.active || e.key !== 'Escape' || ownsEscape(e)) return;
 		e.preventDefault();
 		mode.close();
 	}
@@ -144,7 +151,7 @@
 
 <!-- what visitors see over the map, and where -->
 <InspectorSection title="Controls">
-	<ShareControls state={doc.state} onchange={() => {}} />
+	<SharedMapControls {doc} />
 </InspectorSection>
 
 <style>

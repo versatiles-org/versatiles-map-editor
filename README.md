@@ -138,7 +138,14 @@ The state can alternatively be provided via the iframe's `data` attribute. The e
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
 - **Precision**: how exactly the positions are stored, from 1 m to 36 km, each step twice the one before. _Automatic_ is fine enough for the visible area; coarser positions make shorter links.
-- **Address search in the map**: visitors of the read-only map can search for a place, e.g. their street. The map content does not change. This option is stored in the map.
+
+What a shared map shows is set on the map itself, in **Shared map…** of the menu (the dialog has a button that leads there). The sidebar then has:
+
+- **Visible area**: the area that the map shows completely, on every screen; its handles are on the map.
+- **Rotation and tilt**: how the map is turned when it opens, and whether visitors can turn it.
+- **Controls**: the address search, with which visitors can find a place, e.g. their street; the zoom buttons; and the legend, each with its place on the map.
+
+These settings are stored in the map.
 
 ## Map state format
 

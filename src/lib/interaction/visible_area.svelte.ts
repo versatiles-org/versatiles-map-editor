@@ -178,7 +178,7 @@ export class VisibleAreaMode {
 		this.#doc.state.log();
 	}
 
-	/** Start editing the visible area. `onDone` is called when it ends with Done or Escape. */
+	/** Start editing the visible area. `onDone` is called when it ends with its button or Escape. */
 	public open({ onDone }: { onDone?: () => void } = {}) {
 		this.#onDone = onDone;
 		if (this.active) return;

@@ -10,7 +10,6 @@
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
 	import ShareCode from './ShareCode.svelte';
-	import ShareControls from './ShareControls.svelte';
 	import SharePreview from './SharePreview.svelte';
 
 	const { state: stateManager }: { state: StateManager } = $props();
@@ -73,8 +72,8 @@
 		notice = count > 0 ? { kind: 'outside', count } : undefined;
 	}
 
-	/** Edit the visible area on the map, and come back here when it is done. */
-	function editVisibleArea() {
+	/** Edit what the shared map shows, on the map and in the sidebar, and come back here when it is done. */
+	function editSharedMap() {
 		close();
 		stateManager.mapDocument.visibleArea.open({ onDone: () => open() });
 	}
@@ -113,8 +112,9 @@
 		<SharePreview bind:this={preview} onreload={() => update(0)} />
 
 		<div class="panel">
+			<!-- what the map shows, which is edited on the map itself -->
 			<section aria-labelledby="{uid}-area">
-				<h3 id="{uid}-area">Visible area</h3>
+				<h3 id="{uid}-area">Shared map</h3>
 				{#if notice}
 					<p class="notice">
 						{#if notice.kind === 'outside'}
@@ -132,15 +132,10 @@
 					</Hint>
 				{/if}
 				<div class="buttons">
-					<Button onclick={editVisibleArea}>Edit visible area…</Button>
+					<Button onclick={editSharedMap}>Edit shared map…</Button>
 					{#if notice?.kind === 'outside'}<Button variant="ghost" onclick={fitToElements}>Fit to elements</Button>{/if}
 				</div>
-			</section>
-
-			<!-- what visitors see over the map, and where -->
-			<section aria-labelledby="{uid}-controls">
-				<h3 id="{uid}-controls">Controls</h3>
-				<ShareControls state={stateManager} onchange={() => update(0)} />
+				<Hint>Its visible area, its rotation and tilt, the address search, the zoom buttons and the legend.</Hint>
 			</section>
 
 			<ShareCode bind:this={code} link={linkCode} embed={embedCode} />
