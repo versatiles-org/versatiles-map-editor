@@ -115,8 +115,9 @@ describe('SessionSync', () => {
 		const opening = await sync.prepare(encodeState(state));
 		expect(removeHash).toHaveBeenCalled();
 		expect(opening.kind).toBe('link');
-		// the radius of a link is rounded
-		expect(opening.camera?.radius).toBeCloseTo(camera.radius, -2);
+		// where its author looked last does not matter: the map shows all its elements
+		expect(opening.camera).toBeUndefined();
+		expect(opening).not.toHaveProperty('state.view');
 		await sync.attach(doc, opening);
 		expect(doc.elements).toHaveLength(2);
 		const sessions = await stored();

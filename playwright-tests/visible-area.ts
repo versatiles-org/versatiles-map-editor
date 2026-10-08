@@ -6,6 +6,7 @@ import {
 	project,
 	storedState,
 	waitForMapIsIdle,
+	showView,
 	waitForMapIsReady,
 	type MapWindow,
 	PREVIEW_TIMEOUT,
@@ -36,12 +37,12 @@ async function settledPosition(page: Page, point: [number, number]): Promise<[nu
 	return last;
 }
 
-test('a shared map shows its frame completely, in the viewer and in the editor', async ({ page }) => {
+test('a shared map shows its frame completely in the viewer; the editor shows its elements', async ({ page }) => {
 	// the viewer, in a window of another shape
 	await page.setViewportSize({ width: 500, height: 800 });
 	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
-	let shown = await frameOnPage(page, frame);
+	const shown = await frameOnPage(page, frame);
 	expect(shown.left).toBeGreaterThanOrEqual(9);
 	expect(shown.right).toBeLessThanOrEqual(500 - 9);
 	expect(shown.top).toBeGreaterThanOrEqual(0);
@@ -49,16 +50,17 @@ test('a shared map shows its frame completely, in the viewer and in the editor',
 	// it fills the width, the narrower side
 	expect(shown.right - shown.left).toBeGreaterThan(450);
 
-	// the editor, between its bars: the top bar, the tools, the sidebar and the status line
+	// the editor shows the elements, here a marker, in the middle between its bars: the top bar, the
+	// tools, the sidebar and the status line; whatever the frame, and wherever its author looked last
 	await page.setViewportSize({ width: 1280, height: 720 });
-	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
+	await page.goto(
+		'/#' + encodeState({ view: { center: [2.35, 48.85], radius: 5000 }, frame: { bounds: frame }, elements })
+	);
 	await waitForMapIsReady(page);
-	shown = await frameOnPage(page, frame);
-	expect(shown.top).toBeGreaterThanOrEqual(44 + 9);
-	expect(shown.left).toBeGreaterThanOrEqual(48 + 9);
-	expect(shown.right).toBeLessThanOrEqual(1280 - 250 + 1);
-	expect(shown.bottom).toBeLessThanOrEqual(720 - 26 + 1);
-	// the frame is kept, and the editor has a camera of its own from now on
+	const [x, y] = await project(page, [13.4, 52.5]);
+	expect(x).toBeCloseTo((48 + 1280 - 250) / 2, -1);
+	expect(y).toBeCloseTo((44 + 720 - 26) / 2, -1);
+	// the frame is kept
 	await expect.poll(async () => (await storedState(page)).frame?.bounds).toStrictEqual(frame);
 });
 
@@ -274,8 +276,9 @@ test('the viewer shows the frame again when its size changes, until the visitor 
 });
 
 test('the visible area is edited in a mode of its own, from the menu or the Map panel', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, elements }));
+	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 6000 });
 	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
 	const shared = sidebar(page).getByRole('region', { name: 'Map', exact: true });
 	await expect(shared).toContainText('Shared maps show all elements.');
@@ -321,10 +324,9 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 });
 
 test('the rotation and the tilt of a shared map are set in the visible area mode, with a preview', async ({ page }) => {
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 15000 });
 	const camera = async () => {
 		const { bearing, pitch } = await page.evaluate(() => {
 			const { map } = window as unknown as MapWindow;
@@ -609,10 +611,9 @@ test('the preview of the share dialog shows the frame completely in all three as
 
 test('dragging a handle changes the frame, one undo step per drag', async ({ page }) => {
 	// a view with the whole frame, left of the sidebar
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 15000 });
 	await (await menuItem(page, 'Shared map…')).click();
 
 	// the north-east corner, 80 pixels to the east and 60 to the north
@@ -633,10 +634,9 @@ test('dragging a handle changes the frame, one undo step per drag', async ({ pag
 });
 
 test('the keyboard moves the sides of the frame, one undo step per key', async ({ page }) => {
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 15000 });
 	await (await menuItem(page, 'Shared map…')).click();
 	const size = sidebar(page).getByRole('region', { name: 'Visible area' }).getByRole('status');
 	const before = await size.textContent();

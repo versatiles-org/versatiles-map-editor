@@ -4,6 +4,7 @@ import { encodeState, type MapState, type StateElement } from '../packages/map-s
 import {
 	type MapWindow,
 	project,
+	showView,
 	waitForMapIsReady,
 	storedState,
 	sidebar,
@@ -222,12 +223,12 @@ test('a legend entry follows the style of its elements', async ({ page }) => {
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center: [13.4, 52.5], radius: 3000 },
 				meta: { legend: { entries } },
 				elements: [area(13.38), area(13.41)]
 			})
 	);
 	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 3000 });
 	const entry = async () => (await storedState(page)).meta?.legend?.entries[0].style;
 	const colors = async () => (await storedState(page)).elements.map((e) => e.style?.color);
 	const setColor = async (hex: string) => {
@@ -361,8 +362,9 @@ test(
 				strokeStyle: { color: '#00aa00' }
 			}
 		];
-		await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements }));
+		await page.goto('/#' + encodeState({ meta: { legend }, elements }));
 		await waitForMapIsReady(page);
+		await showView(page, { center: [13.4, 52.5], radius: 3000 });
 		await page.getByRole('button', { name: 'Edit legend' }).click();
 		await page.getByRole('button', { name: 'Open entry 1' }).click();
 		const take = page.getByRole('group', { name: 'Entry 1' }).getByRole('button', { name: /Take style from/ });

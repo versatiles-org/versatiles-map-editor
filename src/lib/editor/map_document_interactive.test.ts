@@ -574,18 +574,20 @@ describe('MapDocument', () => {
 			expect(doc.frame).toStrictEqual(frame);
 		});
 
-		it('is shown when a map without a camera opens, e.g. of a share link; else the elements', async () => {
-			mockMap.fitBounds.mockClear();
-			await doc.loadState({ frame: { bounds: frame }, elements });
-			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual([
-				[13.3, 52.45],
-				[13.5, 52.55]
-			]);
-			await doc.loadState({ elements });
-			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual([
+		it('is not shown when a map without a camera opens, e.g. of a link: the editor shows all elements', async () => {
+			const shown = [
 				[13.4, 52.5],
 				[13.4, 52.5]
-			]);
+			];
+			mockMap.fitBounds.mockClear();
+			await doc.loadState({ frame: { bounds: frame }, elements });
+			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual(shown);
+			await doc.loadState({ elements });
+			expect(mockMap.fitBounds.mock.lastCall?.[0]).toStrictEqual(shown);
+			// an empty map stays where the map is
+			mockMap.fitBounds.mockClear();
+			await doc.loadState({ frame: { bounds: frame }, elements: [] });
+			expect(mockMap.fitBounds).not.toHaveBeenCalled();
 		});
 
 		it('is not shown when the editor has a camera, e.g. of its session', async () => {

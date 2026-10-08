@@ -387,8 +387,9 @@
 		if (destroyed) return;
 
 		// The map has no style yet, so it shows nothing until the country is shown. A map to open
-		// shows its camera, its frame or its elements.
-		if (opening ? opening.kind === 'new' : !hash && !last) await showCountry(map);
+		// shows its camera, its frame or its elements; an empty one in the editor nothing of its own.
+		const empty = opening?.kind === 'link' && opening.state.elements.length === 0;
+		if (opening ? opening.kind === 'new' || empty : !hash && !last) await showCountry(map);
 		if (destroyed) return;
 
 		const doc = createDocument(map);

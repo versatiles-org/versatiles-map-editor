@@ -16,7 +16,7 @@ const RELOAD_WAIT = 500;
 /** What the editor opens: a stored session, the map of a link as a new session, or a new map. */
 export type Opening =
 	| { kind: 'session'; stored: StoredSession; camera?: MapState['view'] }
-	| { kind: 'link'; state: MapState; encoded: string; camera?: MapState['view'] }
+	| { kind: 'link'; state: MapState; encoded: string; camera?: undefined }
 	| { kind: 'new'; camera?: undefined };
 
 /** A map of the list of recent maps. */
@@ -54,6 +54,12 @@ function encodeStep(state: MapState): string {
  * The storage keeps the `RECENT` most recently changed maps, and those that tabs have open.
  */
 /** A new, empty map, with the starting background of the configuration of this instance. */
+/** A map as it is opened: without where its author looked last, so it shows all its elements. */
+function withoutView(state: MapState): MapState {
+	const { view: _view, ...rest } = state;
+	return rest;
+}
+
 async function newMapState(): Promise<MapState> {
 	await configReady();
 	const background = config.current.startBackground;
@@ -99,7 +105,9 @@ export class SessionSync {
 	/**
 	 * What to open, before the map document exists: the map of the link (`hash`), else the most
 	 * recently changed session, else a new map. The map of a link that equals the current state of
-	 * a recent session opens that session. Its `camera` is undefined if the map has no view yet.
+	 * a recent session opens that session. Its `camera` is where the editor looked at a session
+	 * last, e.g. before a reload; a map that is opened, e.g. of a link, has none and shows all its
+	 * elements, wherever its author looked last.
 	 */
 	public async prepare(hash: string): Promise<Opening> {
 		const fromLink = hash ? await this.#fromLink(hash) : undefined;
@@ -164,8 +172,8 @@ export class SessionSync {
 			// e.g. a closed storage: the map of the link opens as a new map
 			console.warn('Failed to look for the map of the link in the storage', error);
 		}
-		if (stored) return { kind: 'session', stored, camera: state.view ?? stored.session.camera };
-		return { kind: 'link', state, encoded, camera: state.view };
+		if (stored) return { kind: 'session', stored };
+		return { kind: 'link', state: withoutView(state), encoded };
 	}
 
 	/** The current state of the most recently changed map, with its camera, e.g. for the viewer on phones. */
@@ -232,7 +240,7 @@ export class SessionSync {
 
 	/** Open a map, e.g. of a file, as a new map in the storage. */
 	public async openMap(state: MapState) {
-		await this.#open({ kind: 'link', state, encoded: encodeStep(state), camera: state.view });
+		await this.#open({ kind: 'link', state: withoutView(state), encoded: encodeStep(state) });
 	}
 
 	/** Delete a map of the storage, unless it is open, here or in another tab. */
@@ -283,7 +291,7 @@ export class SessionSync {
 				case 'link':
 					// stored at once, while the map loads
 					this.#title = opening.state.meta?.title;
-					this.#setSession(this.#store?.create(opening.encoded, { camera: opening.state.view, title: this.#title }));
+					this.#setSession(this.#store?.create(opening.encoded, { title: this.#title }));
 					await this.#load(doc, opening.state);
 					break;
 				case 'new':

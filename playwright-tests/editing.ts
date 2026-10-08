@@ -6,6 +6,7 @@ import {
 	project,
 	storedState,
 	waitForMapIsIdle,
+	showView,
 	waitForMapIsReady,
 	type MapWindow,
 	type Point,
@@ -355,7 +356,6 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 		[x, y + 0.01]
 	];
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{ type: 'polygon', points: square(13.33, 52.47) },
 			{ type: 'polygon', points: square(13.4, 52.47), style: { color: '#0000ff' } },
@@ -364,7 +364,7 @@ test('selecting multiple elements', { tag: '@cross-browser' }, async ({ page }) 
 	};
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
-	await waitForMapIsIdle(page);
+	await showView(page, { center: [13.4, 52.5], radius: 10000 });
 	const elements = async () => (await storedState(page)).elements;
 	const fillColors = async () =>
 		(await elements()).map((e) => (e.type === 'polygon' ? (e.style?.color ?? '#ff0000').toLowerCase() : e.type));
@@ -1020,9 +1020,13 @@ test('typing the radius or the area of circles', async ({ page }) => {
 });
 
 test('the tools work on a map that its author has rotated and tilted', async ({ page }) => {
-	const view = { center: [13.4, 52.5] as [number, number], radius: 6000, turnable: true, bearing: 50, pitch: 45 };
-	await page.goto('/#' + encodeState({ view, elements: [] }));
+	await page.goto('/');
 	await waitForMapIsReady(page);
+	// a map that is opened is not turned: its author turns it
+	await sidebar(page).getByRole('checkbox', { name: 'Rotate and tilt the map while editing' }).check();
+	await showView(page, { center: [13.4, 52.5], radius: 6000 });
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ bearing: 50, pitch: 45 }));
+	await waitForMapIsIdle(page);
 	/** The place on the map at a pixel. */
 	const placeAt = (x: number, y: number) =>
 		page.evaluate(([x, y]) => (window as unknown as MapWindow).map.unproject([x, y]).toArray(), [x, y]);

@@ -254,9 +254,10 @@ export class MapDocument {
 	}
 
 	/**
-	 * Open a map. The editor looks where its camera was (`map`); without one, and always in the
-	 * viewer, the map shows its frame, else its elements. `keepView`: without a camera, the map
-	 * stays where it is, e.g. for a new map.
+	 * Open a map. The editor looks where its camera was (`view`), which a session of the browser
+	 * storage has, e.g. after a reload. Without one, the viewer shows the frame of the map, else its
+	 * elements; the editor all its elements, so none is overlooked, and an empty map where it is.
+	 * `keepView`: without a camera, the map stays where it is, e.g. for a new map.
 	 */
 	public async loadState(state: MapState, { keepView = false } = {}) {
 		this.clear();
@@ -265,9 +266,13 @@ export class MapDocument {
 		if (!camera) this.applyCamera(undefined);
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
 		if (!camera && !keepView) {
-			// only the viewer turns the map; the editor stays north-up and seen from straight above
-			const turn = this.isInteractive() ? {} : { bearing: state.frame?.bearing, pitch: state.frame?.pitch };
-			this.view.fitArea(state.frame?.bounds, state.elements, { keep: !this.isInteractive(), turn });
+			// north-up and seen from straight above, unless it has elements to show
+			if (this.isInteractive()) {
+				if (state.elements.length > 0) this.view.fitArea(undefined, state.elements);
+			} else {
+				const turn = { bearing: state.frame?.bearing, pitch: state.frame?.pitch };
+				this.view.fitArea(state.frame?.bounds, state.elements, { keep: true, turn });
+			}
 		}
 		await this.setState({ ...state, view: camera });
 	}

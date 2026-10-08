@@ -25,6 +25,29 @@ export async function project(page: Page, point: Point): Promise<Point> {
 	}, point);
 }
 
+/**
+ * Move the editor's map to a view: a center and the radius in meters that it shows around it. A map
+ * that is opened shows all its elements, whatever its `view` says, so a test that needs a certain
+ * view, e.g. for positions in pixels, sets it after the map is ready.
+ */
+export async function showView(page: Page, { center, radius }: { center: Point; radius: number }): Promise<void> {
+	await page.evaluate(
+		({ center, radius }) => {
+			const dy = (radius * 360) / 40075016.686;
+			const dx = dy / Math.cos((center[1] * Math.PI) / 180);
+			(window as unknown as MapWindow).map.fitBounds(
+				[
+					[center[0] - dx, center[1] - dy],
+					[center[0] + dx, center[1] + dy]
+				],
+				{ animate: false }
+			);
+		},
+		{ center, radius }
+	);
+	await waitForMapIsIdle(page);
+}
+
 /** The sidebar of the editor, with the inspector of the selection or of the map. */
 export function sidebar(page: Page): Locator {
 	return page.getByRole('complementary', { name: 'Sidebar' });

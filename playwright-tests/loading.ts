@@ -51,14 +51,15 @@ const sidebarAria = `
 /**
  * Check the requests to the tile server. Tiles, sprite sheets and TileJSON depend only on the
  * viewport and are compared exactly. The glyph ranges depend on the label texts in the
- * current tile data, so only the font and the basic Latin range are checked. The editor also
+ * current tile data, so only the fonts (the labels of the map are regular or bold, by the zoom
+ * level) and the basic Latin range are checked. The editor also
  * loads the list of the fonts, to offer them.
  */
 function expectServerRequests(requests: string[], expected: string[]) {
 	expect(requests).toContain('assets/glyphs/font_families.json');
 	const glyphs = requests.filter((url) => url.startsWith('assets/glyphs/') && url.endsWith('.pbf'));
 	expect(glyphs).toContain('assets/glyphs/noto_sans_regular/0-255.pbf');
-	for (const url of glyphs) expect(url).toMatch(/^assets\/glyphs\/noto_sans_regular\/\d+-\d+\.pbf$/);
+	for (const url of glyphs) expect(url).toMatch(/^assets\/glyphs\/noto_sans_(regular|bold)\/\d+-\d+\.pbf$/);
 	expect(requests.filter((url) => !url.startsWith('assets/glyphs/'))).toStrictEqual(expected);
 }
 
@@ -130,10 +131,13 @@ test('filled map', async ({ page }) => {
 		'assets/sprites/icons.json',
 		'assets/sprites/icons.png',
 		'assets/sprites/index.json',
-		'tiles/osm/13/4399/2686',
-		'tiles/osm/13/4399/2687',
-		'tiles/osm/13/4400/2686',
-		'tiles/osm/13/4400/2687',
+		// the map shows all its elements, not where its author looked last
+		'tiles/osm/14/8799/5373',
+		'tiles/osm/14/8799/5374',
+		'tiles/osm/14/8800/5373',
+		'tiles/osm/14/8800/5374',
+		'tiles/osm/14/8801/5373',
+		'tiles/osm/14/8801/5374',
 		'tiles/osm/tiles.json'
 	]);
 

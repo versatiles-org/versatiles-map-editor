@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { expect, test } from './lib/test.js';
-import { encodeState, type MapState } from '../packages/map-state/src/index.js';
+import { boundsOf, encodeState, type MapState } from '../packages/map-state/src/index.js';
 import {
 	coveredPoints,
 	menuItem,
@@ -87,8 +87,8 @@ test('the examples open from the menu', async ({ page }) => {
 	await expect.poll(async () => (await storedState(page)).elements).toStrictEqual(state.elements);
 	expect((await storedState(page)).meta).toStrictEqual(state.meta);
 	await expect(menu).toBeHidden();
-	// the visible area of the example, whatever the window
-	const [west, south, east, north] = state.frame!.bounds!;
+	// all elements of the example, whatever the window and its visible area
+	const [west, south, east, north] = boundsOf(state.elements)!;
 	const bounds = await page.evaluate(() => (window as unknown as MapWindow).map.getBounds().toArray().flat());
 	expect(bounds[0]).toBeLessThanOrEqual(west);
 	expect(bounds[1]).toBeLessThanOrEqual(south);

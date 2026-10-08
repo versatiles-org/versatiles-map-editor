@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState, type StateStyle } from '../packages/map-state/src/index.js';
-import { blueAndRedAround, project, storedState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { blueAndRedAround, project, storedState, showView, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 /** The arrowheads that the map draws, as their images, e.g. ["arrow-triangle"]. */
 async function drawnArrowheads(page: Page): Promise<string[]> {
@@ -119,11 +119,11 @@ test(
 		 */
 		async function measure(atEnd: boolean, style: StateStyle) {
 			const state: MapState = {
-				view: { center: end, radius: 2000 },
 				elements: [{ type: 'line', points: [start, end], style: { color: '#0000ff', width: 4, ...style } }]
 			};
 			await page.goto('/#' + encodeState(state));
 			await waitForMapIsReady(page);
+			await showView(page, { center: end, radius: 2000 });
 			const { blue } = await blueAndRedAround(page, await project(page, atEnd ? end : start));
 			return { beyond: atEnd ? blue.right + 1 : 1 - blue.left, across: blue.bottom - blue.top + 1 };
 		}

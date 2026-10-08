@@ -6,6 +6,7 @@ import {
 	project,
 	storedState,
 	waitForMapIsIdle,
+	showView,
 	waitForMapIsReady,
 	type MapWindow,
 	PREVIEW_TIMEOUT,
@@ -227,10 +228,9 @@ test('a copy shows its check mark for 2 s after the last copy', async ({ page, c
 test('precision of a shared map with a single marker follows the view', async ({ page }) => {
 	// a point has no size: the precision is that of the area that the editor shows, about 20 km
 	const point: [number, number] = [13.4, 52.5];
-	await page.goto(
-		'/#' + encodeState({ view: { center: point, radius: 10000 }, elements: [{ type: 'marker', point }] })
-	);
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point }] }));
 	await waitForMapIsReady(page, { count: 1 });
+	await showView(page, { center: point, radius: 10000 });
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const precision = page.getByRole('slider', { name: 'Precision' });
 	await expect.poll(async () => Number(await precision.inputValue())).toBeGreaterThan(2);

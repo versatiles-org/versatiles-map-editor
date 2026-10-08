@@ -1,14 +1,15 @@
 import { expect, test } from './lib/test.js';
 import type { Locator, Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { coveredPoints, menuItem, project, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { coveredPoints, menuItem, project, showView, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 // Nothing of the editor may cover a control that is shown, e.g. a bar at the edge a menu or a
 // drop-down. Each situation opens as many overlays at once as possible.
 
 const center: [number, number] = [13.4, 52.5];
+// a map that is opened shows its elements: the tests set this view
+const view = { center, radius: 10000 };
 const state: MapState = {
-	view: { center, radius: 10000 },
 	meta: {
 		viewer: { legend: 'top-left' },
 		legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Route' }] }
@@ -29,6 +30,7 @@ const state: MapState = {
 async function open(page: Page) {
 	await page.goto('/#' + encodeState(state));
 	await waitForMapIsReady(page);
+	await showView(page, view);
 }
 
 /** Each of the elements is on top, where it is shown. */
