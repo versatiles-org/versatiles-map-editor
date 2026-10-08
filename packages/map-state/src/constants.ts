@@ -80,14 +80,13 @@ export const METADATA_KEYS = {
 	viewer: 3,
 	labelOverlap: 4,
 	labelMinZoom: 5,
-	mapLabelsOnTop: 6,
-	title: 7,
-	colorScheme: 8
+	title: 6,
+	colorScheme: 7
 } as const;
 
 /**
  * The fields of the background map. A key alone is a flag: the satellite map, no streets or no
- * borders over the imagery, the relief shaded, the terrain raised, the buildings extruded.
+ * borders over the imagery, the labels over the elements, the relief shaded, the terrain raised, the buildings extruded.
  */
 export const BACKGROUND_KEYS = {
 	theme: 1,
@@ -98,12 +97,13 @@ export const BACKGROUND_KEYS = {
 	haloWidth: 6,
 	labelSize: 7,
 	font: 8,
-	noStreets: 9,
-	noBorders: 10,
-	hillshade: 11,
-	terrain: 12,
-	extruded: 13,
-	options: 14
+	labelsOnTop: 9,
+	noStreets: 10,
+	noBorders: 11,
+	hillshade: 12,
+	terrain: 13,
+	extruded: 14,
+	options: 15
 } as const;
 
 /** A theme of the background map is its index in `BACKGROUND_THEMES` in 5 bits; this one is followed by its name. */

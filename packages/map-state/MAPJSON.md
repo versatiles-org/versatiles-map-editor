@@ -228,14 +228,12 @@ and their images at `…/sprites/<sheet>.json`. An unknown name is drawn as noth
 
 ### Labels
 
-`{ "overlap", "minZoom", "mapOnTop" }`: how the labels of markers and of the background map are
-shown.
+`{ "overlap", "minZoom" }`: how the labels of markers are shown.
 
-| Field      | Values                                                                                                                                 | Default        |
-| ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `overlap`  | labels of markers that would overlap other labels: `"show"` them all, also on top of each other, or `"hide"` them (their symbols stay) | `"show"`       |
-| `minZoom`  | the zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`                   | at every zoom  |
-| `mapOnTop` | `true`: the labels of the background map are drawn over the areas and lines of the elements (markers stay on top)                      | `false`, under |
+| Field     | Values                                                                                                                                 | Default       |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `overlap` | labels of markers that would overlap other labels: `"show"` them all, also on top of each other, or `"hide"` them (their symbols stay) | `"show"`      |
+| `minZoom` | the zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`                   | at every zoom |
 
 ### Background map
 
@@ -243,22 +241,23 @@ The background map as its author set it, e.g. `{ "theme": "gray", "labels": "few
 builds the map from these settings with
 [`@versatiles/style`](https://github.com/versatiles-org/versatiles-style). All fields are optional.
 
-| Field       | Values                                                                                                               | Default               |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `base`      | `"vector"` (the map of OpenStreetMap), `"satellite"` (imagery)                                                       | `"vector"`            |
-| `theme`     | the theme of the vector map, one of `@versatiles/style`, e.g. `"gray"`, `"gray-dark"`; an unknown one is the default | `"colorful"`          |
-| `streets`   | `false`: no streets, railways and symbols of points of interest over the imagery; the vector map always has them     | `true`                |
-| `borders`   | `false`: no borders of countries and states over the imagery; the vector map always has them                         | `true`                |
-| `labels`    | `"normal"`, `"fewer"` (more space between them), `"none"`                                                            | `"normal"`            |
-| `language`  | of the labels: `"user"` (the language of the browser), `"local"` (the local names), or a language code, e.g. `"de"`  | `"user"`              |
-| `font`      | the glyph font of the labels, e.g. `"lato_regular"`                                                                  | `"noto_sans_regular"` |
-| `labelSize` | a factor of the size of the labels                                                                                   | `1`                   |
-| `haloWidth` | of the halo around the labels, in pixels                                                                             | `2`, over imagery `1` |
-| `colors`    | changes of the colors, see below                                                                                     | none                  |
-| `hillshade` | `true`: the relief shaded, hills and mountains with light and shadow                                                 | `false`               |
-| `terrain`   | `true`: the terrain raised to its heights, which a tilted map shows                                                  | `false`               |
-| `buildings` | of the vector map: `"flat"`, or `"extruded"` to their heights, which a tilted map shows when zoomed in               | `"flat"`              |
-| `options`   | options of `@versatiles/style` for what the settings cannot say, see below                                           | none                  |
+| Field         | Values                                                                                                               | Default               |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `base`        | `"vector"` (the map of OpenStreetMap), `"satellite"` (imagery)                                                       | `"vector"`            |
+| `theme`       | the theme of the vector map, one of `@versatiles/style`, e.g. `"gray"`, `"gray-dark"`; an unknown one is the default | `"colorful"`          |
+| `streets`     | `false`: no streets, railways and symbols of points of interest over the imagery; the vector map always has them     | `true`                |
+| `borders`     | `false`: no borders of countries and states over the imagery; the vector map always has them                         | `true`                |
+| `labels`      | `"normal"`, `"fewer"` (more space between them), `"none"`                                                            | `"normal"`            |
+| `language`    | of the labels: `"user"` (the language of the browser), `"local"` (the local names), or a language code, e.g. `"de"`  | `"user"`              |
+| `font`        | the glyph font of the labels, e.g. `"lato_regular"`                                                                  | `"noto_sans_regular"` |
+| `labelSize`   | a factor of the size of the labels                                                                                   | `1`                   |
+| `haloWidth`   | of the halo around the labels, in pixels                                                                             | `2`, over imagery `1` |
+| `labelsOnTop` | `true`: the labels are drawn over the areas and lines of the elements (markers stay on top)                          | `false`, under        |
+| `colors`      | changes of the colors, see below                                                                                     | none                  |
+| `hillshade`   | `true`: the relief shaded, hills and mountains with light and shadow                                                 | `false`               |
+| `terrain`     | `true`: the terrain raised to its heights, which a tilted map shows                                                  | `false`               |
+| `buildings`   | of the vector map: `"flat"`, or `"extruded"` to their heights, which a tilted map shows when zoomed in               | `"flat"`              |
+| `options`     | options of `@versatiles/style` for what the settings cannot say, see below                                           | none                  |
 
 `colors` is `{ "saturation", "black", "white" }`: the `saturation` from −1 (gray) to 1, default 0;
 and the lightness that `black` (−1 to 1, default 0) and `white` (0 to 2, default 1) become, where 0

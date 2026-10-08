@@ -157,7 +157,8 @@ export class MapDocumentInteractive extends MapDocument {
 
 	public getState(): MapState {
 		const meta: StateMetadata = {};
-		const background = this.background;
+		// the labels of the background over the elements are a switch of their own here, see `setBackground`
+		const background = this.mapLabelsOnTop ? { ...this.background, labelsOnTop: true } : this.background;
 		if (background) meta.background = background;
 		const legend = this.legend;
 		if (legend) meta.legend = legend;
@@ -169,7 +170,6 @@ export class MapDocumentInteractive extends MapDocument {
 		const labels: StateLabels = {};
 		if (this.labelOverlap === 'hide') labels.overlap = 'hide';
 		if (this.labelMinZoom > 0) labels.minZoom = this.labelMinZoom;
-		if (this.mapLabelsOnTop) labels.mapOnTop = true;
 		if (Object.keys(labels).length > 0) meta.labels = labels;
 		return {
 			...(this.frame || this.frameTurn
@@ -197,13 +197,13 @@ export class MapDocumentInteractive extends MapDocument {
 		if (turn) this.frameTurn = turn;
 		const meta = state.meta ?? {};
 		if (meta.background) void this.setBackground(meta.background);
+		if (meta.background?.labelsOnTop) this.mapLabelsOnTop = true;
 		if (meta.legend) this.legend = meta.legend;
 		if (meta.colorScheme) this.colors.scheme = meta.colorScheme;
 		if (meta.viewer) this.viewer = { ...this.viewer, ...meta.viewer };
 		if (meta.title) this.title = meta.title;
 		if (meta.labels?.overlap) this.labelOverlap = meta.labels.overlap;
 		if (meta.labels?.minZoom) this.labelMinZoom = meta.labels.minZoom;
-		if (meta.labels?.mapOnTop) this.mapLabelsOnTop = true;
 		this.appendElements(state.elements.map((element) => elementFromState(this, element)));
 	}
 }

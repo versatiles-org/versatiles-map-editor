@@ -548,6 +548,7 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 	if (labelSize && labelSize !== D.labelSize) background.labelSize = labelSize;
 	const haloWidth = sanitizeNumber(v.haloWidth, 0);
 	if (haloWidth !== undefined && haloWidth !== BACKGROUND_HALO_WIDTHS[base]) background.haloWidth = haloWidth;
+	if (sanitizeBoolean(v.labelsOnTop)) background.labelsOnTop = true;
 
 	if (typeof v.colors === 'object' && v.colors !== null) {
 		const c = v.colors as Record<string, unknown>;
@@ -671,7 +672,6 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 	if (v.overlap === 'hide') labels.overlap = 'hide';
 	const minZoom = sanitizeLabelMinZoom(v.minZoom);
 	if (minZoom !== undefined) labels.minZoom = minZoom;
-	if (v.mapOnTop === true) labels.mapOnTop = true;
 	return Object.keys(labels).length > 0 ? labels : undefined;
 }
 

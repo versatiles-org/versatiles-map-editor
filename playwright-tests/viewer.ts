@@ -655,7 +655,7 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 	};
 	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
 	async function colors(elements: MapState['elements']) {
-		const meta = { labels: { mapOnTop: true } };
+		const meta = { background: { labelsOnTop: true } };
 		await page.goto('/view/#' + encodeState({ meta, elements }));
 		await page.reload();
 		await waitForMapIsReady(page);

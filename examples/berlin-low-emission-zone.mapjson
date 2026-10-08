@@ -1,9 +1,8 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"meta": {
-		"background": { "theme": "gray", "labels": "fewer", "language": "local", "haloWidth": 1.5 },
-		"title": "Berlin low-emission zone",
-		"labels": { "mapOnTop": true }
+		"background": { "theme": "gray", "labels": "fewer", "language": "local", "haloWidth": 1.5, "labelsOnTop": true },
+		"title": "Berlin low-emission zone"
 	},
 	"elements": [
 		{

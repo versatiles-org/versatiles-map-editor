@@ -439,15 +439,11 @@ export class StateWriter {
 			this.writeKey(METADATA_KEYS.legend, KEY_PARAMETERS.metadata);
 			this.writeLegend(metadata.legend);
 		}
-		const labels = sanitizeLabels(metadata.labels);
-		if (labels?.mapOnTop) {
-			// a flag: the key alone
-			this.writeKey(METADATA_KEYS.mapLabelsOnTop, KEY_PARAMETERS.metadata);
-		}
 		if (metadata.title) {
 			this.writeKey(METADATA_KEYS.title, KEY_PARAMETERS.metadata);
 			this.writeStringRef(metadata.title);
 		}
+		const labels = sanitizeLabels(metadata.labels);
 		if (labels?.overlap === 'hide') {
 			// a flag: the key alone
 			this.writeKey(METADATA_KEYS.labelOverlap, KEY_PARAMETERS.metadata);
@@ -509,6 +505,7 @@ export class StateWriter {
 			key('haloWidth');
 			this.writeVarint(Math.round(background.haloWidth * haloWidth));
 		}
+		if (background.labelsOnTop) key('labelsOnTop');
 		if (background.colors) {
 			key('colors');
 			// 1 bit each whether it is changed, then from its lowest value in steps, in 6 bits

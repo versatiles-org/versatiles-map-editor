@@ -145,8 +145,14 @@ export class MapDocument {
 		this.view.style.setMapLabelsOnTop(onTop);
 	}
 
-	/** Show another background map. The background is set at once; resolves when its style is loaded. */
-	public async setBackground(background?: StateBackground): Promise<void> {
+	/**
+	 * Show another background map. The background is set at once; resolves when its style is loaded.
+	 * Without whether its labels are over the elements, which is `mapLabelsOnTop` here: that is
+	 * the order of the layers, not another style to load.
+	 */
+	public async setBackground(value?: StateBackground): Promise<void> {
+		const { labelsOnTop: _labelsOnTop, ...rest } = value ?? {};
+		const background = Object.keys(rest).length > 0 ? rest : undefined;
 		if (sameBackground(background, this.#background)) return;
 		this.#background = background;
 		await this.view.style.setBackground(background, this.font);
@@ -302,7 +308,7 @@ export class MapDocument {
 		this.frameTurn = turnOf(state.frame);
 		this.applyMetadata(state.meta);
 		// Only awaited when it changes, so an unchanged background restores the elements at once
-		if (!sameBackground(state.meta?.background, this.#background)) {
+		if (!sameBackground({ ...state.meta?.background, labelsOnTop: false }, this.#background)) {
 			await this.setBackground(state.meta?.background);
 			if (outdated()) return;
 		}
@@ -343,7 +349,7 @@ export class MapDocument {
 		this.title = meta?.title ?? '';
 		this.labelOverlap = meta?.labels?.overlap === 'hide' ? 'hide' : 'show';
 		this.labelMinZoom = meta?.labels?.minZoom ?? 0;
-		this.mapLabelsOnTop = meta?.labels?.mapOnTop === true;
+		this.mapLabelsOnTop = meta?.background?.labelsOnTop === true;
 	}
 
 	/** Deselect all elements, e.g. before undo. The viewer has no selection. */

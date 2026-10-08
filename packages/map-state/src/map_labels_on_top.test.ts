@@ -4,7 +4,7 @@ import { decodeState, encodeState, stateFromGeoJSON, stateFromKML, stateToGeoJSO
 
 // the labels of the background map over the areas and lines of the elements
 const state: MapState = {
-	meta: { labels: { mapOnTop: true } },
+	meta: { background: { labelsOnTop: true } },
 	elements: [
 		{
 			type: 'polygon',
@@ -21,18 +21,26 @@ const state: MapState = {
 describe('map labels on top', () => {
 	it('is kept in a link, GeoJSON and KML', () => {
 		expect(decodeState(encodeState(state)).meta).toStrictEqual(state.meta);
-		expect(stateToGeoJSON(state).meta?.labels?.mapOnTop).toBe(true);
+		expect(stateToGeoJSON(state).meta?.background?.labelsOnTop).toBe(true);
 		expect(stateFromGeoJSON(stateToGeoJSON(state)).meta).toStrictEqual(state.meta);
 		expect(stateFromKML(stateToKML(state)).meta).toStrictEqual(state.meta);
 	});
 
+	it('is a setting of the background, with its others', () => {
+		const more: MapState = {
+			meta: { background: { theme: 'gray', labelsOnTop: true, hillshade: true } },
+			elements: []
+		};
+		expect(decodeState(encodeState(more)).meta).toStrictEqual(more.meta);
+	});
+
 	it('is the only metadata of a map', () => {
-		const only: MapState = { meta: { labels: { mapOnTop: true } }, elements: [] };
+		const only: MapState = { meta: { background: { labelsOnTop: true } }, elements: [] };
 		expect(decodeState(encodeState(only)).meta).toStrictEqual(only.meta);
 	});
 
 	it('is not stored when it is off', () => {
-		const off: MapState = { meta: { labels: { mapOnTop: false } }, elements: [] };
+		const off: MapState = { meta: { background: { labelsOnTop: false } }, elements: [] };
 		expect(decodeState(encodeState(off)).meta).toBeUndefined();
 		expect(stateToGeoJSON(off).meta).toBeUndefined();
 	});

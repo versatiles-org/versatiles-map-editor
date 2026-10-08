@@ -469,12 +469,6 @@ export interface StateLabels {
 	 * @multipleOf 0.1
 	 */
 	minZoom?: number;
-	/**
-	 * Draw the labels of the background map over the areas and lines of the elements, instead of
-	 * under them. The labels of markers are always on top.
-	 * @default false
-	 */
-	mapOnTop?: boolean;
 }
 
 /** @category Legend */
@@ -751,6 +745,12 @@ export interface StateBackground {
 	 * @minimum 0
 	 */
 	haloWidth?: number;
+	/**
+	 * Draw the labels over the areas and lines of the elements, instead of under them. The labels
+	 * of markers are always on top.
+	 * @default false
+	 */
+	labelsOnTop?: boolean;
 	/** Changes of the colors of the map. */
 	colors?: StateBackgroundColors;
 	/**

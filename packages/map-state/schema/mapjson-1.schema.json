@@ -195,6 +195,11 @@
 					"description": "The width of the halo around the labels, in pixels. Default: 2 on the vector map, 1 over the imagery.",
 					"minimum": 0
 				},
+				"labelsOnTop": {
+					"type": "boolean",
+					"description": "Draw the labels over the areas and lines of the elements, instead of under them. The labels of markers are always on top.",
+					"default": false
+				},
 				"colors": {
 					"$ref": "#/definitions/StateBackgroundColors",
 					"description": "Changes of the colors of the map."
@@ -605,11 +610,6 @@
 					"exclusiveMinimum": 0,
 					"maximum": 24,
 					"multipleOf": 0.1
-				},
-				"mapOnTop": {
-					"type": "boolean",
-					"description": "Draw the labels of the background map over the areas and lines of the elements, instead of under them. The labels of markers are always on top.",
-					"default": false
 				}
 			},
 			"description": "How the labels are shown: those of markers, and those of the background map."

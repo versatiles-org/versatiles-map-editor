@@ -437,6 +437,9 @@ export class StateReader {
 					case BACKGROUND_KEYS.haloWidth:
 						background.haloWidth = steps(this.readVarint(), haloWidth);
 						break;
+					case BACKGROUND_KEYS.labelsOnTop:
+						background.labelsOnTop = true;
+						break;
 					case BACKGROUND_KEYS.colors: {
 						// 1 bit each whether it is changed, then from its lowest value in steps
 						const read = (lowest: number) =>
@@ -493,9 +496,6 @@ export class StateReader {
 						break;
 					case METADATA_KEYS.colorScheme:
 						metadata.colorScheme = this.readStringRef(true);
-						break;
-					case METADATA_KEYS.mapLabelsOnTop:
-						metadata.labels = { ...metadata.labels, mapOnTop: true };
 						break;
 					case METADATA_KEYS.title:
 						metadata.title = this.readStringRef();

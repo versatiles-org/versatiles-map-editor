@@ -87,7 +87,7 @@ export const MAPJSON_FIELDS = {
 		'scrollZoom'
 	],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
-	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
+	StateLabels: ['overlap', 'minZoom'],
 	StateBackground: [
 		'base',
 		'theme',
@@ -98,6 +98,7 @@ export const MAPJSON_FIELDS = {
 		'font',
 		'labelSize',
 		'haloWidth',
+		'labelsOnTop',
 		'colors',
 		'hillshade',
 		'terrain',

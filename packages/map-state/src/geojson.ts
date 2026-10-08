@@ -15,6 +15,7 @@ import {
 	popupFromProps,
 	removeViewerDefaults,
 	sanitizeBoolean,
+	sanitizeBackground,
 	sanitizeLabels,
 	sanitizeNumber,
 	sanitizeFrame,
@@ -124,7 +125,9 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	const frame = sanitizeFrame(state.frame);
 	if (frame) doc.frame = frame;
 	const meta: StateMetadata = {};
-	if (state.meta?.background) meta.background = state.meta.background;
+	// without the settings that have their default, like the labels below
+	const background = sanitizeBackground(state.meta?.background);
+	if (background) meta.background = background;
 	if (state.meta?.legend) meta.legend = state.meta.legend;
 	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
 	const viewer = removeViewerDefaults(state.meta?.viewer);
