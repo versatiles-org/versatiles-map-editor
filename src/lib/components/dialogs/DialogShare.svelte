@@ -181,9 +181,23 @@
 		<SharePreview bind:this={preview} onreload={() => update(0)} />
 
 		<div class="panel">
+			<!-- First what the dialog is for: the link and the embed code. Then what they show, and
+			     how long the link is, which are settings of the map. -->
+			<ShareCode bind:this={code} link={linkCode} embed={embedCode}>
+				{#snippet linkNotice()}
+					<!-- next to the link that it is about -->
+					{#if linkCode.length > LONG_LINK}
+						<p class="notice">
+							The link is longer than {LONG_LINK} characters, so it may not work everywhere, e.g. in some chat and mail programs.
+							{shorterBy} The embed code works at any length.
+						</p>
+					{/if}
+				{/snippet}
+			</ShareCode>
+
 			<!-- what the map shows, which is edited on the map itself -->
 			<section aria-labelledby="{uid}-area">
-				<h3 id="{uid}-area">Shared map</h3>
+				<h3 id="{uid}-area">What visitors see</h3>
 				{#if notice}
 					<p class="notice">
 						{#if notice.kind === 'outside'}
@@ -193,26 +207,26 @@
 							The map is empty and has no visible area, so it shows the whole world.
 						{/if}
 					</p>
-				{:else}
-					<Hint>
-						{stateManager.mapDocument.frame
-							? 'The map shows the visible area that you set, on every screen.'
-							: 'The map shows all elements, on every screen.'}
-					</Hint>
 				{/if}
 				<div class="buttons">
 					<Button onclick={editSharedMap}>Edit shared map…</Button>
 					{#if notice?.kind === 'outside'}<Button variant="ghost" onclick={fitToElements}>Fit to elements</Button>{/if}
 				</div>
-				<Hint>Its visible area, its rotation and tilt, the address search, the zoom buttons and the legend.</Hint>
+				<Hint>
+					{#if !notice}
+						{stateManager.mapDocument.frame
+							? 'The map shows the visible area that you set, on every screen.'
+							: 'The map shows all elements, on every screen.'}
+					{/if}
+					Its visible area, its rotation and tilt, and its controls are set on the map.
+				</Hint>
 			</section>
 
-			<ShareCode bind:this={code} link={linkCode} embed={embedCode} />
-			<section aria-labelledby="{uid}-options">
-				<h3 id="{uid}-options">Options</h3>
+			<section aria-labelledby="{uid}-size">
+				<h3 id="{uid}-size">Link size</h3>
 				<!-- Like a quality slider: to the right the positions are more accurate, and the link is
 				     longer. From a hundredth of the shared area to 1 m, which is exact; each step half the
-				     one before. Moving it ends "Automatic". -->
+				     one before. Moving it ends "Automatic", which is right below it. -->
 				<InputRow id="{uid}-precision" label="Accuracy">
 					<Slider
 						id="{uid}-precision"
@@ -230,8 +244,15 @@
 						describe={(value) => `${accuracyLevel(maxExponent - value)}, ${accuracySteps(maxExponent - value)}`}
 					/>
 				</InputRow>
-				<!-- What the word of the slider means, right below it. No live region: it would be
-				     announced at every step of the slider, which tells its value itself. -->
+				<Checkbox
+					checked={precision === 'auto'}
+					onchange={(e) => {
+						precision = e.currentTarget.checked ? 'auto' : autoExponent;
+						update(0);
+					}}>Automatic, fine enough for the visible area</Checkbox
+				>
+				<!-- What the word of the slider means. No live region: it would be announced at every step
+				     of the slider, which tells its value itself. -->
 				<p class="result">
 					Round to {accuracySteps(exponent)} · Link: {linkCode.length} characters
 				</p>
@@ -252,19 +273,6 @@
 						{/each}
 					</ul>
 				{/if}
-				{#if linkCode.length > LONG_LINK}
-					<p class="notice">
-						The link is longer than {LONG_LINK} characters, so it may not work everywhere, e.g. in some chat and mail programs.
-						{shorterBy} The embed code works at any length.
-					</p>
-				{/if}
-				<Checkbox
-					checked={precision === 'auto'}
-					onchange={(e) => {
-						precision = e.currentTarget.checked ? 'auto' : autoExponent;
-						update(0);
-					}}>Automatic, fine enough for the visible area</Checkbox
-				>
 				<Hint>A lower accuracy makes a shorter link.</Hint>
 			</section>
 		</div>

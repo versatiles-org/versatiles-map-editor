@@ -1,8 +1,12 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { Button, Hint, TextArea, TextField } from '#lib/components/ui/index.js';
 
-	/** The link of the shared map and the code to embed it, each to copy. */
-	const { link, embed }: { link: string; embed: string } = $props();
+	/**
+	 * The link of the shared map and the code to embed it, each to copy. `linkNotice`: shown below
+	 * the link, e.g. a warning about it.
+	 */
+	const { link, embed, linkNotice }: { link: string; embed: string; linkNotice?: Snippet } = $props();
 
 	const uid = $props.id();
 
@@ -50,12 +54,13 @@
 		<TextField id="{uid}-link" class="code" readonly value={link} onfocus={(e) => e.currentTarget.select()} />
 		<Button variant="primary" class="copy" bind:element={btnLink} onclick={() => copy(link, 'link')}>Copy link</Button>
 	</div>
+	{@render linkNotice?.()}
 </section>
 
 <section>
 	<h3><label for="{uid}-embed">Embed code</label></h3>
 	<Hint>Paste it into the HTML of a website.</Hint>
-	<TextArea id="{uid}-embed" class="code" rows={4} readonly value={embed} onfocus={(e) => e.currentTarget.select()} />
+	<TextArea id="{uid}-embed" class="code" rows={2} readonly value={embed} onfocus={(e) => e.currentTarget.select()} />
 	<div class="buttons">
 		<Button class="copy" bind:element={btnEmbed} onclick={() => copy(embed, 'embed')}>Copy embed code</Button>
 	</div>

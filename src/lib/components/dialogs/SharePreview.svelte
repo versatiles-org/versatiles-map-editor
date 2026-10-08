@@ -47,7 +47,7 @@
 		<div class="ratios">
 			<ChoiceGroup labelledby="{uid}-ratio" value={ratio} onchange={selectRatio} options={RATIOS} />
 		</div>
-		<Button variant="ghost" onclick={onreload}>Reload</Button>
+		<Button onclick={onreload}>Reload</Button>
 	</div>
 	<div class="stage">
 		<iframe title="preview" bind:this={iframe} class={'aspect-' + ratio}></iframe>
