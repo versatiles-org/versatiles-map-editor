@@ -3,12 +3,14 @@ import type { Bounds, MapState, StateFrame, StateViewer } from './types.js';
 import { sanitizeViewer } from './profile.js';
 import {
 	boundsOf,
+	changedMapJSONValues,
 	decodeState,
 	encodeState,
 	sanitizeBounds,
 	sanitizeFrame,
 	stateFromGeoJSON,
 	stateFromKML,
+	stateFromMapJSON,
 	stateToGeoJSON,
 	stateToKML
 } from './index.js';
@@ -243,6 +245,14 @@ describe('sanitizeFrame', () => {
 		expect(sanitizeFrame({ bearing: -180 })).toStrictEqual({ bearing: 180 });
 		expect(sanitizeFrame({ bearing: 360 })).toBeUndefined();
 		expect(sanitizeFrame({ bearing: 12.5, pitch: 33.3 })).toStrictEqual({ bearing: 12.5, pitch: 33.3 });
+		// a rotation within a turn is kept to its last digit, e.g. of a file
+		for (let hundredths = -17999; hundredths <= 18000; hundredths += 7) {
+			const bearing = hundredths / 100;
+			if (bearing !== 0) expect(sanitizeFrame({ bearing })).toStrictEqual({ bearing });
+		}
+		const file = { frame: { bearing: 12.34, pitch: 0.1 }, elements: [] };
+		expect(stateFromMapJSON(file).frame).toStrictEqual(file.frame);
+		expect(changedMapJSONValues(file)).toStrictEqual([]);
 		expect(sanitizeFrame({ pitch: 80 })).toStrictEqual({ pitch: 60 });
 		expect(sanitizeFrame({ pitch: -5 })).toBeUndefined();
 	});

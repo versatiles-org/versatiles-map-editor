@@ -489,6 +489,8 @@ export function sanitizeBounds(value: unknown): Bounds | undefined {
 export function sanitizeBearing(value: unknown): number | undefined {
 	const n = strictNumber(value);
 	if (n === undefined) return undefined;
+	// as it is, if it is within a turn: the arithmetic below would change its last digits
+	if (n > -180 && n <= 180) return n;
 	const bearing = ((n % 360) + 360) % 360;
 	return bearing > 180 ? bearing - 360 : bearing;
 }
