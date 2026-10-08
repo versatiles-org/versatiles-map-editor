@@ -218,7 +218,10 @@ export type DashName = (typeof DASH_NAMES)[number];
  * @category Styles
  */
 export interface MarkerStyle {
-	/** The image of the symbol, e.g. "icons:anchor", or "" for none. Default: a pin, "extras:pin-teardrop". */
+	/**
+	 * The image of the symbol, e.g. "icons:anchor", or "" for none.
+	 * @default "extras:pin-teardrop"
+	 */
 	symbol?: string;
 	/**
 	 * The color of the symbol, with its opacity.
@@ -398,7 +401,10 @@ export type StyleRoleName = 'marker' | 'line' | 'area' | 'outline';
 
 /** @category Map state */
 export interface StateMetadata {
-	/** The background map. Without it, the map has the editor's default background. */
+	/**
+	 * The background map. Without it, the map has the default one: the vector map of
+	 * OpenStreetMap in the theme "colorful", see `BACKGROUND_DEFAULTS`.
+	 */
 	background?: StateBackground;
 	/** A legend, defined by the author, not generated from the elements. */
 	legend?: StateLegend;
@@ -590,8 +596,11 @@ export type StateLegendEntry = StateLegendMarker | StateLegendLine | StateLegend
 export interface StateLegendMarker {
 	type: 'marker';
 	style?: MarkerStyle;
-	/** The text next to it. */
-	label: string;
+	/**
+	 * The text next to it.
+	 * @default ""
+	 */
+	label?: string;
 }
 
 /**
@@ -601,8 +610,11 @@ export interface StateLegendMarker {
 export interface StateLegendLine {
 	type: 'line';
 	style?: LineStyle;
-	/** The text next to it. */
-	label: string;
+	/**
+	 * The text next to it.
+	 * @default ""
+	 */
+	label?: string;
 }
 
 /**
@@ -614,8 +626,11 @@ export interface StateLegendArea {
 	style?: AreaStyle;
 	/** The outline of the area. */
 	outlineStyle?: OutlineStyle;
-	/** The text next to it. */
-	label: string;
+	/**
+	 * The text next to it.
+	 * @default ""
+	 */
+	label?: string;
 }
 
 /**

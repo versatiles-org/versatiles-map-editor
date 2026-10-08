@@ -966,8 +966,6 @@ export function bestExpGolombParameter(values: number[]): number {
 	return best;
 }
 
-/** The keys of the element types. */
-
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
 function repeatKey(element: StateElement): string {
 	const key = (role: StyleRoleName, style: StateStyle | undefined) => (style ? canonical(role, style) : '-');

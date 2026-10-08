@@ -916,8 +916,6 @@ export class StateReader {
 	}
 }
 
-/** The keys of the element types. */
-
 /** A position whose latitude is on the map, as the writer writes it, which MapLibre needs. */
 function checkLatitude(position: [number, number]): [number, number] {
 	if (!(Math.abs(position[1]) <= 90)) throw new Error(`Invalid latitude: ${position[1]}`);

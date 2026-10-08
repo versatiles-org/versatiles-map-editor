@@ -54,7 +54,7 @@ export class StateManager {
 		notify(
 			followed.changed.length > 1
 				? `${followed.changed.length} legend entries have the new style too.`
-				: first.label.trim()
+				: first.label?.trim()
 					? `The legend entry “${first.label.trim()}” has the new style too.`
 					: 'The legend entry has the new style too.',
 			'info'

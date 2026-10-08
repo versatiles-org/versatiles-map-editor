@@ -24,7 +24,7 @@
 				},
 				"$schema": {
 					"type": "string",
-					"description": "The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`, e.g. for editors that check a file while it is written."
+					"description": "The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`, e.g. for editors that check a file while it is written. The editor writes it; a reader does not need it."
 				},
 				"version": {
 					"type": "integer",
@@ -33,7 +33,7 @@
 					"default": 1
 				}
 			},
-			"required": ["$schema", "elements"],
+			"required": ["elements"],
 			"description": "The content of a .mapjson file: a map state with the URL of its schema."
 		},
 		"StateFrame": {
@@ -87,7 +87,7 @@
 			"properties": {
 				"background": {
 					"$ref": "#/definitions/StateBackground",
-					"description": "The background map. Without it, the map has the editor's default background."
+					"description": "The background map. Without it, the map has the default one: the vector map of OpenStreetMap in the theme \"colorful\", see `BACKGROUND_DEFAULTS`."
 				},
 				"legend": {
 					"$ref": "#/definitions/StateLegend",
@@ -283,10 +283,11 @@
 				},
 				"label": {
 					"type": "string",
-					"description": "The text next to it."
+					"description": "The text next to it.",
+					"default": ""
 				}
 			},
-			"required": ["type", "label"],
+			"required": ["type"],
 			"description": "A legend entry with a marker."
 		},
 		"MarkerStyle": {
@@ -294,7 +295,8 @@
 			"properties": {
 				"symbol": {
 					"type": "string",
-					"description": "The image of the symbol, e.g. \"icons:anchor\", or \"\" for none. Default: a pin, \"extras:pin-teardrop\"."
+					"description": "The image of the symbol, e.g. \"icons:anchor\", or \"\" for none.",
+					"default": "extras:pin-teardrop"
 				},
 				"color": {
 					"$ref": "#/definitions/HexColor",
@@ -375,10 +377,11 @@
 				},
 				"label": {
 					"type": "string",
-					"description": "The text next to it."
+					"description": "The text next to it.",
+					"default": ""
 				}
 			},
-			"required": ["type", "label"],
+			"required": ["type"],
 			"description": "A legend entry with a line."
 		},
 		"LineStyle": {
@@ -443,10 +446,11 @@
 				},
 				"label": {
 					"type": "string",
-					"description": "The text next to it."
+					"description": "The text next to it.",
+					"default": ""
 				}
 			},
-			"required": ["type", "label"],
+			"required": ["type"],
 			"description": "A legend entry with an area, e.g. of a polygon or a circle."
 		},
 		"AreaStyle": {

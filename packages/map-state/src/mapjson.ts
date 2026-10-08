@@ -29,9 +29,9 @@ export const MAPJSON_SCHEMA_URL = `https://versatiles.org/versatiles-map-editor/
 export type MapJSON = {
 	/**
 	 * The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`, e.g. for
-	 * editors that check a file while it is written.
+	 * editors that check a file while it is written. The editor writes it; a reader does not need it.
 	 */
-	$schema: string;
+	$schema?: string;
 	/**
 	 * The version of the format of the file: 1. A file without it is of version 1.
 	 * @asType integer

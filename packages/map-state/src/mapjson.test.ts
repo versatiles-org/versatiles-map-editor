@@ -25,6 +25,12 @@ describe('.mapjson files', () => {
 		expect(stateFromMapJSON(JSON.parse(JSON.stringify(json)))).toStrictEqual(state);
 	});
 
+	it('may leave out the text of a legend entry, which is then empty', () => {
+		const json = { elements: [], meta: { legend: { entries: [{ type: 'line' }] } } };
+		expect(stateFromMapJSON(json).meta?.legend?.entries).toStrictEqual([{ type: 'line', label: '' }]);
+		expect(changedMapJSONValues(json)).toStrictEqual([]);
+	});
+
 	it('tell their version in a field of its own, and are of version 1 without it', () => {
 		expect(stateToMapJSON({ elements: [] })).toStrictEqual({ $schema: MAPJSON_SCHEMA_URL, version: 1, elements: [] });
 		expect(stateFromMapJSON({ elements: [] })).toStrictEqual({ elements: [] });

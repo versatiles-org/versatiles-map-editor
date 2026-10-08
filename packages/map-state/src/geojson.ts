@@ -250,7 +250,7 @@ function toFeatures(doc: GeoJSON.GeoJSON): GeoJSON.Feature[] {
 
 /**
  * Convert GeoJSON into a map state document. Accepts a FeatureCollection (optionally
- * with the editor's `map` viewport), a single Feature or a bare Geometry. Features
+ * with the `frame` and the `meta` of a map), a single Feature or a bare Geometry. Features
  * with missing or invalid geometry are skipped.
  * @category Files
  */

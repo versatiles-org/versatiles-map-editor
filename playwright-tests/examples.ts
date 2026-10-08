@@ -26,7 +26,7 @@ for (const name of EXAMPLES) {
 	const state: MapState = JSON.parse(readFileSync(file, 'utf-8'));
 	const types = state.elements.map((e) => e.type);
 	// none, e.g. where a label on the map explains it
-	const legend = state.meta?.legend?.entries.map((e) => e.label) ?? [];
+	const legend = state.meta?.legend?.entries.map((e) => e.label ?? '') ?? [];
 
 	test.describe(name, () => {
 		test('opened in the editor, and downloaded again', async ({ page }) => {

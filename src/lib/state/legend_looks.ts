@@ -111,7 +111,7 @@ export function legendShows(
 	const look = elementLook(state);
 	if (entries.some((entry) => lookOf(entry) === look)) return 'shown';
 	const name = text.trim();
-	if (name && entries.some((entry) => entry.label.trim() === name)) return 'different';
+	if (name && entries.some((entry) => entry.label?.trim() === name)) return 'different';
 	return undefined;
 }
 

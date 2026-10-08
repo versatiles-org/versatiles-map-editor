@@ -25,7 +25,7 @@ defaults, and published at the address that every file names in `$schema`:
 ```
 
 A marker at the Brandenburg Gate in Berlin, with the default style: a red pin. The map shows
-its elements, on the editor's default background map.
+its elements, on the default background map: the vector map of OpenStreetMap.
 
 ## A fuller file
 
