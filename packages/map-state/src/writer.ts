@@ -316,6 +316,7 @@ export class StateWriter {
 		if (frame.canZoom === false) key('noZoom');
 		if (frame.canRotate === true) key('rotate');
 		if (frame.canTilt === true) key('tilt');
+		if (frame.confine === true) key('confine');
 		this.writeInteger(END_KEY, 4);
 	}
 

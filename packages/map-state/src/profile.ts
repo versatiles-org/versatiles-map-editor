@@ -467,6 +467,7 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (v.canZoom === false) frame.canZoom = false;
 	if (sanitizeBoolean(v.canRotate)) frame.canRotate = true;
 	if (sanitizeBoolean(v.canTilt)) frame.canTilt = true;
+	if (sanitizeBoolean(v.confine)) frame.confine = true;
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 

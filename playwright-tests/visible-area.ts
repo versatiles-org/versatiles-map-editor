@@ -727,3 +727,81 @@ test("the editor's marks on the map have the accent of the theme", { tag: '@cros
 	expect(b).toBeGreaterThan(g + 50);
 	expect(r).toBeGreaterThan(g + 30);
 });
+
+test('visitors of a shared map can be kept in the area that it shows when it opens', async ({ page }) => {
+	const place = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			const bounds = map.getBounds();
+			return { zoom: map.getZoom(), west: bounds.getWest(), east: bounds.getEast(), south: bounds.getSouth() };
+		});
+	/** Drag the map far to the right, i.e. look further west. */
+	const dragRight = async () => {
+		await page.mouse.move(200, 300);
+		await page.mouse.down();
+		await page.mouse.move(700, 300, { steps: 8 });
+		await page.mouse.up();
+		await waitForMapIsIdle(page);
+	};
+	const open = async (state: MapState) => {
+		await page.goto('about:blank');
+		await page.goto('/view/#' + encodeState(state));
+		await waitForMapIsReady(page);
+	};
+	await page.setViewportSize({ width: 800, height: 600 });
+
+	// free: the map zooms out and moves away
+	await open({ frame: { bounds: frame }, elements });
+	let start = await place();
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, 600);
+	await waitForMapIsIdle(page);
+	expect((await place()).zoom).toBeLessThan(start.zoom - 0.5);
+	await dragRight();
+	expect((await place()).west).toBeLessThan(start.west - 0.05);
+
+	// confined: not zoomed out, not moved; zoomed in, it moves, but not beyond what it showed
+	await open({ frame: { bounds: frame, confine: true }, elements });
+	start = await place();
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, 600);
+	await waitForMapIsIdle(page);
+	expect((await place()).zoom).toBeCloseTo(start.zoom, 2);
+	await dragRight();
+	// but for a few pixels, the padding of the map
+	expect((await place()).west).toBeCloseTo(start.west, 2);
+	// after a pause, so the wheel starts anew and not from where the turn before would have led
+	await page.waitForTimeout(600);
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, -600);
+	await expect.poll(async () => (await place()).zoom).toBeGreaterThan(start.zoom + 0.5);
+	await waitForMapIsIdle(page);
+	await dragRight();
+	await dragRight();
+	const moved = await place();
+	expect(moved.west).toBeGreaterThanOrEqual(start.west - 0.005);
+	expect(moved.east).toBeLessThan(start.east);
+
+	// without a visible area, in what the elements make the map show
+	await open({ frame: { confine: true }, elements: [...elements, { type: 'marker', point: [13.5, 52.55] }] });
+	start = await place();
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, 600);
+	await dragRight();
+	expect((await place()).zoom).toBeCloseTo(start.zoom, 2);
+	expect((await place()).west).toBeCloseTo(start.west, 2);
+
+	// the author switches it on in the panel, and is not kept in the area himself
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Shared map…')).click();
+	await sidebar(page).getByRole('checkbox', { name: 'Visitors stay in the area' }).check();
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, confine: true });
+	await waitForMapIsIdle(page);
+	const before = await place();
+	await page.mouse.move(500, 350);
+	await page.mouse.wheel(0, 600);
+	await expect.poll(async () => (await place()).zoom).toBeLessThan(before.zoom - 0.5);
+});

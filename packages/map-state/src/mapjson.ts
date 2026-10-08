@@ -78,7 +78,7 @@ export function stateFromMapJSON(json: unknown): MapState {
  */
 export const MAPJSON_FIELDS = {
 	MapJSON: ['$schema', 'frame', 'meta', 'elements'],
-	StateFrame: ['bounds', 'bearing', 'pitch', 'canPan', 'canZoom', 'canRotate', 'canTilt'],
+	StateFrame: ['bounds', 'bearing', 'pitch', 'canPan', 'canZoom', 'canRotate', 'canTilt', 'confine'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
 	StateBackground: [

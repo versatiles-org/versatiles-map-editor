@@ -78,10 +78,38 @@ export class MapView {
 	#held = { center: false, zoom: false };
 	#anchored: { center: maplibregl.LngLat; zoom: number } | undefined;
 
-	/** The center and the zoom of now are those that `hold` keeps. */
+	/** Whether the map stays in what it showed when it last showed an area, see `confine`. */
+	#confined = false;
+
+	/**
+	 * The center and the zoom of now are those that `hold` keeps, and what the map shows now is what
+	 * it stays in, see `confine`.
+	 */
 	#anchor() {
 		const [center, zoom] = [this.map.getCenter?.(), this.map.getZoom?.()];
 		if (center && zoom !== undefined) this.#anchored = { center, zoom };
+		if (this.#confined) this.#limit(true);
+	}
+
+	/**
+	 * Keep the map in what it shows now, or free it again. Its zoom of now is the least one too:
+	 * the bounds alone would let it be zoomed out a little, by how MapLibre fits them.
+	 */
+	#limit(on: boolean) {
+		this.map.setMaxBounds?.(on ? this.map.getBounds?.() : null);
+		this.map.setMinZoom?.(on ? this.map.getZoom?.() : null);
+	}
+
+	/**
+	 * Keep the map in what it shows when it shows an area (`fitArea`), e.g. a shared map whose
+	 * visitors stay in the area that it opens with: it cannot be zoomed out further, nor moved
+	 * beyond it. Of a rotated or tilted map, that is the rectangle around what it shows.
+	 */
+	public confine(confined: boolean) {
+		if (confined === this.#confined) return;
+		this.#confined = confined;
+		if (confined) this.#anchor();
+		else this.#limit(false);
 	}
 
 	constructor(map: maplibregl.Map) {
@@ -229,6 +257,8 @@ export class MapView {
 	}
 
 	#fit(frame: Bounds | undefined, elements: StateElement[], turn: Turn) {
+		// free to show the area, which is then what the map stays in, see `#anchor`
+		if (this.#confined) this.#limit(false);
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
 		if (turn.bearing || turn.pitch) {
 			const area: Bounds = [bounds[0], clampLatitude(bounds[1]), bounds[2], clampLatitude(bounds[3])];

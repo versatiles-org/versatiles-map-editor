@@ -246,8 +246,8 @@
 	const turn = $derived.by(() => {
 		if (editor || !mapDocument) return undefined;
 		const { bearing = 0, pitch = 0, ...can } = mapDocument.frameTurn ?? {};
-		const { canPan = true, canZoom = true, canRotate = false, canTilt = false } = can;
-		return { bearing, pitch, canPan, canZoom, canRotate, canTilt };
+		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine };
 	});
 	const turnKey = $derived(JSON.stringify(turn));
 
@@ -262,6 +262,8 @@
 			center: !turn.canPan,
 			zoom: !turn.canZoom
 		});
+		// in what the map shows when it opens: its frame or its elements; an empty map has neither
+		view.confine(turn.confine && (!!mapDocument?.frame || (mapDocument?.elements.length ?? 0) > 0));
 	});
 
 	// The buttons for zooming, and a compass. In the viewer, the buttons if its visitors can zoom,

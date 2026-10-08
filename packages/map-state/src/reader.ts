@@ -351,6 +351,9 @@ export class StateReader {
 					case FRAME_KEYS.tilt:
 						frame.canTilt = true;
 						break;
+					case FRAME_KEYS.confine:
+						frame.confine = true;
+						break;
 					default:
 						throw new Error(`Unknown key of the frame: ${key}`);
 				}

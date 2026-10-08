@@ -57,6 +57,11 @@ export interface StateFrame {
 	canRotate?: boolean;
 	/** Viewers can tilt the map. Default: false. */
 	canTilt?: boolean;
+	/**
+	 * Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor
+	 * move the map beyond it. Default: false.
+	 */
+	confine?: boolean;
 }
 
 /**

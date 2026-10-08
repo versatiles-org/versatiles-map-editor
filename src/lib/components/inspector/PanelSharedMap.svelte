@@ -75,6 +75,13 @@
 		set canTilt(canTilt: boolean) {
 			mode.setTurn({ canTilt });
 			mode.log();
+		},
+		get confine() {
+			return mode.turn.confine;
+		},
+		set confine(confine: boolean) {
+			mode.setTurn({ confine });
+			mode.log();
 		}
 	};
 
@@ -169,6 +176,14 @@
 		</Checkbox>
 		<Checkbox bind:checked={turn.canTilt} title="Whether visitors of the shared map can tilt it">
 			Visitors can tilt
+		</Checkbox>
+		<!-- in what the map shows when it opens: its visible area, else its elements; an empty map has neither -->
+		<Checkbox
+			bind:checked={turn.confine}
+			disabled={!area}
+			title="Visitors cannot zoom out further than the map opens, nor move it beyond what it shows then"
+		>
+			Visitors stay in the area
 		</Checkbox>
 	</div>
 </InspectorSection>

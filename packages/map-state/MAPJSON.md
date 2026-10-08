@@ -108,15 +108,16 @@ elements in the window, and keeps its own view with the map in the browser.
 What a shared or embedded map shows when it opens, and what its viewers can do with it. All fields are
 optional.
 
-| Field       | Description                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bounds`    | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.           |
-| `bearing`   | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top. |
-| `pitch`     | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                     |
-| `canPan`    | `false`: viewers cannot move the map. Default: `true`.                                                                                     |
-| `canZoom`   | `false`: viewers cannot zoom in or out. Default: `true`.                                                                                   |
-| `canRotate` | `true`: viewers can rotate the map. Default: `false`.                                                                                      |
-| `canTilt`   | `true`: viewers can tilt the map. Default: `false`.                                                                                        |
+| Field       | Description                                                                                                                                    |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bounds`    | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.               |
+| `bearing`   | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top.     |
+| `pitch`     | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                         |
+| `canPan`    | `false`: viewers cannot move the map. Default: `true`.                                                                                         |
+| `canZoom`   | `false`: viewers cannot zoom in or out. Default: `true`.                                                                                       |
+| `canRotate` | `true`: viewers can rotate the map. Default: `false`.                                                                                          |
+| `canTilt`   | `true`: viewers can tilt the map. Default: `false`.                                                                                            |
+| `confine`   | `true`: viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor move the map beyond it. Default: `false`. |
 
 ## Elements
 

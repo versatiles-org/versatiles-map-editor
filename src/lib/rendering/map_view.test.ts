@@ -72,6 +72,22 @@ describe('MapView', () => {
 			expect(map.transformCameraUpdate).toBeNull();
 		});
 
+		it('keeps the map in what it shows when it shows an area, if it is confined', () => {
+			const setMaxBounds = vi.fn();
+			const shown = { west: 1 };
+			Object.assign(map, { setMaxBounds, getBounds: () => shown });
+			view.fitArea([13.3, 52.45, 13.5, 52.55], []);
+			expect(setMaxBounds).not.toHaveBeenCalled();
+			view.confine(true);
+			expect(setMaxBounds).toHaveBeenLastCalledWith(shown);
+			// free while an area is shown, e.g. after the window changed its size, then in what it shows
+			setMaxBounds.mockClear();
+			view.fitArea([13.3, 52.45, 13.5, 52.55], []);
+			expect(setMaxBounds.mock.calls).toStrictEqual([[null], [shown]]);
+			view.confine(false);
+			expect(setMaxBounds).toHaveBeenLastCalledWith(null);
+		});
+
 		it('lets an area be shown turned', () => {
 			view.hold({ bearing: 0, pitch: 0 });
 			let whileFitting: object | undefined;

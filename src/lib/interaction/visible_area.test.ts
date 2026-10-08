@@ -33,7 +33,8 @@ describe('VisibleAreaMode', () => {
 				canPan: true,
 				canZoom: true,
 				canRotate: false,
-				canTilt: false
+				canTilt: false,
+				confine: false
 			});
 			doc.visibleArea.setTurn({ bearing: 30 });
 			doc.visibleArea.setTurn({ bearing: 40 });

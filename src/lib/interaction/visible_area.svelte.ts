@@ -144,8 +144,8 @@ export class VisibleAreaMode {
 	 */
 	public get turn(): Required<FrameTurn> {
 		const { bearing = 0, pitch = 0, ...can } = this.#doc.frameTurn ?? {};
-		const { canPan = true, canZoom = true, canRotate = false, canTilt = false } = can;
-		return { bearing, pitch, canPan, canZoom, canRotate, canTilt };
+		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine };
 	}
 
 	/**

@@ -121,7 +121,9 @@ describe('frame: how the map is turned', () => {
 			{ canTilt: true },
 			{ canPan: false },
 			{ canZoom: false },
-			{ bounds, canTilt: true, canZoom: false }
+			{ bounds, canTilt: true, canZoom: false },
+			{ confine: true },
+			{ bounds, confine: true }
 		] as StateFrame[]) {
 			expect(decodeState(encodeState({ ...state, frame })).frame).toStrictEqual(frame);
 		}

@@ -64,6 +64,10 @@
 				"canTilt": {
 					"type": "boolean",
 					"description": "Viewers can tilt the map. Default: false."
+				},
+				"confine": {
+					"type": "boolean",
+					"description": "Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor move the map beyond it. Default: false."
 				}
 			},
 			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and what its viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if that is switched on."
