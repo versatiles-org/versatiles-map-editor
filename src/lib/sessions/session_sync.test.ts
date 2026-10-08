@@ -140,6 +140,16 @@ describe('SessionSync', () => {
 		expect(opening.kind).toBe('session');
 	});
 
+	it('tells that the link of a newer version of the format was made with a newer editor', async () => {
+		store.create(step([marker(1)]));
+		// version 2: the first bits of the link
+		const opening = await sync.prepare('wAAA');
+		expect(notify).toHaveBeenCalledWith(
+			'The map in the link was made with a newer version of the editor. Please reload the page and try again.'
+		);
+		expect(opening.kind).toBe('session');
+	});
+
 	it('opens a new link in the address bar as a new session, but keeps the map for a broken one', async () => {
 		await sync.attach(doc, await sync.prepare(''));
 		location.hash = encodeState({ elements: [marker(13.4)] });

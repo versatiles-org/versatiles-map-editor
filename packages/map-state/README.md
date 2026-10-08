@@ -67,7 +67,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - Colors are always returned as lowercase hex: `#rrggbb`, or `#rrggbbaa` when transparent.
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
-- `CODEC_VERSION` is the format version that `encodeState` writes.
+- `CODEC_VERSION` is the format version that `encodeState` writes. `decodeState` throws a
+  `LinkVersionError` for a link of a newer version, e.g. to tell that a newer editor made it.
 - `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) tell the version of their format in `version`
   (`MAPJSON_VERSION`), and name its JSON Schema in `$schema` (`MAPJSON_SCHEMA_URL`), e.g. for
   editors; `stateFromMapJSON` throws a
@@ -181,7 +182,7 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 ## Format version
 
 The base64 starts with the format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
-this version is read; a later version can be told apart by it. Then come the palette, the string
+this version is read; a later version is told apart by it, and refused with a `LinkVersionError`. Then come the palette, the string
 table, the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
 relative, the frame (optional: the visible area of a shared map, and its settings as key/value pairs, so settings can be added: how it is turned), the metadata, 1 bit whether an

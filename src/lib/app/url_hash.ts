@@ -1,4 +1,4 @@
-import { decodeState } from '@versatiles/map-state';
+import { decodeState, LinkVersionError } from '@versatiles/map-state';
 import type { MapDocument } from '../document/index.js';
 import { notify } from '../notify.svelte.js';
 
@@ -24,7 +24,11 @@ export class UrlHash {
 			state = decodeState(hash);
 		} catch (error) {
 			console.error('Invalid map state in URL hash', error);
-			notify('The map in the link could not be read. The link may be incomplete.');
+			if (error instanceof LinkVersionError) {
+				notify(
+					'The map in the link was made with a newer version of the editor. Please reload the page and try again.'
+				);
+			} else notify('The map in the link could not be read. The link may be incomplete.');
 			return false;
 		}
 		doc.loadState(state).catch((error) => {

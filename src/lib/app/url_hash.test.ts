@@ -29,6 +29,15 @@ describe('UrlHash', () => {
 		expect(notify).toHaveBeenCalledWith('The map in the link could not be read. The link may be incomplete.');
 	});
 
+	it('tells the user about a link of a newer version of the format, which a newer editor made', () => {
+		// version 2: the first bits of the link
+		expect(urlHash.read('wAAA')).toBe(false);
+		expect(doc.loadState).not.toHaveBeenCalled();
+		expect(notify).toHaveBeenCalledWith(
+			'The map in the link was made with a newer version of the editor. Please reload the page and try again.'
+		);
+	});
+
 	it('tells the user about a map that cannot be loaded', async () => {
 		doc.loadState.mockRejectedValue(new Error('no style'));
 		urlHash.read(encodeState(state));

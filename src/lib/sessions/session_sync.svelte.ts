@@ -1,4 +1,4 @@
-import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
+import { decodeState, encodeState, LinkVersionError, type MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import type { Camera } from '../rendering/index.js';
 import { SessionStore, type CurrentSession, type StoredSession } from './session_store.js';
@@ -151,7 +151,11 @@ export class SessionSync {
 			state = decodeState(hash);
 		} catch (error) {
 			console.error('Invalid map state in URL hash', error);
-			notify('The map in the link could not be read. The link may be incomplete.');
+			if (error instanceof LinkVersionError) {
+				notify(
+					'The map in the link was made with a newer version of the editor. Please reload the page and try again.'
+				);
+			} else notify('The map in the link could not be read. The link may be incomplete.');
 			return undefined;
 		}
 		const encoded = encodeStep(state);

@@ -71,6 +71,18 @@ import {
 	StyleHistory
 } from './style_history.js';
 
+/**
+ * A link of a newer version of the format than this one can read: made with a newer version of
+ * the editor.
+ * @category Links
+ */
+export class LinkVersionError extends Error {
+	constructor(public readonly version: number) {
+		super(`The link is of version ${version} of the format; this version reads up to ${CODEC_VERSION}.`);
+		this.name = 'LinkVersionError';
+	}
+}
+
 export class StateReader {
 	public bits: boolean[];
 	public offset: number = 0;
@@ -274,13 +286,17 @@ export class StateReader {
 				root.elements.push(previous);
 			}
 		} catch (cause) {
+			// as it is, so that a reader can tell it from a damaged link
+			if (cause instanceof LinkVersionError) throw cause;
 			throw new Error(`Error reading root`, { cause });
 		}
 	}
 
-	/** The version of the format, of which only `CODEC_VERSION` is read. */
+	/** The version of the format: a newer one than `CODEC_VERSION` is a `LinkVersionError`. */
 	readVersion() {
 		const version = this.readKey(KEY_PARAMETERS.version);
+		if (version > CODEC_VERSION) throw new LinkVersionError(version);
+		// there is no version before the first one
 		if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
 	}
 

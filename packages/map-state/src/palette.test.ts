@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { StateReader } from './reader.js';
+import { LinkVersionError, StateReader } from './reader.js';
 import { collectColors, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { MapState } from './types.js';
@@ -114,11 +114,22 @@ describe('versions', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('rejects other versions, of which there is no last one', () => {
-		for (const version of [0, 2, 7, 1000]) {
+	it('rejects other versions, of which there is no last one: a newer one with its number', () => {
+		for (const version of [2, 7, 1000]) {
 			const writer = new StateWriter();
 			writer.writeKey(version, KEY_PARAMETERS.version);
-			expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
+			expect(() => decodeState(writer.asBase64())).toThrow(LinkVersionError);
+			expect(() => decodeState(writer.asBase64())).toThrow(
+				expect.objectContaining({
+					version,
+					message: `The link is of version ${version} of the format; this version reads up to 1.`
+				})
+			);
 		}
+		// there is none before the first one
+		const writer = new StateWriter();
+		writer.writeKey(0, KEY_PARAMETERS.version);
+		expect(() => decodeState(writer.asBase64())).toThrow('Error reading root');
+		expect(() => decodeState(writer.asBase64())).not.toThrow(LinkVersionError);
 	});
 });

@@ -145,6 +145,7 @@
  */
 import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
+export { LinkVersionError } from './reader.js';
 import type { MapState } from './types.js';
 
 export * from './types.js';
@@ -209,7 +210,9 @@ export function encodeState(state: MapState, options: { resolution?: number } = 
 }
 
 /**
- * Decode the compact base64 representation back into a map state document.
+ * Decode the compact base64 representation back into a map state document. A link of a newer
+ * version of the format throws a `LinkVersionError`; one that is damaged, cut off or no link at
+ * all throws an error.
  * @category Links
  */
 export function decodeState(base64: string): MapState {
