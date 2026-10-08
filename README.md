@@ -137,7 +137,7 @@ The state can alternatively be provided via the iframe's `data` attribute. The e
 
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
-- **Accuracy**: how exactly the positions are stored, like a quality slider, from _Low_ at the left to _Exact_ (1 m) at the right, each step twice as fine as the one before. A lower accuracy makes a shorter link; below the slider the dialog shows how the positions are rounded and how long the link is. _Automatic_ chooses _High_: fine enough for the visible area.
+- **Accuracy**: how exactly the positions are stored, like a quality slider, from _Low_ at the left to _Exact_ (1 m) at the right, each step twice as fine as the one before. A lower accuracy makes a shorter link; below the slider the dialog shows how the positions are rounded and how long the link is. _Automatic_ chooses _High_: fine enough for the visible area. A link of more than 2000 characters gets a warning, since some chat and mail programs cut long links, with what would make it shorter.
 
 What a shared map shows is set on the map itself, in **Shared map…** of the menu (the dialog has a button that leads there). The sidebar then has:
 

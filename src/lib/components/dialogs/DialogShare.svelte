@@ -132,6 +132,28 @@
 		return list.map((part, i) => ({ ...part, percent: percents[i] }));
 	});
 
+	/**
+	 * From this length on, a link may not work everywhere: some chat and mail programs cut long
+	 * links or do not make them clickable, and old browsers refuse them. The map is in the part
+	 * after the "#", which no server gets, so an embedded map works at any length.
+	 */
+	const LONG_LINK = 2000;
+
+	/** What would make a link that is too long shorter: by what it holds most of. */
+	const shorterBy = $derived.by(() => {
+		const largest = parts?.reduce((a, b) => (b.bits > a.bits ? b : a));
+		switch (largest?.id) {
+			case 'texts':
+				return 'Shorter labels and popups make it shorter.';
+			case 'geometry':
+				return exponent < maxExponent
+					? 'A lower accuracy makes it shorter, and so do fewer points of lines and polygons.'
+					: 'Fewer points of lines and polygons make it shorter.';
+			default:
+				return 'Fewer different styles make it shorter.';
+		}
+	});
+
 	function getLinkCode() {
 		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent) })}`;
 	}
@@ -229,6 +251,12 @@
 							<li><span class="swatch {id}"></span>{label} {percent} %</li>
 						{/each}
 					</ul>
+				{/if}
+				{#if linkCode.length > LONG_LINK}
+					<p class="notice">
+						The link is longer than {LONG_LINK} characters, so it may not work everywhere, e.g. in some chat and mail programs.
+						{shorterBy} The embed code works at any length.
+					</p>
 				{/if}
 				<Checkbox
 					checked={precision === 'auto'}

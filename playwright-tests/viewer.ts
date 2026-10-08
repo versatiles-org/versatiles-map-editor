@@ -764,3 +764,32 @@ test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
 		}
 	});
 });
+
+test('the share dialog warns about a link that is too long to work everywhere', async ({ page }) => {
+	const warning = page.getByRole('dialog').getByText(/The link is longer than 2000 characters/);
+	// texts that do not repeat, so they stay long in the link
+	const text = (i: number) => Array.from({ length: 12 }, (_, k) => ((i + 3) * (k + 7) * 7919).toString(36)).join(' ');
+	const markers = (count: number): MapState['elements'] =>
+		Array.from({ length: count }, (_, i) => ({
+			type: 'marker' as const,
+			point: [13.3 + (i % 10) * 0.02, 52.45 + Math.floor(i / 10) * 0.02] as [number, number],
+			popup: { text: text(i) }
+		}));
+
+	await page.goto('/#' + encodeState({ elements: markers(3) }));
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await expect(page.getByRole('dialog').locator('.result')).toContainText('Link:');
+	await expect(warning).toHaveCount(0);
+	await page.keyboard.press('Escape');
+
+	// many long popups: the texts are what makes it long
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ elements: markers(60) }));
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await expect(warning).toBeVisible();
+	await expect(warning).toContainText('Shorter labels and popups make it shorter.');
+	const link = await page.getByLabel('Link', { exact: true }).inputValue();
+	expect(link.length).toBeGreaterThan(2000);
+});
