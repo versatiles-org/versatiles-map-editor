@@ -21,7 +21,6 @@ import {
 	type StateMetadata,
 	type StateLegend,
 	type StateLegendEntry,
-	type StatePopup,
 	type MapState,
 	type StateStyle,
 	type StyleRoleName,
@@ -45,7 +44,7 @@ import {
 	LEGEND_KEYS,
 	METADATA_KEYS,
 	ORIGIN_SCALE,
-	POPUP_KEYS,
+	ELEMENT_FIELD_KEYS,
 	VIEWER_KEYS
 } from './constants.js';
 import {
@@ -84,8 +83,8 @@ export class StateReader {
 	private nextString: [number, number] = [0, 0];
 	// the styles read so far
 	private styleHistory = new StyleHistory();
-	/** See `StateWriter.hasPopups`. */
-	private hasPopups = true;
+	/** See `StateWriter.hasFields`. */
+	private hasFields = true;
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
@@ -245,7 +244,7 @@ export class StateReader {
 			// Read the metadata
 			root.meta = this.readMetadata();
 			if (!root.meta) delete root.meta;
-			this.hasPopups = this.readBit();
+			this.hasFields = this.readBit();
 
 			// Read the elements
 			let previous: StateElement | undefined;
@@ -530,8 +529,7 @@ export class StateReader {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			this.readElementStyles(element, previous);
 			if (this.readBit()) element.label = this.readStringRef();
-			const popup = this.readPopup();
-			if (popup) element.popup = popup;
+			this.readElementFields(element);
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading marker element`, { cause });
@@ -544,8 +542,7 @@ export class StateReader {
 			if (element.points.length < 2) throw new Error('A line of fewer than 2 points');
 			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
-			const popup = this.readPopup();
-			if (popup) element.popup = popup;
+			this.readElementFields(element);
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading line element`, { cause });
@@ -558,8 +555,7 @@ export class StateReader {
 			if (element.points.length < 3) throw new Error('An area of fewer than 3 points');
 			if (this.readBit()) element.smooth = true;
 			this.readElementStyles(element, previous);
-			const popup = this.readPopup();
-			if (popup) element.popup = popup;
+			this.readElementFields(element);
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading polygon element`, { cause });
@@ -573,8 +569,7 @@ export class StateReader {
 			if (radius < 1) throw new Error('A circle without a radius');
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			this.readElementStyles(element, previous);
-			const popup = this.readPopup();
-			if (popup) element.popup = popup;
+			this.readElementFields(element);
 			return element;
 		} catch (cause) {
 			throw new Error(`Error reading circle element`, { cause });
@@ -698,25 +693,26 @@ export class StateReader {
 		}
 	}
 
-	/** See `StateWriter.writePopup`: 1 bit whether there is one, then its key/value pairs. */
-	readPopup(): StatePopup | undefined {
+	/** See `StateWriter.writeElementFields`. */
+	readElementFields(element: StateElement) {
+		if (!this.hasFields) return;
 		try {
-			if (!this.hasPopups || !this.readBit()) return undefined;
-			const popup: StatePopup = { text: '' };
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.popup);
+				const key = this.readKey(KEY_PARAMETERS.elementFields);
 				switch (key) {
 					case END_KEY:
-						return popup;
-					case POPUP_KEYS.text:
-						popup.text = this.readStringRef();
+						return;
+					case ELEMENT_FIELD_KEYS.popupText: {
+						const text = this.readStringRef();
+						if (text) element.popup = { text };
 						break;
+					}
 					default:
-						throw new Error(`Invalid popup key: ${key}`);
+						throw new Error(`Unknown field of an element: ${key}`);
 				}
 			}
 		} catch (cause) {
-			throw new Error(`Error reading popup`, { cause });
+			throw new Error(`Error reading the fields of an element`, { cause });
 		}
 	}
 

@@ -17,7 +17,7 @@ import {
 	LEGEND_KEYS,
 	METADATA_KEYS,
 	ORIGIN_SCALE,
-	POPUP_KEYS,
+	ELEMENT_FIELD_KEYS,
 	VIEWER_KEYS
 } from './constants.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS, rgbHex } from './color_schemes.js';
@@ -55,7 +55,6 @@ import {
 	type StateElementPolygon,
 	type StateMetadata,
 	type StateLegend,
-	type StatePopup,
 	type MapState,
 	type StateStyle,
 	type StyleRoleName,
@@ -85,8 +84,8 @@ export class StateWriter {
 	private nextString: [number, number] = [0, 0];
 	// the styles written so far
 	private styleHistory = new StyleHistory();
-	/** Whether an element of the map has a popup: without one, the elements have no bit for it. */
-	private hasPopups = true;
+	/** Whether an element of the map has fields (see `writeElementFields`): without one, the elements have no bit for them. */
+	private hasFields = true;
 	// the coordinates of the elements are steps on this grid, from the center of the map
 	private grid: LocalGrid | undefined;
 	// the parameters k of the Exp-Golomb code of the coordinates of the elements, of longitude and of
@@ -180,8 +179,8 @@ export class StateWriter {
 		this.writeGrid(root, frame?.bounds);
 		this.writeFrame(frame);
 		this.writeMetadata(root.meta);
-		this.hasPopups = root.elements.some((element) => !!element.popup?.text);
-		this.writeBit(this.hasPopups);
+		this.hasFields = root.elements.some((element) => !!element.popup?.text);
+		this.writeBit(this.hasFields);
 
 		let previous: string | undefined;
 		root.elements.forEach((element, index) => {
@@ -525,21 +524,21 @@ export class StateWriter {
 		this.writeElementPoint(element.point);
 		this.writeElementStyles(element, repeat);
 		this.writeMarkerLabel(element);
-		this.writePopup(element.popup);
+		this.writeElementFields(element);
 	}
 
 	writeElementLine(element: StateElementLine, repeat = false) {
 		this.writeElementPoints(element.points);
 		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
-		this.writePopup(element.popup);
+		this.writeElementFields(element);
 	}
 
 	writeElementPolygon(element: StateElementPolygon, repeat = false) {
 		this.writeElementPoints(element.points);
 		this.writeBit(element.smooth === true);
 		this.writeElementStyles(element, repeat);
-		this.writePopup(element.popup);
+		this.writeElementFields(element);
 	}
 
 	writeElementCircle(element: StateElementCircle, repeat = false) {
@@ -547,7 +546,7 @@ export class StateWriter {
 		// a circle smaller than 1 m, e.g. drawn by a short drag, is not 0 m
 		this.writeVarint(Math.max(1, Math.round(element.radius)));
 		this.writeElementStyles(element, repeat);
-		this.writePopup(element.popup);
+		this.writeElementFields(element);
 	}
 
 	/**
@@ -609,15 +608,18 @@ export class StateWriter {
 		this.writeKey(END_KEY, KEY_PARAMETERS.legend);
 	}
 
-	/** A popup: 1 bit whether there is one, unless no element of the map has one, then its key/value pairs. */
-	writePopup(popup?: StatePopup) {
-		if (!this.hasPopups) return;
-		if (!popup?.text) return this.writeBit(false);
-		this.writeBit(true);
-		// key/value pairs like a style, so fields can be added later
-		this.writeKey(POPUP_KEYS.text, KEY_PARAMETERS.popup);
-		this.writeStringRef(popup.text);
-		this.writeKey(END_KEY, KEY_PARAMETERS.popup);
+	/**
+	 * The fields of an element besides its geometry and its styles, as key/value pairs: the text of
+	 * its popup. Nothing if no element of the map has fields; else an element without fields costs
+	 * the end of the list, 1 bit.
+	 */
+	writeElementFields(element: StateElement) {
+		if (!this.hasFields) return;
+		if (element.popup?.text) {
+			this.writeKey(ELEMENT_FIELD_KEYS.popupText, KEY_PARAMETERS.elementFields);
+			this.writeStringRef(element.popup.text);
+		}
+		this.writeKey(END_KEY, KEY_PARAMETERS.elementFields);
 	}
 
 	/**

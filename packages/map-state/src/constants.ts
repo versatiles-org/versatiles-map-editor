@@ -59,7 +59,7 @@ export const KEY_PARAMETERS = {
 	viewer: 0,
 	legend: 0,
 	legendEntry: 1,
-	popup: 0
+	elementFields: 0
 } as const;
 
 /**
@@ -151,8 +151,11 @@ export const VIEWER_KEYS = {
 	locate: 8
 } as const;
 
-/** The fields of a popup. */
-export const POPUP_KEYS = { text: 1 } as const;
+/**
+ * The fields of an element besides its geometry, its styles and the label of a marker, which each
+ * type has in a fixed order: a list, so that elements can get fields later.
+ */
+export const ELEMENT_FIELD_KEYS = { popupText: 1 } as const;
 
 /**
  * The parameters of the Exp-Golomb codes of the indexes that links are full of, which are small

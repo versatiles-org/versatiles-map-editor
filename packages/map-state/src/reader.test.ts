@@ -229,7 +229,7 @@ describe('StateReader', () => {
 			writer.writeBit(false); // the points of markers and circles from the origin
 			writer.writeBit(false); // no frame
 			writer.writeBit(false); // no metadata
-			writer.writeBit(true); // elements may have popups
+			writer.writeBit(true); // elements may have fields, e.g. a popup
 			writer.writeKey(9, KEY_PARAMETERS.element); // a type that no element has
 
 			const reader = StateReader.fromBase64(writer.asBase64());
@@ -240,7 +240,7 @@ describe('StateReader', () => {
 
 		it('should read a root state', () => {
 			// version 1, no colors, no strings, the resolution, the origin, one parameter of the code
-			// of the coordinates, points from the origin, no frame, no metadata, no popups, the end of the elements
+			// of the coordinates, points from the origin, no frame, no metadata, no fields of elements, the end of the elements
 			const reader = StateReader.fromBitString(
 				'101' + '000000' + '000000' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0' + '011'
 			);
@@ -497,10 +497,19 @@ describe('popups', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual({ elements: [{ type: 'marker', point: [1, 2] }] });
 	});
 
-	it('reject unknown popup fields', () => {
+	it('are a field of their element, in a list that refuses a field this version does not know', () => {
 		const writer = new StateWriter();
-		writer.writeKey(15, KEY_PARAMETERS.popup);
-		expect(() => new StateReader([true, ...writer.bits]).readPopup()).toThrow('Error reading popup');
+		writer.writeKey(15, KEY_PARAMETERS.elementFields);
+		expect(() => new StateReader(writer.bits).readElementFields({ type: 'marker', point: [0, 0] })).toThrow(
+			expect.objectContaining({
+				message: 'Error reading the fields of an element',
+				cause: expect.objectContaining({ message: 'Unknown field of an element: 15' })
+			})
+		);
+		// an element without fields is the end of the list, 1 bit
+		const none = new StateWriter();
+		none.writeElementFields({ type: 'marker', point: [0, 0] });
+		expect(none.bits.length).toBe(1);
 	});
 });
 

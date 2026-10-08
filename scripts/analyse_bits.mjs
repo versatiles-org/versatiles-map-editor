@@ -30,12 +30,12 @@ import { decodeStringBlock } from '../packages/map-state/dist/string_coder.js';
 import {
 	BACKGROUND_KEYS,
 	ELEMENT_END,
+	ELEMENT_FIELD_KEYS,
 	ELEMENT_KEYS,
 	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
 	METADATA_KEYS,
-	POPUP_KEYS,
 	VIEWER_KEYS
 } from '../packages/map-state/dist/constants.js';
 import { styleFields, styleRemoveKey } from '../packages/map-state/dist/style_history.js';
@@ -133,7 +133,7 @@ const KEY_TABLES = {
 	readBackground: BACKGROUND_KEYS,
 	readLegend: LEGEND_KEYS,
 	readLegendEntry: LEGEND_ENTRY_KEYS,
-	readPopup: POPUP_KEYS,
+	readElementFields: ELEMENT_FIELD_KEYS,
 	readViewer: VIEWER_KEYS,
 	readFrame: FRAME_KEYS
 };

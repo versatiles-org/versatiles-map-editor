@@ -131,7 +131,7 @@ describe('style references', () => {
 		writer.writeBit(false); // the points of markers and circles from the origin
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
-		writer.writeBit(true); // elements may have popups
+		writer.writeBit(true); // elements may have fields, e.g. a popup
 		writer.writeKey(ELEMENT_KEYS.marker, KEY_PARAMETERS.element);
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);

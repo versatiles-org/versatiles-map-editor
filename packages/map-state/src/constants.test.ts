@@ -4,6 +4,7 @@ import {
 	bitsToBase64,
 	CODEC_VERSION,
 	ELEMENT_END,
+	ELEMENT_FIELD_KEYS,
 	ELEMENT_KEYS,
 	END_KEY,
 	FRAME_KEYS,
@@ -11,7 +12,6 @@ import {
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
 	METADATA_KEYS,
-	POPUP_KEYS,
 	VIEWER_KEYS
 } from './constants.js';
 import { StateReader } from './reader.js';
@@ -30,7 +30,7 @@ describe('the keys of the fields', () => {
 			['viewer', Object.values(VIEWER_KEYS), END_KEY],
 			['legend', Object.values(LEGEND_KEYS), END_KEY],
 			['legend entry', Object.values(LEGEND_ENTRY_KEYS), END_KEY],
-			['popup', Object.values(POPUP_KEYS), END_KEY],
+			['fields of an element', Object.values(ELEMENT_FIELD_KEYS), END_KEY],
 			...(Object.keys(STYLE_KEYS) as StyleRoleName[]).map((role): [string, number[], number] => [
 				`style of ${role}`,
 				[...styleFields(role).map((field) => field.key), styleRemoveKey(role)],
