@@ -80,7 +80,9 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   visible area `bounds`, `[west, south, east, north]` (the type `Bounds`), which it shows completely
   whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees; and
   what viewers can do with the map: `canPan` and `canZoom` (unless `false`), `canRotate` and
-  `canTilt` (if `true`). `sanitizeFrame`
+  `canTilt` (if `true`), whether they stay in the area that the map opens with (`confine`), how
+  far they can zoom (`minZoom`, `maxZoom`), and whether an embedded map leaves the wheel to its
+  page (`scrollZoom`, unless `"free"`). `sanitizeFrame`
   checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius).
 - The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
@@ -126,7 +128,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, canPan, canZoom, canRotate, canTilt }`
+- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
   map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say;
@@ -135,7 +137,9 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
-  `meta.viewer`: what the read-only viewer shows over the map, and where;
+  `meta.viewer`: what the read-only viewer shows over the map, and where: the search, the zoom
+  buttons, the legend, a scale bar, and buttons to reset the view, for the whole screen and for
+  the viewer's location;
   `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, from
   which zoom level they are shown, and whether the labels of the background map are on top)
 

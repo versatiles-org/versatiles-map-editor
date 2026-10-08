@@ -14,7 +14,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
 - **Save** the map as a file and open it again. The editor keeps the map, its undo history and the view in the browser, so a reload keeps the work. A map that is opened shows all its elements; where its author looked is not part of the map.
-- **Share** a link or embed the map in a website, with a selectable accuracy and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
+- **Share** a link or embed the map in a website, with a selectable accuracy. The author decides what visitors see over the map (a search, the legend, a scale bar, buttons to zoom, to reset the view, for the whole screen and for their location) and what they can do with it (move, zoom, rotate, tilt, within limits). Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
 - **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
 
 ## Development
@@ -139,12 +139,16 @@ The **Share** dialog (at the top right of the editor) creates the link and the e
 
 - **Accuracy**: how exactly the positions are stored, like a quality slider, from _Low_ at the left to _Exact_ (1 m) at the right, each step twice as fine as the one before. A lower accuracy makes a shorter link; below the slider the dialog shows how the positions are rounded and how long the link is. _Automatic_ chooses _High_: fine enough for the visible area. A link of more than 2000 characters gets a warning, since some chat and mail programs cut long links, with what would make it shorter.
 
+- **Scrolling the page does not zoom the map** (below the embed code): an embedded map leaves the wheel to the page around it, and zooms with Ctrl (or ⌘) and the wheel. On unless switched off; a map in a window of its own always zooms with the wheel.
+
+The embed code asks the page for what the buttons of the map need: `allow="fullscreen"` for the button for the whole screen, `allow="geolocation"` for the one for the visitor's location. Without them, a page of another site does not get these buttons.
+
 What a shared map shows is set on the map itself, in **Shared map…** of the menu (the dialog has a button that leads there). The sidebar then has:
 
 - **Visible area**: the area that the map shows completely, on every screen; its handles are on the map.
 - **Rotation and tilt**: how the map is turned when it opens.
-- **Visitors**: whether they can move the map and zoom (both by default), and rotate and tilt it (neither by default).
-- **Controls**: the address search, with which visitors can find a place, e.g. their street; the zoom buttons; and the legend, each with its place on the map.
+- **Visitors**: whether they can move the map and zoom (both by default), and rotate and tilt it (neither by default); whether they stay in the area that the map shows when it opens; and how far they can zoom out and in.
+- **Controls**: the address search, with which visitors can find a place, e.g. their street; the zoom buttons; the legend; and a scale bar, each with its place on the map. With the zoom buttons, optionally: a button that shows the map as it opened, one for the whole screen, and one that shows where the visitor is and follows them.
 
 These settings are stored in the map.
 

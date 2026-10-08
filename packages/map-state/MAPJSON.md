@@ -31,7 +31,7 @@ its elements, on the editor's default background map.
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
+	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30, "confine": true, "maxZoom": 17 },
 	"meta": {
 		"title": "A walk through Berlin",
 		"background": { "theme": "gray", "labels": "fewer", "colors": { "black": 0.2 } },
@@ -41,7 +41,7 @@ its elements, on the editor's default background map.
 				{ "type": "line", "style": { "color": "#d55e00", "width": 4, "dash": "dashed" }, "label": "Boat route" }
 			]
 		},
-		"viewer": { "search": "top-left", "legend": "top-right" }
+		"viewer": { "search": "top-left", "legend": "top-right", "scale": "bottom-left", "reset": true }
 	},
 	"elements": [
 		{
