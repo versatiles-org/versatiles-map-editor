@@ -24,6 +24,8 @@
 		// a pencil: back to the editor from the preview
 		edit: ['M4 20l1-4L16 5l3 3L8 19z', 'M14 7l3 3'],
 		external: ['M14 4h6v6', 'M20 4l-9 9', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],
+		// the corners of a frame: the map with all that is on it
+		fit: ['M4 9V4h5', 'M15 4h5v5', 'M20 15v5h-5', 'M9 20H4v-5', 'M10 10h4v4h-4z'],
 		front: ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14'],
 		// a handle to drag, e.g. a row of a list
 		grip: ['M7 9h10M7 15h10'],

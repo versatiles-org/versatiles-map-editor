@@ -31,6 +31,7 @@
 		{
 			title: 'View',
 			keys: [
+				['Show all elements', '0'],
 				['Fullscreen, and back', 'F, and Escape'],
 				['Close the preview', 'Escape']
 			]

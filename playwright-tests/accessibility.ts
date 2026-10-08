@@ -104,7 +104,7 @@ test('elements can be chosen and deleted with the keyboard in the list of elemen
 	await page.goto('/#' + state);
 	await waitForMapIsReady(page);
 
-	await page.getByRole('button', { name: 'Elements' }).click();
+	await page.getByRole('button', { name: 'Elements', exact: true }).click();
 	const list = page.getByRole('listbox', { name: 'Elements' });
 	const options = list.getByRole('option');
 	// the element in front first

@@ -213,6 +213,7 @@ test('the legend keeps its corner, stacked with the search or the zoom buttons t
 	const search = page.getByRole('combobox', { name: 'Search address or place' });
 	const zoom = page.locator('.maplibregl-ctrl-group').filter({ has: zoomIn(page) });
 	const attribution = page.locator('.maplibregl-ctrl-attrib');
+	const showAll = page.getByRole('button', { name: 'Show all elements' });
 	for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
 		await test.step(`a legend at ${position}`, async () => {
 			await page.goto('/#' + encodeState({ ...state, meta: { ...state.meta, viewer: { legend: position } } }));
@@ -230,9 +231,12 @@ test('the legend keeps its corner, stacked with the search or the zoom buttons t
 			await expect.poll(async () => (await box(legendList))[horizontal]).toBeCloseTo(edges[horizontal], -1);
 			const legend = await box(legendList);
 			if (vertical === 'top') {
-				// below the search (top left) or the zoom buttons (top right) of the editor
-				const above = await box(horizontal === 'left' ? search : zoom);
-				expect(above.top).toBeCloseTo(edges.top, -1);
+				// below the search (top left), or the zoom buttons and the button that shows all elements
+				// under them (top right) of the editor
+				const first = await box(horizontal === 'left' ? search : zoom);
+				const above = horizontal === 'left' ? first : await box(showAll);
+				expect(first.top).toBeCloseTo(edges.top, -1);
+				if (horizontal === 'right') expect(above.top).toBeCloseTo(first.bottom + 10, -1);
 				expect(legend.top).toBeCloseTo(above.bottom + 10, -1);
 			} else {
 				expect(legend.bottom).toBeCloseTo(edges.bottom, -1);

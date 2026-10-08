@@ -1153,3 +1153,39 @@ test('Shift-drag on the map zooms to a box', async ({ page }) => {
 	await page.keyboard.up('Shift');
 	await expect.poll(zoom).toBeGreaterThan(before + 1);
 });
+
+test('all elements are shown again with a button on the map or the key 0', async ({ page }) => {
+	const points: Point[] = [
+		[13.3, 52.45],
+		[13.5, 52.55]
+	];
+	const button = page.getByRole('button', { name: 'Show all elements' });
+	/** Whether the map shows both markers, and how it is turned. */
+	const shown = () =>
+		page.evaluate((points) => {
+			const { map } = window as unknown as MapWindow;
+			return { all: points.every((point) => map.getBounds().contains(point)), bearing: Math.round(map.getBearing()) };
+		}, points);
+
+	// nothing to show on an empty map
+	await page.goto('/');
+	await waitForMapIsReady(page);
+	await expect(button).toBeDisabled();
+
+	await page.goto('/#' + encodeState({ elements: points.map((point) => ({ type: 'marker', point })) }));
+	await waitForMapIsReady(page);
+	expect(await shown()).toStrictEqual({ all: true, bearing: 0 });
+
+	// somewhere else: the button
+	await showView(page, { center: [2.35, 48.85], radius: 2000 });
+	expect((await shown()).all).toBe(false);
+	await button.click();
+	await expect.poll(shown).toStrictEqual({ all: true, bearing: 0 });
+
+	// the key, on a map that is turned, and stays so
+	await showView(page, { center: [2.35, 48.85], radius: 2000 });
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ bearing: 30 }));
+	await page.locator('.maplibregl-canvas').focus();
+	await page.keyboard.press('0');
+	await expect.poll(shown).toStrictEqual({ all: true, bearing: 30 });
+});

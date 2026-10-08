@@ -14,9 +14,10 @@ export function isCorner(position: string | undefined): position is Corner {
 
 /**
  * The order of the controls in a corner, from its edge inwards: at the top the search, the
- * buttons for zooming and the legend; at the bottom the attribution, the buttons and the legend.
+ * buttons for zooming, the editor's button that shows all elements, and the legend; at the bottom
+ * the attribution, the buttons and the legend.
  */
-export const CONTROL_ORDER = { search: 0, attribution: 0, navigation: 1, legend: 2 };
+export const CONTROL_ORDER = { search: 0, attribution: 0, navigation: 1, fit: 2, legend: 3 };
 
 /** The size of the controls in a corner, with their margins. */
 export interface StackSize {

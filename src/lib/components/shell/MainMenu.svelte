@@ -6,6 +6,7 @@
 	import DialogImportTable from '#lib/components/dialogs/DialogImportTable.svelte';
 	import DialogShortcuts from '#lib/components/dialogs/DialogShortcuts.svelte';
 	import { Icon, IconButton } from '#lib/components/ui/index.js';
+	import { isOwnKeyTarget } from '#lib/components/common/index.js';
 	import type { FileCommands } from '#lib/files/index.js';
 	import type { RecentMap, SessionSync } from '#lib/sessions/index.js';
 	import type { Example } from 'virtual:examples';
@@ -110,6 +111,18 @@
 		}
 		e.preventDefault();
 		list[next]?.focus();
+	}
+
+	/**
+	 * The keys of the view: F for fullscreen, and 0 to show all elements, which has a button on the
+	 * map instead of an item here.
+	 */
+	function onWindowKeydown(e: KeyboardEvent) {
+		fullscreen.onKeydown(e);
+		if (e.defaultPrevented || isOwnKeyTarget(e) || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+		if (e.key !== '0') return;
+		e.preventDefault();
+		doc.showAllElements();
 	}
 
 	function onWindowPointerdown(e: PointerEvent) {
@@ -247,7 +260,7 @@
 </script>
 
 <!-- F switches fullscreen on and off -->
-<svelte:window onpointerdown={onWindowPointerdown} onkeydown={fullscreen.onKeydown} onresize={placeSubmenu} />
+<svelte:window onpointerdown={onWindowPointerdown} onkeydown={onWindowKeydown} onresize={placeSubmenu} />
 
 {#snippet item(
 	label: string,

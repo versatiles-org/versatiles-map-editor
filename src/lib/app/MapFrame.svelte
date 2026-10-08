@@ -19,7 +19,7 @@
 	// bundle after a build. The URL of the bundled worker comes from a plugin in vite.config.ts.
 	import maplibreWorkerUrl from 'virtual:maplibre-worker-url';
 	import { Legend, LoadingIndicator, SearchPlace } from '#lib/components/map_viewer/index.js';
-	import { Notifications } from '#lib/components/ui/index.js';
+	import { Icon, Notifications } from '#lib/components/ui/index.js';
 	import { SymbolLibrary, setSymbolLibrary } from '#lib/components/common/index.js';
 	import type { MapDocument } from '#lib/document/index.js';
 	import type { Box } from '#lib/rendering/index.js';
@@ -161,6 +161,13 @@
 		const position = mapDocument.controls.navigation;
 		if (position !== 'none') return position;
 		return asShared ? undefined : VIEWER_DEFAULTS.navigation;
+	});
+
+	// The editor's own button that shows all elements, with the buttons for zooming; while the
+	// shared map is edited without them, where they would be.
+	const fitCorner: Corner | undefined = $derived.by(() => {
+		if (!editor || !mapDocument) return undefined;
+		return navigationCorner ?? VIEWER_DEFAULTS.navigation;
 	});
 
 	let pageWidth = $state(0);
@@ -445,6 +452,25 @@
 			</div>
 		</div>
 	{/if}
+	{#if mapDocument?.isInteractive() && fitCorner}
+		{@const doc = mapDocument}
+		<div class="control-slot">
+			<div
+				class="maplibregl-ctrl-group map-fit"
+				use:cornerControl={{ map: doc.view.map, corner: fitCorner, order: CONTROL_ORDER.fit }}
+			>
+				<button
+					type="button"
+					aria-label="Show all elements"
+					title="Show all elements (0)"
+					disabled={doc.elements.length === 0}
+					onclick={() => doc.showAllElements()}
+				>
+					<Icon name="fit" />
+				</button>
+			</div>
+		</div>
+	{/if}
 	{#if hint}
 		<div
 			class="hint"
@@ -609,6 +635,18 @@
 			height: var(--size-md);
 			border-color: var(--color-border);
 			box-shadow: var(--shadow-sm);
+		}
+	}
+
+	/* a button of the editor's own with those of MapLibre, in the colors of the editor's theme */
+	.map-fit button {
+		display: flex;
+		/* its icon on whole pixels: the button is 29 pixels wide and high, the icon 18 */
+		padding: 5px 6px 6px 5px;
+		color: var(--color-text);
+
+		&:disabled {
+			opacity: 0.4;
 		}
 	}
 

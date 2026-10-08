@@ -132,6 +132,15 @@ export class MapDocumentInteractive extends MapDocument {
 		return { ...viewport, turnable: true, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
 	}
 
+	/**
+	 * Show all elements, e.g. to find those that are far from where the editor looks. The map stays
+	 * turned as it is. Nothing for an empty map.
+	 */
+	public showAllElements() {
+		const elements = this.elements.map((element) => element.getState());
+		if (elements.length > 0) this.view.fitArea(undefined, elements, { turn: this.view.getTurn() });
+	}
+
 	protected override applyCamera(camera: MapState['view']) {
 		super.applyCamera(camera);
 		this.turnable = camera?.turnable === true;
