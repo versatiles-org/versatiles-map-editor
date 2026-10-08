@@ -425,6 +425,8 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 	await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
 	await shown.uncheck();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ legend: 'none' });
+	// the map shows it as visitors see it, while the shared map is edited
+	await expect(page.getByRole('list', { name: 'Legend' })).toHaveCount(0);
 	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(preview.getByRole('list', { name: 'Legend' })).toHaveCount(0);
 	await page.keyboard.press('Escape');

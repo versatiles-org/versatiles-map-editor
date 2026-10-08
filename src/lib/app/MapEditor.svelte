@@ -125,6 +125,7 @@
 		onmark={markPlace}
 		onselectlegend={selectLegend}
 		editor
+		asShared={sharing}
 		{sessions}
 		{onMapLoad}
 	>

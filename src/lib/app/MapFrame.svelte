@@ -56,6 +56,7 @@
 		onselectlegend,
 		hint,
 		editor = false,
+		asShared = false,
 		sessions,
 		onMapLoad,
 		children
@@ -80,6 +81,11 @@
 		hint?: string;
 		/** Whether this is the editor, which follows the dark mode of the system. */
 		editor?: boolean;
+		/**
+		 * Whether the editor shows the legend, the search and the buttons as a shared map has them,
+		 * while the shared map is edited: one that is hidden there is hidden here too.
+		 */
+		asShared?: boolean;
 		/**
 		 * The browser storage of the editor's maps: the editor opens and keeps its map there, the
 		 * viewer on the editor page (phones) shows the last one without a link. Without it (the
@@ -135,22 +141,26 @@
 
 	// The legend, the search and the buttons for zooming at their places in the viewer. The editor
 	// always shows the search and the buttons, at their places or at the defaults, and a legend
-	// hidden in the viewer at the default place, so it can be edited.
+	// hidden in the viewer at the default place, so it can be edited. Only while the shared map is
+	// edited, it shows them as the viewer does: what is hidden there is hidden here.
+	const showsHidden = $derived(editor && !asShared);
 	const legendPosition: LegendPosition | undefined = $derived.by(() => {
 		if (!mapDocument?.legend?.entries.length) return undefined;
 		const position = mapDocument.controls.legend;
 		if (position !== 'none') return position;
-		return editor ? VIEWER_DEFAULTS.legend : undefined;
+		return showsHidden ? VIEWER_DEFAULTS.legend : undefined;
 	});
 	const searchCorner: Corner | undefined = $derived.by(() => {
 		if (!search || !mapDocument) return undefined;
 		const position = mapDocument.controls.search;
-		return position === 'none' ? 'top-left' : position;
+		if (position !== 'none') return position;
+		return asShared ? undefined : 'top-left';
 	});
 	const navigationCorner: Corner | undefined = $derived.by(() => {
 		if (!navigation || !mapDocument) return undefined;
 		const position = mapDocument.controls.navigation;
-		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
+		if (position !== 'none') return position;
+		return asShared ? undefined : VIEWER_DEFAULTS.navigation;
 	});
 
 	let pageWidth = $state(0);
@@ -261,17 +271,30 @@
 		}
 	}
 
+	/** Whether visitors of the shared map get a compass: unless it is neither turned nor can be. */
+	function visitorsCompass(doc: MapDocument): boolean {
+		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = doc.frameTurn ?? {};
+		return !(lockBearing && lockPitch && !bearing && !pitch);
+	}
+	// by its value, so a change of the frame that keeps it does not add the buttons again
+	const sharedCompass = $derived(!!mapDocument && (!editor || asShared) && visitorsCompass(mapDocument));
+
 	// the buttons for zooming, and a compass: in the viewer unless its map is neither turned nor can
-	// be, in the editor while its author turns the map
+	// be, in the editor while its author turns the map, or while the shared map is edited and has one
 	$effect(() => {
 		void turnKey;
 		const corner = navigationCorner;
-		const m = mapDocument?.view.map;
-		if (!m || !corner) return;
-		const compass = turn ? !(turn.lockBearing && turn.lockPitch && !turn.bearing && !turn.pitch) : authorTurns;
-		// back to how the map opened; in the editor to north at the top, seen from straight above,
-		// which while the visible area is edited is how the shared map opens then
-		const reset = () => m.easeTo({ bearing: turn?.bearing ?? 0, pitch: turn?.pitch ?? 0 });
+		const doc = mapDocument;
+		const m = doc?.view.map;
+		if (!doc || !m || !corner) return;
+		const compass = turn ? sharedCompass : authorTurns || sharedCompass;
+		// Back to how the map opened. In the editor to north at the top, seen from straight above,
+		// which while the shared map is edited is how it opens then; if its author does not turn the
+		// map there, back to how the shared map is turned.
+		const reset = () => {
+			const to = turn ?? (authorTurns ? undefined : doc.frameTurn);
+			m.easeTo({ bearing: to?.bearing ?? 0, pitch: to?.pitch ?? 0 });
+		};
 		return addNavigation(m, corner, compass ? reset : undefined);
 	});
 

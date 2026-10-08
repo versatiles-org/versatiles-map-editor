@@ -115,11 +115,17 @@ test.describe('address search in the viewer', () => {
 		const preview = page.frameLocator('iframe[title=preview]');
 		const viewer = async () => (await storedState(page)).meta?.viewer;
 
-		// off by default; on at the top left, then at the top right
+		// off by default, so the map does not show it while the shared map is edited; on at the top
+		// left, then at the top right
+		const onMap = page.getByRole('combobox', { name: 'Search address or place' });
+		const zoomIn = page.getByRole('button', { name: 'Zoom in' });
 		const option = controls.getByRole('checkbox', { name: 'Address search' });
 		await expect(option).not.toBeChecked();
+		await expect(onMap).toHaveCount(0);
+		await expect(zoomIn).toBeVisible();
 		await option.check();
 		await expect.poll(viewer).toStrictEqual({ search: 'top-left' });
+		await expect(onMap).toBeVisible();
 		await controls
 			.getByRole('radiogroup', { name: 'Place of the address search' })
 			.getByRole('radio', { name: 'Top right' })
@@ -137,11 +143,14 @@ test.describe('address search in the viewer', () => {
 		await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
 		await controls.getByRole('checkbox', { name: 'Zoom buttons' }).uncheck();
 		await expect.poll(viewer).toStrictEqual({ search: 'top-right', navigation: 'none' });
+		// hidden on the map too, until the editor is back, which always has them
+		await expect(zoomIn).toHaveCount(0);
 		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 		await expect(preview.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
 
 		// one undo step each
 		await page.keyboard.press('Escape');
+		await expect(zoomIn).toBeVisible();
 		await page.keyboard.press('ControlOrMeta+z');
 		await expect.poll(viewer).toStrictEqual({ search: 'top-right' });
 	});

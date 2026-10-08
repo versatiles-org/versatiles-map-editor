@@ -149,8 +149,9 @@
 	</div>
 </InspectorSection>
 
-<!-- what visitors see over the map, and where -->
+<!-- what visitors see over the map, and where; the map shows them so, see `asShared` of MapFrame -->
 <InspectorSection title="Controls">
+	<Hint>The map shows them as visitors see them.</Hint>
 	<SharedMapControls {doc} />
 </InspectorSection>
 
