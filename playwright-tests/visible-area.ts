@@ -864,3 +864,56 @@ test('the zoom of visitors of a shared map can be limited', async ({ page }) => 
 	await wheel(3000);
 	expect(await zoom()).toBeLessThan(now - 1);
 });
+
+test('a shared map can leave the wheel to the page around it', async ({ page }) => {
+	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+	const hint = page.locator('.maplibregl-cooperative-gesture-screen');
+	await page.setViewportSize({ width: 800, height: 600 });
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame, scrollZoom: 'protected' }, elements }));
+	await waitForMapIsReady(page);
+	const start = await zoom();
+	// the wheel alone does not zoom, and the map says what does
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, -600);
+	await expect(hint).toHaveClass(/maplibregl-show/);
+	await waitForMapIsIdle(page);
+	expect(await zoom()).toBe(start);
+	// with Ctrl it does, or with ⌘ where the browser says that it is on a Mac
+	const modifier = (await page.evaluate(() => navigator.userAgent.includes('Mac'))) ? 'Meta' : 'Control';
+	// after a pause, so the wheel starts anew
+	await expect
+		.poll(async () => {
+			await page.waitForTimeout(700);
+			await page.keyboard.down(modifier);
+			await page.mouse.wheel(0, -600);
+			await page.keyboard.up(modifier);
+			await page.waitForTimeout(700);
+			return zoom();
+		})
+		.toBeGreaterThan(start + 0.5);
+
+	// free by default
+	await page.goto('about:blank');
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
+	await waitForMapIsReady(page);
+	const free = await zoom();
+	await page.mouse.move(400, 300);
+	await page.mouse.wheel(0, -600);
+	await expect.poll(zoom).toBeGreaterThan(free + 0.5);
+
+	// the panel; the author's wheel zooms the map as ever
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Shared map…')).click();
+	await sidebar(page).getByRole('checkbox', { name: 'Scrolling does not zoom the map' }).check();
+	await expect
+		.poll(async () => (await storedState(page)).frame)
+		.toStrictEqual({ bounds: frame, scrollZoom: 'protected' });
+	await waitForMapIsIdle(page);
+	const before = await zoom();
+	await page.mouse.move(500, 350);
+	await page.mouse.wheel(0, 600);
+	await expect.poll(zoom).toBeLessThan(before - 0.5);
+});

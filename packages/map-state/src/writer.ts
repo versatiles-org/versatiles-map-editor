@@ -326,6 +326,7 @@ export class StateWriter {
 			key('maxZoom');
 			this.writeInteger(Math.round(frame.maxZoom * 2), 6);
 		}
+		if (frame.scrollZoom === 'protected') key('scrollProtected');
 		this.writeInteger(END_KEY, 4);
 	}
 

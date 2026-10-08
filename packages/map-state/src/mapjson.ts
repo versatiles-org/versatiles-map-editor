@@ -88,7 +88,8 @@ export const MAPJSON_FIELDS = {
 		'canTilt',
 		'confine',
 		'minZoom',
-		'maxZoom'
+		'maxZoom',
+		'scrollZoom'
 	],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],

@@ -247,8 +247,8 @@
 		if (editor || !mapDocument) return undefined;
 		const { bearing = 0, pitch = 0, ...can } = mapDocument.frameTurn ?? {};
 		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
-		const { minZoom, maxZoom } = can;
-		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom };
+		const { minZoom, maxZoom, scrollZoom = 'free' } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom };
 	});
 	const turnKey = $derived(JSON.stringify(turn));
 
@@ -264,6 +264,11 @@
 			zoom: !turn.canZoom
 		});
 		view.setZoomLimits({ min: turn.minZoom, max: turn.maxZoom });
+		// The wheel scrolls the page around the map, which zooms with Ctrl (or ⌘) and the wheel, and
+		// moves on touch screens with two fingers: MapLibre's cooperative gestures, with its hint.
+		const gestures = view.map.cooperativeGestures;
+		if (turn.scrollZoom === 'protected') gestures?.enable();
+		else gestures?.disable();
 		// in what the map shows when it opens: its frame or its elements; an empty map has neither
 		view.confine(turn.confine && (!!mapDocument?.frame || (mapDocument?.elements.length ?? 0) > 0));
 	});

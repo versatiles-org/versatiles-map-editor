@@ -360,6 +360,9 @@ export class StateReader {
 					case FRAME_KEYS.maxZoom:
 						frame.maxZoom = this.readInteger(6) / 2;
 						break;
+					case FRAME_KEYS.scrollProtected:
+						frame.scrollZoom = 'protected';
+						break;
 					default:
 						throw new Error(`Unknown key of the frame: ${key}`);
 				}

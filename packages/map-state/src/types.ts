@@ -24,6 +24,12 @@ export type HexColor = string;
 export const MAX_PITCH = 60;
 
 /**
+ * What the wheel does over a shared map, see `StateFrame.scrollZoom`.
+ * @category Map state
+ */
+export const SCROLL_ZOOMS = ['free', 'protected'] as const;
+
+/**
  * The largest zoom level of a map, and so of the limits of a frame.
  * @category Map state
  */
@@ -85,6 +91,12 @@ export interface StateFrame {
 	 * @multipleOf 0.5
 	 */
 	maxZoom?: number;
+	/**
+	 * What the wheel does over the map, e.g. of a map that is embedded in a page: "free" zooms the
+	 * map; "protected" scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves
+	 * on touch screens with two fingers. Default: "free".
+	 */
+	scrollZoom?: (typeof SCROLL_ZOOMS)[number];
 }
 
 /**

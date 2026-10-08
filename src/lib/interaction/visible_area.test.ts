@@ -37,7 +37,8 @@ describe('VisibleAreaMode', () => {
 				confine: false,
 				// no limits of the zoom
 				minZoom: undefined,
-				maxZoom: undefined
+				maxZoom: undefined,
+				scrollZoom: 'free'
 			});
 			doc.visibleArea.setTurn({ bearing: 30 });
 			doc.visibleArea.setTurn({ bearing: 40 });

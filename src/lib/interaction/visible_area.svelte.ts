@@ -146,8 +146,8 @@ export class VisibleAreaMode {
 		const { bearing = 0, pitch = 0, ...can } = this.#doc.frameTurn ?? {};
 		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
 		// the zoom limits have no default: undefined is no limit
-		const { minZoom, maxZoom } = can;
-		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom };
+		const { minZoom, maxZoom, scrollZoom = 'free' } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom };
 	}
 
 	/**

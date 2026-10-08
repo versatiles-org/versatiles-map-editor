@@ -478,6 +478,7 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	const minZoom = zoom(v.minZoom);
 	if (minZoom !== undefined) frame.minZoom = maxZoom === undefined ? minZoom : Math.min(minZoom, maxZoom);
 	if (maxZoom !== undefined) frame.maxZoom = maxZoom;
+	if (v.scrollZoom === 'protected') frame.scrollZoom = 'protected';
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 

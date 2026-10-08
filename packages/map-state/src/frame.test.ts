@@ -124,6 +124,7 @@ describe('frame: how the map is turned', () => {
 			{ bounds, canTilt: true, canZoom: false },
 			{ confine: true },
 			{ minZoom: 3.5 },
+			{ scrollZoom: 'protected' },
 			{ maxZoom: 0 },
 			{ bounds, minZoom: 8, maxZoom: 22 },
 			{ bounds, confine: true }
@@ -261,6 +262,10 @@ describe('sanitizeFrame', () => {
 		expect(sanitizeFrame({ minZoom: -1, maxZoom: 23 })).toStrictEqual({ minZoom: 0, maxZoom: 22 });
 		expect(sanitizeFrame({ minZoom: 'far', maxZoom: null })).toBeUndefined();
 		expect(sanitizeFrame({ minZoom: 0 })).toStrictEqual({ minZoom: 0 });
+		// the wheel zooms the map unless the frame says that it is protected
+		expect(sanitizeFrame({ scrollZoom: 'free' })).toBeUndefined();
+		expect(sanitizeFrame({ scrollZoom: 'locked' })).toBeUndefined();
+		expect(sanitizeFrame({ scrollZoom: 'protected' })).toStrictEqual({ scrollZoom: 'protected' });
 		expect(sanitizeFrame({})).toBeUndefined();
 		expect(sanitizeFrame([-10, -20, 10, 20])).toBeUndefined();
 		expect(sanitizeFrame(undefined)).toBeUndefined();
