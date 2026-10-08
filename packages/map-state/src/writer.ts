@@ -20,7 +20,6 @@ import {
 	ELEMENT_FIELD_KEYS,
 	VIEWER_KEYS
 } from './constants.js';
-import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS, rgbHex } from './color_schemes.js';
 import { boundsOf, centerOf } from './bounds.js';
 import {
 	LEGEND_DEFAULTS,
@@ -786,17 +785,18 @@ export class StateWriter {
 	}
 
 	/**
-	 * A color of the palette: 1 bit whether it is one of the color schemes (`BUILT_IN_COLORS`), then
-	 * its index there, else its red, green and blue; then its alpha (see `writeColor`).
+	 * A color of the palette: 1 bit whether it is black or white, then 1 bit which (white: 1), else
+	 * its red, green and blue; then its alpha (see `writeColor`). Black and white are the colors
+	 * that maps of any design have, e.g. for labels and halos; the format knows no other colors.
 	 */
 	writePaletteColor(color: string) {
-		const index = BUILT_IN_COLORS.indexOf(rgbHex(color));
-		if (index < 0) {
-			this.writeBit(false);
-			return this.writeColor(color);
-		}
-		this.writeBit(true);
-		this.writeInteger(index, BUILT_IN_COLOR_BITS);
+		const rgb = parseColor(color);
+		if (!rgb) throw new Error(`Invalid color: ${color}`);
+		const [r, g, b] = [rgb.r, rgb.g, rgb.b].map(Math.round);
+		const gray = r === g && g === b && (r === 0 || r === 255);
+		this.writeBit(gray);
+		if (!gray) return this.writeColor(color);
+		this.writeBit(r === 255);
 		this.writeAlpha(color);
 	}
 

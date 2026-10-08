@@ -86,6 +86,28 @@ describe('color palette', () => {
 	});
 });
 
+describe('the colors of a palette', () => {
+	it('cost 3 bits if black or white, else 26, each 8 more with alpha', () => {
+		const bits = (color: string) => {
+			const writer = new StateWriter();
+			writer.writePaletteColor(color);
+			return writer.bits.length;
+		};
+		expect(['#000000', '#ffffff', '#ffffff80', '#0072b2', '#0072b24d', '#fefefe'].map(bits)).toStrictEqual([
+			3, 3, 11, 26, 34, 26
+		]);
+	});
+
+	it('are read with their alpha, in lowercase', () => {
+		const colors = ['#000000', '#FFFFFF', '#00000080', '#ffffff4d', '#0072B2', '#00664a80', '#010101'];
+		const writer = new StateWriter();
+		for (const color of colors) writer.writePaletteColor(color);
+		const reader = new StateReader(writer.bits);
+		expect(colors.map(() => reader.readPaletteColor())).toStrictEqual(colors.map((color) => color.toLowerCase()));
+		expect(reader.ended()).toBe(true);
+	});
+});
+
 describe('versions', () => {
 	it('encodeState writes version 1', () => {
 		expect(StateReader.fromBase64(encodeState(state)).readKey(KEY_PARAMETERS.version)).toBe(1);

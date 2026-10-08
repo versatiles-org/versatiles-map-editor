@@ -123,7 +123,7 @@
  * defaults, which a style leaves out.
  *
  * @categoryDescription Colors
- * Reading and writing the colors of styles, and the color schemes of the editor.
+ * Reading and writing the colors of styles.
  *
  * @categoryDescription Legend
  * The legend of a map: its entries, how it is laid out, and where a shared map shows it.
@@ -145,7 +145,6 @@ export type { GeoJSONDocument } from './geojson.js';
 export { stateFromGeoJSON, stateToGeoJSON } from './geojson.js';
 export { CODEC_VERSION } from './constants.js';
 export { formatHex, parseColor, type RGBA } from './color.js';
-export { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 export {
 	coarsestResolutionForArea,
 	exponentForResolution,

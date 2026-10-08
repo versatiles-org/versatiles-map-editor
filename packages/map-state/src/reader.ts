@@ -1,4 +1,4 @@
-import { formatHex, parseColor } from './color.js';
+import { formatHex } from './color.js';
 import {
 	ARROW_NAMES,
 	BACKGROUND_LABELS,
@@ -61,7 +61,6 @@ import {
 } from './profile.js';
 import { LocalGrid } from './grid.js';
 import { decodeStringBlock } from './string_coder.js';
-import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS } from './color_schemes.js';
 import {
 	roleOf,
 	styleFields,
@@ -842,11 +841,8 @@ export class StateReader {
 	/** See `StateWriter.writePaletteColor`. */
 	readPaletteColor(): string {
 		if (!this.readBit()) return this.readColor();
-		const index = this.readInteger(BUILT_IN_COLOR_BITS);
-		const color = BUILT_IN_COLORS[index];
-		if (color === undefined) throw new Error(`Invalid built-in color: ${index}`);
-		const rgb = parseColor(color)!;
-		return formatHex({ ...rgb, alpha: this.readAlpha() });
+		const value = this.readBit() ? 255 : 0;
+		return formatHex({ r: value, g: value, b: value, alpha: this.readAlpha() });
 	}
 
 	/** The strings of the metadata, the labels and the popups, each once, which are referenced afterwards. */
