@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from './geojson.js';
 import { decodeState, encodeState } from './index.js';
-import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, type MapState } from './types.js';
+import { FILL_PATTERN_NAMES, DASH_NAMES, type MapState } from './types.js';
 
 /** A GeoJSON document as a link, and back. */
 const encodeGeoJSON = (doc: GeoJSONDocument) => encodeState(stateFromGeoJSON(doc));
@@ -132,7 +132,7 @@ describe('the names of the dashes and the fill patterns', () => {
 		];
 		const state: MapState = {
 			elements: [
-				...STROKE_STYLE_NAMES.slice(1).map((dash) => ({ type: 'line' as const, points, style: { dash } })),
+				...DASH_NAMES.slice(1).map((dash) => ({ type: 'line' as const, points, style: { dash } })),
 				...FILL_PATTERN_NAMES.slice(1).map((pattern) => ({ type: 'polygon' as const, points, style: { pattern } }))
 			]
 		};

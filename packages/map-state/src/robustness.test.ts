@@ -5,13 +5,7 @@ import { decodeState, encodeState, stateFromMapJSON, type Bounds, type MapState 
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
-import {
-	FILL_PATTERN_NAMES,
-	LABEL_POSITION_NAMES,
-	STROKE_STYLE_NAMES,
-	type Position,
-	type StateStyle
-} from './types.js';
+import { FILL_PATTERN_NAMES, LABEL_POSITION_NAMES, DASH_NAMES, type Position, type StateStyle } from './types.js';
 
 // Links that are cut off, changed or made up must either be refused quickly, or give a map that the
 // editor can draw and the writer can write again: what a corrupt or hostile link can do.
@@ -43,7 +37,7 @@ function checkStyle(style: StateStyle | undefined) {
 		if (style[key] !== undefined) expect(Number.isFinite(style[key])).toBe(true);
 	}
 	if (style.pattern !== undefined) expect(FILL_PATTERN_NAMES).toContain(style.pattern);
-	if (style.dash !== undefined) expect(STROKE_STYLE_NAMES).toContain(style.dash);
+	if (style.dash !== undefined) expect(DASH_NAMES).toContain(style.dash);
 	if (style.labelPosition !== undefined) expect(LABEL_POSITION_NAMES).toContain(style.labelPosition);
 	if (style.rotation !== undefined) expect(Math.abs(style.rotation)).toBeLessThanOrEqual(180);
 	for (const key of ['color', 'labelColor', 'haloColor'] as const) {

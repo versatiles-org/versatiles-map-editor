@@ -40,7 +40,7 @@ import {
 	BACKGROUND_THEMES,
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
-	STROKE_STYLE_NAMES,
+	DASH_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -692,7 +692,7 @@ export class StateWriter {
 			case 'pattern':
 				return this.writeName(FILL_PATTERN_NAMES, style.pattern!);
 			case 'dash':
-				return this.writeName(STROKE_STYLE_NAMES, style.dash!);
+				return this.writeName(DASH_NAMES, style.dash!);
 			case 'rotation':
 				return this.writeVarint(Math.round(style.rotation!), true);
 			case 'size':

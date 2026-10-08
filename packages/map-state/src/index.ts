@@ -87,8 +87,8 @@
  * | read or write a `.mapjson` file | {@link stateFromMapJSON}, {@link stateToMapJSON} |
  * | exchange a map with other tools | {@link stateToGeoJSON}, {@link stateFromGeoJSON}, {@link stateToKML}, {@link stateFromKML} |
  * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeFrame}, {@link sanitizeBounds} |
- * | know the values a field can have | the tables of names, e.g. {@link STROKE_STYLE_NAMES}, {@link BACKGROUND_THEMES}, {@link LEGEND_POSITIONS} |
- * | know the default of a field | the defaults, e.g. {@link LINE_DEFAULTS}, {@link SYMBOL_DEFAULTS}, {@link LEGEND_DEFAULTS} |
+ * | know the values a field can have | the tables of names, e.g. {@link DASH_NAMES}, {@link BACKGROUND_THEMES}, {@link LEGEND_POSITIONS} |
+ * | know the default of a field | the defaults, e.g. {@link LINE_DEFAULTS}, {@link MARKER_DEFAULTS}, {@link LEGEND_DEFAULTS} |
  *
  * ## Good to know
  *
@@ -168,10 +168,10 @@ export { stateFromKML, stateToKML } from './kml.js';
 
 // The style vocabulary: defaults and names of the style values, e.g. for rendering the elements
 export {
-	FILL_DEFAULTS,
+	AREA_DEFAULTS,
 	LINE_DEFAULTS,
 	ARROW_DEFAULTS,
-	SYMBOL_DEFAULTS,
+	MARKER_DEFAULTS,
 	hasArrow,
 	PATTERN_SCALE_RANGE,
 	PATTERN_COVERAGE_RANGE,

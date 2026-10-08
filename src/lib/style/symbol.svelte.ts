@@ -1,6 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type LabelPositionName, type StateStyle, SYMBOL_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
+import { type LabelPositionName, type StateStyle, MARKER_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
 import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
 
@@ -100,21 +100,21 @@ const anchors: Record<LabelPositionName, TextAnchor | undefined> = {
 };
 
 export class SymbolStyle extends StylePart {
-	static readonly defaultStyle = SYMBOL_DEFAULTS;
+	static readonly defaultStyle = MARKER_DEFAULTS;
 	protected readonly defaults = SymbolStyle.defaultStyle;
 
-	#color: string = $state(SYMBOL_DEFAULTS.color);
-	#haloWidth: number = $state(SYMBOL_DEFAULTS.haloWidth);
-	#rotation: number = $state(SYMBOL_DEFAULTS.rotation);
-	#flat: boolean = $state(SYMBOL_DEFAULTS.flat);
-	#size: number = $state(SYMBOL_DEFAULTS.size);
-	#labelSize: number = $state(SYMBOL_DEFAULTS.labelSize);
-	#symbol: string = $state(SYMBOL_DEFAULTS.symbol);
+	#color: string = $state(MARKER_DEFAULTS.color);
+	#haloWidth: number = $state(MARKER_DEFAULTS.haloWidth);
+	#rotation: number = $state(MARKER_DEFAULTS.rotation);
+	#flat: boolean = $state(MARKER_DEFAULTS.flat);
+	#size: number = $state(MARKER_DEFAULTS.size);
+	#labelSize: number = $state(MARKER_DEFAULTS.labelSize);
+	#symbol: string = $state(MARKER_DEFAULTS.symbol);
 	#label: string = $state('');
-	#labelPosition: LabelPositionName = $state(SYMBOL_DEFAULTS.labelPosition);
-	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
-	#labelFont: string = $state(SYMBOL_DEFAULTS.labelFont);
-	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
+	#labelPosition: LabelPositionName = $state(MARKER_DEFAULTS.labelPosition);
+	#labelColor: string = $state(MARKER_DEFAULTS.labelColor);
+	#labelFont: string = $state(MARKER_DEFAULTS.labelFont);
+	#haloColor: string = $state(MARKER_DEFAULTS.haloColor);
 
 	get color(): string {
 		return this.#color;

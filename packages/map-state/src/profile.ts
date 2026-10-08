@@ -15,7 +15,7 @@ import {
 	NAVIGATION_POSITIONS,
 	SCALE_POSITIONS,
 	SEARCH_POSITIONS,
-	STROKE_STYLE_NAMES,
+	DASH_NAMES,
 	MAX_PITCH,
 	MAX_ZOOM,
 	type Bounds,
@@ -54,7 +54,7 @@ import { STYLE_ROLE_FIELDS } from './style_roles.js';
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
 /** @category Styles */
-export const FILL_DEFAULTS: Defaults<'color' | 'pattern' | 'patternScale' | 'patternCoverage'> = {
+export const AREA_DEFAULTS: Defaults<'color' | 'pattern' | 'patternScale' | 'patternCoverage'> = {
 	color: '#ff0000',
 	pattern: 'solid',
 	patternScale: 1,
@@ -87,7 +87,7 @@ export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> =
 	arrowSize: 3
 };
 /** @category Styles */
-export const SYMBOL_DEFAULTS: Defaults<
+export const MARKER_DEFAULTS: Defaults<
 	| 'color'
 	| 'rotation'
 	| 'size'
@@ -191,7 +191,7 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
 	set(s, 'patternScale', sanitizeNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
 	set(s, 'patternCoverage', sanitizeNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
-	set(s, 'dash', oneOf(STROKE_STYLE_NAMES, v.dash));
+	set(s, 'dash', oneOf(DASH_NAMES, v.dash));
 	set(s, 'rotation', sanitizeRotation(v.rotation));
 	const size = sanitizeNumber(v.size, 0);
 	if (size) s.size = size;
@@ -278,7 +278,7 @@ export function removeDefaultFields(value: StateStyle, def: StateStyle): StateSt
  * so other tools read them: the color without alpha, and `fill-opacity`.
  */
 export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
-	const s = { ...FILL_DEFAULTS, ...style };
+	const s = { ...AREA_DEFAULTS, ...style };
 	const { r, g, b, alpha } = parseColor(s.color) ?? { r: 0, g: 0, b: 0, alpha: 1 };
 	return {
 		'fill-color': formatHex({ r, g, b, alpha: 1 }),
@@ -291,20 +291,20 @@ export function fillPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 }
 
 export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
-	const s: StateStyle = { ...FILL_DEFAULTS };
+	const s: StateStyle = { ...AREA_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['fill-color']));
 		// the opacity becomes the alpha of the color, also of a color with an alpha of its own
 		const opacity = sanitizeNumber(p['fill-opacity'], 0, 1);
 		if (opacity !== undefined && opacity < 1) {
-			const color = parseColor(s.color ?? FILL_DEFAULTS.color)!;
+			const color = parseColor(s.color ?? AREA_DEFAULTS.color)!;
 			s.color = formatHex({ ...color, alpha: color.alpha * opacity });
 		}
 		set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, p['fill-pattern']));
 		set(s, 'patternScale', sanitizeNumber(p['fill-pattern-scale'], ...PATTERN_SCALE_RANGE));
 		set(s, 'patternCoverage', sanitizeNumber(p['fill-pattern-coverage'], ...PATTERN_COVERAGE_RANGE));
 	}
-	return removeDefaultFields(withoutUnusedFields(s), FILL_DEFAULTS);
+	return removeDefaultFields(withoutUnusedFields(s), AREA_DEFAULTS);
 }
 
 // ----- stroke / line (line, polygon stroke, circle stroke) -----
@@ -323,7 +323,7 @@ export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 	const s: StateStyle = { ...LINE_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['stroke-color']));
-		set(s, 'dash', oneOf(STROKE_STYLE_NAMES, p['stroke-style']));
+		set(s, 'dash', oneOf(DASH_NAMES, p['stroke-style']));
 		set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
 		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
 	}
@@ -366,7 +366,7 @@ export function labelOf(value: unknown): { label?: string } {
 }
 
 export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
-	const s = { ...SYMBOL_DEFAULTS, ...style };
+	const s = { ...MARKER_DEFAULTS, ...style };
 	return {
 		'symbol-color': s.color,
 		'symbol-halo-width': s.haloWidth,
@@ -385,7 +385,7 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 }
 
 export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
-	const s: StateStyle = { ...SYMBOL_DEFAULTS };
+	const s: StateStyle = { ...MARKER_DEFAULTS };
 	if (p) {
 		set(s, 'color', sanitizeColor(p['symbol-color']));
 		set(s, 'haloWidth', sanitizeNumber(p['symbol-halo-width'], 0));
@@ -400,7 +400,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		set(s, 'labelFont', sanitizeString(p['symbol-label-font']));
 		set(s, 'flat', sanitizeBoolean(p['symbol-flat']));
 	}
-	return removeDefaultFields(s, SYMBOL_DEFAULTS);
+	return removeDefaultFields(s, MARKER_DEFAULTS);
 }
 
 // ----- popup (all elements) -----

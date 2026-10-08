@@ -1,8 +1,8 @@
 import {
 	ARROW_DEFAULTS,
-	FILL_DEFAULTS,
+	AREA_DEFAULTS,
 	LINE_DEFAULTS,
-	SYMBOL_DEFAULTS,
+	MARKER_DEFAULTS,
 	removeDefaultFields,
 	withoutUnusedFields,
 	type StateStyle
@@ -16,8 +16,8 @@ export type StyleRole = 'symbol' | 'fill' | 'line' | 'outline';
 
 /** Every field of each role with its default: what a style of the role is without any field set. */
 export const ROLE_DEFAULTS = {
-	symbol: SYMBOL_DEFAULTS,
-	fill: FILL_DEFAULTS,
+	symbol: MARKER_DEFAULTS,
+	fill: AREA_DEFAULTS,
 	line: { ...LINE_DEFAULTS, ...ARROW_DEFAULTS },
 	outline: LINE_DEFAULTS
 } as const;

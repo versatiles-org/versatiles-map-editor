@@ -6,7 +6,7 @@ import {
 	BACKGROUND_THEMES,
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
-	STROKE_STYLE_NAMES,
+	DASH_NAMES,
 	LEGEND_ENTRY_TYPES,
 	LEGEND_FONTS,
 	LEGEND_LAYOUTS,
@@ -769,7 +769,7 @@ export class StateReader {
 					style.pattern = this.readName(FILL_PATTERN_NAMES);
 					break;
 				case 'dash':
-					style.dash = this.readName(STROKE_STYLE_NAMES);
+					style.dash = this.readName(DASH_NAMES);
 					break;
 				case 'rotation':
 					style.rotation = this.readVarint(true);

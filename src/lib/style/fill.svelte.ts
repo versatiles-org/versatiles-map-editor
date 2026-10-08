@@ -2,7 +2,7 @@ import { StylePart } from './abstract.svelte.js';
 import {
 	type FillPatternName,
 	type StateStyle,
-	FILL_DEFAULTS,
+	AREA_DEFAULTS,
 	FILL_PATTERN_NAMES,
 	formatHex,
 	parseColor
@@ -37,13 +37,13 @@ export function parseFillPatternName(name: string): FillPatternImage | undefined
 }
 
 export class FillStyle extends StylePart {
-	static readonly defaultStyle = FILL_DEFAULTS;
+	static readonly defaultStyle = AREA_DEFAULTS;
 	protected readonly defaults = FillStyle.defaultStyle;
 
-	#color: string = $state(FILL_DEFAULTS.color);
-	#pattern: FillPatternName = $state(FILL_DEFAULTS.pattern);
-	#patternScale: number = $state(FILL_DEFAULTS.patternScale);
-	#patternCoverage: number = $state(FILL_DEFAULTS.patternCoverage);
+	#color: string = $state(AREA_DEFAULTS.color);
+	#pattern: FillPatternName = $state(AREA_DEFAULTS.pattern);
+	#patternScale: number = $state(AREA_DEFAULTS.patternScale);
+	#patternCoverage: number = $state(AREA_DEFAULTS.patternCoverage);
 
 	get color(): string {
 		return this.#color;

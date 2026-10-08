@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import { STROKE_STYLE_NAMES, type DashName } from '@versatiles/map-state';
+	import { DASH_NAMES, type DashName } from '@versatiles/map-state';
 	import { dashArrays, LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';
@@ -32,7 +32,7 @@
 		'long-dash': 'Long dash',
 		'dash-dot': 'Dash-dot'
 	};
-	const styles = STROKE_STYLE_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
+	const styles = DASH_NAMES.map((name) => ({ value: name, label: NAMES[name] }));
 
 	/** The dashes as in the map, for a line of this width in the preview. */
 	function dashes(name: DashName, width = 2): string | undefined {

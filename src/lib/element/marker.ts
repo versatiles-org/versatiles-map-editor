@@ -6,7 +6,7 @@ import { type GeoPoint, movePoint, snapPoint } from '../geometry.js';
 
 /**
  * The symbol of the markers that the editor creates: a pin. A marker without a symbol, e.g. in an
- * imported file, has the flag of the format (SYMBOL_DEFAULTS).
+ * imported file, has the flag of the format (MARKER_DEFAULTS).
  */
 export const NEW_MARKER_SYMBOL = 'extras:pin-teardrop';
 

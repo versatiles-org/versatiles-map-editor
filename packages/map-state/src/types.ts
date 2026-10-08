@@ -247,9 +247,9 @@ export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
  * The dashes of a line or an outline.
  * @category Styles
  */
-export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted', 'long-dash', 'dash-dot'] as const;
+export const DASH_NAMES = ['solid', 'dashed', 'dotted', 'long-dash', 'dash-dot'] as const;
 /** @category Styles */
-export type DashName = (typeof STROKE_STYLE_NAMES)[number];
+export type DashName = (typeof DASH_NAMES)[number];
 
 /**
  * The style of a marker: its symbol, and the look of its label. Missing fields have their default.

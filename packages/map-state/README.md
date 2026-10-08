@@ -85,8 +85,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   page (`scrollZoom`, unless `"free"`). `sanitizeFrame`
   checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius).
-- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
-  style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
+- The style vocabulary (`AREA_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `MARKER_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
+  style are names, listed in `FILL_PATTERN_NAMES`, `DASH_NAMES`, `ARROW_NAMES` and
   `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
   `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
   Links store the index of a name, so the tables only grow at their end (the rules for names are
@@ -157,7 +157,7 @@ colors normalized to lowercase hex) or fall back to the defaults.
 
 Choices are names (`fill-pattern`, `stroke-style`, `stroke-arrow-start`, `stroke-arrow-end`,
 `symbol-label-position`), as in the style itself; their tables (`FILL_PATTERN_NAMES`,
-`STROKE_STYLE_NAMES`, `ARROW_NAMES`, `LABEL_POSITION_NAMES`) and name types live in `types.ts`.
+`DASH_NAMES`, `ARROW_NAMES`, `LABEL_POSITION_NAMES`) and name types live in `types.ts`.
 `symbol-pattern` is the name of the image, e.g. `icons:anchor`. The editor's `StylePart` classes
 take their defaults from here and only add rendering data, in records keyed by the name types, so
 TypeScript checks that every name can be rendered.
