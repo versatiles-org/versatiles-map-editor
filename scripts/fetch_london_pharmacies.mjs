@@ -94,8 +94,9 @@ const frame = [
 ];
 
 const state = {
-	// the format version of the file, see packages/map-state/MAPJSON.md
+	// the schema and the version of the format of the file, see packages/map-state/MAPJSON.md
 	$schema: 'https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json',
+	version: 1,
 	frame: { bounds: frame },
 	meta: {
 		// a faded gray map, so the markers stand out

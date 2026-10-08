@@ -132,7 +132,7 @@ describe('FileCommands', () => {
 		});
 
 		it('tells the user about a file of a newer version of the editor', async () => {
-			choose('trip.mapjson', JSON.stringify({ $schema: MAPJSON_SCHEMA_URL.replace('-1.', '-2.'), elements: [] }));
+			choose('trip.mapjson', JSON.stringify({ $schema: MAPJSON_SCHEMA_URL, version: 2, elements: [] }));
 			await files.openFile();
 			expect(notify).toHaveBeenLastCalledWith(
 				'The map was saved by a newer version of the editor. Please reload the page and try again.'
@@ -167,8 +167,8 @@ describe('FileCommands', () => {
 		questions.askDownloadFilename.mockResolvedValueOnce('berlin.mapjson');
 		await files.downloadFile();
 		expect(questions.askDownloadFilename).toHaveBeenLastCalledWith('map.mapjson');
-		// with the URL of the schema of its version first
-		expect(downloadJSON).toHaveBeenCalledWith({ $schema: MAPJSON_SCHEMA_URL, ...state }, 'berlin.mapjson');
+		// with the URL of the schema and the version of the format first
+		expect(downloadJSON).toHaveBeenCalledWith({ $schema: MAPJSON_SCHEMA_URL, version: 1, ...state }, 'berlin.mapjson');
 
 		await files.downloadFile();
 		expect(questions.askDownloadFilename).toHaveBeenLastCalledWith('berlin.mapjson');

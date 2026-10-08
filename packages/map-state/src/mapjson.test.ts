@@ -25,8 +25,24 @@ describe('.mapjson files', () => {
 		expect(stateFromMapJSON(JSON.parse(JSON.stringify(json)))).toStrictEqual(state);
 	});
 
+	it('tell their version in a field of its own, and are of version 1 without it', () => {
+		expect(stateToMapJSON({ elements: [] })).toStrictEqual({ $schema: MAPJSON_SCHEMA_URL, version: 1, elements: [] });
+		expect(stateFromMapJSON({ elements: [] })).toStrictEqual({ elements: [] });
+		expect(stateFromMapJSON({ version: 1, elements: [] })).toStrictEqual({ elements: [] });
+		// not by the name of the schema, which may be any address, e.g. a copy of it
+		expect(stateFromMapJSON({ $schema: 'https://example.org/mapjson-2.schema.json', elements: [] })).toStrictEqual({
+			elements: []
+		});
+		// a version is a whole number from 1
+		for (const version of ['1', 1.5, 0, -1, null, true]) {
+			expect(() => stateFromMapJSON({ version, elements: [] }), String(version)).toThrow(
+				'The file has no valid version'
+			);
+		}
+	});
+
 	it('of a newer version are refused with the version', () => {
-		const newer = { $schema: MAPJSON_SCHEMA_URL.replace('mapjson-1', 'mapjson-2'), elements: [] };
+		const newer = { $schema: MAPJSON_SCHEMA_URL, version: 2, elements: [] };
 		expect(() => stateFromMapJSON(newer)).toThrow(MapJSONVersionError);
 		try {
 			stateFromMapJSON(newer);
@@ -43,7 +59,7 @@ describe('.mapjson files', () => {
 		const files = globSync(['examples/*.mapjson', 'packages/map-state/src/__fixtures__/**/*.mapjson']);
 		expect(files.length).toBeGreaterThan(0);
 		for (const file of files) {
-			const { $schema: _schema, ...json } = JSON.parse(readFileSync(file, 'utf-8'));
+			const { $schema: _schema, version: _version, ...json } = JSON.parse(readFileSync(file, 'utf-8'));
 			expect(stateFromMapJSON(json), file).toStrictEqual(json);
 		}
 	});
@@ -78,7 +94,7 @@ describe('.mapjson files', () => {
 				}
 			]
 		};
-		const { $schema: _schema, ...written } = stateToMapJSON(state);
+		const { $schema: _schema, version: _version, ...written } = stateToMapJSON(state);
 		expect(written).toStrictEqual(rounded);
 		// the state itself is not changed
 		expect(state.elements[0]).toStrictEqual({ type: 'marker', point: [13.4000049, 52.5000051] });
@@ -164,13 +180,14 @@ describe('.mapjson files', () => {
 		const json = stateToMapJSON(state);
 		expect(json).toStrictEqual({
 			$schema: MAPJSON_SCHEMA_URL,
+			version: 1,
 			frame: { bounds: [13.12346, 52, 14, 53], pitch: 60 },
 			meta: { viewer: { canRotate: true }, legend: { entries: [] } },
 			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#ff0000', rotation: 180 } }]
 		});
 		// in this order, and read again as the same map
-		expect(Object.keys(json)).toStrictEqual(['$schema', 'frame', 'meta', 'elements']);
-		const { $schema: _schema, ...written } = json;
+		expect(Object.keys(json)).toStrictEqual(['$schema', 'version', 'frame', 'meta', 'elements']);
+		const { $schema: _schema, version: _version, ...written } = json;
 		expect(stateFromMapJSON(json)).toStrictEqual(written);
 		expect(changedMapJSONValues(json)).toStrictEqual([]);
 	});

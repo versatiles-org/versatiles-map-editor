@@ -24,7 +24,13 @@
 				},
 				"$schema": {
 					"type": "string",
-					"description": "The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`."
+					"description": "The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`, e.g. for editors that check a file while it is written."
+				},
+				"version": {
+					"type": "integer",
+					"description": "The version of the format of the file: 1. A file without it is of version 1.",
+					"minimum": 1,
+					"default": 1
 				}
 			},
 			"required": ["$schema", "elements"],

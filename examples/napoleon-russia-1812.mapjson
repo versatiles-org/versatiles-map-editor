@@ -1,5 +1,6 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
+	"version": 1,
 	"frame": { "bounds": [23.3, 53.9, 39.8, 56.2] },
 	"meta": {
 		"background": { "theme": "gray", "colors": { "black": 0.35 } },

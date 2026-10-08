@@ -19,6 +19,7 @@ defaults, and published at the address that every file names in `$schema`:
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
+	"version": 1,
 	"elements": [{ "type": "marker", "point": [13.3777, 52.5163] }]
 }
 ```
@@ -31,6 +32,7 @@ its elements, on the editor's default background map.
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
+	"version": 1,
 	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
 	"meta": {
 		"title": "A walk through Berlin",
@@ -101,12 +103,13 @@ its elements, on the editor's default background map.
 
 ## The map
 
-| Field      | Description                                                                                    |
-| ---------- | ---------------------------------------------------------------------------------------------- |
-| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor. |
-| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.      |
-| `meta`     | The properties of the map, see [Properties](#properties). Optional.                            |
-| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.            |
+| Field      | Description                                                                                                          |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                       |
+| `version`  | The version of the format, `1`, see [Versions](#versions). Written by the editor; a file without it is of version 1. |
+| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.                            |
+| `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                  |
+| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                  |
 
 Where the author looks in the editor is not part of a map: the editor opens a map with all its
 elements in the window, and keeps its own view with the map in the browser.
@@ -324,7 +327,7 @@ In code, [`@versatiles/map-state`](README.md) reads and writes files:
 import { stateFromMapJSON, stateToMapJSON } from '@versatiles/map-state';
 
 const state = stateFromMapJSON(JSON.parse(text)); // refuses files of newer versions
-const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this version
+const text = JSON.stringify(stateToMapJSON(state)); // with the $schema and the version
 ```
 
 Reading keeps what is valid and leaves out the rest, e.g. an element that cannot be drawn or a
@@ -339,9 +342,11 @@ The format is a release candidate: it may still change without a new version, an
 not open a file of an earlier candidate completely. From the first release of the editor after
 its candidates, the rules below hold.
 
-The version of the format is in the name of the schema in `$schema`: `mapjson-1.schema.json` is
-version 1. A file without `$schema` is read as version 1. A file of a newer version than the editor
-knows is refused, instead of being read wrongly.
+The version of the format is the field `version` of a file, a whole number: `1` now. A file
+without it is read as version 1. A file of a newer version than the editor knows is refused,
+instead of being read wrongly. The schema of a version has it in its name:
+`mapjson-1.schema.json`; the address in `$schema` is for editors and validators, and does not
+tell the version to a reader.
 
 New fields and new names of the choices do not change the version: an older editor reads such a
 file, warns about the fields it does not know and uses the defaults of the names it does not know.

@@ -27,8 +27,18 @@ export const MAPJSON_SCHEMA_URL = `https://versatiles.org/versatiles-map-editor/
  * @category Files
  */
 export type MapJSON = {
-	/** The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`. */
+	/**
+	 * The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`, e.g. for
+	 * editors that check a file while it is written.
+	 */
 	$schema: string;
+	/**
+	 * The version of the format of the file: 1. A file without it is of version 1.
+	 * @asType integer
+	 * @minimum 1
+	 * @default 1
+	 */
+	version?: number;
 } & MapState;
 
 /**
@@ -43,7 +53,8 @@ export class MapJSONVersionError extends Error {
 }
 
 /**
- * The map state as the content of a .mapjson file, with the URL of its schema first. Only its
+ * The map state as the content of a .mapjson file, with the URL of its schema and its version
+ * first. Only its
  * valid parts, as `stateFromMapJSON` reads them, so reading the file gives the map that was
  * written: e.g. colors in lower case, coordinates with `COORDINATE_DIGITS` decimal places, and
  * no settings with their default value.
@@ -51,11 +62,17 @@ export class MapJSONVersionError extends Error {
  */
 export function stateToMapJSON(state: MapState): MapJSON {
 	const { frame, meta, elements } = sanitizeState(state);
-	return { $schema: MAPJSON_SCHEMA_URL, ...(frame ? { frame } : {}), ...(meta ? { meta } : {}), elements };
+	return {
+		$schema: MAPJSON_SCHEMA_URL,
+		version: MAPJSON_VERSION,
+		...(frame ? { frame } : {}),
+		...(meta ? { meta } : {}),
+		elements
+	};
 }
 
 /**
- * The map state of the content of a .mapjson file. One of a newer version (see `$schema`) throws a
+ * The map state of the content of a .mapjson file. One of a newer version (its `version`) throws a
  * `MapJSONVersionError`, and one without elements an error. A file may contain anything, so only
  * its valid parts are kept, as of an imported GeoJSON: e.g. an element that cannot be drawn is
  * left out, and so is a style field with an invalid value.
@@ -63,9 +80,12 @@ export function stateToMapJSON(state: MapState): MapJSON {
  */
 export function stateFromMapJSON(json: unknown): MapState {
 	if (typeof json !== 'object' || json === null || Array.isArray(json)) throw new Error('The file contains no map');
-	const { $schema, frame, meta, elements } = json as Record<string, unknown>;
-	const version = typeof $schema === 'string' ? /mapjson-(\d+)\.schema\.json$/.exec($schema)?.[1] : undefined;
-	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
+	const { version = 1, frame, meta, elements } = json as Record<string, unknown>;
+	// the field alone says it, not e.g. the name of the schema
+	if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) {
+		throw new Error('The file has no valid version');
+	}
+	if (version > MAPJSON_VERSION) throw new MapJSONVersionError(version);
 	if (!Array.isArray(elements)) throw new Error('The file contains no map elements');
 
 	return sanitizeState({ elements, frame, meta });
@@ -76,7 +96,7 @@ export function stateFromMapJSON(json: unknown): MapState {
  * test compares them), to find the fields that this version does not know.
  */
 export const MAPJSON_FIELDS = {
-	MapJSON: ['$schema', 'frame', 'meta', 'elements'],
+	MapJSON: ['$schema', 'version', 'frame', 'meta', 'elements'],
 	StateFrame: ['bounds', 'bearing', 'pitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom'],
@@ -277,7 +297,7 @@ export function changedMapJSONValues(json: unknown): string[] {
 	};
 
 	const state = sanitizeState({ elements: [], frame: json.frame, meta: json.meta });
-	const { $schema: _schema, elements, ...rest } = json;
+	const { $schema: _schema, version: _version, elements, ...rest } = json;
 	compare(rest, state, '', '');
 
 	// the entries of the legend: those with a type are kept, in their order

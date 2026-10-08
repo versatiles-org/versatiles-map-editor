@@ -68,8 +68,9 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `parseColor` reads a CSS color (hex with or without alpha, `rgb()`, `hsl()`, `transparent`) as
   `RGBA` (channels 0…255, `alpha` 0…1), and `formatHex` writes one in this form.
 - `CODEC_VERSION` is the format version that `encodeState` writes.
-- `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) name the JSON Schema of their format version in
-  `$schema` (`MAPJSON_SCHEMA_URL`, version `MAPJSON_VERSION`); `stateFromMapJSON` throws a
+- `.mapjson` files (see [MAPJSON.md](MAPJSON.md)) tell the version of their format in `version`
+  (`MAPJSON_VERSION`), and name its JSON Schema in `$schema` (`MAPJSON_SCHEMA_URL`), e.g. for
+  editors; `stateFromMapJSON` throws a
   `MapJSONVersionError` for a file of a newer version. Unknown fields are allowed, but not kept;
   `unknownMapJSONFields` lists them by their path, e.g. to warn about them, and
   `changedMapJSONValues` the values that are not valid and were left out or corrected. The schema is in the package, at
