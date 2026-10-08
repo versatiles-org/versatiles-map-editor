@@ -22,7 +22,7 @@
 	const haloColor = $derived(group(layers, 'haloColor'));
 	const size = $derived(group(layers, 'size'));
 	const labelSize = $derived(group(layers, 'labelSize'));
-	const font = $derived(group(layers, 'font'));
+	const font = $derived(group(layers, 'labelFont'));
 	// color, size and rotation do nothing without a symbol (e.g. a marker that is only a label)
 	const hasSymbol = $derived(symbol.mixed || symbol.value !== '');
 	// the label around the symbol in the center of a 3×3 grid; "auto" is the center

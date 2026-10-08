@@ -191,7 +191,7 @@ test('a font for the label of each marker, else the one of the background map', 
 	});
 	const symbolFont = () =>
 		page.evaluate(() => (window as unknown as MapWindow).map.getLayoutProperty('elements_symbol', 'text-font'));
-	const fonts = async () => (await storedState(page)).elements.map((e) => styleOf(e)?.font);
+	const fonts = async () => (await storedState(page)).elements.map((e) => styleOf(e)?.labelFont);
 	const label = page.getByRole('region', { name: 'Label', exact: true });
 	const background = page.getByRole('region', { name: 'Background labels' });
 	const [x, y] = await project(page, a);

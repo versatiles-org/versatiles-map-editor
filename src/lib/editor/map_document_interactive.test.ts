@@ -36,7 +36,7 @@ describe('MapDocument', () => {
 		// a marker with a font of its own: the layer lists it, the others have the font of the background map
 		const marker = addElement(doc, 'marker');
 		marker.layer.label = 'A';
-		marker.layer.font = 'lato_bold';
+		marker.layer.labelFont = 'lato_bold';
 		doc.view.renderer.flush();
 		expect(textFont()).toStrictEqual([
 			'match',
@@ -45,7 +45,7 @@ describe('MapDocument', () => {
 			['literal', ['lato_bold']],
 			['literal', ['noto_sans_regular']]
 		]);
-		expect(doc.getState().elements[0].style).toMatchObject({ font: 'lato_bold' });
+		expect(doc.getState().elements[0].style).toMatchObject({ labelFont: 'lato_bold' });
 		expect(doc.getState().meta).toBeUndefined();
 
 		// a new background: the others follow its font
@@ -61,7 +61,7 @@ describe('MapDocument', () => {
 		]);
 
 		// without fonts of their own, all labels have the font of the background map
-		marker.layer.font = '';
+		marker.layer.labelFont = '';
 		doc.view.renderer.flush();
 		expect(textFont()).toStrictEqual(['literal', ['open_sans_regular']]);
 	});

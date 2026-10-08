@@ -14,7 +14,7 @@ export const STYLE_ROLE_FIELDS = {
 		'haloColor',
 		'labelColor',
 		'labelSize',
-		'font',
+		'labelFont',
 		'labelPosition',
 		'flat'
 	],

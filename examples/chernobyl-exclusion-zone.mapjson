@@ -51,7 +51,7 @@
 				"symbol": "icons:nuclear",
 				"labelPosition": "bottom",
 				"labelColor": "#ff4d4d",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -67,7 +67,7 @@
 				"symbol": "base:icon-town_hall",
 				"labelPosition": "top",
 				"labelColor": "#ffc84d",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -82,7 +82,7 @@
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
 				"labelColor": "#ffc84d",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": { "text": "**Chernobyl**\nThe town that gave the plant its name, evacuated in May 1986." }
@@ -95,7 +95,7 @@
 				"color": "#ffc84d",
 				"symbol": "base:icon-town_hall",
 				"labelColor": "#ffc84d",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": { "text": "**Slavutych**\nBuilt after the disaster for the workers of the plant and their families." }

@@ -304,7 +304,7 @@ export interface MarkerStyle {
 	 * background map.
 	 * @default ""
 	 */
-	font?: string;
+	labelFont?: string;
 	/**
 	 * The position of the label around the symbol; "auto" where it fits, or on the point without a
 	 * symbol.

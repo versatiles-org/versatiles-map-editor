@@ -96,7 +96,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	| 'labelPosition'
 	| 'labelColor'
 	| 'labelSize'
-	| 'font'
+	| 'labelFont'
 	| 'haloColor'
 	| 'flat'
 > = {
@@ -110,7 +110,7 @@ export const SYMBOL_DEFAULTS: Defaults<
 	labelPosition: 'auto',
 	labelColor: '#000000',
 	// the font of the labels of the background map
-	font: '',
+	labelFont: '',
 	haloColor: '#ffffff',
 	// upright, facing the viewer
 	flat: false
@@ -206,7 +206,7 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	const arrowSize = sanitizeNumber(v.arrowSize, 0);
 	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
-	set(s, 'font', sanitizeString(v.font));
+	set(s, 'labelFont', sanitizeString(v.labelFont));
 	const fields: readonly string[] = STYLE_ROLE_FIELDS[role];
 	const own: StateStyle = Object.fromEntries(Object.entries(s).filter(([key]) => fields.includes(key)));
 	const used = withoutUnusedFields(own);
@@ -377,7 +377,7 @@ export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropert
 		'symbol-label-color': s.labelColor,
 		'symbol-label-size': s.labelSize,
 		// none: the font of the labels of the background map
-		'symbol-label-font': s.font || undefined,
+		'symbol-label-font': s.labelFont || undefined,
 		'symbol-halo-color': s.haloColor,
 		// only of a flat marker
 		'symbol-flat': s.flat || undefined
@@ -397,7 +397,7 @@ export function symbolStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle |
 		if (labelSize) s.labelSize = labelSize;
 		set(s, 'haloColor', sanitizeColor(p['symbol-halo-color']));
 		set(s, 'symbol', sanitizeSymbol(p['symbol-pattern']));
-		set(s, 'font', sanitizeString(p['symbol-label-font']));
+		set(s, 'labelFont', sanitizeString(p['symbol-label-font']));
 		set(s, 'flat', sanitizeBoolean(p['symbol-flat']));
 	}
 	return removeDefaultFields(s, SYMBOL_DEFAULTS);

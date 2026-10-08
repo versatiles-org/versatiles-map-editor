@@ -101,7 +101,7 @@ describe('the JSON Schema of .mapjson files', () => {
 						rotation: -45,
 						haloWidth: 2,
 						labelSize: 1.5,
-						font: 'noto_sans_bold',
+						labelFont: 'noto_sans_bold',
 						labelPosition: 'top'
 					},
 					popup: { text: '**bold**' }

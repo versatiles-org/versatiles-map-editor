@@ -8,7 +8,7 @@ const ENCODED: { [K in keyof StateStyle]-?: (value: NonNullable<StateStyle[K]>) 
 	color: (v) => colorKey(v),
 	symbol: (v) => v,
 	labelColor: (v) => colorKey(v),
-	font: (v) => v,
+	labelFont: (v) => v,
 	size: (v) => Math.round(v * 10),
 	labelSize: (v) => Math.round(v * 10),
 	labelPosition: (v) => v,
@@ -46,7 +46,7 @@ export const STYLE_KEYS: {
 	marker: [
 		'color',
 		'symbol',
-		'font',
+		'labelFont',
 		'labelColor',
 		'labelSize',
 		'size',

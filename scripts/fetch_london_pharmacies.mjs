@@ -121,7 +121,7 @@ const state = {
 			// the label above the symbol
 			labelPosition: 'top',
 			labelColor: LABEL_COLOR,
-			font: 'noto_sans_bold'
+			labelFont: 'noto_sans_bold'
 		}
 	}))
 };

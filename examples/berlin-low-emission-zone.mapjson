@@ -95,7 +95,7 @@
 			"type": "marker",
 			"point": [13.38998, 52.50473],
 			"label": "Low-emission zone",
-			"style": { "size": 2, "labelSize": 2, "symbol": "", "labelColor": "#0072b2", "font": "noto_sans_bold" }
+			"style": { "size": 2, "labelSize": 2, "symbol": "", "labelColor": "#0072b2", "labelFont": "noto_sans_bold" }
 		}
 	]
 }

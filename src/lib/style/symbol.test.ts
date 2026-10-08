@@ -16,10 +16,10 @@ describe('SymbolStyle', () => {
 		expect(keys).toStrictEqual([
 			'color',
 			'flat',
-			'font',
 			'haloColor',
 			'haloWidth',
 			'labelColor',
+			'labelFont',
 			'labelPosition',
 			'labelSize',
 			'rotation',

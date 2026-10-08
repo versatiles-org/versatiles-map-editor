@@ -364,7 +364,7 @@
 					"exclusiveMinimum": 0,
 					"default": 1
 				},
-				"font": {
+				"labelFont": {
 					"type": "string",
 					"description": "The glyph font of the label, e.g. \"noto_sans_bold\"; \"\" for the font of the labels of the background map.",
 					"default": ""

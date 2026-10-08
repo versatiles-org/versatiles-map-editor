@@ -41,7 +41,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -54,7 +54,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -67,7 +67,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -80,7 +80,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -93,7 +93,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -106,7 +106,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -119,7 +119,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -132,7 +132,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -145,7 +145,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -158,7 +158,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -171,7 +171,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -184,7 +184,7 @@
 				"labelSize": 0.8,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{ "type": "marker", "point": [2.2976, 48.8552], "style": { "color": "#d55e00", "symbol": "base:icon-monument" } },
@@ -202,7 +202,7 @@
 				"color": "#d55e00",
 				"symbol": "base:icon-monument",
 				"labelColor": "#b33c00",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -213,7 +213,7 @@
 				"color": "#009e73",
 				"symbol": "base:icon-outdoor",
 				"labelColor": "#009e73",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -224,7 +224,7 @@
 				"color": "#009e73",
 				"symbol": "base:icon-outdoor",
 				"labelColor": "#009e73",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -235,7 +235,7 @@
 				"color": "#009e73",
 				"symbol": "base:icon-golf",
 				"labelColor": "#009e73",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		},
 		{
@@ -249,7 +249,7 @@
 				"haloWidth": 2,
 				"symbol": "base:icon-stadium",
 				"labelColor": "#cc9900",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			}
 		}
 	]

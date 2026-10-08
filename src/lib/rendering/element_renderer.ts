@@ -582,7 +582,7 @@ export class ElementRenderer {
 	private updateFonts(force: boolean) {
 		const fonts = new Set<string>();
 		for (const element of this.elements) {
-			const font = element.getStyleLayers().symbol?.font;
+			const font = element.getStyleLayers().symbol?.labelFont;
 			if (font) fonts.add(font);
 		}
 		const sorted = [...fonts].sort();

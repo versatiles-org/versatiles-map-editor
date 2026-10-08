@@ -51,7 +51,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Kiermasz Świąteczny, Piaseczno"
@@ -67,7 +67,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Pruszków"
@@ -83,7 +83,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Świąteczny, Konstancin-Jeziorna"
@@ -99,7 +99,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Pałacowy Kiermasz Świąteczny, Jabłonna"
@@ -115,7 +115,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Nieporęt"
@@ -131,7 +131,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Podkowa Leśna"
@@ -147,7 +147,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Otwock"
@@ -163,7 +163,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Święta w Karolinie, Otrębusy"
@@ -179,7 +179,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Świąteczny, Nadarzyn"
@@ -195,7 +195,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Świąteczny, Błonie"
@@ -211,7 +211,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Milanówek"
@@ -227,7 +227,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Kiermasz Świąteczny, Józefosław"
@@ -243,7 +243,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Bożonarodzeniowy, Sulejówek"
@@ -259,7 +259,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Świąteczny Kiermasz Rękodzieła, Grodzisk Mazowiecki"
@@ -275,7 +275,7 @@
 				"labelSize": 0.9,
 				"symbol": "base:icon-marketplace",
 				"labelColor": "#ff8000",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Jarmark Świąteczny, Serock"
@@ -288,7 +288,7 @@
 				"color": "#56b4e9",
 				"size": 0.8,
 				"symbol": "base:icon-gift",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -302,7 +302,7 @@
 				"color": "#56b4e9",
 				"size": 0.8,
 				"symbol": "base:icon-gift",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -316,7 +316,7 @@
 				"color": "#56b4e9",
 				"size": 0.8,
 				"symbol": "base:icon-gift",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -330,7 +330,7 @@
 				"color": "#56b4e9",
 				"size": 0.8,
 				"symbol": "base:icon-gift",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -344,7 +344,7 @@
 				"color": "#56b4e9",
 				"size": 0.8,
 				"symbol": "base:icon-gift",
-				"font": "noto_sans_bold",
+				"labelFont": "noto_sans_bold",
 				"haloColor": "#000000"
 			},
 			"popup": {
@@ -360,7 +360,7 @@
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"labelColor": "#ff4060",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Christmas market at the Barbakan"
@@ -375,7 +375,7 @@
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"labelColor": "#ff4060",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Warsaw Christmas Market"
@@ -390,7 +390,7 @@
 				"size": 1.2,
 				"symbol": "extras:shape-star",
 				"labelColor": "#ff4060",
-				"font": "noto_sans_bold"
+				"labelFont": "noto_sans_bold"
 			},
 			"popup": {
 				"text": "Christmas market above the clouds"

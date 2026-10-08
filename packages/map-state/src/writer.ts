@@ -721,8 +721,8 @@ export class StateWriter {
 				return this.writeColorValue(style[name]!);
 			case 'symbol':
 				return this.writeStringRef(style.symbol!, true);
-			case 'font':
-				return this.writeStringRef(style.font!, true);
+			case 'labelFont':
+				return this.writeStringRef(style.labelFont!, true);
 			case 'visible':
 				// the key alone means "false"
 				return;
@@ -896,7 +896,7 @@ function collectFormatStrings(root: MapState): string[] {
 		for (const style of styles) {
 			// in the order of the keys of the style
 			if (style?.symbol != null) strings.push(style.symbol);
-			if (style?.font != null) strings.push(style.font);
+			if (style?.labelFont != null) strings.push(style.labelFont);
 		}
 	}
 	return strings;

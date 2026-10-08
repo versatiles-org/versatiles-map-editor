@@ -821,8 +821,8 @@ export class StateReader {
 				case 'labelSize':
 					style.labelSize = this.readVarint() / 10;
 					break;
-				case 'font':
-					style.font = this.readStringRef(true);
+				case 'labelFont':
+					style.labelFont = this.readStringRef(true);
 					break;
 			}
 		}

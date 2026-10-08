@@ -113,7 +113,7 @@ export class SymbolStyle extends StylePart {
 	#label: string = $state('');
 	#labelPosition: LabelPositionName = $state(SYMBOL_DEFAULTS.labelPosition);
 	#labelColor: string = $state(SYMBOL_DEFAULTS.labelColor);
-	#font: string = $state(SYMBOL_DEFAULTS.font);
+	#labelFont: string = $state(SYMBOL_DEFAULTS.labelFont);
 	#haloColor: string = $state(SYMBOL_DEFAULTS.haloColor);
 
 	get color(): string {
@@ -209,12 +209,12 @@ export class SymbolStyle extends StylePart {
 		this.changed();
 	}
 	/** The glyph font of the label, e.g. "noto_sans_bold", or "" for the font of the background map. */
-	get font(): string {
-		return this.#font;
+	get labelFont(): string {
+		return this.#labelFont;
 	}
-	set font(value: string) {
-		if (value === this.#font) return;
-		this.#font = value;
+	set labelFont(value: string) {
+		if (value === this.#labelFont) return;
+		this.#labelFont = value;
 		this.changed();
 	}
 	/** The color of the halo around the symbol and the label. */
@@ -260,7 +260,7 @@ export class SymbolStyle extends StylePart {
 			labelColor: text.color,
 			labelOpacity: text.opacity,
 			// none: the font of the background map, see `ElementRenderer.applyFonts`
-			...(this.font ? { font: this.font } : {}),
+			...(this.labelFont ? { font: this.labelFont } : {}),
 			haloColor: cssColor(this.haloColor),
 			place: this.getPlace(),
 			// only of a flat marker, for the layer of its label if the labels have layers of their own
@@ -279,7 +279,7 @@ export class SymbolStyle extends StylePart {
 				symbol: this.symbol,
 				labelPosition: this.labelPosition,
 				labelColor: this.labelColor,
-				font: this.font,
+				labelFont: this.labelFont,
 				haloColor: this.haloColor,
 				flat: this.flat
 			},
@@ -296,7 +296,7 @@ export class SymbolStyle extends StylePart {
 		if (style.symbol != null) this.symbol = style.symbol;
 		if (style.labelPosition != null) this.labelPosition = style.labelPosition;
 		if (style.labelColor != null) this.labelColor = style.labelColor;
-		if (style.font != null) this.font = style.font;
+		if (style.labelFont != null) this.labelFont = style.labelFont;
 		if (style.haloColor != null) this.haloColor = style.haloColor;
 		if (style.flat != null) this.flat = style.flat;
 	}
