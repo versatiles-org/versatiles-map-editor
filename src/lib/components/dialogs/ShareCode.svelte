@@ -55,15 +55,17 @@
 
 <section>
 	<h3><label for="{uid}-link">Link</label></h3>
+	<!-- where the map is, and so who can see it and what a link shows -->
 	<Hint>
-		Anyone with the link can view the map, but not change it. To pass the map on for editing, download it as a file (☰
-		→ Download…).
+		The map is not stored on a server: all of it is in the link itself. So a link shows the map as it is now, and anyone
+		who has it can view the map, but not change it.
 	</Hint>
 	<div class="row">
 		<TextField id="{uid}-link" class="code" readonly value={link} onfocus={(e) => e.currentTarget.select()} />
 		<Button variant="primary" class="copy" bind:element={btnLink} onclick={() => copy(link, 'link')}>Copy link</Button>
 	</div>
 	{@render linkNotice?.()}
+	<Hint>To pass the map on for editing, download it as a file (☰ → Download…).</Hint>
 </section>
 
 <section>

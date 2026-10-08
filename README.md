@@ -135,7 +135,7 @@ The read-only viewer at `/view/` (the folder `view/` next to the editor, so it n
 
 The state can alternatively be provided via the iframe's `data` attribute.
 
-**A link is for viewing.** It holds what the viewer shows, and leaves out what only the author of a map needs: its title, the color scheme of the color picker, and a legend that shared maps do not show. To pass a map on for editing, download it as a `.mapjson` file, which has all of it. The editor (`/`) still takes a link, e.g. one made by another program: it opens the map as a new one in the browser storage and removes the hash from the URL.
+**A link is for viewing, and it is the map.** Nothing is stored on a server: all of the map is in the link itself, so a link shows the map as it was when the link was made. It holds what the viewer shows, and leaves out what only the author of a map needs: its title, the color scheme of the color picker, and a legend that shared maps do not show. To pass a map on for editing, download it as a `.mapjson` file, which has all of it. The editor (`/`) still takes a link, e.g. one made by another program: it opens the map as a new one in the browser storage and removes the hash from the URL.
 
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
