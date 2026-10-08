@@ -844,19 +844,31 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	// without zoom buttons, the button is where they would be
 	await page.goto('about:blank');
 	await page.setViewportSize({ width: 800, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, navigation: 'none' } }, elements }));
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, zoom: false } }, elements }));
 	await waitForMapIsReady(page);
 	await expect(page.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
 	const alone = (await reset.boundingBox())!;
 	expect(alone.x).toBeCloseTo(button.x, 0);
 	expect(alone.y).toBeLessThan(button.y);
+
+	// the navigation buttons have their place, whichever of them the map has
+	await page.goto('about:blank');
+	await page.goto(
+		'/view/#' +
+			encodeState({ frame, meta: { viewer: { reset: true, zoom: false, navigation: 'bottom-left' } }, elements })
+	);
+	await waitForMapIsReady(page);
+	const moved = (await reset.boundingBox())!;
+	expect(moved.x).toBeLessThan(100);
+	expect(moved.y).toBeGreaterThan(450);
 });
 
 test('the reset button of a shared map is switched on in the panel, where the map shows it', async ({ page }) => {
 	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5] }] }));
 	await waitForMapIsReady(page);
 	const reset = page.getByRole('button', { name: 'Reset view' });
-	const option = sidebar(page).getByRole('checkbox', { name: 'Reset button' });
+	const buttons = sidebar(page).getByRole('region', { name: 'Navigation buttons' });
+	const option = buttons.getByRole('checkbox', { name: 'Reset view' });
 	// the editor has none of its own
 	await expect(reset).toHaveCount(0);
 	await (await menuItem(page, 'Shared map…')).click();
@@ -865,6 +877,14 @@ test('the reset button of a shared map is switched on in the panel, where the ma
 	await option.check();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ reset: true });
 	await expect(reset).toBeVisible();
+	// the place of all navigation buttons, also of this one
+	const before = (await reset.boundingBox())!;
+	await buttons.getByRole('radiogroup', { name: 'Place' }).getByRole('radio', { name: 'Bottom left' }).check();
+	await expect
+		.poll(async () => (await storedState(page)).meta?.viewer)
+		.toStrictEqual({ navigation: 'bottom-left', reset: true });
+	await expect.poll(async () => (await reset.boundingBox())!.x).toBeLessThan(before.x - 300);
+	await page.getByRole('button', { name: 'Undo' }).click();
 	// one undo step, and not outside the mode
 	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(reset).toHaveCount(0);
@@ -924,7 +944,7 @@ test('a shared map can have a button for the whole screen, which an embedded map
 	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Shared map…')).click();
-	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen button' }).check();
+	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen' }).check();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ fullscreen: true });
 	await expect(button).toBeVisible();
 	await page.getByRole('button', { name: /^Share/ }).click();
@@ -1056,10 +1076,10 @@ test('a shared map can show where its visitor is, and follow them until that is 
 	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Shared map…')).click();
-	await sidebar(page).getByRole('checkbox', { name: 'My location button' }).check();
+	await sidebar(page).getByRole('checkbox', { name: 'My location' }).check();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ locate: true });
 	await expect(locate).toBeVisible();
-	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen button' }).check();
+	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen' }).check();
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
 	await expect(dialog.getByLabel('Embed code')).toHaveValue(/ allow="fullscreen; geolocation"><\/iframe>$/);

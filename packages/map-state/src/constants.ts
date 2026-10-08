@@ -113,7 +113,7 @@ export const FRAME_KEYS = {
 
 /**
  * The settings of the viewer, in 4 bits: of a control the index of its choice follows (see
- * `VIEWER_CHOICES`), a button is its key alone.
+ * `VIEWER_CHOICES`), a button is its key alone, and so is that the buttons for zooming are hidden.
  */
 export const VIEWER_KEYS = {
 	search: 1,
@@ -122,7 +122,8 @@ export const VIEWER_KEYS = {
 	reset: 4,
 	fullscreen: 5,
 	scale: 6,
-	locate: 7
+	locate: 7,
+	noZoom: 8
 } as const;
 
 /** The fields of a popup, in 4 bits. */

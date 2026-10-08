@@ -41,7 +41,7 @@
 		type LegendPosition,
 		type StackSize
 	} from './overlay_layout.js';
-	import { MAX_PITCH, VIEWER_DEFAULTS, type StateLegend } from '@versatiles/map-state';
+	import { MAX_PITCH, type StateLegend } from '@versatiles/map-state';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -162,9 +162,7 @@
 	});
 	const navigationCorner: Corner | undefined = $derived.by(() => {
 		if (!navigation || !mapDocument) return undefined;
-		if (ownPlaces) return 'top-right';
-		const position = mapDocument.controls.navigation;
-		return position === 'none' ? undefined : position;
+		return ownPlaces ? 'top-right' : mapDocument.controls.navigation;
 	});
 
 	// The other buttons of the viewer: to reset the view, and for the whole screen. With the buttons
@@ -174,11 +172,8 @@
 	const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled === true;
 	const showsReset = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.reset);
 	const showsFullscreen = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.fullscreen && canFullscreen);
-	/** Where the other buttons are: with the buttons for zooming, or where they would be. */
-	const besideZoom = (doc: MapDocument): Corner => {
-		const position = doc.controls.navigation;
-		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
-	};
+	/** Where the other navigation buttons are: at the place of all of them, below those for zooming. */
+	const besideZoom = (doc: MapDocument): Corner => doc.controls.navigation;
 	const buttonsCorner: Corner | undefined = $derived(
 		mapDocument && (showsReset || showsFullscreen) ? besideZoom(mapDocument) : undefined
 	);
@@ -212,7 +207,7 @@
 	// shared map is edited without them, where they would be.
 	const fitCorner: Corner | undefined = $derived.by(() => {
 		if (!editor || !mapDocument) return undefined;
-		return navigationCorner ?? VIEWER_DEFAULTS.navigation;
+		return navigationCorner;
 	});
 
 	let pageWidth = $state(0);
@@ -339,7 +334,9 @@
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
-		const [zoom, compass] = turn ? [turn.canZoom, turn.canRotate || turn.canTilt] : [true, true];
+		// of a shared map: the buttons for zooming unless it hides them or its visitors cannot zoom
+		const shownZoom = ownPlaces || (mapDocument?.controls.zoom ?? true);
+		const [zoom, compass] = turn ? [shownZoom && turn.canZoom, turn.canRotate || turn.canTilt] : [shownZoom, true];
 		if (!zoom && !compass) return;
 		// Back to how the map opened. In the editor to north at the top, seen from straight above,
 		// which while the shared map is edited is how it opens then, see `VisibleAreaMode`.

@@ -6,6 +6,7 @@
 	import { NUDGE } from '#lib/interaction/index.js';
 	import InspectorSection from './InspectorSection.svelte';
 	import SharedMapControls from './SharedMapControls.svelte';
+	import SharedMapNavigation from './SharedMapNavigation.svelte';
 
 	/**
 	 * What a shared map shows, while it is edited on the map (see `VisibleAreaMode`): its visible
@@ -258,7 +259,12 @@
 	{/each}
 </InspectorSection>
 
-<!-- what visitors see over the map, and where; the map shows them so, see `asShared` of MapFrame -->
+<!-- the buttons with which visitors move the map: one stack at a place -->
+<InspectorSection title="Navigation buttons">
+	<SharedMapNavigation {doc} />
+</InspectorSection>
+
+<!-- what else visitors see over the map, and where; the map shows all of it so, see `asShared` of MapFrame -->
 <InspectorSection title="Controls">
 	<Hint>The map shows them as visitors see them.</Hint>
 	<SharedMapControls {doc} />

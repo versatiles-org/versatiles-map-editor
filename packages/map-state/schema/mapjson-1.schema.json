@@ -558,8 +558,12 @@
 				},
 				"navigation": {
 					"type": "string",
-					"enum": ["top-left", "top-right", "bottom-left", "bottom-right", "none"],
-					"description": "The buttons for zooming in and out. Default: \"top-right\"."
+					"enum": ["top-left", "top-right", "bottom-left", "bottom-right"],
+					"description": "The place of the navigation buttons: those for zooming, the compass, and the buttons to reset the view, for the whole screen and for the viewer's location, as far as the map has them. Default: \"top-right\"."
+				},
+				"zoom": {
+					"type": "boolean",
+					"description": "The buttons for zooming in and out, of the navigation buttons. Default: true."
 				},
 				"legend": {
 					"type": "string",
@@ -573,18 +577,18 @@
 				},
 				"reset": {
 					"type": "boolean",
-					"description": "A button that shows the map as it opened: its area, its rotation and its tilt. With the buttons for zooming, or where they would be. Default: false."
+					"description": "A button that shows the map as it opened: its area, its rotation and its tilt. One of the navigation buttons. Default: false."
 				},
 				"fullscreen": {
 					"type": "boolean",
-					"description": "A button that shows the map on the whole screen, and back. With the buttons for zooming, or where they would be. An embedded map needs the permission of its page: `allow=\"fullscreen\"` on its iframe. Default: false."
+					"description": "A button that shows the map on the whole screen, and back. One of the navigation buttons. An embedded map needs the permission of its page: `allow=\"fullscreen\"` on its iframe. Default: false."
 				},
 				"locate": {
 					"type": "boolean",
-					"description": "A button that shows where the viewer is, if they allow it, and follows them until it is switched off. With the buttons for zooming, or where they would be. An embedded map needs the permission of its page: `allow=\"geolocation\"` on its iframe. Default: false."
+					"description": "A button that shows where the viewer is, if they allow it, and follows them until it is switched off. One of the navigation buttons. An embedded map needs the permission of its page: `allow=\"geolocation\"` on its iframe. Default: false."
 				}
 			},
-			"description": "What the viewer shows over the map, and where: a control at a position, or \"none\"; a button (e.g. `reset`) with the buttons for zooming, or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
+			"description": "What the viewer shows over the map, and where: a control at a position, or \"none\"; the navigation buttons at a position, each of them shown or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
 		},
 		"StateLabels": {
 			"type": "object",

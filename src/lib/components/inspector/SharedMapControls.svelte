@@ -9,14 +9,19 @@
 
 	const uid = $props.id();
 
-	const CONTROLS: { key: PlacedControl; label: string; hint: string; layout: 'segmented' | 'grid' }[] = [
+	// the navigation buttons have a section of their own, see SharedMapNavigation
+	const CONTROLS: {
+		key: Exclude<PlacedControl, 'navigation'>;
+		label: string;
+		hint: string;
+		layout: 'segmented' | 'grid';
+	}[] = [
 		{
 			key: 'search',
 			label: 'Address search',
 			hint: 'Visitors can find a place, e.g. their street. The map content does not change.',
 			layout: 'segmented'
 		},
-		{ key: 'navigation', label: 'Zoom buttons', hint: 'Buttons to zoom in and out.', layout: 'grid' },
 		{ key: 'legend', label: 'Legend', hint: 'The legend that you made for the map.', layout: 'grid' },
 		{
 			key: 'scale',
@@ -27,14 +32,8 @@
 	];
 
 	/** Show a control of the viewer at a place, or hide it ("none"); one undo step. */
-	function setControl<K extends PlacedControl>(key: K, place: NonNullable<StateViewer[K]>) {
+	function setControl<K extends Exclude<PlacedControl, 'navigation'>>(key: K, place: NonNullable<StateViewer[K]>) {
 		doc.viewer = { ...doc.viewer, [key]: place };
-		doc.state.log();
-	}
-
-	/** Show a button of the viewer with its zoom buttons, or not; one undo step. */
-	function setButton(key: 'reset' | 'fullscreen' | 'locate', shown: boolean) {
-		doc.viewer = { ...doc.viewer, [key]: shown };
 		doc.state.log();
 	}
 </script>
@@ -62,30 +61,6 @@
 			{/if}
 		</div>
 		<Hint>{hint}</Hint>
-		{#if key === 'navigation'}
-			<!-- the buttons that join the zoom buttons, or stand where they would be -->
-			<div class="control">
-				<Checkbox checked={doc.controls.reset} onchange={(e) => setButton('reset', e.currentTarget.checked)}>
-					Reset button
-				</Checkbox>
-			</div>
-			<Hint>Shows the map as it opened, after a visitor moved or turned it.</Hint>
-			<div class="control">
-				<Checkbox checked={doc.controls.fullscreen} onchange={(e) => setButton('fullscreen', e.currentTarget.checked)}>
-					Fullscreen button
-				</Checkbox>
-			</div>
-			<Hint>Shows the map on the whole screen. An embedded map needs the embed code of “Share” for it.</Hint>
-			<div class="control">
-				<Checkbox checked={doc.controls.locate} onchange={(e) => setButton('locate', e.currentTarget.checked)}>
-					My location button
-				</Checkbox>
-			</div>
-			<Hint>
-				Shows where the visitor is, if they allow it, and follows them until it is switched off. The position stays in
-				their browser. An embedded map needs the embed code of “Share” for it.
-			</Hint>
-		{/if}
 	{/if}
 {/each}
 

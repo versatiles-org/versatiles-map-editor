@@ -507,7 +507,7 @@ export const LEGEND_FONTS = ['sans-serif', 'serif', 'monospace'] as const;
  */
 export const SEARCH_POSITIONS = ['top-left', 'top-right'] as const;
 /**
- * The places of the buttons for zooming: the corners.
+ * The places of the navigation buttons: the corners.
  * @category Viewer
  */
 export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
@@ -518,33 +518,39 @@ export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bo
 export const SCALE_POSITIONS = ['bottom-left', 'bottom-right'] as const;
 
 /**
- * What the viewer shows over the map, and where: a control at a position, or "none"; a button
- * (e.g. `reset`) with the buttons for zooming, or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
+ * What the viewer shows over the map, and where: a control at a position, or "none"; the
+ * navigation buttons at a position, each of them shown or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
  * @category Viewer
  */
 export interface StateViewer {
 	/** The address search. Default: "none". */
 	search?: (typeof SEARCH_POSITIONS)[number] | 'none';
-	/** The buttons for zooming in and out. Default: "top-right". */
-	navigation?: (typeof NAVIGATION_POSITIONS)[number] | 'none';
+	/**
+	 * The place of the navigation buttons: those for zooming, the compass, and the buttons to
+	 * reset the view, for the whole screen and for the viewer's location, as far as the map has
+	 * them. Default: "top-right".
+	 */
+	navigation?: (typeof NAVIGATION_POSITIONS)[number];
+	/** The buttons for zooming in and out, of the navigation buttons. Default: true. */
+	zoom?: boolean;
 	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
 	/** A bar with the length that it stands for on the map, in meters or kilometers. Default: "none". */
 	scale?: (typeof SCALE_POSITIONS)[number] | 'none';
 	/**
-	 * A button that shows the map as it opened: its area, its rotation and its tilt. With the
-	 * buttons for zooming, or where they would be. Default: false.
+	 * A button that shows the map as it opened: its area, its rotation and its tilt. One of the
+	 * navigation buttons. Default: false.
 	 */
 	reset?: boolean;
 	/**
-	 * A button that shows the map on the whole screen, and back. With the buttons for zooming, or
-	 * where they would be. An embedded map needs the permission of its page: `allow="fullscreen"`
+	 * A button that shows the map on the whole screen, and back. One of the navigation buttons. An
+	 * embedded map needs the permission of its page: `allow="fullscreen"`
 	 * on its iframe. Default: false.
 	 */
 	fullscreen?: boolean;
 	/**
 	 * A button that shows where the viewer is, if they allow it, and follows them until it is
-	 * switched off. With the buttons for zooming, or where they would be. An embedded map needs the
+	 * switched off. One of the navigation buttons. An embedded map needs the
 	 * permission of its page: `allow="geolocation"` on its iframe. Default: false.
 	 */
 	locate?: boolean;

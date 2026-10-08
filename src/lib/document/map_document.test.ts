@@ -289,6 +289,7 @@ describe('MapDocument', () => {
 		expect(mapDocument.controls).toStrictEqual({
 			search: 'top-right',
 			navigation: 'top-right',
+			zoom: true,
 			legend: 'none',
 			scale: 'none',
 			reset: true,
@@ -300,6 +301,7 @@ describe('MapDocument', () => {
 		expect(mapDocument.controls).toStrictEqual({
 			search: 'none',
 			navigation: 'top-right',
+			zoom: true,
 			legend: 'bottom-left',
 			scale: 'none',
 			reset: false,

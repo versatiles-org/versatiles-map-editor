@@ -637,6 +637,10 @@ export class StateReader {
 					viewer[button] = true;
 					continue;
 				}
+				if (key === VIEWER_KEYS.noZoom) {
+					viewer.zoom = false;
+					continue;
+				}
 				const name = controls.find((control) => VIEWER_KEYS[control] === key);
 				if (!name) throw new Error(`Invalid viewer key: ${key}`);
 				const choice = VIEWER_CHOICES[name][this.readVarint()];

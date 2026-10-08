@@ -289,18 +289,19 @@ Where shared maps show the legend is a setting of the viewer.
 
 ### Viewer
 
-What shared and embedded maps show over the map: a control at a place or `"none"`, a button with
-the zoom buttons or not. Controls in the same corner are stacked.
+What shared and embedded maps show over the map: a control at a place or `"none"`; the navigation
+buttons at a place, each of them shown or not. Controls in the same corner are stacked.
 
-| Field        | Values                                                                                                                                                                                                                                                    | Default         |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `search`     | the address search: `"top-left"`, `"top-right"`                                                                                                                                                                                                           | `"none"`        |
-| `navigation` | the zoom buttons: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                                                                                                                                                          | `"top-right"`   |
-| `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                                                                  | `"bottom-left"` |
-| `scale`      | a scale bar, in meters or kilometers: `"bottom-left"`, `"bottom-right"`                                                                                                                                                                                   | `"none"`        |
-| `reset`      | a button that shows the map as it opened, with the zoom buttons or where they would be: `true`                                                                                                                                                            | `false`         |
-| `fullscreen` | a button that shows the map on the whole screen, and back, with the zoom buttons or where they would be: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has.                                             | `false`         |
-| `locate`     | a button that shows where the viewer is, if they allow it, and follows them until it is switched off, with the zoom buttons or where they would be: `true`. An embedded map needs `allow="geolocation"` on its iframe, which the editor's embed code has. | `false`         |
+| Field        | Values                                                                                                                                                                                                                             | Default         |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `search`     | the address search: `"top-left"`, `"top-right"`                                                                                                                                                                                    | `"none"`        |
+| `navigation` | the place of the navigation buttons (those for zooming, the compass, and the buttons below, as far as the map has them): `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                            | `"top-right"`   |
+| `zoom`       | the buttons to zoom in and out, of the navigation buttons: `false` hides them                                                                                                                                                      | `true`          |
+| `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                                           | `"bottom-left"` |
+| `scale`      | a scale bar, in meters or kilometers: `"bottom-left"`, `"bottom-right"`                                                                                                                                                            | `"none"`        |
+| `reset`      | one of the navigation buttons, which shows the map as it opened: `true`                                                                                                                                                            | `false`         |
+| `fullscreen` | one of the navigation buttons, which shows the map on the whole screen, and back: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has.                                             | `false`         |
+| `locate`     | one of the navigation buttons, which shows where the viewer is, if they allow it, and follows them until it is switched off: `true`. An embedded map needs `allow="geolocation"` on its iframe, which the editor's embed code has. | `false`         |
 
 ## Checking a file
 

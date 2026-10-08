@@ -141,8 +141,11 @@ test.describe('address search in the viewer', () => {
 
 		// the zoom buttons are on by default, and can be hidden: the dialog leads to the panel, and back
 		await dialog.getByRole('button', { name: 'Edit shared map…' }).click();
-		await controls.getByRole('checkbox', { name: 'Zoom buttons' }).uncheck();
-		await expect.poll(viewer).toStrictEqual({ search: 'top-right', navigation: 'none' });
+		await sidebar(page)
+			.getByRole('region', { name: 'Navigation buttons' })
+			.getByRole('checkbox', { name: 'Zoom' })
+			.uncheck();
+		await expect.poll(viewer).toStrictEqual({ search: 'top-right', zoom: false });
 		// hidden on the map too, until the editor is back, which always has them
 		await expect(zoomIn).toHaveCount(0);
 		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();

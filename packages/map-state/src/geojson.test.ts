@@ -344,7 +344,7 @@ describe('color scheme', () => {
 
 describe('viewer', () => {
 	it('round-trips as the meta member, without defaults and invalid values', () => {
-		const viewer = { search: 'top-right', navigation: 'none', legend: 'top' } as const;
+		const viewer = { search: 'top-right', zoom: false, legend: 'top' } as const;
 		const doc = stateToGeoJSON({ meta: { viewer }, elements: [] });
 		expect(doc.meta).toStrictEqual({ viewer });
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ viewer });

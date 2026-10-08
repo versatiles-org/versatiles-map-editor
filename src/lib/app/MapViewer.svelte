@@ -32,7 +32,7 @@
 	{createDocument}
 	bind:mapDocument
 	search={mapDocument !== undefined && mapDocument.controls.search !== 'none'}
-	navigation={mapDocument !== undefined && mapDocument.controls.navigation !== 'none'}
+	navigation
 	{hint}
 	{sessions}
 	{onMapLoad}

@@ -137,9 +137,9 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   `meta.legend`: layout, generic font, bold, italic and entries of a legend defined by the
   author, each a marker, line or area with the style of an element;
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
-  `meta.viewer`: what the read-only viewer shows over the map, and where: the search, the zoom
-  buttons, the legend, a scale bar, and buttons to reset the view, for the whole screen and for
-  the viewer's location;
+  `meta.viewer`: what the read-only viewer shows over the map, and where: the search, the legend,
+  a scale bar, and the navigation buttons (their place, and which of them: to zoom, to reset the
+  view, for the whole screen and for the viewer's location);
   `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, from
   which zoom level they are shown, and whether the labels of the background map are on top)
 

@@ -84,7 +84,7 @@ describe('the JSON Schema of .mapjson files', () => {
 					bold: true,
 					entries: [{ type: 'area', style: { color: '#ff0000' }, label: 'A' }]
 				},
-				viewer: { search: 'top-right', navigation: 'none', legend: 'bottom' },
+				viewer: { search: 'top-right', zoom: false, legend: 'bottom' },
 				colorScheme: 'dark2',
 				labels: { overlap: 'hide', minZoom: 12.5, mapOnTop: true },
 				title: 'All'

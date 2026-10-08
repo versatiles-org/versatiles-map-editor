@@ -718,7 +718,7 @@ describe('viewer', () => {
 		for (const viewer of [
 			{ search: 'top-right', navigation: 'bottom-left', legend: 'right' },
 			{ search: 'top-left' },
-			{ navigation: 'none', legend: 'none' }
+			{ zoom: false, legend: 'none' }
 		] as StateViewer[]) {
 			const state: MapState = { meta: { viewer }, elements: [] };
 			expect(decodeState(encodeState(state))).toStrictEqual(state);
@@ -729,6 +729,7 @@ describe('viewer', () => {
 		const defaults: StateViewer = {
 			search: 'none',
 			navigation: 'top-right',
+			zoom: true,
 			legend: 'bottom-left',
 			scale: 'none',
 			reset: false,
@@ -744,8 +745,8 @@ describe('viewer', () => {
 	it('keeps a button of the viewer as its key alone, e.g. the one that resets the view', () => {
 		const state = (viewer: StateViewer) => ({ meta: { viewer }, elements: [] });
 		expect(decodeState(encodeState(state({ reset: true })))).toStrictEqual(state({ reset: true }));
-		expect(decodeState(encodeState(state({ navigation: 'none', reset: true })))).toStrictEqual(
-			state({ navigation: 'none', reset: true })
+		expect(decodeState(encodeState(state({ zoom: false, reset: true })))).toStrictEqual(
+			state({ zoom: false, reset: true })
 		);
 		expect(decodeState(encodeState(state({ fullscreen: true })))).toStrictEqual(state({ fullscreen: true }));
 		expect(decodeState(encodeState(state({ locate: true })))).toStrictEqual(state({ locate: true }));
@@ -762,7 +763,7 @@ describe('viewer', () => {
 			writer.writeRoot(state(viewer));
 			return writer.bits.length;
 		};
-		expect(bits({ navigation: 'none', reset: true }) - bits({ navigation: 'none' })).toBe(4);
+		expect(bits({ zoom: false, reset: true }) - bits({ zoom: false })).toBe(4);
 		// a file may say anything: only `true` switches it on
 		expect(stateFromMapJSON(state({ reset: 'yes' } as unknown as StateViewer)).meta).toBeUndefined();
 	});
