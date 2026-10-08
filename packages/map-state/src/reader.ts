@@ -37,7 +37,9 @@ import {
 	BASE64_CODE2BITS,
 	CODEC_VERSION,
 	ELEMENT_KEYS,
+	ELEMENT_END,
 	END_KEY,
+	KEY_PARAMETERS,
 	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
@@ -251,7 +253,8 @@ export class StateReader {
 				const { key, repeat } = this.readElementType(previous);
 				const before = repeat ? previous : undefined;
 				switch (key) {
-					case END_KEY:
+					case ELEMENT_END:
+						this.readEnd();
 						return root;
 					case ELEMENT_KEYS.marker:
 						previous = this.readElementMarker(before);
@@ -278,7 +281,7 @@ export class StateReader {
 
 	/** The version of the format, of which only `CODEC_VERSION` is read. */
 	readVersion() {
-		const version = this.readInteger(3);
+		const version = this.readKey(KEY_PARAMETERS.version);
 		if (version !== CODEC_VERSION) throw new Error(`Unsupported version: ${version}`);
 	}
 
@@ -298,16 +301,26 @@ export class StateReader {
 	}
 
 	/**
-	 * See `StateWriter.writeElementType`: the key of the type (0: no more elements, also at the
-	 * end of the bits), and whether the element repeats the type and the styles of `previous`.
+	 * See `StateWriter.writeElementType`: the key of the type, or `ELEMENT_END` for no more
+	 * elements, and whether the element repeats the type and the styles of `previous`.
 	 */
 	readElementType(previous: StateElement | undefined): { key: number; repeat: boolean } {
-		try {
-			const repeat = previous ? this.readBit() : false;
-			return { key: repeat ? ELEMENT_KEYS[previous!.type] : this.readInteger(3), repeat };
-		} catch (_) {
-			return { key: 0, repeat: false };
-		}
+		const repeat = previous ? this.readBit() : false;
+		return { key: repeat ? ELEMENT_KEYS[previous!.type] : this.readKey(KEY_PARAMETERS.element), repeat };
+	}
+
+	/**
+	 * After the end of the elements: only the bits that fill the last character, fewer than 6 and
+	 * all 0. Anything else is not a link of this format, e.g. two links in a row.
+	 */
+	readEnd() {
+		const rest = this.bits.slice(this.offset);
+		if (rest.length >= 6 || rest.some((bit) => bit)) throw new Error('Data after the end of the map');
+	}
+
+	/** A key of a list of fields, the type of an element or the version, see `StateWriter.writeKey`. */
+	readKey(parameter: number): number {
+		return this.readExpGolomb(parameter);
 	}
 
 	/** See `StateWriter.writeFrame`. */
@@ -328,10 +341,9 @@ export class StateReader {
 				if (!bounds) throw new Error('Frame beyond the map');
 				frame.bounds = bounds;
 			}
-			// its settings, if it has any, see `StateWriter.writeFrame`
-			const set = this.readBit();
-			while (set) {
-				const key = this.readInteger(4);
+			// its settings, see `StateWriter.writeFrame`
+			while (true) {
+				const key = this.readKey(KEY_PARAMETERS.frame);
 				if (key === END_KEY) break;
 				switch (key) {
 					case FRAME_KEYS.bearing:
@@ -389,7 +401,7 @@ export class StateReader {
 			const { labelSize, haloWidth, colors } = BACKGROUND_STEPS;
 			const steps = (value: number, per: number) => Math.round((value / per) * 1e4) / 1e4;
 			while (true) {
-				const key = this.readInteger(4);
+				const key = this.readKey(KEY_PARAMETERS.background);
 				switch (key) {
 					case END_KEY: {
 						// without the settings that have their default value, as the writer writes it
@@ -471,7 +483,7 @@ export class StateReader {
 
 			const metadata: StateMetadata = {};
 			while (true) {
-				const key = this.readInteger(6);
+				const key = this.readKey(KEY_PARAMETERS.metadata);
 				switch (key) {
 					case END_KEY:
 						return metadata;
@@ -590,7 +602,7 @@ export class StateReader {
 		try {
 			const legend: StateLegend = { entries: [] };
 			while (true) {
-				const key = this.readInteger(4);
+				const key = this.readKey(KEY_PARAMETERS.legend);
 				switch (key) {
 					case END_KEY:
 						return legend;
@@ -630,7 +642,7 @@ export class StateReader {
 			const viewer: Record<string, string | boolean> = {};
 			const controls = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
 			while (true) {
-				const key = this.readInteger(4);
+				const key = this.readKey(KEY_PARAMETERS.viewer);
 				if (key === END_KEY) return viewer as StateViewer;
 				const button = VIEWER_BUTTONS.find((name) => VIEWER_KEYS[name] === key);
 				if (button) {
@@ -659,7 +671,7 @@ export class StateReader {
 		let strokeStyle: StateStyle | undefined;
 		let label = '';
 		while (true) {
-			const key = this.readInteger(4);
+			const key = this.readKey(KEY_PARAMETERS.legendEntry);
 			switch (key) {
 				case END_KEY:
 					if (!type) throw new Error('Legend entry without type');
@@ -692,7 +704,7 @@ export class StateReader {
 			if (!this.hasPopups || !this.readBit()) return undefined;
 			const popup: StatePopup = { text: '' };
 			while (true) {
-				const key = this.readInteger(4);
+				const key = this.readKey(KEY_PARAMETERS.popup);
 				switch (key) {
 					case END_KEY:
 						return popup;

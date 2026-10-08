@@ -107,7 +107,7 @@ describe('the label of a marker', () => {
 			elements: [{ type: 'marker', point: [13, 52], label: 'Label', popup: { text: 'Popup' } }]
 		};
 		const reader = StateReader.fromBase64(encodeState(state));
-		reader.readInteger(3);
+		reader.readVersion();
 		reader.readPalette();
 		expect(reader.readStringTable()).toStrictEqual(['Label', 'Popup']);
 	});

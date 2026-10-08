@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import { STYLE_HISTORY_SIZE, StyleHistory } from './style_history.js';
+import { CODEC_VERSION, ELEMENT_KEYS, KEY_PARAMETERS } from './constants.js';
 import type { MapState } from './types.js';
 
 function encode(state: MapState): string {
@@ -119,7 +120,7 @@ describe('style references', () => {
 
 	it('reject an invalid reference', () => {
 		const writer = new StateWriter();
-		writer.writeInteger(1, 3); // version
+		writer.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 		writer.writeArray([], () => {}); // palette
 		writer.writeVarint(0); // no strings
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
@@ -131,7 +132,7 @@ describe('style references', () => {
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeBit(true); // elements may have popups
-		writer.writeInteger(1, 3); // marker
+		writer.writeKey(ELEMENT_KEYS.marker, KEY_PARAMETERS.element);
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style

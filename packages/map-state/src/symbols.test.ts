@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
-import { STRING_INDEX_K } from './constants.js';
+import { CODEC_VERSION, ELEMENT_KEYS, KEY_PARAMETERS, STRING_INDEX_K } from './constants.js';
 
 function encode(state: MapState): string {
 	const writer = new StateWriter();
@@ -66,7 +66,7 @@ describe('symbols', () => {
 			elements: NAMES.map((symbol, i) => ({ type: 'marker', point: [13 + i / 100, 52], style: { symbol } }))
 		};
 		const reader = StateReader.fromBase64(encode(state));
-		reader.readInteger(3);
+		reader.readVersion();
 		reader.readPalette();
 		// the words of the format, then the others
 		expect(reader.readStringTable()).toStrictEqual([
@@ -89,7 +89,7 @@ describe('symbols', () => {
 
 	it('are rejected if they are not in the string table', () => {
 		const writer = new StateWriter();
-		writer.writeInteger(1, 3); // version
+		writer.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 		writer.writeVarint(0); // no colors
 		writer.writeVarint(0); // no strings
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
@@ -101,7 +101,7 @@ describe('symbols', () => {
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeBit(true); // elements may have popups
-		writer.writeInteger(1, 3); // marker
+		writer.writeKey(ELEMENT_KEYS.marker, KEY_PARAMETERS.element);
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style

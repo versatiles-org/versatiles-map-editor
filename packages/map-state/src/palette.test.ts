@@ -3,7 +3,7 @@ import { StateReader } from './reader.js';
 import { collectColors, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { MapState } from './types.js';
-import { COLOR_INDEX_K } from './constants.js';
+import { CODEC_VERSION, COLOR_INDEX_K, ELEMENT_KEYS, KEY_PARAMETERS } from './constants.js';
 
 function encode(state: MapState): string {
 	const writer = new StateWriter();
@@ -55,7 +55,7 @@ describe('color palette', () => {
 
 	it('rejects an index outside the palette', () => {
 		const writer = new StateWriter();
-		writer.writeInteger(1, 3); // version
+		writer.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 		writer.writePalette(['#ff0000']);
 		writer.writeVarint(0); // no strings
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
@@ -67,7 +67,7 @@ describe('color palette', () => {
 		writer.writeBit(false); // no frame
 		writer.writeBit(false); // no metadata
 		writer.writeBit(true); // elements may have popups
-		writer.writeInteger(1, 3); // marker
+		writer.writeKey(ELEMENT_KEYS.marker, KEY_PARAMETERS.element);
 		writer.writeExpGolomb(0, 0, true); // the point
 		writer.writeExpGolomb(0, 0, true);
 		writer.writeBit(true); // style
@@ -88,14 +88,14 @@ describe('color palette', () => {
 
 describe('versions', () => {
 	it('encodeState writes version 1', () => {
-		expect(StateReader.fromBase64(encodeState(state)).readInteger(3)).toBe(1);
+		expect(StateReader.fromBase64(encodeState(state)).readKey(KEY_PARAMETERS.version)).toBe(1);
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('rejects other versions, also the original version 0', () => {
-		for (const version of [0, 2, 7]) {
+	it('rejects other versions, of which there is no last one', () => {
+		for (const version of [0, 2, 7, 1000]) {
 			const writer = new StateWriter();
-			writer.writeInteger(version, 3);
+			writer.writeKey(version, KEY_PARAMETERS.version);
 			expect(() => new StateReader(writer.bits).readRoot()).toThrow('Error reading root');
 		}
 	});

@@ -181,12 +181,20 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
 ## Format version
 
-The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
+The base64 starts with the format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
 this version is read; a later version can be told apart by it. Then come the palette, the string
 table, the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
 relative, the frame (optional: the visible area of a shared map, and its settings as key/value pairs, so settings can be added: how it is turned, and what its viewers can do), the metadata, 1 bit whether an
-element has a popup (without one, the elements have no bit for it) and the elements.
+element has a popup (without one, the elements have no bit for it) and the elements, with an
+explicit end: a link that was cut off, or that has anything after its end, is refused instead of
+read as a smaller map.
+
+The fields of the metadata, the background, the frame, the viewer, the legend and a popup are
+key/value pairs, each list with an end key. A key is an Exp-Golomb code, and so are the type of
+an element and the version (`KEY_PARAMETERS`): the numbers have no limit, so a field can always
+be added, and the fields that are expected most have the smallest numbers and the shortest codes.
+
 To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,

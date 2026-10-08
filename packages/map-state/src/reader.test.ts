@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
+import { BACKGROUND_KEYS, CODEC_VERSION, END_KEY, KEY_PARAMETERS, METADATA_KEYS } from './constants.js';
 import type { StateLegend, StateMetadata, MapState, StateStyle, StateViewer } from './types.js';
 import { StateWriter } from './writer.js';
 import { decodeState, encodeState, stateFromMapJSON } from './index.js';
@@ -217,7 +218,7 @@ describe('StateReader', () => {
 	describe('readRoot', () => {
 		it('should reject unknown element keys', () => {
 			const writer = new StateWriter();
-			writer.writeInteger(1, 3); // version
+			writer.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 			writer.writeVarint(0); // no colors
 			writer.writeVarint(0); // no strings
 			writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
@@ -229,20 +230,19 @@ describe('StateReader', () => {
 			writer.writeBit(false); // no frame
 			writer.writeBit(false); // no metadata
 			writer.writeBit(true); // elements may have popups
-			writer.writeInteger(5, 3); // unknown element key
-			writer.writeInteger(0, 3);
+			writer.writeKey(9, KEY_PARAMETERS.element); // a type that no element has
 
 			const reader = StateReader.fromBase64(writer.asBase64());
 			expect(() => reader.readRoot()).toThrow(
-				expect.objectContaining({ cause: expect.objectContaining({ message: 'Unknown element key: 5' }) })
+				expect.objectContaining({ cause: expect.objectContaining({ message: 'Unknown element key: 9' }) })
 			);
 		});
 
 		it('should read a root state', () => {
 			// version 1, no colors, no strings, the resolution, the origin, one parameter of the code
-			// of the coordinates, points from the origin, no frame, no metadata, no popups, no elements
+			// of the coordinates, points from the origin, no frame, no metadata, no popups, the end of the elements
 			const reader = StateReader.fromBitString(
-				'001' + '000000' + '000000' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0'
+				'101' + '000000' + '000000' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0' + '011'
 			);
 			const root = reader.readRoot();
 			expect(root).toStrictEqual({ elements: [] });
@@ -261,7 +261,7 @@ describe('StateReader', () => {
 
 			const writer = new StateWriter();
 			writer.writeRoot(root);
-			expect(writer.asBitString()).toBe('001000000000000000011000110010000000111001000000000000011100');
+			expect(writer.asBitString()).toBe('10100000000000000001100011001000000011100100000000000111000011');
 
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -300,7 +300,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgAGzhUwlDgQAP1y8AASgmf1OKEJYiEAAm8rwABD7x8AGGwAAGGwANoAD9AiAAEoIWmNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisWkziPdNoFEoAE8qAABvdD-YbGidFg'
+				'pT_AAAAAD_sj__wAERERCIiIgAGzhUwlDhAA_XLwABKCZ_U4oQliIQACbyvAAEPvHwAYbAAAYbAARoAD9AiAAEoIWmNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisWkziPdNoFEigBPKgAAb3Q_mGxonRZg'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -373,7 +373,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9q5QojnJmOogTwkSHTsyAtOGtIdiCDYBAWHasTq1I'
+				'oSqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9q5QqOcmY6iBPCRIdOxCAtOGtIdiCDYBAWHasTq1Jg'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -499,7 +499,7 @@ describe('popups', () => {
 
 	it('reject unknown popup fields', () => {
 		const writer = new StateWriter();
-		writer.writeInteger(15, 4);
+		writer.writeKey(15, KEY_PARAMETERS.popup);
 		expect(() => new StateReader([true, ...writer.bits]).readPopup()).toThrow('Error reading popup');
 	});
 });
@@ -566,7 +566,7 @@ describe('background', () => {
 	it('stores a theme and a language of its lists as their index, others as text', () => {
 		const strings = (background: MapState['meta'] & object) => {
 			const reader = StateReader.fromBase64(encodeState({ meta: background, elements: [] }));
-			reader.readInteger(3);
+			reader.readVersion();
 			reader.readPalette();
 			return reader.readStringTable();
 		};
@@ -611,7 +611,7 @@ describe('background', () => {
 			const writer = new StateWriter();
 			writer.writeStringTable([], strings);
 			writer.writeBit(true);
-			writer.writeInteger(2, 6); // the background
+			writer.writeKey(METADATA_KEYS.background, KEY_PARAMETERS.metadata);
 			write(writer);
 			const reader = new StateReader(writer.bits);
 			reader.readStringTable();
@@ -626,22 +626,26 @@ describe('background', () => {
 				})
 			});
 		// a key that the format does not have
-		expect(read((writer) => writer.writeInteger(15, 4))).toThrow(error('Invalid background key: 15'));
+		expect(read((writer) => writer.writeKey(99, KEY_PARAMETERS.background))).toThrow(
+			error('Invalid background key: 99')
+		);
 		// a theme beyond its list
 		expect(
 			read((writer) => {
-				writer.writeInteger(2, 4);
+				writer.writeKey(BACKGROUND_KEYS.theme, KEY_PARAMETERS.background);
 				writer.writeInteger(30, 5);
 			})
 		).toThrow(error('Invalid index: 30 of 24'));
 		// no setting at all
-		expect(read((writer) => writer.writeInteger(0, 4))).toThrow(error('A background without settings'));
+		expect(read((writer) => writer.writeKey(END_KEY, KEY_PARAMETERS.background))).toThrow(
+			error('A background without settings')
+		);
 		// options that are no JSON, or no object
 		for (const json of ['{', '[]', 'null']) {
 			expect(
 				read(
 					(writer) => {
-						writer.writeInteger(14, 4);
+						writer.writeKey(BACKGROUND_KEYS.options, KEY_PARAMETERS.background);
 						writer.writeStringRef(json, true);
 					},
 					[json]
@@ -701,7 +705,7 @@ describe('legend', () => {
 
 	it('rejects unknown fields', () => {
 		const writer = new StateWriter();
-		writer.writeInteger(15, 4);
+		writer.writeKey(15, KEY_PARAMETERS.legend);
 		expect(() => new StateReader(writer.bits).readLegend()).toThrow('Error reading legend');
 	});
 });
@@ -757,13 +761,13 @@ describe('viewer', () => {
 		expect(decodeState(encodeState(state({ reset: true, fullscreen: true })))).toStrictEqual(
 			state({ reset: true, fullscreen: true })
 		);
-		// 4 bits more than another setting of the viewer
+		// only the bits of its key more than another setting of the viewer: 5, as one of the rarer ones
 		const bits = (viewer: StateViewer) => {
 			const writer = new StateWriter();
 			writer.writeRoot(state(viewer));
 			return writer.bits.length;
 		};
-		expect(bits({ zoom: false, reset: true }) - bits({ zoom: false })).toBe(4);
+		expect(bits({ zoom: false, reset: true }) - bits({ zoom: false })).toBe(5);
 		// a file may say anything: only `true` switches it on
 		expect(stateFromMapJSON(state({ reset: 'yes' } as unknown as StateViewer)).meta).toBeUndefined();
 	});

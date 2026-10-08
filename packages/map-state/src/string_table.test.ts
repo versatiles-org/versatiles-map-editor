@@ -27,7 +27,7 @@ describe('the string table', () => {
 	it('has the strings in the order they are written, each once', () => {
 		expect([...new Set(collectStrings(state))]).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', 'Open 24 h']);
 		const reader = StateReader.fromBase64(encodeState(state));
-		reader.readInteger(3);
+		reader.readVersion();
 		reader.readPalette();
 		expect(reader.readStringTable()).toStrictEqual(['Pharmacy', 'Pharmacies', 'Boots', 'Open 24 h']);
 	});
@@ -40,7 +40,7 @@ describe('the string table', () => {
 		};
 		const withMeta: MapState = { ...state, meta: { ...state.meta, ...meta } };
 		const reader = StateReader.fromBase64(encodeState(withMeta));
-		reader.readInteger(3);
+		reader.readVersion();
 		reader.readPalette();
 		expect(reader.readStringTable()).toStrictEqual([
 			'lato_regular',

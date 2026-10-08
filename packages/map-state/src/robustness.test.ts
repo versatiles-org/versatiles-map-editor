@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { parseColor } from './color.js';
 import { decodeState, encodeState, stateFromMapJSON, type MapState } from './index.js';
 import { sanitizeFrame } from './profile.js';
+import { StateReader } from './reader.js';
+import { StateWriter } from './writer.js';
 import {
 	FILL_PATTERN_NAMES,
 	LABEL_POSITION_NAMES,
@@ -104,6 +106,30 @@ describe('corrupt links', { timeout: 60_000 }, () => {
 			for (let length = 0; length < link.length; length += step) tryLink(link.slice(0, length), slowest);
 		}
 		expect(slowest.ms).toBeLessThan(2000);
+	});
+
+	it('cut off anywhere are refused: no map loses its last elements unnoticed', () => {
+		for (const link of links) {
+			for (let length = 0; length < link.length; length++) {
+				expect(() => decodeState(link.slice(0, length)), `${length} of ${link.length}`).toThrow();
+			}
+		}
+	});
+
+	it('with anything after their end are refused, e.g. two links in a row', () => {
+		for (const link of links) {
+			expect(() => decodeState(link + 'A')).toThrow();
+			expect(() => decodeState(link + link)).toThrow();
+		}
+		// the bits that fill the last character are zeros
+		const writer = new StateWriter();
+		writer.writeRoot({ elements: [] });
+		const filled = (fill: boolean[]) => () => new StateReader([...writer.bits, ...fill]).readRoot();
+		expect(filled([false, false, false, false, false])).not.toThrow();
+		expect(filled([false, false, true])).toThrow(
+			expect.objectContaining({ cause: expect.objectContaining({ message: 'Data after the end of the map' }) })
+		);
+		expect(filled([false, false, false, false, false, false])).toThrow();
 	});
 
 	it('with characters changed are refused or drawable', () => {

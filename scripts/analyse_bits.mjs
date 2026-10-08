@@ -28,6 +28,8 @@ import {
 import { StateReader } from '../packages/map-state/dist/reader.js';
 import { decodeStringBlock } from '../packages/map-state/dist/string_coder.js';
 import {
+	BACKGROUND_KEYS,
+	ELEMENT_END,
 	ELEMENT_KEYS,
 	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
@@ -60,7 +62,7 @@ const KIND_TITLES = { stringRefs: 'string refs' };
 const KIND_NAMES = LINK_KINDS.map((kind) => KIND_TITLES[kind] ?? kind);
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
-const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'readExpGolomb', 'readBlock']);
+const PRIMITIVES = new Set(['readBit', 'readInteger', 'readKey', 'readVarint', 'readExpGolomb', 'readBlock']);
 
 /** A reader that records each call of a read method: its name, and the bits it consumed. */
 class TracingReader extends StateReader {
@@ -81,7 +83,7 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 		// the reads inside a primitive belong to it
 		if (parent.primitive) return method.apply(this, args);
 		const span = {
-			name: label(name, args, parent.name),
+			name: label(name, args),
 			method: name,
 			args,
 			primitive: PRIMITIVES.has(name),
@@ -95,10 +97,6 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 			// what it read, e.g. the number of strings for `expandStringTables`, and for `--content`
 			span.value = value;
 			return value;
-		} catch (error) {
-			// e.g. the type of a next element, in the padding of the last character
-			if (span.primitive) span.name = '(padding)';
-			throw error;
 		} finally {
 			span.end = this.offset;
 			this.stack.pop();
@@ -106,27 +104,18 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 	};
 }
 
-// the read methods of key/value pairs, whose integers are their keys
-const KEY_VALUE_READS = new Set([
-	'readMetadata',
-	'readLegend',
-	'readLegendEntry',
-	'readPopup',
-	'readViewer',
-	'readStylePatch',
-	'readStyleKey'
-]);
-
 /**
  * The name of a call in the tree: primitives with their arguments, e.g. `int(4)` or `varint±`, and
- * the integers of key/value pairs as `key(4)`.
+ * the keys of key/value pairs with the parameter of their Exp-Golomb code, e.g. `key(k=1)`.
  */
-function label(name, args, parent) {
+function label(name, args) {
 	switch (name) {
 		case 'readBit':
 			return 'bit';
 		case 'readInteger':
-			return KEY_VALUE_READS.has(parent) ? `key(${args[0]})` : `int(${args[0]})`;
+			return `int(${args[0]})`;
+		case 'readKey':
+			return `key(k=${args[0]})`;
 		case 'readVarint':
 			return args[0] ? 'varint±' : 'varint';
 		case 'readExpGolomb':
@@ -141,6 +130,7 @@ function label(name, args, parent) {
 // the tables of the keys of key/value pairs, by the method that reads them
 const KEY_TABLES = {
 	readMetadata: METADATA_KEYS,
+	readBackground: BACKGROUND_KEYS,
 	readLegend: LEGEND_KEYS,
 	readLegendEntry: LEGEND_ENTRY_KEYS,
 	readPopup: POPUP_KEYS,
@@ -177,10 +167,9 @@ function contentOf(span, parent) {
 		case 'readStringTable':
 		case 'readBlock':
 			return '';
-		case 'readInteger': {
-			// the keys of key/value pairs (see `label`), and of the settings of a frame, in 4 bits
-			const isKey = span.name.startsWith('key(') || (parent.method === 'readFrame' && args[0] === 4);
-			const table = isKey ? KEY_TABLES[parent.method] : undefined;
+		case 'readKey': {
+			// of a list of key/value pairs; else the version, or the type of an element, which its call names
+			const table = KEY_TABLES[parent.method];
 			return table ? keyName(table, value) : String(value);
 		}
 		case 'readStyleKey': {
@@ -192,6 +181,7 @@ function contentOf(span, parent) {
 			return field ? `${value} = ${field.name}` : String(value);
 		}
 		case 'readElementType': {
+			if (value?.key === ELEMENT_END) return 'the end of the elements';
 			const type = Object.keys(ELEMENT_KEYS).find((k) => ELEMENT_KEYS[k] === value?.key);
 			return value?.repeat ? `as the element before${type ? ` (${type})` : ''}` : (type ?? short(value));
 		}
@@ -214,8 +204,6 @@ function aggregate(
 	span.children.forEach((child, index) => {
 		// a line per call: with what it read
 		if (expand) child.content = contentOf(child, span);
-		// a read at the end that found no bits
-		if (child.end === child.start && child.name === '(padding)') return;
 		const key = expand ? index : child.name;
 		let childNode = node.children.get(key);
 		if (!childNode) {

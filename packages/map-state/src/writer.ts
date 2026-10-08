@@ -9,7 +9,9 @@ import {
 	bitsToBase64,
 	CODEC_VERSION,
 	ELEMENT_KEYS,
+	ELEMENT_END,
 	END_KEY,
+	KEY_PARAMETERS,
 	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
@@ -162,7 +164,7 @@ export class StateWriter {
 	}
 
 	writeRoot(root: MapState) {
-		this.writeInteger(CODEC_VERSION, 3);
+		this.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 		this.writePalette(collectColors(root));
 		this.writeStringTable(collectStrings(root), collectFormatStrings(root));
 		this.styleHistory = new StyleHistory();
@@ -202,6 +204,9 @@ export class StateWriter {
 					break;
 			}
 		});
+		// the end of the elements: no more bits is an error for the reader, e.g. of a link that was cut off
+		if (root.elements.length > 0) this.writeBit(false);
+		this.writeKey(ELEMENT_END, KEY_PARAMETERS.element);
 	}
 
 	/**
@@ -251,11 +256,12 @@ export class StateWriter {
 
 	/**
 	 * The type of an element: after the first, 1 bit whether it repeats the type and the styles of
-	 * the element before; unless it does, its type in 3 bits.
+	 * the element before; unless it does, its type as a key (`ELEMENT_KEYS`). After the last element
+	 * comes `ELEMENT_END` in place of a type, see `writeRoot`.
 	 */
 	private writeElementType(element: StateElement, repeat: boolean, first: boolean) {
 		if (!first) this.writeBit(repeat);
-		if (!repeat) this.writeInteger(ELEMENT_KEYS[element.type], 3);
+		if (!repeat) this.writeKey(ELEMENT_KEYS[element.type], KEY_PARAMETERS.element);
 	}
 
 	/** The styles of an element, unless it repeats those of the element before: the style, and for areas the outline. */
@@ -279,7 +285,7 @@ export class StateWriter {
 
 	/**
 	 * The frame, each part only if the map has it. Its area: the south-west corner on the grid, and
-	 * the width and height in steps of the grid. Then, if it has any (1 bit), its settings as
+	 * the width and height in steps of the grid. Then its settings as
 	 * key/value pairs (`FRAME_KEYS`), so settings can be added later: the rotation (9 bits, whole degrees from 0 to 359), the tilt
 	 * (6 bits, whole degrees), and a flag for each thing that viewers can do other than by default.
 	 */
@@ -299,12 +305,8 @@ export class StateWriter {
 			this.writeVarint(Math.max(1, y1 - y0));
 		}
 
-		// most frames are only an area: 1 bit says that no settings follow
-		const { bounds: _bounds, ...settings } = frame;
-		const set = Object.keys(settings).length > 0;
-		this.writeBit(set);
-		if (!set) return;
-		const key = (name: keyof typeof FRAME_KEYS) => this.writeInteger(FRAME_KEYS[name], 4);
+		// most frames are only an area: the end of its settings is 1 bit
+		const key = (name: keyof typeof FRAME_KEYS) => this.writeKey(FRAME_KEYS[name], KEY_PARAMETERS.frame);
 		if (frame.bearing) {
 			key('bearing');
 			this.writeInteger(((frame.bearing % 360) + 360) % 360, 9);
@@ -328,7 +330,7 @@ export class StateWriter {
 			this.writeInteger(Math.round(frame.maxZoom * 2), 6);
 		}
 		if (frame.scrollZoom === 'free') key('scrollFree');
-		this.writeInteger(END_KEY, 4);
+		this.writeKey(END_KEY, KEY_PARAMETERS.frame);
 	}
 
 	/** The grid of the element coordinates, which the map of the root sets. */
@@ -379,6 +381,14 @@ export class StateWriter {
 	 * each doubling 2 bits more. Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic
 	 * instead of bit operators, which would cut the values to 32 bits.
 	 */
+	/**
+	 * A key of a list of fields, the type of an element or the version: an Exp-Golomb code with the
+	 * parameter of its list (`KEY_PARAMETERS`), so the numbers have no limit.
+	 */
+	writeKey(key: number, parameter: number) {
+		this.writeExpGolomb(key, parameter);
+	}
+
 	writeExpGolomb(value: number, k: number, signed?: true) {
 		if (!Number.isSafeInteger(value)) throw new Error(`value must be a safe integer: ${value}`);
 		if (signed) value = zigzag(value);
@@ -407,41 +417,41 @@ export class StateWriter {
 		// first the words of the format, as they are first in the string table
 		const background = linkBackground(metadata.background);
 		if (background) {
-			this.writeInteger(METADATA_KEYS.background, 6);
+			this.writeKey(METADATA_KEYS.background, KEY_PARAMETERS.metadata);
 			this.writeBackground(background);
 		}
 		if (metadata.colorScheme) {
-			this.writeInteger(METADATA_KEYS.colorScheme, 6);
+			this.writeKey(METADATA_KEYS.colorScheme, KEY_PARAMETERS.metadata);
 			this.writeStringRef(metadata.colorScheme, true);
 		}
 		if (metadata.legend) {
-			this.writeInteger(METADATA_KEYS.legend, 6);
+			this.writeKey(METADATA_KEYS.legend, KEY_PARAMETERS.metadata);
 			this.writeLegend(metadata.legend);
 		}
 		const labels = sanitizeLabels(metadata.labels);
 		if (labels?.mapOnTop) {
 			// a flag: the key alone
-			this.writeInteger(METADATA_KEYS.mapLabelsOnTop, 6);
+			this.writeKey(METADATA_KEYS.mapLabelsOnTop, KEY_PARAMETERS.metadata);
 		}
 		if (metadata.title) {
-			this.writeInteger(METADATA_KEYS.title, 6);
+			this.writeKey(METADATA_KEYS.title, KEY_PARAMETERS.metadata);
 			this.writeStringRef(metadata.title);
 		}
 		if (labels?.overlap === 'hide') {
 			// a flag: the key alone
-			this.writeInteger(METADATA_KEYS.labelOverlap, 6);
+			this.writeKey(METADATA_KEYS.labelOverlap, KEY_PARAMETERS.metadata);
 		}
 		if (labels?.minZoom !== undefined) {
-			this.writeInteger(METADATA_KEYS.labelMinZoom, 6);
+			this.writeKey(METADATA_KEYS.labelMinZoom, KEY_PARAMETERS.metadata);
 			// in tenths of a zoom level
 			this.writeVarint(Math.round(labels.minZoom * 10));
 		}
 		const viewer = removeViewerDefaults(metadata.viewer);
 		if (viewer) {
-			this.writeInteger(METADATA_KEYS.viewer, 6);
+			this.writeKey(METADATA_KEYS.viewer, KEY_PARAMETERS.metadata);
 			this.writeViewer(viewer);
 		}
-		this.writeInteger(END_KEY, 6);
+		this.writeKey(END_KEY, KEY_PARAMETERS.metadata);
 	}
 
 	/**
@@ -451,7 +461,7 @@ export class StateWriter {
 	 * sliders (`BACKGROUND_STEPS`), of the colors only those that change something.
 	 */
 	writeBackground(background: StateBackground) {
-		const key = (name: keyof typeof BACKGROUND_KEYS) => this.writeInteger(BACKGROUND_KEYS[name], 4);
+		const key = (name: keyof typeof BACKGROUND_KEYS) => this.writeKey(BACKGROUND_KEYS[name], KEY_PARAMETERS.background);
 		/** The index of a name in its list, or the index that says its name follows, and the name. */
 		const name = (list: readonly string[], value: string, bits: number, text: number) => {
 			const index = list.indexOf(value);
@@ -507,7 +517,7 @@ export class StateWriter {
 			key('options');
 			this.writeStringRef(JSON.stringify(background.options), true);
 		}
-		this.writeInteger(END_KEY, 4);
+		this.writeKey(END_KEY, KEY_PARAMETERS.background);
 	}
 
 	/** `repeat`: the element has the type and the styles of the element before, which are not written. */
@@ -548,55 +558,55 @@ export class StateWriter {
 		for (const [name, choices] of Object.entries(VIEWER_CHOICES)) {
 			const choice = viewer[name as keyof typeof VIEWER_CHOICES];
 			if (choice === undefined) continue;
-			this.writeInteger(VIEWER_KEYS[name as keyof typeof VIEWER_CHOICES], 4);
+			this.writeKey(VIEWER_KEYS[name as keyof typeof VIEWER_CHOICES], KEY_PARAMETERS.viewer);
 			this.writeVarint((choices as readonly string[]).indexOf(choice));
 		}
 		for (const button of VIEWER_BUTTONS) {
-			if (viewer[button]) this.writeInteger(VIEWER_KEYS[button], 4);
+			if (viewer[button]) this.writeKey(VIEWER_KEYS[button], KEY_PARAMETERS.viewer);
 		}
-		if (viewer.zoom === false) this.writeInteger(VIEWER_KEYS.noZoom, 4);
-		this.writeInteger(END_KEY, 4);
+		if (viewer.zoom === false) this.writeKey(VIEWER_KEYS.noZoom, KEY_PARAMETERS.viewer);
+		this.writeKey(END_KEY, KEY_PARAMETERS.viewer);
 	}
 
 	// key/value pairs like a style, so fields can be added later
 	writeLegend(legend: StateLegend) {
 		if (legend.layout && legend.layout !== LEGEND_DEFAULTS.layout) {
-			this.writeInteger(LEGEND_KEYS.layout, 4);
+			this.writeKey(LEGEND_KEYS.layout, KEY_PARAMETERS.legend);
 			this.writeVarint(LEGEND_LAYOUTS.indexOf(legend.layout));
 		}
 		if (legend.font && legend.font !== LEGEND_DEFAULTS.font) {
-			this.writeInteger(LEGEND_KEYS.font, 4);
+			this.writeKey(LEGEND_KEYS.font, KEY_PARAMETERS.legend);
 			this.writeVarint(LEGEND_FONTS.indexOf(legend.font));
 		}
 		// only the key: they are false without it
-		if (legend.bold) this.writeInteger(LEGEND_KEYS.bold, 4);
-		if (legend.italic) this.writeInteger(LEGEND_KEYS.italic, 4);
+		if (legend.bold) this.writeKey(LEGEND_KEYS.bold, KEY_PARAMETERS.legend);
+		if (legend.italic) this.writeKey(LEGEND_KEYS.italic, KEY_PARAMETERS.legend);
 		if (legend.theme && legend.theme !== LEGEND_DEFAULTS.theme) {
-			this.writeInteger(LEGEND_KEYS.theme, 4);
+			this.writeKey(LEGEND_KEYS.theme, KEY_PARAMETERS.legend);
 			this.writeVarint(LEGEND_THEMES.indexOf(legend.theme));
 		}
-		this.writeInteger(LEGEND_KEYS.entries, 4);
+		this.writeKey(LEGEND_KEYS.entries, KEY_PARAMETERS.legend);
 		this.writeArray(legend.entries, (entry) => {
 			const type = LEGEND_ENTRY_TYPES.indexOf(entry.type);
 			if (type < 0) throw new Error(`Invalid legend entry type: ${entry.type}`);
-			this.writeInteger(LEGEND_ENTRY_KEYS.type, 4);
+			this.writeKey(LEGEND_ENTRY_KEYS.type, KEY_PARAMETERS.legendEntry);
 			this.writeVarint(type);
 			// the styles like those of elements, which can refer to them
 			if (entry.style) {
-				this.writeInteger(LEGEND_ENTRY_KEYS.style, 4);
+				this.writeKey(LEGEND_ENTRY_KEYS.style, KEY_PARAMETERS.legendEntry);
 				this.writeStyle(roleOf(entry.type), entry.style);
 			}
 			if ('strokeStyle' in entry && entry.strokeStyle) {
-				this.writeInteger(LEGEND_ENTRY_KEYS.strokeStyle, 4);
+				this.writeKey(LEGEND_ENTRY_KEYS.strokeStyle, KEY_PARAMETERS.legendEntry);
 				this.writeStyle('outline', entry.strokeStyle);
 			}
 			if (entry.label) {
-				this.writeInteger(LEGEND_ENTRY_KEYS.label, 4);
+				this.writeKey(LEGEND_ENTRY_KEYS.label, KEY_PARAMETERS.legendEntry);
 				this.writeStringRef(entry.label);
 			}
-			this.writeInteger(END_KEY, 4);
+			this.writeKey(END_KEY, KEY_PARAMETERS.legendEntry);
 		});
-		this.writeInteger(END_KEY, 4);
+		this.writeKey(END_KEY, KEY_PARAMETERS.legend);
 	}
 
 	/** A popup: 1 bit whether there is one, unless no element of the map has one, then its key/value pairs. */
@@ -605,9 +615,9 @@ export class StateWriter {
 		if (!popup?.text) return this.writeBit(false);
 		this.writeBit(true);
 		// key/value pairs like a style, so fields can be added later
-		this.writeInteger(POPUP_KEYS.text, 4);
+		this.writeKey(POPUP_KEYS.text, KEY_PARAMETERS.popup);
 		this.writeStringRef(popup.text);
-		this.writeInteger(END_KEY, 4);
+		this.writeKey(END_KEY, KEY_PARAMETERS.popup);
 	}
 
 	/**

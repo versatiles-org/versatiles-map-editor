@@ -36,45 +36,70 @@ export const CODEC_VERSION = 1;
 export const ORIGIN_SCALE = 100;
 
 // The keys of the fields in the base64 format, the same for writer and reader. A list of fields
-// (e.g. of the metadata) ends with `END_KEY`; unused keys are free for later fields.
+// (e.g. of the metadata) ends with `END_KEY`. A key is an Exp-Golomb code (see
+// `StateWriter.writeKey`), so no list has a last key: a field that is added later gets the next
+// number. The numbers are in the order of how often the fields are expected, the frequent ones
+// first, since a small number is a short code; they are part of the format and never change.
 
-/** The end of a list of fields, and of the elements. */
+/** The end of a list of fields. */
 export const END_KEY = 0;
 
-/** The type of an element, in 3 bits. */
-export const ELEMENT_KEYS = { marker: 1, line: 2, polygon: 3, circle: 4 } as const satisfies Record<
-	StateElement['type'],
-	number
->;
-
-/** The fields of the metadata, in 6 bits; 1, 5, 6 and 8 are free. */
-export const METADATA_KEYS = {
-	background: 2,
-	legend: 3,
-	colorScheme: 4,
-	mapLabelsOnTop: 7,
-	title: 9,
-	viewer: 10,
-	labelOverlap: 11,
-	labelMinZoom: 12
+/**
+ * The parameter k of the Exp-Golomb code of the keys of each list, and of the version: with 0,
+ * the key 0 costs 1 bit, 1 and 2 cost 3 bits, 3 to 6 cost 5 bits; with 1, the keys 0 and 1 cost 2
+ * bits, 2 to 5 cost 4 bits, 6 to 13 cost 6 bits; with 2, 0 to 3 cost 3 bits, 4 to 11 cost 5 bits.
+ * Chosen by measuring the example maps (2026-10-08).
+ */
+export const KEY_PARAMETERS = {
+	version: 2,
+	element: 0,
+	metadata: 1,
+	background: 1,
+	frame: 0,
+	viewer: 0,
+	legend: 0,
+	legendEntry: 1,
+	popup: 0
 } as const;
 
 /**
- * The fields of the background map, in 4 bits; 15 is free. A key alone is a flag: the satellite
- * map, no streets or no borders over the imagery, the relief shaded, the terrain raised, the
- * buildings extruded.
+ * The type of an element. Markers are the most of the elements of most maps, so theirs is the
+ * shortest; `ELEMENT_END` is among them, since it is written once per map.
+ */
+export const ELEMENT_KEYS = { marker: 0, line: 1, polygon: 3, circle: 4 } as const satisfies Record<
+	StateElement['type'],
+	number
+>;
+/** The end of the elements, in place of the type of a next one. */
+export const ELEMENT_END = 2;
+
+/** The fields of the metadata. A link for viewing has neither a title nor a color scheme. */
+export const METADATA_KEYS = {
+	background: 1,
+	legend: 2,
+	viewer: 3,
+	labelOverlap: 4,
+	labelMinZoom: 5,
+	mapLabelsOnTop: 6,
+	title: 7,
+	colorScheme: 8
+} as const;
+
+/**
+ * The fields of the background map. A key alone is a flag: the satellite map, no streets or no
+ * borders over the imagery, the relief shaded, the terrain raised, the buildings extruded.
  */
 export const BACKGROUND_KEYS = {
-	satellite: 1,
-	theme: 2,
-	noStreets: 3,
-	noBorders: 4,
-	labels: 5,
-	language: 6,
-	font: 7,
-	labelSize: 8,
-	haloWidth: 9,
-	colors: 10,
+	theme: 1,
+	satellite: 2,
+	labels: 3,
+	language: 4,
+	colors: 5,
+	haloWidth: 6,
+	labelSize: 7,
+	font: 8,
+	noStreets: 9,
+	noBorders: 10,
 	hillshade: 11,
 	terrain: 12,
 	extruded: 13,
@@ -88,45 +113,45 @@ export const BACKGROUND_LANGUAGE_TEXT = 15;
 /** The steps of the numbers of the background map in a link, as its sliders have them: per 1. */
 export const BACKGROUND_STEPS = { labelSize: 20, haloWidth: 4, colors: 20 } as const;
 
-/** The fields of the legend, in 4 bits; 1 is free. */
-export const LEGEND_KEYS = { layout: 2, entries: 3, font: 4, bold: 5, italic: 6, theme: 7 } as const;
+/** The fields of the legend. */
+export const LEGEND_KEYS = { entries: 1, theme: 2, layout: 3, font: 4, bold: 5, italic: 6 } as const;
 
-/** The fields of an entry of the legend, in 4 bits. */
-export const LEGEND_ENTRY_KEYS = { label: 3, type: 5, style: 6, strokeStyle: 7 } as const;
+/** The fields of an entry of the legend. */
+export const LEGEND_ENTRY_KEYS = { type: 1, style: 2, label: 3, strokeStyle: 4 } as const;
 
 /**
- * The settings of a frame besides its area, in 4 bits: how the map is turned when it opens, and
- * what its viewers can do. Each only if it differs from its default; a flag is its key alone.
+ * The settings of a frame besides its area: how the map is turned when it opens, and what its
+ * viewers can do. Each only if it differs from its default; a flag is its key alone.
  */
 export const FRAME_KEYS = {
 	bearing: 1,
-	pitch: 2,
-	noPan: 3,
-	noZoom: 4,
-	rotate: 5,
-	tilt: 6,
-	confine: 7,
-	minZoom: 8,
+	rotate: 2,
+	pitch: 3,
+	tilt: 4,
+	confine: 5,
+	scrollFree: 6,
+	noZoom: 7,
+	noPan: 8,
 	maxZoom: 9,
-	scrollFree: 10
+	minZoom: 10
 } as const;
 
 /**
- * The settings of the viewer, in 4 bits: of a control the index of its choice follows (see
- * `VIEWER_CHOICES`), a button is its key alone, and so is that the buttons for zooming are hidden.
+ * The settings of the viewer: of a control the index of its choice follows (see `VIEWER_CHOICES`),
+ * a button is its key alone, and so is that the buttons for zooming are hidden.
  */
 export const VIEWER_KEYS = {
-	search: 1,
-	navigation: 2,
-	legend: 3,
-	reset: 4,
-	fullscreen: 5,
-	scale: 6,
-	locate: 7,
-	noZoom: 8
+	legend: 1,
+	search: 2,
+	navigation: 3,
+	noZoom: 4,
+	scale: 5,
+	reset: 6,
+	fullscreen: 7,
+	locate: 8
 } as const;
 
-/** The fields of a popup, in 4 bits. */
+/** The fields of a popup. */
 export const POPUP_KEYS = { text: 1 } as const;
 
 /**

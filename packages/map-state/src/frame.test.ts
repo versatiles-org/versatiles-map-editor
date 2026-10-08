@@ -14,6 +14,7 @@ import {
 import { centerOf } from './bounds.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
+import { KEY_PARAMETERS } from './constants.js';
 
 const bounds: Bounds = [13.3, 52.45, 13.5, 52.55];
 const frame: StateFrame = { bounds };
@@ -154,30 +155,22 @@ describe('frame: how the map is turned', () => {
 
 	it('refuses a setting that this version does not know', () => {
 		const writer = new StateWriter();
-		writer.writeRoot({ elements: [], frame: { canRotate: true } });
-		// the key of the setting, 4 bits after the flags "frame", "no area" and "settings"
-		const bits = [...writer.bits];
-		const at = bits.length - 1;
-		const index = bits.findIndex(
-			(_, i) =>
-				i < at - 8 &&
-				bits
-					.slice(i, i + 11)
-					.map(Number)
-					.join('') ===
-					'101' + '0101' + '0000'
+		writer.writeBit(true); // a frame
+		writer.writeBit(false); // without an area
+		writer.writeKey(99, KEY_PARAMETERS.frame);
+		expect(() => new StateReader(writer.bits).readFrame()).toThrow(
+			expect.objectContaining({ cause: expect.objectContaining({ message: 'Unknown key of the frame: 99' }) })
 		);
-		expect(index).toBeGreaterThan(-1);
-		// key 5 (rotate) becomes key 15, which no setting has
-		bits.splice(index + 3, 4, true, true, true, true);
-		// root, frame
-		expect(() => new StateReader(bits).readRoot()).toThrow(
-			expect.objectContaining({
-				cause: expect.objectContaining({
-					cause: expect.objectContaining({ message: 'Unknown key of the frame: 15' })
-				})
-			})
-		);
+	});
+
+	it('costs 1 bit for its settings if it is only an area', () => {
+		const bits = (frame: StateFrame) => {
+			const writer = new StateWriter();
+			writer.writeRoot({ elements: [], frame });
+			return writer.bits.length;
+		};
+		// "visitors can rotate" is the key 2 of 3 bits
+		expect(bits({ bounds, canRotate: true }) - bits({ bounds })).toBe(3);
 	});
 
 	it('is kept in GeoJSON, KML and .mapjson files', () => {

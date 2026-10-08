@@ -133,14 +133,14 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wAACOIUPoSYFpPf2k9_1OgJeiEUNP9Q0_-GoDhqAaTeIFMaAAAgAAOGoDhqA4agOGoBpsrojQJRpPgGk-Ai2F2J'
+			'pD_AAAAP8AAAA_z__wAACOIUPoSYWk9_aT3_U6Al6IRQ0_1DT_4agOGoBpN4gUQaAAAgAAOGoDhqA4agOGoBpsrojQJFaT4BpPgIthdiT'
 		);
 	});
 
 	it('should write an empty root object correctly', () => {
 		const writer = new StateWriter();
 		writer.writeRoot({ elements: [] });
-		expect(writer.asBitString()).toBe('00100000000000000000000000000000000000000');
+		expect(writer.asBitString()).toBe('10100000000000000000000000000000000000000011');
 	});
 
 	it('should write a style correctly', () => {
