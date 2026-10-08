@@ -138,12 +138,14 @@ export class VisibleAreaMode {
 	}
 
 	/**
-	 * How a shared map is turned when it opens, and whether its viewers can turn it, with the
-	 * defaults: north at the top, seen from straight above, free to turn.
+	 * How a shared map is turned when it opens, and what its viewers can do with it, with the
+	 * defaults: north at the top, seen from straight above; they can move it and zoom, but not
+	 * rotate or tilt it.
 	 */
 	public get turn(): Required<FrameTurn> {
-		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = this.#doc.frameTurn ?? {};
-		return { bearing, pitch, lockBearing, lockPitch };
+		const { bearing = 0, pitch = 0, ...can } = this.#doc.frameTurn ?? {};
+		const { canPan = true, canZoom = true, canRotate = false, canTilt = false } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt };
 	}
 
 	/**

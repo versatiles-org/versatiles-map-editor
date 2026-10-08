@@ -179,7 +179,8 @@ test('two fingers and the keyboard turn the map, in the viewer and in the editor
 		);
 
 	await test.step('the viewer', async () => {
-		await page.goto('/view/#' + encodeState(line));
+		// a map whose visitors can turn it, which is not the default
+		await page.goto('/view/#' + encodeState({ ...line, frame: { canRotate: true, canTilt: true } }));
 		await waitForMapIsReady(page);
 		const touch = await Touchscreen.create(page);
 		await rotate(touch);

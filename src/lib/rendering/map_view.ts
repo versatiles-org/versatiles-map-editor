@@ -74,6 +74,15 @@ export class MapView {
 	#fitting = false;
 	/** The part of the map that e.g. the legend covers, which a fitted area keeps clear of. */
 	#covered: Box | undefined;
+	/** Whether the center and the zoom are kept, see `hold`, and where: as the map last showed an area. */
+	#held = { center: false, zoom: false };
+	#anchored: { center: maplibregl.LngLat; zoom: number } | undefined;
+
+	/** The center and the zoom of now are those that `hold` keeps. */
+	#anchor() {
+		const [center, zoom] = [this.map.getCenter?.(), this.map.getZoom?.()];
+		if (center && zoom !== undefined) this.#anchored = { center, zoom };
+	}
 
 	constructor(map: maplibregl.Map) {
 		this.map = map;
@@ -83,7 +92,8 @@ export class MapView {
 		// the area only if no resize follows it, e.g. a move by the visitor or by the address search.
 		let resized = false;
 		map.on('movestart', () => {
-			if (this.#fitting) return;
+			// a map that its visitor can neither move nor zoom stays as it is, whatever the gesture
+			if (this.#fitting || (this.#held.center && this.#held.zoom)) return;
 			queueMicrotask(() => {
 				if (!resized) this.#kept = undefined;
 			});
@@ -97,20 +107,28 @@ export class MapView {
 	}
 
 	/**
-	 * Keep the rotation and/or the tilt of the map at a value, whatever moves the map, e.g. the
-	 * gestures of a visitor who may not turn it; undefined lets it turn freely. Showing an area
-	 * (`fitArea`) turns the map anyway.
+	 * Keep parts of the camera as they are, whatever moves the map, e.g. the gestures of a visitor
+	 * who may not turn it: the rotation and/or the tilt at a value (undefined lets it turn freely),
+	 * the `center` and/or the `zoom` where the map last showed an area (`fitArea`), which sets all of
+	 * the camera anyway.
 	 */
-	public holdTurn(held: Turn) {
+	public hold(held: Turn & { center?: boolean; zoom?: boolean }) {
 		const { bearing, pitch } = held;
-		if (bearing === undefined && pitch === undefined) {
+		this.#held = { center: held.center === true, zoom: held.zoom === true };
+		this.#anchor();
+		if (bearing === undefined && pitch === undefined && !this.#held.center && !this.#held.zoom) {
 			this.map.setTransformCameraUpdate(null);
 			return;
 		}
 		// MapLibre asks before every change of the camera
 		this.map.setTransformCameraUpdate(() => {
 			if (this.#fitting) return {};
-			return { ...(bearing === undefined ? {} : { bearing }), ...(pitch === undefined ? {} : { pitch }) };
+			return {
+				...(bearing === undefined ? {} : { bearing }),
+				...(pitch === undefined ? {} : { pitch }),
+				...(this.#held.center && this.#anchored ? { center: this.#anchored.center } : {}),
+				...(this.#held.zoom && this.#anchored ? { zoom: this.#anchored.zoom } : {})
+			};
 		});
 		this.#fitting = true;
 		try {
@@ -235,6 +253,7 @@ export class MapView {
 			console.error('Failed to show the area of the map', error);
 		} finally {
 			this.#fitting = false;
+			this.#anchor();
 		}
 	}
 
@@ -337,6 +356,7 @@ export class MapView {
 			console.error('Failed to show the area of the map', error);
 		} finally {
 			this.#fitting = false;
+			this.#anchor();
 		}
 	}
 

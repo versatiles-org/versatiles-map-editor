@@ -10,9 +10,9 @@
 	/**
 	 * What a shared map shows, while it is edited on the map (see `VisibleAreaMode`): its visible
 	 * area, whose handles are on the map; how it is turned when it opens, its rotation and its tilt,
-	 * which the map shows at once, and whether its visitors can change them; and what they see over
-	 * the map, and where. Escape ends the mode. Shift and an arrow key move that side of the area
-	 * outwards, with Alt too inwards.
+	 * which the map shows at once; what its visitors can do with it: move it, zoom, rotate and tilt
+	 * it; and what they see over the map, and where. Escape ends the mode. Shift and an arrow key
+	 * move that side of the area outwards, with Alt too inwards.
 	 */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
@@ -48,18 +48,32 @@
 		set pitch(pitch: number) {
 			mode.setTurn({ pitch });
 		},
-		get canRotate() {
-			return !mode.turn.lockBearing;
+		get canPan() {
+			return mode.turn.canPan;
 		},
-		set canRotate(free: boolean) {
-			mode.setTurn({ lockBearing: !free });
+		set canPan(canPan: boolean) {
+			mode.setTurn({ canPan });
+			mode.log();
+		},
+		get canZoom() {
+			return mode.turn.canZoom;
+		},
+		set canZoom(canZoom: boolean) {
+			mode.setTurn({ canZoom });
+			mode.log();
+		},
+		get canRotate() {
+			return mode.turn.canRotate;
+		},
+		set canRotate(canRotate: boolean) {
+			mode.setTurn({ canRotate });
 			mode.log();
 		},
 		get canTilt() {
-			return !mode.turn.lockPitch;
+			return mode.turn.canTilt;
 		},
-		set canTilt(free: boolean) {
-			mode.setTurn({ lockPitch: !free });
+		set canTilt(canTilt: boolean) {
+			mode.setTurn({ canTilt });
 			mode.log();
 		}
 	};
@@ -139,7 +153,17 @@
 			onchange={() => mode.log()}
 		/>
 	</InputRow>
+</InspectorSection>
+
+<!-- what visitors can do with the map from there -->
+<InspectorSection title="Visitors">
 	<div class="visitors">
+		<Checkbox bind:checked={turn.canPan} title="Whether visitors of the shared map can move it">
+			Visitors can pan
+		</Checkbox>
+		<Checkbox bind:checked={turn.canZoom} title="Whether visitors of the shared map can zoom in and out">
+			Visitors can zoom
+		</Checkbox>
 		<Checkbox bind:checked={turn.canRotate} title="Whether visitors of the shared map can rotate it">
 			Visitors can rotate
 		</Checkbox>
@@ -167,6 +191,5 @@
 		flex-direction: column;
 		align-items: flex-start;
 		gap: var(--space-1);
-		margin-top: var(--space-2);
 	}
 </style>

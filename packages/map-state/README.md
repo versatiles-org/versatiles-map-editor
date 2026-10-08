@@ -77,7 +77,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - `frame` in the state is what a shared map shows when it opens (the type `StateFrame`): its
   visible area `bounds`, `[west, south, east, north]` (the type `Bounds`), which it shows completely
   whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees; and
-  `lockBearing` and `lockPitch`, with which viewers cannot rotate or tilt the map. `sanitizeFrame`
+  what viewers can do with the map: `canPan` and `canZoom` (unless `false`), `canRotate` and
+  `canTilt` (if `true`). `sanitizeFrame`
   checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
   `centerOf(bounds)` their center.
@@ -126,7 +127,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
+- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, canPan, canZoom, canRotate, canTilt }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
   map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say;

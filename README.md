@@ -142,7 +142,8 @@ The **Share** dialog (at the top right of the editor) creates the link and the e
 What a shared map shows is set on the map itself, in **Shared map…** of the menu (the dialog has a button that leads there). The sidebar then has:
 
 - **Visible area**: the area that the map shows completely, on every screen; its handles are on the map.
-- **Rotation and tilt**: how the map is turned when it opens, and whether visitors can turn it.
+- **Rotation and tilt**: how the map is turned when it opens.
+- **Visitors**: whether they can move the map and zoom (both by default), and rotate and tilt it (neither by default).
 - **Controls**: the address search, with which visitors can find a place, e.g. their street; the zoom buttons; and the legend, each with its place on the map.
 
 These settings are stored in the map.

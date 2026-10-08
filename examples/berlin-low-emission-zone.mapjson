@@ -1,6 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"frame": { "lockBearing": true, "lockPitch": true },
 	"meta": {
 		"background": { "theme": "gray", "labels": "fewer", "language": "local", "haloWidth": 1.5 },
 		"title": "Berlin low-emission zone",

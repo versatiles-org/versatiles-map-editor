@@ -38,29 +38,42 @@ describe('MapView', () => {
 		});
 	});
 
-	describe('holdTurn', () => {
+	describe('hold', () => {
 		const next = { bearing: 77, pitch: 33 };
 		const asked = () => (map.transformCameraUpdate as unknown as (next: object) => object)(next);
 
 		it('keeps the rotation and/or the tilt, whatever moves the map', () => {
-			view.holdTurn({ bearing: 30 });
+			view.hold({ bearing: 30 });
 			expect(map.jumpTo).toHaveBeenLastCalledWith({ bearing: 30 });
 			expect(asked()).toStrictEqual({ bearing: 30 });
-			view.holdTurn({ pitch: 0 });
+			view.hold({ pitch: 0 });
 			expect(asked()).toStrictEqual({ pitch: 0 });
-			view.holdTurn({ bearing: -20, pitch: 45 });
+			view.hold({ bearing: -20, pitch: 45 });
 			expect(map.jumpTo).toHaveBeenLastCalledWith({ bearing: -20, pitch: 45 });
 			expect(asked()).toStrictEqual({ bearing: -20, pitch: 45 });
 		});
 
 		it('lets the map turn freely again', () => {
-			view.holdTurn({ bearing: 30 });
-			view.holdTurn({});
+			view.hold({ bearing: 30 });
+			view.hold({});
+			expect(map.transformCameraUpdate).toBeNull();
+		});
+
+		it('keeps the center and/or the zoom where the map last showed an area', () => {
+			view.fitArea([13.3, 52.45, 13.5, 52.55], []);
+			const [center, zoom] = [map.getCenter(), map.getZoom()];
+			view.hold({ center: true });
+			expect(asked()).toStrictEqual({ center });
+			view.hold({ zoom: true });
+			expect(asked()).toStrictEqual({ zoom });
+			view.hold({ bearing: 10, center: true, zoom: true });
+			expect(asked()).toStrictEqual({ bearing: 10, center, zoom });
+			view.hold({});
 			expect(map.transformCameraUpdate).toBeNull();
 		});
 
 		it('lets an area be shown turned', () => {
-			view.holdTurn({ bearing: 0, pitch: 0 });
+			view.hold({ bearing: 0, pitch: 0 });
 			let whileFitting: object | undefined;
 			map.jumpTo.mockImplementationOnce(() => (whileFitting = asked()));
 			view.fitArea([13.3, 52.45, 13.5, 52.55], [], { turn: { bearing: 90, pitch: 45 } });

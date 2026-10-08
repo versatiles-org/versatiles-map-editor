@@ -142,7 +142,7 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 	await page.setViewportSize({ width: 800, height: 600 });
 
 	await test.step('free: the map turns, and the compass turns it back to how it opened', async () => {
-		await open({ bounds: frame, bearing: 30, pitch: 20 });
+		await open({ bounds: frame, bearing: 30, pitch: 20, canRotate: true, canTilt: true });
 		expect(await camera()).toStrictEqual({ bearing: 30, pitch: 20 });
 		await turn(120, -60);
 		const turned = await camera();
@@ -156,7 +156,7 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 	});
 
 	await test.step('a map that is not turned can be turned too', async () => {
-		await open({ bounds: frame });
+		await open({ bounds: frame, canRotate: true, canTilt: true });
 		await turn(120, -60);
 		const turned = await camera();
 		expect(turned.bearing).not.toBe(0);
@@ -165,32 +165,80 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
 	});
 
-	await test.step('locked rotation: only the tilt changes', async () => {
-		await open({ bounds: frame, bearing: 30, lockBearing: true });
+	await test.step('only the tilt is free: the rotation stays', async () => {
+		await open({ bounds: frame, bearing: 30, canTilt: true });
 		await turn(120, -60);
 		const turned = await camera();
 		expect(turned.bearing).toBe(30);
 		expect(turned.pitch).toBeGreaterThan(0);
 	});
 
-	await test.step('locked tilt: only the rotation changes', async () => {
-		await open({ bounds: frame, pitch: 40, lockPitch: true });
+	await test.step('only the rotation is free: the tilt stays', async () => {
+		await open({ bounds: frame, pitch: 40, canRotate: true });
 		await turn(120, -60);
 		const turned = await camera();
 		expect(turned.bearing).not.toBe(0);
 		expect(turned.pitch).toBe(40);
 	});
 
-	await test.step('both locked: the map stays, with a compass only if it is turned', async () => {
-		await open({ bounds: frame, bearing: -45, lockBearing: true, lockPitch: true });
+	await test.step('by default the map is not turned by its visitors, and has no compass', async () => {
+		await open({ bounds: frame, bearing: -45 });
 		await turn(120, -60);
 		expect(await camera()).toStrictEqual({ bearing: -45, pitch: 0 });
-		await expect(compass).toBeVisible();
-		await open({ bounds: frame, lockBearing: true, lockPitch: true });
-		await turn(120, -60);
-		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
 		await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 		await expect(compass).toHaveCount(0);
+	});
+
+	await test.step('visitors move the map and zoom, unless that is switched off', async () => {
+		const place = () =>
+			page.evaluate(() => {
+				const { map } = window as unknown as MapWindow;
+				return { lng: map.getCenter().lng, zoom: map.getZoom() };
+			});
+		/** Drag the map to the left, and turn the wheel to zoom in. */
+		const moveAndZoom = async () => {
+			await page.mouse.move(400, 300);
+			await page.mouse.down();
+			await page.mouse.move(250, 300, { steps: 5 });
+			await page.mouse.up();
+			await page.mouse.wheel(0, -400);
+			await waitForMapIsIdle(page);
+		};
+		const zoomIn = page.getByRole('button', { name: 'Zoom in' });
+
+		await open({ bounds: frame });
+		let start = await place();
+		await moveAndZoom();
+		expect((await place()).lng).not.toBeCloseTo(start.lng, 4);
+		expect((await place()).zoom).toBeGreaterThan(start.zoom);
+
+		// not moved: zooming keeps the center, and the buttons are there
+		await open({ bounds: frame, canPan: false });
+		start = await place();
+		await moveAndZoom();
+		expect((await place()).lng).toBeCloseTo(start.lng, 6);
+		expect((await place()).zoom).toBeGreaterThan(start.zoom);
+		await expect(zoomIn).toBeVisible();
+
+		// not zoomed: no buttons for it
+		await open({ bounds: frame, canZoom: false });
+		start = await place();
+		await moveAndZoom();
+		expect((await place()).lng).not.toBeCloseTo(start.lng, 4);
+		expect((await place()).zoom).toBeCloseTo(start.zoom, 6);
+		await expect(zoomIn).toHaveCount(0);
+
+		// neither: the map stays as it opened, also in a window of another size
+		await open({ bounds: frame, canPan: false, canZoom: false });
+		start = await place();
+		await moveAndZoom();
+		expect(await place()).toStrictEqual(start);
+		await page.setViewportSize({ width: 500, height: 700 });
+		await waitForMapIsIdle(page);
+		const shown = await frameOnPage(page, frame);
+		expect(shown.left).toBeGreaterThanOrEqual(0);
+		expect(shown.right).toBeLessThanOrEqual(500);
+		await page.setViewportSize({ width: 800, height: 600 });
 	});
 
 	await test.step('the editor does not open turned like the shared map', async () => {
@@ -354,18 +402,28 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
 	});
 
-	await test.step('visitors can be kept from rotating and tilting', async () => {
-		const rotate = sidebar(page).getByRole('checkbox', { name: 'Visitors can rotate' });
-		const tilt = sidebar(page).getByRole('checkbox', { name: 'Visitors can tilt' });
-		await expect(rotate).toBeChecked();
-		await rotate.uncheck();
-		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true });
-		await tilt.uncheck();
-		await expect
-			.poll(stored)
-			.toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true, lockPitch: true });
-		await tilt.check();
-		await expect.poll(stored).toStrictEqual({ bounds: frame, bearing: 40, pitch: 50, lockBearing: true });
+	await test.step('what visitors can do: move and zoom unless switched off, rotate and tilt if switched on', async () => {
+		const can = (name: string) => sidebar(page).getByRole('checkbox', { name: `Visitors can ${name}` });
+		const turned = { bounds: frame, bearing: 40, pitch: 50 };
+		await expect(can('pan')).toBeChecked();
+		await expect(can('zoom')).toBeChecked();
+		await expect(can('rotate')).not.toBeChecked();
+		await expect(can('tilt')).not.toBeChecked();
+		await can('pan').uncheck();
+		await expect.poll(stored).toStrictEqual({ ...turned, canPan: false });
+		await can('zoom').uncheck();
+		await expect.poll(stored).toStrictEqual({ ...turned, canPan: false, canZoom: false });
+		// one undo step each
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect.poll(stored).toStrictEqual(turned);
+		await expect(can('pan')).toBeChecked();
+		await can('rotate').check();
+		await expect.poll(stored).toStrictEqual({ ...turned, canRotate: true });
+		await can('tilt').check();
+		await expect.poll(stored).toStrictEqual({ ...turned, canRotate: true, canTilt: true });
+		await can('rotate').uncheck();
+		await expect.poll(stored).toStrictEqual({ ...turned, canTilt: true });
 	});
 
 	await test.step('a handle moves its side on the turned map', async () => {
@@ -410,7 +468,7 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 	await test.step('the editor is turned only in this mode', async () => {
 		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
-		expect(await stored()).toMatchObject({ bearing: 40, pitch: 50, lockBearing: true });
+		expect(await stored()).toMatchObject({ bearing: 40, pitch: 50, canTilt: true });
 		await (await menuItem(page, 'Shared map…')).click();
 		await expect.poll(camera).toStrictEqual({ bearing: 40, pitch: 50 });
 		await expect(sidebar(page).getByRole('spinbutton', { name: 'Rotation' })).toHaveValue('40');

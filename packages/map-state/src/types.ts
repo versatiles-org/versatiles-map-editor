@@ -14,8 +14,9 @@ export type HexColor = string;
 export const MAX_PITCH = 60;
 
 /**
- * What a shared or embedded map shows when it opens: an area, seen from a direction, and whether
- * its viewers can turn and tilt it from there.
+ * What a shared or embedded map shows when it opens: an area, seen from a direction, and what its
+ * viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if
+ * that is switched on.
  */
 export interface StateFrame {
 	/**
@@ -37,10 +38,14 @@ export interface StateFrame {
 	 * @maximum 60
 	 */
 	pitch?: number;
-	/** Viewers cannot rotate the map. Default: false. */
-	lockBearing?: boolean;
-	/** Viewers cannot tilt the map. Default: false. */
-	lockPitch?: boolean;
+	/** Viewers can move the map. Default: true. */
+	canPan?: boolean;
+	/** Viewers can zoom in and out. Default: true. */
+	canZoom?: boolean;
+	/** Viewers can rotate the map. Default: false. */
+	canRotate?: boolean;
+	/** Viewers can tilt the map. Default: false. */
+	canTilt?: boolean;
 }
 
 /**

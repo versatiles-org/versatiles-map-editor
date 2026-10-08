@@ -99,7 +99,15 @@ describe('frame', () => {
 });
 
 describe('frame: how the map is turned', () => {
-	const turned: StateFrame = { bounds, bearing: -120, pitch: 45, lockBearing: true, lockPitch: true };
+	const turned: StateFrame = {
+		bounds,
+		bearing: -120,
+		pitch: 45,
+		canPan: false,
+		canZoom: false,
+		canRotate: true,
+		canTilt: true
+	};
 
 	it('is kept in a link, with and without an area', () => {
 		expect(decodeState(encodeState({ ...state, frame: turned })).frame).toStrictEqual(turned);
@@ -107,9 +115,11 @@ describe('frame: how the map is turned', () => {
 			{ bearing: 90 },
 			{ pitch: 60 },
 			{ bearing: 180, pitch: 1 },
-			{ lockBearing: true },
-			{ lockPitch: true },
-			{ bounds, lockPitch: true }
+			{ canRotate: true },
+			{ canTilt: true },
+			{ canPan: false },
+			{ canZoom: false },
+			{ bounds, canTilt: true, canZoom: false }
 		] as StateFrame[]) {
 			expect(decodeState(encodeState({ ...state, frame })).frame).toStrictEqual(frame);
 		}
@@ -192,8 +202,17 @@ describe('sanitizeFrame', () => {
 	it('keeps the valid parts, without those that have their default value', () => {
 		expect(sanitizeFrame({ bounds: [-10, -20, 10, 20] })).toStrictEqual({ bounds: [-10, -20, 10, 20] });
 		expect(sanitizeFrame({ bounds: [10, -20, -10, 20], bearing: 45 })).toStrictEqual({ bearing: 45 });
-		expect(sanitizeFrame({ bearing: 0, pitch: 0, lockBearing: false, lockPitch: false })).toBeUndefined();
-		expect(sanitizeFrame({ bearing: 'east', pitch: null, lockPitch: 'yes' })).toBeUndefined();
+		// viewers can move the map and zoom, but not rotate or tilt it
+		expect(
+			sanitizeFrame({ bearing: 0, pitch: 0, canPan: true, canZoom: true, canRotate: false, canTilt: false })
+		).toBeUndefined();
+		expect(sanitizeFrame({ canPan: false, canZoom: false, canRotate: true, canTilt: true })).toStrictEqual({
+			canPan: false,
+			canZoom: false,
+			canRotate: true,
+			canTilt: true
+		});
+		expect(sanitizeFrame({ bearing: 'east', pitch: null, canTilt: 'yes', canPan: 0 })).toBeUndefined();
 		expect(sanitizeFrame({})).toBeUndefined();
 		expect(sanitizeFrame([-10, -20, 10, 20])).toBeUndefined();
 		expect(sanitizeFrame(undefined)).toBeUndefined();

@@ -52,7 +52,15 @@ describe('the JSON Schema of .mapjson files', () => {
 
 	it('fits what the editor writes, with every kind of element and property', () => {
 		const state: MapState = {
-			frame: { bounds: [13.3, 52.4, 13.5, 52.6], bearing: -30, pitch: 45, lockBearing: true, lockPitch: true },
+			frame: {
+				bounds: [13.3, 52.4, 13.5, 52.6],
+				bearing: -30,
+				pitch: 45,
+				canPan: false,
+				canZoom: false,
+				canRotate: true,
+				canTilt: true
+			},
 			meta: {
 				background: {
 					base: 'satellite',

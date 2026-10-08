@@ -294,13 +294,18 @@ export class StateWriter {
 			this.writeVarint(Math.max(1, y1 - y0));
 		}
 
-		const turned = !!(frame.bearing || frame.pitch || frame.lockBearing || frame.lockPitch);
-		this.writeBit(turned);
-		if (turned) {
+		// how the map is turned, and what its viewers can do: each bit is set for what is not the default
+		const [noPan, noZoom] = [frame.canPan === false, frame.canZoom === false];
+		const [rotate, tilt] = [frame.canRotate === true, frame.canTilt === true];
+		const set = !!(frame.bearing || frame.pitch) || noPan || noZoom || rotate || tilt;
+		this.writeBit(set);
+		if (set) {
 			this.writeInteger((((frame.bearing ?? 0) % 360) + 360) % 360, 9);
 			this.writeInteger(frame.pitch ?? 0, 6);
-			this.writeBit(frame.lockBearing === true);
-			this.writeBit(frame.lockPitch === true);
+			this.writeBit(noPan);
+			this.writeBit(noZoom);
+			this.writeBit(rotate);
+			this.writeBit(tilt);
 		}
 	}
 

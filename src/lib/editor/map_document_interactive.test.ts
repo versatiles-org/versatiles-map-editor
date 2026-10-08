@@ -605,7 +605,7 @@ describe('MapDocument', () => {
 		});
 
 		it('keeps how the shared map is turned, with and without a visible area', async () => {
-			const turn = { bearing: 30, pitch: 45, lockPitch: true };
+			const turn = { bearing: 30, pitch: 45, canTilt: true };
 			await doc.loadState({ frame: { bounds: frame, ...turn }, elements });
 			expect(doc.frame).toStrictEqual(frame);
 			expect(doc.frameTurn).toStrictEqual(turn);

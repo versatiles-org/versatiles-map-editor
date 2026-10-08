@@ -27,15 +27,28 @@ describe('VisibleAreaMode', () => {
 		it('is set in the mode, shown by the map at once, and an undo step when it is logged', async () => {
 			doc.frame = [1, 2, 3, 4];
 			doc.visibleArea.open();
-			expect(doc.visibleArea.turn).toStrictEqual({ bearing: 0, pitch: 0, lockBearing: false, lockPitch: false });
+			expect(doc.visibleArea.turn).toStrictEqual({
+				bearing: 0,
+				pitch: 0,
+				canPan: true,
+				canZoom: true,
+				canRotate: false,
+				canTilt: false
+			});
 			doc.visibleArea.setTurn({ bearing: 30 });
 			doc.visibleArea.setTurn({ bearing: 40 });
 			doc.visibleArea.log();
 			expect(doc.frameTurn).toStrictEqual({ bearing: 40 });
 			expect(map.getBearing()).toBe(40);
-			doc.visibleArea.setTurn({ pitch: 50, lockPitch: true });
+			doc.visibleArea.setTurn({ pitch: 50, canTilt: true, canPan: false });
 			doc.visibleArea.log();
-			expect(doc.getState().frame).toStrictEqual({ bounds: [1, 2, 3, 4], bearing: 40, pitch: 50, lockPitch: true });
+			expect(doc.getState().frame).toStrictEqual({
+				bounds: [1, 2, 3, 4],
+				bearing: 40,
+				pitch: 50,
+				canPan: false,
+				canTilt: true
+			});
 			expect(map.getPitch()).toBe(50);
 
 			// one step per logged change, and the map follows
@@ -49,9 +62,9 @@ describe('VisibleAreaMode', () => {
 
 		it('is kept without its defaults, and within its limits', () => {
 			doc.visibleArea.open();
-			doc.visibleArea.setTurn({ bearing: 270, pitch: 99, lockBearing: true });
-			expect(doc.frameTurn).toStrictEqual({ bearing: -90, pitch: 60, lockBearing: true });
-			doc.visibleArea.setTurn({ bearing: 0, pitch: 0, lockBearing: false });
+			doc.visibleArea.setTurn({ bearing: 270, pitch: 99, canRotate: true, canZoom: false });
+			expect(doc.frameTurn).toStrictEqual({ bearing: -90, pitch: 60, canZoom: false, canRotate: true });
+			doc.visibleArea.setTurn({ bearing: 0, pitch: 0, canRotate: false, canZoom: true });
 			expect(doc.frameTurn).toBeUndefined();
 		});
 

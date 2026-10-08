@@ -231,48 +231,44 @@
 		return addAttribution(m, corner, () => m.getContainer().closest('.page')?.querySelector('.legend'));
 	});
 
-	// How the map of the viewer is turned when it opens, and whether its visitors can turn it. The
+	// How the map of the viewer is turned when it opens, and what its visitors can do with it. The
 	// editor is not turned. By its values, so the same frame does not set it up again.
 	const turn = $derived.by(() => {
 		if (editor || !mapDocument) return undefined;
-		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = mapDocument.frameTurn ?? {};
-		return { bearing, pitch, lockBearing, lockPitch };
+		const { bearing = 0, pitch = 0, ...can } = mapDocument.frameTurn ?? {};
+		const { canPan = true, canZoom = true, canRotate = false, canTilt = false } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt };
 	});
 	const turnKey = $derived(JSON.stringify(turn));
 
-	// a locked rotation or tilt stays as the author set it
+	// what visitors cannot change stays as the author set it
 	$effect(() => {
 		void turnKey;
 		const view = mapDocument?.view;
 		if (!view || !turn) return;
-		view.holdTurn({
-			...(turn.lockBearing ? { bearing: turn.bearing } : {}),
-			...(turn.lockPitch ? { pitch: turn.pitch } : {})
+		view.hold({
+			...(turn.canRotate ? {} : { bearing: turn.bearing }),
+			...(turn.canTilt ? {} : { pitch: turn.pitch }),
+			center: !turn.canPan,
+			zoom: !turn.canZoom
 		});
 	});
 
-	/** Whether visitors of the shared map get a compass: unless it is neither turned nor can be. */
-	function visitorsCompass(doc: MapDocument): boolean {
-		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = doc.frameTurn ?? {};
-		return !(lockBearing && lockPitch && !bearing && !pitch);
-	}
-	// by its value, so a change of the frame that keeps it does not add the buttons again
-	const visitorsHaveCompass = $derived(!!mapDocument && visitorsCompass(mapDocument));
-
-	// The buttons for zooming, and a compass. In the viewer unless its map is neither turned nor can
-	// be. Always in the editor, whose author can turn the map with the right mouse button (or Ctrl),
-	// two fingers, and Shift with the arrow keys: faded while the map is not turned, so the buttons
-	// below it stay where they are.
+	// The buttons for zooming, and a compass. In the viewer, the buttons if its visitors can zoom,
+	// and the compass if they can rotate or tilt the map. Both always in the editor, whose author
+	// can turn the map with the right mouse button (or Ctrl), two fingers, and Shift with the arrow
+	// keys: the compass faded while the map is not turned, so the buttons below it stay where they are.
 	$effect(() => {
 		void turnKey;
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
-		if (!editor && !visitorsHaveCompass) return addNavigation(m, corner);
+		const [zoom, compass] = turn ? [turn.canZoom, turn.canRotate || turn.canTilt] : [true, true];
+		if (!zoom && !compass) return;
 		// Back to how the map opened. In the editor to north at the top, seen from straight above,
 		// which while the shared map is edited is how it opens then, see `VisibleAreaMode`.
 		const reset = () => m.easeTo({ bearing: turn?.bearing ?? 0, pitch: turn?.pitch ?? 0 });
-		return addNavigation(m, corner, reset, { fade: editor });
+		return addNavigation(m, corner, compass ? reset : undefined, { fade: editor, zoom });
 	});
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it

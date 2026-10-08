@@ -49,16 +49,24 @@
 					"minimum": 0,
 					"maximum": 60
 				},
-				"lockBearing": {
+				"canPan": {
 					"type": "boolean",
-					"description": "Viewers cannot rotate the map. Default: false."
+					"description": "Viewers can move the map. Default: true."
 				},
-				"lockPitch": {
+				"canZoom": {
 					"type": "boolean",
-					"description": "Viewers cannot tilt the map. Default: false."
+					"description": "Viewers can zoom in and out. Default: true."
+				},
+				"canRotate": {
+					"type": "boolean",
+					"description": "Viewers can rotate the map. Default: false."
+				},
+				"canTilt": {
+					"type": "boolean",
+					"description": "Viewers can tilt the map. Default: false."
 				}
 			},
-			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and whether its viewers can turn and tilt it from there."
+			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and what its viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if that is switched on."
 		},
 		"Bounds": {
 			"type": "array",

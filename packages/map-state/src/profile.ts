@@ -420,7 +420,8 @@ export function sanitizeBearing(value: unknown): number | undefined {
 
 /**
  * A valid frame, with its valid parts: without an invalid area, and without the parts that have
- * their default value (north at the top, looking straight down, viewers can turn the map).
+ * their default value (north at the top, looking straight down; viewers can move the map and zoom,
+ * but not rotate or tilt it).
  * Undefined if nothing is left, which is the frame of a map without one.
  */
 export function sanitizeFrame(value: unknown): StateFrame | undefined {
@@ -433,8 +434,10 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (bearing) frame.bearing = bearing;
 	const pitch = sanitizeNumber(v.pitch, 0, MAX_PITCH);
 	if (pitch) frame.pitch = pitch;
-	if (sanitizeBoolean(v.lockBearing)) frame.lockBearing = true;
-	if (sanitizeBoolean(v.lockPitch)) frame.lockPitch = true;
+	if (v.canPan === false) frame.canPan = false;
+	if (v.canZoom === false) frame.canZoom = false;
+	if (sanitizeBoolean(v.canRotate)) frame.canRotate = true;
+	if (sanitizeBoolean(v.canTilt)) frame.canTilt = true;
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 

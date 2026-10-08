@@ -326,8 +326,11 @@ export class StateReader {
 			if (this.readBit()) {
 				frame.bearing = this.readInteger(9);
 				frame.pitch = this.readInteger(6);
-				frame.lockBearing = this.readBit();
-				frame.lockPitch = this.readBit();
+				// see `StateWriter.writeFrame`
+				frame.canPan = !this.readBit();
+				frame.canZoom = !this.readBit();
+				frame.canRotate = this.readBit();
+				frame.canTilt = this.readBit();
 			}
 			// without the parts that have their default value, and with the rotation up to 180°
 			return sanitizeFrame(frame);
