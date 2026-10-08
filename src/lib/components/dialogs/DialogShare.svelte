@@ -7,7 +7,8 @@
 		exponentForResolution,
 		measureLink,
 		resolutionForArea,
-		resolutionOfExponent
+		resolutionOfExponent,
+		sanitizeFrame
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
 	import ShareCode from './ShareCode.svelte';
@@ -154,6 +155,19 @@
 		}
 	});
 
+	/**
+	 * Whether an embedded map leaves the wheel to the page around it, which is the default, or
+	 * zooms with it; one undo step. A setting of the map, like what its visitors can do.
+	 */
+	function setScrollProtected(on: boolean) {
+		const doc = stateManager.mapDocument;
+		const { bounds: _bounds, ...turn } =
+			sanitizeFrame({ ...doc.frameTurn, scrollZoom: on ? 'protected' : 'free' }) ?? {};
+		doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+		stateManager.log();
+		update(0);
+	}
+
 	function getLinkCode() {
 		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent) })}`;
 	}
@@ -196,6 +210,16 @@
 							{shorterBy} The embed code works at any length.
 						</p>
 					{/if}
+				{/snippet}
+				{#snippet embedOptions()}
+					<!-- a setting of the map for where it is embedded: kept with the map, on unless switched off -->
+					<Checkbox
+						checked={stateManager.mapDocument.frameTurn?.scrollZoom !== 'free'}
+						onchange={(e) => setScrollProtected(e.currentTarget.checked)}
+						title="The wheel scrolls the page, also over the map, which zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers"
+					>
+						Scrolling the page does not zoom the map
+					</Checkbox>
 				{/snippet}
 			</ShareCode>
 

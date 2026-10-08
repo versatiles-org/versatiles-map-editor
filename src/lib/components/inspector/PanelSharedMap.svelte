@@ -76,13 +76,6 @@
 			mode.setTurn({ canTilt });
 			mode.log();
 		},
-		get scrollProtected() {
-			return mode.turn.scrollZoom === 'protected';
-		},
-		set scrollProtected(on: boolean) {
-			mode.setTurn({ scrollZoom: on ? 'protected' : 'free' });
-			mode.log();
-		},
 		get confine() {
 			return mode.turn.confine;
 		},
@@ -263,16 +256,6 @@
 			</ButtonGroup>
 		{/if}
 	{/each}
-
-	<!-- for a map in a page: the wheel scrolls the page, also over the map -->
-	<div class="visitors">
-		<Checkbox
-			bind:checked={turn.scrollProtected}
-			title="For a map in a page: the wheel scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers"
-		>
-			Scrolling does not zoom the map
-		</Checkbox>
-	</div>
 </InspectorSection>
 
 <!-- what visitors see over the map, and where; the map shows them so, see `asShared` of MapFrame -->

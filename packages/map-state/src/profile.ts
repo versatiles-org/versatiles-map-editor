@@ -451,7 +451,7 @@ export function sanitizeBearing(value: unknown): number | undefined {
 /**
  * A valid frame, with its valid parts: without an invalid area, and without the parts that have
  * their default value (north at the top, looking straight down; viewers can move the map and zoom,
- * but not rotate or tilt it).
+ * but not rotate or tilt it; an embedded map leaves the wheel to its page).
  * Undefined if nothing is left, which is the frame of a map without one.
  * @category Map state
  */
@@ -479,7 +479,7 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	const minZoom = zoom(v.minZoom);
 	if (minZoom !== undefined) frame.minZoom = maxZoom === undefined ? minZoom : Math.min(minZoom, maxZoom);
 	if (maxZoom !== undefined) frame.maxZoom = maxZoom;
-	if (v.scrollZoom === 'protected') frame.scrollZoom = 'protected';
+	if (v.scrollZoom === 'free') frame.scrollZoom = 'free';
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 

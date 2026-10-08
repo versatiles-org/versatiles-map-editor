@@ -1,6 +1,6 @@
 import { expect, test } from './lib/test.js';
-import type { Page } from '@playwright/test';
-import { encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
+import type { Frame, FrameLocator, Page } from '@playwright/test';
+import { decodeState, encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
 import {
 	menuItem,
 	project,
@@ -865,21 +865,41 @@ test('the zoom of visitors of a shared map can be limited', async ({ page }) => 
 	expect(await zoom()).toBeLessThan(now - 1);
 });
 
-test('a shared map can leave the wheel to the page around it', async ({ page }) => {
-	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
-	const hint = page.locator('.maplibregl-cooperative-gesture-screen');
+test('an embedded map leaves the wheel to the page around it, unless its author sets it free', async ({ page }) => {
+	const mapOf = (scope: Page | FrameLocator) => scope.locator('.maplibregl-canvas');
+	const zoomOf = (target: Page | Frame) => target.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+	/** The viewer in a page that embeds it, which is higher than the window, so it scrolls. */
+	const embed = async (state: MapState) => {
+		await page.goto('about:blank');
+		await page.goto('/view/#' + encodeState({ elements: [] }));
+		const src = new URL('/view/#' + encodeState(state), page.url()).href;
+		await page.setContent(
+			`<body style="margin:0;height:3000px"><iframe src="${src}" style="width:700px;height:500px;border:0"></iframe></body>`
+		);
+		await waitForMapIsReady(page);
+		return page.frames().find((frame) => frame !== page.mainFrame())!;
+	};
 	await page.setViewportSize({ width: 800, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame: { bounds: frame, scrollZoom: 'protected' }, elements }));
+
+	// a map in a window of its own has no page around it: the wheel zooms it
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
-	const start = await zoom();
-	// the wheel alone does not zoom, and the map says what does
+	const alone = await zoomOf(page);
 	await page.mouse.move(400, 300);
 	await page.mouse.wheel(0, -600);
+	await expect.poll(() => zoomOf(page)).toBeGreaterThan(alone + 0.5);
+
+	// embedded: the wheel alone does not zoom, and the map says what does
+	let inner = await embed({ frame: { bounds: frame }, elements });
+	const start = await zoomOf(inner);
+	await page.mouse.move(350, 250);
+	await page.mouse.wheel(0, -600);
+	const hint = page.frameLocator('iframe').locator('.maplibregl-cooperative-gesture-screen');
 	await expect(hint).toHaveClass(/maplibregl-show/);
-	await waitForMapIsIdle(page);
-	expect(await zoom()).toBe(start);
+	expect(await zoomOf(inner)).toBe(start);
 	// with Ctrl it does, or with ⌘ where the browser says that it is on a Mac
 	const modifier = (await page.evaluate(() => navigator.userAgent.includes('Mac'))) ? 'Meta' : 'Control';
+	await expect(mapOf(page.frameLocator('iframe'))).toBeVisible();
 	// after a pause, so the wheel starts anew
 	await expect
 		.poll(async () => {
@@ -888,32 +908,34 @@ test('a shared map can leave the wheel to the page around it', async ({ page }) 
 			await page.mouse.wheel(0, -600);
 			await page.keyboard.up(modifier);
 			await page.waitForTimeout(700);
-			return zoom();
+			return zoomOf(inner);
 		})
 		.toBeGreaterThan(start + 0.5);
 
-	// free by default
-	await page.goto('about:blank');
-	await page.goto('/view/#' + encodeState({ frame: { bounds: frame }, elements }));
-	await waitForMapIsReady(page);
-	const free = await zoom();
-	await page.mouse.move(400, 300);
+	// set free by its author: the wheel zooms the embedded map
+	inner = await embed({ frame: { bounds: frame, scrollZoom: 'free' }, elements });
+	const free = await zoomOf(inner);
+	await page.mouse.move(350, 250);
 	await page.mouse.wheel(0, -600);
-	await expect.poll(zoom).toBeGreaterThan(free + 0.5);
+	await expect.poll(() => zoomOf(inner)).toBeGreaterThan(free + 0.5);
 
-	// the panel; the author's wheel zooms the map as ever
+	// The share dialog, with the embed code: on unless switched off, which is kept with the map. Its
+	// preview is embedded, and follows.
 	await page.setViewportSize({ width: 1280, height: 720 });
 	await page.goto('about:blank');
 	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
-	await (await menuItem(page, 'Shared map…')).click();
-	await sidebar(page).getByRole('checkbox', { name: 'Scrolling does not zoom the map' }).check();
-	await expect
-		.poll(async () => (await storedState(page)).frame)
-		.toStrictEqual({ bounds: frame, scrollZoom: 'protected' });
-	await waitForMapIsIdle(page);
-	const before = await zoom();
-	await page.mouse.move(500, 350);
-	await page.mouse.wheel(0, 600);
-	await expect.poll(zoom).toBeLessThan(before - 0.5);
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const option = page.getByRole('dialog').getByRole('checkbox', { name: 'Scrolling the page does not zoom the map' });
+	await expect(option).toBeChecked();
+	await option.uncheck();
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, scrollZoom: 'free' });
+	const link = await page.getByRole('dialog').getByLabel('Link', { exact: true }).inputValue();
+	// in the link too, which is what the embed code embeds
+	expect(decodeState(new URL(link).hash.slice(1)).frame?.scrollZoom).toBe('free');
+	await page.keyboard.press('Escape');
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await expect(option).toBeChecked();
 });

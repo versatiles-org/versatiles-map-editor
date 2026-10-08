@@ -288,13 +288,22 @@
 		if (m && corner) return addScale(m, corner);
 	});
 
+	/** Whether the page is embedded in another one, in an iframe; also of another site, which hides its window. */
+	const embedded = (() => {
+		try {
+			return typeof window !== 'undefined' && window.self !== window.top;
+		} catch {
+			return true;
+		}
+	})();
+
 	// How the map of the viewer is turned when it opens, and what its visitors can do with it. The
 	// editor is not turned. By its values, so the same frame does not set it up again.
 	const turn = $derived.by(() => {
 		if (editor || !mapDocument) return undefined;
 		const { bearing = 0, pitch = 0, ...can } = mapDocument.frameTurn ?? {};
 		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
-		const { minZoom, maxZoom, scrollZoom = 'free' } = can;
+		const { minZoom, maxZoom, scrollZoom = 'protected' } = can;
 		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom };
 	});
 	const turnKey = $derived(JSON.stringify(turn));
@@ -311,10 +320,11 @@
 			zoom: !turn.canZoom
 		});
 		view.setZoomLimits({ min: turn.minZoom, max: turn.maxZoom });
-		// The wheel scrolls the page around the map, which zooms with Ctrl (or ⌘) and the wheel, and
-		// moves on touch screens with two fingers: MapLibre's cooperative gestures, with its hint.
+		// An embedded map leaves the wheel to the page around it, unless its author set it free: it
+		// zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers. MapLibre's
+		// cooperative gestures, with its hint. A map in a window of its own has no page to scroll.
 		const gestures = view.map.cooperativeGestures;
-		if (turn.scrollZoom === 'protected') gestures?.enable();
+		if (embedded && turn.scrollZoom === 'protected') gestures?.enable();
 		else gestures?.disable();
 		// in what the map shows when it opens: its frame or its elements; an empty map has neither
 		view.confine(turn.confine && (!!mapDocument?.frame || (mapDocument?.elements.length ?? 0) > 0));

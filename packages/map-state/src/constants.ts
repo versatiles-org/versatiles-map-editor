@@ -108,7 +108,7 @@ export const FRAME_KEYS = {
 	confine: 7,
 	minZoom: 8,
 	maxZoom: 9,
-	scrollProtected: 10
+	scrollFree: 10
 } as const;
 
 /**

@@ -85,8 +85,8 @@
 				},
 				"scrollZoom": {
 					"type": "string",
-					"enum": ["free", "protected"],
-					"description": "What the wheel does over the map, e.g. of a map that is embedded in a page: \"free\" zooms the map; \"protected\" scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers. Default: \"free\"."
+					"enum": ["protected", "free"],
+					"description": "What the wheel does over the map when it is embedded in a page: \"protected\" scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers; \"free\" zooms the map. A map in a window of its own is always free. Default: \"protected\"."
 				}
 			},
 			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and what its viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if that is switched on."

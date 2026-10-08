@@ -4,9 +4,15 @@
 
 	/**
 	 * The link of the shared map and the code to embed it, each to copy. `linkNotice`: shown below
-	 * the link, e.g. a warning about it.
+	 * the link, e.g. a warning about it. `embedOptions`: shown below the embed code, e.g. a setting
+	 * of embedded maps.
 	 */
-	const { link, embed, linkNotice }: { link: string; embed: string; linkNotice?: Snippet } = $props();
+	const {
+		link,
+		embed,
+		linkNotice,
+		embedOptions
+	}: { link: string; embed: string; linkNotice?: Snippet; embedOptions?: Snippet } = $props();
 
 	const uid = $props.id();
 
@@ -64,6 +70,7 @@
 	<div class="buttons">
 		<Button class="copy" bind:element={btnEmbed} onclick={() => copy(embed, 'embed')}>Copy embed code</Button>
 	</div>
+	{@render embedOptions?.()}
 </section>
 <span class="sr-only" role="status">{copied}</span>
 {#if copyError}<p class="copy-error" role="alert">{copyError}</p>{/if}
