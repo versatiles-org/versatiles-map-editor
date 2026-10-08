@@ -99,7 +99,7 @@ const state = {
 	frame: { bounds: frame },
 	meta: {
 		// a faded gray map, so the markers stand out
-		background: { theme: 'gray', labels: 'fewer', language: 'local', colors: { black: 0.3 } },
+		background: { theme: 'gray', labels: 'fewer', colors: { black: 0.3 } },
 		// the legend is kept in the map, but not shown
 		legend: { entries: [{ type: 'marker', style: { color: COLOR, symbol: SYMBOL }, label: 'Pharmacy' }] },
 		viewer: { search: 'top-left', legend: 'none' },
