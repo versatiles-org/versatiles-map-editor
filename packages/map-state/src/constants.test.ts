@@ -10,7 +10,8 @@ import {
 } from './constants.js';
 import { StateReader } from './reader.js';
 import { STYLE_KEYS, styleFields, styleRemoveKey } from './style_history.js';
-import { STYLE_ROLE_FIELDS, type StyleRoleName } from './types.js';
+import { STYLE_ROLE_FIELDS } from './style_roles.js';
+import type { StyleRoleName } from './types.js';
 
 describe('the keys of the fields', () => {
 	it('are each once in their list, not the end, and fit their bits', () => {

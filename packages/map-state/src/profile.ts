@@ -27,7 +27,6 @@ import {
 	type LineStyle,
 	type MarkerStyle,
 	type OutlineStyle,
-	STYLE_ROLE_FIELDS,
 	type StateLegend,
 	type StateLegendEntry,
 	type StyleRoleName,
@@ -36,6 +35,7 @@ import {
 	type StateStyle,
 	type StateViewer
 } from './types.js';
+import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
 // ---------------------------------------------------------------------------
 // Style vocabulary of the serialization format.
@@ -213,6 +213,7 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 /**
  * Whether a style has an arrowhead at an end of the line.
  * @category Styles
+ * @internal
  */
 export function hasArrow(style: StateStyle | undefined): boolean {
 	return (style?.arrowStart ?? 'none') !== 'none' || (style?.arrowEnd ?? 'none') !== 'none';
@@ -230,6 +231,7 @@ export function hasPattern(style: StateStyle | undefined): boolean {
  * A style without the fields that have no effect: the size of arrowheads without one, and the
  * size and the coverage of a pattern without one.
  * @category Styles
+ * @internal
  */
 export function withoutUnusedFields(style: StateStyle): StateStyle {
 	let used = style;
@@ -254,6 +256,7 @@ function set<K extends keyof StateStyle>(style: StateStyle, key: K, value: State
  * Returns undefined when nothing remains, so `StateElement.style` stays absent
  * for fully-default styles.
  * @category Styles
+ * @internal
  */
 export function removeDefaultFields(value: StateStyle, def: StateStyle): StateStyle | undefined {
 	const entries = Object.entries(value).filter(([k, v]) => {
@@ -472,6 +475,7 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 /**
  * The width of the halo of the labels of each base map, if the background does not set one.
  * @category Background map
+ * @internal
  */
 export const BACKGROUND_HALO_WIDTHS = { vector: 2, satellite: 1 } as const;
 
@@ -591,6 +595,7 @@ export const LEGEND_DEFAULTS = {
  * The legend without the fields that have their default value, as the base64 string stores it, so
  * a legend is the same whether it comes from a link, a file or the editor.
  * @category Legend
+ * @internal
  */
 export function removeLegendDefaults(legend: StateLegend): StateLegend {
 	const result = { ...legend };
@@ -664,6 +669,7 @@ export const VIEWER_DEFAULTS = { search: 'none', navigation: 'top-right', legend
 /**
  * The choices of each control of the viewer: "none", or one of its positions.
  * @category Viewer
+ * @internal
  */
 export const VIEWER_CHOICES = {
 	search: ['none', ...SEARCH_POSITIONS],
@@ -674,6 +680,7 @@ export const VIEWER_CHOICES = {
 /**
  * The settings of the viewer without those with their default value, or undefined if all have it.
  * @category Viewer
+ * @internal
  */
 export function removeViewerDefaults(viewer: StateViewer | undefined): StateViewer | undefined {
 	if (!viewer) return undefined;

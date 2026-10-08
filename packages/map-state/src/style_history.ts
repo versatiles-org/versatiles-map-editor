@@ -1,6 +1,7 @@
 import { parseColor } from './color.js';
 import { withoutUnusedFields } from './profile.js';
-import type { STYLE_ROLE_FIELDS, StateElement, StateLegendEntry, StateStyle, StyleRoleName } from './types.js';
+import type { STYLE_ROLE_FIELDS } from './style_roles.js';
+import type { StateElement, StateLegendEntry, StateStyle, StyleRoleName } from './types.js';
 
 /** How a field of a style is encoded: values that encode identically are equal, e.g. a halo of 1.04 and 1. */
 const ENCODED: { [K in keyof StateStyle]-?: (value: NonNullable<StateStyle[K]>) => unknown } = {

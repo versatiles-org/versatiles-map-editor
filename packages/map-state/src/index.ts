@@ -56,7 +56,6 @@
 import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
 import type { MapState } from './types.js';
-import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
 
 export * from './types.js';
 export type { GeoJSONDocument } from './geojson.js';
@@ -71,7 +70,7 @@ export {
 	resolutionOfExponent,
 	MAX_EXPONENT
 } from './grid.js';
-export { boundsOf, centerOf } from './bounds.js';
+export { boundsOf } from './bounds.js';
 export { LINK_KINDS, measureLink, measureState, type LinkKind, type LinkMeasure } from './measure.js';
 export { COORDINATE_DIGITS, roundCoordinate, sanitizeBounds, sanitizeFrame } from './profile.js';
 export {
@@ -92,7 +91,6 @@ export {
 	ARROW_DEFAULTS,
 	SYMBOL_DEFAULTS,
 	hasArrow,
-	hasPattern,
 	PATTERN_SCALE_RANGE,
 	PATTERN_COVERAGE_RANGE,
 	withoutUnusedFields,
@@ -126,20 +124,4 @@ export function encodeState(state: MapState, options: { resolution?: number } = 
  */
 export function decodeState(base64: string): MapState {
 	return StateReader.fromBase64(base64).readRoot();
-}
-
-/**
- * Compress a GeoJSON FeatureCollection into the compact base64 representation.
- * @category Links
- */
-export function encodeGeoJSON(doc: GeoJSONDocument): string {
-	return encodeState(stateFromGeoJSON(doc));
-}
-
-/**
- * Decompress the base64 representation back into a GeoJSON FeatureCollection.
- * @category Links
- */
-export function decodeGeoJSON(base64: string): GeoJSONDocument {
-	return stateToGeoJSON(decodeState(base64));
 }

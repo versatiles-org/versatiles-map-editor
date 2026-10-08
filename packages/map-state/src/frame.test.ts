@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import type { Bounds, MapState, StateFrame } from './types.js';
 import {
 	boundsOf,
-	centerOf,
 	decodeState,
 	encodeState,
 	sanitizeBounds,
@@ -12,6 +11,7 @@ import {
 	stateToGeoJSON,
 	stateToKML
 } from './index.js';
+import { centerOf } from './bounds.js';
 
 const bounds: Bounds = [13.3, 52.45, 13.5, 52.55];
 const frame: StateFrame = { bounds };

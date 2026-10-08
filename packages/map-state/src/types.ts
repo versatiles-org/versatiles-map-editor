@@ -393,34 +393,6 @@ export type StateStyle = MarkerStyle & LineStyle & AreaStyle & OutlineStyle;
  */
 export type StyleRoleName = 'marker' | 'line' | 'area' | 'outline';
 
-/**
- * The fields of the style of each role, e.g. to check the style of a file (a test compares them with the types).
- * @category Styles
- */
-export const STYLE_ROLE_FIELDS = {
-	marker: [
-		'symbol',
-		'color',
-		'size',
-		'rotation',
-		'haloWidth',
-		'haloColor',
-		'labelColor',
-		'labelSize',
-		'font',
-		'labelPosition',
-		'flat'
-	],
-	line: ['color', 'width', 'dash', 'arrowStart', 'arrowEnd', 'arrowSize'],
-	area: ['color', 'pattern', 'patternScale', 'patternCoverage'],
-	outline: ['visible', 'color', 'width', 'dash']
-} as const satisfies {
-	marker: readonly (keyof MarkerStyle)[];
-	line: readonly (keyof LineStyle)[];
-	area: readonly (keyof AreaStyle)[];
-	outline: readonly (keyof OutlineStyle)[];
-};
-
 /** @category Map state */
 export interface StateMetadata {
 	/** The background map. Without it, the map has the editor's default background. */

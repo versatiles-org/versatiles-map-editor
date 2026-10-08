@@ -50,8 +50,6 @@ decodeState(base64: string): MapState
 
 stateToGeoJSON(state: MapState): GeoJSONDocument
 stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapState
-encodeGeoJSON(doc: GeoJSONDocument): string // = encodeState(stateFromGeoJSON(doc))
-decodeGeoJSON(base64: string): GeoJSONDocument // = stateToGeoJSON(decodeState(base64))
 
 stateToKML(state: MapState): string
 stateFromKML(kml: string): MapState
@@ -84,16 +82,13 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   what viewers can do with the map: `canPan` and `canZoom` (unless `false`), `canRotate` and
   `canTilt` (if `true`). `sanitizeFrame`
   checks one, `sanitizeBounds` an area;
-  `boundsOf(elements)` gives the bounds of elements (circles with their radius), and
-  `centerOf(bounds)` their center.
-- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`,
-  `removeDefaultFields`) helps to render the elements the way the editor does. The choices of a
+  `boundsOf(elements)` gives the bounds of elements (circles with their radius).
+- The style vocabulary (`FILL_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `SYMBOL_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
   style are names, listed in `FILL_PATTERN_NAMES`, `STROKE_STYLE_NAMES`, `ARROW_NAMES` and
   `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
   `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
   Links store the index of a name, so the tables only grow at their end (the rules for names are
   in `types.ts` and `MAPJSON.md`).
-  `hasArrow` and `hasPattern` tell whether a style has an arrowhead or a fill pattern, and
   `PATTERN_SCALE_RANGE` and `PATTERN_COVERAGE_RANGE` are the ranges of the size and the coverage
   of a pattern.
   `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend that names none, and

@@ -23,6 +23,8 @@ export default {
 	// The exports by what they are for (the tag `@category` of each), not by their kind, so e.g. the
 	// type of the legend, its defaults and its tables of names are together. In the order in which
 	// a developer needs them: first how a map is read and written, then what it holds.
+	// what the editor needs of how states are normalized, but nobody should build on (`@internal`)
+	excludeInternal: true,
 	categorizeByGroup: false,
 	categoryOrder: CATEGORIES,
 	defaultCategory: 'Other',

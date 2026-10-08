@@ -1,12 +1,6 @@
 import { roundCoordinate, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
-import {
-	STYLE_ROLE_FIELDS,
-	type Bounds,
-	type MapState,
-	type Position,
-	type StateElement,
-	type StateLegendEntry
-} from './types.js';
+import { type Bounds, type MapState, type Position, type StateElement, type StateLegendEntry } from './types.js';
+import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
 /**
  * The version of the format of .mapjson files, in the name of its JSON Schema.

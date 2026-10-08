@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { stateToGeoJSON, stateFromGeoJSON, type GeoJSONDocument } from './geojson.js';
-import { decodeState, encodeGeoJSON, decodeGeoJSON, encodeState } from './index.js';
+import { decodeState, encodeState } from './index.js';
 import { FILL_PATTERN_NAMES, STROKE_STYLE_NAMES, type MapState } from './types.js';
+
+/** A GeoJSON document as a link, and back. */
+const encodeGeoJSON = (doc: GeoJSONDocument) => encodeState(stateFromGeoJSON(doc));
+const decodeGeoJSON = (base64: string) => stateToGeoJSON(decodeState(base64));
 
 describe('stateToGeoJSON', () => {
 	it('maps a marker to a Point feature with symbol properties', () => {
@@ -244,7 +248,7 @@ describe('stateFromGeoJSON', () => {
 	});
 });
 
-describe('encodeGeoJSON / decodeGeoJSON', () => {
+describe('a GeoJSON document as a link', () => {
 	it('round-trips a document through base64 (stable fixed point + geometry preserved)', () => {
 		const doc = stateToGeoJSON({
 			elements: [
