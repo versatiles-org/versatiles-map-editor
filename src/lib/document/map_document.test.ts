@@ -290,6 +290,7 @@ describe('MapDocument', () => {
 			search: 'top-right',
 			navigation: 'top-right',
 			legend: 'none',
+			scale: 'none',
 			reset: true,
 			fullscreen: false
 		});
@@ -299,6 +300,7 @@ describe('MapDocument', () => {
 			search: 'none',
 			navigation: 'top-right',
 			legend: 'bottom-left',
+			scale: 'none',
 			reset: false,
 			fullscreen: false
 		});

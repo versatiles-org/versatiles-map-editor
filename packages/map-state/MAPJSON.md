@@ -297,6 +297,7 @@ the zoom buttons or not. Controls in the same corner are stacked.
 | `search`     | the address search: `"top-left"`, `"top-right"`                                                                                                                                                               | `"none"`        |
 | `navigation` | the zoom buttons: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                                                                                                              | `"top-right"`   |
 | `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                      | `"bottom-left"` |
+| `scale`      | a scale bar, in meters or kilometers: `"bottom-left"`, `"bottom-right"`                                                                                                                                       | `"none"`        |
 | `reset`      | a button that shows the map as it opened, with the zoom buttons or where they would be: `true`                                                                                                                | `false`         |
 | `fullscreen` | a button that shows the map on the whole screen, and back, with the zoom buttons or where they would be: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has. | `false`         |
 

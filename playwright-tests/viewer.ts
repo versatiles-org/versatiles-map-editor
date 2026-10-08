@@ -939,3 +939,55 @@ test('a shared map can have a button for the whole screen, which an embedded map
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await expect(dialog.getByLabel('Embed code')).toHaveValue(/border:0"><\/iframe>$/);
 });
+
+test('a shared map can have a scale bar, in meters or kilometers', async ({ page }) => {
+	const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+	const frame = { bounds: [13.3, 52.45, 13.5, 52.55] as [number, number, number, number] };
+	const scale = page.locator('.maplibregl-ctrl-scale');
+	await page.setViewportSize({ width: 800, height: 600 });
+
+	// not by default
+	await page.goto('/view/#' + encodeState({ frame, elements }));
+	await waitForMapIsReady(page);
+	await expect(scale).toHaveCount(0);
+
+	// at its place, in a metric unit, and it follows the zoom
+	for (const place of ['bottom-left', 'bottom-right'] as const) {
+		await page.goto('about:blank');
+		await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { scale: place } }, elements }));
+		await waitForMapIsReady(page);
+		await expect(scale).toHaveText(/^[\d.,]+\s?(m|km)$/);
+		const box = (await scale.boundingBox())!;
+		expect(box.y).toBeGreaterThan(450);
+		if (place === 'bottom-left') expect(box.x).toBeLessThan(150);
+		else expect(box.x + box.width).toBeGreaterThan(650);
+		// not over the attribution, which is in the same corner or the other one
+		const attribution = (await page.locator('.maplibregl-ctrl-attrib').boundingBox())!;
+		expect(boxesOverlap(box, attribution)).toBe(false);
+	}
+	const before = await scale.textContent();
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ zoom: 16 }));
+	await expect(scale).not.toHaveText(before!);
+	await expect(scale).toHaveText(/^[\d.,]+\s?m$/);
+
+	// the panel: off by default; on at the bottom left, then at the bottom right; shown on the map there
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ elements }));
+	await waitForMapIsReady(page);
+	await expect(scale).toHaveCount(0);
+	await (await menuItem(page, 'Shared map…')).click();
+	const option = sidebar(page).getByRole('checkbox', { name: 'Scale bar' });
+	await expect(option).not.toBeChecked();
+	await option.check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ scale: 'bottom-left' });
+	await expect(scale).toBeVisible();
+	await sidebar(page)
+		.getByRole('radiogroup', { name: 'Place of the scale bar' })
+		.getByRole('radio', { name: 'Bottom right' })
+		.check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ scale: 'bottom-right' });
+	// not outside the mode
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
+	await expect(scale).toHaveCount(0);
+});

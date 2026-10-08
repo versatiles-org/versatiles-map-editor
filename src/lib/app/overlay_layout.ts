@@ -15,9 +15,10 @@ export function isCorner(position: string | undefined): position is Corner {
 /**
  * The order of the controls in a corner, from its edge inwards: at the top the search, the
  * buttons for zooming, the other buttons of the viewer (e.g. to reset the view), the editor's button
- * that shows all elements, and the legend; at the bottom the attribution, the buttons and the legend.
+ * that shows all elements, and the legend; at the bottom the attribution, the scale bar, the buttons
+ * and the legend.
  */
-export const CONTROL_ORDER = { search: 0, attribution: 0, navigation: 1, buttons: 2, fit: 3, legend: 4 };
+export const CONTROL_ORDER = { search: 0, attribution: 0, scale: 1, navigation: 2, buttons: 3, fit: 4, legend: 5 };
 
 /** The size of the controls in a corner, with their margins. */
 export interface StackSize {
@@ -91,6 +92,15 @@ function addOrdered(map: maplibre.Map, control: maplibre.IControl, corner: Corne
 	return () => {
 		if (map.hasControl(placed)) map.removeControl(placed);
 	};
+}
+
+/**
+ * Add a scale bar in a bottom corner: a bar with the length that it stands for, in meters or
+ * kilometers. Returns a function that removes it again.
+ */
+export function addScale(map: maplibre.Map, corner: AttributionCorner): () => void {
+	const control = new maplibre.ScaleControl({ maxWidth: 100, unit: 'metric' });
+	return addOrdered(map, control, corner, CONTROL_ORDER.scale);
 }
 
 /** The label of the compass, which turns the map back. */

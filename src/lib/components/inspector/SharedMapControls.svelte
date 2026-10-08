@@ -17,7 +17,13 @@
 			layout: 'segmented'
 		},
 		{ key: 'navigation', label: 'Zoom buttons', hint: 'Buttons to zoom in and out.', layout: 'grid' },
-		{ key: 'legend', label: 'Legend', hint: 'The legend that you made for the map.', layout: 'grid' }
+		{ key: 'legend', label: 'Legend', hint: 'The legend that you made for the map.', layout: 'grid' },
+		{
+			key: 'scale',
+			label: 'Scale bar',
+			hint: 'A bar with the length that it stands for, in meters or kilometers.',
+			layout: 'segmented'
+		}
 	];
 
 	/** Show a control of the viewer at a place, or hide it ("none"); one undo step. */

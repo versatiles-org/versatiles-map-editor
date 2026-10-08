@@ -29,6 +29,7 @@
 	import {
 		addAttribution,
 		addNavigation,
+		addScale,
 		CONTROL_ORDER,
 		cornerControl,
 		CORNERS,
@@ -258,6 +259,18 @@
 		if (!m) return;
 		// as its button alone if its text would cover the legend, e.g. on a narrow map
 		return addAttribution(m, corner, () => m.getContainer().closest('.page')?.querySelector('.legend'));
+	});
+
+	// the scale bar of a shared map, which the editor shows only while the shared map is edited
+	const scaleCorner = $derived.by(() => {
+		if (!mapDocument || ownPlaces) return undefined;
+		const position = mapDocument.controls.scale;
+		return position === 'none' ? undefined : position;
+	});
+	$effect(() => {
+		const corner = scaleCorner;
+		const m = mapDocument?.view.map;
+		if (m && corner) return addScale(m, corner);
 	});
 
 	// How the map of the viewer is turned when it opens, and what its visitors can do with it. The

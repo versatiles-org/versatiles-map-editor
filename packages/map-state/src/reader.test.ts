@@ -730,6 +730,7 @@ describe('viewer', () => {
 			search: 'none',
 			navigation: 'top-right',
 			legend: 'bottom-left',
+			scale: 'none',
 			reset: false,
 			fullscreen: false
 		};
@@ -746,6 +747,10 @@ describe('viewer', () => {
 			state({ navigation: 'none', reset: true })
 		);
 		expect(decodeState(encodeState(state({ fullscreen: true })))).toStrictEqual(state({ fullscreen: true }));
+		// and a control with its place
+		expect(decodeState(encodeState(state({ scale: 'bottom-right', reset: true })))).toStrictEqual(
+			state({ scale: 'bottom-right', reset: true })
+		);
 		expect(decodeState(encodeState(state({ reset: true, fullscreen: true })))).toStrictEqual(
 			state({ reset: true, fullscreen: true })
 		);

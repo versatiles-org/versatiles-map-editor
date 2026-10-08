@@ -139,7 +139,7 @@ describe('.mapjson files', () => {
 				theme: 'x',
 				background: { theme: 'gray', options: { anything: 1 }, colors: { black: 0.2, gamma: 2 }, glow: true },
 				legend: { entries: [{ type: 'line', label: 'A', icon: 'x', style: { glow: 2 } }] },
-				viewer: { scale: 'top-left' }
+				viewer: { minimap: 'top-left' }
 			},
 			elements: [
 				// e.g. a typo, which the schema allows now
@@ -163,7 +163,7 @@ describe('.mapjson files', () => {
 			'meta.theme',
 			'meta.background.glow',
 			'meta.background.colors.gamma',
-			'meta.viewer.scale',
+			'meta.viewer.minimap',
 			'meta.legend.entries[0].icon',
 			'meta.legend.entries[0].style.glow',
 			'elements[0].note',

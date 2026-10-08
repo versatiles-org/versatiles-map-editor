@@ -8,7 +8,7 @@ export interface PlaceOption<T> {
 }
 
 /** The controls of the viewer that have a place on the map; its other settings are buttons with the zoom buttons. */
-export type PlacedControl = 'search' | 'navigation' | 'legend';
+export type PlacedControl = 'search' | 'navigation' | 'legend' | 'scale';
 
 type Places<K extends PlacedControl> = Exclude<NonNullable<StateViewer[K]>, 'none'>;
 
@@ -17,6 +17,10 @@ export const PLACES: { [K in PlacedControl]: PlaceOption<Places<K>>[] } = {
 	search: [
 		{ value: 'top-left', label: 'Top left', cell: [1, 1] },
 		{ value: 'top-right', label: 'Top right', cell: [1, 2] }
+	],
+	scale: [
+		{ value: 'bottom-left', label: 'Bottom left', cell: [1, 1] },
+		{ value: 'bottom-right', label: 'Bottom right', cell: [1, 2] }
 	],
 	navigation: [
 		{ value: 'top-left', label: 'Top left', cell: [1, 1] },

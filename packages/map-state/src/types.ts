@@ -510,6 +510,11 @@ export const SEARCH_POSITIONS = ['top-left', 'top-right'] as const;
  * @category Viewer
  */
 export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
+/**
+ * The places of the scale bar: at the bottom, where the scale of a map is.
+ * @category Viewer
+ */
+export const SCALE_POSITIONS = ['bottom-left', 'bottom-right'] as const;
 
 /**
  * What the viewer shows over the map, and where: a control at a position, or "none"; a button
@@ -523,6 +528,8 @@ export interface StateViewer {
 	navigation?: (typeof NAVIGATION_POSITIONS)[number] | 'none';
 	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
+	/** A bar with the length that it stands for on the map, in meters or kilometers. Default: "none". */
+	scale?: (typeof SCALE_POSITIONS)[number] | 'none';
 	/**
 	 * A button that shows the map as it opened: its area, its rotation and its tilt. With the
 	 * buttons for zooming, or where they would be. Default: false.

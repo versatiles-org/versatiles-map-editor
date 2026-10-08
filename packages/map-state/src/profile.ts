@@ -13,6 +13,7 @@ import {
 	LEGEND_THEMES,
 	LEGEND_POSITIONS,
 	NAVIGATION_POSITIONS,
+	SCALE_POSITIONS,
 	SEARCH_POSITIONS,
 	STROKE_STYLE_NAMES,
 	MAX_PITCH,
@@ -674,13 +675,14 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 
 /**
  * What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the
- * legend at the bottom left, no other buttons.
+ * legend at the bottom left, no scale bar, no other buttons.
  * @category Viewer
  */
 export const VIEWER_DEFAULTS = {
 	search: 'none',
 	navigation: 'top-right',
 	legend: 'bottom-left',
+	scale: 'none',
 	reset: false,
 	fullscreen: false
 } as const;
@@ -700,7 +702,8 @@ export const VIEWER_BUTTONS = ['reset', 'fullscreen'] as const;
 export const VIEWER_CHOICES = {
 	search: ['none', ...SEARCH_POSITIONS],
 	navigation: ['none', ...NAVIGATION_POSITIONS],
-	legend: ['none', ...LEGEND_POSITIONS]
+	legend: ['none', ...LEGEND_POSITIONS],
+	scale: ['none', ...SCALE_POSITIONS]
 } as const;
 
 /**

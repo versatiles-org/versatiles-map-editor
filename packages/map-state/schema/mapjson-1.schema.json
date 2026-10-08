@@ -566,6 +566,11 @@
 					"enum": ["bottom-left", "bottom", "bottom-right", "right", "top-right", "top", "top-left", "left", "none"],
 					"description": "The legend, if the map has one: a side (centered) or a corner. Default: \"bottom-left\"."
 				},
+				"scale": {
+					"type": "string",
+					"enum": ["bottom-left", "bottom-right", "none"],
+					"description": "A bar with the length that it stands for on the map, in meters or kilometers. Default: \"none\"."
+				},
 				"reset": {
 					"type": "boolean",
 					"description": "A button that shows the map as it opened: its area, its rotation and its tilt. With the buttons for zooming, or where they would be. Default: false."
