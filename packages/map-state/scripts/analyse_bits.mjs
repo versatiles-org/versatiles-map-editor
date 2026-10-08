@@ -17,6 +17,8 @@ import {
 	boundsOf,
 	encodeState,
 	exponentForResolution,
+	LINK_KINDS,
+	measureLink,
 	resolutionForArea,
 	resolutionOfExponent,
 	stateFromMapJSON
@@ -36,22 +38,9 @@ Options:
                        chooses it: fine enough for the frame, else the elements (default: auto)
   --help               this text`;
 
-/**
- * The kinds of bits, by the innermost of these read methods that read them; all others are
- * structure: types, flags, keys, counts.
- */
-const KINDS = {
-	readStringTable: 'strings',
-	readStringRef: 'string refs',
-	readElementPoint: 'coordinates',
-	readElementPoints: 'coordinates',
-	readStyle: 'styles',
-	readElementStyles: 'styles',
-	readPalette: 'colors',
-	readFrame: 'frame',
-	readBackground: 'background'
-};
-const KIND_NAMES = [...new Set(Object.values(KINDS)), 'structure'];
+// the kinds of bits of `measureLink` of the package, which the share dialog shows too, by their names here
+const KIND_TITLES = { stringRefs: 'string refs' };
+const KIND_NAMES = LINK_KINDS.map((kind) => KIND_TITLES[kind] ?? kind);
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
 const PRIMITIVES = new Set(['readBit', 'readInteger', 'readVarint', 'readExpGolomb', 'readBlock']);
@@ -218,7 +207,7 @@ function analyse(state, base64, options) {
 		characters: base64.length,
 		step: options.step,
 		elements,
-		kinds: kindsOf(reader.root),
+		kinds: Object.fromEntries(LINK_KINDS.map((kind, i) => [KIND_NAMES[i], measureLink(base64).kinds[kind]])),
 		tree
 	};
 }
@@ -257,14 +246,6 @@ function expandStringTables(span, bits) {
 function abbreviate(string) {
 	const quoted = JSON.stringify(string);
 	return quoted.length > 40 ? quoted.slice(0, 38) + '…"' : quoted;
-}
-
-/** The bits of each kind: those of the leaves, by the innermost classified call above them. */
-function kindsOf(span, kind = 'structure', kinds = Object.fromEntries(KIND_NAMES.map((name) => [name, 0]))) {
-	const own = KINDS[span.name] ?? kind;
-	if (span.children.length === 0) kinds[own] += span.end - span.start;
-	for (const child of span.children) kindsOf(child, own, kinds);
-	return kinds;
 }
 
 function printTree(title, analysis, options) {

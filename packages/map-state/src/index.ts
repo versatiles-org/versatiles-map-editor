@@ -17,6 +17,7 @@ export {
 	MAX_EXPONENT
 } from './grid.js';
 export { boundsOf, centerOf } from './bounds.js';
+export { LINK_KINDS, measureLink, measureState, type LinkKind, type LinkMeasure } from './measure.js';
 export { COORDINATE_DIGITS, roundCoordinate, sanitizeBounds, sanitizeFrame } from './profile.js';
 export {
 	MAPJSON_SCHEMA_URL,

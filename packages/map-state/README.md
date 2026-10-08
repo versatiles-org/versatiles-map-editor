@@ -230,7 +230,12 @@ design.
 
 ### Size of a link
 
-To see where the bits of a map go, as a tree of the reads with their bits:
+`measureState(state, { resolution })` and `measureLink(base64)` tell the size of a link and where
+its bits go, e.g. to show an author what makes a link long: they return `{ characters, bits, kinds }`,
+with the bits of each kind (`LINK_KINDS`: `strings`, `stringRefs`, `coordinates`, `styles`,
+`colors`, `frame`, `background`, `structure`), which add up to `bits`.
+
+To see it in detail, as a tree of the reads with their bits:
 
 ```sh
 npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-percent p] [files…]
