@@ -18,6 +18,7 @@ import {
 	sanitizeBackground,
 	sanitizeLabels,
 	sanitizeNumber,
+	sanitizeString,
 	sanitizeFrame,
 	sanitizeMetadata,
 	sanitizePosition,
@@ -199,7 +200,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 					outlineStyle: strokeStyleFromProps(p)
 				};
 			}
-			return { type: 'marker', point, ...labelOf(p?.['symbol-label']), style: symbolStyleFromProps(p) };
+			return { type: 'marker', point, ...labelOf(sanitizeString(p?.['symbol-label'])), style: symbolStyleFromProps(p) };
 		}
 		case 'LineString': {
 			const points = sanitizePositions(g.coordinates);

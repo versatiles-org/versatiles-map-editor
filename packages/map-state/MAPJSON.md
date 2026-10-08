@@ -326,6 +326,11 @@ const state = stateFromMapJSON(JSON.parse(text)); // refuses files of newer vers
 const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this version
 ```
 
+Reading keeps what is valid and leaves out the rest, e.g. an element that cannot be drawn or a
+field with a wrong value. A value has the type that the schema says: a number is a number, not
+`"3"`; a flag is `true` or `false`, not `"true"`; a color is `"#rrggbb"` or `"#rrggbbaa"`, not
+`"#f00"` or `"red"`.
+
 ## Versions
 
 The format is a release candidate: it may still change without a new version, and the editor may

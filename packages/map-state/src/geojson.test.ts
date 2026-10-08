@@ -297,7 +297,7 @@ describe('legend', () => {
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ legend });
 	});
 
-	it('sanitizes foreign legends', () => {
+	it('keeps only the valid parts of a legend, with the types of a map state', () => {
 		const doc = {
 			type: 'FeatureCollection',
 			features: [],
@@ -307,7 +307,9 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'monospace',
 					entries: [
-						{ type: 'line', style: { color: '#F00', width: '3', dash: 7, size: -1, extra: 1 }, label: 5 },
+						{ type: 'line', style: { color: '#FF0000', width: 3, dash: 7, size: -1, extra: 1 }, label: 5 },
+						// a short color and a number as text are not what a map state has
+						{ type: 'line', style: { color: '#F00', width: '3' }, label: 'w' },
 						// only areas have an outline
 						{ type: 'marker', style: { symbol: 'flag' }, outlineStyle: { color: '#000' }, label: 'y' },
 						{ type: 'area', style: 'red', outlineStyle: { visible: false }, label: 'z' },
@@ -325,7 +327,8 @@ describe('legend', () => {
 				font: 'monospace',
 				entries: [
 					// only valid fields; a symbol is the name of its image, e.g. no short name
-					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '5' },
+					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '' },
+					{ type: 'line', label: 'w' },
 					{ type: 'marker', label: 'y' },
 					{ type: 'area', outlineStyle: { visible: false }, label: 'z' }
 				]

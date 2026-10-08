@@ -122,6 +122,32 @@ function oneOf<T extends string>(table: readonly T[], value: unknown): T | undef
 	return (table as readonly unknown[]).includes(value) ? (value as T) : undefined;
 }
 
+// ----- the values of a map state, e.g. of a .mapjson file -----
+// Only the types that the schema of the files has: a number is a number, not "3". What is read
+// once is read for good, so nothing is read by guessing. Numbers beyond their range are the
+// nearest value in it.
+
+function strictNumber(value: unknown, min = -Infinity, max = Infinity): number | undefined {
+	return typeof value === 'number' ? sanitizeNumber(value, min, max) : undefined;
+}
+
+function strictRotation(value: unknown): number | undefined {
+	return typeof value === 'number' ? sanitizeRotation(value) : undefined;
+}
+
+function strictString(value: unknown): string | undefined {
+	return typeof value === 'string' ? value : undefined;
+}
+
+function strictBoolean(value: unknown): boolean | undefined {
+	return typeof value === 'boolean' ? value : undefined;
+}
+
+/** A color as the files have it, "#rrggbb" or "#rrggbbaa", in lower case. */
+function strictColor(value: unknown): string | undefined {
+	return typeof value === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{8})$/i.test(value) ? sanitizeColor(value) : undefined;
+}
+
 // ----- sanitizers for foreign GeoJSON property values -----
 // Imported GeoJSON may contain anything; these return undefined for values the
 // encoder cannot represent, so the corresponding default is used instead.
@@ -177,7 +203,7 @@ export interface RoleStyles {
 }
 
 /**
- * A style of the role as JSON has it (e.g. of a legend entry in GeoJSON): only its valid fields
+ * A style of the role as a map state has it, e.g. in a .mapjson file: only its valid fields
  * of that role, or undefined if none is. Fields of other roles are left out, e.g. `arrowStart` of
  * a marker.
  */
@@ -185,29 +211,29 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	if (typeof value !== 'object' || value === null) return undefined;
 	const v = value as Record<string, unknown>;
 	const s: StateStyle = {};
-	set(s, 'color', sanitizeColor(v.color));
-	set(s, 'labelColor', sanitizeColor(v.labelColor));
-	set(s, 'haloColor', sanitizeColor(v.haloColor));
-	set(s, 'haloWidth', sanitizeNumber(v.haloWidth, 0));
+	set(s, 'color', strictColor(v.color));
+	set(s, 'labelColor', strictColor(v.labelColor));
+	set(s, 'haloColor', strictColor(v.haloColor));
+	set(s, 'haloWidth', strictNumber(v.haloWidth, 0));
 	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
-	set(s, 'patternScale', sanitizeNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
-	set(s, 'patternCoverage', sanitizeNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
+	set(s, 'patternScale', strictNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
+	set(s, 'patternCoverage', strictNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
 	set(s, 'dash', oneOf(DASH_NAMES, v.dash));
-	set(s, 'rotation', sanitizeRotation(v.rotation));
-	const size = sanitizeNumber(v.size, 0);
+	set(s, 'rotation', strictRotation(v.rotation));
+	const size = strictNumber(v.size, 0);
 	if (size) s.size = size;
-	const labelSize = sanitizeNumber(v.labelSize, 0);
+	const labelSize = strictNumber(v.labelSize, 0);
 	if (labelSize) s.labelSize = labelSize;
-	set(s, 'width', sanitizeNumber(v.width, 0));
+	set(s, 'width', strictNumber(v.width, 0));
 	set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, v.labelPosition));
-	set(s, 'visible', sanitizeBoolean(v.visible));
-	set(s, 'flat', sanitizeBoolean(v.flat));
+	set(s, 'visible', strictBoolean(v.visible));
+	set(s, 'flat', strictBoolean(v.flat));
 	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
 	set(s, 'arrowEnd', oneOf(ARROW_NAMES, v.arrowEnd));
-	const arrowSize = sanitizeNumber(v.arrowSize, 0);
+	const arrowSize = strictNumber(v.arrowSize, 0);
 	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
-	set(s, 'labelFont', sanitizeString(v.labelFont));
+	set(s, 'labelFont', strictString(v.labelFont));
 	const fields: readonly string[] = STYLE_ROLE_FIELDS[role];
 	const own: StateStyle = Object.fromEntries(Object.entries(s).filter(([key]) => fields.includes(key)));
 	const used = withoutUnusedFields(own);
@@ -362,7 +388,7 @@ export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
  * several lines, each ended by a line feed (also in a text of Windows).
  */
 export function labelOf(value: unknown): { label?: string } {
-	const label = sanitizeString(value)?.replace(/\r\n?/g, '\n');
+	const label = strictString(value)?.replace(/\r\n?/g, '\n');
 	return label ? { label } : {};
 }
 
@@ -447,7 +473,7 @@ export function sanitizeBounds(value: unknown): Bounds | undefined {
 
 /** A rotation of the map in degrees, normalized to (-180, 180]. */
 export function sanitizeBearing(value: unknown): number | undefined {
-	const n = sanitizeNumber(value);
+	const n = strictNumber(value);
 	if (n === undefined) return undefined;
 	const bearing = ((n % 360) + 360) % 360;
 	return bearing > 180 ? bearing - 360 : bearing;
@@ -467,7 +493,7 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (bounds) frame.bounds = bounds;
 	const bearing = sanitizeBearing(v.bearing);
 	if (bearing) frame.bearing = bearing;
-	const pitch = sanitizeNumber(v.pitch, 0, MAX_PITCH);
+	const pitch = strictNumber(v.pitch, 0, MAX_PITCH);
 	if (pitch) frame.pitch = pitch;
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
@@ -519,36 +545,36 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 
 	const base = oneOf(BACKGROUND_BASES, v.base) ?? D.base;
 	if (base !== D.base) background.base = base;
-	const theme = sanitizeString(v.theme);
+	const theme = strictString(v.theme);
 	if (theme && theme !== D.theme) background.theme = theme;
-	if (sanitizeBoolean(v.streets) === false) background.streets = false;
-	if (sanitizeBoolean(v.borders) === false) background.borders = false;
+	if (strictBoolean(v.streets) === false) background.streets = false;
+	if (strictBoolean(v.borders) === false) background.borders = false;
 	const labels = oneOf(BACKGROUND_LABELS, v.labels);
 	if (labels && labels !== D.labels) background.labels = labels;
-	const language = sanitizeString(v.language);
+	const language = strictString(v.language);
 	if (language && language !== D.language) background.language = language;
-	const font = sanitizeString(v.font);
+	const font = strictString(v.font);
 	if (font && font !== D.font) background.font = font;
-	const labelSize = sanitizeNumber(v.labelSize, 0);
+	const labelSize = strictNumber(v.labelSize, 0);
 	if (labelSize && labelSize !== D.labelSize) background.labelSize = labelSize;
-	const haloWidth = sanitizeNumber(v.haloWidth, 0);
+	const haloWidth = strictNumber(v.haloWidth, 0);
 	if (haloWidth !== undefined && haloWidth !== BACKGROUND_HALO_WIDTHS[base]) background.haloWidth = haloWidth;
-	if (sanitizeBoolean(v.labelsOnTop)) background.labelsOnTop = true;
+	if (strictBoolean(v.labelsOnTop)) background.labelsOnTop = true;
 
 	if (typeof v.colors === 'object' && v.colors !== null) {
 		const c = v.colors as Record<string, unknown>;
 		const colors: StateBackgroundColors = {};
-		const saturation = sanitizeNumber(c.saturation, -1, 1);
+		const saturation = strictNumber(c.saturation, -1, 1);
 		if (saturation) colors.saturation = saturation;
-		const black = sanitizeNumber(c.black, -1, 1);
+		const black = strictNumber(c.black, -1, 1);
 		if (black) colors.black = black;
-		const white = sanitizeNumber(c.white, 0, 2);
+		const white = strictNumber(c.white, 0, 2);
 		if (white !== undefined && white !== BACKGROUND_COLOR_DEFAULTS.white) colors.white = white;
 		if (Object.keys(colors).length > 0) background.colors = colors;
 	}
 
-	if (sanitizeBoolean(v.hillshade)) background.hillshade = true;
-	if (sanitizeBoolean(v.terrain)) background.terrain = true;
+	if (strictBoolean(v.hillshade)) background.hillshade = true;
+	if (strictBoolean(v.terrain)) background.terrain = true;
 	if (oneOf(BACKGROUND_BUILDINGS, v.buildings) === 'extruded') background.buildings = 'extruded';
 
 	if (typeof v.options === 'object' && v.options !== null && !Array.isArray(v.options)) {
@@ -629,7 +655,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;
-		const label = sanitizeString(e.label) ?? '';
+		const label = strictString(e.label) ?? '';
 		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
 		if (!type) continue;
 		legend.entries.push(sanitizeLegendEntry(type, e.style, e.outlineStyle, label));
@@ -741,12 +767,12 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 	// what its viewers can do
 	if (v.canPan === false) viewer.canPan = false;
 	if (v.canZoom === false) viewer.canZoom = false;
-	if (sanitizeBoolean(v.canRotate)) viewer.canRotate = true;
-	if (sanitizeBoolean(v.canTilt)) viewer.canTilt = true;
-	if (sanitizeBoolean(v.confine)) viewer.confine = true;
+	if (strictBoolean(v.canRotate)) viewer.canRotate = true;
+	if (strictBoolean(v.canTilt)) viewer.canTilt = true;
+	if (strictBoolean(v.confine)) viewer.confine = true;
 	// in steps of 0.5; a least zoom above the largest one is the largest one
 	const zoom = (value: unknown) => {
-		const level = sanitizeNumber(value, 0, MAX_ZOOM);
+		const level = strictNumber(value, 0, MAX_ZOOM);
 		return level === undefined ? undefined : Math.round(level * 2) / 2;
 	};
 	const maxZoom = zoom(v.maxZoom);
@@ -804,13 +830,13 @@ export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
 	if (background) meta.background = background;
 	const legend = sanitizeLegend(v.legend);
 	if (legend) meta.legend = legend;
-	const colorScheme = sanitizeString(v.colorScheme);
+	const colorScheme = strictString(v.colorScheme);
 	if (colorScheme) meta.colorScheme = colorScheme;
 	const viewer = sanitizeViewer(v.viewer);
 	if (viewer) meta.viewer = viewer;
 	const labels = sanitizeLabels(v.labels);
 	if (labels) meta.labels = labels;
-	const title = sanitizeString(v.title);
+	const title = strictString(v.title);
 	if (title) meta.title = title;
 	return Object.keys(meta).length > 0 ? meta : undefined;
 }
@@ -818,7 +844,7 @@ export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
 /** A popup with a text that is not blank, or undefined. */
 function sanitizePopup(value: unknown): StatePopup | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const text = sanitizeString((value as Record<string, unknown>).text);
+	const text = strictString((value as Record<string, unknown>).text);
 	return text?.trim() ? { text } : undefined;
 }
 
@@ -842,7 +868,7 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 			const points = sanitizePositions(v.points);
 			if (!points || points.length < 2) return undefined;
 			element = { type: 'line', points, style: sanitizeStyle('line', v.style) };
-			if (sanitizeBoolean(v.smooth)) element.smooth = true;
+			if (strictBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
 		case 'polygon': {
@@ -854,12 +880,12 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 				style: sanitizeStyle('area', v.style),
 				outlineStyle: sanitizeStyle('outline', v.outlineStyle)
 			};
-			if (sanitizeBoolean(v.smooth)) element.smooth = true;
+			if (strictBoolean(v.smooth)) element.smooth = true;
 			break;
 		}
 		case 'circle': {
 			const point = sanitizePosition(v.point);
-			const radius = sanitizeNumber(v.radius);
+			const radius = strictNumber(v.radius);
 			if (!point || radius === undefined || radius <= 0) return undefined;
 			element = {
 				type: 'circle',

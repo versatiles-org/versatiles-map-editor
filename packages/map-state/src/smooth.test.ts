@@ -73,7 +73,8 @@ describe('smooth lines and polygons', () => {
 		const read = (smooth: unknown) =>
 			stateFromMapJSON({ elements: [{ type: 'line', points, smooth }] }).elements[0] as { smooth?: boolean };
 		expect(read(true).smooth).toBe(true);
-		expect(read('true').smooth).toBe(true);
+		// a flag is a boolean, not a text
+		expect('smooth' in read('true')).toBe(false);
 		expect('smooth' in read(false)).toBe(false);
 		expect('smooth' in read('yes')).toBe(false);
 		// a marker is never smooth

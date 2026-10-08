@@ -107,7 +107,16 @@ describe('.mapjson files', () => {
 				{
 					type: 'marker',
 					point: [1, 2],
-					style: { rotation: 45.5, color: '#FF0000', labelColor: 'red', size: 'big' },
+					// only the types of the schema: no number or flag as text, no short or named color
+					style: {
+						rotation: 45.5,
+						color: '#FF0000',
+						labelColor: 'red',
+						haloColor: '#fff',
+						size: 'big',
+						haloWidth: '2',
+						flat: 'true'
+					},
 					popup: { text: 7 }
 				},
 				{ type: 'marker', point: [1] },
@@ -136,7 +145,7 @@ describe('.mapjson files', () => {
 		expect(stateFromMapJSON(json)).toStrictEqual({
 			meta: { title: 'Map' },
 			elements: [
-				{ type: 'marker', point: [1, 2], style: { rotation: 46, color: '#ff0000' }, popup: { text: '7' } },
+				{ type: 'marker', point: [1, 2], style: { rotation: 46, color: '#ff0000' } },
 				{ type: 'circle', point: [0, 0], radius: 50, outlineStyle: { width: 0 } }
 			]
 		});
