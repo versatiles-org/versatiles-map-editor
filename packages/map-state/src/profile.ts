@@ -154,6 +154,22 @@ function strictColor(value: unknown): string | undefined {
 	return typeof value === 'string' && /^#([0-9a-f]{6}|[0-9a-f]{8})$/i.test(value) ? sanitizeColor(value) : undefined;
 }
 
+/**
+ * An object as JSON holds it, e.g. without the fields that are undefined or functions, or undefined
+ * if it is none, is empty then, or cannot be written as JSON at all (e.g. with a BigInt).
+ */
+function jsonObject(value: unknown): Record<string, unknown> | undefined {
+	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+	let held: unknown;
+	try {
+		held = JSON.parse(JSON.stringify(value));
+	} catch {
+		return undefined;
+	}
+	if (typeof held !== 'object' || held === null || Array.isArray(held)) return undefined;
+	return Object.keys(held).length > 0 ? (held as Record<string, unknown>) : undefined;
+}
+
 // ----- sanitizers for foreign GeoJSON property values -----
 // Imported GeoJSON may contain anything; these return undefined for values the
 // encoder cannot represent, so the corresponding default is used instead.
@@ -549,8 +565,9 @@ export const BACKGROUND_COLOR_DEFAULTS = { saturation: 0, black: 0, white: 1 } a
 
 /**
  * A valid background with its valid settings, without those that have their default value.
- * Undefined if nothing is left, which is the default background. The `options` are not checked,
- * since they belong to `@versatiles/style`.
+ * Undefined if nothing is left, which is the default background. Of the `options` only what JSON
+ * can hold is kept, since a file and a link keep them as JSON; what they say is not checked, since
+ * they belong to `@versatiles/style`.
  * @category Background map
  */
 export function sanitizeBackground(value: unknown): StateBackground | undefined {
@@ -593,9 +610,8 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 	if (strictBoolean(v.terrain)) background.terrain = true;
 	if (oneOf(BACKGROUND_BUILDINGS, v.buildings) === 'extruded') background.buildings = 'extruded';
 
-	if (typeof v.options === 'object' && v.options !== null && !Array.isArray(v.options)) {
-		if (Object.keys(v.options).length > 0) background.options = v.options as Record<string, unknown>;
-	}
+	const options = jsonObject(v.options);
+	if (options) background.options = options;
 	return Object.keys(background).length > 0 ? background : undefined;
 }
 

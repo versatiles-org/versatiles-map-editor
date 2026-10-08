@@ -275,6 +275,24 @@ describe('the writer writes only what the reader reads', () => {
 		checkDrawable(decodeState(encodeState({ elements: read })));
 	});
 
+	it('keeps of the options of a background only what JSON can hold, so the link can be read', () => {
+		const background = (options: unknown) => ({ elements: [], meta: { background: { theme: 'gray', options } } });
+		// nothing is left of these
+		for (const options of [{ a: undefined }, { a() {} }, { toJSON: () => 'x' }, { a: 1n }, {}, [1], 'x']) {
+			expect(read(background(options)).meta).toStrictEqual({ background: { theme: 'gray' } });
+		}
+		// and of these what JSON has
+		const mixed = { sky: false, a: undefined, list: [1, undefined], date: new Date(0) };
+		expect(read(background(mixed)).meta?.background?.options).toStrictEqual({
+			sky: false,
+			list: [1, null],
+			date: '1970-01-01T00:00:00.000Z'
+		});
+		// the only setting of a background
+		expect(read({ elements: [], meta: { background: { options: { a: undefined } } } }).meta).toBeUndefined();
+		expect(stateFromMapJSON(background({ a: undefined })).meta).toStrictEqual({ background: { theme: 'gray' } });
+	});
+
 	it('refuses a number that does not fit its bits instead of writing another one', () => {
 		expect(() => new StateWriter().writeInteger(64, 6)).toThrow('64 does not fit 6 bits');
 		expect(() => new StateWriter().writeInteger(-1, 6)).toThrow();
