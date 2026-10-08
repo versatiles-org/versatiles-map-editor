@@ -66,6 +66,7 @@ import {
 	colorKey,
 	encodedValue,
 	roleOf,
+	sizeTenths,
 	styleFields,
 	STYLE_KEY_PARAMETER,
 	styleRemoveKey,
@@ -698,9 +699,9 @@ export class StateWriter {
 			case 'rotation':
 				return this.writeVarint(Math.round(style.rotation!), true);
 			case 'size':
-				return this.writeVarint(Math.round(style.size! * 10));
+				return this.writeVarint(sizeTenths(style.size!));
 			case 'labelSize':
-				return this.writeVarint(Math.round(style.labelSize! * 10));
+				return this.writeVarint(sizeTenths(style.labelSize!));
 			case 'width':
 				return this.writeVarint(Math.round(style.width! * 10));
 			case 'labelPosition':
@@ -709,7 +710,7 @@ export class StateWriter {
 			case 'arrowEnd':
 				return this.writeName(ARROW_NAMES, style[name]!);
 			case 'arrowSize':
-				return this.writeVarint(Math.round(style.arrowSize! * 10));
+				return this.writeVarint(sizeTenths(style.arrowSize!));
 			case 'patternScale':
 				return this.writeVarint(Math.round(style.patternScale! * 10));
 			case 'patternCoverage':

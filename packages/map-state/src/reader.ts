@@ -734,6 +734,13 @@ export class StateReader {
 		}
 	}
 
+	/** A size that is a factor, in tenths: above 0, as the writer writes it (`sizeTenths`). */
+	readSize(): number {
+		const tenths = this.readVarint();
+		if (tenths < 1) throw new Error('A size of 0');
+		return tenths / 10;
+	}
+
 	/** A style of the role: a reference to an earlier style of the role (0: none) and the differences to it. */
 	readStyle(role: StyleRoleName): StateStyle {
 		try {
@@ -796,7 +803,7 @@ export class StateReader {
 					if (style.rotation <= -180 || style.rotation > 180) throw new Error(`Invalid rotation: ${style.rotation}`);
 					break;
 				case 'size':
-					style.size = this.readVarint() / 10;
+					style.size = this.readSize();
 					break;
 				case 'width':
 					style.width = this.readVarint() / 10;
@@ -809,7 +816,7 @@ export class StateReader {
 					style[field.name] = this.readName(ARROW_NAMES);
 					break;
 				case 'arrowSize':
-					style.arrowSize = this.readVarint() / 10;
+					style.arrowSize = this.readSize();
 					break;
 				// limited, since a large pattern would take long to draw
 				case 'patternScale':
@@ -839,7 +846,7 @@ export class StateReader {
 					style.symbol = this.readStringRef(true);
 					break;
 				case 'labelSize':
-					style.labelSize = this.readVarint() / 10;
+					style.labelSize = this.readSize();
 					break;
 				case 'labelFont':
 					style.labelFont = this.readStringRef(true);

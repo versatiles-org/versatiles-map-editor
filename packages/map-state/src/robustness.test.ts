@@ -5,6 +5,7 @@ import { decodeState, encodeState, stateFromGeoJSON, stateFromMapJSON, type Boun
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
+import { styleFields } from './style_history.js';
 import { FILL_PATTERN_NAMES, LABEL_POSITION_NAMES, DASH_NAMES, type Position, type StateStyle } from './types.js';
 
 // Links that are cut off, changed or made up must either be refused quickly, or give a map that the
@@ -291,6 +292,40 @@ describe('the writer writes only what the reader reads', () => {
 		// the only setting of a background
 		expect(read({ elements: [], meta: { background: { options: { a: undefined } } } }).meta).toBeUndefined();
 		expect(stateFromMapJSON(background({ a: undefined })).meta).toStrictEqual({ background: { theme: 'gray' } });
+	});
+
+	it('keeps a small size as the smallest one, not as none', () => {
+		const state: MapState = {
+			elements: [
+				{ type: 'marker', point: [0, 0], label: 'A', style: { size: 0.04, labelSize: 0.01 } },
+				{
+					type: 'line',
+					points: [
+						[0, 0],
+						[1, 1]
+					],
+					style: { arrowEnd: 'triangle', arrowSize: 0.04 }
+				}
+			]
+		};
+		const once = read(state);
+		expect(once.elements.map((element) => element.style)).toStrictEqual([
+			{ size: 0.1, labelSize: 0.1 },
+			{ arrowEnd: 'triangle', arrowSize: 0.1 }
+		]);
+		// and it stays so
+		expect(read(once)).toStrictEqual(once);
+		// a link with a size of 0 is none of this format
+		for (const field of ['size', 'labelSize'] as const) {
+			const writer = new StateWriter();
+			writer.writeExpGolomb(0, 0); // no reference
+			writer.writeExpGolomb(styleFields('marker').find(({ name }) => name === field)!.key, 0);
+			writer.writeVarint(0);
+			writer.writeExpGolomb(0, 0); // end
+			expect(() => new StateReader(writer.bits).readStyle('marker')).toThrow(
+				expect.objectContaining({ cause: expect.objectContaining({ message: 'A size of 0' }) })
+			);
+		}
 	});
 
 	it('refuses a number that does not fit its bits instead of writing another one', () => {

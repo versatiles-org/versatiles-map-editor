@@ -3,20 +3,28 @@ import { withoutUnusedFields } from './profile.js';
 import type { STYLE_ROLE_FIELDS } from './style_roles.js';
 import type { StateElement, StateLegendEntry, StateStyle, StyleRoleName } from './types.js';
 
+/**
+ * A size that is a factor above 0, in the tenths that a link stores: at least 1 tenth, so a
+ * small size does not become none, which no size is.
+ */
+export function sizeTenths(value: number): number {
+	return Math.max(1, Math.round(value * 10));
+}
+
 /** How a field of a style is encoded: values that encode identically are equal, e.g. a halo of 1.04 and 1. */
 const ENCODED: { [K in keyof StateStyle]-?: (value: NonNullable<StateStyle[K]>) => unknown } = {
 	color: (v) => colorKey(v),
 	symbol: (v) => v,
 	labelColor: (v) => colorKey(v),
 	labelFont: (v) => v,
-	size: (v) => Math.round(v * 10),
-	labelSize: (v) => Math.round(v * 10),
+	size: sizeTenths,
+	labelSize: sizeTenths,
 	labelPosition: (v) => v,
 	width: (v) => Math.round(v * 10),
 	dash: (v) => v,
 	arrowStart: (v) => v,
 	arrowEnd: (v) => v,
-	arrowSize: (v) => Math.round(v * 10),
+	arrowSize: sizeTenths,
 	haloWidth: (v) => Math.round(v * 10),
 	haloColor: (v) => colorKey(v),
 	rotation: (v) => Math.round(v),
