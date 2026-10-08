@@ -17,14 +17,18 @@ describe('FillStyle', () => {
 
 	it('should initialize layer with default values', () => {
 		expect(layer).toBeDefined();
-		expect(layer.color).toBe('#ff0000');
+		expect(layer.color).toBe('#ff000040');
 		expect(layer.pattern).toBe('solid');
 	});
 
 	it('gives the pattern image in the opaque color, and the opacity of the color on its own', () => {
 		// a solid fill has no size and coverage
 		layer.patternScale = 2;
-		expect(layer.getProperties()).toStrictEqual({ pattern: 'fill-pattern:solid:1:1:#ff0000', opacity: 1 });
+		// the default is a translucent red
+		expect(layer.getProperties()).toStrictEqual({
+			pattern: 'fill-pattern:solid:1:1:#ff0000',
+			opacity: expect.closeTo(0.25, 2)
+		});
 		layer.color = '#00FF0080';
 		layer.pattern = 'diagonal-up';
 		layer.patternCoverage = 0.25;

@@ -55,7 +55,8 @@ type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K
 
 /** @category Styles */
 export const AREA_DEFAULTS: Defaults<'color' | 'pattern' | 'patternScale' | 'patternCoverage'> = {
-	color: '#ff0000',
+	// translucent, so the map under an area stays readable
+	color: '#ff000040',
 	pattern: 'solid',
 	patternScale: 1,
 	patternCoverage: 0.5

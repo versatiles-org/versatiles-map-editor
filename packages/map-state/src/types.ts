@@ -330,7 +330,7 @@ export interface LineStyle {
 export interface AreaStyle {
 	/**
 	 * The color of the area, with its opacity.
-	 * @default "#ff0000"
+	 * @default "#ff000040"
 	 */
 	color?: HexColor;
 	/**

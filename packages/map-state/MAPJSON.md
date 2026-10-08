@@ -177,7 +177,7 @@ other kinds are unknown fields (see [Basics](#basics)).
 
 | Field             | Meaning                                                                                                                                                                                             |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `color`           | the area with its opacity, default `"#ff0000"`                                                                                                                                                      |
+| `color`           | the area with its opacity, default `"#ff000040"`, a translucent red                                                                                                                                 |
 | `pattern`         | `"solid"`, `"diagonal-up"` (/), `"diagonal-down"` (\\), `"horizontal"`, `"vertical"`, `"cross"` (+), `"diagonal-cross"` (×), `"dots"`, `"diagonal-dots"` (dots in diagonal rows); default `"solid"` |
 | `patternScale`    | with a pattern: its size, a factor from 0.5 to 4; at 1 the lines (across them) or dots are 8 pixels apart; default `1`                                                                              |
 | `patternCoverage` | with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95; default `0.5`                                                                                                |

@@ -9,7 +9,7 @@ describe('the defaults of the roles of styles', () => {
 
 	it('complete a style with the defaults of its role', () => {
 		expect(completeStyle('fill', { pattern: 'diagonal-up' })).toStrictEqual({
-			color: '#ff0000',
+			color: '#ff000040',
 			pattern: 'diagonal-up',
 			patternScale: 1,
 			patternCoverage: 0.5

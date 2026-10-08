@@ -541,7 +541,8 @@ test('choosing a color scheme', async ({ page }) => {
 		.getByRole('group', { name: 'Okabe-Ito (colorblind-safe)' })
 		.getByRole('button', { name: '#0072b2' })
 		.click();
-	await expect.poll(async () => (await polygon()).style?.color?.toLowerCase()).toBe('#0072b2');
+	// with the opacity that the fill had: the translucent default of an area
+	await expect.poll(async () => (await polygon()).style?.color?.toLowerCase()).toBe('#0072b240');
 	await page.keyboard.press('Escape');
 
 	// the scheme belongs to the map, so every color picker offers it

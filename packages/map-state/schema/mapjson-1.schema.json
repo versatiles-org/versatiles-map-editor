@@ -449,7 +449,7 @@
 				"color": {
 					"$ref": "#/definitions/HexColor",
 					"description": "The color of the area, with its opacity.",
-					"default": "#ff0000"
+					"default": "#ff000040"
 				},
 				"pattern": {
 					"$ref": "#/definitions/FillPatternName",
