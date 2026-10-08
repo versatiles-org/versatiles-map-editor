@@ -5,6 +5,7 @@
 		boundsOf,
 		coarsestResolutionForArea,
 		exponentForResolution,
+		measureLink,
 		resolutionForArea,
 		resolutionOfExponent
 	} from '@versatiles/map-state';
@@ -99,6 +100,38 @@
 		update(0);
 	}
 
+	/**
+	 * What the link holds, as the shares of its three parts in percent, which add up to 100: the
+	 * texts (labels, popups, the title), the geometry (the positions of the elements and the visible
+	 * area), and the rest (styles, colors, the background map, the legend's and the map's settings).
+	 * So its author sees what makes it long, and what a lower accuracy can save: only the geometry.
+	 */
+	const parts = $derived.by(() => {
+		const hash = linkCode.split('#')[1];
+		if (!hash) return undefined;
+		let kinds;
+		try {
+			({ kinds } = measureLink(hash));
+		} catch {
+			return undefined;
+		}
+		const texts = kinds.strings + kinds.stringRefs;
+		const geometry = kinds.coordinates + kinds.frame;
+		const total = Object.values(kinds).reduce((sum, bits) => sum + bits, 0);
+		const list = [
+			{ id: 'rest', label: 'Meta', bits: total - texts - geometry },
+			{ id: 'texts', label: 'Texts', bits: texts },
+			{ id: 'geometry', label: 'Geometry', bits: geometry }
+		];
+		// whole percents that add up to 100: rounded down, the rest to the largest remainders
+		const exact = list.map(({ bits }) => (100 * bits) / total);
+		const percents = exact.map(Math.floor);
+		const byRemainder = exact.map((value, i) => ({ i, rest: value - percents[i] })).sort((a, b) => b.rest - a.rest);
+		const left = 100 - percents.reduce((sum, p) => sum + p, 0);
+		for (let k = 0; k < left; k++) percents[byRemainder[k].i]++;
+		return list.map((part, i) => ({ ...part, percent: percents[i] }));
+	});
+
 	function getLinkCode() {
 		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent) })}`;
 	}
@@ -180,6 +213,23 @@
 				<p class="result">
 					Round to {accuracySteps(exponent)} · Link: {linkCode.length} characters
 				</p>
+				{#if parts}
+					<!-- what the link holds; one picture for screen readers, its legend for the eyes -->
+					<div
+						class="bar"
+						role="img"
+						aria-label="The link holds: {parts.map(({ label, percent }) => `${label} ${percent} %`).join(', ')}"
+					>
+						{#each parts as { id, bits } (id)}
+							<span class={id} style:flex-grow={bits}></span>
+						{/each}
+					</div>
+					<ul class="parts" aria-hidden="true">
+						{#each parts as { id, label, percent } (id)}
+							<li><span class="swatch {id}"></span>{label} {percent} %</li>
+						{/each}
+					</ul>
+				{/if}
 				<Checkbox
 					checked={precision === 'auto'}
 					onchange={(e) => {
@@ -242,6 +292,56 @@
 		color: var(--color-text-muted);
 		font-size: var(--font-size-sm);
 		font-variant-numeric: tabular-nums;
+	}
+
+	/* what the link holds: a bar of its three parts, and their names below */
+	.bar {
+		display: flex;
+		height: 6px;
+		gap: 1px;
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+
+		span {
+			flex-basis: 0;
+		}
+	}
+
+	.parts {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-3);
+		margin: 0;
+		padding: 0;
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
+		font-variant-numeric: tabular-nums;
+		list-style: none;
+
+		li {
+			display: flex;
+			align-items: center;
+			gap: var(--space-1);
+		}
+	}
+
+	.swatch {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+	}
+
+	.texts {
+		background: var(--color-accent);
+	}
+
+	.geometry {
+		/* apart from the accent in both themes: darker on a light background, lighter on a dark one */
+		background: color-mix(in srgb, var(--color-accent) 50%, var(--color-text));
+	}
+
+	.rest {
+		background: var(--color-border-field);
 	}
 
 	.buttons {

@@ -168,7 +168,7 @@ test('precision of a shared map', async ({ page }) => {
 	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('High');
 	await expect.poll(async () => (await shared()).point).toStrictEqual(AUTO_POINT);
 	const auto = await shared();
-	await expect(result).toHaveText(`Positions to 9 m · Link: ${auto.length} characters`);
+	await expect(result).toHaveText(`Round to 9 m · Link: ${auto.length} characters`);
 
 	// Like a quality slider, from about a hundredth of the larger side at the left (0.00128°, about
 	// 140 m) to 1 m at the right, which is exact; moving the slider ends "Automatic"
@@ -181,14 +181,31 @@ test('precision of a shared map', async ({ page }) => {
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
 	const exact = await shared();
 	// the length of the link is told
-	await expect(result).toHaveText(`Positions to 1 m · Link: ${exact.length} characters`);
+	await expect(result).toHaveText(`Round to 1 m · Link: ${exact.length} characters`);
 	// 0.00064°: the second step from the left
 	await precision.fill('1');
 	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('Low');
 	await expect.poll(async () => (await shared()).point).toStrictEqual(COARSE_POINT);
 	expect((await shared()).length).toBeLessThan(auto.length);
 	expect(auto.length).toBeLessThanOrEqual(exact.length);
-	await expect(result).toHaveText(`Positions to 71 m · Link: ${(await shared()).length} characters`);
+	await expect(result).toHaveText(`Round to 71 m · Link: ${(await shared()).length} characters`);
+	// what the link holds, in three parts that add up: a marker without text is styles and settings,
+	// and its position
+	const bar = page.getByRole('dialog').getByRole('img', { name: /^The link holds:/ });
+	const shares = async () =>
+		[...(await bar.getAttribute('aria-label'))!.matchAll(/(\d+) %/g)].map((match) => Number(match[1]));
+	const [meta, texts, geometry] = await shares();
+	expect(texts + geometry + meta).toBe(100);
+	expect(geometry).toBeGreaterThan(0);
+	expect(meta).toBeGreaterThan(texts);
+	await expect(page.getByRole('dialog').locator('.parts li')).toHaveText([
+		`Meta ${meta} %`,
+		`Texts ${texts} %`,
+		`Geometry ${geometry} %`
+	]);
+	// a higher accuracy is more geometry
+	await page.keyboard.press('End');
+	await expect.poll(async () => (await shares())[2]).toBeGreaterThan(geometry);
 	// one step finer than what is too fine to be seen
 	await precision.fill('3');
 	await expect(precision).toHaveAttribute('aria-valuetext', 'Medium, 18 m');
