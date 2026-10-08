@@ -140,27 +140,28 @@
 	const hintOffset = $derived(hint === undefined ? 0 : hintHeight + MAP_PADDING);
 
 	// The legend, the search and the buttons for zooming at their places in the viewer. The editor
-	// always shows the search and the buttons, at their places or at the defaults, and a legend
-	// hidden in the viewer at the default place, so it can be edited. Only while the shared map is
-	// edited, it shows them as the viewer does: what is hidden there is hidden here.
-	const showsHidden = $derived(editor && !asShared);
+	// has places of its own, whatever the shared map says, and always shows all of them: the search
+	// at the top left, the buttons at the top right, the legend at the bottom left (and the
+	// attribution at the bottom right, see below). Only while the shared map is edited, it shows
+	// them as the viewer does: at their places, and what is hidden there is hidden here.
+	const ownPlaces = $derived(editor && !asShared);
 	const legendPosition: LegendPosition | undefined = $derived.by(() => {
 		if (!mapDocument?.legend?.entries.length) return undefined;
+		if (ownPlaces) return 'bottom-left';
 		const position = mapDocument.controls.legend;
-		if (position !== 'none') return position;
-		return showsHidden ? VIEWER_DEFAULTS.legend : undefined;
+		return position === 'none' ? undefined : position;
 	});
 	const searchCorner: Corner | undefined = $derived.by(() => {
 		if (!search || !mapDocument) return undefined;
+		if (ownPlaces) return 'top-left';
 		const position = mapDocument.controls.search;
-		if (position !== 'none') return position;
-		return asShared ? undefined : 'top-left';
+		return position === 'none' ? undefined : position;
 	});
 	const navigationCorner: Corner | undefined = $derived.by(() => {
 		if (!navigation || !mapDocument) return undefined;
+		if (ownPlaces) return 'top-right';
 		const position = mapDocument.controls.navigation;
-		if (position !== 'none') return position;
-		return asShared ? undefined : VIEWER_DEFAULTS.navigation;
+		return position === 'none' ? undefined : position;
 	});
 
 	// The editor's own button that shows all elements, with the buttons for zooming; while the
@@ -222,7 +223,7 @@
 
 	// the attribution in a bottom corner that nothing else takes; a value of its own, so a change of
 	// the layout does not add it again
-	const attributionCorner = $derived(layout.attributionCorner);
+	const attributionCorner = $derived(ownPlaces ? 'bottom-right' : layout.attributionCorner);
 	$effect(() => {
 		const corner = attributionCorner;
 		const m = mapDocument?.view.map;

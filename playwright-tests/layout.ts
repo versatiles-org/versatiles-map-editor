@@ -204,7 +204,9 @@ test('a message is above the drawer and the bars', async ({ page }) => {
 });
 
 // one page for all positions: a new map in the URL hash replaces the legend without a reload
-test('the legend keeps its corner, stacked with the search or the zoom buttons there', async ({ page }) => {
+test('the editor has places of its own for its controls; while the shared map is edited, the legend keeps its corner, stacked with the search or the zoom buttons there', async ({
+	page
+}) => {
 	const legendList = page.getByRole('list', { name: 'Legend' });
 	const box = async (locator: Locator) => {
 		const b = (await locator.boundingBox())!;
@@ -216,9 +218,9 @@ test('the legend keeps its corner, stacked with the search or the zoom buttons t
 	const showAll = page.getByRole('button', { name: 'Show all elements' });
 	for (const position of ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const) {
 		await test.step(`a legend at ${position}`, async () => {
-			await page.goto('/#' + encodeState({ ...state, meta: { ...state.meta, viewer: { legend: position } } }));
+			const viewer = { legend: position, search: 'top-left' as const };
+			await page.goto('/#' + encodeState({ ...state, meta: { ...state.meta, viewer } }));
 			await waitForMapIsReady(page);
-			await expect(legendList).toContainClass(`position-${position}`);
 			const map = (await page.locator('.map').boundingBox())!;
 			const edges = {
 				top: map.y + 44 + 10,
@@ -226,6 +228,22 @@ test('the legend keeps its corner, stacked with the search or the zoom buttons t
 				left: map.x + 48 + 10,
 				right: map.x + map.width - 250 - 10
 			};
+			const middle = map.x + map.width / 2;
+
+			// the editor: the search at the top left, the buttons at the top right, the legend at the
+			// bottom left and the attribution at the bottom right, wherever the shared map has them
+			await expect(legendList).toContainClass('position-bottom-left');
+			expect((await box(legendList)).left).toBeCloseTo(edges.left, -1);
+			expect((await box(legendList)).bottom).toBeCloseTo(edges.bottom, -1);
+			expect((await box(search)).left).toBeCloseTo(edges.left, -1);
+			expect((await box(search)).top).toBeCloseTo(edges.top, -1);
+			expect((await box(zoom)).right).toBeCloseTo(edges.right, -1);
+			expect((await box(zoom)).top).toBeCloseTo(edges.top, -1);
+			expect((await box(attribution)).left).toBeGreaterThan(middle);
+
+			// while the shared map is edited: as its visitors see them
+			await (await menuItem(page, 'Shared map…')).click();
+			await expect(legendList).toContainClass(`position-${position}`);
 			const [vertical, horizontal] = position.split('-') as ['top' | 'bottom', 'left' | 'right'];
 			// at most 10px from the edge of the map between the bars, e.g. of the tools
 			await expect.poll(async () => (await box(legendList))[horizontal]).toBeCloseTo(edges[horizontal], -1);
@@ -243,7 +261,6 @@ test('the legend keeps its corner, stacked with the search or the zoom buttons t
 			}
 			// the zoom buttons stay at the top right; the attribution is in the other bottom corner
 			expect((await box(zoom)).right).toBeCloseTo(edges.right, -1);
-			const middle = map.x + map.width / 2;
 			const a = await box(attribution);
 			if (position === 'bottom-left') expect(a.left).toBeGreaterThan(middle);
 			else expect(a.right).toBeLessThan(middle);
