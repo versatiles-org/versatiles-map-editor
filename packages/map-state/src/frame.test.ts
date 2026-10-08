@@ -12,6 +12,8 @@ import {
 	stateToKML
 } from './index.js';
 import { centerOf } from './bounds.js';
+import { StateReader } from './reader.js';
+import { StateWriter } from './writer.js';
 
 const bounds: Bounds = [13.3, 52.45, 13.5, 52.55];
 const frame: StateFrame = { bounds };
@@ -133,9 +135,43 @@ describe('frame: how the map is turned', () => {
 		expect(decodeState(encodeState({ ...state, frame: { bearing: 359.8 } })).frame).toBeUndefined();
 	});
 
-	it('makes a link three characters longer at most', () => {
+	it('costs a link what it sets: nothing without a setting, little for one, more for all', () => {
 		const plain = encodeState(state);
-		expect(encodeState({ ...state, frame: turned }).length - plain.length).toBeLessThanOrEqual(3);
+		const longer = (frame: StateFrame) => encodeState({ ...state, frame }).length - plain.length;
+		// only an area: 1 bit says that no settings follow, as before the settings were a list
+		expect(longer({ bounds })).toBe(0);
+		expect(longer({ bounds, canRotate: true })).toBeLessThanOrEqual(2);
+		expect(longer({ bounds, bearing: -120 })).toBeLessThanOrEqual(3);
+		// all six settings: a key each, which is the price for settings that can be added later
+		expect(longer(turned)).toBeLessThanOrEqual(8);
+	});
+
+	it('refuses a setting that this version does not know', () => {
+		const writer = new StateWriter();
+		writer.writeRoot({ elements: [], frame: { canRotate: true } });
+		// the key of the setting, 4 bits after the flags "frame", "no area" and "settings"
+		const bits = [...writer.bits];
+		const at = bits.length - 1;
+		const index = bits.findIndex(
+			(_, i) =>
+				i < at - 8 &&
+				bits
+					.slice(i, i + 11)
+					.map(Number)
+					.join('') ===
+					'101' + '0101' + '0000'
+		);
+		expect(index).toBeGreaterThan(-1);
+		// key 5 (rotate) becomes key 15, which no setting has
+		bits.splice(index + 3, 4, true, true, true, true);
+		// root, frame
+		expect(() => new StateReader(bits).readRoot()).toThrow(
+			expect.objectContaining({
+				cause: expect.objectContaining({
+					cause: expect.objectContaining({ message: 'Unknown key of the frame: 15' })
+				})
+			})
+		);
 	});
 
 	it('is kept in GeoJSON, KML and .mapjson files', () => {

@@ -38,6 +38,7 @@ import {
 	CODEC_VERSION,
 	ELEMENT_KEYS,
 	END_KEY,
+	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
 	METADATA_KEYS,
@@ -325,14 +326,33 @@ export class StateReader {
 				if (!bounds) throw new Error('Frame beyond the map');
 				frame.bounds = bounds;
 			}
-			if (this.readBit()) {
-				frame.bearing = this.readInteger(9);
-				frame.pitch = this.readInteger(6);
-				// see `StateWriter.writeFrame`
-				frame.canPan = !this.readBit();
-				frame.canZoom = !this.readBit();
-				frame.canRotate = this.readBit();
-				frame.canTilt = this.readBit();
+			// its settings, if it has any, see `StateWriter.writeFrame`
+			const set = this.readBit();
+			while (set) {
+				const key = this.readInteger(4);
+				if (key === END_KEY) break;
+				switch (key) {
+					case FRAME_KEYS.bearing:
+						frame.bearing = this.readInteger(9);
+						break;
+					case FRAME_KEYS.pitch:
+						frame.pitch = this.readInteger(6);
+						break;
+					case FRAME_KEYS.noPan:
+						frame.canPan = false;
+						break;
+					case FRAME_KEYS.noZoom:
+						frame.canZoom = false;
+						break;
+					case FRAME_KEYS.rotate:
+						frame.canRotate = true;
+						break;
+					case FRAME_KEYS.tilt:
+						frame.canTilt = true;
+						break;
+					default:
+						throw new Error(`Unknown key of the frame: ${key}`);
+				}
 			}
 			// without the parts that have their default value, and with the rotation up to 180°
 			return sanitizeFrame(frame);

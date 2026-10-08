@@ -94,6 +94,12 @@ export const LEGEND_KEYS = { layout: 2, entries: 3, font: 4, bold: 5, italic: 6,
 /** The fields of an entry of the legend, in 4 bits. */
 export const LEGEND_ENTRY_KEYS = { label: 3, type: 5, style: 6, strokeStyle: 7 } as const;
 
+/**
+ * The settings of a frame besides its area, in 4 bits: how the map is turned when it opens, and
+ * what its viewers can do. Each only if it differs from its default; a flag is its key alone.
+ */
+export const FRAME_KEYS = { bearing: 1, pitch: 2, noPan: 3, noZoom: 4, rotate: 5, tilt: 6 } as const;
+
 /** The fields of a popup, in 4 bits. */
 export const POPUP_KEYS = { text: 1 } as const;
 

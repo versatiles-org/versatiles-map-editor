@@ -10,6 +10,7 @@ import {
 	CODEC_VERSION,
 	ELEMENT_KEYS,
 	END_KEY,
+	FRAME_KEYS,
 	LEGEND_ENTRY_KEYS,
 	LEGEND_KEYS,
 	METADATA_KEYS,
@@ -276,9 +277,9 @@ export class StateWriter {
 
 	/**
 	 * The frame, each part only if the map has it. Its area: the south-west corner on the grid, and
-	 * the width and height in steps of the grid. How the map is turned: the rotation (9 bits, whole
-	 * degrees from 0 to 359) and the tilt (6 bits, whole degrees), and 1 bit each whether viewers
-	 * cannot rotate and cannot tilt it.
+	 * the width and height in steps of the grid. Then, if it has any (1 bit), its settings as
+	 * key/value pairs (`FRAME_KEYS`), so settings can be added later: the rotation (9 bits, whole degrees from 0 to 359), the tilt
+	 * (6 bits, whole degrees), and a flag for each thing that viewers can do other than by default.
 	 */
 	writeFrame(frame: StateFrame | undefined) {
 		if (!frame) return this.writeBit(false);
@@ -296,19 +297,25 @@ export class StateWriter {
 			this.writeVarint(Math.max(1, y1 - y0));
 		}
 
-		// how the map is turned, and what its viewers can do: each bit is set for what is not the default
-		const [noPan, noZoom] = [frame.canPan === false, frame.canZoom === false];
-		const [rotate, tilt] = [frame.canRotate === true, frame.canTilt === true];
-		const set = !!(frame.bearing || frame.pitch) || noPan || noZoom || rotate || tilt;
+		// most frames are only an area: 1 bit says that no settings follow
+		const { bounds: _bounds, ...settings } = frame;
+		const set = Object.keys(settings).length > 0;
 		this.writeBit(set);
-		if (set) {
-			this.writeInteger((((frame.bearing ?? 0) % 360) + 360) % 360, 9);
-			this.writeInteger(frame.pitch ?? 0, 6);
-			this.writeBit(noPan);
-			this.writeBit(noZoom);
-			this.writeBit(rotate);
-			this.writeBit(tilt);
+		if (!set) return;
+		const key = (name: keyof typeof FRAME_KEYS) => this.writeInteger(FRAME_KEYS[name], 4);
+		if (frame.bearing) {
+			key('bearing');
+			this.writeInteger(((frame.bearing % 360) + 360) % 360, 9);
 		}
+		if (frame.pitch) {
+			key('pitch');
+			this.writeInteger(frame.pitch, 6);
+		}
+		if (frame.canPan === false) key('noPan');
+		if (frame.canZoom === false) key('noZoom');
+		if (frame.canRotate === true) key('rotate');
+		if (frame.canTilt === true) key('tilt');
+		this.writeInteger(END_KEY, 4);
 	}
 
 	/** The grid of the element coordinates, which the map of the root sets. */

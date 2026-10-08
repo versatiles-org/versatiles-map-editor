@@ -181,7 +181,7 @@ The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`),
 this version is read; a later version can be told apart by it. Then come the palette, the string
 table, the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
-relative, the frame (optional: the visible area of a shared map, and how it is turned), the metadata, 1 bit whether an
+relative, the frame (optional: the visible area of a shared map, and its settings as key/value pairs, so settings can be added: how it is turned, and what its viewers can do), the metadata, 1 bit whether an
 element has a popup (without one, the elements have no bit for it) and the elements.
 To keep hashes short:
 
