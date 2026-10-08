@@ -118,8 +118,15 @@ export abstract class AbstractElement {
 		this.destroy();
 	}
 
-	/** Move the element by `dx` degrees of longitude and `dy` in mercator units (see `movePoint`). */
+	/**
+	 * Move the element by `dx` degrees of longitude and `dy` in mercator units (see `movePoint`). Its
+	 * positions are then off the grid of the coordinates: `snap` puts them back, once when the move
+	 * is done, since rounding each small step of a drag would bend the element.
+	 */
 	abstract moveBy(dx: number, dy: number): void;
+
+	/** Put the positions of the element on the grid of the coordinates, see `snapPoint`. */
+	abstract snap(): void;
 	abstract getFeature(): GeoJSON.Feature;
 	abstract getSelectionNodes(): SelectionNode[];
 	abstract getSelectionNodeUpdater(properties?: Record<string, unknown>): SelectionNodeUpdater | undefined;

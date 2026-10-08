@@ -1,9 +1,24 @@
+import { roundCoordinate, type Bounds } from '@versatiles/map-state';
+
 /** A position as [longitude, latitude], in degrees. */
 export type GeoPoint = [number, number];
 /** A line of positions, e.g. of a line or of the ring of a polygon. */
 export type GeoPath = GeoPoint[];
 
 const EARTH_RADIUS = 6371008.8; // Radius of the Earth in meters
+
+/**
+ * A position on the grid of the coordinates of a map: 0.00001°, about 1 m (`COORDINATE_DIGITS`).
+ * The editor keeps all positions on it, so a map is the same in the editor, in a file and in a link.
+ */
+export function snapPoint([x, y]: GeoPoint): GeoPoint {
+	return [roundCoordinate(x), roundCoordinate(y)];
+}
+
+/** An area whose sides are on the grid of the coordinates, see `snapPoint`. */
+export function snapBounds(bounds: Bounds): Bounds {
+	return bounds.map(roundCoordinate) as Bounds;
+}
 
 /** The northernmost latitude of the Web Mercator projection. */
 export const MAX_LATITUDE = 85.051129;

@@ -1,5 +1,12 @@
-import { sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
-import { STYLE_ROLE_FIELDS, type MapState, type StateElement, type StateLegendEntry } from './types.js';
+import { roundCoordinate, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
+import {
+	STYLE_ROLE_FIELDS,
+	type Bounds,
+	type MapState,
+	type Position,
+	type StateElement,
+	type StateLegendEntry
+} from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
 export const MAPJSON_VERSION = 1;
@@ -21,9 +28,19 @@ export class MapJSONVersionError extends Error {
 	}
 }
 
-/** The map state as the content of a .mapjson file, with the URL of its schema first. */
+/**
+ * The map state as the content of a .mapjson file, with the URL of its schema first. Its
+ * coordinates have `COORDINATE_DIGITS` decimal places.
+ */
 export function stateToMapJSON(state: MapState): MapJSON {
-	return { $schema: MAPJSON_SCHEMA_URL, ...state };
+	const point = ([x, y]: Position): Position => [roundCoordinate(x), roundCoordinate(y)];
+	const elements = state.elements.map((element): StateElement => {
+		if (element.type === 'marker' || element.type === 'circle') return { ...element, point: point(element.point) };
+		return { ...element, points: element.points.map(point) };
+	});
+	const bounds = state.frame?.bounds?.map(roundCoordinate) as Bounds | undefined;
+	const frame = state.frame && bounds ? { frame: { ...state.frame, bounds } } : {};
+	return { $schema: MAPJSON_SCHEMA_URL, ...state, ...frame, elements };
 }
 
 /**

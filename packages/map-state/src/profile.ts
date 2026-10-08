@@ -384,11 +384,28 @@ export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undef
 
 // ----- visible area -----
 
-/** A valid area: four numbers, west < east and south < north, within the latitudes of the map. */
+/**
+ * The decimal places of a coordinate, in degrees: 0.00001° is about 1 m, and the finest step of
+ * the coordinates of a link. A map has no finer coordinates, in none of its forms.
+ */
+export const COORDINATE_DIGITS = 5;
+
+const COORDINATE_STEPS = 10 ** COORDINATE_DIGITS;
+
+/** A longitude or a latitude with `COORDINATE_DIGITS` decimal places. */
+export function roundCoordinate(value: number): number {
+	// + 0: not -0, e.g. of -0.000001
+	return Math.round(value * COORDINATE_STEPS) / COORDINATE_STEPS + 0;
+}
+
+/**
+ * A valid area: four numbers, west < east and south < north, within the latitudes of the map. Its
+ * sides have `COORDINATE_DIGITS` decimal places.
+ */
 export function sanitizeBounds(value: unknown): Bounds | undefined {
 	if (!Array.isArray(value) || value.length !== 4) return undefined;
-	const [west, south, east, north] = value;
-	if (![west, south, east, north].every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined;
+	if (!value.every((n) => typeof n === 'number' && Number.isFinite(n))) return undefined;
+	const [west, south, east, north] = (value as number[]).map(roundCoordinate);
 	if (!(west < east && south < north && south >= -90 && north <= 90 && west >= -180 && east <= 180)) return undefined;
 	return [west, south, east, north];
 }
@@ -630,12 +647,15 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 
 // ----- whole maps, e.g. of a .mapjson file -----
 
-/** A 2D position with finite coordinates (any altitude is dropped), or undefined. */
+/**
+ * A 2D position with finite coordinates (any altitude is dropped), or undefined. Its coordinates
+ * have `COORDINATE_DIGITS` decimal places.
+ */
 export function sanitizePosition(value: unknown): Position | undefined {
 	if (!Array.isArray(value) || value.length < 2) return undefined;
 	const [x, y] = value;
 	if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
-	return [x, y];
+	return [roundCoordinate(x), roundCoordinate(y)];
 }
 
 /** All positions, or undefined if any of them is invalid. */

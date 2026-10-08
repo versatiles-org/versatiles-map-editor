@@ -43,6 +43,46 @@ describe('.mapjson files', () => {
 		}
 	});
 
+	it('have coordinates with 5 decimal places, about 1 m, when written and when read', () => {
+		const state: MapState = {
+			frame: { bounds: [13.3000004, 52.4499996, 13.5, 52.55] },
+			elements: [
+				{ type: 'marker', point: [13.4000049, 52.5000051] },
+				{ type: 'circle', point: [-0.0000004, 0.0000004], radius: 123.456 },
+				{
+					type: 'line',
+					points: [
+						[13.123456789, 52.987654321],
+						[13.2, 52.9]
+					]
+				}
+			]
+		};
+		const rounded: MapState = {
+			frame: { bounds: [13.3, 52.45, 13.5, 52.55] },
+			elements: [
+				{ type: 'marker', point: [13.4, 52.50001] },
+				// not -0; the radius is no coordinate
+				{ type: 'circle', point: [0, 0], radius: 123.456 },
+				{
+					type: 'line',
+					points: [
+						[13.12346, 52.98765],
+						[13.2, 52.9]
+					]
+				}
+			]
+		};
+		const { $schema: _schema, ...written } = stateToMapJSON(state);
+		expect(written).toStrictEqual(rounded);
+		// the state itself is not changed
+		expect(state.elements[0]).toStrictEqual({ type: 'marker', point: [13.4000049, 52.5000051] });
+		expect(stateFromMapJSON(state)).toStrictEqual(rounded);
+		// as text: no long tails, e.g. of 0.1 + 0.2
+		const text = JSON.stringify(stateToMapJSON({ elements: [{ type: 'marker', point: [0.1 + 0.2, 1.1 + 2.2] }] }));
+		expect(text).toContain('[0.3,3.3]');
+	});
+
 	it('keep only what is valid, since they may contain anything', () => {
 		const json = {
 			// the camera of the editor, which is not part of a map

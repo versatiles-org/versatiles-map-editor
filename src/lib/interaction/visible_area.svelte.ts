@@ -1,7 +1,7 @@
 import { sanitizeFrame, type Bounds } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import { HANDLES, handlePosition, type Handle, type Turn } from '../rendering/index.js';
-import { lat2mercator, MAX_LATITUDE, mercator2lat } from '../geometry.js';
+import { lat2mercator, MAX_LATITUDE, mercator2lat, snapBounds } from '../geometry.js';
 import type { FrameTurn } from '../document/index.js';
 import {
 	claimEvent,
@@ -214,7 +214,7 @@ export class VisibleAreaMode {
 
 	/** The frame becomes the part of the map that is shown now; one undo step. */
 	public useCurrentView() {
-		this.#doc.frame = this.#doc.view.viewBounds();
+		this.#doc.frame = snapBounds(this.#doc.view.viewBounds());
 		this.#doc.state.log();
 		this.render();
 	}
@@ -243,14 +243,14 @@ export class VisibleAreaMode {
 			next[index] = grown[index];
 			const [width, height] = this.#flatSize(next);
 			if (width < MIN_SIZE || height < MIN_SIZE) return;
-			this.#doc.frame = next;
+			this.#doc.frame = snapBounds(next);
 			this.#nudged = true;
 			this.render();
 			return;
 		}
 		const { x, y } = this.#doc.view.map.project(handlePosition(area, side));
 		const [dx, dy] = { n: [0, -pixels], e: [pixels, 0], s: [0, pixels], w: [-pixels, 0] }[side];
-		this.#doc.frame = this.#resized(area, side, { x: x + dx, y: y + dy });
+		this.#doc.frame = snapBounds(this.#resized(area, side, { x: x + dx, y: y + dy }));
 		this.#nudged = true;
 		this.render();
 	}
@@ -306,7 +306,7 @@ export class VisibleAreaMode {
 			(e) => {
 				e.preventDefault();
 				moved = true;
-				doc.frame = this.#resized(doc.frame ?? start, handle, e.point);
+				doc.frame = snapBounds(this.#resized(doc.frame ?? start, handle, e.point));
 				this.render();
 			},
 			() => {

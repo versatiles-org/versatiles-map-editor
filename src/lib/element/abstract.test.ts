@@ -24,6 +24,7 @@ class TestElement extends AbstractElement {
 	}
 
 	moveBy() {}
+	snap() {}
 	getSelectionNodeUpdater() {
 		return undefined;
 	}

@@ -1,6 +1,6 @@
 import { AbstractElement } from './abstract.svelte.js';
 import type { ElementOwner, SelectionNode, SelectionNodeUpdater } from './types.js';
-import { getMiddlePoint, movePoint, type GeoPath, type GeoPoint } from '../geometry.js';
+import { getMiddlePoint, movePoint, snapPoint, type GeoPath, type GeoPoint } from '../geometry.js';
 import { curvePoint, smoothPath } from './smooth_path.js';
 import type { StateElement, StateElementLine, StateElementPolygon } from '@versatiles/map-state';
 
@@ -36,12 +36,17 @@ export abstract class AbstractPathElement extends AbstractElement {
 
 	protected setGeometry(state: StateElement) {
 		const { points, smooth } = state as StateElementLine | StateElementPolygon;
-		this.path = points.map((point): GeoPoint => [...point]);
+		this.path = points.map(snapPoint);
 		this.#smooth = smooth === true;
 	}
 
 	moveBy(dx: number, dy: number) {
 		this.path = this.path.map((point) => movePoint(point, dx, dy));
+		this.changed();
+	}
+
+	snap() {
+		this.path = this.path.map(snapPoint);
 		this.changed();
 	}
 
@@ -76,14 +81,13 @@ export abstract class AbstractPathElement extends AbstractElement {
 			const i = Math.floor(index);
 			vertex = i + 1;
 			// where its handle was, see `getSelectionNodes`
-			point = this.segmentMiddle(i);
+			point = snapPoint(this.segmentMiddle(i));
 			this.path.splice(vertex, 0, point);
 		}
 
 		return {
 			update: (lng: number, lat: number) => {
-				point[0] = lng;
-				point[1] = lat;
+				[point[0], point[1]] = snapPoint([lng, lat]);
 				this.changed();
 			},
 			vertex

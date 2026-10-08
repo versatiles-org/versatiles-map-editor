@@ -1,4 +1,4 @@
-import { type GeoPath, pathLength } from '../geometry.js';
+import { type GeoPath, pathLength, snapPoint } from '../geometry.js';
 import { LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.svelte.js';
 import type { StateElementLine } from '@versatiles/map-state';
@@ -9,7 +9,7 @@ export class LineElement extends AbstractPathElement {
 
 	constructor(doc: ElementOwner, line: GeoPath) {
 		super(doc, true);
-		this.path = line;
+		this.path = line.map(snapPoint);
 
 		this.layer = new LineStyle(() => this.changed(), { canHide: false, arrows: true });
 

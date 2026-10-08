@@ -2,7 +2,7 @@ import { AbstractElement } from './abstract.svelte.js';
 import type { ElementOwner, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
 import { SymbolStyle } from '../style/index.js';
 import type { StateElement, StateElementMarker } from '@versatiles/map-state';
-import { type GeoPoint, movePoint } from '../geometry.js';
+import { type GeoPoint, movePoint, snapPoint } from '../geometry.js';
 
 /**
  * The symbol of the markers that the editor creates: a pin. A marker without a symbol, e.g. in an
@@ -22,7 +22,7 @@ export class MarkerElement extends AbstractElement {
 
 	constructor(doc: ElementOwner, point: GeoPoint) {
 		super(doc);
-		this.point = point;
+		this.point = snapPoint(point);
 
 		this.layer = new SymbolStyle(() => this.changed());
 		this.changed();
@@ -54,19 +54,23 @@ export class MarkerElement extends AbstractElement {
 	getSelectionNodeUpdater(): SelectionNodeUpdater | undefined {
 		return {
 			update: (lng, lat) => {
-				this.point[0] = lng;
-				this.point[1] = lat;
+				this.point = snapPoint([lng, lat]);
 				this.changed();
 			}
 		};
 	}
 
 	protected setGeometry(state: StateElement) {
-		this.point = [...(state as StateElementMarker).point];
+		this.point = snapPoint((state as StateElementMarker).point);
 	}
 
 	moveBy(dx: number, dy: number) {
 		this.point = movePoint(this.point, dx, dy);
+		this.changed();
+	}
+
+	snap() {
+		this.point = snapPoint(this.point);
 		this.changed();
 	}
 

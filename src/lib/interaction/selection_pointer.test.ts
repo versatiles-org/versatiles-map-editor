@@ -311,6 +311,7 @@ describe('SelectionPointer', () => {
 				({
 					select: vi.fn(),
 					moveBy: vi.fn(),
+					snap: vi.fn(),
 					getSelectionNodes: vi.fn(() => [{ index: 0, coordinates: [0, 0] }])
 				}) as unknown as Mocked<AbstractElement>;
 			elements = [createElement(), createElement(), createElement()];
@@ -360,6 +361,10 @@ describe('SelectionPointer', () => {
 			expect(elements[0].moveBy).toHaveBeenCalledWith(2, 0);
 			expect(elements[1].moveBy).toHaveBeenCalledWith(2, 0);
 			expect(elements[2].moveBy).not.toHaveBeenCalled();
+			// back on the grid of the coordinates, once, when the drag ends
+			expect(elements[0].snap).toHaveBeenCalledTimes(1);
+			expect(elements[1].snap).toHaveBeenCalledTimes(1);
+			expect(elements[2].snap).not.toHaveBeenCalled();
 			expect(mockState.log).toHaveBeenCalled();
 			expect(selected()).toStrictEqual([elements[0], elements[1]]);
 		});

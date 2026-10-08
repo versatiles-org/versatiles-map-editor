@@ -1,5 +1,5 @@
 import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
-import { type GeoPoint, circle, circleArea, distance, movePoint } from '../geometry.js';
+import { type GeoPoint, circle, circleArea, distance, movePoint, snapPoint } from '../geometry.js';
 import { FillStyle, LineStyle } from '../style/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
 import { AbstractElement } from './abstract.svelte.js';
@@ -12,7 +12,7 @@ export class CircleElement extends AbstractElement {
 
 	constructor(doc: ElementOwner, point: GeoPoint, radius: number) {
 		super(doc);
-		this.point = point;
+		this.point = snapPoint(point);
 		this.radius = radius;
 
 		this.fillLayer = new FillStyle(() => this.changed());
@@ -49,8 +49,7 @@ export class CircleElement extends AbstractElement {
 		if (properties.index == 0) {
 			return {
 				update: (lng: number, lat: number) => {
-					this.point[0] = lng;
-					this.point[1] = lat;
+					this.point = snapPoint([lng, lat]);
 					this.changed();
 				}
 			};
@@ -88,8 +87,13 @@ export class CircleElement extends AbstractElement {
 
 	protected setGeometry(state: StateElement) {
 		const { point, radius } = state as StateElementCircle;
-		this.point = [...point];
+		this.point = snapPoint(point);
 		this.radius = radius;
+	}
+
+	snap() {
+		this.point = snapPoint(this.point);
+		this.changed();
 	}
 
 	moveBy(dx: number, dy: number) {

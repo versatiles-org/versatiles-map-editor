@@ -112,6 +112,9 @@ export class SelectionPointer {
 			() => {
 				// A click (or tap) on a selected element selects only this element
 				if (!moved) this.selection.selectElement(element);
+				// back on the grid of the coordinates, once, see `moveBy`
+				else targets?.forEach((target) => target.snap());
+				if (moved) this.selection.updateSelectionNodes();
 				this.doc.state.log();
 			}
 		);

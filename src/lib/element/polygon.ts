@@ -1,4 +1,4 @@
-import { type GeoPath, polygonArea } from '../geometry.js';
+import { type GeoPath, polygonArea, snapPoint } from '../geometry.js';
 import { FillStyle, LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.svelte.js';
 import type { StateElementPolygon } from '@versatiles/map-state';
@@ -10,7 +10,7 @@ export class PolygonElement extends AbstractPathElement {
 
 	constructor(doc: ElementOwner, polygon: GeoPath) {
 		super(doc, false);
-		this.path = polygon;
+		this.path = polygon.map(snapPoint);
 
 		this.fillLayer = new FillStyle(() => this.changed());
 

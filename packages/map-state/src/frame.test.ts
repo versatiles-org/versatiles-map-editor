@@ -42,10 +42,17 @@ describe('frame', () => {
 	});
 
 	it('is never empty, and an invalid one is left out', () => {
-		const tiny = decodeState(encodeState({ elements: [], frame: { bounds: [13.4, 52.5, 13.400001, 52.500001] } }));
+		// one step of the coordinates wide and high, in a link with coarser steps
+		const tiny = decodeState(
+			encodeState({ elements: [], frame: { bounds: [13.4, 52.5, 13.40001, 52.50001] } }, { resolution: 100 })
+		);
 		const area = tiny.frame!.bounds!;
 		expect(area[2]).toBeGreaterThan(area[0]);
 		expect(area[3]).toBeGreaterThan(area[1]);
+		// less than a step of the coordinates is no area
+		expect(
+			decodeState(encodeState({ elements: [], frame: { bounds: [13.4, 52.5, 13.400001, 52.500001] } })).frame
+		).toBeUndefined();
 		expect(
 			decodeState(encodeState({ elements: [], frame: { bounds: [13.5, 52.5, 13.4, 52.6] } })).frame
 		).toBeUndefined();

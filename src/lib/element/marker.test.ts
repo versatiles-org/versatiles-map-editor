@@ -73,6 +73,18 @@ describe('MarkerElement', () => {
 		}
 	});
 
+	it('keeps its point on the grid of the coordinates: 5 decimal places, about 1 m', () => {
+		expect(new MarkerElement(mockDoc, [13.4000049, 52.5000051]).point).toStrictEqual([13.4, 52.50001]);
+		// a dragged node
+		element.getSelectionNodeUpdater()?.update(13.123456789, 52.987654321);
+		expect(element.point).toStrictEqual([13.12346, 52.98765]);
+		// a moved marker, once the move is done
+		element.moveBy(0.0000004, 0);
+		expect(element.point[0]).not.toBe(13.12346);
+		element.snap();
+		expect(element.point).toStrictEqual([13.12346, 52.98765]);
+	});
+
 	it('should not delete its only node', () => {
 		expect(element.canDeleteNode(0)).toBe(false);
 		expect(element.deleteNode(0)).toBe(false);

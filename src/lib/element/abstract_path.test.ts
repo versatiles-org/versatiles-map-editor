@@ -3,7 +3,7 @@ import { AbstractPathElement } from './abstract_path.svelte.js';
 import { MockElementOwner } from './__mocks__/owner.js';
 import type { ElementOwner, SelectionNode } from './types.js';
 import type { StateElement } from '@versatiles/map-state';
-import { getMiddlePoint, lat2mercator, type GeoPoint } from '../geometry.js';
+import { getMiddlePoint, lat2mercator, snapPoint, type GeoPoint } from '../geometry.js';
 import { curvePoint } from './smooth_path.js';
 
 class TestPathElement extends AbstractPathElement {
@@ -92,7 +92,8 @@ describe('AbstractPathElement', () => {
 		expect(element.getSelectionNodeUpdater({ index: 1 })?.vertex).toBe(1);
 		// the midpoint of the closing edge becomes the last vertex
 		expect(element.getSelectionNodeUpdater({ index: 2.5 })?.vertex).toBe(3);
-		expect(element.path).toStrictEqual([[0, 0], [10, 0], [10, 10], getMiddlePoint([10, 10], [0, 0])]);
+		// on the grid of the coordinates
+		expect(element.path).toStrictEqual([[0, 0], [10, 0], [10, 10], snapPoint(getMiddlePoint([10, 10], [0, 0]))]);
 	});
 
 	it('has the handles of a smooth element on its curve, and adds the node there', () => {
@@ -110,7 +111,7 @@ describe('AbstractPathElement', () => {
 		expect(handle.coordinates).not.toStrictEqual(getMiddlePoint(path[0], path[1]));
 
 		expect(element.getSelectionNodeUpdater({ index: 0.5 })?.vertex).toBe(1);
-		expect(element.path[1]).toStrictEqual(handle.coordinates);
+		expect(element.path[1]).toStrictEqual(snapPoint(handle.coordinates));
 	});
 
 	it('should delete a vertex', () => {
