@@ -29,6 +29,8 @@
 		front: ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14'],
 		// a handle to drag, e.g. a row of a list
 		grip: ['M7 9h10M7 15h10'],
+		// a house: back to how the map opened
+		home: ['M4 11l8-7 8 7', 'M6.5 9.5V19h11V9.5', 'M10 19v-5h4v5'],
 		// a letter "A": a marker that is only a label, without symbol
 		label: ['M6 19l6-14 6 14', 'M8.5 14h7'],
 		layers: ['M12 4.5l9 5-9 5-9-5z', 'M3 14.5l9 5 9-5'],

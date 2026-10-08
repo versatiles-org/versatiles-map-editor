@@ -283,13 +283,23 @@ describe('MapDocument', () => {
 	it('keeps the settings of the viewer without their defaults, and gives them with defaults as controls', async () => {
 		await mapDocument.loadState({
 			elements: [],
-			meta: { viewer: { search: 'top-right', navigation: 'top-right', legend: 'none' } }
+			meta: { viewer: { search: 'top-right', navigation: 'top-right', legend: 'none', reset: true } }
 		});
-		expect(mapDocument.viewer).toStrictEqual({ search: 'top-right', legend: 'none' });
-		expect(mapDocument.controls).toStrictEqual({ search: 'top-right', navigation: 'top-right', legend: 'none' });
-		mapDocument.viewer = { search: 'none' };
+		expect(mapDocument.viewer).toStrictEqual({ search: 'top-right', legend: 'none', reset: true });
+		expect(mapDocument.controls).toStrictEqual({
+			search: 'top-right',
+			navigation: 'top-right',
+			legend: 'none',
+			reset: true
+		});
+		mapDocument.viewer = { search: 'none', reset: false };
 		expect(mapDocument.viewer).toBeUndefined();
-		expect(mapDocument.controls).toStrictEqual({ search: 'none', navigation: 'top-right', legend: 'bottom-left' });
+		expect(mapDocument.controls).toStrictEqual({
+			search: 'none',
+			navigation: 'top-right',
+			legend: 'bottom-left',
+			reset: false
+		});
 	});
 
 	it('should identify as non-interactive', () => {

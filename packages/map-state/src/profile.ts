@@ -661,13 +661,19 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 // ----- viewer -----
 
 /**
- * What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left.
+ * What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the
+ * legend at the bottom left, no other buttons.
  * @category Viewer
  */
-export const VIEWER_DEFAULTS = { search: 'none', navigation: 'top-right', legend: 'bottom-left' } as const;
+export const VIEWER_DEFAULTS = {
+	search: 'none',
+	navigation: 'top-right',
+	legend: 'bottom-left',
+	reset: false
+} as const;
 
 /**
- * The choices of each control of the viewer: "none", or one of its positions.
+ * The choices of each control of the viewer that has a position: "none", or one of its positions.
  * @category Viewer
  * @internal
  */
@@ -694,11 +700,12 @@ export function removeViewerDefaults(viewer: StateViewer | undefined): StateView
 /** Valid settings of the viewer, without defaults, or undefined. Invalid values are left out. */
 export function sanitizeViewer(value: unknown): StateViewer | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const viewer: Record<string, string> = {};
+	const viewer: Record<string, string | boolean> = {};
 	for (const [key, choices] of Object.entries(VIEWER_CHOICES)) {
 		const choice = (value as Record<string, unknown>)[key];
 		if ((choices as readonly unknown[]).includes(choice)) viewer[key] = choice as string;
 	}
+	if ((value as Record<string, unknown>).reset === true) viewer.reset = true;
 	return removeViewerDefaults(viewer as StateViewer);
 }
 

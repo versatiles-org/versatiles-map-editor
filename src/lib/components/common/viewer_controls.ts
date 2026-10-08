@@ -7,10 +7,13 @@ export interface PlaceOption<T> {
 	cell: [number, number];
 }
 
-type Places<K extends keyof StateViewer> = Exclude<NonNullable<StateViewer[K]>, 'none'>;
+/** The controls of the viewer that have a place on the map; its other settings are buttons with the zoom buttons. */
+export type PlacedControl = 'search' | 'navigation' | 'legend';
+
+type Places<K extends PlacedControl> = Exclude<NonNullable<StateViewer[K]>, 'none'>;
 
 /** The places of each control of the viewer, as they are on the map. */
-export const PLACES: { [K in keyof StateViewer]-?: PlaceOption<Places<K>>[] } = {
+export const PLACES: { [K in PlacedControl]: PlaceOption<Places<K>>[] } = {
 	search: [
 		{ value: 'top-left', label: 'Top left', cell: [1, 1] },
 		{ value: 'top-right', label: 'Top right', cell: [1, 2] }
@@ -35,7 +38,7 @@ export const PLACES: { [K in keyof StateViewer]-?: PlaceOption<Places<K>>[] } = 
 };
 
 /** The place a control gets when it is shown again: its default, or the first place for the search. */
-export function defaultPlace<K extends keyof StateViewer>(key: K): Places<K> {
+export function defaultPlace<K extends PlacedControl>(key: K): Places<K> {
 	const place = VIEWER_DEFAULTS[key];
 	return (place === 'none' ? PLACES[key][0].value : place) as Places<K>;
 }

@@ -15,7 +15,8 @@ import {
 	LEGEND_KEYS,
 	METADATA_KEYS,
 	ORIGIN_SCALE,
-	POPUP_KEYS
+	POPUP_KEYS,
+	VIEWER_KEYS
 } from './constants.js';
 import { BUILT_IN_COLOR_BITS, BUILT_IN_COLORS, rgbHex } from './color_schemes.js';
 import { boundsOf, centerOf } from './bounds.js';
@@ -529,15 +530,16 @@ export class StateWriter {
 
 	/**
 	 * The choices that differ from the defaults, as key/value pairs like a style: the key of the
-	 * control, and the index of its choice in `VIEWER_CHOICES`.
+	 * control, and the index of its choice in `VIEWER_CHOICES`; a button is its key alone (`VIEWER_KEYS`).
 	 */
 	writeViewer(viewer: StateViewer) {
-		Object.entries(VIEWER_CHOICES).forEach(([name, choices], i) => {
-			const choice = viewer[name as keyof StateViewer];
-			if (choice === undefined) return;
-			this.writeInteger(i + 1, 4);
+		for (const [name, choices] of Object.entries(VIEWER_CHOICES)) {
+			const choice = viewer[name as keyof typeof VIEWER_CHOICES];
+			if (choice === undefined) continue;
+			this.writeInteger(VIEWER_KEYS[name as keyof typeof VIEWER_CHOICES], 4);
 			this.writeVarint((choices as readonly string[]).indexOf(choice));
-		});
+		}
+		if (viewer.reset) this.writeInteger(VIEWER_KEYS.reset, 4);
 		this.writeInteger(END_KEY, 4);
 	}
 

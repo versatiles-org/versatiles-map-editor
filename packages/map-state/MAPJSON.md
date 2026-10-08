@@ -285,14 +285,15 @@ Where shared maps show the legend is a setting of the viewer.
 
 ### Viewer
 
-What shared and embedded maps show over the map, each at a place or `"none"`. Controls in the
-same corner are stacked.
+What shared and embedded maps show over the map: a control at a place or `"none"`, a button with
+the zoom buttons or not. Controls in the same corner are stacked.
 
-| Field        | Places                                                                                                   | Default         |
+| Field        | Values                                                                                                   | Default         |
 | ------------ | -------------------------------------------------------------------------------------------------------- | --------------- |
 | `search`     | the address search: `"top-left"`, `"top-right"`                                                          | `"none"`        |
 | `navigation` | the zoom buttons: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                         | `"top-right"`   |
 | `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"` | `"bottom-left"` |
+| `reset`      | a button that shows the map as it opened, with the zoom buttons or where they would be: `true`           | `false`         |
 
 ## Checking a file
 

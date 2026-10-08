@@ -43,7 +43,8 @@ import {
 	LEGEND_KEYS,
 	METADATA_KEYS,
 	ORIGIN_SCALE,
-	POPUP_KEYS
+	POPUP_KEYS,
+	VIEWER_KEYS
 } from './constants.js';
 import {
 	hasArrow,
@@ -610,15 +611,19 @@ export class StateReader {
 		}
 	}
 
-	/** The settings of the viewer: a choice per control, by its index in `VIEWER_CHOICES`. */
+	/** The settings of the viewer, see `StateWriter.writeViewer`. */
 	readViewer(): StateViewer {
 		try {
-			const viewer: Record<string, string> = {};
-			const keys = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
+			const viewer: Record<string, string | boolean> = {};
+			const controls = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
 			while (true) {
 				const key = this.readInteger(4);
 				if (key === END_KEY) return viewer as StateViewer;
-				const name = keys[key - 1];
+				if (key === VIEWER_KEYS.reset) {
+					viewer.reset = true;
+					continue;
+				}
+				const name = controls.find((control) => VIEWER_KEYS[control] === key);
 				if (!name) throw new Error(`Invalid viewer key: ${key}`);
 				const choice = VIEWER_CHOICES[name][this.readVarint()];
 				if (!choice) throw new Error(`Invalid viewer ${name}`);

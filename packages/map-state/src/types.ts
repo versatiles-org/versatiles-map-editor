@@ -472,8 +472,8 @@ export const SEARCH_POSITIONS = ['top-left', 'top-right'] as const;
 export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
 
 /**
- * What the viewer shows over the map, and where: each at a position, or "none". Controls in the
- * same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
+ * What the viewer shows over the map, and where: a control at a position, or "none"; a button
+ * (e.g. `reset`) with the buttons for zooming, or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
  * @category Viewer
  */
 export interface StateViewer {
@@ -483,6 +483,11 @@ export interface StateViewer {
 	navigation?: (typeof NAVIGATION_POSITIONS)[number] | 'none';
 	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
+	/**
+	 * A button that shows the map as it opened: its area, its rotation and its tilt. With the
+	 * buttons for zooming, or where they would be. Default: false.
+	 */
+	reset?: boolean;
 }
 
 /** @category Legend */

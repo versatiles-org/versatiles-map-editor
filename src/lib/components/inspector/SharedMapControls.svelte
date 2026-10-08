@@ -2,14 +2,14 @@
 	import type { StateViewer } from '@versatiles/map-state';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { Checkbox, ChoiceGroup, Hint } from '#lib/components/ui/index.js';
-	import { defaultPlace, PLACES } from '#lib/components/common/index.js';
+	import { defaultPlace, PLACES, type PlacedControl } from '#lib/components/common/index.js';
 
 	/** What visitors see over the shared map, and where. */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
 
-	const CONTROLS: { key: keyof StateViewer; label: string; hint: string; layout: 'segmented' | 'grid' }[] = [
+	const CONTROLS: { key: PlacedControl; label: string; hint: string; layout: 'segmented' | 'grid' }[] = [
 		{
 			key: 'search',
 			label: 'Address search',
@@ -21,8 +21,14 @@
 	];
 
 	/** Show a control of the viewer at a place, or hide it ("none"); one undo step. */
-	function setControl<K extends keyof StateViewer>(key: K, place: NonNullable<StateViewer[K]>) {
+	function setControl<K extends PlacedControl>(key: K, place: NonNullable<StateViewer[K]>) {
 		doc.viewer = { ...doc.viewer, [key]: place };
+		doc.state.log();
+	}
+
+	/** Show a button of the viewer with its zoom buttons, or not; one undo step. */
+	function setButton(key: 'reset', shown: boolean) {
+		doc.viewer = { ...doc.viewer, [key]: shown };
 		doc.state.log();
 	}
 </script>
@@ -49,6 +55,15 @@
 			{/if}
 		</div>
 		<Hint>{hint}</Hint>
+		{#if key === 'navigation'}
+			<!-- the buttons that join the zoom buttons, or stand where they would be -->
+			<div class="control">
+				<Checkbox checked={doc.controls.reset} onchange={(e) => setButton('reset', e.currentTarget.checked)}>
+					Reset button
+				</Checkbox>
+			</div>
+			<Hint>Shows the map as it opened, after a visitor moved or turned it.</Hint>
+		{/if}
 	{/if}
 {/each}
 

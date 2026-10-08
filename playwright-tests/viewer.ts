@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { decodeState, encodeState, type MapState, type StateElementMarker } from '../packages/map-state/src/index.js';
 import {
 	boxesOverlap,
+	menuItem,
 	project,
 	storedState,
 	waitForMapIsIdle,
@@ -792,4 +793,81 @@ test('the share dialog warns about a link that is too long to work everywhere', 
 	await expect(warning).toContainText('Shorter labels and popups make it shorter.');
 	const link = await page.getByLabel('Link', { exact: true }).inputValue();
 	expect(link.length).toBeGreaterThan(2000);
+});
+
+test('a shared map can have a button that shows it as it opened', async ({ page }) => {
+	const frame = {
+		bounds: [13.3, 52.45, 13.5, 52.55] as [number, number, number, number],
+		bearing: 30,
+		canRotate: true
+	};
+	const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+	const reset = page.getByRole('button', { name: 'Reset view' });
+	const camera = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			const { lng, lat } = map.getCenter();
+			return [lng, lat, map.getZoom(), map.getBearing(), map.getPitch()].map((n) => Math.round(n * 1000) / 1000);
+		});
+	await page.setViewportSize({ width: 800, height: 600 });
+
+	// not without the setting
+	await page.goto('/view/#' + encodeState({ frame, elements }));
+	await waitForMapIsReady(page);
+	await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
+	await expect(reset).toHaveCount(0);
+
+	// with it: below the zoom buttons; back to the area, the rotation and the tilt
+	await page.goto('about:blank');
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true } }, elements }));
+	await waitForMapIsReady(page);
+	const start = await camera();
+	const zoom = (await page.getByRole('button', { name: 'Zoom out' }).boundingBox())!;
+	const button = (await reset.boundingBox())!;
+	expect(button.y).toBeGreaterThan(zoom.y + zoom.height);
+	expect(button.x).toBeCloseTo(zoom.x, 0);
+	await page.mouse.move(400, 300);
+	await page.mouse.down();
+	await page.mouse.move(250, 380, { steps: 5 });
+	await page.mouse.up();
+	await page.mouse.wheel(0, -400);
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ bearing: -80 }));
+	await waitForMapIsIdle(page);
+	expect(await camera()).not.toStrictEqual(start);
+	await reset.click();
+	await expect.poll(camera).toStrictEqual(start);
+	// as when it opened, the map shows its area again in a window of another size
+	await page.setViewportSize({ width: 500, height: 700 });
+	await waitForMapIsIdle(page);
+	expect((await camera())[2]).not.toBe(start[2]);
+
+	// without zoom buttons, the button is where they would be
+	await page.goto('about:blank');
+	await page.setViewportSize({ width: 800, height: 600 });
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, navigation: 'none' } }, elements }));
+	await waitForMapIsReady(page);
+	await expect(page.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
+	const alone = (await reset.boundingBox())!;
+	expect(alone.x).toBeCloseTo(button.x, 0);
+	expect(alone.y).toBeLessThan(button.y);
+});
+
+test('the reset button of a shared map is switched on in the panel, where the map shows it', async ({ page }) => {
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5] }] }));
+	await waitForMapIsReady(page);
+	const reset = page.getByRole('button', { name: 'Reset view' });
+	const option = sidebar(page).getByRole('checkbox', { name: 'Reset button' });
+	// the editor has none of its own
+	await expect(reset).toHaveCount(0);
+	await (await menuItem(page, 'Shared map…')).click();
+	await expect(option).not.toBeChecked();
+	await expect(reset).toHaveCount(0);
+	await option.check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ reset: true });
+	await expect(reset).toBeVisible();
+	// one undo step, and not outside the mode
+	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
+	await expect(reset).toHaveCount(0);
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toBeUndefined();
 });

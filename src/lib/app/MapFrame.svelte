@@ -164,6 +164,15 @@
 		return position === 'none' ? undefined : position;
 	});
 
+	// The other buttons of the viewer, e.g. to reset the view: with the buttons for zooming, or
+	// where they would be. The editor shows them only while the shared map is edited.
+	const showsReset = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.reset);
+	const buttonsCorner: Corner | undefined = $derived.by(() => {
+		if (!mapDocument || !showsReset) return undefined;
+		const position = mapDocument.controls.navigation;
+		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
+	});
+
 	// The editor's own button that shows all elements, with the buttons for zooming; while the
 	// shared map is edited without them, where they would be.
 	const fitCorner: Corner | undefined = $derived.by(() => {
@@ -417,6 +426,25 @@
 			</div>
 		</div>
 	{/if}
+	{#if mapDocument && buttonsCorner}
+		{@const doc = mapDocument}
+		<div class="control-slot">
+			<div
+				class="maplibregl-ctrl-group map-button"
+				use:cornerControl={{ map: doc.view.map, corner: buttonsCorner, order: CONTROL_ORDER.buttons }}
+			>
+				<!-- as the map opened; in the viewer it also stays so when its size changes -->
+				<button
+					type="button"
+					aria-label="Reset view"
+					title="Show the map as it opened"
+					onclick={() => doc.showStart({ keep: !editor })}
+				>
+					<Icon name="home" />
+				</button>
+			</div>
+		</div>
+	{/if}
 	{#if mapDocument?.isInteractive() && fitCorner}
 		{@const doc = mapDocument}
 		<div class="control-slot">
@@ -604,7 +632,8 @@
 	}
 
 	/* a button of the editor's own with those of MapLibre, in the colors of the editor's theme */
-	.map-fit button {
+	.map-fit button,
+	.map-button button {
 		display: flex;
 		/* its icon on whole pixels: the button is 29 pixels wide and high, the icon 18 */
 		padding: 5px 6px 6px 5px;

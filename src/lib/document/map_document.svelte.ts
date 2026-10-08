@@ -243,6 +243,17 @@ export class MapDocument {
 		elements.forEach((element) => element.destroy());
 	}
 
+	/**
+	 * Show the map as a shared map opens: its frame, else its elements, turned as the frame says,
+	 * e.g. for the reset button of the viewer. `keep`: as when it opened, the area is shown again
+	 * when the size of the map changes, until it is moved.
+	 */
+	public showStart({ keep = false }: { keep?: boolean } = {}) {
+		const turn = { bearing: this.frameTurn?.bearing, pitch: this.frameTurn?.pitch };
+		const elements = this.elements.map((element) => element.getState());
+		this.view.fitArea(this.frame, elements, { keep, turn });
+	}
+
 	/** The bounds of all elements, or undefined without elements. */
 	public getBounds(): Bounds | undefined {
 		return boundsOf(this.elements.map((element) => element.getState()));

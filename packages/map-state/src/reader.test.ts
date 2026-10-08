@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { StateReader } from './reader.js';
 import type { StateLegend, StateMetadata, MapState, StateStyle, StateViewer } from './types.js';
 import { StateWriter } from './writer.js';
-import { decodeState, encodeState } from './index.js';
+import { decodeState, encodeState, stateFromMapJSON } from './index.js';
 
 describe('StateReader', () => {
 	const path: [number, number][] = [
@@ -726,11 +726,28 @@ describe('viewer', () => {
 	});
 
 	it('does not store the defaults, like missing metadata', () => {
-		const defaults: StateViewer = { search: 'none', navigation: 'top-right', legend: 'bottom-left' };
+		const defaults: StateViewer = { search: 'none', navigation: 'top-right', legend: 'bottom-left', reset: false };
 		expect(encodeState({ meta: { viewer: defaults }, elements: [] })).toBe(encodeState({ elements: [] }));
 		expect(
 			decodeState(encodeState({ meta: { viewer: { search: 'top-left', legend: 'bottom-left' } }, elements: [] }))
 		).toStrictEqual({ meta: { viewer: { search: 'top-left' } }, elements: [] });
+	});
+
+	it('keeps a button of the viewer as its key alone, e.g. the one that resets the view', () => {
+		const state = (viewer: StateViewer) => ({ meta: { viewer }, elements: [] });
+		expect(decodeState(encodeState(state({ reset: true })))).toStrictEqual(state({ reset: true }));
+		expect(decodeState(encodeState(state({ navigation: 'none', reset: true })))).toStrictEqual(
+			state({ navigation: 'none', reset: true })
+		);
+		// 4 bits more than another setting of the viewer
+		const bits = (viewer: StateViewer) => {
+			const writer = new StateWriter();
+			writer.writeRoot(state(viewer));
+			return writer.bits.length;
+		};
+		expect(bits({ navigation: 'none', reset: true }) - bits({ navigation: 'none' })).toBe(4);
+		// a file may say anything: only `true` switches it on
+		expect(stateFromMapJSON(state({ reset: 'yes' } as unknown as StateViewer)).meta).toBeUndefined();
 	});
 });
 

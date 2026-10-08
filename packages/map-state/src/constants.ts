@@ -100,6 +100,12 @@ export const LEGEND_ENTRY_KEYS = { label: 3, type: 5, style: 6, strokeStyle: 7 }
  */
 export const FRAME_KEYS = { bearing: 1, pitch: 2, noPan: 3, noZoom: 4, rotate: 5, tilt: 6 } as const;
 
+/**
+ * The settings of the viewer, in 4 bits: of a control the index of its choice follows (see
+ * `VIEWER_CHOICES`), a button is its key alone.
+ */
+export const VIEWER_KEYS = { search: 1, navigation: 2, legend: 3, reset: 4 } as const;
+
 /** The fields of a popup, in 4 bits. */
 export const POPUP_KEYS = { text: 1 } as const;
 
