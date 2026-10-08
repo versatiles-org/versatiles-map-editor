@@ -311,6 +311,13 @@ test('the visible area is edited in a mode of its own, from the menu or the Map 
 	await (await menuItem(page, 'Shared map…')).click();
 	await page.getByRole('button', { name: 'Marker', exact: true }).click();
 	await expect(bar).toBeHidden();
+
+	// and so does a new map, which starts with the panel of the map
+	await (await menuItem(page, 'Shared map…')).click();
+	await expect(bar).toBeVisible();
+	await (await menuItem(page, 'New map')).click();
+	await expect(bar).toBeHidden();
+	await expect(sidebar(page).getByRole('heading', { level: 2 })).toHaveText('Map');
 });
 
 test('the rotation and the tilt of a shared map are set in the visible area mode, with a preview', async ({ page }) => {

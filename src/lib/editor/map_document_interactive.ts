@@ -47,8 +47,13 @@ export class MapDocumentInteractive extends MapDocument {
 		this.state = new StateManager(this);
 	}
 
-	/** Load a map, e.g. from a file, as a new start of the history. */
+	/**
+	 * Load a map, e.g. from a file, as a new start of the history. Its author starts with the map as
+	 * a whole: nothing is selected, and the shared map of the map before is not edited any more.
+	 */
 	public async loadState(state: MapState, options: { keepView?: boolean } = {}) {
+		// without going back to where the mode was opened from, e.g. the share dialog
+		this.visibleArea.close({ returning: false });
 		await super.loadState(state, options);
 		if (state) this.state.history.reset(state);
 	}

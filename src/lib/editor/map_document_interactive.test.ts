@@ -635,6 +635,16 @@ describe('MapDocument', () => {
 			expect(doc.frameTurn).toStrictEqual({ bearing: -90 });
 		});
 
+		it('is not edited any more when another map is opened, and does not return to where it was opened from', async () => {
+			await doc.loadState({ frame: { bounds: frame }, elements });
+			const onDone = vi.fn();
+			doc.visibleArea.open({ onDone });
+			expect(doc.visibleArea.active).toBe(true);
+			await doc.loadState({ elements: [] });
+			expect(doc.visibleArea.active).toBe(false);
+			expect(onDone).not.toHaveBeenCalled();
+		});
+
 		it('is turned on its own: the editor keeps how the author turned its map, if it can be turned', async () => {
 			const view = { center: [13.4, 52.5] as [number, number], radius: 1000 };
 			await doc.loadState({
