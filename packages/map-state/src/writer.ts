@@ -1,5 +1,7 @@
 import { parseColor } from './color.js';
 import {
+	COLOR_INDEX_K,
+	STRING_INDEX_K,
 	BACKGROUND_KEYS,
 	BACKGROUND_LANGUAGE_TEXT,
 	BACKGROUND_STEPS,
@@ -700,7 +702,7 @@ export class StateWriter {
 	writeColorValue(color: string) {
 		const index = this.palette.get(colorKey(color));
 		if (index === undefined) throw new Error(`Color not in the palette: ${color}`);
-		this.writeVarint(index);
+		this.writeExpGolomb(index, COLOR_INDEX_K);
 	}
 
 	/**
@@ -742,7 +744,7 @@ export class StateWriter {
 			this.writeBit(true);
 		} else {
 			this.writeBit(false);
-			this.writeVarint(index);
+			this.writeExpGolomb(index, STRING_INDEX_K);
 		}
 		this.nextString[section] = Math.max(this.nextString[section], index + 1);
 	}

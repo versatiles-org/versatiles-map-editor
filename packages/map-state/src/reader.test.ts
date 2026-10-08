@@ -300,7 +300,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgAGzhUwlDgQAP1y8AASgmf0AcUISxEIABN5XgACH3j4AMNgAAMNgAbQAH6BEAAJQQtMaUyHZqz6dlw3iPwG_dzOTTXupR_Uuoh6qJFYtBM4j3QjQKJQAJ5UAADe6H8w2NDdEQ'
+				'JT_AAAAAD_sj__wAERERCIiIgAGzhUwlDgQAP1y8AASgmf1OKEJYiEAAm8rwABD7x8AGGwAAGGwANoAD9AiAAEoIWmNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisWkziPdNoFEoAE8qAABvdD-YbGidFg'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -331,7 +331,7 @@ describe('StateReader', () => {
 			writer.writePalette(['#c400ff42']);
 			writer.writeStyle('marker', marker);
 			writer.writeStyle('outline', outline);
-			expect(writer.asBase64()).toBe('CYgB_0KgD5CCBLwzMTQDuIUK');
+			expect(writer.asBase64()).toBe('CYgB_0Kp8hBAl4ZmJq7iFCg');
 
 			const reader = new StateReader(writer.bits);
 			reader.readPalette();
@@ -373,7 +373,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS'
+				'ISqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9q5QojnJmOogTwkSHTsyAtOGtIdiCDYBAWHasTq1I'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [

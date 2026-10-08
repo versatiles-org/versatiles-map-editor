@@ -95,3 +95,12 @@ export const LEGEND_ENTRY_KEYS = { label: 3, type: 5, style: 6, strokeStyle: 7 }
 
 /** The fields of a popup, in 4 bits. */
 export const POPUP_KEYS = { text: 1 } as const;
+
+/**
+ * The parameters of the Exp-Golomb codes of the indexes that links are full of, which are small
+ * (see `StateWriter.writeExpGolomb`; measured on the example maps, 2026-10-08): a color is mostly
+ * one of the first of the palette, which has the most frequent ones first, so 0 costs 1 bit; a
+ * string that is referenced again is mostly one of the first of its section, so up to 3 costs 3 bits.
+ */
+export const COLOR_INDEX_K = 0;
+export const STRING_INDEX_K = 2;

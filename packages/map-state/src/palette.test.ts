@@ -3,6 +3,7 @@ import { StateReader } from './reader.js';
 import { collectColors, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { MapState } from './types.js';
+import { COLOR_INDEX_K } from './constants.js';
 
 function encode(state: MapState): string {
 	const writer = new StateWriter();
@@ -72,7 +73,7 @@ describe('color palette', () => {
 		writer.writeBit(true); // style
 		writer.writeExpGolomb(0, 0); // no reference
 		writer.writeExpGolomb(1, 0); // color
-		writer.writeVarint(5);
+		writer.writeExpGolomb(5, COLOR_INDEX_K);
 		writer.writeExpGolomb(0, 0); // end
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(

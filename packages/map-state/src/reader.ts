@@ -28,6 +28,8 @@ import {
 	type StateViewer
 } from './types.js';
 import {
+	COLOR_INDEX_K,
+	STRING_INDEX_K,
 	BACKGROUND_KEYS,
 	BACKGROUND_LANGUAGE_TEXT,
 	BACKGROUND_STEPS,
@@ -830,7 +832,7 @@ export class StateReader {
 	/** See `StateWriter.writeStringRef`. */
 	readStringRef(format = false): string {
 		const section = format ? 0 : 1;
-		const index = this.readBit() ? this.nextString[section] : this.readVarint();
+		const index = this.readBit() ? this.nextString[section] : this.readExpGolomb(STRING_INDEX_K);
 		const value = this.strings[section][index];
 		if (value === undefined) throw new Error(`Invalid string index: ${index}`);
 		this.nextString[section] = Math.max(this.nextString[section], index + 1);
@@ -839,7 +841,7 @@ export class StateReader {
 
 	/** A color, as its index in the palette. */
 	readColorValue(): string {
-		const index = this.readVarint();
+		const index = this.readExpGolomb(COLOR_INDEX_K);
 		const color = this.palette[index];
 		if (color === undefined) throw new Error(`Invalid palette index: ${index}`);
 		return color;

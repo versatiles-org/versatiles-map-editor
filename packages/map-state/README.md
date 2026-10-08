@@ -187,13 +187,15 @@ element has a popup (without one, the elements have no bit for it) and the eleme
 To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
-  and referenced by index (#5); a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
+  and referenced by index (#5), which is an Exp-Golomb code, so the most frequent color costs
+  1 bit; a color of the color schemes (`COLOR_SCHEMES`, `color_schemes.ts`)
   or white as its index there in 6 bits instead of 24;
 - the strings are stored once in a string table of 2 sections, each in the order they are written:
   the words of the format (the font, the options and an unlisted theme or language of the
   background, the color scheme, the names of the symbols and
   the label fonts), then the others (the title, the labels, the legend labels, the popups). A field
-  refers to a string of its section by 1 bit for the next new one, else by its index. The table is
+  refers to a string of its section by 1 bit for the next new one, else by its index (an
+  Exp-Golomb code, 3 bits for the first four). The table is
   one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
   adaptive model predicts each character from the four before it (PPM of order 4 over code points,
   with escape method D and update exclusion), and an arithmetic coder spends fewer bits on likelier

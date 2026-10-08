@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
+import { STRING_INDEX_K } from './constants.js';
 
 function encode(state: MapState): string {
 	const writer = new StateWriter();
@@ -108,7 +109,7 @@ describe('symbols', () => {
 		writer.writeExpGolomb(2, 0); // symbol
 		// not the next string, but the one with index 5
 		writer.writeBit(false);
-		writer.writeVarint(5);
+		writer.writeExpGolomb(5, STRING_INDEX_K);
 		// root, marker, style
 		expect(() => new StateReader(writer.bits).readRoot()).toThrow(
 			expect.objectContaining({

@@ -133,7 +133,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wAACOIUPoSYFpPf2k9_0AdAS9EIoaf6hp_8NQHDUA0E3iBTGgAAIAADhqA4agOGoDhqAaEZXQzQJRpPgGk-Ai2F2J'
+			'JD_AAAAP8AAAA_z__wAACOIUPoSYFpPf2k9_1OgJeiEUNP9Q0_-GoDhqAaTeIFMaAAAgAAOGoDhqA4agOGoBpsrojQJRpPgGk-Ai2F2J'
 		);
 	});
 
@@ -155,7 +155,7 @@ describe('StateWriter', () => {
 			color: '#ff0000'
 		});
 		writer.writeStyle('area', { pattern: 'diagonal-down', color: '#ff0000' });
-		expect(writer.asBase64()).toBe('Cf4AAKAPkIIEvDMxNAMS');
+		expect(writer.asBase64()).toBe('Cf4AAKnyEECXhmYmrEg');
 	});
 
 	it('should write a RGB color correctly', () => {

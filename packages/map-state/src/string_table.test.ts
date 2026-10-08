@@ -3,6 +3,7 @@ import { StateReader } from './reader.js';
 import { collectStrings, StateWriter } from './writer.js';
 import { decodeState, encodeState } from './index.js';
 import type { MapState } from './types.js';
+import { STRING_INDEX_K } from './constants.js';
 
 /** The bits that `write` adds after a table of these strings. */
 function refBits(strings: string[], write: (writer: StateWriter) => void): string {
@@ -58,7 +59,8 @@ describe('the string table', () => {
 
 	it('refers to the next new string with 1 bit, and to others with their index', () => {
 		const bits = refBits(['a', 'b'], (writer) => ['a', 'b', 'a', 'b'].forEach((s) => writer.writeStringRef(s)));
-		expect(bits).toBe('1' + '1' + '0' + '000000' + '0' + '000010');
+		// an index is an Exp-Golomb code with the parameter 2: 3 bits up to 3
+		expect(bits).toBe('1' + '1' + '0' + '100' + '0' + '101');
 	});
 
 	it('counts the next string of each section by itself, so both can be written in turns', () => {
@@ -111,7 +113,7 @@ describe('the string table', () => {
 		const writer = new StateWriter();
 		writer.writeStringTable(['a']);
 		writer.writeBit(false);
-		writer.writeVarint(5);
+		writer.writeExpGolomb(5, STRING_INDEX_K);
 		const reader = new StateReader(writer.bits);
 		reader.readStringTable();
 		expect(() => reader.readStringRef()).toThrow('Invalid string index: 5');
