@@ -240,15 +240,19 @@ its bits go, e.g. to show an author what makes a link long: they return `{ chara
 with the bits of each kind (`LINK_KINDS`: `strings`, `stringRefs`, `coordinates`, `styles`,
 `colors`, `frame`, `background`, `structure`), which add up to `bits`.
 
-To see it in detail, as a tree of the reads with their bits:
+To see it in detail, as a tree of the reads with their bits, run this in the repository of the
+editor (the script is `scripts/analyse_bits.mjs` there):
 
 ```sh
-npm run analyse-bits --workspace @versatiles/map-state -- [--depth n] [--min-percent p] [files…]
+npm run analyse-bits -- [--example name] [--content] [--depth n] [--min-percent p] [files…]
 ```
 
-Without files, it analyses the examples. The tree shows each string of the string table with its
-bits, e.g. how much a label costs. It encodes at the precision of the share dialog
-(`resolutionForArea`), or at `--resolution <m>`. `--summary` prints a line per map instead: its bits
-and the shares of strings, coordinates, styles, colors, the background map and so on. `--json` prints both as JSON, e.g.
-to compare two versions of the format with `diff`. Test maps with labels and popups in other
+Without files, it analyses the examples of the repository, or with `--example paris` the one whose
+file name contains that. The tree shows each string of the string table with its bits, e.g. how
+much a label costs. `--content` shows what the link holds, a line per read with the key or the
+value that it read (e.g. `3 = legend`, `"#cc9900"`, `marker: {"color":…}`), to see whether each
+piece is needed. It encodes at the precision of the share dialog (`resolutionForArea`), or at
+`--resolution <m>`. `--summary` prints a line per map instead: its bits and the shares of strings,
+coordinates, styles, colors, the background map and so on. `--json` prints both as JSON, e.g. to
+compare two versions of the format with `diff`. Test maps with labels and popups in other
 languages and scripts are in `src/__fixtures__/languages/`.

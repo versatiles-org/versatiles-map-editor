@@ -21,6 +21,7 @@
     "packages/*"
   ],
   "scripts": {
+    "analyse-bits": "npm run build --workspace @versatiles/map-state && node scripts/analyse_bits.mjs",
     "build": "npm run check-types && vite build",
     "check-types": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings && tsc -p playwright-tests",
     "check-watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

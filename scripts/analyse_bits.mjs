@@ -5,9 +5,11 @@
  * reader, not the writer: the writer tries out several encodings of each style and keeps only the
  * shortest, while the reader reads exactly the bits of the link.
  *
- *     npm run analyse-bits --workspace @versatiles/map-state -- [options] [files…]
+ *     npm run analyse-bits -- [options] [files…]
  *
- * Without files, all examples. It reads the built package, so the npm script builds it first.
+ * Without files, the examples of the repository, or the one of `--example`. `--content` shows
+ * what the link holds, call by call: each key and each value, to see whether it is needed. It
+ * reads the built package @versatiles/map-state, so the npm script builds it first.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -22,13 +24,28 @@ import {
 	resolutionForArea,
 	resolutionOfExponent,
 	stateFromMapJSON
-} from '../dist/index.js';
-import { StateReader } from '../dist/reader.js';
-import { decodeStringBlock } from '../dist/string_coder.js';
+} from '../packages/map-state/dist/index.js';
+import { StateReader } from '../packages/map-state/dist/reader.js';
+import { decodeStringBlock } from '../packages/map-state/dist/string_coder.js';
+import {
+	ELEMENT_KEYS,
+	FRAME_KEYS,
+	LEGEND_ENTRY_KEYS,
+	LEGEND_KEYS,
+	METADATA_KEYS,
+	POPUP_KEYS,
+	VIEWER_KEYS
+} from '../packages/map-state/dist/constants.js';
+import { styleFields, styleRemoveKey } from '../packages/map-state/dist/style_history.js';
 
 const HELP = `Usage: analyse_bits.mjs [options] [files…]
 
+Without files, the examples of the repository.
+
 Options:
+  --example <name>     only the example whose file name contains <name>, e.g. "paris"
+  --content            what the link holds: a line per call with the key or the value that it
+                       read, instead of the shares
   --depth <n>          show the tree to this depth (default: all)
   --expand             a line per call, instead of the calls of the same method merged
   --min-percent <p>    merge the lines below p % of the bits into one (default: 0)
@@ -65,6 +82,8 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 		if (parent.primitive) return method.apply(this, args);
 		const span = {
 			name: label(name, args, parent.name),
+			method: name,
+			args,
 			primitive: PRIMITIVES.has(name),
 			start: this.offset,
 			children: []
@@ -73,8 +92,8 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
 		this.stack.push(span);
 		try {
 			const value = method.apply(this, args);
-			// e.g. the number of strings, for `expandStringTables`
-			if (span.primitive) span.value = value;
+			// what it read, e.g. the number of strings for `expandStringTables`, and for `--content`
+			span.value = value;
 			return value;
 		} catch (error) {
 			// e.g. the type of a next element, in the padding of the last character
@@ -119,6 +138,71 @@ function label(name, args, parent) {
 	}
 }
 
+// the tables of the keys of key/value pairs, by the method that reads them
+const KEY_TABLES = {
+	readMetadata: METADATA_KEYS,
+	readLegend: LEGEND_KEYS,
+	readLegendEntry: LEGEND_ENTRY_KEYS,
+	readPopup: POPUP_KEYS,
+	readViewer: VIEWER_KEYS,
+	readFrame: FRAME_KEYS
+};
+
+/** The name of a key of a table, e.g. "3 = legend"; 0 ends a list of key/value pairs. */
+function keyName(table, key) {
+	if (key === 0) return '0 = end';
+	const name = Object.keys(table).find((k) => table[k] === key);
+	return name ? `${key} = ${name}` : String(key);
+}
+
+/** A value as a short text: JSON, cut where it gets long. */
+function short(value, length = 72) {
+	if (value === undefined) return '';
+	if (Array.isArray(value) && value.length > 4 && Array.isArray(value[0])) {
+		return `${value.length} points, ${JSON.stringify(value[0])} … ${JSON.stringify(value.at(-1))}`;
+	}
+	const text = JSON.stringify(value) ?? '';
+	return text.length > length ? text.slice(0, length - 1) + '…' : text;
+}
+
+/**
+ * What a call read, for `--content`: the name of a key, or the value, as far as it says
+ * something. The calls that only gather what their children read, e.g. the whole map, say nothing.
+ */
+function contentOf(span, parent) {
+	const { method, args = [], value } = span;
+	switch (method) {
+		case undefined: // e.g. a string of the string table, whose name is its text
+		case 'readRoot':
+		case 'readStringTable':
+		case 'readBlock':
+			return '';
+		case 'readInteger': {
+			// the keys of key/value pairs (see `label`), and of the settings of a frame, in 4 bits
+			const isKey = span.name.startsWith('key(') || (parent.method === 'readFrame' && args[0] === 4);
+			const table = isKey ? KEY_TABLES[parent.method] : undefined;
+			return table ? keyName(table, value) : String(value);
+		}
+		case 'readStyleKey': {
+			if (parent.method !== 'readStylePatch') return String(value);
+			const role = parent.args[0];
+			if (value === 0) return '0 = end';
+			if (value === styleRemoveKey(role)) return `${value} = remove the field of the next key`;
+			const field = styleFields(role).find((f) => f.key === value);
+			return field ? `${value} = ${field.name}` : String(value);
+		}
+		case 'readElementType': {
+			const type = Object.keys(ELEMENT_KEYS).find((k) => ELEMENT_KEYS[k] === value?.key);
+			return value?.repeat ? `as the element before${type ? ` (${type})` : ''}` : (type ?? short(value));
+		}
+		case 'readStyle':
+		case 'readStylePatch':
+			return `${args[0]}: ${short(value)}`;
+		default:
+			return short(value);
+	}
+}
+
 /** Merges the calls into a tree of nodes: the calls of the same method under the same node in one, unless `expand`. */
 function aggregate(
 	span,
@@ -128,12 +212,21 @@ function aggregate(
 	node.count++;
 	node.bits += span.end - span.start;
 	span.children.forEach((child, index) => {
+		// a line per call: with what it read
+		if (expand) child.content = contentOf(child, span);
 		// a read at the end that found no bits
 		if (child.end === child.start && child.name === '(padding)') return;
 		const key = expand ? index : child.name;
 		let childNode = node.children.get(key);
 		if (!childNode) {
-			childNode = { name: child.name, primitive: child.primitive, count: 0, bits: 0, children: new Map() };
+			childNode = {
+				name: child.name,
+				primitive: child.primitive,
+				content: child.content,
+				count: 0,
+				bits: 0,
+				children: new Map()
+			};
 			node.children.set(key, childNode);
 		}
 		aggregate(child, expand, childNode);
@@ -275,10 +368,15 @@ function printTree(title, analysis, options) {
 					: 'cyan';
 		const columns = [
 			color('gray', prefix) + color(nameStyle, node.name) + ' '.repeat(width - prefix.length - node.name.length),
-			color('bold', format(node.bits).padStart(9)),
-			(fraction * 100).toFixed(1).padStart(5) + '%',
-			color('magenta', bar(fraction, 20))
+			color('bold', format(node.bits).padStart(9))
 		];
+		if (options.content) {
+			// what the call read, instead of its share
+			columns.push(color(node.primitive ? 'gray' : 'green', node.content ?? ''));
+			console.log(columns.join('  ').trimEnd());
+			continue;
+		}
+		columns.push((fraction * 100).toFixed(1).padStart(5) + '%', color('magenta', bar(fraction, 20)));
 		if (node.count > 1) {
 			columns.push(
 				color('yellow', `×${format(node.count)}`.padStart(8)),
@@ -323,7 +421,14 @@ function printSummary(analyses) {
 /** A node of the tree as JSON: its name, calls and bits, and its children. */
 function nodeJSON(node) {
 	const children = [...node.children.values()].map(nodeJSON);
-	return { name: node.name, count: node.count, bits: node.bits, ...(children.length > 0 && { children }) };
+	return {
+		name: node.name,
+		count: node.count,
+		bits: node.bits,
+		// with `--content`: what the call read
+		...(node.content && { content: node.content }),
+		...(children.length > 0 && { children })
+	};
 }
 
 function main() {
@@ -332,6 +437,8 @@ function main() {
 		options: {
 			depth: { type: 'string' },
 			expand: { type: 'boolean', default: false },
+			content: { type: 'boolean', default: false },
+			example: { type: 'string' },
 			'min-percent': { type: 'string', default: '0' },
 			summary: { type: 'boolean', default: false },
 			json: { type: 'boolean', default: false },
@@ -343,19 +450,28 @@ function main() {
 
 	const options = {
 		depth: values.depth === undefined ? Infinity : Number(values.depth),
-		expand: values.expand,
+		// what each call read is shown per call
+		expand: values.expand || values.content,
+		content: values.content,
 		minPercent: Number(values['min-percent']),
 		resolution: values.resolution === 'auto' ? 'auto' : Number(values.resolution)
 	};
 
 	let files = positionals;
 	if (files.length === 0) {
-		// the examples of the repository: two folders above the package
-		const examples = join(dirname(fileURLToPath(import.meta.url)), '../../../examples');
-		files = readdirSync(examples)
+		// the examples of the repository, or the one that is asked for
+		const examples = join(dirname(fileURLToPath(import.meta.url)), '../examples');
+		const names = readdirSync(examples)
 			.filter((name) => name.endsWith('.mapjson'))
-			.sort()
-			.map((name) => join(examples, name));
+			.sort();
+		const wanted = values.example?.toLowerCase();
+		const chosen = wanted ? names.filter((name) => name.toLowerCase().includes(wanted)) : names;
+		if (chosen.length === 0) {
+			console.error(`No example has "${values.example}" in its name. The examples:\n  ${names.join('\n  ')}`);
+			process.exitCode = 1;
+			return;
+		}
+		files = chosen.map((name) => join(examples, name));
 	}
 
 	const analyses = files.map((file) => {
