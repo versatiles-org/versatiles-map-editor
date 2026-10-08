@@ -685,7 +685,7 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 export const VIEWER_DEFAULTS = {
 	search: 'none',
 	navigation: 'top-right',
-	zoom: true,
+	zoomButtons: true,
 	legend: 'bottom-left',
 	scale: 'none',
 	reset: false,
@@ -695,7 +695,7 @@ export const VIEWER_DEFAULTS = {
 
 /**
  * The navigation buttons of the viewer that are off unless the map switches them on. (The buttons
- * for zooming are on unless `zoom` is false; the compass comes with a map that can be turned.)
+ * for zooming are on unless `zoomButtons` is false; the compass comes with a map that can be turned.)
  * @category Viewer
  * @internal
  */
@@ -739,7 +739,7 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 	for (const button of VIEWER_BUTTONS) {
 		if ((value as Record<string, unknown>)[button] === true) viewer[button] = true;
 	}
-	if ((value as Record<string, unknown>).zoom === false) viewer.zoom = false;
+	if ((value as Record<string, unknown>).zoomButtons === false) viewer.zoomButtons = false;
 	return removeViewerDefaults(viewer as StateViewer);
 }
 

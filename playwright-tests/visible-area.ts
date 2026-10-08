@@ -187,7 +187,7 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 			'/view/#' +
 				encodeState({
 					frame: { bounds: frame, canRotate: true, canTilt: true },
-					meta: { viewer: { zoom: false, reset: true } },
+					meta: { viewer: { zoomButtons: false, reset: true } },
 					elements
 				})
 		);

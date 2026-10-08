@@ -844,7 +844,7 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	// without zoom buttons, the button is where they would be
 	await page.goto('about:blank');
 	await page.setViewportSize({ width: 800, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, zoom: false } }, elements }));
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, zoomButtons: false } }, elements }));
 	await waitForMapIsReady(page);
 	await expect(page.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
 	const alone = (await reset.boundingBox())!;
@@ -855,7 +855,7 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	await page.goto('about:blank');
 	await page.goto(
 		'/view/#' +
-			encodeState({ frame, meta: { viewer: { reset: true, zoom: false, navigation: 'bottom-left' } }, elements })
+			encodeState({ frame, meta: { viewer: { reset: true, zoomButtons: false, navigation: 'bottom-left' } }, elements })
 	);
 	await waitForMapIsReady(page);
 	const moved = (await reset.boundingBox())!;

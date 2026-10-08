@@ -535,7 +535,7 @@ export interface StateViewer {
 	 * The buttons for zooming in and out, of the navigation buttons, and with them the compass of
 	 * a map that its viewers can turn. Default: true.
 	 */
-	zoom?: boolean;
+	zoomButtons?: boolean;
 	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
 	/** A bar with the length that it stands for on the map, in meters or kilometers. Default: "none". */

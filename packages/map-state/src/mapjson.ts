@@ -109,7 +109,7 @@ export const MAPJSON_FIELDS = {
 	StateLegendMarker: ['type', 'style', 'label'],
 	StateLegendLine: ['type', 'style', 'label'],
 	StateLegendArea: ['type', 'style', 'outlineStyle', 'label'],
-	StateViewer: ['search', 'navigation', 'zoom', 'legend', 'scale', 'reset', 'fullscreen', 'locate'],
+	StateViewer: ['search', 'navigation', 'zoomButtons', 'legend', 'scale', 'reset', 'fullscreen', 'locate'],
 	StatePopup: ['text'],
 	MarkerStyle: STYLE_ROLE_FIELDS.marker,
 	LineStyle: STYLE_ROLE_FIELDS.line,

@@ -644,7 +644,7 @@ export class StateReader {
 					continue;
 				}
 				if (key === VIEWER_KEYS.noZoom) {
-					viewer.zoom = false;
+					viewer.zoomButtons = false;
 					continue;
 				}
 				const name = controls.find((control) => VIEWER_KEYS[control] === key);

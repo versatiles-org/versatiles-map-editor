@@ -576,7 +576,7 @@ export class StateWriter {
 		for (const button of VIEWER_BUTTONS) {
 			if (viewer[button]) this.writeKey(VIEWER_KEYS[button], KEY_PARAMETERS.viewer);
 		}
-		if (viewer.zoom === false) this.writeKey(VIEWER_KEYS.noZoom, KEY_PARAMETERS.viewer);
+		if (viewer.zoomButtons === false) this.writeKey(VIEWER_KEYS.noZoom, KEY_PARAMETERS.viewer);
 		this.writeKey(END_KEY, KEY_PARAMETERS.viewer);
 	}
 

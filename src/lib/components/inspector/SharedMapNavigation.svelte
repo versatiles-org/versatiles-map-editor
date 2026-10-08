@@ -14,9 +14,9 @@
 
 	const uid = $props.id();
 
-	const BUTTONS: { key: 'zoom' | 'reset' | 'fullscreen' | 'locate'; label: string; hint: string }[] = [
+	const BUTTONS: { key: 'zoomButtons' | 'reset' | 'fullscreen' | 'locate'; label: string; hint: string }[] = [
 		{
-			key: 'zoom',
+			key: 'zoomButtons',
 			label: 'Zoom',
 			hint: 'Buttons to zoom in and out, with a compass if visitors can rotate or tilt the map.'
 		},

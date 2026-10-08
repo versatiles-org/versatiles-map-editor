@@ -145,7 +145,7 @@ test.describe('address search in the viewer', () => {
 			.getByRole('region', { name: 'Navigation buttons' })
 			.getByRole('checkbox', { name: 'Zoom' })
 			.uncheck();
-		await expect.poll(viewer).toStrictEqual({ search: 'top-right', zoom: false });
+		await expect.poll(viewer).toStrictEqual({ search: 'top-right', zoomButtons: false });
 		// hidden on the map too, until the editor is back, which always has them
 		await expect(zoomIn).toHaveCount(0);
 		await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();

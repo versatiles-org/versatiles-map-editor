@@ -344,11 +344,11 @@ describe('color scheme', () => {
 
 describe('viewer', () => {
 	it('round-trips as the meta member, without defaults and invalid values', () => {
-		const viewer = { search: 'top-right', zoom: false, legend: 'top' } as const;
+		const viewer = { search: 'top-right', zoomButtons: false, legend: 'top' } as const;
 		const doc = stateToGeoJSON({ meta: { viewer }, elements: [] });
 		expect(doc.meta).toStrictEqual({ viewer });
 		expect(stateFromGeoJSON(doc).meta).toStrictEqual({ viewer });
-		const foreign = { search: 'bottom', navigation: 'top-right', legend: 'right', zoom: true };
+		const foreign = { search: 'bottom', navigation: 'top-right', legend: 'right', zoomButtons: true };
 		expect(stateFromGeoJSON({ ...doc, meta: { viewer: foreign } } as unknown as GeoJSONDocument).meta).toStrictEqual({
 			viewer: { legend: 'right' }
 		});

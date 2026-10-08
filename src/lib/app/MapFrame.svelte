@@ -333,7 +333,7 @@
 		if (!m || !corner) return;
 		// Of a shared map: none of them if it hides the buttons for zooming, which the compass belongs
 		// to; else those unless its visitors cannot zoom, and the compass if they can turn the map.
-		if (!ownPlaces && mapDocument?.controls.zoom === false) return;
+		if (!ownPlaces && mapDocument?.controls.zoomButtons === false) return;
 		const [zoom, compass] = turn ? [turn.canZoom, turn.canRotate || turn.canTilt] : [true, true];
 		if (!zoom && !compass) return;
 		// Back to how the map opened. In the editor to north at the top, seen from straight above,
