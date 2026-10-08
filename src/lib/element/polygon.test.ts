@@ -73,7 +73,7 @@ describe('PolygonElement', () => {
 		expect(state.type).toBe('polygon');
 		expect(state.points).toEqual(element.path);
 		expect(state.style).toEqual(element.fillLayer.getState());
-		expect(state.strokeStyle).toEqual(element.strokeLayer.getState());
+		expect(state.outlineStyle).toEqual(element.strokeLayer.getState());
 	});
 
 	it('should restore from state correctly', () => {
@@ -85,7 +85,7 @@ describe('PolygonElement', () => {
 				[20, 20]
 			],
 			style: { color: '#00ff00' },
-			strokeStyle: { width: 2 }
+			outlineStyle: { width: 2 }
 		};
 		const restoredElement = PolygonElement.fromState(mockDoc, state);
 

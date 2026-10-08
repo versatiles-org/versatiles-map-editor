@@ -108,7 +108,7 @@ export const MAPJSON_FIELDS = {
 	StateLegend: ['layout', 'font', 'bold', 'italic', 'theme', 'entries'],
 	StateLegendMarker: ['type', 'style', 'label'],
 	StateLegendLine: ['type', 'style', 'label'],
-	StateLegendArea: ['type', 'style', 'strokeStyle', 'label'],
+	StateLegendArea: ['type', 'style', 'outlineStyle', 'label'],
 	StateViewer: ['search', 'navigation', 'zoom', 'legend', 'scale', 'reset', 'fullscreen', 'locate'],
 	StatePopup: ['text'],
 	MarkerStyle: STYLE_ROLE_FIELDS.marker,
@@ -117,8 +117,8 @@ export const MAPJSON_FIELDS = {
 	OutlineStyle: STYLE_ROLE_FIELDS.outline,
 	StateElementMarker: ['type', 'point', 'label', 'style', 'popup'],
 	StateElementLine: ['type', 'points', 'smooth', 'style', 'popup'],
-	StateElementPolygon: ['type', 'points', 'smooth', 'style', 'strokeStyle', 'popup'],
-	StateElementCircle: ['type', 'point', 'radius', 'style', 'strokeStyle', 'popup']
+	StateElementPolygon: ['type', 'points', 'smooth', 'style', 'outlineStyle', 'popup'],
+	StateElementCircle: ['type', 'point', 'radius', 'style', 'outlineStyle', 'popup']
 } satisfies Record<string, readonly string[]>;
 
 const ELEMENT_FIELDS: Record<StateElement['type'], readonly string[]> = {
@@ -157,7 +157,7 @@ export function unknownMapJSONFields(json: unknown): string[] {
 	const checkStyles = (owner: Record<string, unknown>, path: string) => {
 		const role = owner.type === 'marker' ? 'marker' : owner.type === 'line' ? 'line' : 'area';
 		check(owner.style, STYLE_ROLE_FIELDS[role], `${path}.style`);
-		if (role === 'area') check(owner.strokeStyle, STYLE_ROLE_FIELDS.outline, `${path}.strokeStyle`);
+		if (role === 'area') check(owner.outlineStyle, STYLE_ROLE_FIELDS.outline, `${path}.outlineStyle`);
 	};
 
 	const root = check(json, MAPJSON_FIELDS.MapJSON, '');

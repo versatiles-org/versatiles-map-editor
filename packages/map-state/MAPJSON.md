@@ -52,7 +52,7 @@ its elements, on the editor's default background map.
 				[13.375, 52.515]
 			],
 			"style": { "color": "#009e7380", "pattern": "diagonal-up" },
-			"strokeStyle": { "visible": false }
+			"outlineStyle": { "visible": false }
 		},
 		{
 			"type": "line",
@@ -130,12 +130,12 @@ breaks and links (`[label](https://…)` or a bare URL). A marker can also have 
 next to its symbol, which its style styles. A label can have several lines (`\n`); the map breaks
 its lines only there.
 
-| `type`    | Geometry                                                                                | Styles                                        |
-| --------- | --------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `marker`  | `point`: a position                                                                     | `style`: the symbol and its label             |
-| `line`    | `points`: at least 2 positions; `smooth`, see below                                     | `style`: the line                             |
-| `polygon` | `points`: at least 3 positions; the last one connects to the first; `smooth`, see below | `style`: the area; `strokeStyle`: its outline |
-| `circle`  | `point`: the center; `radius`: in meters                                                | `style`: the area; `strokeStyle`: its outline |
+| `type`    | Geometry                                                                                | Styles                                         |
+| --------- | --------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `marker`  | `point`: a position                                                                     | `style`: the symbol and its label              |
+| `line`    | `points`: at least 2 positions; `smooth`, see below                                     | `style`: the line                              |
+| `polygon` | `points`: at least 3 positions; the last one connects to the first; `smooth`, see below | `style`: the area; `outlineStyle`: its outline |
+| `circle`  | `point`: the center; `radius`: in meters                                                | `style`: the area; `outlineStyle`: its outline |
 
 `"smooth": true` draws a line or polygon as a smooth curve through its points instead of straight
 from point to point. The file keeps only the points, so other programs, which do not know the field,
@@ -183,7 +183,7 @@ other kinds are unknown fields (see [Basics](#basics)).
 | `patternScale`    | with a pattern: its size, a factor from 0.5 to 4; at 1 the lines (across them) or dots are 8 pixels apart; default `1`                                                                              |
 | `patternCoverage` | with a pattern: the share of the area that its lines or dots cover, from 0.05 to 0.95; default `0.5`                                                                                                |
 
-**Outlines** (`strokeStyle` of a polygon or a circle):
+**Outlines** (`outlineStyle` of a polygon or a circle):
 
 | Field     | Meaning                                                                           |
 | --------- | --------------------------------------------------------------------------------- |
@@ -272,10 +272,10 @@ something. The editor keeps them, but does not write them itself.
 ### Legend
 
 `{ "entries": [ … ], "layout", "font", "bold", "italic", "theme" }`. Each of its `entries` is a
-small copy of an element and a text: `{ "type", "style", "strokeStyle", "label" }`. The `type` is
-`"marker"`, `"line"` or `"area"` (of a polygon or a circle), and `style` and `strokeStyle` are
+small copy of an element and a text: `{ "type", "style", "outlineStyle", "label" }`. The `type` is
+`"marker"`, `"line"` or `"area"` (of a polygon or a circle), and `style` and `outlineStyle` are
 styles like those of such an element (see [Styles](#styles)), with the same defaults: e.g. a marker
-entry without a style is a red flag. Only areas have a `strokeStyle`, for their outline. The
+entry without a style is a red flag. Only areas have an `outlineStyle`, for their outline. The
 entry's `label` is its text.
 
 | Field    | Values                                                                           | Default        |

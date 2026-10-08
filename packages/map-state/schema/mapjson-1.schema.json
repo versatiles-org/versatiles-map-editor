@@ -465,7 +465,7 @@
 				"style": {
 					"$ref": "#/definitions/AreaStyle"
 				},
-				"strokeStyle": {
+				"outlineStyle": {
 					"$ref": "#/definitions/OutlineStyle",
 					"description": "The outline of the area."
 				},
@@ -736,7 +736,7 @@
 					"$ref": "#/definitions/AreaStyle",
 					"description": "The area: its color (with its opacity) and pattern."
 				},
-				"strokeStyle": {
+				"outlineStyle": {
 					"$ref": "#/definitions/OutlineStyle",
 					"description": "The outline: whether it is drawn, its color, width and dashes."
 				},
@@ -766,7 +766,7 @@
 					"$ref": "#/definitions/AreaStyle",
 					"description": "The area: its color (with its opacity) and pattern."
 				},
-				"strokeStyle": {
+				"outlineStyle": {
 					"$ref": "#/definitions/OutlineStyle",
 					"description": "The outline: whether it is drawn, its color, width and dashes."
 				},

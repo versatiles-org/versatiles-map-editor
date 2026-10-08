@@ -122,7 +122,7 @@ describe('the JSON Schema of .mapjson files', () => {
 						[13.3, 52.6]
 					],
 					style: { pattern: 'diagonal-down' },
-					strokeStyle: { visible: false }
+					outlineStyle: { visible: false }
 				},
 				{ type: 'circle', point: [13.4, 52.5], radius: 500 }
 			]

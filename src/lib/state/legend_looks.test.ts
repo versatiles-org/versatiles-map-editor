@@ -10,7 +10,7 @@ const park = (color: string): StateElement => ({
 		[0, 1]
 	],
 	style: { color },
-	strokeStyle: { visible: false }
+	outlineStyle: { visible: false }
 });
 const cafe = (color: string, label = 'Cafe'): StateElement => ({
 	type: 'marker',
@@ -21,7 +21,7 @@ const cafe = (color: string, label = 'Cafe'): StateElement => ({
 const parks: StateLegendEntry = {
 	type: 'area',
 	style: { color: '#00aa00' },
-	strokeStyle: { visible: false },
+	outlineStyle: { visible: false },
 	label: 'Parks'
 };
 const cafes: StateLegendEntry = {
@@ -43,7 +43,7 @@ describe('legend looks', () => {
 			const after = [park('#008800'), park('#008800'), cafe('#0000ff')];
 			const followed = followStyleChanges(before, after, [parks, cafes]);
 			expect(followed?.entries).toStrictEqual([
-				{ type: 'area', style: { color: '#008800' }, strokeStyle: { visible: false }, label: 'Parks' },
+				{ type: 'area', style: { color: '#008800' }, outlineStyle: { visible: false }, label: 'Parks' },
 				cafes
 			]);
 			expect(followed?.changed.map((e) => e.label)).toStrictEqual(['Parks']);
@@ -97,7 +97,7 @@ describe('legend looks', () => {
 					cafes,
 					{ type: 'line', style: { color: '#aa00aa' }, label: 'Bus' },
 					// an area with its outline, and a marker with the default red
-					{ type: 'area', style: { color: '#00ff0080' }, strokeStyle: { color: '#008800' }, label: 'Forest' },
+					{ type: 'area', style: { color: '#00ff0080' }, outlineStyle: { color: '#008800' }, label: 'Forest' },
 					{ type: 'marker', label: 'Flag' }
 				]
 			})

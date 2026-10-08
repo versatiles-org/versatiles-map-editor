@@ -167,7 +167,7 @@ export interface StateElementPolygon {
 	/** The area: its color (with its opacity) and pattern. */
 	style?: AreaStyle;
 	/** The outline: whether it is drawn, its color, width and dashes. */
-	strokeStyle?: OutlineStyle;
+	outlineStyle?: OutlineStyle;
 	popup?: StatePopup;
 }
 
@@ -186,7 +186,7 @@ export interface StateElementCircle {
 	/** The area: its color (with its opacity) and pattern. */
 	style?: AreaStyle;
 	/** The outline: whether it is drawn, its color, width and dashes. */
-	strokeStyle?: OutlineStyle;
+	outlineStyle?: OutlineStyle;
 	popup?: StatePopup;
 }
 
@@ -617,7 +617,7 @@ export interface StateLegendArea {
 	type: 'area';
 	style?: AreaStyle;
 	/** The outline of the area. */
-	strokeStyle?: OutlineStyle;
+	outlineStyle?: OutlineStyle;
 	/** The text next to it. */
 	label: string;
 }

@@ -13,9 +13,9 @@ describe('the text color of a legend entry', () => {
 
 	it('is the opaque color of the outline of an area, else of its fill', () => {
 		const fill = { color: '#009e734d' };
-		expect(textColor({ type: 'area', style: fill, strokeStyle: { color: '#0072b2' }, label: '' })).toBe('#0072b2');
-		expect(textColor({ type: 'area', style: fill, strokeStyle: { visible: false }, label: '' })).toBe('#009e73');
-		expect(textColor({ type: 'area', style: fill, strokeStyle: { color: '#0072b280' }, label: '' })).toBe('#0072b2');
+		expect(textColor({ type: 'area', style: fill, outlineStyle: { color: '#0072b2' }, label: '' })).toBe('#0072b2');
+		expect(textColor({ type: 'area', style: fill, outlineStyle: { visible: false }, label: '' })).toBe('#009e73');
+		expect(textColor({ type: 'area', style: fill, outlineStyle: { color: '#0072b280' }, label: '' })).toBe('#0072b2');
 	});
 });
 

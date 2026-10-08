@@ -64,7 +64,9 @@ test('rearranging the entries of the legend', { tag: '@cross-browser' }, async (
 });
 
 test('the theme of the legend: light, dark or a glass over the map', { tag: '@cross-browser' }, async ({ page }) => {
-	const entries = [{ type: 'area' as const, style: { color: '#0072b2' }, strokeStyle: { visible: false }, label: 'A' }];
+	const entries = [
+		{ type: 'area' as const, style: { color: '#0072b2' }, outlineStyle: { visible: false }, label: 'A' }
+	];
 	await page.goto('/#' + encodeState({ meta: { legend: { entries } }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).click();
@@ -177,14 +179,14 @@ test(
 		await entry.getByRole('radio', { name: 'Area' }).check();
 		await expect
 			.poll(stored)
-			.toStrictEqual({ type: 'area', style: { color: '#0000ff' }, strokeStyle: { visible: false }, label: 'A' });
+			.toStrictEqual({ type: 'area', style: { color: '#0000ff' }, outlineStyle: { visible: false }, label: 'A' });
 		await entry.getByRole('combobox', { name: 'Pattern' }).click();
 		await page.getByRole('option', { name: 'Diagonal up', exact: true }).click();
 		await entry.getByRole('checkbox', { name: 'Outline' }).check();
 		await expect.poll(stored).toStrictEqual({
 			type: 'area',
 			style: { color: '#0000ff', pattern: 'diagonal-up' },
-			strokeStyle: { color: '#0000ff' },
+			outlineStyle: { color: '#0000ff' },
 			label: 'A'
 		});
 		await expect(entry.getByRole('button', { name: /^Outline color/ })).toBeVisible();
@@ -204,13 +206,13 @@ test('a legend entry follows the style of its elements', async ({ page }) => {
 			[west + 0.005, 52.5]
 		],
 		style: { color: '#00aa00' },
-		strokeStyle: { visible: false },
+		outlineStyle: { visible: false },
 		popup: { text: 'Parks' }
 	});
 	// "Lakes" shows a color that no area has
 	const entries = [
-		{ type: 'area' as const, style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Parks' },
-		{ type: 'area' as const, style: { color: '#00ffff' }, strokeStyle: { visible: false }, label: 'Lakes' }
+		{ type: 'area' as const, style: { color: '#00aa00' }, outlineStyle: { visible: false }, label: 'Parks' },
+		{ type: 'area' as const, style: { color: '#00ffff' }, outlineStyle: { visible: false }, label: 'Lakes' }
 	];
 	await page.goto(
 		'/#' +
@@ -351,7 +353,7 @@ test(
 				type: 'polygon',
 				points,
 				style: { color: '#00ff004d', pattern: 'diagonal-up' },
-				strokeStyle: { color: '#00aa00' }
+				outlineStyle: { color: '#00aa00' }
 			}
 		];
 		await page.goto('/#' + encodeState({ meta: { legend }, elements }));
@@ -390,7 +392,7 @@ test(
 		await expect.poll(entry).toStrictEqual({
 			type: 'area',
 			style: { color: '#00ff004d', pattern: 'diagonal-up' },
-			strokeStyle: { color: '#00aa00' },
+			outlineStyle: { color: '#00aa00' },
 			label: 'Park'
 		});
 		await expect(take).toHaveAttribute('aria-pressed', 'false');
@@ -417,7 +419,7 @@ test('editing the legend', async ({ page }) => {
 					[13.38, 52.5]
 				],
 				style: { color: '#00aa00' },
-				strokeStyle: { visible: false }
+				outlineStyle: { visible: false }
 			}
 		]
 	};
@@ -465,7 +467,7 @@ test('editing the legend', async ({ page }) => {
 		layout: 'horizontal',
 		entries: [
 			// a new entry is an area without an outline, one with a symbol a marker
-			{ type: 'area', style: { color: '#00aa00' }, strokeStyle: { visible: false }, label: 'Park' },
+			{ type: 'area', style: { color: '#00aa00' }, outlineStyle: { visible: false }, label: 'Park' },
 			{ type: 'marker', style: { color: '#0000ff', symbol: 'base:icon-cafe' }, label: 'Cafe' }
 		]
 	});

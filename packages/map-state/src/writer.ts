@@ -275,7 +275,7 @@ export class StateWriter {
 		if (repeat) return;
 		this.writeOptionalStyle(roleOf(element.type), element.style);
 		if (element.type === 'polygon' || element.type === 'circle')
-			this.writeOptionalStyle('outline', element.strokeStyle);
+			this.writeOptionalStyle('outline', element.outlineStyle);
 	}
 
 	private writeOptionalStyle(role: StyleRoleName, style: StateStyle | undefined) {
@@ -608,9 +608,9 @@ export class StateWriter {
 				this.writeKey(LEGEND_ENTRY_KEYS.style, KEY_PARAMETERS.legendEntry);
 				this.writeStyle(roleOf(entry.type), entry.style);
 			}
-			if ('strokeStyle' in entry && entry.strokeStyle) {
-				this.writeKey(LEGEND_ENTRY_KEYS.strokeStyle, KEY_PARAMETERS.legendEntry);
-				this.writeStyle('outline', entry.strokeStyle);
+			if ('outlineStyle' in entry && entry.outlineStyle) {
+				this.writeKey(LEGEND_ENTRY_KEYS.outlineStyle, KEY_PARAMETERS.legendEntry);
+				this.writeStyle('outline', entry.outlineStyle);
 			}
 			if (entry.label) {
 				this.writeKey(LEGEND_ENTRY_KEYS.label, KEY_PARAMETERS.legendEntry);
@@ -836,7 +836,7 @@ export class StateWriter {
 function allStyles(root: MapState): StateStyle[] {
 	return [...root.elements, ...(root.meta?.legend?.entries ?? [])].flatMap((item) => [
 		...(item.style ? [item.style] : []),
-		...('strokeStyle' in item && item.strokeStyle ? [item.strokeStyle] : [])
+		...('outlineStyle' in item && item.outlineStyle ? [item.outlineStyle] : [])
 	]);
 }
 
@@ -892,7 +892,7 @@ function collectFormatStrings(root: MapState): string[] {
 	const meta = root.meta;
 	const strings = [...backgroundStrings(meta), ...(meta?.colorScheme ? [meta.colorScheme] : [])];
 	for (const item of [...(meta?.legend?.entries ?? []), ...root.elements]) {
-		const styles: (StateStyle | undefined)[] = [item.style, 'strokeStyle' in item ? item.strokeStyle : undefined];
+		const styles: (StateStyle | undefined)[] = [item.style, 'outlineStyle' in item ? item.outlineStyle : undefined];
 		for (const style of styles) {
 			// in the order of the keys of the style
 			if (style?.symbol != null) strings.push(style.symbol);
@@ -972,8 +972,8 @@ export function bestExpGolombParameter(values: number[]): number {
 /** The type and the styles of an element as they are encoded: equal for an element that repeats the one before. */
 function repeatKey(element: StateElement): string {
 	const key = (role: StyleRoleName, style: StateStyle | undefined) => (style ? canonical(role, style) : '-');
-	const strokeStyle = 'strokeStyle' in element ? element.strokeStyle : undefined;
-	return [element.type, key(roleOf(element.type), element.style), key('outline', strokeStyle)].join('|');
+	const outlineStyle = 'outlineStyle' in element ? element.outlineStyle : undefined;
+	return [element.type, key(roleOf(element.type), element.style), key('outline', outlineStyle)].join('|');
 }
 
 /** The colors of all styles and of the legend, most frequent first, so they get the shortest indices. */

@@ -56,7 +56,7 @@ function checkDrawable(state: MapState) {
 	if (state.frame) expect(sanitizeFrame(state.frame)).toStrictEqual(state.frame);
 	for (const element of state.elements) {
 		checkStyle(element.style);
-		if ('strokeStyle' in element) checkStyle(element.strokeStyle);
+		if ('outlineStyle' in element) checkStyle(element.outlineStyle);
 		switch (element.type) {
 			case 'marker':
 				checkPosition(element.point);

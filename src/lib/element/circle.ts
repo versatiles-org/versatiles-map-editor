@@ -107,7 +107,7 @@ export class CircleElement extends AbstractElement {
 			point: this.point,
 			radius: this.radius,
 			style: this.fillLayer.getState(),
-			strokeStyle: this.strokeLayer.getState(),
+			outlineStyle: this.strokeLayer.getState(),
 			...this.getPopupState()
 		};
 	}
@@ -115,7 +115,7 @@ export class CircleElement extends AbstractElement {
 	static fromState(doc: ElementOwner, state: StateElementCircle) {
 		const element = new CircleElement(doc, state.point, state.radius);
 		element.fillLayer.setState(state.style);
-		element.strokeLayer.setState(state.strokeStyle);
+		element.strokeLayer.setState(state.outlineStyle);
 		return element;
 	}
 }

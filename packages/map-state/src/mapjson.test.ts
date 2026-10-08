@@ -127,7 +127,7 @@ describe('.mapjson files', () => {
 					]
 				},
 				{ type: 'circle', point: [0, 0], radius: 0 },
-				{ type: 'circle', point: [0, 0], radius: 50, style: { pattern: 1.5 }, strokeStyle: { width: -1 } },
+				{ type: 'circle', point: [0, 0], radius: 50, style: { pattern: 1.5 }, outlineStyle: { width: -1 } },
 				{ type: 'star', point: [0, 0] },
 				null,
 				'marker'
@@ -137,7 +137,7 @@ describe('.mapjson files', () => {
 			meta: { title: 'Map' },
 			elements: [
 				{ type: 'marker', point: [1, 2], style: { rotation: 46, color: '#ff0000' }, popup: { text: '7' } },
-				{ type: 'circle', point: [0, 0], radius: 50, strokeStyle: { width: 0 } }
+				{ type: 'circle', point: [0, 0], radius: 50, outlineStyle: { width: 0 } }
 			]
 		});
 	});
@@ -166,7 +166,7 @@ describe('.mapjson files', () => {
 						[1, 0],
 						[1, 1]
 					],
-					strokeStyle: { glow: 1 },
+					outlineStyle: { glow: 1 },
 					popup: { text: 'p', image: 'i' }
 				}
 			]
@@ -183,7 +183,7 @@ describe('.mapjson files', () => {
 			'elements[0].note',
 			'elements[0].style.colour',
 			'elements[1]',
-			'elements[2].strokeStyle.glow',
+			'elements[2].outlineStyle.glow',
 			'elements[2].popup.image'
 		]);
 		expect(stateFromMapJSON(json)).not.toHaveProperty('view');
@@ -206,14 +206,14 @@ describe('.mapjson files', () => {
 						[1, 1]
 					],
 					style: { width: 3 },
-					strokeStyle: { pattern: 'dots' }
+					outlineStyle: { pattern: 'dots' }
 				}
 			]
 		};
 		expect(unknownMapJSONFields(json)).toStrictEqual([
 			'elements[0].style.arrowStart',
 			'elements[1].style.width',
-			'elements[1].strokeStyle.pattern'
+			'elements[1].outlineStyle.pattern'
 		]);
 		const state = stateFromMapJSON(json);
 		expect(state.elements[0].style).toStrictEqual({ color: '#0000ff' });

@@ -16,8 +16,8 @@
  * ├─ elements[]   in drawing order, the first one at the back
  * │  ├─ marker    point, label, style, popup
  * │  ├─ line      points, smooth, style, popup
- * │  ├─ polygon   points, smooth, style, strokeStyle, popup
- * │  └─ circle    point, radius, style, strokeStyle, popup
+ * │  ├─ polygon   points, smooth, style, outlineStyle, popup
+ * │  └─ circle    point, radius, style, outlineStyle, popup
  * ├─ frame        what a shared map shows when it opens:
  * │               bounds, bearing, pitch, canPan, canZoom, …
  * └─ meta         title, background, legend, viewer, labels,

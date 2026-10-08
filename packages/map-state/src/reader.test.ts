@@ -286,14 +286,14 @@ describe('StateReader', () => {
 						type: 'polygon',
 						points: path,
 						style: { pattern: 'dots', patternScale: 1.5, color: '#0000ff64' },
-						strokeStyle: { dash: 'dotted', width: 0.8, color: '#ffff00' }
+						outlineStyle: { dash: 'dotted', width: 0.8, color: '#ffff00' }
 					},
 					{
 						type: 'circle',
 						point: [9, 10],
 						radius: 12345,
 						style: { color: '#111111' },
-						strokeStyle: { color: '#222222' }
+						outlineStyle: { color: '#222222' }
 					}
 				]
 			};
@@ -424,7 +424,7 @@ describe('StateReader', () => {
 							[expect.closeTo(13.3718, 5), expect.closeTo(52.51926, 5)],
 							[expect.closeTo(13.37115, 5), expect.closeTo(52.51794, 5)]
 						],
-						strokeStyle: {
+						outlineStyle: {
 							color: '#aa0000',
 							width: 1
 						},
@@ -675,7 +675,7 @@ describe('legend', () => {
 						{
 							type: 'area',
 							style: { color: '#ff0000', pattern: 'diagonal-up' },
-							strokeStyle: { width: 3 },
+							outlineStyle: { width: 3 },
 							label: 'Red area'
 						},
 						{ type: 'marker', style: { color: '#0000ff', symbol: 'icons:anchor', size: 1.5 }, label: 'Blue marker' },

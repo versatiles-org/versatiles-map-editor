@@ -126,7 +126,7 @@
 		<StyleStroke layers={[line]} {doc} />
 		<StyleArrows layers={[line]} {doc} />
 	{:else}
-		{@const outline = entryStyle(doc, index, 'strokeStyle', 'outline')}
+		{@const outline = entryStyle(doc, index, 'outlineStyle', 'outline')}
 		<StyleFill layers={[entryStyle(doc, index, 'style', 'fill')]} {doc} colorLabel="Fill color" />
 		<InputRow id="{id}-outline" label="Outline">
 			<Checkbox

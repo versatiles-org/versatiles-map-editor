@@ -117,7 +117,7 @@ export const BACKGROUND_STEPS = { labelSize: 20, haloWidth: 4, colors: 20 } as c
 export const LEGEND_KEYS = { entries: 1, theme: 2, layout: 3, font: 4, bold: 5, italic: 6 } as const;
 
 /** The fields of an entry of the legend. */
-export const LEGEND_ENTRY_KEYS = { type: 1, style: 2, label: 3, strokeStyle: 4 } as const;
+export const LEGEND_ENTRY_KEYS = { type: 1, style: 2, label: 3, outlineStyle: 4 } as const;
 
 /**
  * The settings of a frame besides its area: how the map is turned when it opens, and what its

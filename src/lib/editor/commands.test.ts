@@ -166,7 +166,7 @@ describe('addLegendEntry', () => {
 		// all colors are offered in the color picker, also those of the legend and of the halos
 		expect(doc.colors.getColors().sort()).toStrictEqual(['#111111', '#222222', '#ffffff']);
 		// areas of the color, without an outline
-		expect(doc.legend?.entries[0]).toMatchObject({ type: 'area', strokeStyle: { visible: false } });
+		expect(doc.legend?.entries[0]).toMatchObject({ type: 'area', outlineStyle: { visible: false } });
 
 		doc.state.undo();
 		expect(doc.legend?.entries).toHaveLength(1);
@@ -197,9 +197,9 @@ describe('addToLegend', () => {
 			type: 'polygon',
 			points,
 			style: { color: '#00ff004d', pattern: 'diagonal-down' },
-			strokeStyle: { color: '#00ff00' }
+			outlineStyle: { color: '#00ff00' }
 		});
-		const zone = doc.addElement({ type: 'circle', point: [0, 0], radius: 100, strokeStyle: { visible: false } });
+		const zone = doc.addElement({ type: 'circle', point: [0, 0], radius: 100, outlineStyle: { visible: false } });
 		doc.selection.selectElements([cafe, route, park, zone]);
 
 		expect(addToLegend(doc)).toBe(4);
@@ -210,11 +210,11 @@ describe('addToLegend', () => {
 			{
 				type: 'area',
 				style: { color: '#00ff004d', pattern: 'diagonal-down' },
-				strokeStyle: { color: '#00ff00' },
+				outlineStyle: { color: '#00ff00' },
 				label: ''
 			},
 			// a circle is an area
-			{ type: 'area', strokeStyle: { visible: false }, label: '' }
+			{ type: 'area', outlineStyle: { visible: false }, label: '' }
 		]);
 		doc.state.undo();
 		expect(doc.legend).toBeUndefined();
@@ -294,12 +294,12 @@ describe('pasteStyleToEntry', () => {
 				point: [0, 0],
 				radius: 1,
 				style: { pattern: 'diagonal-up' },
-				strokeStyle: { visible: false }
+				outlineStyle: { visible: false }
 			})
 		).toStrictEqual({
 			type: 'area',
 			style: { pattern: 'diagonal-up' },
-			strokeStyle: { visible: false },
+			outlineStyle: { visible: false },
 			label: 'Kept'
 		});
 		// all defaults

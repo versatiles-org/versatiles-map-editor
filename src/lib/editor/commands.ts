@@ -58,7 +58,7 @@ export function addLegendEntry(doc: MapDocumentInteractive): void {
 	const candidates = [...doc.colors.getColors().filter((c) => isMain.has(c)), ...main.reverse()];
 	const color = candidates.find((c) => !used.has(c)) ?? '#ff0000';
 	// an area of the color, without an outline
-	const entry: StateLegendEntry = { type: 'area', style: { color }, strokeStyle: { visible: false }, label: '' };
+	const entry: StateLegendEntry = { type: 'area', style: { color }, outlineStyle: { visible: false }, label: '' };
 	doc.legend = { ...doc.legend, entries: [...entries, entry] };
 	doc.state.log();
 }
@@ -111,7 +111,7 @@ export function pasteStyleToEntry(doc: MapDocumentInteractive, index: number): v
 			? {
 					type: 'area',
 					style: style('fill', copied.fill),
-					strokeStyle: style('outline', copied.stroke),
+					outlineStyle: style('outline', copied.stroke),
 					label
 				}
 			: { type: 'line', style: style('line', copied.stroke), label };

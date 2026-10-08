@@ -26,7 +26,7 @@
 		const draw = (e: StateLegendEntry) =>
 			e.type === 'line'
 				? drawLine(canvas, e.style)
-				: drawArea(canvas, e.style, 'strokeStyle' in e ? e.strokeStyle : undefined);
+				: drawArea(canvas, e.style, 'outlineStyle' in e ? e.outlineStyle : undefined);
 		draw(entry);
 		return { update: draw };
 	};

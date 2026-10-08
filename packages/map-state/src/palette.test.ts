@@ -23,7 +23,7 @@ const state: MapState = {
 			[(1301 + i) / 100, 52.01]
 		] as [number, number][],
 		style: { color: i % 2 ? '#0000ff' : '#00ff00' },
-		strokeStyle: { color: '#ffffff80' }
+		outlineStyle: { color: '#ffffff80' }
 	}))
 };
 

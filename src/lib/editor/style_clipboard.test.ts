@@ -49,7 +49,7 @@ describe('StyleClipboard', () => {
 
 		copyAndPaste(source, target);
 		expect(target.getState().style).toStrictEqual(source.getState().style);
-		expect(target.getState().strokeStyle).toStrictEqual(source.getState().strokeStyle);
+		expect(target.getState().outlineStyle).toStrictEqual(source.getState().outlineStyle);
 	});
 
 	it('does not transfer the label of a marker', () => {
@@ -72,7 +72,7 @@ describe('StyleClipboard', () => {
 		polygon.strokeLayer.visible = false;
 
 		copyAndPaste(line, polygon);
-		expect(polygon.getState().strokeStyle).toStrictEqual({ color: '#0000ff', width: 5 });
+		expect(polygon.getState().outlineStyle).toStrictEqual({ color: '#0000ff', width: 5 });
 		expect(polygon.getState().style).toBeUndefined();
 	});
 
@@ -99,7 +99,7 @@ describe('StyleClipboard', () => {
 
 		const polygon = newPolygon(doc);
 		copyAndPaste(arrowed, polygon);
-		expect(polygon.getState().strokeStyle).toBeUndefined();
+		expect(polygon.getState().outlineStyle).toBeUndefined();
 	});
 
 	it('transfers only the color between elements without common style parts', () => {
@@ -111,7 +111,7 @@ describe('StyleClipboard', () => {
 
 		copyAndPaste(marker, polygon, line);
 		expect(polygon.getState().style).toStrictEqual({ color: '#00ff00' });
-		expect(polygon.getState().strokeStyle).toBeUndefined();
+		expect(polygon.getState().outlineStyle).toBeUndefined();
 		expect(line.getState().style).toStrictEqual({ color: '#00ff00' });
 
 		polygon.fillLayer.color = '#0000ff';

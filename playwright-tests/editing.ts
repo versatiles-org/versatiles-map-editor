@@ -269,7 +269,9 @@ test('color picker', { tag: '@cross-browser' }, async ({ page }) => {
 	const fill = async () =>
 		((await storedState(page)).elements[0] as { style?: { color?: string } })?.style?.color?.toLowerCase();
 	const stroke = async () =>
-		((await storedState(page)).elements[0] as { strokeStyle?: { color?: string } })?.strokeStyle?.color?.toLowerCase();
+		(
+			(await storedState(page)).elements[0] as { outlineStyle?: { color?: string } }
+		)?.outlineStyle?.color?.toLowerCase();
 	const [fillColor, strokeColor] = await page.getByLabel('Color').all();
 
 	// a hex value sets the fill color
@@ -451,8 +453,8 @@ test('copying and pasting a style', async ({ page }) => {
 	const styles = async () =>
 		(await storedState(page)).elements.map((e) => {
 			const lower = (style?: { color?: string }) => style && { ...style, color: style.color?.toLowerCase() };
-			return 'strokeStyle' in e
-				? { style: lower(e.style), strokeStyle: lower(e.strokeStyle) }
+			return 'outlineStyle' in e
+				? { style: lower(e.style), outlineStyle: lower(e.outlineStyle) }
 				: { style: lower(e.style) };
 		});
 	const pasteButton = page.getByRole('button', { name: 'Paste style' });
@@ -479,7 +481,7 @@ test('copying and pasting a style', async ({ page }) => {
 		.poll(styles)
 		.toStrictEqual([
 			{ style: { color: '#0000ff', width: 4 } },
-			{ style: undefined, strokeStyle: { color: '#0000ff', width: 4 } },
+			{ style: undefined, outlineStyle: { color: '#0000ff', width: 4 } },
 			{ style: { color: '#0000ff' } }
 		]);
 
@@ -639,7 +641,7 @@ test(
 		await page.goto('/#' + encodeState(state));
 		await waitForMapIsReady(page);
 		const polygon = async () =>
-			(await storedState(page)).elements[0] as { style?: { pattern?: string }; strokeStyle?: { width?: number } };
+			(await storedState(page)).elements[0] as { style?: { pattern?: string }; outlineStyle?: { width?: number } };
 		const pattern = async () => (await polygon()).style?.pattern;
 
 		// the fill pattern in a drop-down list with pictures, chosen by click
@@ -681,12 +683,12 @@ test(
 		const field = page.getByRole('spinbutton', { name: 'Width' });
 		await field.fill('2.3');
 		await field.press('Enter');
-		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(2.3);
+		await expect.poll(async () => (await polygon()).outlineStyle?.width).toBe(2.3);
 		// the slider shows the step next to it, the field the exact value
 		await expect(field).toHaveValue('2.3');
 		await field.fill('150');
 		await field.press('Enter');
-		await expect.poll(async () => (await polygon()).strokeStyle?.width).toBe(20);
+		await expect.poll(async () => (await polygon()).outlineStyle?.width).toBe(20);
 		await expect(field).toHaveValue('20');
 
 		// the label of a marker, at its place around the symbol

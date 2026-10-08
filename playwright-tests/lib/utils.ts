@@ -501,5 +501,5 @@ export function styleOf(item: StateElement | StateLegendEntry | undefined): Stat
 
 /** The outline of an area or of an area entry of the legend. */
 export function strokeStyleOf(item: StateElement | StateLegendEntry | undefined): StateStyle | undefined {
-	return item && 'strokeStyle' in item ? item.strokeStyle : undefined;
+	return item && 'outlineStyle' in item ? item.outlineStyle : undefined;
 }

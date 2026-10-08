@@ -53,7 +53,7 @@ export function setEntryType(doc: MapDocumentInteractive, index: number, type: S
 	const style = { color: colorOf(entry) };
 	replaceEntry(doc, index, () =>
 		type === 'area'
-			? { type, style, strokeStyle: { visible: false }, label: entry.label }
+			? { type, style, outlineStyle: { visible: false }, label: entry.label }
 			: { type, style, label: entry.label }
 	);
 	doc.state.log();
@@ -66,8 +66,8 @@ export function setEntryType(doc: MapDocumentInteractive, index: number, type: S
 export function setEntryOutline(doc: MapDocumentInteractive, index: number, visible: boolean) {
 	const entry = legendOf(doc).entries[index];
 	if (!entry) return;
-	const outline = entryStyle(doc, index, 'strokeStyle', 'outline');
-	if (visible && !entryStyleOf(entry, 'strokeStyle')?.color) {
+	const outline = entryStyle(doc, index, 'outlineStyle', 'outline');
+	if (visible && !entryStyleOf(entry, 'outlineStyle')?.color) {
 		const fill = parseColor(colorOf(entry));
 		if (fill) outline.color = formatHex({ ...fill, alpha: 1 });
 	}
@@ -75,8 +75,8 @@ export function setEntryOutline(doc: MapDocumentInteractive, index: number, visi
 	doc.state.log();
 }
 
-/** The entry with the style (`style` or `strokeStyle`), without it if it is undefined. */
-function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style: StateStyle | undefined) {
+/** The entry with the style (`style` or `outlineStyle`), without it if it is undefined. */
+function withStyle(entry: StateLegendEntry, key: 'style' | 'outlineStyle', style: StateStyle | undefined) {
 	const result: Record<string, unknown> = { ...entry };
 	if (style) result[key] = style;
 	else delete result[key];
@@ -88,7 +88,7 @@ function withStyle(entry: StateLegendEntry, key: 'style' | 'strokeStyle', style:
  * StyleStroke), which edit it like that of an element: it is stored as an element's, see
  * `storedStyle`.
  */
-export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'style' | 'strokeStyle', role: StyleRole) {
+export function entryStyle(doc: MapDocumentInteractive, index: number, key: 'style' | 'outlineStyle', role: StyleRole) {
 	const get = (): StateStyle => completeStyle(role, entryStyleOf(legendOf(doc).entries[index], key));
 	const set = (field: keyof StateStyle, value: unknown) => {
 		const style = storedStyle(role, { ...get(), [field]: value });

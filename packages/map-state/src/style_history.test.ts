@@ -57,7 +57,7 @@ describe('style references', () => {
 						[1, 1]
 					],
 					style: { color: '#00ff00', pattern: 'diagonal-up' },
-					strokeStyle: { color: '#000000', width: 3, visible: false }
+					outlineStyle: { color: '#000000', width: 3, visible: false }
 				},
 				{
 					type: 'polygon',
@@ -67,7 +67,7 @@ describe('style references', () => {
 						[1, 1]
 					],
 					style: { color: '#00ff00' },
-					strokeStyle: { color: '#000000', width: 3 }
+					outlineStyle: { color: '#000000', width: 3 }
 				},
 				{
 					type: 'line',

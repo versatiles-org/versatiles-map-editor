@@ -7,13 +7,13 @@
 				{
 					"type": "area",
 					"style": { "color": "#ff710040" },
-					"strokeStyle": { "color": "#ff7100", "width": 2.5 },
+					"outlineStyle": { "color": "#ff7100", "width": 2.5 },
 					"label": "10 km zone"
 				},
 				{
 					"type": "area",
 					"style": { "color": "#e69f0040" },
-					"strokeStyle": { "color": "#e69f00", "dash": "dotted", "width": 2.5 },
+					"outlineStyle": { "color": "#e69f00", "dash": "dotted", "width": 2.5 },
 					"label": "30 km exclusion zone"
 				}
 			],
@@ -28,7 +28,7 @@
 			"point": [30.099, 51.389],
 			"radius": 30000,
 			"style": { "color": "#e69f0040" },
-			"strokeStyle": { "color": "#e69f00", "dash": "dotted", "width": 2.5 },
+			"outlineStyle": { "color": "#e69f00", "dash": "dotted", "width": 2.5 },
 			"popup": { "text": "**30 km exclusion zone**\nEvacuated after the disaster of 26 April 1986." }
 		},
 		{
@@ -36,7 +36,7 @@
 			"point": [30.099, 51.389],
 			"radius": 10000,
 			"style": { "color": "#ff710040" },
-			"strokeStyle": { "color": "#ff7100", "width": 2.5 },
+			"outlineStyle": { "color": "#ff7100", "width": 2.5 },
 			"popup": { "text": "**10 km zone**\nThe most contaminated area around the plant." }
 		},
 		{

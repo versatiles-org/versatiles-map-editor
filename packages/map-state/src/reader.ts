@@ -583,13 +583,13 @@ export class StateReader {
 		const hasStroke = element.type === 'polygon' || element.type === 'circle';
 		if (previous) {
 			if (previous.style) element.style = { ...previous.style };
-			if (hasStroke && 'strokeStyle' in previous && previous.strokeStyle) {
-				element.strokeStyle = { ...previous.strokeStyle };
+			if (hasStroke && 'outlineStyle' in previous && previous.outlineStyle) {
+				element.outlineStyle = { ...previous.outlineStyle };
 			}
 			return;
 		}
 		if (this.readBit()) element.style = { ...this.readStyle(roleOf(element.type)) };
-		if (hasStroke && this.readBit()) element.strokeStyle = { ...this.readStyle('outline') };
+		if (hasStroke && this.readBit()) element.outlineStyle = { ...this.readStyle('outline') };
 	}
 
 	readLegend(): StateLegend {
@@ -662,14 +662,14 @@ export class StateReader {
 	readLegendEntry(): StateLegendEntry {
 		let type: StateLegendEntry['type'] | undefined;
 		let style: StateStyle | undefined;
-		let strokeStyle: StateStyle | undefined;
+		let outlineStyle: StateStyle | undefined;
 		let label = '';
 		while (true) {
 			const key = this.readKey(KEY_PARAMETERS.legendEntry);
 			switch (key) {
 				case END_KEY:
 					if (!type) throw new Error('Legend entry without type');
-					return { type, ...(style && { style }), ...(strokeStyle && { strokeStyle }), label } as StateLegendEntry;
+					return { type, ...(style && { style }), ...(outlineStyle && { outlineStyle }), label } as StateLegendEntry;
 				case LEGEND_ENTRY_KEYS.label:
 					label = this.readStringRef();
 					break;
@@ -682,9 +682,9 @@ export class StateReader {
 					if (!type) throw new Error('A style of a legend entry before its type');
 					style = this.readStyle(roleOf(type));
 					break;
-				case LEGEND_ENTRY_KEYS.strokeStyle:
+				case LEGEND_ENTRY_KEYS.outlineStyle:
 					if (type !== 'area') throw new Error('An outline of a legend entry that is no area');
-					strokeStyle = this.readStyle('outline');
+					outlineStyle = this.readStyle('outline');
 					break;
 				default:
 					throw new Error(`Invalid legend entry key: ${key}`);

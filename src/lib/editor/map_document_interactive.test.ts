@@ -217,14 +217,14 @@ describe('MapDocument', () => {
 					[5, 2]
 				] as GeoPath,
 				style: { color: '#abcdef' },
-				strokeStyle: { color: '#123456' },
+				outlineStyle: { color: '#123456' },
 				type: 'polygon'
 			};
 
 			const polygon = addElement(doc, 'polygon');
 			polygon.path = element.points;
 			polygon.fillLayer.color = element.style.color;
-			polygon.strokeLayer.color = element.strokeStyle.color;
+			polygon.strokeLayer.color = element.outlineStyle.color;
 
 			expect(doc.getState().elements).toStrictEqual([element]);
 
@@ -352,12 +352,12 @@ describe('MapDocument', () => {
 				const circleCopy = doc.duplicateElement(circle, [0, 10]);
 
 				expect(polygonCopy).toBeInstanceOf(PolygonElement);
-				expect(polygonCopy.getState()).toMatchObject({ strokeStyle: { visible: false } });
+				expect(polygonCopy.getState()).toMatchObject({ outlineStyle: { visible: false } });
 				expect(circleCopy).toBeInstanceOf(CircleElement);
 				expect(circleCopy.getState()).toMatchObject({
 					radius: circle.radius,
 					point: [circle.point[0], expect.closeTo(circle.point[1] + 10)],
-					strokeStyle: { color: '#123456' }
+					outlineStyle: { color: '#123456' }
 				});
 			});
 		});
@@ -372,7 +372,7 @@ describe('MapDocument', () => {
 			await doc.setState(decodeState(doc.state.getHash()));
 			const [restoredPolygon, restoredMarker] = doc.elements.map((e) => e.getState());
 			// an invisible fill
-			expect(restoredPolygon).toMatchObject({ style: { color: '#ff000000' }, strokeStyle: { visible: false } });
+			expect(restoredPolygon).toMatchObject({ style: { color: '#ff000000' }, outlineStyle: { visible: false } });
 			expect(restoredMarker).toMatchObject({ style: { haloWidth: 0 } });
 		});
 	});
@@ -505,12 +505,12 @@ describe('MapDocument', () => {
 			expect(mockMap.addSource).not.toHaveBeenCalled();
 			// the defaults, which the state leaves out
 			expect(polygon.getState().style).toBeUndefined();
-			expect(polygon.getState().strokeStyle).toBeUndefined();
+			expect(polygon.getState().outlineStyle).toBeUndefined();
 
 			await doc.state.redo();
 			expect(doc.elements).toStrictEqual([polygon, marker]);
 			expect(polygon.getState().style).toStrictEqual({ color: '#12345633' });
-			expect(polygon.getState().strokeStyle).toStrictEqual({ width: 7 });
+			expect(polygon.getState().outlineStyle).toStrictEqual({ width: 7 });
 		});
 
 		it('restore the geometry and the popup', async () => {

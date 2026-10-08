@@ -42,7 +42,7 @@ export class PolygonElement extends AbstractPathElement {
 			points: this.path,
 			...this.getSmoothState(),
 			style: this.fillLayer.getState(),
-			strokeStyle: this.strokeLayer.getState(),
+			outlineStyle: this.strokeLayer.getState(),
 			...this.getPopupState()
 		};
 	}
@@ -51,7 +51,7 @@ export class PolygonElement extends AbstractPathElement {
 		const element = new PolygonElement(doc, state.points);
 		element.smooth = state.smooth === true;
 		element.fillLayer.setState(state.style);
-		element.strokeLayer.setState(state.strokeStyle);
+		element.strokeLayer.setState(state.outlineStyle);
 		return element;
 	}
 }

@@ -22,7 +22,7 @@ export function legendEntryOf(state: StateElement): StateLegendEntry {
 			? { type: 'marker', style: markerLook(state.style), label: '' }
 			: state.type === 'line'
 				? { type: 'line', style: state.style, label: '' }
-				: { type: 'area', style: state.style, strokeStyle: state.strokeStyle, label: '' };
+				: { type: 'area', style: state.style, outlineStyle: state.outlineStyle, label: '' };
 	return withoutEmptyStyles(entry);
 }
 
@@ -30,17 +30,17 @@ export function legendEntryOf(state: StateElement): StateLegendEntry {
 export function withoutEmptyStyles<T extends StateLegendEntry>(entry: T): T {
 	const result: Record<string, unknown> = { ...entry };
 	if (!result.style) delete result.style;
-	if (!result.strokeStyle) delete result.strokeStyle;
+	if (!result.outlineStyle) delete result.outlineStyle;
 	return result as T;
 }
 
-/** The style (`style`) or the outline (`strokeStyle`, only of an area) of an entry. */
+/** The style (`style`) or the outline (`outlineStyle`, only of an area) of an entry. */
 export function entryStyleOf(
 	entry: StateLegendEntry | undefined,
-	key: 'style' | 'strokeStyle'
+	key: 'style' | 'outlineStyle'
 ): StateStyle | undefined {
 	if (!entry) return undefined;
-	return key === 'style' ? entry.style : 'strokeStyle' in entry ? entry.strokeStyle : undefined;
+	return key === 'style' ? entry.style : 'outlineStyle' in entry ? entry.outlineStyle : undefined;
 }
 
 /** A style with its fields in one order, so equal styles give the same text. */
@@ -49,7 +49,7 @@ const sorted = (style: StateStyle | undefined) =>
 
 /** What an entry shows, without its text, e.g. to find entries that look the same. */
 export function lookOf(entry: StateLegendEntry): string {
-	return JSON.stringify([entry.type, sorted(entry.style), sorted(entryStyleOf(entry, 'strokeStyle'))]);
+	return JSON.stringify([entry.type, sorted(entry.style), sorted(entryStyleOf(entry, 'outlineStyle'))]);
 }
 
 /** The look of an element, see `lookOf`. */
@@ -123,7 +123,7 @@ export function legendColors(legend: StateLegend | undefined): string[] {
 	return (legend?.entries ?? []).flatMap((entry) => {
 		if (entry.type === 'marker') return [completeStyle('symbol', entry.style).color];
 		if (entry.type === 'line') return [completeStyle('line', entry.style).color];
-		const outline = completeStyle('outline', entry.strokeStyle);
+		const outline = completeStyle('outline', entry.outlineStyle);
 		return [completeStyle('fill', entry.style).color, ...(outline.visible ? [outline.color] : [])];
 	});
 }

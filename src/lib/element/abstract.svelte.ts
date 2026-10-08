@@ -104,7 +104,7 @@ export abstract class AbstractElement {
 		symbol?.setState(state.style);
 		fill?.setState(state.style);
 		// the outline of an area has its own style, a line has only one
-		stroke?.setState(fill ? (state as { strokeStyle?: StateStyle }).strokeStyle : state.style);
+		stroke?.setState(fill ? (state as { outlineStyle?: StateStyle }).outlineStyle : state.style);
 		this.popup = state.popup?.text ?? '';
 		this.changed();
 		return true;

@@ -581,12 +581,12 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 function sanitizeLegendEntry(
 	type: StateLegendEntry['type'],
 	style: unknown,
-	strokeStyle: unknown,
+	outlineStyle: unknown,
 	label: string
 ): StateLegendEntry {
 	const styles = (s: unknown, role: StyleRoleName) => {
 		const sanitized = sanitizeStyle(role, s);
-		return sanitized ? { [role === 'outline' ? 'strokeStyle' : 'style']: sanitized } : {};
+		return sanitized ? { [role === 'outline' ? 'outlineStyle' : 'style']: sanitized } : {};
 	};
 	switch (type) {
 		case 'marker':
@@ -595,7 +595,7 @@ function sanitizeLegendEntry(
 			return { type, ...styles(style, 'line'), label };
 		case 'area':
 			// only areas have an outline
-			return { type, ...styles(style, 'area'), ...styles(strokeStyle, 'outline'), label };
+			return { type, ...styles(style, 'area'), ...styles(outlineStyle, 'outline'), label };
 	}
 }
 
@@ -646,7 +646,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 		const label = sanitizeString(e.label) ?? '';
 		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
 		if (!type) continue;
-		legend.entries.push(sanitizeLegendEntry(type, e.style, e.strokeStyle, label));
+		legend.entries.push(sanitizeLegendEntry(type, e.style, e.outlineStyle, label));
 	}
 	return removeLegendDefaults(legend);
 }
@@ -838,7 +838,7 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 				type: 'polygon',
 				points,
 				style: sanitizeStyle('area', v.style),
-				strokeStyle: sanitizeStyle('outline', v.strokeStyle)
+				outlineStyle: sanitizeStyle('outline', v.outlineStyle)
 			};
 			if (sanitizeBoolean(v.smooth)) element.smooth = true;
 			break;
@@ -852,7 +852,7 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 				point,
 				radius,
 				style: sanitizeStyle('area', v.style),
-				strokeStyle: sanitizeStyle('outline', v.strokeStyle)
+				outlineStyle: sanitizeStyle('outline', v.outlineStyle)
 			};
 			break;
 		}

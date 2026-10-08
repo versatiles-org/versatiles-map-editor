@@ -104,7 +104,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 					[1, 1]
 				],
 				style: { color: '#11223380' },
-				strokeStyle: { color: '#445566', width: 3, visible: false },
+				outlineStyle: { color: '#445566', width: 3, visible: false },
 				popup: { text: 'A polygon' }
 			},
 			{
@@ -112,7 +112,7 @@ describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 				point: [10, 20],
 				radius: 500,
 				style: { color: '#778899' },
-				strokeStyle: { dash: 'dotted' },
+				outlineStyle: { dash: 'dotted' },
 				popup: { text: 'A circle' }
 			}
 		]
@@ -309,8 +309,8 @@ describe('legend', () => {
 					entries: [
 						{ type: 'line', style: { color: '#F00', width: '3', dash: 7, size: -1, extra: 1 }, label: 5 },
 						// only areas have an outline
-						{ type: 'marker', style: { symbol: 'flag' }, strokeStyle: { color: '#000' }, label: 'y' },
-						{ type: 'area', style: 'red', strokeStyle: { visible: false }, label: 'z' },
+						{ type: 'marker', style: { symbol: 'flag' }, outlineStyle: { color: '#000' }, label: 'y' },
+						{ type: 'area', style: 'red', outlineStyle: { visible: false }, label: 'z' },
 						{ type: 'circle', style: { color: '#0F0' }, label: 'x' },
 						// without a type
 						{ color: '#0F0', label: 'x', symbol: 'icons:anchor' },
@@ -327,7 +327,7 @@ describe('legend', () => {
 					// only valid fields; a symbol is the name of its image, e.g. no short name
 					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '5' },
 					{ type: 'marker', label: 'y' },
-					{ type: 'area', strokeStyle: { visible: false }, label: 'z' }
+					{ type: 'area', outlineStyle: { visible: false }, label: 'z' }
 				]
 			}
 		});
@@ -385,7 +385,7 @@ describe('stateFromGeoJSON with foreign property values', () => {
 
 	it('clamps negative sizes and out-of-range opacity', () => {
 		const circle = styleOf({ subType: 'Circle', radius: 100, 'stroke-width': -1, 'fill-opacity': 1.5 });
-		expect(circle).toEqual({ type: 'circle', point: [13.4, 52.5], radius: 100, strokeStyle: { width: 0 } });
+		expect(circle).toEqual({ type: 'circle', point: [13.4, 52.5], radius: 100, outlineStyle: { width: 0 } });
 	});
 
 	it('normalizes parseable colors and drops unparseable ones', () => {
@@ -399,7 +399,7 @@ describe('stateFromGeoJSON with foreign property values', () => {
 		expect(styleOf({ 'symbol-size': '2', 'symbol-label': 7 })).toMatchObject({ label: '7', style: { size: 2 } });
 		expect(styleOf({ subType: 'Circle', radius: '50', 'stroke-visibility': 'false' })).toMatchObject({
 			radius: 50,
-			strokeStyle: { visible: false }
+			outlineStyle: { visible: false }
 		});
 	});
 

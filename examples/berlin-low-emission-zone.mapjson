@@ -38,7 +38,7 @@
 			],
 			"smooth": true,
 			"style": { "color": "#0072b2", "pattern": "diagonal-up", "patternScale": 0.5, "patternCoverage": 0.15 },
-			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
+			"outlineStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
 				"text": "**Umweltzone**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
 			}
@@ -64,7 +64,7 @@
 				[13.33783, 52.51149]
 			],
 			"style": { "color": "#009e7380" },
-			"strokeStyle": { "color": "#009e73" },
+			"outlineStyle": { "color": "#009e73" },
 			"popup": { "text": "**Großer Tiergarten**" }
 		},
 		{
@@ -88,7 +88,7 @@
 				[13.38621, 52.47608]
 			],
 			"style": { "color": "#009e7380" },
-			"strokeStyle": { "color": "#009e73" },
+			"outlineStyle": { "color": "#009e73" },
 			"popup": { "text": "**Tempelhofer Feld**" }
 		},
 		{

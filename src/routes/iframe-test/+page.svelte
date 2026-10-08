@@ -39,14 +39,14 @@
 					[13.37115, 52.51794]
 				],
 				style: { color: '#aa0000', pattern: 'diagonal-up', patternCoverage: 0.25 },
-				strokeStyle: { width: 1, color: '#aa0000' }
+				outlineStyle: { width: 1, color: '#aa0000' }
 			},
 			{
 				type: 'circle',
 				point: [13.36106, 52.51089],
 				radius: 302,
 				style: { color: '#aa000038', pattern: 'diagonal-up' },
-				strokeStyle: { color: '#aa0000' }
+				outlineStyle: { color: '#aa0000' }
 			}
 		]
 	};

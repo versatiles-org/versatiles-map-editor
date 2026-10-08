@@ -59,7 +59,7 @@ describe('ElementRenderer', () => {
 						[3, 4],
 						[5, 2]
 					],
-					strokeStyle: { visible: false }
+					outlineStyle: { visible: false }
 				},
 				{ type: 'marker', point: [1, 2], label: 'A' }
 			]

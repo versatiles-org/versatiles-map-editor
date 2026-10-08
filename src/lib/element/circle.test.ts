@@ -77,7 +77,7 @@ describe('CircleElement', () => {
 		expect(state.point).toStrictEqual([10, 20]);
 		expect(state.radius).toStrictEqual(300000);
 		expect(state.style).toStrictEqual({ color: '#00ff00' });
-		expect(state.strokeStyle).toStrictEqual({ color: '#0000ff' });
+		expect(state.outlineStyle).toStrictEqual({ color: '#0000ff' });
 	});
 
 	it('should create CircleElement from state', () => {
@@ -86,7 +86,7 @@ describe('CircleElement', () => {
 			point: [30, 40] as GeoPoint,
 			radius: 10,
 			style: {},
-			strokeStyle: {}
+			outlineStyle: {}
 		};
 		const element = CircleElement.fromState(doc, state);
 		expect(element.point).toEqual([30, 40]);

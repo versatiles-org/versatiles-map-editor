@@ -52,9 +52,9 @@ describe('elements that repeat the one before', () => {
 				[13.1, 52.1]
 			],
 			style: { color: '#00ff00' },
-			strokeStyle: { width: 2 }
+			outlineStyle: { width: 2 }
 		};
-		const circle: StateElement = { type: 'circle', point: [13, 52], radius: 100, strokeStyle: { visible: false } };
+		const circle: StateElement = { type: 'circle', point: [13, 52], radius: 100, outlineStyle: { visible: false } };
 		const elements = [line, { ...line }, polygon, { ...polygon }, circle, { ...circle }];
 		expect(roundTrip(elements)).toStrictEqual(elements);
 		// line, polygon (fill and outline), circle (outline)
@@ -74,8 +74,8 @@ describe('elements that repeat the one before', () => {
 			[13.1, 52.1]
 		];
 		const elements: StateElement[] = [
-			{ type: 'polygon', points: square, style: { color: '#00ff00' }, strokeStyle: { width: 2 } },
-			{ type: 'polygon', points: square, style: { color: '#00ff00' }, strokeStyle: { width: 3 } },
+			{ type: 'polygon', points: square, style: { color: '#00ff00' }, outlineStyle: { width: 2 } },
+			{ type: 'polygon', points: square, style: { color: '#00ff00' }, outlineStyle: { width: 3 } },
 			{ type: 'line', points: square, style: { color: '#00ff00' } },
 			marker(13, { color: '#00ff00' })
 		];

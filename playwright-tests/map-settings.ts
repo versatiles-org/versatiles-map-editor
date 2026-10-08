@@ -484,7 +484,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 		() => ({ type: 'marker', point: at() }),
 		() => ({ type: 'marker', point: at(), label: 'Label' }),
 		() => ({ type: 'polygon', points: [at(), at(), at()] }),
-		() => ({ type: 'polygon', points: [at(), at(), at()], strokeStyle: { visible: false } }),
+		() => ({ type: 'polygon', points: [at(), at(), at()], outlineStyle: { visible: false } }),
 		() => ({ type: 'circle', point: at(), radius: 200 }),
 		() => ({ type: 'line', points: [at(), at()] })
 	];
@@ -496,7 +496,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 				? [`${i} symbol`, ...(e.type === 'marker' && e.label ? [`${i} label`] : [])]
 				: [
 						...(e.type === 'line' ? [] : [`${i} fill`]),
-						...('strokeStyle' in e && e.strokeStyle?.visible === false ? [] : [`${i} stroke`])
+						...('outlineStyle' in e && e.outlineStyle?.visible === false ? [] : [`${i} stroke`])
 					];
 		if (!markersOnTop) return elements.flatMap(parts);
 		return [

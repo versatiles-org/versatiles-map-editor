@@ -80,7 +80,7 @@ function polygonToFeature(el: StateElementPolygon): GeoJSON.Feature {
 		type: 'Feature',
 		properties: clean({
 			...fillPropsFromStyle(el.style),
-			...strokePropsFromStyle(el.strokeStyle),
+			...strokePropsFromStyle(el.outlineStyle),
 			smooth: el.smooth || undefined,
 			description: el.popup?.text
 		}),
@@ -93,7 +93,7 @@ function circleToFeature(el: StateElementCircle): GeoJSON.Feature {
 		type: 'Feature',
 		properties: clean({
 			...fillPropsFromStyle(el.style),
-			...strokePropsFromStyle(el.strokeStyle),
+			...strokePropsFromStyle(el.outlineStyle),
 			subType: 'Circle',
 			radius: el.radius,
 			description: el.popup?.text
@@ -193,7 +193,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 					point,
 					radius,
 					style: fillStyleFromProps(p),
-					strokeStyle: strokeStyleFromProps(p)
+					outlineStyle: strokeStyleFromProps(p)
 				};
 			}
 			return { type: 'marker', point, ...labelOf(p?.['symbol-label']), style: symbolStyleFromProps(p) };
@@ -215,7 +215,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 				type: 'polygon',
 				points,
 				style: fillStyleFromProps(p),
-				strokeStyle: strokeStyleFromProps(p),
+				outlineStyle: strokeStyleFromProps(p),
 				...smoothOf(p)
 			};
 		}

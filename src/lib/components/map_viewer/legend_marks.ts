@@ -35,7 +35,7 @@ function drawnWidth({ width, dash }: { width: number; dash: DashName }, max: num
 export function textColor(entry: StateLegendEntry): string {
 	if (entry.type === 'marker') return completeStyle('symbol', entry.style).color;
 	if (entry.type === 'line') return completeStyle('line', entry.style).color;
-	const outline = completeStyle('outline', entry.strokeStyle);
+	const outline = completeStyle('outline', entry.outlineStyle);
 	const color = outline.visible ? outline.color : completeStyle('fill', entry.style).color;
 	const parsed = parseColor(color);
 	return parsed ? formatHex({ ...parsed, alpha: 1 }) : color;

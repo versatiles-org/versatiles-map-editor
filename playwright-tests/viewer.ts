@@ -645,13 +645,13 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 			[13.42, 52.5]
 		],
 		style: { color: '#00000000' },
-		strokeStyle: { color: '#0000ff', width: 8 }
+		outlineStyle: { color: '#0000ff', width: 8 }
 	};
 	const area: MapState['elements'][number] = {
 		type: 'polygon',
 		points: square(0.004),
 		style: { color: '#00ff00' },
-		strokeStyle: { visible: false }
+		outlineStyle: { visible: false }
 	};
 	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
 	async function colors(elements: MapState['elements']) {

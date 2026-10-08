@@ -121,14 +121,14 @@ describe('StateWriter', () => {
 						[13, 14]
 					],
 					style: { pattern: 'cross', color: '#0000ff' },
-					strokeStyle: { width: 0.8, visible: false, color: '#ffff00' }
+					outlineStyle: { width: 0.8, visible: false, color: '#ffff00' }
 				},
 				{
 					type: 'circle',
 					point: [15, 16],
 					radius: 17,
 					style: { pattern: 'diagonal-up' },
-					strokeStyle: { width: 0.2 }
+					outlineStyle: { width: 0.2 }
 				}
 			]
 		});

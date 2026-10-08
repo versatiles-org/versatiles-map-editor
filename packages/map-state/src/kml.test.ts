@@ -45,10 +45,10 @@ const state: MapState = {
 				[13.4, 52.5]
 			],
 			style: { color: '#12345680', pattern: 'diagonal-down' },
-			strokeStyle: { color: '#654321', visible: false },
+			outlineStyle: { color: '#654321', visible: false },
 			popup: { text: 'A polygon' }
 		},
-		{ type: 'circle', point: [13.5, 52.6], radius: 1500, style: { color: '#abcdef' }, strokeStyle: { width: 1 } }
+		{ type: 'circle', point: [13.5, 52.6], radius: 1500, style: { color: '#abcdef' }, outlineStyle: { width: 1 } }
 	]
 };
 
@@ -184,7 +184,7 @@ describe('stateFromKML', () => {
 					[2, 2]
 				],
 				style: { color: '#00ff0040' },
-				strokeStyle: { visible: false }
+				outlineStyle: { visible: false }
 			},
 			{ type: 'marker', point: [5, 5] }
 		]);
