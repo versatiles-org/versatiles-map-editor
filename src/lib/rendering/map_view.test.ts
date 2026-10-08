@@ -88,6 +88,28 @@ describe('MapView', () => {
 			expect(setMaxBounds).toHaveBeenLastCalledWith(null);
 		});
 
+		it('limits how far the map is zoomed, and a confined map by what it showed instead of a least zoom', () => {
+			const [setMinZoom, setMaxZoom] = [vi.fn(), vi.fn()];
+			Object.assign(map, { setMinZoom, setMaxZoom, setMaxBounds: vi.fn(), getBounds: () => ({}) });
+			view.setZoomLimits({ min: 4, max: 12.5 });
+			expect(setMinZoom).toHaveBeenLastCalledWith(4);
+			expect(setMaxZoom).toHaveBeenLastCalledWith(12.5);
+			view.setZoomLimits({});
+			expect(setMinZoom).toHaveBeenLastCalledWith(null);
+			expect(setMaxZoom).toHaveBeenLastCalledWith(null);
+
+			view.fitArea([13.3, 52.45, 13.5, 52.55], []);
+			view.confine(true);
+			expect(setMinZoom).toHaveBeenLastCalledWith(map.getZoom());
+			setMinZoom.mockClear();
+			view.setZoomLimits({ min: 4, max: 12.5 });
+			expect(setMinZoom).not.toHaveBeenCalled();
+			expect(setMaxZoom).toHaveBeenLastCalledWith(12.5);
+			// free again: the least zoom of the limits
+			view.confine(false);
+			expect(setMinZoom).toHaveBeenLastCalledWith(4);
+		});
+
 		it('lets an area be shown turned', () => {
 			view.hold({ bearing: 0, pitch: 0 });
 			let whileFitting: object | undefined;

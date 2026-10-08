@@ -354,6 +354,12 @@ export class StateReader {
 					case FRAME_KEYS.confine:
 						frame.confine = true;
 						break;
+					case FRAME_KEYS.minZoom:
+						frame.minZoom = this.readInteger(6) / 2;
+						break;
+					case FRAME_KEYS.maxZoom:
+						frame.maxZoom = this.readInteger(6) / 2;
+						break;
 					default:
 						throw new Error(`Unknown key of the frame: ${key}`);
 				}

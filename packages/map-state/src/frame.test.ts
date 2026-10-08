@@ -123,6 +123,9 @@ describe('frame: how the map is turned', () => {
 			{ canZoom: false },
 			{ bounds, canTilt: true, canZoom: false },
 			{ confine: true },
+			{ minZoom: 3.5 },
+			{ maxZoom: 0 },
+			{ bounds, minZoom: 8, maxZoom: 22 },
 			{ bounds, confine: true }
 		] as StateFrame[]) {
 			expect(decodeState(encodeState({ ...state, frame })).frame).toStrictEqual(frame);
@@ -251,6 +254,13 @@ describe('sanitizeFrame', () => {
 			canTilt: true
 		});
 		expect(sanitizeFrame({ bearing: 'east', pitch: null, canTilt: 'yes', canPan: 0 })).toBeUndefined();
+		// zoom limits: from 0 to 22 in steps of 0.5, the least one not above the largest one
+		expect(sanitizeFrame({ minZoom: 3.3, maxZoom: 12.76 })).toStrictEqual({ minZoom: 3.5, maxZoom: 13 });
+		expect(sanitizeFrame({ minZoom: 14, maxZoom: 10 })).toStrictEqual({ minZoom: 10, maxZoom: 10 });
+		// beyond the levels of a map: the nearest level; no number: no limit
+		expect(sanitizeFrame({ minZoom: -1, maxZoom: 23 })).toStrictEqual({ minZoom: 0, maxZoom: 22 });
+		expect(sanitizeFrame({ minZoom: 'far', maxZoom: null })).toBeUndefined();
+		expect(sanitizeFrame({ minZoom: 0 })).toStrictEqual({ minZoom: 0 });
 		expect(sanitizeFrame({})).toBeUndefined();
 		expect(sanitizeFrame([-10, -20, 10, 20])).toBeUndefined();
 		expect(sanitizeFrame(undefined)).toBeUndefined();

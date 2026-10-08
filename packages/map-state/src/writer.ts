@@ -317,6 +317,15 @@ export class StateWriter {
 		if (frame.canRotate === true) key('rotate');
 		if (frame.canTilt === true) key('tilt');
 		if (frame.confine === true) key('confine');
+		// zoom levels in steps of 0.5: 6 bits, up to 22
+		if (frame.minZoom !== undefined) {
+			key('minZoom');
+			this.writeInteger(Math.round(frame.minZoom * 2), 6);
+		}
+		if (frame.maxZoom !== undefined) {
+			key('maxZoom');
+			this.writeInteger(Math.round(frame.maxZoom * 2), 6);
+		}
 		this.writeInteger(END_KEY, 4);
 	}
 

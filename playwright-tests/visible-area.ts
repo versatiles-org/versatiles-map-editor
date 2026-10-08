@@ -805,3 +805,62 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 	await page.mouse.wheel(0, 600);
 	await expect.poll(async () => (await place()).zoom).toBeLessThan(before.zoom - 0.5);
 });
+
+test('the zoom of visitors of a shared map can be limited', async ({ page }) => {
+	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
+	const stored = async () => (await storedState(page)).frame;
+	const wheel = async (delta: number) => {
+		await page.waitForTimeout(600);
+		await page.mouse.move(400, 300);
+		await page.mouse.wheel(0, delta);
+		await page.waitForTimeout(800);
+		await waitForMapIsIdle(page);
+	};
+
+	// the viewer: the map of a frame of about 14 × 11 km opens at a zoom of about 11
+	await page.setViewportSize({ width: 800, height: 600 });
+	await page.goto('/view/#' + encodeState({ frame: { bounds: frame, minZoom: 10.5, maxZoom: 12 }, elements }));
+	await waitForMapIsReady(page);
+	const start = await zoom();
+	expect(start).toBeGreaterThan(10.5);
+	expect(start).toBeLessThan(12);
+	// with the wheel, and whatever else zooms the map
+	await wheel(-2000);
+	expect(await zoom()).toBe(12);
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ zoom: 20 }));
+	expect(await zoom()).toBe(12);
+	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ zoom: 2 }));
+	expect(await zoom()).toBe(10.5);
+
+	// the panel: a new limit is the zoom of the map now, in steps of 0.5; one undo step each
+	await page.setViewportSize({ width: 1280, height: 720 });
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
+	await waitForMapIsReady(page);
+	await showView(page, { center: [13.4, 52.5], radius: 15000 });
+	await (await menuItem(page, 'Shared map…')).click();
+	const now = Math.round((await zoom()) * 2) / 2;
+	const limitIn = sidebar(page).getByRole('checkbox', { name: 'Limit zooming in' });
+	const limitOut = sidebar(page).getByRole('checkbox', { name: 'Limit zooming out' });
+	await limitIn.check();
+	await expect.poll(stored).toStrictEqual({ bounds: frame, maxZoom: now });
+	const level = sidebar(page).getByRole('spinbutton', { name: 'Zoom level' });
+	await level.fill('14');
+	await level.press('Enter');
+	await expect.poll(stored).toStrictEqual({ bounds: frame, maxZoom: 14 });
+	// the least zoom is not above the largest one
+	await limitOut.check();
+	await expect.poll(stored).toStrictEqual({ bounds: frame, minZoom: now, maxZoom: 14 });
+	await level.first().fill('16');
+	await level.first().press('Enter');
+	await expect.poll(stored).toStrictEqual({ bounds: frame, minZoom: 16, maxZoom: 16 });
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(stored).toStrictEqual({ bounds: frame, minZoom: now, maxZoom: 14 });
+	// visitors who stay in the area need no least zoom: it is off, and kept for later
+	await sidebar(page).getByRole('checkbox', { name: 'Visitors stay in the area' }).check();
+	await expect(limitOut).toBeDisabled();
+	await expect(limitOut).not.toBeChecked();
+	// the author is not limited
+	await wheel(3000);
+	expect(await zoom()).toBeLessThan(now - 1);
+});

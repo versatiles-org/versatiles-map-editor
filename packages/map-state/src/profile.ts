@@ -16,6 +16,7 @@ import {
 	SEARCH_POSITIONS,
 	STROKE_STYLE_NAMES,
 	MAX_PITCH,
+	MAX_ZOOM,
 	type Bounds,
 	type StateFrame,
 	type Position,
@@ -468,6 +469,15 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (sanitizeBoolean(v.canRotate)) frame.canRotate = true;
 	if (sanitizeBoolean(v.canTilt)) frame.canTilt = true;
 	if (sanitizeBoolean(v.confine)) frame.confine = true;
+	// in steps of 0.5; a least zoom above the largest one is the largest one
+	const zoom = (value: unknown) => {
+		const level = sanitizeNumber(value, 0, MAX_ZOOM);
+		return level === undefined ? undefined : Math.round(level * 2) / 2;
+	};
+	const maxZoom = zoom(v.maxZoom);
+	const minZoom = zoom(v.minZoom);
+	if (minZoom !== undefined) frame.minZoom = maxZoom === undefined ? minZoom : Math.min(minZoom, maxZoom);
+	if (maxZoom !== undefined) frame.maxZoom = maxZoom;
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 

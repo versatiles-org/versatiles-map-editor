@@ -98,7 +98,17 @@ export const LEGEND_ENTRY_KEYS = { label: 3, type: 5, style: 6, strokeStyle: 7 }
  * The settings of a frame besides its area, in 4 bits: how the map is turned when it opens, and
  * what its viewers can do. Each only if it differs from its default; a flag is its key alone.
  */
-export const FRAME_KEYS = { bearing: 1, pitch: 2, noPan: 3, noZoom: 4, rotate: 5, tilt: 6, confine: 7 } as const;
+export const FRAME_KEYS = {
+	bearing: 1,
+	pitch: 2,
+	noPan: 3,
+	noZoom: 4,
+	rotate: 5,
+	tilt: 6,
+	confine: 7,
+	minZoom: 8,
+	maxZoom: 9
+} as const;
 
 /**
  * The settings of the viewer, in 4 bits: of a control the index of its choice follows (see

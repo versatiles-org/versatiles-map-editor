@@ -24,6 +24,12 @@ export type HexColor = string;
 export const MAX_PITCH = 60;
 
 /**
+ * The largest zoom level of a map, and so of the limits of a frame.
+ * @category Map state
+ */
+export const MAX_ZOOM = 22;
+
+/**
  * What a shared or embedded map shows when it opens: an area, seen from a direction, and what its
  * viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if
  * that is switched on.
@@ -62,6 +68,23 @@ export interface StateFrame {
 	 * move the map beyond it. Default: false.
 	 */
 	confine?: boolean;
+	/**
+	 * The least zoom level that viewers can zoom out to, in steps of 0.5. What a zoom level shows
+	 * depends on the size of the window, so `confine` is the better way to keep viewers from zooming
+	 * out. Default: none.
+	 * @minimum 0
+	 * @maximum 22
+	 * @multipleOf 0.5
+	 */
+	minZoom?: number;
+	/**
+	 * The largest zoom level that viewers can zoom in to, in steps of 0.5, e.g. if the map is not
+	 * meant to be looked at more closely. Not less than `minZoom`. Default: none.
+	 * @minimum 0
+	 * @maximum 22
+	 * @multipleOf 0.5
+	 */
+	maxZoom?: number;
 }
 
 /**

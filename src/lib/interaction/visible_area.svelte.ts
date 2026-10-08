@@ -142,10 +142,12 @@ export class VisibleAreaMode {
 	 * defaults: north at the top, seen from straight above; they can move it and zoom, but not
 	 * rotate or tilt it.
 	 */
-	public get turn(): Required<FrameTurn> {
+	public get turn(): Required<Omit<FrameTurn, 'minZoom' | 'maxZoom'>> & Pick<FrameTurn, 'minZoom' | 'maxZoom'> {
 		const { bearing = 0, pitch = 0, ...can } = this.#doc.frameTurn ?? {};
 		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
-		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine };
+		// the zoom limits have no default: undefined is no limit
+		const { minZoom, maxZoom } = can;
+		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom };
 	}
 
 	/**

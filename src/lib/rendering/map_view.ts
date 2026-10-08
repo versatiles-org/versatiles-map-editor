@@ -97,7 +97,21 @@ export class MapView {
 	 */
 	#limit(on: boolean) {
 		this.map.setMaxBounds?.(on ? this.map.getBounds?.() : null);
-		this.map.setMinZoom?.(on ? this.map.getZoom?.() : null);
+		this.map.setMinZoom?.(on ? this.map.getZoom?.() : (this.#zoomLimits.min ?? null));
+	}
+
+	/** The zoom levels that the map can be zoomed to, see `setZoomLimits`. */
+	#zoomLimits: { min?: number; max?: number } = {};
+
+	/**
+	 * Limit how far the map can be zoomed out and in, e.g. by the visitors of a shared map;
+	 * undefined for no limit. They also hold when the map shows an area (`fitArea`). A map that is
+	 * confined is not zoomed out beyond what it showed, whatever its least zoom.
+	 */
+	public setZoomLimits({ min, max }: { min?: number; max?: number }) {
+		this.#zoomLimits = { min, max };
+		this.map.setMaxZoom?.(max ?? null);
+		if (!this.#confined) this.map.setMinZoom?.(min ?? null);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MAX_PITCH, type Bounds } from '@versatiles/map-state';
+	import { MAX_PITCH, MAX_ZOOM, type Bounds } from '@versatiles/map-state';
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { Button, ButtonGroup, Checkbox, Hint, InputRow, Slider } from '#lib/components/ui/index.js';
 	import { formatLength, isOwnKeyTarget } from '#lib/components/common/index.js';
@@ -82,6 +82,34 @@
 		set confine(confine: boolean) {
 			mode.setTurn({ confine });
 			mode.log();
+		}
+	};
+
+	/** The zoom of the map now, in the steps of the limits: 0.5. */
+	const zoomNow = () => Math.round(doc.view.map.getZoom() * 2) / 2;
+
+	// How far visitors can zoom out and in: no limit, or a zoom level. A new limit is the zoom of the
+	// map now; the least zoom is never above the largest one.
+	const limits = {
+		get min() {
+			return mode.turn.minZoom;
+		},
+		get max() {
+			return mode.turn.maxZoom;
+		},
+		setMin(minZoom: number | undefined) {
+			const max = mode.turn.maxZoom;
+			mode.setTurn({
+				minZoom,
+				...(minZoom !== undefined && max !== undefined && max < minZoom ? { maxZoom: minZoom } : {})
+			});
+		},
+		setMax(maxZoom: number | undefined) {
+			const min = mode.turn.minZoom;
+			mode.setTurn({
+				maxZoom,
+				...(maxZoom !== undefined && min !== undefined && min > maxZoom ? { minZoom: maxZoom } : {})
+			});
 		}
 	};
 
@@ -186,6 +214,48 @@
 			Visitors stay in the area
 		</Checkbox>
 	</div>
+
+	<!-- How far visitors can zoom. Zooming out: not needed for visitors who stay in the area, which
+	     limits it already, and for every screen, which a zoom level does not. -->
+	{#each [{ key: 'out', label: 'Limit zooming out', value: limits.min, set: limits.setMin }, { key: 'in', label: 'Limit zooming in', value: limits.max, set: limits.setMax }] as limit (limit.key)}
+		{@const off = limit.key === 'out' && turn.confine}
+		<div class="visitors">
+			<Checkbox
+				checked={limit.value !== undefined && !off}
+				disabled={off}
+				title={off ? 'Visitors who stay in the area cannot zoom out beyond it' : undefined}
+				onchange={(e) => {
+					limit.set(e.currentTarget.checked ? zoomNow() : undefined);
+					mode.log();
+				}}
+			>
+				{limit.label}
+			</Checkbox>
+		</div>
+		{#if limit.value !== undefined && !off}
+			<InputRow id="{uid}-zoom-{limit.key}" label="Zoom level">
+				<Slider
+					id="{uid}-zoom-{limit.key}"
+					min={0}
+					max={MAX_ZOOM}
+					step={0.5}
+					bind:value={() => limit.value ?? 0, (value) => limit.set(value)}
+					onchange={() => mode.log()}
+				/>
+			</InputRow>
+			<ButtonGroup>
+				<Button
+					variant="ghost"
+					onclick={() => {
+						limit.set(zoomNow());
+						mode.log();
+					}}
+				>
+					Use current zoom
+				</Button>
+			</ButtonGroup>
+		{/if}
+	{/each}
 </InspectorSection>
 
 <!-- what visitors see over the map, and where; the map shows them so, see `asShared` of MapFrame -->
