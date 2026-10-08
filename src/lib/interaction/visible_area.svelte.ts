@@ -40,8 +40,8 @@ export function handleCursor(handle: Handle, bearing = 0): string {
  * bounds of the elements, dashed, whose handles turn them into a frame. Corners move two sides,
  * edges one; each drag is one undo step. Drawing and selecting are off meanwhile; the map can
  * still be moved. The map is rotated and tilted like a shared map opens (see `turn`), as a preview:
- * by the sliders of the mode, and by the author who can turn the editor's map (`turnable`), whose
- * turns of the map in this mode turn the shared map.
+ * by the sliders of the mode, and by the author, whose turns of the map in this mode turn the
+ * shared map.
  *
  * Created before the drawing and the selection, so its listeners run first and can claim the
  * events of the map.
@@ -162,7 +162,7 @@ export class VisibleAreaMode {
 	 * a slider, since the map is then turned like the shared map already.
 	 */
 	#followMap() {
-		if (!this.active || !this.#doc.turnable) return;
+		if (!this.active) return;
 		const map = this.#doc.view.getTurn();
 		const [bearing, pitch] = [Math.round(map.bearing), Math.round(map.pitch)];
 		const now = this.turn;
@@ -208,7 +208,7 @@ export class VisibleAreaMode {
 		this.#doc.cursor.setResize(undefined);
 		this.#doc.view.hideVisibleArea();
 		// back to how the author turned the editor's map, if at all
-		this.#doc.view.setTurn(this.#doc.turnable ? this.turnBefore : {});
+		this.#doc.view.setTurn(this.turnBefore);
 		if (returning) onDone?.();
 	}
 

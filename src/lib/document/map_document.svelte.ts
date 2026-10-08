@@ -68,11 +68,6 @@ export class MapDocument {
 	 */
 	public frameTurn: FrameTurn | undefined = $state.raw(undefined);
 	/**
-	 * Whether the author can rotate and tilt the map in the editor, which else shows it with north
-	 * at the top, seen from straight above. Kept with the camera, so it is not part of the history.
-	 */
-	public turnable = $state(false);
-	/**
 	 * The legend of the map, if it has one. Replaced as a whole on every change. Without the fields
 	 * that have their default value, as links store it, so a legend is the same in a link, a file
 	 * and the editor.

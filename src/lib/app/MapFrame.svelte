@@ -251,58 +251,28 @@
 		});
 	});
 
-	/**
-	 * Whether the author can turn the map of the editor. While the visible area is edited, that
-	 * turns the shared map, see `VisibleAreaMode`.
-	 */
-	const authorTurns = $derived(editor && !!mapDocument?.turnable);
-
-	// the right mouse button (or Ctrl), two fingers, and Shift with the arrow keys
-	$effect(() => {
-		const m = mapDocument?.view.map;
-		if (m && editor) setTurnGestures(m, authorTurns);
-	});
-
-	/** Whether the map can be rotated and tilted with the mouse, two fingers and the keyboard. */
-	function setTurnGestures(m: MaplibreMapType, on: boolean) {
-		if (on) {
-			m.dragRotate.enable();
-			m.touchZoomRotate.enableRotation();
-			m.touchPitch.enable();
-			m.keyboard.enableRotation();
-		} else {
-			m.dragRotate.disable();
-			m.touchZoomRotate.disableRotation();
-			m.touchPitch.disable();
-			m.keyboard.disableRotation();
-		}
-	}
-
 	/** Whether visitors of the shared map get a compass: unless it is neither turned nor can be. */
 	function visitorsCompass(doc: MapDocument): boolean {
 		const { bearing = 0, pitch = 0, lockBearing = false, lockPitch = false } = doc.frameTurn ?? {};
 		return !(lockBearing && lockPitch && !bearing && !pitch);
 	}
 	// by its value, so a change of the frame that keeps it does not add the buttons again
-	const sharedCompass = $derived(!!mapDocument && (!editor || asShared) && visitorsCompass(mapDocument));
+	const visitorsHaveCompass = $derived(!!mapDocument && visitorsCompass(mapDocument));
 
-	// the buttons for zooming, and a compass: in the viewer unless its map is neither turned nor can
-	// be, in the editor while its author turns the map, or while the shared map is edited and has one
+	// The buttons for zooming, and a compass. In the viewer unless its map is neither turned nor can
+	// be. Always in the editor, whose author can turn the map with the right mouse button (or Ctrl),
+	// two fingers, and Shift with the arrow keys: faded while the map is not turned, so the buttons
+	// below it stay where they are.
 	$effect(() => {
 		void turnKey;
 		const corner = navigationCorner;
-		const doc = mapDocument;
-		const m = doc?.view.map;
-		if (!doc || !m || !corner) return;
-		const compass = turn ? sharedCompass : authorTurns || sharedCompass;
+		const m = mapDocument?.view.map;
+		if (!m || !corner) return;
+		if (!editor && !visitorsHaveCompass) return addNavigation(m, corner);
 		// Back to how the map opened. In the editor to north at the top, seen from straight above,
-		// which while the shared map is edited is how it opens then; if its author does not turn the
-		// map there, back to how the shared map is turned.
-		const reset = () => {
-			const to = turn ?? (authorTurns ? undefined : doc.frameTurn);
-			m.easeTo({ bearing: to?.bearing ?? 0, pitch: to?.pitch ?? 0 });
-		};
-		return addNavigation(m, corner, compass ? reset : undefined);
+		// which while the shared map is edited is how it opens then, see `VisibleAreaMode`.
+		const reset = () => m.easeTo({ bearing: turn?.bearing ?? 0, pitch: turn?.pitch ?? 0 });
+		return addNavigation(m, corner, reset, { fade: editor });
 	});
 
 	// onMount instead of $effect: init() reads and writes reactive state, which must not re-run it
@@ -358,8 +328,6 @@
 			fadeDuration: 0
 		});
 		symbolLibrary.map = map;
-		// the editor's map is turned only if its author switched that on, see below
-		if (editor) setTurnGestures(map, false);
 
 		void onMapInit(map);
 
@@ -648,6 +616,11 @@
 		&:disabled {
 			opacity: 0.4;
 		}
+	}
+
+	/* the compass of the editor while its map is not turned, see addNavigation */
+	:global(.maplibregl-ctrl-compass.compass-idle) {
+		opacity: 0.35;
 	}
 
 	:global(.maplibregl-ctrl-attrib) {

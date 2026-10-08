@@ -142,7 +142,7 @@ test('pinch-zoom on a selected element zooms the map', async ({ page }) => {
 	expect(await linePoints(page)).toStrictEqual(points);
 });
 
-test('two fingers and the keyboard turn the map of the viewer, not the one of the editor', async ({ page }) => {
+test('two fingers and the keyboard turn the map, in the viewer and in the editor', async ({ page }) => {
 	const camera = async () => {
 		const { bearing, pitch } = await page.evaluate(() => {
 			const { map } = window as unknown as MapWindow;
@@ -195,13 +195,17 @@ test('two fingers and the keyboard turn the map of the viewer, not the one of th
 		const touch = await Touchscreen.create(page);
 		const zoom = await page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
 		await rotate(touch);
+		await expect.poll(async () => (await camera()).bearing).not.toBe(0);
 		await tilt(touch);
+		await expect.poll(async () => (await camera()).pitch).toBeGreaterThan(0);
+		// Shift and the arrow keys turn it on
+		const before = await camera();
 		await page.locator('.maplibregl-canvas').focus();
 		await page.keyboard.press('Shift+ArrowLeft');
 		await page.keyboard.press('Shift+ArrowUp');
 		await waitForMapIsIdle(page);
-		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
-		// two fingers still zoom the map, and nothing was changed
+		expect(await camera()).not.toStrictEqual(before);
+		// the zoom stays, and nothing of the map was changed
 		expect(await page.evaluate(() => (window as unknown as MapWindow).map.getZoom())).toBeCloseTo(zoom, 0);
 		expect(await linePoints(page)).toStrictEqual(points);
 	});

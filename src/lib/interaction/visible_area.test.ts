@@ -67,10 +67,9 @@ describe('VisibleAreaMode', () => {
 		});
 	});
 
-	describe('an author who can turn the map', () => {
+	describe('an author who turns the map', () => {
 		it('turns the shared map by turning the map in the mode, one undo step per gesture', async () => {
 			doc.frame = [1, 2, 3, 4];
-			doc.turnable = true;
 			doc.visibleArea.open();
 			// e.g. with the right mouse button: the map turns, and tells it
 			map.jumpTo({ bearing: 33.4, pitch: 20.6 });
@@ -89,7 +88,6 @@ describe('VisibleAreaMode', () => {
 		});
 
 		it('does not when the mode turns the map itself, or when it is closed', () => {
-			doc.turnable = true;
 			doc.frameTurn = { bearing: 12.5 };
 			doc.visibleArea.open();
 			map.emit('rotate');
@@ -98,14 +96,6 @@ describe('VisibleAreaMode', () => {
 			map.jumpTo({ bearing: 80 });
 			map.emit('rotate');
 			expect(doc.frameTurn).toStrictEqual({ bearing: 12.5 });
-		});
-
-		it('is needed: without the switch, a turned map does not change the shared map', () => {
-			doc.visibleArea.open();
-			map.jumpTo({ bearing: 80 });
-			map.emit('rotate');
-			map.emit('moveend');
-			expect(doc.frameTurn).toBeUndefined();
 		});
 	});
 

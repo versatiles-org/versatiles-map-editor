@@ -1023,7 +1023,6 @@ test('the tools work on a map that its author has rotated and tilted', async ({ 
 	await page.goto('/');
 	await waitForMapIsReady(page);
 	// a map that is opened is not turned: its author turns it
-	await sidebar(page).getByRole('checkbox', { name: 'Rotate and tilt the map while editing' }).check();
 	await showView(page, { center: [13.4, 52.5], radius: 6000 });
 	await page.evaluate(() => (window as unknown as MapWindow).map.jumpTo({ bearing: 50, pitch: 45 }));
 	await waitForMapIsIdle(page);

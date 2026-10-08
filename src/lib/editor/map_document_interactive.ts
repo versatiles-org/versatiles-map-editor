@@ -121,14 +121,15 @@ export class MapDocumentInteractive extends MapDocument {
 	}
 
 	/**
-	 * Where the editor looks, and how its map is turned if the author can turn it: the view of the
-	 * map state. Not as a shared map is turned, which the map shows while the visible area is edited.
+	 * Where the editor looks, and how its author turned its map: the view of the map state. Not as a
+	 * shared map is turned, which the map shows while the visible area is edited.
 	 */
 	public getCamera(): Viewport {
 		const viewport = this.view.getViewport();
-		if (!this.turnable) return viewport;
 		// while the visible area is edited, the map shows how a shared map is turned
 		const { bearing, pitch } = this.visibleArea.active ? this.visibleArea.turnBefore : this.view.getTurn();
+		if (!bearing && !pitch) return viewport;
+		// `turnable`: a view keeps its rotation and tilt only with it
 		return { ...viewport, turnable: true, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
 	}
 
@@ -143,26 +144,13 @@ export class MapDocumentInteractive extends MapDocument {
 
 	protected override applyCamera(camera: MapState['view']) {
 		super.applyCamera(camera);
-		this.turnable = camera?.turnable === true;
-		this.#turn(this.turnable ? { bearing: camera?.bearing, pitch: camera?.pitch } : {});
+		this.#turn({ bearing: camera?.bearing, pitch: camera?.pitch });
 	}
 
 	/** Turn the editor's map; while the visible area is edited, which shows how a shared map is turned, when that ends. */
 	#turn(turn: Turn) {
 		if (this.visibleArea?.active) this.visibleArea.turnBefore = turn;
 		else this.view.setTurn(turn);
-	}
-
-	/**
-	 * Let the author rotate and tilt the map of the editor, or not: then it is shown with north at
-	 * the top, seen from straight above. Kept with the camera of the map, not in its history.
-	 */
-	public setTurnable(turnable: boolean) {
-		if (turnable === this.turnable) return;
-		this.turnable = turnable;
-		if (!turnable) this.#turn({});
-		// the camera is stored when the map has moved
-		this.view.map.fire?.('moveend');
 	}
 
 	public getGeoJSON(): GeoJSONDocument {

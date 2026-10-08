@@ -194,14 +194,12 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		await expect(compass).toHaveCount(0);
 	});
 
-	await test.step('the editor is not turned', async () => {
+	await test.step('the editor does not open turned like the shared map', async () => {
 		await page.setViewportSize({ width: 1280, height: 720 });
 		await page.goto('about:blank');
 		await page.goto('/#' + encodeState({ frame: { bounds: frame, bearing: 30 }, elements }));
 		await waitForMapIsReady(page);
-		await turn(120, -60);
 		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
-		await expect(compass).toHaveCount(0);
 	});
 });
 
@@ -421,7 +419,9 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 	});
 });
 
-test('the author turns the map of the editor, if that is switched on', async ({ page }) => {
+test('the author turns the map of the editor, which has a compass that is faded while it is not turned', async ({
+	page
+}) => {
 	await page.goto(
 		'/#' +
 			encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame, bearing: 40 }, elements })
@@ -442,32 +442,24 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 		await page.mouse.up({ button: 'right' });
 		await waitForMapIsIdle(page);
 	};
-	const turnable = page.getByRole('checkbox', { name: 'Rotate and tilt the map while editing' });
 	const compass = page.getByRole('button', { name: 'Reset rotation and tilt' });
 	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
 	let own = { bearing: 0, pitch: 0 };
 
-	await test.step('off: the map stays, without a compass', async () => {
-		await expect(turnable).not.toBeChecked();
-		await turn(120, -60);
-		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
-		await expect(compass).toHaveCount(0);
-	});
-
-	await test.step('on: the map turns, and the editor keeps it', async () => {
-		await turnable.check();
+	await test.step('the map turns, and the editor keeps it', async () => {
+		// always there, so the buttons below it stay where they are
 		await expect(compass).toBeVisible();
+		await expect(compass).toContainClass('compass-idle');
 		await turn(120, -60);
 		own = await camera();
 		expect(own.bearing).not.toBe(0);
 		expect(own.pitch).toBeGreaterThan(0);
-		await expect.poll(async () => (await storedState(page)).view?.turnable).toBe(true);
+		await expect(compass).not.toContainClass('compass-idle');
 		await expect.poll(async () => Math.round((await storedState(page)).view?.bearing ?? 0)).toBe(own.bearing);
 		// how the shared map is turned is another thing
 		expect((await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
 		await page.reload();
 		await waitForMapIsReady(page);
-		await expect(turnable).toBeChecked();
 		expect(await camera()).toStrictEqual(own);
 	});
 
@@ -505,17 +497,11 @@ test('the author turns the map of the editor, if that is switched on', async ({ 
 		expect((await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
 	});
 
-	await test.step('the compass turns the map back, and switching it off too', async () => {
+	await test.step('the compass turns the map back', async () => {
 		await compass.click();
 		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
-		await turn(-100, -40);
-		expect((await camera()).bearing).not.toBe(0);
-		await turnable.uncheck();
-		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
-		await expect(compass).toHaveCount(0);
-		await expect.poll(async () => (await storedState(page)).view?.turnable).toBeUndefined();
-		await turn(120, -60);
-		expect(await camera()).toStrictEqual({ bearing: 0, pitch: 0 });
+		await expect(compass).toContainClass('compass-idle');
+		await expect.poll(async () => (await storedState(page)).view?.bearing).toBeUndefined();
 	});
 });
 

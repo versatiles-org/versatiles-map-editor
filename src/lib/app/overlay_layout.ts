@@ -99,15 +99,29 @@ export const COMPASS_LABEL = 'Reset rotation and tilt';
 /**
  * Add the buttons for zooming in and out in a corner. With `reset` also a compass, for a map that
  * can be turned or is turned: it shows the rotation and the tilt, and a click calls `reset`, e.g.
- * to turn the map back to where it started. Returns a function that removes them again.
+ * to turn the map back to where it started. `fade`: the compass is faded while the map is not
+ * turned (the class `compass-idle`), for a compass that is always there. Returns a function that
+ * removes them again.
  */
-export function addNavigation(map: maplibre.Map, corner: Corner, reset?: () => void): () => void {
+export function addNavigation(
+	map: maplibre.Map,
+	corner: Corner,
+	reset?: () => void,
+	{ fade = false }: { fade?: boolean } = {}
+): () => void {
 	const control = new maplibre.NavigationControl({ showCompass: !!reset, visualizePitch: true });
 	if (!reset) return addOrdered(map, control, corner, CONTROL_ORDER.navigation);
+	let compass: HTMLButtonElement | null = null;
+	const update = () => compass?.classList.toggle('compass-idle', !map.getBearing() && !map.getPitch());
 	const withReset: maplibre.IControl = {
 		onAdd(map) {
 			const element = control.onAdd(map);
-			const compass = element.querySelector<HTMLButtonElement>('.maplibregl-ctrl-compass');
+			compass = element.querySelector<HTMLButtonElement>('.maplibregl-ctrl-compass');
+			if (compass && fade) {
+				update();
+				map.on('rotate', update);
+				map.on('pitch', update);
+			}
 			if (compass) {
 				compass.title = COMPASS_LABEL;
 				compass.setAttribute('aria-label', COMPASS_LABEL);
@@ -124,6 +138,8 @@ export function addNavigation(map: maplibre.Map, corner: Corner, reset?: () => v
 			return element;
 		},
 		onRemove() {
+			map.off('rotate', update);
+			map.off('pitch', update);
 			control.onRemove();
 		}
 	};

@@ -7,7 +7,6 @@
 		type IconName,
 		Button,
 		ButtonGroup,
-		Checkbox,
 		ChoiceGroup,
 		Hint,
 		InputRow,
@@ -145,14 +144,6 @@
 				>Its visible area, its rotation and tilt, and what visitors see over it: the search, the zoom buttons, the
 				legend.</Hint
 			>
-			<!-- the editor's own map, not what shared maps show -->
-			<Checkbox
-				checked={doc.turnable}
-				onchange={(e) => doc.setTurnable(e.currentTarget.checked)}
-				title="Turn the map with the right mouse button (or Ctrl), or with two fingers; the compass turns it back"
-			>
-				Rotate and tilt the map while editing
-			</Checkbox>
 		</InspectorSection>
 		<!-- its sections: the background map, its colors and its labels -->
 		<PanelBackground {doc} />

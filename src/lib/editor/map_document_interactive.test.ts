@@ -647,44 +647,36 @@ describe('MapDocument', () => {
 			expect(onDone).not.toHaveBeenCalled();
 		});
 
-		it('is turned on its own: the editor keeps how the author turned its map, if it can be turned', async () => {
+		it('is turned on its own: the editor keeps how its author turned its map', async () => {
 			const view = { center: [13.4, 52.5] as [number, number], radius: 1000 };
+			// e.g. a session of the browser storage after a reload
 			await doc.loadState({
 				view: { ...view, turnable: true, bearing: 25, pitch: 40 },
 				frame: { bearing: -90 },
 				elements
 			});
-			expect(doc.turnable).toBe(true);
 			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([25, 40]);
-			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
-			expect(doc.getState().view).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
+			expect(doc.getCamera()).toMatchObject({ bearing: 25, pitch: 40 });
 			expect(doc.getState().frame).toStrictEqual({ bearing: -90 });
 			// the visible area mode shows how the shared map is turned; the camera keeps the editor's turn
 			doc.visibleArea.open();
 			expect(mockMap.getBearing()).toBe(-90);
-			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 25, pitch: 40 });
+			expect(doc.getCamera()).toMatchObject({ bearing: 25, pitch: 40 });
 			doc.visibleArea.close();
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([25, 40]);
 
-			// a map that cannot be turned is not, whatever its view says
-			await doc.loadState({ view: { ...view, bearing: 25, pitch: 40 }, elements });
-			expect(doc.turnable).toBe(false);
-			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 0]);
-			expect(doc.getState().view).not.toHaveProperty('turnable');
-			expect(doc.getState().view).not.toHaveProperty('bearing');
-			// and neither is a map without a camera, e.g. of a share link
-			await doc.loadState({ view: { ...view, turnable: true, bearing: 25 }, elements });
+			// a map without a camera is not turned, e.g. one that is opened
 			await doc.loadState({ elements });
-			expect(doc.turnable).toBe(false);
-			expect(mockMap.getBearing()).toBe(0);
+			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 0]);
+			expect(doc.getCamera()).not.toHaveProperty('bearing');
+			expect(doc.getCamera()).not.toHaveProperty('pitch');
 		});
 
-		it('can be turned by its author if that is switched on, and is not turned any more when it is switched off', async () => {
+		it('is turned by its author at any time, which its camera keeps', async () => {
 			await doc.loadState({ view: { center: [13.4, 52.5], radius: 1000 }, elements });
-			doc.setTurnable(true);
-			expect(doc.getCamera()).toMatchObject({ turnable: true });
 			// e.g. with the right mouse button
 			mockMap.jumpTo({ bearing: 70, pitch: 20 });
-			expect(doc.getCamera()).toMatchObject({ turnable: true, bearing: 70, pitch: 20 });
+			expect(doc.getCamera()).toMatchObject({ bearing: 70, pitch: 20 });
 			// the visible area mode turns the map like the shared map, and back when it ends
 			doc.frameTurn = { pitch: 55 };
 			doc.visibleArea.open();
@@ -692,13 +684,6 @@ describe('MapDocument', () => {
 			expect(doc.getCamera()).toMatchObject({ bearing: 70, pitch: 20 });
 			doc.visibleArea.close();
 			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([70, 20]);
-
-			// switched off while the mode is open: flat when it ends
-			doc.visibleArea.open();
-			doc.setTurnable(false);
-			expect(doc.getCamera()).not.toHaveProperty('turnable');
-			doc.visibleArea.close();
-			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([0, 0]);
 		});
 
 		it('is next to the bounds of the elements', () => {
