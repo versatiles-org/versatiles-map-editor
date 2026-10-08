@@ -1,5 +1,6 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
+	"frame": { "lockBearing": true, "lockPitch": true },
 	"meta": {
 		"background": { "theme": "gray", "labels": "fewer", "language": "local", "haloWidth": 1.5 },
 		"title": "Berlin low-emission zone",
@@ -9,54 +10,38 @@
 		{
 			"type": "polygon",
 			"points": [
-				[13.28325, 52.50106],
 				[13.28995, 52.49656],
 				[13.30095, 52.48866],
-				[13.31204, 52.47971],
 				[13.31513, 52.47845],
-				[13.31887, 52.47789],
-				[13.32865, 52.47756],
-				[13.34265, 52.47816],
-				[13.35324, 52.47943],
+				[13.336410855008438, 52.478375264369646],
 				[13.36121, 52.4789],
-				[13.36505, 52.47506],
 				[13.36995, 52.47157],
 				[13.38572, 52.47083],
-				[13.40133, 52.46531],
-				[13.40589, 52.4648],
+				[13.403722557362414, 52.46475999719459],
 				[13.43107, 52.46738],
-				[13.45173, 52.4708],
-				[13.4558, 52.47324],
-				[13.45893, 52.4881],
+				[13.4549594160178, 52.47236116922204],
 				[13.46105, 52.49346],
 				[13.46756, 52.49831],
 				[13.46875, 52.50306],
-				[13.47581, 52.51042],
-				[13.47564, 52.51233],
+				[13.475638308093636, 52.51108051970937],
 				[13.4702, 52.52213],
 				[13.45965, 52.52521],
-				[13.45495, 52.52926],
 				[13.44794, 52.53634],
-				[13.43855, 52.54056],
-				[13.42675, 52.54476],
+				[13.428014855524452, 52.543810025885676],
 				[13.41507, 52.54921],
-				[13.40105, 52.54931],
-				[13.38795, 52.54866],
+				[13.396153236078334, 52.54930173680364],
 				[13.37775, 52.54727],
-				[13.36575, 52.54286],
-				[13.35532, 52.53731],
-				[13.34355, 52.53636],
-				[13.28702, 52.52904],
-				[13.28271, 52.5262],
-				[13.28475, 52.51846],
+				[13.356994752500327, 52.53808090171563],
+				[13.322881092721929, 52.533559466901295],
+				[13.282661486067497, 52.52685767310982],
 				[13.28593, 52.51275],
-				[13.28315, 52.5079],
 				[13.2815, 52.50434]
 			],
-			"style": { "color": "#0072b280", "pattern": "diagonal-up", "patternCoverage": 0.25 },
+			"smooth": true,
+			"style": { "color": "#0072b2", "pattern": "diagonal-up", "patternScale": 0.5, "patternCoverage": 0.15 },
 			"strokeStyle": { "color": "#0072b2", "width": 2.5 },
 			"popup": {
-				"text": "** (Umweltzone)**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
+				"text": "**Umweltzone**\nSince 2010, cars in the area inside the S-Bahn ring need a green emissions sticker."
 			}
 		},
 		{
@@ -81,7 +66,7 @@
 			],
 			"style": { "color": "#009e7380" },
 			"strokeStyle": { "color": "#009e73" },
-			"popup": { "text": "**Großer Tiergarten**\nThe largest park in the center of Berlin." }
+			"popup": { "text": "**Großer Tiergarten**" }
 		},
 		{
 			"type": "polygon",
@@ -105,21 +90,13 @@
 			],
 			"style": { "color": "#009e7380" },
 			"strokeStyle": { "color": "#009e73" },
-			"popup": {
-				"text": "**Tempelhofer Feld**\nThe former airport, closed in 2008, is a public park since 2010. A referendum in 2014 kept it free of buildings."
-			}
+			"popup": { "text": "**Tempelhofer Feld**" }
 		},
 		{
 			"type": "marker",
-			"point": [13.412151412165855, 52.50286852563164],
+			"point": [13.38997819662282, 52.50473438515871],
 			"label": "Low-emission zone",
-			"style": {
-				"size": 2,
-				"labelSize": 2,
-				"symbol": "",
-				"labelColor": "#0072b2",
-				"font": "noto_sans_bold"
-			}
+			"style": { "size": 2, "labelSize": 2, "symbol": "", "labelColor": "#0072b2", "font": "noto_sans_bold" }
 		}
 	]
 }
