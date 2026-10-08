@@ -152,6 +152,29 @@ describe('.mapjson files', () => {
 		});
 	});
 
+	it('are written as they are read: only what is valid, without defaults', () => {
+		const state = {
+			frame: { bounds: [13.123456789, 52, 14, 53], bearing: 0, pitch: 80 },
+			meta: { viewer: { search: 'none', canRotate: true }, legend: { layout: 'vertical', entries: [] } },
+			elements: [
+				{ type: 'marker', point: [13.4000001, 52.5], style: { color: '#FF0000', rotation: 180, size: 'big' } },
+				{ type: 'line', points: [[0, 0]] }
+			]
+		} as unknown as MapState;
+		const json = stateToMapJSON(state);
+		expect(json).toStrictEqual({
+			$schema: MAPJSON_SCHEMA_URL,
+			frame: { bounds: [13.12346, 52, 14, 53], pitch: 60 },
+			meta: { viewer: { canRotate: true }, legend: { entries: [] } },
+			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#ff0000', rotation: -180 } }]
+		});
+		// in this order, and read again as the same map
+		expect(Object.keys(json)).toStrictEqual(['$schema', 'frame', 'meta', 'elements']);
+		const { $schema: _schema, ...written } = json;
+		expect(stateFromMapJSON(json)).toStrictEqual(written);
+		expect(changedMapJSONValues(json)).toStrictEqual([]);
+	});
+
 	it('report the values that are not kept as they are: invalid, beyond their range, or not drawable', () => {
 		const json = {
 			$schema: MAPJSON_SCHEMA_URL,

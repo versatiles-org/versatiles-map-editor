@@ -3,19 +3,11 @@ import {
 	BACKGROUND_DEFAULTS,
 	BACKGROUND_HALO_WIDTHS,
 	LEGEND_DEFAULTS,
-	roundCoordinate,
 	sanitizeElement,
 	sanitizeState,
 	VIEWER_DEFAULTS
 } from './profile.js';
-import {
-	LEGEND_ENTRY_TYPES,
-	type Bounds,
-	type MapState,
-	type Position,
-	type StateElement,
-	type StateLegendEntry
-} from './types.js';
+import { LEGEND_ENTRY_TYPES, type MapState, type StateElement, type StateLegendEntry } from './types.js';
 import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
 /**
@@ -51,19 +43,15 @@ export class MapJSONVersionError extends Error {
 }
 
 /**
- * The map state as the content of a .mapjson file, with the URL of its schema first. Its
- * coordinates have `COORDINATE_DIGITS` decimal places.
+ * The map state as the content of a .mapjson file, with the URL of its schema first. Only its
+ * valid parts, as `stateFromMapJSON` reads them, so reading the file gives the map that was
+ * written: e.g. colors in lower case, coordinates with `COORDINATE_DIGITS` decimal places, and
+ * no settings with their default value.
  * @category Files
  */
 export function stateToMapJSON(state: MapState): MapJSON {
-	const point = ([x, y]: Position): Position => [roundCoordinate(x), roundCoordinate(y)];
-	const elements = state.elements.map((element): StateElement => {
-		if (element.type === 'marker' || element.type === 'circle') return { ...element, point: point(element.point) };
-		return { ...element, points: element.points.map(point) };
-	});
-	const bounds = state.frame?.bounds?.map(roundCoordinate) as Bounds | undefined;
-	const frame = state.frame && bounds ? { frame: { ...state.frame, bounds } } : {};
-	return { $schema: MAPJSON_SCHEMA_URL, ...state, ...frame, elements };
+	const { frame, meta, elements } = sanitizeState(state);
+	return { $schema: MAPJSON_SCHEMA_URL, ...(frame ? { frame } : {}), ...(meta ? { meta } : {}), elements };
 }
 
 /**
