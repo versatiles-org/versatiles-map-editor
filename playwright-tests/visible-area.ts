@@ -895,8 +895,16 @@ test('an embedded map leaves the wheel to the page around it, unless its author 
 		await page.setContent(
 			`<body style="margin:0;height:3000px"><iframe src="${src}" style="width:700px;height:500px;border:0"></iframe></body>`
 		);
-		await waitForMapIsReady(page);
-		return page.frames().find((frame) => frame !== page.mainFrame())!;
+		// the map of the frame: the window of the page around it is still the one of the viewer before,
+		// which says that its map is ready
+		const inner = page.frames().find((frame) => frame !== page.mainFrame())!;
+		await expect
+			.poll(
+				() => inner.evaluate(() => (window as unknown as { mapReady?: boolean }).mapReady === true).catch(() => false), // while the frame loads
+				{ timeout: 30_000 }
+			)
+			.toBe(true);
+		return inner;
 	};
 	await page.setViewportSize({ width: 800, height: 600 });
 
