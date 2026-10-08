@@ -45,6 +45,20 @@
 	 * step that still makes sense for it (see `resolutionForArea`). A single point or an empty map
 	 * shows the area around it, like the view of the editor.
 	 */
+	/**
+	 * The accuracy of the positions of a link in a word, which says more than its meters: "Exact"
+	 * for the grid of the editor, "High" up to what "Automatic" chooses, which is too fine to be seen
+	 * on the shared map, then "Medium" for two steps, and "Low" beyond.
+	 */
+	function accuracyLevel(exponent: number): string {
+		if (exponent === 0) return 'Exact';
+		if (exponent <= autoExponent) return 'High';
+		return exponent <= autoExponent + 1 ? 'Medium' : 'Low';
+	}
+
+	/** The steps of the positions of a link, e.g. "9 m". */
+	const accuracySteps = (exponent: number) => formatPrecision(resolutionOfExponent(exponent));
+
 	function updateExponents() {
 		const doc = stateManager.mapDocument;
 		let area = doc.frame ?? doc.getBounds();
@@ -141,23 +155,31 @@
 			<ShareCode bind:this={code} link={linkCode} embed={embedCode} />
 			<section aria-labelledby="{uid}-options">
 				<h3 id="{uid}-options">Options</h3>
-				<!-- from 1 m to a hundredth of the shared area, each step twice the one before; moving it ends "Automatic" -->
-				<InputRow id="{uid}-precision" label="Precision">
+				<!-- Like a quality slider: to the right the positions are more accurate, and the link is
+				     longer. From a hundredth of the shared area to 1 m, which is exact; each step half the
+				     one before. Moving it ends "Automatic". -->
+				<InputRow id="{uid}-precision" label="Accuracy">
 					<Slider
 						id="{uid}-precision"
 						min={0}
 						max={maxExponent}
 						step={1}
 						bind:value={
-							() => exponent,
+							() => maxExponent - exponent,
 							(value) => {
-								precision = value;
+								precision = maxExponent - value;
 								update(0);
 							}
 						}
-						format={(value) => formatPrecision(resolutionOfExponent(value))}
+						format={(value) => accuracyLevel(maxExponent - value)}
+						describe={(value) => `${accuracyLevel(maxExponent - value)}, ${accuracySteps(maxExponent - value)}`}
 					/>
 				</InputRow>
+				<!-- What the word of the slider means, right below it. No live region: it would be
+				     announced at every step of the slider, which tells its value itself. -->
+				<p class="result">
+					Round to {accuracySteps(exponent)} · Link: {linkCode.length} characters
+				</p>
 				<Checkbox
 					checked={precision === 'auto'}
 					onchange={(e) => {
@@ -165,7 +187,7 @@
 						update(0);
 					}}>Automatic, fine enough for the visible area</Checkbox
 				>
-				<Hint>Coarser positions make shorter links.</Hint>
+				<Hint>A lower accuracy makes a shorter link.</Hint>
 			</section>
 		</div>
 	</div>
@@ -212,6 +234,14 @@
 				border-bottom: none;
 			}
 		}
+	}
+
+	/* what the accuracy means: how the positions are rounded, and how long the link is */
+	.result {
+		margin: 0;
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.buttons {

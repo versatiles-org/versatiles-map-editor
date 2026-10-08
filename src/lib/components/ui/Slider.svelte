@@ -9,7 +9,8 @@
 	 * gradient through the colors of a channel; `checkered` draws it over a checkerboard, e.g. for
 	 * an opacity. `wide` fills the width of the container, instead of the part of an input row.
 	 * `format` shows the value as a text instead of the number field, e.g. "570 m" for a step of a
-	 * scale whose numbers mean nothing to the reader; screen readers announce this text too.
+	 * scale whose numbers mean nothing to the reader; screen readers announce this text too, or
+	 * the longer one of `describe`, e.g. "High, 9 m" for a slider that shows "High".
 	 */
 	let {
 		id,
@@ -23,7 +24,8 @@
 		track,
 		checkered = false,
 		wide = false,
-		format
+		format,
+		describe
 	}: {
 		id: string;
 		min: number;
@@ -37,6 +39,7 @@
 		checkered?: boolean;
 		wide?: boolean;
 		format?: (value: number) => string;
+		describe?: (value: number) => string;
 	} = $props();
 
 	// as many decimals as the steps of the slider have, e.g. 1 for steps of 0.1
@@ -72,7 +75,7 @@
 		class:checkered
 		style:--fill={fill}
 		style:--track={track}
-		aria-valuetext={format?.(value)}
+		aria-valuetext={(describe ?? format)?.(value)}
 	/>
 	{#if format}
 		<!-- for the eyes: the slider tells screen readers its value itself -->

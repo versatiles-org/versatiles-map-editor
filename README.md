@@ -14,7 +14,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
 - **Save** the map as a file and open it again. The editor keeps the map, its undo history and the view in the browser, so a reload keeps the work. A map that is opened shows all its elements; where its author looked is not part of the map.
-- **Share** a link or embed the map in a website, with a selectable precision and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
+- **Share** a link or embed the map in a website, with a selectable accuracy and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
 - **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
 
 ## Development
@@ -137,7 +137,7 @@ The state can alternatively be provided via the iframe's `data` attribute. The e
 
 The **Share** dialog (at the top right of the editor) creates the link and the embed code, with a preview in different aspect ratios. Its options:
 
-- **Precision**: how exactly the positions are stored, from 1 m to 36 km, each step twice the one before. _Automatic_ is fine enough for the visible area; coarser positions make shorter links.
+- **Accuracy**: how exactly the positions are stored, like a quality slider, from _Low_ at the left to _Exact_ (1 m) at the right, each step twice as fine as the one before. A lower accuracy makes a shorter link; below the slider the dialog shows how the positions are rounded and how long the link is. _Automatic_ chooses _High_: fine enough for the visible area.
 
 What a shared map shows is set on the map itself, in **Shared map…** of the menu (the dialog has a button that leads there). The sidebar then has:
 

@@ -149,7 +149,9 @@ test('precision of a shared map', async ({ page }) => {
 	);
 	await waitForMapIsReady(page, { count: 1 });
 	await page.getByRole('button', { name: /^Share/ }).click();
-	const precision = page.getByRole('slider', { name: 'Precision' });
+	const precision = page.getByRole('slider', { name: 'Accuracy' });
+	// what the word of the slider means: how the positions are rounded, and how long the link is
+	const result = page.getByRole('dialog').locator('.result');
 	const automatic = page.getByRole('checkbox', { name: /^Automatic/ });
 	const shared = async () => {
 		const link = await page.getByLabel('Link', { exact: true }).inputValue();
@@ -162,28 +164,38 @@ test('precision of a shared map', async ({ page }) => {
 	// automatic: about a thousandth of the larger side of the visible area, in steps of
 	// 0.00001° × 2^n: 0.00008°, about 9 m; the coordinates keep at most 5 decimal places
 	await expect(automatic).toBeChecked();
-	await expect(precision).toHaveAttribute('aria-valuetext', '9 m');
+	await expect(precision).toHaveAttribute('aria-valuetext', 'High, 9 m');
+	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('High');
 	await expect.poll(async () => (await shared()).point).toStrictEqual(AUTO_POINT);
 	const auto = await shared();
+	await expect(result).toHaveText(`Positions to 9 m · Link: ${auto.length} characters`);
 
-	// from 1 m to about a hundredth of the larger side: 0.00128°, about 140 m; moving the slider
-	// ends "Automatic"
+	// Like a quality slider, from about a hundredth of the larger side at the left (0.00128°, about
+	// 140 m) to 1 m at the right, which is exact; moving the slider ends "Automatic"
 	await precision.focus();
-	await page.keyboard.press('End');
-	await expect(precision).toHaveAttribute('aria-valuetext', '140 m');
-	await expect(automatic).not.toBeChecked();
 	await page.keyboard.press('Home');
-	await expect(precision).toHaveAttribute('aria-valuetext', '1 m');
+	await expect(precision).toHaveAttribute('aria-valuetext', 'Low, 140 m');
+	await expect(automatic).not.toBeChecked();
+	await page.keyboard.press('End');
+	await expect(precision).toHaveAttribute('aria-valuetext', 'Exact, 1 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual([13.41234, 52.51234]);
-	// 0.00064°
-	await precision.fill('6');
-	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('71 m');
+	const exact = await shared();
+	// the length of the link is told
+	await expect(result).toHaveText(`Positions to 1 m · Link: ${exact.length} characters`);
+	// 0.00064°: the second step from the left
+	await precision.fill('1');
+	await expect(page.getByRole('dialog').locator('.slider .text')).toHaveText('Low');
 	await expect.poll(async () => (await shared()).point).toStrictEqual(COARSE_POINT);
 	expect((await shared()).length).toBeLessThan(auto.length);
+	expect(auto.length).toBeLessThanOrEqual(exact.length);
+	await expect(result).toHaveText(`Positions to 71 m · Link: ${(await shared()).length} characters`);
+	// one step finer than what is too fine to be seen
+	await precision.fill('3');
+	await expect(precision).toHaveAttribute('aria-valuetext', 'Medium, 18 m');
 
 	// automatic again
 	await automatic.check();
-	await expect(precision).toHaveAttribute('aria-valuetext', '9 m');
+	await expect(precision).toHaveAttribute('aria-valuetext', 'High, 9 m');
 	await expect.poll(async () => (await shared()).point).toStrictEqual(AUTO_POINT);
 
 	// the map in the editor keeps its precision
@@ -229,11 +241,12 @@ test('precision of a shared map with a single marker follows the view', async ({
 	await waitForMapIsReady(page, { count: 1 });
 	await showView(page, { center: point, radius: 10000 });
 	await page.getByRole('button', { name: /^Share/ }).click();
-	const precision = page.getByRole('slider', { name: 'Precision' });
-	await expect.poll(async () => Number(await precision.inputValue())).toBeGreaterThan(2);
+	const precision = page.getByRole('slider', { name: 'Accuracy' });
 	const max = Number(await precision.getAttribute('max'));
 	expect(max).toBeGreaterThan(5);
 	expect(max).toBeLessThan(15);
+	// coarser than 4 m, which is two steps left of the right end
+	await expect.poll(async () => Number(await precision.inputValue())).toBeLessThan(max - 2);
 });
 
 test.describe('overlays of the viewer on a phone', () => {
@@ -292,7 +305,7 @@ test.describe('the share dialog on the smallest editor screen', { tag: '@cross-b
 
 		for (const control of [
 			dialog.getByRole('button', { name: 'Copy embed code' }),
-			dialog.getByRole('slider', { name: 'Precision' }),
+			dialog.getByRole('slider', { name: 'Accuracy' }),
 			dialog.getByRole('button', { name: 'Edit shared map…' }),
 			dialog.getByRole('button', { name: 'Reload' })
 		]) {
