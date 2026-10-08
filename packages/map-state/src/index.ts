@@ -9,9 +9,27 @@
  *
  * ## A map
  *
- * A map is a {@link MapState}: plain data, without classes. Its `elements` are in drawing order;
- * its `frame` says what a shared map shows when it opens; its `meta` holds the title, the
- * background map, the legend and what the viewer shows.
+ * A map is a {@link MapState}: plain data, without classes.
+ *
+ * ```text
+ * MapState
+ * ├─ elements[]   in drawing order, the first one at the back
+ * │  ├─ marker    point, label, style, popup
+ * │  ├─ line      points, smooth, style, popup
+ * │  ├─ polygon   points, smooth, style, strokeStyle, popup
+ * │  └─ circle    point, radius, style, strokeStyle, popup
+ * ├─ frame        what a shared map shows when it opens:
+ * │               bounds, bearing, pitch, canPan, canZoom, …
+ * └─ meta         title, background, legend, viewer, labels,
+ *                 colorScheme
+ * ```
+ *
+ * Only `elements` is required. Each part has its type: {@link StateElement}, {@link StateFrame},
+ * {@link StateMetadata}.
+ *
+ * ## Examples
+ *
+ * A link of a map, and the map of a link:
  *
  * ```ts
  * import { encodeState, decodeState, type MapState } from '@versatiles/map-state';
@@ -21,6 +39,42 @@
  * };
  * const link = 'https://versatiles.org/versatiles-map-editor/view/#' + encodeState(state);
  * const again = decodeState(link.split('#')[1]);
+ * ```
+ *
+ * A shorter link: with a visible area, and positions only as fine as that area needs:
+ *
+ * ```ts
+ * import { encodeState, resolutionForArea, type Bounds } from '@versatiles/map-state';
+ *
+ * const bounds: Bounds = [13.3, 52.45, 13.5, 52.55]; // west, south, east, north
+ * const hash = encodeState({ ...state, frame: { bounds } }, { resolution: resolutionForArea(bounds) });
+ * ```
+ *
+ * A `.mapjson` file, which may come from anywhere:
+ *
+ * ```ts
+ * import { readFileSync } from 'node:fs';
+ * import { stateFromMapJSON, unknownMapJSONFields, MapJSONVersionError } from '@versatiles/map-state';
+ *
+ * const json = JSON.parse(readFileSync('walk.mapjson', 'utf8'));
+ * try {
+ * 	const map = stateFromMapJSON(json); // only its valid parts
+ * 	const unknown = unknownMapJSONFields(json); // e.g. ['elements[0].style.colour']
+ * 	if (unknown.length > 0) console.warn('Fields that were not read:', unknown);
+ * } catch (error) {
+ * 	if (error instanceof MapJSONVersionError) console.error('The file is of a newer version of the format');
+ * 	else throw error;
+ * }
+ * ```
+ *
+ * A map for other tools:
+ *
+ * ```ts
+ * import { stateToGeoJSON, stateToKML, stateFromGeoJSON } from '@versatiles/map-state';
+ *
+ * const geojson = stateToGeoJSON(state); // a FeatureCollection, the styles as properties
+ * const kml = stateToKML(state); // for Google Earth and GIS tools
+ * const back = stateFromGeoJSON(geojson); // also reads the GeoJSON of other tools
  * ```
  *
  * ## What to use
@@ -50,6 +104,35 @@
  * the formats of links, GeoJSON and KML in the
  * [README](https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/README.md).
  * Below, everything the package exports, by what it is for.
+ *
+ * @categoryDescription Links
+ * A map as a compact string, e.g. in the address of a shared map: writing and reading it, how
+ * accurate its positions are, and what makes it long.
+ *
+ * @categoryDescription Files
+ * A map as a file: `.mapjson`, the format of the editor, and GeoJSON and KML for other tools.
+ *
+ * @categoryDescription Map state
+ * The map as a whole: its type, what a shared map shows of it when it opens, its positions and areas.
+ *
+ * @categoryDescription Elements
+ * What is drawn on the map: markers, lines, polygons and circles, with their popups.
+ *
+ * @categoryDescription Styles
+ * How an element looks: the types of its styles, the values that a field can have, and the
+ * defaults, which a style leaves out.
+ *
+ * @categoryDescription Colors
+ * Reading and writing the colors of styles, and the color schemes of the editor.
+ *
+ * @categoryDescription Legend
+ * The legend of a map: its entries, how it is laid out, and where a shared map shows it.
+ *
+ * @categoryDescription Background map
+ * The map behind the elements: its theme, labels, colors, relief and buildings.
+ *
+ * @categoryDescription Viewer
+ * What a shared map shows over the map, and where: the address search and the zoom buttons.
  *
  * @packageDocumentation
  */

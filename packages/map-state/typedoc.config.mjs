@@ -26,6 +26,9 @@ export default {
 	// what the editor needs of how states are normalized, but nobody should build on (`@internal`)
 	excludeInternal: true,
 	categorizeByGroup: false,
+	// in a category first what is called, then what it takes and returns, then the constants
+	sort: ['kind', 'alphabetical'],
+	kindSortOrder: ['Function', 'Class', 'Interface', 'TypeAlias', 'Variable'],
 	categoryOrder: CATEGORIES,
 	defaultCategory: 'Other',
 	navigation: { includeCategories: true, includeGroups: false },
