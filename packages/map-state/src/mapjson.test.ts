@@ -5,6 +5,7 @@ import {
 	MapJSONVersionError,
 	stateFromMapJSON,
 	stateToMapJSON,
+	changedMapJSONValues,
 	unknownMapJSONFields,
 	type MapState,
 	decodeState,
@@ -149,6 +150,118 @@ describe('.mapjson files', () => {
 				{ type: 'circle', point: [0, 0], radius: 50, outlineStyle: { width: 0 } }
 			]
 		});
+	});
+
+	it('report the values that are not kept as they are: invalid, beyond their range, or not drawable', () => {
+		const json = {
+			$schema: MAPJSON_SCHEMA_URL,
+			// across the date line, and steeper than a map can be tilted
+			frame: { bounds: [170, 50, -170, 55], pitch: 80, bearing: 20 },
+			meta: {
+				title: 7,
+				background: { theme: 'gray', labels: 'many', labelSize: '2', colors: { black: 5, white: 1 } },
+				viewer: { search: 'middle', canPan: 'no', minZoom: 14, maxZoom: 10, reset: true },
+				labels: { overlap: 'sometimes', minZoom: 99 },
+				legend: {
+					layout: 'diagonal',
+					// the last one is no entry: told with the fields that are not known
+					entries: [{ type: 'line', label: 5, style: { dash: 'wavy', width: 3 } }, { type: 'marker', label: 'ok' }, 'x']
+				}
+			},
+			elements: [
+				{
+					type: 'marker',
+					point: [1, 2],
+					label: 3,
+					style: { color: 'red', symbol: 'flag', rotation: 45.5, size: 2 },
+					popup: { text: 7 }
+				},
+				{ type: 'line', points: [[0, 0]] },
+				{ type: 'circle', point: [0, 0], radius: 0 },
+				{ type: 'circle', point: [0, 0], radius: 50, style: 'red', outlineStyle: { width: -1, visible: 'no' } }
+			]
+		};
+		expect(changedMapJSONValues(json)).toStrictEqual([
+			'frame.bounds',
+			'frame.pitch',
+			'meta.title',
+			'meta.background.labels',
+			'meta.background.labelSize',
+			'meta.background.colors.black',
+			'meta.viewer.search',
+			'meta.viewer.canPan',
+			'meta.viewer.minZoom',
+			'meta.labels.overlap',
+			'meta.labels.minZoom',
+			'meta.legend.layout',
+			'meta.legend.entries[0].label',
+			'meta.legend.entries[0].style.dash',
+			'elements[0].label',
+			'elements[0].style.color',
+			'elements[0].style.symbol',
+			'elements[0].style.rotation',
+			'elements[0].popup.text',
+			'elements[1]',
+			'elements[2]',
+			'elements[3].style',
+			'elements[3].outlineStyle.width',
+			'elements[3].outlineStyle.visible'
+		]);
+	});
+
+	it('report nothing for what is only written in another way, is the default, or is not known', () => {
+		const json = {
+			$schema: MAPJSON_SCHEMA_URL,
+			frame: { bounds: [13.123456789, 52, 14, 53], bearing: 0, pitch: 0 },
+			meta: {
+				title: '',
+				background: {
+					base: 'vector',
+					theme: 'colorful',
+					streets: true,
+					labels: 'normal',
+					language: 'user',
+					labelSize: 1,
+					haloWidth: 2,
+					labelsOnTop: false,
+					colors: { saturation: 0, black: 0, white: 1 },
+					hillshade: false,
+					buildings: 'flat',
+					options: { anything: [1, 2] }
+				},
+				viewer: { search: 'none', navigation: 'top-right', zoomButtons: true, canPan: true, canRotate: false },
+				labels: { overlap: 'show' },
+				legend: { layout: 'vertical', font: 'sans-serif', bold: false, entries: [{ type: 'area', label: 'A' }] }
+			},
+			elements: [
+				{
+					type: 'marker',
+					point: [13.4000001, 52.5],
+					label: 'Line 1\r\nLine 2',
+					style: { color: '#FF0000', haloColor: '#FFFFFF80', colour: 'x' },
+					popup: { text: '  ' }
+				},
+				{
+					type: 'polygon',
+					points: [
+						[0, 0],
+						[1, 0],
+						[1, 1]
+					],
+					smooth: false,
+					style: { patternScale: 2 },
+					future: 1
+				},
+				{ type: 'text', point: [0, 0] }
+			]
+		};
+		expect(changedMapJSONValues(json)).toStrictEqual([]);
+		// and none of the examples has any
+		for (const file of globSync('examples/*.mapjson')) {
+			expect(changedMapJSONValues(JSON.parse(readFileSync(file, 'utf-8'))), file).toStrictEqual([]);
+		}
+		// no map at all: `stateFromMapJSON` refuses it
+		expect(changedMapJSONValues({ meta: { title: 7 } })).toStrictEqual([]);
 	});
 
 	it('report the fields that this version does not know, which are not kept', () => {

@@ -1,5 +1,21 @@
-import { roundCoordinate, sanitizeState } from './profile.js';
-import { type Bounds, type MapState, type Position, type StateElement, type StateLegendEntry } from './types.js';
+import {
+	BACKGROUND_COLOR_DEFAULTS,
+	BACKGROUND_DEFAULTS,
+	BACKGROUND_HALO_WIDTHS,
+	LEGEND_DEFAULTS,
+	roundCoordinate,
+	sanitizeElement,
+	sanitizeState,
+	VIEWER_DEFAULTS
+} from './profile.js';
+import {
+	LEGEND_ENTRY_TYPES,
+	type Bounds,
+	type MapState,
+	type Position,
+	type StateElement,
+	type StateLegendEntry
+} from './types.js';
 import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
 /**
@@ -199,4 +215,99 @@ export function unknownMapJSONFields(json: unknown): string[] {
 		});
 	}
 	return unknown;
+}
+
+// what a reader leaves out of each object without a loss, since it is what the object has anyway
+const NEUTRAL: Record<string, Record<string, unknown>> = {
+	meta: { title: '', colorScheme: '' },
+	frame: { bearing: 0, pitch: 0 },
+	'meta.viewer': VIEWER_DEFAULTS,
+	'meta.legend': LEGEND_DEFAULTS,
+	'meta.labels': { overlap: 'show', minZoom: 0 },
+	'meta.background': { ...BACKGROUND_DEFAULTS, labelsOnTop: false },
+	'meta.background.colors': BACKGROUND_COLOR_DEFAULTS,
+	element: { smooth: false, label: '' }
+};
+
+/** The fields of a style that are left out if they have no effect, e.g. the size of a pattern without one. */
+const UNUSED_STYLE_FIELDS = ['arrowSize', 'patternScale', 'patternCoverage'];
+
+/**
+ * The values of the content of a .mapjson file that `stateFromMapJSON` does not keep as they are,
+ * by their path: a value that is not valid and left out, e.g. `elements[2].style.color` for
+ * "red"; one beyond its range, which becomes the nearest valid value, e.g. `frame.pitch` for 80;
+ * and an element or a legend entry that cannot be drawn, e.g. `elements[4]` for a line with one
+ * point. So the editor can tell that the map is not what the file says.
+ *
+ * Not among them: the fields that this version does not know (see `unknownMapJSONFields`); a value
+ * that is the default, which a map does not store; and a value that is only written in another
+ * way, e.g. a color in upper case or a coordinate with more decimal places.
+ * @category Files
+ */
+export function changedMapJSONValues(json: unknown): string[] {
+	if (!isObject(json) || !Array.isArray(json.elements)) return [];
+	const changed: string[] = [];
+
+	// a color in upper case, the line breaks of Windows
+	const sameText = (a: string, b: string) => a.replace(/\r\n?/g, '\n').toLowerCase() === b.toLowerCase();
+	/** Whether leaving the value out loses nothing. */
+	const isNeutral = (kind: string, key: string, value: unknown, owner: Record<string, unknown>): boolean => {
+		if (kind === 'style') return UNUSED_STYLE_FIELDS.includes(key) && typeof value === 'number';
+		if (kind === 'popup') return key === 'text' && typeof value === 'string' && value.trim() === '';
+		if (kind === 'meta.background' && key === 'haloWidth') {
+			return value === BACKGROUND_HALO_WIDTHS[owner.base === 'satellite' ? 'satellite' : 'vector'];
+		}
+		return key in (NEUTRAL[kind] ?? {}) && NEUTRAL[kind][key] === value;
+	};
+	/** `kind`: what the object is, for its defaults; e.g. all elements are of the kind "element". */
+	const compare = (input: unknown, output: unknown, path: string, kind: string) => {
+		if (!isObject(input)) return void changed.push(path);
+		const kept = isObject(output) ? output : {};
+		for (const [key, value] of Object.entries(input)) {
+			const at = path ? `${path}.${key}` : key;
+			const result = kept[key];
+			// the options of the background are those of @versatiles/style, which are not checked
+			if (value === undefined || at === 'meta.background.options') continue;
+			if (isObject(value)) {
+				const inner = ['style', 'outlineStyle', 'popup'].includes(key) ? key.replace('outlineStyle', 'style') : at;
+				compare(value, result, at, inner);
+			} else if (Array.isArray(value)) {
+				// positions are kept or their owner is not; the lists of entries and elements are compared below
+				if (result === undefined && !['entries', 'elements'].includes(key)) changed.push(at);
+			} else if (result === undefined) {
+				if (!isNeutral(kind, key, value, input)) changed.push(at);
+			} else if (
+				result !== value &&
+				!(typeof value === 'string' && typeof result === 'string' && sameText(value, result))
+			) {
+				changed.push(at);
+			}
+		}
+	};
+
+	const state = sanitizeState({ elements: [], frame: json.frame, meta: json.meta });
+	const { $schema: _schema, elements, ...rest } = json;
+	compare(rest, state, '', '');
+
+	// the entries of the legend: those with a type are kept, in their order
+	const entries = isObject(json.meta) && isObject(json.meta.legend) ? json.meta.legend.entries : undefined;
+	if (Array.isArray(entries)) {
+		const kept = [...(state.meta?.legend?.entries ?? [])];
+		entries.forEach((entry, index) => {
+			const path = `meta.legend.entries[${index}]`;
+			const known = isObject(entry) && LEGEND_ENTRY_TYPES.includes(entry.type as StateLegendEntry['type']);
+			if (known) compare(entry, kept.shift(), path, 'entry');
+			else changed.push(path);
+		});
+	}
+	elements.forEach((element: unknown, index) => {
+		const path = `elements[${index}]`;
+		const kept = sanitizeElement(element);
+		if (kept) compare(element, kept, path, 'element');
+		else changed.push(path);
+	});
+
+	// the fields that this version does not know are told on their own
+	const unknown = unknownMapJSONFields(json);
+	return changed.filter((path) => !unknown.some((field) => path === field || path.startsWith(`${field}.`)));
 }

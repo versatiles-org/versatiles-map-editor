@@ -329,7 +329,8 @@ const text = JSON.stringify(stateToMapJSON(state)); // with the $schema of this 
 Reading keeps what is valid and leaves out the rest, e.g. an element that cannot be drawn or a
 field with a wrong value. A value has the type that the schema says: a number is a number, not
 `"3"`; a flag is `true` or `false`, not `"true"`; a color is `"#rrggbb"` or `"#rrggbbaa"`, not
-`"#f00"` or `"red"`.
+`"#f00"` or `"red"`. `changedMapJSONValues(json)` lists the values that were left out or corrected, by
+their path, e.g. `elements[2].style.color`; the editor warns about them when it opens a file.
 
 ## Versions
 

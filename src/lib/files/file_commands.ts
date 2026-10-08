@@ -4,6 +4,7 @@ import {
 	stateFromKML,
 	stateFromMapJSON,
 	unknownMapJSONFields,
+	changedMapJSONValues,
 	stateToKML,
 	stateToMapJSON,
 	type MapState
@@ -102,6 +103,7 @@ export class FileCommands {
 			await this.#maps.openMap({ ...state, meta: { ...state.meta, title } });
 			this.#filename = file.name;
 			warnOfUnknownFields(unknownMapJSONFields(json));
+			warnOfChangedValues(changedMapJSONValues(json));
 		} catch (error) {
 			console.error(error);
 			if (error instanceof FileReadError) notify('Failed to read the file. Please try again.');
@@ -167,6 +169,18 @@ export class FileCommands {
 			else notify(`Failed to import ${format}. Please check the file format.`);
 		}
 	}
+}
+
+/**
+ * Warn that a file has values that are not valid, e.g. a color "red" or a line with one point:
+ * they are left out, or replaced by the nearest valid value, so the map is not what the file
+ * says. Names the first few.
+ */
+function warnOfChangedValues(values: string[]): void {
+	if (values.length === 0) return;
+	const named = values.slice(0, 3).join(', ');
+	const more = values.length > 3 ? ` and ${values.length - 3} more` : '';
+	notify(`The file contains values that are not valid, which were left out or corrected: ${named}${more}.`, 'warning');
 }
 
 /**

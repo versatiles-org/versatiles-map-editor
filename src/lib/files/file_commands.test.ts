@@ -108,6 +108,29 @@ describe('FileCommands', () => {
 			);
 		});
 
+		it('opens a file with invalid values, and warns that they were left out or corrected', async () => {
+			const elements = [
+				{ type: 'marker', point: [1, 2], style: { color: 'red', size: '2' } },
+				{ type: 'line', points: [[0, 0]] }
+			];
+			choose('trip.mapjson', JSON.stringify({ frame: { pitch: 80 }, elements }));
+			await files.openFile();
+			expect(maps.openMap).toHaveBeenCalledWith({
+				frame: { pitch: 60 },
+				elements: [{ type: 'marker', point: [1, 2] }],
+				meta: { title: 'trip' }
+			});
+			expect(notify).toHaveBeenLastCalledWith(
+				'The file contains values that are not valid, which were left out or corrected: frame.pitch, elements[0].style.color, elements[0].style.size and 1 more.',
+				'warning'
+			);
+			// a valid file is opened without a word
+			vi.mocked(notify).mockClear();
+			choose('trip.mapjson', JSON.stringify({ elements: [{ type: 'marker', point: [1, 2] }] }));
+			await files.openFile();
+			expect(notify).not.toHaveBeenCalled();
+		});
+
 		it('tells the user about a file of a newer version of the editor', async () => {
 			choose('trip.mapjson', JSON.stringify({ $schema: MAPJSON_SCHEMA_URL.replace('-1.', '-2.'), elements: [] }));
 			await files.openFile();

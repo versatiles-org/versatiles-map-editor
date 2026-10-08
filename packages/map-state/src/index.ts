@@ -54,13 +54,20 @@
  *
  * ```ts
  * import { readFileSync } from 'node:fs';
- * import { stateFromMapJSON, unknownMapJSONFields, MapJSONVersionError } from '@versatiles/map-state';
+ * import {
+ * 	changedMapJSONValues,
+ * 	stateFromMapJSON,
+ * 	unknownMapJSONFields,
+ * 	MapJSONVersionError
+ * } from '@versatiles/map-state';
  *
  * const json = JSON.parse(readFileSync('walk.mapjson', 'utf8'));
  * try {
  * 	const map = stateFromMapJSON(json); // only its valid parts
  * 	const unknown = unknownMapJSONFields(json); // e.g. ['elements[0].style.colour']
  * 	if (unknown.length > 0) console.warn('Fields that were not read:', unknown);
+ * 	const changed = changedMapJSONValues(json); // e.g. ['elements[0].style.color'] for "red"
+ * 	if (changed.length > 0) console.warn('Values that were left out or corrected:', changed);
  * } catch (error) {
  * 	if (error instanceof MapJSONVersionError) console.error('The file is of a newer version of the format');
  * 	else throw error;
@@ -162,6 +169,7 @@ export {
 	stateFromMapJSON,
 	stateToMapJSON,
 	unknownMapJSONFields,
+	changedMapJSONValues,
 	type MapJSON
 } from './mapjson.js';
 export { stateFromKML, stateToKML } from './kml.js';
