@@ -76,9 +76,11 @@ describe('arrowheads', () => {
 		expect(() => new StateReader(writer.bits).readStyle('line')).toThrow(
 			expect.objectContaining({ cause: expect.objectContaining({ message: 'Invalid index: 4 of 4' }) })
 		);
-		// and the writer does not write one
-		const style = { arrowEnd: 'star' } as unknown as StateStyle;
-		expect(() => encodeState({ elements: [{ type: 'line', points, style }] })).toThrow('Invalid name: star');
+		// and the writer does not write one: the line is kept without it
+		const style = { arrowEnd: 'star', width: 3 } as unknown as StateStyle;
+		expect(decodeState(encodeState({ elements: [{ type: 'line', points, style }] })).elements).toStrictEqual([
+			{ type: 'line', points, style: { width: 3 } }
+		]);
 	});
 
 	it('are properties of lines in GeoJSON, by name', () => {

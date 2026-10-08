@@ -27,6 +27,7 @@ import {
 	type StateLabels,
 	type AreaStyle,
 	type LineStyle,
+	type MapState,
 	type MarkerStyle,
 	type OutlineStyle,
 	type StateLegend,
@@ -765,6 +766,19 @@ export function sanitizePositions(value: unknown): Position[] | undefined {
 		positions.push(position);
 	}
 	return positions;
+}
+
+/**
+ * The valid parts of a map: its elements that can be drawn, with the valid fields of their styles,
+ * a valid frame and valid properties. What a file and a link keep.
+ */
+export function sanitizeState(value: { elements: unknown[]; frame?: unknown; meta?: unknown }): MapState {
+	const state: MapState = { elements: value.elements.map(sanitizeElement).filter((element) => element !== undefined) };
+	const frame = sanitizeFrame(value.frame);
+	if (frame) state.frame = frame;
+	const meta = sanitizeMetadata(value.meta);
+	if (meta) state.meta = meta;
+	return state;
 }
 
 /** The valid properties of the whole map, or undefined if none is. */

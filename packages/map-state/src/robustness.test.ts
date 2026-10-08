@@ -1,7 +1,7 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 import { parseColor } from './color.js';
-import { decodeState, encodeState, stateFromMapJSON, type MapState } from './index.js';
+import { decodeState, encodeState, stateFromMapJSON, type Bounds, type MapState } from './index.js';
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
@@ -158,5 +158,91 @@ describe('corrupt links', { timeout: 60_000 }, () => {
 			}
 		}
 		expect(slowest.ms).toBeLessThan(2000);
+	});
+});
+
+// what the writer is given may be anything, e.g. from a script that uses the package
+describe('the writer writes only what the reader reads', () => {
+	const read = (state: unknown, resolution?: number) =>
+		decodeState(encodeState(state as MapState, resolution ? { resolution } : {}));
+
+	it('keeps the valid parts of invalid elements, and leaves out what cannot be drawn', () => {
+		const state = {
+			elements: [
+				{ type: 'marker', point: [13, 52], style: { rotation: 200, size: 'big', color: 'no color' } },
+				{
+					type: 'polygon',
+					points: [
+						[1, 2],
+						[3, 4],
+						[5, 2]
+					],
+					style: { pattern: 'dots', patternScale: 9 }
+				},
+				{ type: 'line', points: [[1, 2]] },
+				{
+					type: 'polygon',
+					points: [
+						[1, 2],
+						[3, 4]
+					]
+				},
+				{ type: 'circle', point: [1, 2], radius: -5 },
+				{ type: 'star', point: [1, 2] },
+				{ type: 'marker', point: [13, Infinity] }
+			],
+			frame: { bounds: [10, 50, 5, 55], pitch: 500 },
+			meta: { viewer: { search: 'somewhere' }, legend: 'yes' }
+		};
+		const result = read(state);
+		expect(result.elements.map((element) => element.type)).toStrictEqual(['marker', 'polygon']);
+		checkDrawable(result);
+		// and again the same
+		expect(read(result)).toStrictEqual(result);
+	});
+
+	it('keeps positions on the map at every accuracy, e.g. at the poles', () => {
+		for (const resolution of [1, 100, 5000, 20000, 40000]) {
+			const state: MapState = {
+				elements: [
+					{ type: 'marker', point: [0, 90] },
+					{ type: 'marker', point: [179.99999, -90] },
+					{ type: 'marker', point: [10, 91] },
+					{
+						type: 'line',
+						points: [
+							[-180, -89.99999],
+							[180, 89.99999]
+						]
+					},
+					{ type: 'circle', point: [0, -95], radius: 10 }
+				]
+			};
+			const result = read(state, resolution);
+			expect(result.elements).toHaveLength(5);
+			checkDrawable(result);
+		}
+	});
+
+	it('keeps a frame on the map at every accuracy, e.g. of the whole world or at its end', () => {
+		const frames: Bounds[] = [
+			[-180, -90, 180, 90],
+			[179.9, 89.9, 180, 90],
+			[-180, -90, -179.9, -89.9],
+			[179.99998, 89.99998, 180, 90]
+		];
+		for (const bounds of frames) {
+			for (const resolution of [1, 100, 5000, 20000, 40000]) {
+				const result = read({ elements: [], frame: { bounds } }, resolution);
+				expect(result.frame?.bounds, `${bounds} at ${resolution} m`).toBeDefined();
+				checkDrawable(result);
+			}
+		}
+	});
+
+	it('refuses a number that does not fit its bits instead of writing another one', () => {
+		expect(() => new StateWriter().writeInteger(64, 6)).toThrow('64 does not fit 6 bits');
+		expect(() => new StateWriter().writeInteger(-1, 6)).toThrow();
+		expect(() => new StateWriter().writeInteger(63, 6)).not.toThrow();
 	});
 });

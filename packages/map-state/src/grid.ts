@@ -7,6 +7,10 @@ const METERS_PER_DEGREE = 111320;
 const BASE_STEP = 1e-5;
 const STEPS_PER_DEGREE = 1e5;
 
+/** The map ends at these degrees. */
+const MAX_LATITUDE = 90;
+const MAX_LONGITUDE = 180;
+
 /**
  * The coarsest step is the finest one times 2^15: 0.32768°, about 36 km. Stored in 4 bits.
  * @category Links
@@ -68,16 +72,28 @@ export class LocalGrid {
 
 	constructor(center: [number, number], exponent: number) {
 		this.factor = 2 ** exponent;
-		this.origin = [this.steps(center[0]), this.steps(center[1])];
+		this.origin = [this.steps(center[0]), this.steps(center[1], MAX_LATITUDE)];
 	}
 
-	/** A coordinate in whole steps. */
-	private steps(value: number): number {
-		return Math.round((value * STEPS_PER_DEGREE) / this.factor);
+	/**
+	 * A coordinate in whole steps. `limit`: the largest degrees of the map, which rounding does
+	 * not leave: e.g. 90° is between two steps of a coarse grid, and becomes the one below.
+	 */
+	private steps(value: number, limit = Infinity): number {
+		const steps = Math.round((value * STEPS_PER_DEGREE) / this.factor);
+		const most = Math.floor((limit * STEPS_PER_DEGREE) / this.factor);
+		return Math.min(most, Math.max(-most, steps));
 	}
 
-	toGrid([lng, lat]: [number, number]): [number, number] {
-		return [this.steps(lng) - this.origin[0], this.steps(lat) - this.origin[1]];
+	/**
+	 * A position in steps from the origin. Its latitude stays on the map; `inside`: its longitude
+	 * too, between -180° and 180°, as the sides of a frame are.
+	 */
+	toGrid([lng, lat]: [number, number], inside = false): [number, number] {
+		return [
+			this.steps(lng, inside ? MAX_LONGITUDE : Infinity) - this.origin[0],
+			this.steps(lat, MAX_LATITUDE) - this.origin[1]
+		];
 	}
 
 	fromGrid([x, y]: [number, number]): [number, number] {

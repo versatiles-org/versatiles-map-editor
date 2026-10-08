@@ -1,4 +1,4 @@
-import { roundCoordinate, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
+import { roundCoordinate, sanitizeState } from './profile.js';
 import { type Bounds, type MapState, type Position, type StateElement, type StateLegendEntry } from './types.js';
 import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
@@ -64,12 +64,7 @@ export function stateFromMapJSON(json: unknown): MapState {
 	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
 	if (!Array.isArray(elements)) throw new Error('The file contains no map elements');
 
-	const state: MapState = { elements: elements.map(sanitizeElement).filter((element) => element !== undefined) };
-	const area = sanitizeFrame(frame);
-	if (area) state.frame = area;
-	const metadata = sanitizeMetadata(meta);
-	if (metadata) state.meta = metadata;
-	return state;
+	return sanitizeState({ elements, frame, meta });
 }
 
 /**

@@ -26,6 +26,7 @@ import {
 	removeViewerDefaults,
 	sanitizeBackground,
 	sanitizeFrame,
+	sanitizeState,
 	sanitizeLabels,
 	VIEWER_BUTTONS,
 	VIEWER_CHOICES,
@@ -119,6 +120,8 @@ export class StateWriter {
 
 	writeInteger(value: number, bits: number) {
 		if (value % 1 !== 0) throw new Error('value must be an integer');
+		// not wrapped: the reader would read another value
+		if (value < 0 || value >= 2 ** bits) throw new Error(`${value} does not fit ${bits} bits`);
 		for (let i = bits - 1; i >= 0; i--) {
 			this.bits.push((value & (1 << i)) > 0);
 		}
@@ -161,7 +164,12 @@ export class StateWriter {
 		this.writeVarint(Math.round(point[1] * scale), true);
 	}
 
-	writeRoot(root: MapState) {
+	/**
+	 * The whole map. Only its valid parts, as a file is read (see `sanitizeState`): so that the
+	 * reader reads every link that is written.
+	 */
+	writeRoot(state: MapState) {
+		const root = sanitizeState(state);
 		this.writeKey(CODEC_VERSION, KEY_PARAMETERS.version);
 		this.writePalette(collectColors(root));
 		this.writeStringTable(collectStrings(root), collectFormatStrings(root));
@@ -294,11 +302,15 @@ export class StateWriter {
 		const bounds = frame.bounds;
 		this.writeBit(!!bounds);
 		if (bounds) {
-			const [x0, y0] = this.elementGrid.toGrid([bounds[0], bounds[1]]);
-			const [x1, y1] = this.elementGrid.toGrid([bounds[2], bounds[3]]);
+			// on the map, also where the grid is coarse
+			let [x0, y0] = this.elementGrid.toGrid([bounds[0], bounds[1]], true);
+			const [x1, y1] = this.elementGrid.toGrid([bounds[2], bounds[3]], true);
+			// at least one step, so an area never becomes empty: to the inside, at the end of the map
+			const [endX, endY] = this.elementGrid.toGrid([180, 90], true);
+			if (x1 === x0 && x0 === endX) x0--;
+			if (y1 === y0 && y0 === endY) y0--;
 			this.writeVarint(x0, true);
 			this.writeVarint(y0, true);
-			// at least one step, so an area never becomes empty
 			this.writeVarint(Math.max(1, x1 - x0));
 			this.writeVarint(Math.max(1, y1 - y0));
 		}

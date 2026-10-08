@@ -700,9 +700,16 @@ describe('legend', () => {
 		expect(decodeState(encodeState(state))).toStrictEqual(state);
 	});
 
-	it('refuses an entry without a valid type', () => {
-		const legend = { entries: [{ color: '#ff0000', label: 'A' }] } as unknown as StateLegend;
-		expect(() => encodeState({ meta: { legend }, elements: [] })).toThrow('Invalid legend entry type');
+	it('leaves out an entry without a valid type', () => {
+		const legend = {
+			entries: [
+				{ color: '#ff0000', label: 'A' },
+				{ type: 'line', label: 'B' }
+			]
+		} as unknown as StateLegend;
+		expect(decodeState(encodeState({ meta: { legend }, elements: [] })).meta?.legend?.entries).toStrictEqual([
+			{ type: 'line', label: 'B' }
+		]);
 	});
 
 	it('does not store the default layout', () => {
@@ -783,10 +790,10 @@ describe('viewer', () => {
 });
 
 describe('invalid links', () => {
-	/** The message of the innermost error of decoding the map, e.g. "Invalid latitude: 95". */
-	function decodeError(state: MapState): string {
+	/** The message of the innermost error, e.g. "Invalid latitude: 95". */
+	function innerError(read: () => unknown): string {
 		try {
-			decodeState(encodeState(state));
+			read();
 		} catch (error) {
 			let inner = error as Error;
 			while (inner.cause instanceof Error) inner = inner.cause;
@@ -795,32 +802,41 @@ describe('invalid links', () => {
 		return 'no error';
 	}
 
-	it('are refused with elements that cannot be drawn, which the editor never writes', () => {
-		expect(decodeError({ elements: [{ type: 'line', points: [[0, 0]] }] })).toBe('A line of fewer than 2 points');
+	/** A reader after the grid of an empty map: steps of 0.00001° from 0, 0. */
+	function onGrid(write: (writer: StateWriter) => void): StateReader {
+		const writer = new StateWriter();
+		writer.writeGrid({ elements: [] }, undefined);
+		write(writer);
+		const reader = new StateReader(writer.bits);
+		reader.readGrid();
+		return reader;
+	}
+
+	// the writer writes none of these (see robustness.test.ts), so they are written by hand
+	it('are refused with elements that cannot be drawn', () => {
+		const line = onGrid((writer) => writer.writeElementLine({ type: 'line', points: [[0, 0]] }));
+		expect(innerError(() => line.readElementLine())).toBe('A line of fewer than 2 points');
 		const twoPoints: [number, number][] = [
 			[0, 0],
 			[1, 1]
 		];
-		expect(decodeError({ elements: [{ type: 'polygon', points: twoPoints }] })).toBe('An area of fewer than 3 points');
-		expect(decodeError({ elements: [{ type: 'marker', point: [0, 95] }] })).toBe('Invalid latitude: 95');
-		expect(
-			decodeError({
-				elements: [
-					{
-						type: 'line',
-						points: [
-							[0, 0],
-							[1, -91]
-						]
-					}
-				]
-			})
-		).toBe('Invalid latitude: -91');
+		const polygon = onGrid((writer) => writer.writeElementPolygon({ type: 'polygon', points: twoPoints }));
+		expect(innerError(() => polygon.readElementPolygon())).toBe('An area of fewer than 3 points');
+		// 95° north, in steps
+		const marker = onGrid((writer) => {
+			writer.writeExpGolomb(0, 0, true);
+			writer.writeExpGolomb(9500000, 0, true);
+		});
+		expect(innerError(() => marker.readElementMarker())).toBe('Invalid latitude: 95');
 	});
 
 	it('are refused with a rotation beyond 180°', () => {
-		const marker = (style: StateStyle): MapState => ({ elements: [{ type: 'marker', point: [0, 0], style }] });
-		expect(decodeError(marker({ rotation: 200 }))).toBe('Invalid rotation: 200');
+		const writer = new StateWriter();
+		writer.writeStyle('marker', { rotation: 200 });
+		expect(innerError(() => new StateReader(writer.bits).readStyle('marker'))).toBe('Invalid rotation: 200');
+		// which the writer turns into the same direction within it
+		const state: MapState = { elements: [{ type: 'marker', point: [0, 0], style: { rotation: 200 } }] };
+		expect(decodeState(encodeState(state)).elements[0].style).toStrictEqual({ rotation: -160 });
 	});
 
 	it('keep a circle smaller than 1 m, as 1 m', () => {

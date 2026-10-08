@@ -98,7 +98,8 @@ describe('the label of a marker', () => {
 			marker(13.3, { color: '#ff0000' }, 'A'),
 			marker(13.4, {})
 		];
-		expect(roundTrip(elements)).toStrictEqual(elements);
+		// a style without fields is none
+		expect(roundTrip(elements)).toStrictEqual([...elements.slice(0, 2), marker(13.4)]);
 		expect(roundTrip([marker(13.1, undefined, '')])).toStrictEqual([marker(13.1)]);
 	});
 
