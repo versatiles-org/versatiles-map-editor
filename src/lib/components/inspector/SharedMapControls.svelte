@@ -42,7 +42,8 @@
 {#each CONTROLS as { key, label, hint, layout } (key)}
 	{#if key !== 'legend' || doc.legend?.entries.length}
 		{@const place = doc.controls[key]}
-		<div class="control">
+		<!-- the places as words are too wide beside the checkbox: below it -->
+		<div class="control" class:below={layout === 'segmented'}>
 			<Checkbox
 				checked={place !== 'none'}
 				onchange={(e) => setControl(key, e.currentTarget.checked ? defaultPlace(key) : 'none')}
@@ -96,5 +97,10 @@
 		justify-content: space-between;
 		gap: var(--space-2);
 		margin-top: var(--space-2);
+	}
+
+	.control.below {
+		flex-direction: column;
+		align-items: stretch;
 	}
 </style>
