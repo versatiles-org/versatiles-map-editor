@@ -115,11 +115,11 @@ elements in the window, and keeps its own view with the map in the browser.
 What a shared or embedded map shows when it opens. All fields are optional. What its viewers can
 do from there, e.g. rotate the map, is a setting of the [viewer](#viewer).
 
-| Field     | Description                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bounds`  | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.           |
-| `bearing` | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top. |
-| `pitch`   | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                     |
+| Field     | Description                                                                                                                                          |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bounds`  | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.                     |
+| `bearing` | The rotation: the compass direction at the top of the window, in degrees clockwise from north (above -180, up to 180). Default: 0, north at the top. |
+| `pitch`   | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                               |
 
 ## Elements
 
@@ -153,7 +153,7 @@ other kinds are unknown fields (see [Basics](#basics)).
 | `color`         | the symbol, default `"#ff0000"`                                                                                                                                                                                               |
 | `symbol`        | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a pin                                                                                                                                                    |
 | `size`          | a factor of the symbol, default `1`                                                                                                                                                                                           |
-| `rotation`      | the symbol, in whole degrees clockwise, −180 to 180, default `0`                                                                                                                                                              |
+| `rotation`      | the symbol, in whole degrees clockwise, above −180 and up to 180, default `0`                                                                                                                                                 |
 | `haloWidth`     | around the symbol and the label, in pixels, default `1`                                                                                                                                                                       |
 | `haloColor`     | the halo, default `"#ffffff"`                                                                                                                                                                                                 |
 | `labelColor`    | the text of the label, default `"#000000"`                                                                                                                                                                                    |

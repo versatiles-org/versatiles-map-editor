@@ -776,7 +776,8 @@ export class StateReader {
 					break;
 				case 'rotation':
 					style.rotation = this.readVarint(true);
-					if (Math.abs(style.rotation) > 180) throw new Error(`Invalid rotation: ${style.rotation}`);
+					// as the writer writes it: above -180° and up to 180°
+					if (style.rotation <= -180 || style.rotation > 180) throw new Error(`Invalid rotation: ${style.rotation}`);
 					break;
 				case 'size':
 					style.size = this.readVarint() / 10;

@@ -839,6 +839,22 @@ describe('invalid links', () => {
 		expect(decodeState(encodeState(state)).elements[0].style).toStrictEqual({ rotation: -160 });
 	});
 
+	it('have half a turn of a symbol as 180°, like the one of a map, never as -180°', () => {
+		const half = (rotation: number): MapState => ({
+			frame: { bearing: rotation },
+			elements: [{ type: 'marker', point: [0, 0], style: { rotation } }]
+		});
+		for (const rotation of [180, -180, 540]) {
+			const state = decodeState(encodeState(half(rotation)));
+			expect(state.frame).toStrictEqual({ bearing: 180 });
+			expect(state.elements[0].style).toStrictEqual({ rotation: 180 });
+			expect(stateFromMapJSON(half(rotation))).toStrictEqual(state);
+		}
+		const writer = new StateWriter();
+		writer.writeStyle('marker', { rotation: -180 });
+		expect(innerError(() => new StateReader(writer.bits).readStyle('marker'))).toBe('Invalid rotation: -180');
+	});
+
 	it('keep a circle smaller than 1 m, as 1 m', () => {
 		const state = decodeState(encodeState({ elements: [{ type: 'circle', point: [0, 0], radius: 0.3 }] }));
 		expect(state.elements).toStrictEqual([{ type: 'circle', point: [0, 0], radius: 1 }]);

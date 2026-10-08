@@ -39,7 +39,10 @@ function checkStyle(style: StateStyle | undefined) {
 	if (style.pattern !== undefined) expect(FILL_PATTERN_NAMES).toContain(style.pattern);
 	if (style.dash !== undefined) expect(DASH_NAMES).toContain(style.dash);
 	if (style.labelPosition !== undefined) expect(LABEL_POSITION_NAMES).toContain(style.labelPosition);
-	if (style.rotation !== undefined) expect(Math.abs(style.rotation)).toBeLessThanOrEqual(180);
+	if (style.rotation !== undefined) {
+		expect(style.rotation).toBeGreaterThan(-180);
+		expect(style.rotation).toBeLessThanOrEqual(180);
+	}
 	for (const key of ['color', 'labelColor', 'haloColor'] as const) {
 		if (style[key] !== undefined) expect(parseColor(style[key])).toBeDefined();
 	}

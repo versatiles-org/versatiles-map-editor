@@ -49,7 +49,7 @@ export interface StateFrame {
 	/**
 	 * The rotation of the map: the compass direction at the top of the window, in degrees
 	 * clockwise from north, e.g. 90 with east at the top. Default: 0, north at the top.
-	 * @minimum -180
+	 * @exclusiveMinimum -180
 	 * @maximum 180
 	 */
 	bearing?: number;
@@ -232,9 +232,9 @@ export interface MarkerStyle {
 	 */
 	size?: number;
 	/**
-	 * The rotation of the symbol, in whole degrees clockwise.
+	 * The rotation of the symbol, in whole degrees clockwise, above -180 and up to 180.
 	 * @asType integer
-	 * @minimum -180
+	 * @exclusiveMinimum -180
 	 * @maximum 180
 	 * @default 0
 	 */

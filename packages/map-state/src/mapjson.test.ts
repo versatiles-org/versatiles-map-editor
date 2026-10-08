@@ -166,7 +166,7 @@ describe('.mapjson files', () => {
 			$schema: MAPJSON_SCHEMA_URL,
 			frame: { bounds: [13.12346, 52, 14, 53], pitch: 60 },
 			meta: { viewer: { canRotate: true }, legend: { entries: [] } },
-			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#ff0000', rotation: -180 } }]
+			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#ff0000', rotation: 180 } }]
 		});
 		// in this order, and read again as the same map
 		expect(Object.keys(json)).toStrictEqual(['$schema', 'frame', 'meta', 'elements']);

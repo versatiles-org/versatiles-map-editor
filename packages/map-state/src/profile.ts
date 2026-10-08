@@ -159,11 +159,13 @@ export function sanitizeNumber(value: unknown, min = -Infinity, max = Infinity):
 	return Math.min(max, Math.max(min, value));
 }
 
-/** A rotation in whole degrees, normalized to [-180, 180). */
+/** A rotation in whole degrees, normalized to (-180, 180], like the rotation of a map (`sanitizeBearing`). */
 export function sanitizeRotation(value: unknown): number | undefined {
 	const n = sanitizeNumber(value);
 	if (n === undefined) return undefined;
-	return ((((Math.round(n) + 180) % 360) + 360) % 360) - 180;
+	const rotation = ((Math.round(n) % 360) + 360) % 360;
+	// + 0: not -0
+	return (rotation > 180 ? rotation - 360 : rotation) + 0;
 }
 
 /** A parseable color, normalized to lowercase hex (#rrggbb or #rrggbbaa). */
