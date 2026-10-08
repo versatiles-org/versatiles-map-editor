@@ -58,7 +58,7 @@ const points: Point[] = [
 	[13.35, 52.5],
 	[13.45, 52.5]
 ];
-const line: MapState = { view: { center, radius: 10000 }, elements: [{ type: 'line', points }] };
+const line: MapState = { elements: [{ type: 'line', points }] };
 
 const linePoints = async (page: Page) => {
 	const element = (await storedState(page)).elements[0];
@@ -198,13 +198,13 @@ test('two fingers and the keyboard turn the map, in the viewer and in the editor
 		await expect.poll(async () => (await camera()).bearing).not.toBe(0);
 		await tilt(touch);
 		await expect.poll(async () => (await camera()).pitch).toBeGreaterThan(0);
-		// Shift and the arrow keys turn it on
-		const before = await camera();
+		// Shift and an arrow key turn it on
+		await waitForMapIsIdle(page);
+		const before = (await camera()).bearing;
 		await page.locator('.maplibregl-canvas').focus();
 		await page.keyboard.press('Shift+ArrowLeft');
-		await page.keyboard.press('Shift+ArrowUp');
+		await expect.poll(async () => (await camera()).bearing).not.toBe(before);
 		await waitForMapIsIdle(page);
-		expect(await camera()).not.toStrictEqual(before);
 		// the zoom stays, and nothing of the map was changed
 		expect(await page.evaluate(() => (window as unknown as MapWindow).map.getZoom())).toBeCloseTo(zoom, 0);
 		expect(await linePoints(page)).toStrictEqual(points);
@@ -212,7 +212,7 @@ test('two fingers and the keyboard turn the map, in the viewer and in the editor
 });
 
 test('drawing a line with taps and the Finish button', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, center);
 
@@ -228,7 +228,7 @@ test('drawing a line with taps and the Finish button', async ({ page }) => {
 
 test('dragging a handle of the visible area with a finger, a bit off the handle', async ({ page }) => {
 	const frame: [number, number, number, number] = [13.35, 52.47, 13.45, 52.53];
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, frame: { bounds: frame }, elements: [] }));
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements: [] }));
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Shared map…')).click();
 	const touch = await Touchscreen.create(page);
@@ -259,7 +259,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 		point: [13.3 + i * 0.005, 52.5] as Point,
 		label: `M${i + 1}`
 	}));
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements }));
+	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Elements', exact: true }).tap();
 	const touch = await Touchscreen.create(page);
@@ -292,7 +292,7 @@ test('dragging elements in the list with a finger, by their handles', async ({ p
 
 test('rearranging the entries of the legend with a finger', async ({ page }) => {
 	const entries = ['A', 'B', 'C'].map((label) => ({ type: 'area' as const, style: { color: '#ff0000' }, label }));
-	await page.goto('/#' + encodeState({ view: { center, radius: 3000 }, meta: { legend: { entries } }, elements: [] }));
+	await page.goto('/#' + encodeState({ meta: { legend: { entries } }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();
 	const touch = await Touchscreen.create(page);
@@ -308,7 +308,7 @@ test('rearranging the entries of the legend with a finger', async ({ page }) => 
 test('taking the style of an element for a legend entry with a tap', async ({ page }) => {
 	const legend = { entries: [{ type: 'marker' as const, label: 'Route' }] };
 	const elements: MapState['elements'] = [{ type: 'line', points, style: { color: '#d55e00', width: 4 } }];
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, meta: { legend }, elements }));
+	await page.goto('/#' + encodeState({ meta: { legend }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: 'Edit legend' }).tap();
 	await page.getByRole('button', { name: 'Open entry 1' }).tap();

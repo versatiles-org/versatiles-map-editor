@@ -21,19 +21,11 @@ describe('the JSON Schema of .mapjson files', () => {
 		const { definitions } = committed as { definitions: Record<string, { properties?: Record<string, unknown> }> };
 		const fields = (properties?: Record<string, unknown>) => Object.keys(properties ?? {}).sort();
 		for (const [name, known] of Object.entries(MAPJSON_FIELDS)) {
-			const properties =
-				name === 'view'
-					? (definitions.MapJSON.properties!.view as { properties: Record<string, unknown> }).properties
-					: definitions[name]?.properties;
-			expect([...known].sort(), name).toStrictEqual(fields(properties));
+			expect([...known].sort(), name).toStrictEqual(fields(definitions[name]?.properties));
 		}
 		// every object of the schema is in the list
 		const objects = Object.entries(definitions).filter(([, definition]) => definition.properties);
-		expect(objects.map(([name]) => name).sort()).toStrictEqual(
-			Object.keys(MAPJSON_FIELDS)
-				.filter((name) => name !== 'view')
-				.sort()
-		);
+		expect(objects.map(([name]) => name).sort()).toStrictEqual(Object.keys(MAPJSON_FIELDS).sort());
 	});
 
 	it('allows unknown fields, e.g. of a newer version', () => {
@@ -60,7 +52,6 @@ describe('the JSON Schema of .mapjson files', () => {
 
 	it('fits what the editor writes, with every kind of element and property', () => {
 		const state: MapState = {
-			view: { center: [13.4, 52.5], radius: 1200, turnable: true, bearing: 15, pitch: 30 },
 			frame: { bounds: [13.3, 52.4, 13.5, 52.6], bearing: -30, pitch: 45, lockBearing: true, lockPitch: true },
 			meta: {
 				background: {

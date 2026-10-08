@@ -4,6 +4,7 @@ import { encodeState, type Bounds, type MapState } from '../packages/map-state/s
 import {
 	menuItem,
 	project,
+	storedCamera,
 	storedState,
 	waitForMapIsIdle,
 	showView,
@@ -53,9 +54,7 @@ test('a shared map shows its frame completely in the viewer; the editor shows it
 	// the editor shows the elements, here a marker, in the middle between its bars: the top bar, the
 	// tools, the sidebar and the status line; whatever the frame, and wherever its author looked last
 	await page.setViewportSize({ width: 1280, height: 720 });
-	await page.goto(
-		'/#' + encodeState({ view: { center: [2.35, 48.85], radius: 5000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 	const [x, y] = await project(page, [13.4, 52.5]);
 	expect(x).toBeCloseTo((48 + 1280 - 250) / 2, -1);
@@ -422,10 +421,7 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 test('the author turns the map of the editor, which has a compass that is faded while it is not turned', async ({
 	page
 }) => {
-	await page.goto(
-		'/#' +
-			encodeState({ view: { center: [13.4, 52.5], radius: 15000 }, frame: { bounds: frame, bearing: 40 }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame, bearing: 40 }, elements }));
 	await waitForMapIsReady(page);
 	const camera = async () => {
 		const { bearing, pitch } = await page.evaluate(() => {
@@ -455,7 +451,7 @@ test('the author turns the map of the editor, which has a compass that is faded 
 		expect(own.bearing).not.toBe(0);
 		expect(own.pitch).toBeGreaterThan(0);
 		await expect(compass).not.toContainClass('compass-idle');
-		await expect.poll(async () => Math.round((await storedState(page)).view?.bearing ?? 0)).toBe(own.bearing);
+		await expect.poll(async () => Math.round((await storedCamera(page))?.bearing ?? 0)).toBe(own.bearing);
 		// how the shared map is turned is another thing
 		expect((await storedState(page)).frame).toStrictEqual({ bounds: frame, bearing: 40 });
 		await page.reload();
@@ -501,7 +497,7 @@ test('the author turns the map of the editor, which has a compass that is faded 
 		await compass.click();
 		await expect.poll(camera).toStrictEqual({ bearing: 0, pitch: 0 });
 		await expect(compass).toContainClass('compass-idle');
-		await expect.poll(async () => (await storedState(page)).view?.bearing).toBeUndefined();
+		await expect.poll(async () => (await storedCamera(page))?.bearing).toBeUndefined();
 	});
 });
 
@@ -517,9 +513,7 @@ test('the share dialog warns about elements outside the visible area, and edits 
 			]
 		}
 	];
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements: outside })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements: outside }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -551,9 +545,7 @@ test('the share dialog tells that an empty map without a visible area shows the 
 test('the preview of the share dialog shows the frame completely in all three aspect ratios', async ({ page }) => {
 	// the preview loads three times, which may take longer than the timeout of a test (see PREVIEW_TIMEOUT)
 	test.slow();
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -646,9 +638,7 @@ test('the keyboard moves the sides of the frame, one undo step per key', async (
 });
 
 test('importing a file with a frame gives a frame that covers both', async ({ page }) => {
-	await page.goto(
-		'/#' + encodeState({ view: { center: [13.4, 52.5], radius: 6000 }, frame: { bounds: frame }, elements })
-	);
+	await page.goto('/#' + encodeState({ frame: { bounds: frame }, elements }));
 	await waitForMapIsReady(page);
 	const file = { type: 'FeatureCollection', features: [], frame: { bounds: [13.45, 52.5, 13.6, 52.6] } };
 	const importGeoJSON = await menuItem(page, 'Import', 'GeoJSON…');

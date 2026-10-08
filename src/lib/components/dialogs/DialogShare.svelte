@@ -86,7 +86,7 @@
 	}
 
 	function getLinkCode() {
-		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent), camera: false })}`;
+		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent) })}`;
 	}
 
 	function getEmbedCode() {

@@ -53,7 +53,7 @@ for (const name of EXAMPLES) {
 			if (legend.length > 0) expect(await coveredPoints(overlay)).toStrictEqual([]);
 			expect(pageErrors).toStrictEqual([]);
 
-			// the file is what the editor writes, except for the view, which depends on the window
+			// the file is what the editor writes
 			await (await menuItem(page, 'Download…')).click();
 			const [download] = await Promise.all([
 				page.waitForEvent('download'),
@@ -61,7 +61,7 @@ for (const name of EXAMPLES) {
 			]);
 			const downloaded: MapState = JSON.parse(readFileSync(await download.path(), 'utf-8'));
 			// with its title, and its visible area
-			expect({ ...downloaded, view: state.view }).toStrictEqual(state);
+			expect(downloaded).toStrictEqual(state);
 		});
 
 		test('shared as a link, in the viewer', async ({ page }) => {

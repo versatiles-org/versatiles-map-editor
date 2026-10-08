@@ -1,6 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": { "center": [10.861904352344993, 53.19113723673652], "radius": 192440.7112769086 },
 	"frame": { "bounds": [9.653, 52.422, 14.05, 53.656] },
 	"meta": {
 		"background": { "theme": "gray", "language": "local", "colors": { "black": 0.35 } },

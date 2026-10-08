@@ -1,5 +1,6 @@
 import type * as GeoJSON from 'geojson';
 import { stateFromGeoJSON, stateToGeoJSON, type GeoJSONDocument } from './geojson.js';
+import { boundsOf } from './bounds.js';
 import type { MapState, Bounds } from './types.js';
 import { child, children, descendants, parseXml, text, xml, type XmlElement } from './xml.js';
 
@@ -11,7 +12,6 @@ import { child, children, descendants, parseXml, text, xml, type XmlElement } fr
  *   exact map state. Files of other tools are imported as far as KML styles can be mapped.
  */
 
-const VIEW_DATA = 'versatiles:view';
 const FRAME_DATA = 'versatiles:frame';
 const META_DATA = 'versatiles:meta';
 const CENTER_DATA = 'center';
@@ -25,25 +25,29 @@ type Point = [number, number];
 // Export
 // ---------------------------------------------------------------------------
 
-/** The center of the area of a frame, and the radius (in meters) that shows all of it. */
+/** The least radius that Google Earth is told to show, in meters. */
+const MIN_RADIUS = 500;
+
+/** The center of an area, e.g. of a frame, and the radius (in meters) that shows all of it. */
 function viewOfFrame([west, south, east, north]: Bounds): { center: [number, number]; radius: number } {
 	const center: [number, number] = [(west + east) / 2, (south + north) / 2];
 	const meters = 111320;
 	const width = (east - west) * meters * Math.cos((center[1] * Math.PI) / 180);
 	const height = (north - south) * meters;
-	return { center, radius: Math.max(width, height) / 2 };
+	// at least some surroundings, e.g. of a single marker
+	return { center, radius: Math.max(width / 2, height / 2, MIN_RADIUS) };
 }
 
 /** The map state as a KML document. */
 export function stateToKML(state: MapState): string {
 	const doc = stateToGeoJSON(state);
 	const documentData: Record<string, string> = {};
-	if (doc.view) documentData[VIEW_DATA] = JSON.stringify(doc.view);
 	if (doc.frame) documentData[FRAME_DATA] = JSON.stringify(doc.frame);
 	if (doc.meta) documentData[META_DATA] = JSON.stringify(doc.meta);
 
-	// where Google Earth looks: at the area of the frame, else at the camera
-	const view = doc.frame?.bounds ? viewOfFrame(doc.frame.bounds) : doc.view;
+	// where Google Earth looks: at the area of the frame, else at all elements
+	const area = doc.frame?.bounds ?? boundsOf(state.elements);
+	const view = area && viewOfFrame(area);
 	const content = [
 		xml('name', state.meta?.title || 'Map'),
 		view &&
@@ -191,8 +195,6 @@ export function stateFromKML(kml: string): MapState {
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features: [] };
 	const document = child(kmlElement, 'Document') ?? kmlElement;
 	const documentData = readExtendedData(child(document, 'ExtendedData'));
-	const view = parseJson(documentData[VIEW_DATA]);
-	if (view) doc.view = view as GeoJSONDocument['view'];
 	const frame = parseJson(documentData[FRAME_DATA]);
 	if (frame) doc.frame = frame as GeoJSONDocument['frame'];
 	const meta = parseJson(documentData[META_DATA]);

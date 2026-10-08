@@ -4,7 +4,7 @@ import { encodeState, type MapState } from '../packages/map-state/src/index.js';
 import { drawnElements, storedState, trackServerRequests, waitForMapIsReady, sidebar } from './lib/utils.js';
 
 const mapUrl =
-	'/#ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS';
+	'/#ISqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS';
 
 // The controls of the top bar, the tools and the sidebar at the start, in this order. Only names and states
 // are compared, so e.g. a separator or an icon does not matter.
@@ -165,7 +165,6 @@ test('invalid hash', async ({ page }) => {
 test('a map near a pole keeps its elements', async ({ page }) => {
 	// half the height of the view reaches beyond the latitudes of the map
 	const state: MapState = {
-		view: { center: [0, 70], radius: 3_061_000 },
 		elements: [{ type: 'marker', point: [10, 70] }]
 	};
 	await page.goto('/#' + encodeState(state));

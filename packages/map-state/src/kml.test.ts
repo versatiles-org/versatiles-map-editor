@@ -5,7 +5,6 @@ import type { MapState } from './types.js';
 
 // every element type, style field and map property
 const state: MapState = {
-	view: { center: [13.4, 52.5], radius: 12345 },
 	meta: {
 		background: { theme: 'gray' },
 		legend: {
@@ -79,6 +78,36 @@ describe('stateToKML', () => {
 	it('writes circles as polygons', () => {
 		const circle = placemarks[4] as ReturnType<typeof parseXml>;
 		expect(child(circle, 'Polygon')).toBeDefined();
+	});
+
+	/** Where Google Earth looks: longitude, latitude and range, or undefined without a LookAt. */
+	function lookAt(map: MapState): number[] | undefined {
+		const element = child(child(child(parseXml(stateToKML(map)), 'kml'), 'Document'), 'LookAt');
+		return element && ['longitude', 'latitude', 'range'].map((name) => Number(text(child(element, name))));
+	}
+
+	it('looks at the area of the frame, else at all elements', () => {
+		// 0.2° of longitude at 52.5° north: 13,554 m, of which the range is 1.25 times
+		const framed = lookAt({ ...state, frame: { bounds: [13.3, 52.45, 13.5, 52.55] } })!;
+		expect(framed[0]).toBeCloseTo(13.4, 10);
+		expect(framed[1]).toBeCloseTo(52.5, 10);
+		expect(framed[2]).toBe(16942);
+		// from the south-west of the line to the north-east of the circle, with its radius of 1500 m
+		const all = lookAt(state)!;
+		expect(all[0]).toBeCloseTo((13.3 + 13.5 + 1500 / 111320 / Math.cos((52.6 * Math.PI) / 180)) / 2, 10);
+		expect(all[1]).toBeCloseTo((52.4 + 52.6 + 1500 / 111320) / 2, 10);
+		expect(all[2]).toBe(29705);
+	});
+
+	it('looks at the surroundings of a single marker, and nowhere without elements', () => {
+		// a radius of 500 m at least
+		expect(lookAt({ elements: [{ type: 'marker', point: [13.4, 52.5] }] })).toStrictEqual([13.4, 52.5, 1250]);
+		expect(lookAt({ elements: [] })).toBeUndefined();
+	});
+
+	it('writes no camera of the editor', () => {
+		expect(kml).not.toContain('versatiles:view');
+		expect(kml).toContain('versatiles:meta');
 	});
 });
 

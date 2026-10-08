@@ -192,38 +192,6 @@ describe('StateReader', () => {
 		});
 	});
 
-	describe('readView', () => {
-		it('should write and read a map object 1', () => {
-			const map: MapState['view'] = {
-				center: [1.0085728693898135, 2.017145738779627],
-				radius: 10085.53503412156
-			};
-			const writer = new StateWriter();
-			writer.writeView(map);
-			expect(writer.asBitString()).toBe('110000101000000011000111001100000010001010011110000100');
-
-			const reader = new StateReader(writer.bits);
-			expect(reader.readView()).toStrictEqual(map);
-			expect(reader.ended()).toBe(true);
-		});
-
-		it('should write and read a map object 2', () => {
-			const map0: MapState['view'] = {
-				center: [-121.013, 82.65],
-				radius: 10.021315508993025
-			};
-			const writer = new StateWriter();
-			writer.writeView(map0);
-			expect(writer.asBitString()).toBe('100100001010011110101111001110001011011101000011001010111011100010111100');
-
-			const reader = new StateReader(writer.bits);
-			const map1 = reader.readView();
-			expect(map1?.center).toStrictEqual(map0.center);
-			expect(map1?.radius).toBeCloseTo(map0.radius, 10);
-			expect(reader.ended()).toBe(true);
-		});
-	});
-
 	describe('readMetadata', () => {
 		function test(metadata0: StateMetadata | undefined, expected: string) {
 			const writer = new StateWriter();
@@ -252,7 +220,6 @@ describe('StateReader', () => {
 			writer.writeInteger(1, 3); // version
 			writer.writeVarint(0); // no colors
 			writer.writeVarint(0); // no strings
-			writer.writeBit(false); // no camera
 			writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 			writer.writeVarint(0, true); // the origin
 			writer.writeVarint(0, true);
@@ -272,21 +239,18 @@ describe('StateReader', () => {
 		});
 
 		it('should read a root state', () => {
-			// version 1, no colors, no strings, no camera, the resolution, the origin, one parameter of
-			// the code of the coordinates, points from the origin, no frame, no metadata, no popups, no elements
+			// version 1, no colors, no strings, the resolution, the origin, one parameter of the code
+			// of the coordinates, points from the origin, no frame, no metadata, no popups, no elements
 			const reader = StateReader.fromBitString(
-				'001' + '000000' + '000000' + '0' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0'
+				'001' + '000000' + '000000' + '0010' + '100000' + '000000' + '0' + '00000' + '0' + '0' + '0' + '0'
 			);
 			const root = reader.readRoot();
 			expect(root).toStrictEqual({ elements: [] });
+			expect(reader.ended()).toBe(true);
 		});
 
 		it('should read a simple root state', () => {
 			const root = {
-				view: {
-					center: [1, 2],
-					radius: 8192
-				},
 				elements: [
 					{
 						type: 'marker',
@@ -297,9 +261,7 @@ describe('StateReader', () => {
 
 			const writer = new StateWriter();
 			writer.writeRoot(root);
-			expect(writer.asBitString()).toBe(
-				'00100000000000011000001000111101110101101110111001101011011111000010000000100010011001000010110000100110000001111000011010100000001110000110101000000000'
-			);
+			expect(writer.asBitString()).toBe('001000000000000000011000110010000000111001000000000000011100');
 
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -307,10 +269,6 @@ describe('StateReader', () => {
 
 		it('should read a root object correctly', () => {
 			const root: MapState = {
-				view: {
-					radius: 1024,
-					center: [1, 2]
-				},
 				elements: [
 					{
 						type: 'marker',
@@ -342,7 +300,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'JT_AAAAAD_sj__wAERERCIiIgFkIb_SgX-1gImQsDgQAYbAAAYbANAHFCEsRCAAYawAAGGsAADDYAADDYAG0AAS4KkAAE0V_TGlMh2as-nZcN4j8Bv3czk017qUf1LqIeqiRWLQTOI90I0CiUAAYaoAABhqgMw2NDdEQ'
+				'JT_AAAAAD_sj__wAERERCIiIgAGzhUwlDgQAP1y8AASgmf0AcUISxEIABN5XgACH3j4AMNgAAMNgAbQAH6BEAAJQQtMaUyHZqz6dlw3iPwG_dzOTTXupR_Uuoh6qJFYtBM4j3QjQKJQAJ5UAADe6H8w2NDdEQ'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);
@@ -415,7 +373,7 @@ describe('StateReader', () => {
 	describe('big hashes', () => {
 		it('should return demo route', () => {
 			const reader = StateReader.fromBase64(
-				'ISqAAAIAniYwRbIEOHuiK52TZRnXExrJTSBDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS'
+				'ISqAAAIAniYwRbIEOHuiK5hDOIaioOCaCSQcUZcpUO11nwbzxrkTgeG3mcGsydKj-JlSD0f4q9oByhRHOTMdACBPCRIdOzIC04a0h2IINgEBYdoBidANS'
 			);
 			expect(reader.readRoot()).toStrictEqual({
 				elements: [
@@ -476,11 +434,7 @@ describe('StateReader', () => {
 						},
 						type: 'polygon'
 					}
-				],
-				view: {
-					center: [expect.closeTo(13.36075, 5), expect.closeTo(52.51318, 5)],
-					radius: expect.closeTo(1078.64)
-				}
+				]
 			});
 		});
 	});
@@ -814,7 +768,6 @@ describe('invalid links', () => {
 				]
 			})
 		).toBe('Invalid latitude: -91');
-		expect(decodeError({ view: { center: [0, 120], radius: 1000 }, elements: [] })).toMatch(/^Invalid latitude: 1[12]/);
 	});
 
 	it('are refused with a rotation beyond 180°', () => {

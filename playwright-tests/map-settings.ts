@@ -14,7 +14,6 @@ import {
 
 test('styling the background map', async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{
 				type: 'polygon',
@@ -118,7 +117,7 @@ test('styling the background map', async ({ page }) => {
 
 test('the relief of the background map: shaded, and raised as terrain, on both maps', async ({ page }) => {
 	// the Alps around the Zugspitze
-	await page.goto('/#' + encodeState({ view: { center: [10.98, 47.42], radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const features = async () => {
 		const { hillshade, terrain } = (await storedState(page)).meta?.background ?? {};
@@ -163,7 +162,7 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 });
 
 test('the buildings of the vector map are raised to their heights', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.52], radius: 400 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const stored = async () => (await storedState(page)).meta?.background;
 	/** The kinds of the layers that draw the buildings. */
@@ -193,7 +192,6 @@ test('the buildings of the vector map are raised to their heights', async ({ pag
 
 test('the satellite imagery without streets, borders and labels', async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Cafe' }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -250,7 +248,7 @@ test('the satellite imagery without streets, borders and labels', async ({ page 
 });
 
 test('the size and the halo of the labels of both maps', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const layerIds = () => page.evaluate(() => (window as unknown as MapWindow).map.getStyle().layers.map((l) => l.id));
 	const cityLabel = () =>
@@ -290,7 +288,7 @@ test('the size and the halo of the labels of both maps', async ({ page }) => {
 });
 
 test('changing the colors of the vector map and of the satellite imagery', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const background = async () => (await storedState(page)).meta?.background;
 	const paint = (layer: string, property: string) =>
@@ -351,7 +349,7 @@ async function channelRange(page: Page): Promise<[number, number]> {
 }
 
 test('black and white become exactly what is set, on both maps', { tag: '@cross-browser' }, async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.39, 52.51], radius: 2500 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	const setLevel = async (name: string, percent: string) => {
 		await page.getByRole('spinbutton', { name }).fill(percent);
@@ -404,7 +402,7 @@ test('black and white become exactly what is set, on both maps', { tag: '@cross-
 });
 
 test('the labels of the background map over areas and lines, those of markers always on top', async ({ page }) => {
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+	await page.goto('/#' + encodeState({ elements: [] }));
 	await waitForMapIsReady(page);
 	// the position of the layers of the elements, relative to the first label of the background map
 	const order = () =>
@@ -506,7 +504,7 @@ test('the layers of the elements draw them in their order', async ({ page }) => 
 			...elements.flatMap((e, i) => (e.type === 'marker' ? parts(e, i) : []))
 		];
 	};
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 2000 }, elements }));
+	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	expect(await drawnParts(page)).toStrictEqual(reference(false));
 

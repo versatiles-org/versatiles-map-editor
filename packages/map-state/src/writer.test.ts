@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
-import type { MapState, StateMetadata } from './types.js';
-import { decodeState, encodeState } from './index.js';
+import type { StateMetadata } from './types.js';
 
 describe('StateWriter', () => {
 	it('should initialize with an empty bits array', () => {
@@ -86,51 +85,6 @@ describe('StateWriter', () => {
 		});
 	});
 
-	it('should write a map object correctly', () => {
-		const writer = new StateWriter();
-		writer.writeView({
-			radius: 128,
-			center: [5, 6]
-		});
-		expect(writer.asBase64()).toBe('owDLD4DzOSE');
-	});
-
-	describe('writeView edge cases', () => {
-		function roundTrip(map: { radius: number; center: [number, number] }) {
-			const writer = new StateWriter();
-			writer.writeView(map);
-			return new StateReader(writer.bits).readView();
-		}
-
-		it('should skip degenerate viewports', () => {
-			for (const radius of [0, -5, NaN, Infinity]) {
-				expect(roundTrip({ radius, center: [5, 6] })).toBeUndefined();
-			}
-			expect(roundTrip({ radius: 100, center: [NaN, 6] })).toBeUndefined();
-		});
-
-		it('should skip degenerate viewports of a whole map, whose elements are kept', () => {
-			const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
-			for (const view of [
-				{ radius: 100, center: [NaN, 6] as [number, number] },
-				{ radius: 100, center: [5, Infinity] as [number, number] },
-				{ radius: 0, center: [5, 6] as [number, number] }
-			]) {
-				expect(decodeState(encodeState({ view, elements }))).toStrictEqual({ elements });
-			}
-		});
-
-		it('should clamp tiny radii to 1 m', () => {
-			expect(roundTrip({ radius: 0.5, center: [5, 6] })?.radius).toBe(1);
-		});
-
-		it('should clamp huge radii to the largest encodable value', () => {
-			const map = roundTrip({ radius: 1e12, center: [5, 6] });
-			expect(map?.radius).toBeCloseTo(Math.pow(2, 1023 / 40));
-			expect(map?.center).toStrictEqual([5, 6]);
-		});
-	});
-
 	describe('writeMetadata', () => {
 		function test(metadata: StateMetadata, expected: string) {
 			const writer = new StateWriter();
@@ -145,7 +99,6 @@ describe('StateWriter', () => {
 	it('should write a root object correctly', () => {
 		const writer = new StateWriter();
 		writer.writeRoot({
-			view: { radius: 1024, center: [1, 2] },
 			elements: [
 				{
 					type: 'marker',
@@ -180,20 +133,14 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'JD_AAAAP8AAAA_z__wABZCG_0oF_tYCJkLCYHhqA4agNAHQEvRCKGoAoagHDUBw1ANBN4gUxiBqACBqAOGoDhqA4agOGoBoRldDNAlDK5gDK5gIthdiQ'
+			'JD_AAAAP8AAAA_z__wAACOIUPoSYFpPf2k9_0AdAS9EIoaf6hp_8NQHDUA0E3iBTGgAAIAADhqA4agOGoDhqAaEZXQzQJRpPgGk-Ai2F2J'
 		);
 	});
 
 	it('should write an empty root object correctly', () => {
 		const writer = new StateWriter();
-		writer.writeRoot({
-			view: {
-				radius: 1024,
-				center: [0, 0]
-			},
-			elements: []
-		});
-		expect(writer.asBitString()).toBe('00100000000000010110010000000000000000000000000000000000000000000');
+		writer.writeRoot({ elements: [] });
+		expect(writer.asBitString()).toBe('00100000000000000000000000000000000000000');
 	});
 
 	it('should write a style correctly', () => {

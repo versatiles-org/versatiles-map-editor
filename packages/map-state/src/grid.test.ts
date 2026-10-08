@@ -58,7 +58,6 @@ describe('LocalGrid', () => {
 
 // a map in Berlin, far from the origin of the coordinates
 const berlin: MapState = {
-	view: { center: [13.4, 52.5], radius: 10000 },
 	elements: [
 		{ type: 'marker', point: [13.41234, 52.51234] },
 		{
@@ -86,7 +85,7 @@ describe('coordinates relative to the map center', () => {
 		expect(decode(coarse).elements[0]).toStrictEqual({ type: 'marker', point: [13.41248, 52.51264] });
 	});
 
-	it('work without a map viewport', () => {
+	it('work for a single marker, which is the origin itself', () => {
 		const state: MapState = { elements: [{ type: 'marker', point: [-70.12345, -33.45678] }] };
 		expect(decode(encode(state))).toStrictEqual(state);
 	});

@@ -80,7 +80,6 @@ test(
 
 test('elements can be chosen and deleted with the keyboard in the list of elements', async ({ page }) => {
 	const state = encodeState({
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{ type: 'marker', point: [13.4, 52.5], label: 'Berlin' },
 			{
@@ -165,7 +164,6 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 
 test('the drawer of elements opens with E, and chooses the map, the legend or elements', async ({ page }) => {
 	const state = encodeState({
-		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: { legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }] } },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	});
@@ -195,9 +193,7 @@ test('the drawer of elements opens with E, and chooses the map, the legend or el
 
 test('the status line explains the tool and the selection, and ? lists all shortcuts', async ({ page }) => {
 	const center: [number, number] = [13.4, 52.5];
-	await page.goto(
-		'/#' + encodeState({ view: { center, radius: 10000 }, elements: [{ type: 'marker', point: center }] })
-	);
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: center }] }));
 	await waitForMapIsReady(page);
 	const status = page.locator('.statusbar');
 
@@ -221,7 +217,6 @@ test('the status line explains the tool and the selection, and ? lists all short
 
 test('names show the popup text without its formatting', async ({ page }) => {
 	const state = encodeState({
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [
 			{
 				type: 'polygon',
@@ -249,7 +244,7 @@ test('the list of elements selects like lists of files', { tag: '@cross-browser'
 		point: [13.38 + i * 0.01, 52.5] as [number, number],
 		label: `M${i + 1}`
 	}));
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements }));
+	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	const list = page.getByRole('listbox', { name: 'Elements' });
@@ -295,7 +290,7 @@ test('dragging elements in the list changes the drawing order', { tag: '@cross-b
 		point: [13.38 + i * 0.01, 52.5] as [number, number],
 		label: `M${i + 1}`
 	}));
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements }));
+	await page.goto('/#' + encodeState({ elements }));
 	await waitForMapIsReady(page);
 	await page.keyboard.press('e');
 	const list = page.getByRole('listbox', { name: 'Elements' });

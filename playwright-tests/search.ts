@@ -174,7 +174,6 @@ test.describe('address search in the viewer', () => {
 				})
 			);
 			const state: MapState = {
-				view: { center: [13.4, 52.5], radius: 10000 },
 				meta: {
 					viewer: { search: 'top-left', legend: 'top-left' },
 					legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Area' }] }
@@ -203,7 +202,7 @@ test.describe('address search in the viewer', () => {
 		});
 
 		test('is hidden by default', async ({ page }) => {
-			await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+			await page.goto('/#' + encodeState({ elements: [] }));
 			await waitForMapIsReady(page);
 			await expect(page.getByRole('combobox', { name: 'Search address or place' })).toHaveCount(0);
 		});

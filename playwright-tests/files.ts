@@ -84,7 +84,6 @@ test('the download dialog confirms with Enter, and cancels', async ({ page }) =>
 
 test('a new or opened map is a new map, and the one before is kept in the recent maps', async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
 			title: 'Markers',
 			legend: { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'A' }] }
@@ -174,7 +173,6 @@ test('the status line tells whether the map is saved, and downloads it', async (
 
 test('exporting and importing KML', { tag: '@cross-browser' }, async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		meta: {
 			background: { theme: 'gray' },
 			legend: { entries: [{ type: 'area' as const, style: { color: '#00ff00' }, label: 'Park' }] }

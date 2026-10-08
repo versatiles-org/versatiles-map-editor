@@ -138,21 +138,19 @@ describe('MapDocument', () => {
 
 		it('should create and restore empty map', async () => {
 			expect(doc.getState()).toStrictEqual({
-				elements: [],
-				view: { center: [1, 2], radius: 312696.8037113758 }
+				elements: []
 			});
-			expect(doc.state.getHash()).toBe('IAG2haCUQgImQsAA');
+			expect(doc.state.getHash()).toBe('IAAAAAA');
 
 			doc.view.map.setCenter({ lng: 12, lat: 34 });
 			doc.view.map.setZoom(5);
 
 			expect(doc.getState()).toStrictEqual({
-				elements: [],
-				view: { center: [12, 34], radius: 215179.62743964553 }
+				elements: []
 			});
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IAGxYdVMa_AAriQ0mAA');
+			expect(hash).toBe('IAAAAAA');
 
 			await doc.setState(decodeState(hash));
 			expect(doc.elements.length).toBe(0);
@@ -178,7 +176,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('IAQCqJMAdkk20LQSiEBEyFhQCxkcA41AAw');
+			expect(hash).toBe('IAQCqJMAdkkAFcSGkwADs');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -203,7 +201,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('ISrze8BtoWglEICJkLAAITAAAw1AgAAYagWgI');
+			expect(hash).toBe('ISrze8AELGMiQIThp_w0_UNQChqAaAg');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -231,7 +229,7 @@ describe('MapDocument', () => {
 			expect(doc.getState().elements).toStrictEqual([element]);
 
 			const hash = doc.state.getHash();
-			expect(hash).toBe('Iirze8EjRWAbaFoJRCAiZCwgDGgABAAA41AHGoA41AHGn9oDoK');
+			expect(hash).toBe('Iirze8EjRWABjJjImDG4af7DT_hqA4agOGoDhp_aA6Cg');
 
 			await doc.setState(decodeState(hash));
 			const elements = doc.elements;
@@ -388,17 +386,8 @@ describe('MapDocument', () => {
 			expect(geojson.type).toBe('FeatureCollection');
 			expect(geojson.features).toHaveLength(1);
 			expect(geojson.features[0].geometry.type).toBe('Point');
-			expect(geojson.view?.center).toEqual([10, 20]);
-			expect(typeof geojson.view?.radius).toBe('number');
-		});
-
-		it('applies the viewport from an imported document', () => {
-			doc.addGeoJSON({
-				type: 'FeatureCollection',
-				view: { center: [10, 20], radius: 1000 },
-				features: []
-			});
-			expect(mockMap.fitBounds).toHaveBeenCalled();
+			// where the editor looks is not part of the map
+			expect(geojson).not.toHaveProperty('view');
 		});
 
 		it('imports Point, Circle, LineString and Polygon features', () => {
@@ -591,7 +580,7 @@ describe('MapDocument', () => {
 		});
 
 		it('is not shown when the editor has a camera, e.g. of its session', async () => {
-			await doc.loadState({ frame: { bounds: frame }, elements, view: { center: [10, 50], radius: 1000 } });
+			await doc.loadState({ frame: { bounds: frame }, elements }, { camera: { center: [10, 50], radius: 1000 } });
 			const [[west, south], [east, north]] = mockMap.fitBounds.mock.lastCall?.[0] as [number, number][];
 			expect((west + east) / 2).toBeCloseTo(10);
 			expect((south + north) / 2).toBeCloseTo(50);
@@ -608,12 +597,11 @@ describe('MapDocument', () => {
 			expect(doc.frame).toStrictEqual(frame);
 		});
 
-		it('is in share links, where the camera is left out', () => {
+		it('is in links, which do not tell where the editor looks', () => {
 			doc.frame = frame;
-			const shared = decodeState(doc.state.getHash({ camera: false }));
+			const shared = decodeState(doc.state.getHash());
 			expect(shared.frame).toStrictEqual({ bounds: frame });
-			expect(shared.view).toBeUndefined();
-			expect(decodeState(doc.state.getHash()).view).toBeDefined();
+			expect(shared).not.toHaveProperty('view');
 		});
 
 		it('keeps how the shared map is turned, with and without a visible area', async () => {
@@ -622,7 +610,7 @@ describe('MapDocument', () => {
 			expect(doc.frame).toStrictEqual(frame);
 			expect(doc.frameTurn).toStrictEqual(turn);
 			expect(doc.getState().frame).toStrictEqual({ bounds: frame, ...turn });
-			expect(decodeState(doc.state.getHash({ camera: false })).frame).toStrictEqual({ bounds: frame, ...turn });
+			expect(decodeState(doc.state.getHash()).frame).toStrictEqual({ bounds: frame, ...turn });
 			// without an area, e.g. after "Fit to elements"
 			doc.frame = undefined;
 			expect(doc.getState().frame).toStrictEqual(turn);
@@ -650,11 +638,7 @@ describe('MapDocument', () => {
 		it('is turned on its own: the editor keeps how its author turned its map', async () => {
 			const view = { center: [13.4, 52.5] as [number, number], radius: 1000 };
 			// e.g. a session of the browser storage after a reload
-			await doc.loadState({
-				view: { ...view, turnable: true, bearing: 25, pitch: 40 },
-				frame: { bearing: -90 },
-				elements
-			});
+			await doc.loadState({ frame: { bearing: -90 }, elements }, { camera: { ...view, bearing: 25, pitch: 40 } });
 			expect([mockMap.getBearing(), mockMap.getPitch()]).toStrictEqual([25, 40]);
 			expect(doc.getCamera()).toMatchObject({ bearing: 25, pitch: 40 });
 			expect(doc.getState().frame).toStrictEqual({ bearing: -90 });
@@ -673,7 +657,7 @@ describe('MapDocument', () => {
 		});
 
 		it('is turned by its author at any time, which its camera keeps', async () => {
-			await doc.loadState({ view: { center: [13.4, 52.5], radius: 1000 }, elements });
+			await doc.loadState({ elements }, { camera: { center: [13.4, 52.5], radius: 1000 } });
 			// e.g. with the right mouse button
 			mockMap.jumpTo({ bearing: 70, pitch: 20 });
 			expect(doc.getCamera()).toMatchObject({ bearing: 70, pitch: 20 });

@@ -51,10 +51,6 @@ function checkStyle(style: StateStyle | undefined) {
 
 /** A map that the editor can draw. */
 function checkDrawable(state: MapState) {
-	if (state.view) {
-		checkPosition(state.view.center);
-		expect(state.view.radius).toBeGreaterThan(0);
-	}
 	if (state.frame) expect(sanitizeFrame(state.frame)).toStrictEqual(state.frame);
 	for (const element of state.elements) {
 		checkStyle(element.style);

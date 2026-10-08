@@ -1,9 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": {
-		"center": [139.739, 35.6746],
-		"radius": 8996
-	},
 	"meta": {
 		"title": "東京の主要駅"
 	},

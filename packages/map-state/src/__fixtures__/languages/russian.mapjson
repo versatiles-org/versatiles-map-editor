@@ -1,9 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": {
-		"center": [37.6124, 55.7574],
-		"radius": 4591
-	},
 	"meta": {
 		"title": "Станции московского метро"
 	},

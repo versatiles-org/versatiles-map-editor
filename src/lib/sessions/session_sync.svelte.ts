@@ -1,5 +1,6 @@
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
+import type { Camera } from '../rendering/index.js';
 import { SessionStore, type CurrentSession, type StoredSession } from './session_store.js';
 import { notify } from '../notify.svelte.js';
 import { SessionLocks } from './session_locks.js';
@@ -15,7 +16,7 @@ const RELOAD_WAIT = 500;
 
 /** What the editor opens: a stored session, the map of a link as a new session, or a new map. */
 export type Opening =
-	| { kind: 'session'; stored: StoredSession; camera?: MapState['view'] }
+	| { kind: 'session'; stored: StoredSession; camera?: Camera }
 	| { kind: 'link'; state: MapState; encoded: string; camera?: undefined }
 	| { kind: 'new'; camera?: undefined };
 
@@ -38,9 +39,9 @@ export interface RecentMap {
  */
 export type SaveStatus = 'saved' | 'memory' | 'failed';
 
-/** A state as the history and the storage keep it: encoded, without the viewport. */
+/** A state as the history and the storage keep it: encoded. */
 function encodeStep(state: MapState): string {
-	return encodeState({ ...state, view: undefined });
+	return encodeState(state);
 }
 
 /**
@@ -54,12 +55,6 @@ function encodeStep(state: MapState): string {
  * The storage keeps the `RECENT` most recently changed maps, and those that tabs have open.
  */
 /** A new, empty map, with the starting background of the configuration of this instance. */
-/** A map as it is opened: without where its author looked last, so it shows all its elements. */
-function withoutView(state: MapState): MapState {
-	const { view: _view, ...rest } = state;
-	return rest;
-}
-
 async function newMapState(): Promise<MapState> {
 	await configReady();
 	const background = config.current.startBackground;
@@ -173,14 +168,14 @@ export class SessionSync {
 			console.warn('Failed to look for the map of the link in the storage', error);
 		}
 		if (stored) return { kind: 'session', stored };
-		return { kind: 'link', state: withoutView(state), encoded };
+		return { kind: 'link', state, encoded };
 	}
 
-	/** The current state of the most recently changed map, with its camera, e.g. for the viewer on phones. */
+	/** The current state of the most recently changed map, e.g. for the viewer on phones. */
 	public async last(): Promise<MapState | undefined> {
 		const found = await this.#findSession(async ({ state }) => decodeStep(state) !== undefined);
 		const state = found && decodeStep(found.state);
-		return found && state ? { ...state, view: found.session.camera } : undefined;
+		return found && state ? state : undefined;
 	}
 
 	/** The most recently changed maps, e.g. for the menu. */
@@ -240,7 +235,7 @@ export class SessionSync {
 
 	/** Open a map, e.g. of a file, as a new map in the storage. */
 	public async openMap(state: MapState) {
-		await this.#open({ kind: 'link', state: withoutView(state), encoded: encodeStep(state) });
+		await this.#open({ kind: 'link', state, encoded: encodeStep(state) });
 	}
 
 	/** Delete a map of the storage, unless it is open, here or in another tab. */
@@ -282,7 +277,7 @@ export class SessionSync {
 				case 'session': {
 					const { stored, camera } = opening;
 					const state = decodeState(stored.states[stored.position]);
-					await this.#load(doc, { ...state, view: camera });
+					await this.#load(doc, state, { camera });
 					doc.state.history.restore(stored.states, stored.position);
 					this.#setSession(stored.session.id);
 					this.#title = stored.session.title;
@@ -312,7 +307,7 @@ export class SessionSync {
 	 * Load a map into the document. Its moves are not stored: they would give the camera to the
 	 * session open before, and each reload would store the camera again, slightly changed.
 	 */
-	async #load(doc: MapDocumentInteractive, state: MapState, options?: { keepView?: boolean }) {
+	async #load(doc: MapDocumentInteractive, state: MapState, options?: { camera?: Camera; keepView?: boolean }) {
 		this.#loading = true;
 		try {
 			await doc.loadState(state, options);

@@ -20,7 +20,7 @@ test('marker labels with braces are drawn as they are', async ({ page }) => {
 	});
 	const center: [number, number] = [13.4, 52.5];
 	const marker = { type: 'marker' as const, point: center, label: 'Price {EUR}' };
-	await page.goto('/#' + encodeState({ view: { center, radius: 10000 }, elements: [marker] }));
+	await page.goto('/#' + encodeState({ elements: [marker] }));
 	await waitForMapIsReady(page);
 	await waitForMapIsIdle(page);
 	const [textField, labels] = await page.evaluate(() => {
@@ -39,7 +39,6 @@ test('the text color and the halo color of a label', async ({ page }) => {
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center, radius: 10000 },
 				elements: [{ type: 'marker', point: center, label: 'Cafe' }]
 			})
 	);
@@ -72,7 +71,6 @@ test('the size of a label apart from the size of its symbol', async ({ page }) =
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center, radius: 10000 },
 				// a blue symbol, a red label to the right of it, no halo: the colors are easy to count
 				elements: [
 					{
@@ -127,7 +125,6 @@ test('a label at a corner of its symbol, and a label without symbol on the point
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center, radius: 10000 },
 				elements: [{ type: 'marker', point: center, label: 'MMM', style }]
 			})
 	);
@@ -180,7 +177,6 @@ test('a font for the label of each marker, else the one of the background map', 
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center: a, radius: 10000 },
 				elements: [
 					{ type: 'marker', point: a, label: 'A' },
 					{ type: 'marker', point: [13.45, 52.5], label: 'B' }
@@ -245,7 +241,6 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center, radius: 10000 },
 				elements: [
 					{ type: 'marker', point: center, label: 'A' },
 					{ type: 'marker', point: center, label: 'B' }

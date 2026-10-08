@@ -14,8 +14,6 @@ describe('maps in other languages', () => {
 	it.each(files)('keep their texts in a link: %s', (file) => {
 		const state = stateFromMapJSON(JSON.parse(readFileSync(file, 'utf-8')));
 		const decoded = decodeState(encodeState(state));
-		// not the camera, which a link stores rounded
-		expect(decoded.meta).toStrictEqual(state.meta);
-		expect(decoded.elements).toStrictEqual(state.elements);
+		expect(decoded).toStrictEqual(state);
 	});
 });

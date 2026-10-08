@@ -5,17 +5,9 @@ import { encodeState, type MapState } from '@versatiles/map-state';
 describe('StateHistory', () => {
 	let history: StateHistory;
 	const state1: MapState = {
-		view: {
-			center: [1, 2],
-			radius: 16
-		},
 		elements: [{ type: 'marker', point: [3, 4], label: 'test' }]
 	};
 	const state2: MapState = {
-		view: {
-			center: [3, 4],
-			radius: 1024
-		},
 		elements: [
 			{
 				type: 'line',
@@ -33,14 +25,14 @@ describe('StateHistory', () => {
 	});
 
 	it('should initialize with the given state', () => {
-		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state1, view: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual(state1);
 		expect(history.undoEnabled).toBe(false);
 		expect(history.redoEnabled).toBe(false);
 	});
 
 	it('should reset the history with a new state', () => {
 		history.reset(state2);
-		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state2, view: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual(state2);
 		expect(history['history'].length).toBe(1);
 		expect(history.undoEnabled).toBe(false);
 		expect(history.redoEnabled).toBe(false);
@@ -48,7 +40,7 @@ describe('StateHistory', () => {
 
 	it('should push a new state to the history', () => {
 		history.push(state2);
-		expect(JSON.parse(history['history'][0].json!)).toEqual({ ...state2, view: undefined });
+		expect(JSON.parse(history['history'][0].json!)).toEqual(state2);
 		expect(history['history'].length).toBe(2);
 		expect(history.undoEnabled).toBe(true);
 		expect(history.redoEnabled).toBe(false);
@@ -57,7 +49,7 @@ describe('StateHistory', () => {
 	it('should undo to the previous state', () => {
 		history.push(state2);
 		const undoneState = history.undo();
-		expect(undoneState).toEqual({ ...state1, view: undefined });
+		expect(undoneState).toEqual(state1);
 		expect(history.undoEnabled).toBe(false);
 		expect(history.redoEnabled).toBe(true);
 	});
@@ -66,7 +58,7 @@ describe('StateHistory', () => {
 		history.push(state2);
 		history.undo();
 		const redoneState = history.redo();
-		expect(redoneState).toEqual({ ...state2, view: undefined });
+		expect(redoneState).toEqual(state2);
 		expect(history.undoEnabled).toBe(true);
 		expect(history.redoEnabled).toBe(false);
 	});
@@ -78,24 +70,18 @@ describe('StateHistory', () => {
 		expect(history.undoEnabled).toBe(true);
 	});
 
-	it('should ignore viewport changes', () => {
-		history.push({ ...state1, view: { center: [7, 8], radius: 99 } });
-		expect(history['history'].length).toBe(1);
-		expect(history.undoEnabled).toBe(false);
-	});
-
 	it('should keep the redo stack when pushing the current state after undo', () => {
 		history.push(state2);
 		history.undo();
 		history.push(state1);
 		expect(history.redoEnabled).toBe(true);
-		expect(history.redo()).toEqual({ ...state2, view: undefined });
+		expect(history.redo()).toEqual(state2);
 	});
 
 	it('should not modify the pushed state', () => {
-		const state: MapState = { view: { center: [5, 6], radius: 100 }, elements: [] };
+		const state: MapState = { elements: [] };
 		history.push(state);
-		expect(state).toStrictEqual({ view: { center: [5, 6], radius: 100 }, elements: [] });
+		expect(state).toStrictEqual({ elements: [] });
 	});
 
 	it('should not exceed the maximum history length', () => {
@@ -106,7 +92,7 @@ describe('StateHistory', () => {
 	});
 
 	it('continues a stored history, and decodes its states when they are needed', () => {
-		const stored = [state1, state2, state1].map((state) => encodeState({ ...state, view: undefined }));
+		const stored = [state1, state2, state1].map((state) => encodeState(state));
 		// the second state is the current one: one step was undone
 		history.restore(stored, 1);
 		expect(history.undone).toBe(1);

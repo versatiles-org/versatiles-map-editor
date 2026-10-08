@@ -122,7 +122,6 @@ describe('style references', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writeArray([], () => {}); // palette
 		writer.writeVarint(0); // no strings
-		writer.writeBit(false); // no map
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);

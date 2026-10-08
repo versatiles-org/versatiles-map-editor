@@ -66,15 +66,13 @@ describe('stateToGeoJSON', () => {
 		expect(f.properties).toMatchObject({ subType: 'Circle', radius: 500 });
 	});
 
-	it('emits the viewport as center + radius', () => {
-		const doc = stateToGeoJSON({ view: { center: [13.4, 52.5], radius: 1234 }, elements: [] });
-		expect(doc.view).toEqual({ center: [13.4, 52.5], radius: 1234 });
+	it('emits no viewport, only the features of an empty map', () => {
+		expect(stateToGeoJSON({ elements: [] })).toStrictEqual({ type: 'FeatureCollection', features: [] });
 	});
 });
 
 describe('stateFromGeoJSON ∘ stateToGeoJSON round-trip (lossless)', () => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 1234 },
 		elements: [
 			{ type: 'marker', point: [13.4, 52.5] },
 			{
@@ -519,9 +517,9 @@ describe('stateFromGeoJSON with unusual input', () => {
 		expect(state.elements).toEqual([{ type: 'polygon', points: ring }]);
 	});
 
-	it('ignores an invalid viewport', () => {
-		const doc: GeoJSONDocument = { ...collection(), view: { center: [1, 2], radius: 'far' as unknown as number } };
-		expect(stateFromGeoJSON(doc).view).toBeUndefined();
+	it('ignores a viewport, e.g. of an older file', () => {
+		const doc = { ...collection(), view: { center: [1, 2], radius: 1000 } } as GeoJSONDocument;
+		expect(stateFromGeoJSON(doc)).toStrictEqual({ elements: [] });
 	});
 
 	it('always produces encodable documents', () => {

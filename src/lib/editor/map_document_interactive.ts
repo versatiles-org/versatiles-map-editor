@@ -16,7 +16,7 @@ import {
 	type Bounds
 } from '@versatiles/map-state';
 import type { GeoPoint } from '../geometry.js';
-import type { Turn, Viewport } from '../rendering/index.js';
+import type { Camera, Turn } from '../rendering/index.js';
 
 export class MapDocumentInteractive extends MapDocument {
 	public readonly selection: SelectionHandler;
@@ -51,7 +51,7 @@ export class MapDocumentInteractive extends MapDocument {
 	 * Load a map, e.g. from a file, as a new start of the history. Its author starts with the map as
 	 * a whole: nothing is selected, and the shared map of the map before is not edited any more.
 	 */
-	public async loadState(state: MapState, options: { keepView?: boolean } = {}) {
+	public async loadState(state: MapState, options: { camera?: Camera; keepView?: boolean } = {}) {
 		// without going back to where the mode was opened from, e.g. the share dialog
 		this.visibleArea.close({ returning: false });
 		await super.loadState(state, options);
@@ -121,16 +121,14 @@ export class MapDocumentInteractive extends MapDocument {
 	}
 
 	/**
-	 * Where the editor looks, and how its author turned its map: the view of the map state. Not as a
-	 * shared map is turned, which the map shows while the visible area is edited.
+	 * Where the editor looks, and how its author turned its map. Not as a shared map is turned, which
+	 * the map shows while the visible area is edited.
 	 */
-	public getCamera(): Viewport {
+	public getCamera(): Camera {
 		const viewport = this.view.getViewport();
 		// while the visible area is edited, the map shows how a shared map is turned
 		const { bearing, pitch } = this.visibleArea.active ? this.visibleArea.turnBefore : this.view.getTurn();
-		if (!bearing && !pitch) return viewport;
-		// `turnable`: a view keeps its rotation and tilt only with it
-		return { ...viewport, turnable: true, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
+		return { ...viewport, ...(bearing ? { bearing } : {}), ...(pitch ? { pitch } : {}) };
 	}
 
 	/**
@@ -142,7 +140,7 @@ export class MapDocumentInteractive extends MapDocument {
 		if (elements.length > 0) this.view.fitArea(undefined, elements, { turn: this.view.getTurn() });
 	}
 
-	protected override applyCamera(camera: MapState['view']) {
+	protected override applyCamera(camera: Camera | undefined) {
 		super.applyCamera(camera);
 		this.#turn({ bearing: camera?.bearing, pitch: camera?.pitch });
 	}
@@ -174,7 +172,6 @@ export class MapDocumentInteractive extends MapDocument {
 		if (this.mapLabelsOnTop) labels.mapOnTop = true;
 		if (Object.keys(labels).length > 0) meta.labels = labels;
 		return {
-			view: this.getCamera(),
 			...(this.frame || this.frameTurn
 				? { frame: { ...(this.frame ? { bounds: this.frame } : {}), ...this.frameTurn } }
 				: {}),
@@ -192,7 +189,6 @@ export class MapDocumentInteractive extends MapDocument {
 	 * properties it has (e.g. the background) replace the current ones.
 	 */
 	public addState(state: MapState) {
-		if (state.view) this.applyCamera(state.view);
 		// both visible areas: one that covers both; else the one there is
 		const bounds = state.frame?.bounds;
 		if (bounds) this.frame = this.frame ? unionOf(this.frame, bounds) : bounds;

@@ -29,13 +29,12 @@ describe('example maps', () => {
 		describe(name, () => {
 			const state = read(name);
 
-			it('has its view, elements, legend and background', () => {
+			it('has its elements, legend and background', () => {
 				const types: Record<string, number> = {};
 				for (const element of state.elements) types[element.type] = (types[element.type] ?? 0) + 1;
 				expect(types).toStrictEqual(expected.types);
 				expect(state.meta?.legend?.entries ?? []).toHaveLength(expected.legend);
 				expect(state.meta?.background?.base ?? 'vector').toBe(expected.base);
-				expect(state.view).toBeDefined();
 			});
 
 			it('survives a link', () => {

@@ -18,7 +18,6 @@ import {
 	MAX_PITCH,
 	type Bounds,
 	type StateFrame,
-	type MapState,
 	type Position,
 	type StateBackground,
 	type StateBackgroundColors,
@@ -649,25 +648,6 @@ export function sanitizePositions(value: unknown): Position[] | undefined {
 		positions.push(position);
 	}
 	return positions;
-}
-
-/** The camera of the editor: a center and a radius in meters, or undefined. */
-export function sanitizeView(value: unknown): MapState['view'] {
-	if (typeof value !== 'object' || value === null) return undefined;
-	const { center, radius, turnable, bearing, pitch } = value as Record<string, unknown>;
-	const position = sanitizePosition(center);
-	const meters = sanitizeNumber(radius, 0);
-	if (!position || meters === undefined) return undefined;
-	const view: NonNullable<MapState['view']> = { center: position, radius: meters };
-	// only a map that the author can turn is turned
-	if (sanitizeBoolean(turnable)) {
-		view.turnable = true;
-		const rotation = sanitizeBearing(bearing);
-		if (rotation) view.bearing = rotation;
-		const tilt = sanitizeNumber(pitch, 0, MAX_PITCH);
-		if (tilt) view.pitch = tilt;
-	}
-	return view;
 }
 
 /** The valid properties of the whole map, or undefined if none is. */

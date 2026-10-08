@@ -1,7 +1,7 @@
 # The `.mapjson` format
 
 A `.mapjson` file is a map of the [VersaTiles map editor](https://github.com/versatiles-org/versatiles-map-editor)
-as JSON: its view, the area that shared maps show, its properties (background map, legend, …)
+as JSON: the area that shared maps show, its properties (background map, legend, …)
 and its elements (markers, lines, polygons, circles) with their styles and popups. It is what
 the editor writes with ☰ → Download… and opens with ☰ → Open…, and the most complete form of a
 map: links, GeoJSON and KML hold the same map, but a link is compact and the others leave out
@@ -31,7 +31,6 @@ its elements, on the editor's default background map.
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": { "center": [13.39, 52.51], "radius": 2500 },
 	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
 	"meta": {
 		"title": "A walk through Berlin",
@@ -80,7 +79,7 @@ its elements, on the editor's default background map.
   then north. Areas (the `bounds` of the `frame`) are `[west, south, east, north]`.
 - **Colors** are hex codes: `"#rrggbb"`, or `"#rrggbbaa"` with an opacity (alpha), e.g.
   `"#009e7380"` is half transparent. The editor writes them in lower case.
-- **Distances** are in meters (the radius of a circle and of the view), **widths** and **halos**
+- **Distances** are in meters (the radius of a circle), **widths** and **halos**
   in pixels on the screen.
 - **Defaults** are left out: a field that is missing has its default value, so a file holds only
   what differs, e.g. a style `{}` is the default style. Writing a default is allowed.
@@ -92,25 +91,15 @@ its elements, on the editor's default background map.
 
 ## The map
 
-| Field      | Description                                                                                                            |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor.                         |
-| `view`     | The view of the author, see [The view](#the-view). The editor opens the map there. Shared maps leave it out. Optional. |
-| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.                              |
-| `meta`     | The properties of the map, see [Properties](#properties). Optional.                                                    |
-| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.                                    |
+| Field      | Description                                                                                    |
+| ---------- | ---------------------------------------------------------------------------------------------- |
+| `$schema`  | The URL of the schema of the format version, see [Versions](#versions). Written by the editor. |
+| `frame`    | What shared and embedded maps show when they open, see [The frame](#the-frame). Optional.      |
+| `meta`     | The properties of the map, see [Properties](#properties). Optional.                            |
+| `elements` | The markers, lines, polygons and circles, in drawing order. Required, may be empty.            |
 
-### The view
-
-Where the author's editor looks. `center` and `radius` are required.
-
-| Field      | Description                                                                                                                                     |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `center`   | A position.                                                                                                                                     |
-| `radius`   | In meters: the largest circle in the window.                                                                                                    |
-| `turnable` | `true`: the author can rotate and tilt the map in the editor, which else shows it with north at the top, from straight above. Default: `false`. |
-| `bearing`  | The rotation of the editor's map, if it is `turnable`, in degrees clockwise from north (-180 to 180). Default: 0.                               |
-| `pitch`    | The tilt of the editor's map, if it is `turnable`, in degrees from straight above (0 to 60). Default: 0.                                        |
+Where the author looks in the editor is not part of a map: the editor opens a map with all its
+elements in the window, and keeps its own view with the map in the browser.
 
 ### The frame
 
@@ -335,8 +324,8 @@ changes its meaning.
 
 The same map can be held in other forms, which the package converts into each other:
 
-| Form    | Use                                                                                                               | Compared with `.mapjson`                                                                                                                                                                           |
-| ------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Link    | the base64 string in the URL of a shared map, e.g. `…/view/#…`                                                    | The same content, compact; coordinates are rounded to the precision of the link, rotations and tilts to whole degrees, and the numbers of the background map to the steps of the editor's sliders. |
-| GeoJSON | for other tools: a `FeatureCollection` with the styles as feature properties, and `view`, `frame`, `meta` members | The same content; the order of the elements is the order of the features. See the [README](README.md#geojson-profile-profilets).                                                                   |
-| KML     | for Google Earth and GIS tools                                                                                    | The geometry and the main styles; other properties in `<ExtendedData>`. See the [README](README.md#kml-kmlts).                                                                                     |
+| Form    | Use                                                                                                       | Compared with `.mapjson`                                                                                                                                                                           |
+| ------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Link    | the base64 string in the URL of a shared map, e.g. `…/view/#…`                                            | The same content, compact; coordinates are rounded to the precision of the link, rotations and tilts to whole degrees, and the numbers of the background map to the steps of the editor's sliders. |
+| GeoJSON | for other tools: a `FeatureCollection` with the styles as feature properties, and `frame`, `meta` members | The same content; the order of the elements is the order of the features. See the [README](README.md#geojson-profile-profilets).                                                                   |
+| KML     | for Google Earth and GIS tools                                                                            | The geometry and the main styles; other properties in `<ExtendedData>`. See the [README](README.md#kml-kmlts).                                                                                     |

@@ -21,13 +21,10 @@ export class StateManager {
 
 	/**
 	 * The map as a link. `resolution`: the precision of the coordinates in meters, e.g. coarser for
-	 * sharing. `camera: false` leaves out where the editor looks, e.g. for sharing: a shared map
-	 * shows its frame, else its elements.
+	 * sharing.
 	 */
-	public getHash({ resolution, camera = true }: { resolution?: number; camera?: boolean } = {}): string {
-		const state = this.mapDocument.getState();
-		if (!camera) delete state.view;
-		return encodeState(state, { resolution });
+	public getHash({ resolution }: { resolution?: number } = {}): string {
+		return encodeState(this.mapDocument.getState(), { resolution });
 	}
 
 	public log() {

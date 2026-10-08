@@ -326,13 +326,9 @@ export async function waitForMapIsIdle(page: Page): Promise<void> {
 	);
 }
 
-/**
- * The map that the editor keeps in the browser storage: the current state of the tab's session
- * (else the most recently changed one), with its camera. Writes are asynchronous, so the state can
- * be outdated for a moment. Returns an empty state if there is none (yet).
- */
-export async function storedState(page: Page): Promise<MapState> {
-	const stored = await page.evaluate(async () => {
+/** The current step of the tab's session in the browser storage (else of the most recently changed one), with its camera. */
+async function storedSession(page: Page): Promise<{ state: string; camera?: StoredCamera } | undefined> {
+	return page.evaluate(async () => {
 		const name = 'versatiles-map-editor';
 		// opening a database that does not exist would create it, without the editor's tables
 		if (!(await indexedDB.databases()).some((db) => db.name === name)) return undefined;
@@ -350,7 +346,7 @@ export async function storedState(page: Page): Promise<MapState> {
 					request.onsuccess = () => resolve(request.result as T);
 					request.onerror = () => reject(request.error);
 				});
-			type Session = { id: string; changed: number; position: number; camera?: MapState['view'] };
+			type Session = { id: string; changed: number; position: number; camera?: StoredCamera };
 			const sessions = await read<Session[]>('sessions', undefined, true);
 			const own = sessionStorage.getItem('versatiles-map-editor:session');
 			const session = sessions.find(({ id }) => id === own) ?? sessions.sort((a, b) => b.changed - a.changed)[0];
@@ -361,9 +357,29 @@ export async function storedState(page: Page): Promise<MapState> {
 			db.close();
 		}
 	});
-	if (!stored) return { elements: [] };
-	const state = decodeState(stored.state);
-	return stored.camera ? { ...state, view: stored.camera } : state;
+}
+
+/** Where the editor looks, as it keeps it with a map in the browser storage. */
+export interface StoredCamera {
+	center: Point;
+	radius: number;
+	bearing?: number;
+	pitch?: number;
+}
+
+/**
+ * The map that the editor keeps in the browser storage: the current state of the tab's session
+ * (else the most recently changed one). Writes are asynchronous, so the state can be outdated for
+ * a moment. Returns an empty state if there is none (yet).
+ */
+export async function storedState(page: Page): Promise<MapState> {
+	const stored = await storedSession(page);
+	return stored ? decodeState(stored.state) : { elements: [] };
+}
+
+/** Where the editor looked last at the map of `storedState`, which is not part of the map. */
+export async function storedCamera(page: Page): Promise<StoredCamera | undefined> {
+	return (await storedSession(page))?.camera;
 }
 
 /**

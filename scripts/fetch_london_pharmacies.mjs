@@ -92,14 +92,10 @@ const frame = [
 	round(Math.max(...lngs) + 0.005, 3),
 	round(Math.max(...lats) + 0.005, 3)
 ];
-const center = [round((frame[0] + frame[2]) / 2, 5), round((frame[1] + frame[3]) / 2, 5)];
-// half of the height of the frame, in meters
-const radius = Math.round(((frame[3] - frame[1]) / 2) * 111320);
 
 const state = {
 	// the format version of the file, see packages/map-state/MAPJSON.md
 	$schema: 'https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json',
-	view: { center, radius },
 	frame: { bounds: frame },
 	meta: {
 		// a faded gray map, so the markers stand out

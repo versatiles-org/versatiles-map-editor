@@ -11,7 +11,6 @@ function encode(state: MapState): string {
 }
 
 // many elements in a few colors, as in a typical map
-// without a viewport, whose radius is stored lossy by design
 const state: MapState = {
 	meta: { legend: { entries: [{ type: 'area', style: { color: '#0000ff' }, label: 'Water' }] } },
 	elements: Array.from({ length: 20 }, (_, i) => ({
@@ -58,7 +57,6 @@ describe('color palette', () => {
 		writer.writeInteger(1, 3); // version
 		writer.writePalette(['#ff0000']);
 		writer.writeVarint(0); // no strings
-		writer.writeBit(false); // no camera
 		writer.writeInteger(0, 4); // the step of the coordinates: 0.00001°
 		writer.writeVarint(0, true); // the origin
 		writer.writeVarint(0, true);

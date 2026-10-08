@@ -13,7 +13,7 @@ This is a [SvelteKit](https://svelte.dev/docs/kit) application built with [MapLi
 - **Legend** with a position, a layout and a font. New entries start with a color of the map that the legend does not show yet.
 - **Search** for addresses and places.
 - **Import and export** GeoJSON and KML, and import tables (CSV/TSV) as markers, with colors and symbols by category.
-- **Save** the map as a file and open it again. The editor keeps the map, its undo history and the view in the browser, so a reload keeps the work.
+- **Save** the map as a file and open it again. The editor keeps the map, its undo history and the view in the browser, so a reload keeps the work. A map that is opened shows all its elements; where its author looked is not part of the map.
 - **Share** a link or embed the map in a website, with a selectable precision and an optional search. Shared links and embedded maps open the read-only viewer, which phones also see in place of the editor.
 - **Configurable** color schemes and fonts for an organisation, see [Configuration](#configuration).
 
@@ -111,13 +111,13 @@ npm run doc-graph       # dependency graph only
 
 [![JavaScript of the editor (/), without the map worker](docs/bundle-treemap-editor.svg)](docs/bundle-treemap-editor.svg?raw=true)
 
-Sized by the bundle's own source map: **1261.6 KB** raw, **349.6 KB** gzipped, across 69 modules.
+Sized by the bundle's own source map: **1270.6 KB** raw, **353 KB** gzipped, across 70 modules.
 
 #### Viewer
 
 [![JavaScript of the viewer (/view), without the map worker](docs/bundle-treemap-viewer.svg)](docs/bundle-treemap-viewer.svg?raw=true)
 
-Sized by the bundle's own source map: **1261.6 KB** raw, **349.6 KB** gzipped, across 69 modules.
+Sized by the bundle's own source map: **1270.6 KB** raw, **353 KB** gzipped, across 70 modules.
 
 ### Dependency Graph
 

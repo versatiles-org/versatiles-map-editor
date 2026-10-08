@@ -39,7 +39,6 @@ import {
 	LEGEND_LAYOUTS,
 	LEGEND_THEMES,
 	type Bounds,
-	MAX_PITCH,
 	type StateBackground,
 	type StateFrame,
 	type StateElement,
@@ -163,8 +162,6 @@ export class StateWriter {
 		this.writeStringTable(collectStrings(root), collectFormatStrings(root));
 		this.styleHistory = new StyleHistory();
 
-		// the camera, with its own center
-		this.writeView(root.view);
 		// as links keep it: the rotation and the tilt in whole degrees
 		const frame = sanitizeFrame(
 			root.frame && {
@@ -212,9 +209,8 @@ export class StateWriter {
 		this.writeInteger(exponent, 4);
 
 		// The coordinates of the frame and the elements are steps from an origin near them, so the
-		// numbers stay small: the center of the frame, else of the camera, else of the elements
-		const near =
-			(frame && centerOf(frame)) ?? storedView(root.view)?.center ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
+		// numbers stay small: the center of the frame, else of the elements
+		const near = (frame && centerOf(frame)) ?? centerOf(boundsOf(root.elements) ?? [0, 0, 0, 0]);
 		const origin: [number, number] = [Math.round(near[0] * ORIGIN_SCALE), Math.round(near[1] * ORIGIN_SCALE)];
 		this.writeVarint(origin[0], true);
 		this.writeVarint(origin[1], true);
@@ -306,35 +302,6 @@ export class StateWriter {
 			this.writeBit(frame.lockBearing === true);
 			this.writeBit(frame.lockPitch === true);
 		}
-	}
-
-	/** Returns the center as the reader decodes it, or undefined without a map. */
-	writeView(camera: MapState['view']): [number, number] | undefined {
-		const map = storedView(camera);
-		if (!map) {
-			this.writeBit(false);
-			return undefined;
-		}
-
-		this.writeBit(true);
-
-		// The radius is log-encoded in 10 bits: 1 m … 2^(1023/40) m ≈ 49,000 km
-		const value = Math.min(1023, Math.max(0, Math.round(Math.log2(map.radius) * 40)));
-		const radius = Math.pow(2, value / 40);
-		this.writeInteger(value, 10);
-		// effective resolution of coordinates is 1000 times the visible radius
-		this.writePoint(map.center, radius / 1e3);
-
-		// whether the author can turn the map in the editor, and then how it is turned: the rotation
-		// (9 bits, whole degrees from 0 to 359) and the tilt (6 bits, whole degrees)
-		this.writeBit(map.turnable === true);
-		if (map.turnable) {
-			this.writeInteger(((Math.round(map.bearing ?? 0) % 360) + 360) % 360, 9);
-			this.writeInteger(Math.min(MAX_PITCH, Math.max(0, Math.round(map.pitch ?? 0))), 6);
-		}
-
-		const scale = Math.round(1e5 / Math.max(1, radius / 1e3));
-		return [Math.round(map.center[0] * scale) / scale, Math.round(map.center[1] * scale) / scale];
 	}
 
 	/** The grid of the element coordinates, which the map of the root sets. */
@@ -967,10 +934,4 @@ export function collectColors(root: MapState): string[] {
 		else counts.set(key, { color, count: 1, first: i });
 	});
 	return [...counts.values()].sort((a, b) => b.count - a.count || a.first - b.first).map((entry) => entry.color);
-}
-
-/** The camera, unless it is degenerate (e.g. from a zero-sized map container), which is not stored. */
-function storedView(map: MapState['view']): MapState['view'] {
-	if (!map || !(map.radius > 0) || !Number.isFinite(map.radius) || !map.center.every(Number.isFinite)) return undefined;
-	return map;
 }

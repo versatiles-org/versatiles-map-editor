@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import { decodeState, encodeState, type MapState } from '@versatiles/map-state';
 import { MapDocumentInteractive } from '../editor/map_document_interactive.js';
+import type { Camera } from '../rendering/index.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 import { LngLatBounds } from 'maplibre-gl';
 import { SessionStore } from './session_store.js';
@@ -14,7 +15,7 @@ vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
 
 const camera = { center: [13.4, 52.5] as [number, number], radius: 1000 };
 const marker = (lng: number): MapState['elements'][number] => ({ type: 'marker', point: [lng, 52.5] });
-/** A step as the storage keeps it: without the viewport. */
+/** A step as the storage keeps it. */
 const step = (elements: MapState['elements']) => encodeState({ elements });
 
 describe('SessionSync', () => {
@@ -45,7 +46,7 @@ describe('SessionSync', () => {
 	});
 
 	/** The session of the map as stored: its states (decoded elements) and the current position. */
-	async function stored(): Promise<{ elements: number[]; position: number; camera?: MapState['view'] }[]> {
+	async function stored(): Promise<{ elements: number[]; position: number; camera?: Camera }[]> {
 		await store.flush();
 		const sessions = await store.list();
 		return Promise.all(
@@ -111,7 +112,7 @@ describe('SessionSync', () => {
 
 	it('opens the map of a link as a new session, and removes the link from the URL', async () => {
 		store.create(step([marker(1)]));
-		const state: MapState = { view: camera, elements: [marker(13.4), marker(13.5)] };
+		const state: MapState = { elements: [marker(13.4), marker(13.5)] };
 		const opening = await sync.prepare(encodeState(state));
 		expect(removeHash).toHaveBeenCalled();
 		expect(opening.kind).toBe('link');
@@ -128,7 +129,7 @@ describe('SessionSync', () => {
 	it('opens the session of a link whose map it already has', async () => {
 		const id = store.create(step([marker(13.4)]), { camera });
 		store.create(step([marker(1)]));
-		const opening = await sync.prepare(encodeState({ view: camera, elements: [marker(13.4)] }));
+		const opening = await sync.prepare(encodeState({ elements: [marker(13.4)] }));
 		expect(opening).toMatchObject({ kind: 'session', stored: { session: { id } } });
 	});
 
@@ -141,7 +142,7 @@ describe('SessionSync', () => {
 
 	it('opens a new link in the address bar as a new session, but keeps the map for a broken one', async () => {
 		await sync.attach(doc, await sync.prepare(''));
-		location.hash = encodeState({ view: camera, elements: [marker(13.4)] });
+		location.hash = encodeState({ elements: [marker(13.4)] });
 		dispatchEvent(new HashChangeEvent('hashchange'));
 		await vi.waitFor(async () => expect((await stored()).map((s) => s.elements)).toStrictEqual([[1]]));
 		expect(doc.elements).toHaveLength(1);
@@ -157,7 +158,7 @@ describe('SessionSync', () => {
 		vi.spyOn(console, 'warn').mockImplementation(() => {});
 		await sync.attach(doc, await sync.prepare(''));
 		const open = async (lngs: number[]) => {
-			location.hash = encodeState({ view: camera, elements: lngs.map(marker) });
+			location.hash = encodeState({ elements: lngs.map(marker) });
 			dispatchEvent(new HashChangeEvent('hashchange'));
 			await vi.waitFor(() => expect(doc.elements).toHaveLength(lngs.length));
 		};
@@ -169,7 +170,7 @@ describe('SessionSync', () => {
 		removeHash.mockImplementationOnce(() => {
 			throw new Error('blocked');
 		});
-		location.hash = encodeState({ view: camera, elements: [marker(2)] });
+		location.hash = encodeState({ elements: [marker(2)] });
 		dispatchEvent(new HashChangeEvent('hashchange'));
 		await vi.waitFor(() => expect(notify).toHaveBeenCalledWith('The map in the link could not be opened.'));
 
@@ -301,7 +302,7 @@ describe('SessionSync', () => {
 		});
 
 		it('starts a new map, and keeps the one before', async () => {
-			await sync.attach(doc, await sync.prepare(encodeState({ view: camera, elements: [marker(1)] })));
+			await sync.attach(doc, await sync.prepare(encodeState({ elements: [marker(1)] })));
 			await sync.newMap();
 			expect(doc.elements).toHaveLength(0);
 			expect(doc.state.history.undoEnabled).toBe(false);
@@ -338,9 +339,9 @@ describe('SessionSync', () => {
 				map.setCenter(LngLatBounds.convert(bounds).getCenter());
 				map.emit('moveend');
 			});
-			const otherCamera: MapState['view'] = { center: [2, 48], radius: 5000 };
+			const otherCamera: Camera = { center: [2, 48], radius: 5000 };
 			const other = store.create(step([marker(1)]), { camera: otherCamera });
-			await sync.attach(doc, await sync.prepare(encodeState({ view: camera, elements: [marker(13.4)] })));
+			await sync.attach(doc, await sync.prepare(encodeState({ elements: [marker(13.4)] })));
 			const first = (await store.list()).find(({ id }) => id !== other)!.id;
 			await store.flush();
 			const cameraOf = async (id: string) => (await store.load(id))?.session.camera;
@@ -364,7 +365,7 @@ describe('SessionSync', () => {
 			await sync.openRecent(other);
 			await sync.newMap();
 			await sync.openMap({ elements: [marker(2)] });
-			location.hash = encodeState({ view: camera, elements: [marker(3)] });
+			location.hash = encodeState({ elements: [marker(3)] });
 			dispatchEvent(new HashChangeEvent('hashchange'));
 			await vi.waitFor(() => expect(sync.openings).toBe(before + 4));
 			location.hash = '';
@@ -383,7 +384,7 @@ describe('SessionSync', () => {
 
 			expect((await sync.recent()).map(({ name }) => name)).toStrictEqual(['1 marker', '1 marker']);
 			// a link with the map of a stored one opens that, with its history
-			location.hash = encodeState({ view: camera, elements: [marker(9)] });
+			location.hash = encodeState({ elements: [marker(9)] });
 			dispatchEvent(new HashChangeEvent('hashchange'));
 			await vi.waitFor(() => expect(doc.state.history.undoEnabled).toBe(true));
 			// and no other one
@@ -531,7 +532,7 @@ describe('SessionSync', () => {
 		it('opens the map of a link as a new session if another tab has its session open', async () => {
 			const [a] = await createSessions(13.4);
 			await (await openTab()).prepare('');
-			const opening = await sync.prepare(encodeState({ view: camera, elements: [marker(13.4)] }));
+			const opening = await sync.prepare(encodeState({ elements: [marker(13.4)] }));
 			expect(opening.kind).toBe('link');
 			expect(a).toBeDefined();
 		});
@@ -541,7 +542,7 @@ describe('SessionSync', () => {
 			await sync.attach(doc, await sync.prepare(''));
 			expect(await lockedSessions()).toStrictEqual([a]);
 
-			location.hash = encodeState({ view: camera, elements: [marker(2)] });
+			location.hash = encodeState({ elements: [marker(2)] });
 			dispatchEvent(new HashChangeEvent('hashchange'));
 			await vi.waitFor(async () => expect(await lockedSessions()).not.toContain(a));
 			const locked = await lockedSessions();

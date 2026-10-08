@@ -1,9 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": {
-		"center": [13.4289, 52.5228],
-		"radius": 4175
-	},
 	"meta": {
 		"title": "Coffee in Berlin ☕"
 	},

@@ -14,7 +14,6 @@ async function drawnArrowheads(page: Page): Promise<string[]> {
 
 test('the arrowheads of a line are chosen for its start and its end, and swapped', async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 3000 },
 		elements: [
 			{
 				type: 'line',
@@ -86,7 +85,6 @@ test('a line is reversed in the inspector, so its arrowheads point the other way
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center: [13.4, 52.5], radius: 3000 },
 				elements: [{ type: 'line', points, style: { arrowEnd: 'triangle' } }]
 			})
 	);

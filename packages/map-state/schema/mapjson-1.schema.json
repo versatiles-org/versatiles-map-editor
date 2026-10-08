@@ -1,6 +1,6 @@
 {
 	"title": "VersaTiles map (.mapjson), format version 1",
-	"description": "A map of the VersaTiles map editor: its view, visible area, properties and elements. See https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/MAPJSON.md",
+	"description": "A map of the VersaTiles map editor: its visible area, properties and elements. See https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/MAPJSON.md",
 	"$id": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"$ref": "#/definitions/MapJSON",
@@ -8,37 +8,6 @@
 		"MapJSON": {
 			"type": "object",
 			"properties": {
-				"view": {
-					"type": "object",
-					"properties": {
-						"center": {
-							"$ref": "#/definitions/Position"
-						},
-						"radius": {
-							"type": "number",
-							"description": "The radius of the largest circle that the window shows, in meters.",
-							"exclusiveMinimum": 0
-						},
-						"turnable": {
-							"type": "boolean",
-							"description": "The author can rotate and tilt the map in the editor, which else shows it with north at the top, seen from straight above. Default: false."
-						},
-						"bearing": {
-							"type": "number",
-							"description": "The rotation of the editor's map, if it is `turnable`: the compass direction at the top of the window, in degrees clockwise from north. Default: 0.",
-							"minimum": -180,
-							"maximum": 180
-						},
-						"pitch": {
-							"type": "number",
-							"description": "The tilt of the editor's map, if it is `turnable`, in degrees: 0 looks straight down. Default: 0.",
-							"minimum": 0,
-							"maximum": 60
-						}
-					},
-					"required": ["center", "radius"],
-					"description": "The camera: where the author's editor looks, e.g. after a reload. Links for sharing and embedding leave it out; they show the `frame`."
-				},
 				"frame": {
 					"$ref": "#/definitions/StateFrame",
 					"description": "What a shared or embedded map shows when it opens, and how its viewers can turn it."
@@ -60,22 +29,6 @@
 			},
 			"required": ["$schema", "elements"],
 			"description": "The content of a .mapjson file: a map state with the URL of its schema."
-		},
-		"Position": {
-			"type": "array",
-			"minItems": 2,
-			"items": [
-				{
-					"type": "number",
-					"title": "longitude"
-				},
-				{
-					"type": "number",
-					"title": "latitude"
-				}
-			],
-			"maxItems": 2,
-			"description": "A position on the map: longitude and latitude, in degrees (WGS 84)."
 		},
 		"StateFrame": {
 			"type": "object",
@@ -650,6 +603,22 @@
 			},
 			"required": ["type", "point"],
 			"description": "A symbol at a point, with an optional label."
+		},
+		"Position": {
+			"type": "array",
+			"minItems": 2,
+			"items": [
+				{
+					"type": "number",
+					"title": "longitude"
+				},
+				{
+					"type": "number",
+					"title": "latitude"
+				}
+			],
+			"maxItems": 2,
+			"description": "A position on the map: longitude and latitude, in degrees (WGS 84)."
 		},
 		"StatePopup": {
 			"type": "object",

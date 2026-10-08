@@ -1,4 +1,4 @@
-import { sanitizeView, sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
+import { sanitizeElement, sanitizeFrame, sanitizeMetadata } from './profile.js';
 import { STYLE_ROLE_FIELDS, type MapState, type StateElement, type StateLegendEntry } from './types.js';
 
 /** The version of the format of .mapjson files, in the name of its JSON Schema. */
@@ -34,14 +34,12 @@ export function stateToMapJSON(state: MapState): MapJSON {
  */
 export function stateFromMapJSON(json: unknown): MapState {
 	if (typeof json !== 'object' || json === null || Array.isArray(json)) throw new Error('The file contains no map');
-	const { $schema, view, frame, meta, elements } = json as Record<string, unknown>;
+	const { $schema, frame, meta, elements } = json as Record<string, unknown>;
 	const version = typeof $schema === 'string' ? /mapjson-(\d+)\.schema\.json$/.exec($schema)?.[1] : undefined;
 	if (version !== undefined && Number(version) > MAPJSON_VERSION) throw new MapJSONVersionError(Number(version));
 	if (!Array.isArray(elements)) throw new Error('The file contains no map elements');
 
 	const state: MapState = { elements: elements.map(sanitizeElement).filter((element) => element !== undefined) };
-	const camera = sanitizeView(view);
-	if (camera) state.view = camera;
 	const area = sanitizeFrame(frame);
 	if (area) state.frame = area;
 	const metadata = sanitizeMetadata(meta);
@@ -54,9 +52,7 @@ export function stateFromMapJSON(json: unknown): MapState {
  * test compares them), to find the fields that this version does not know.
  */
 export const MAPJSON_FIELDS = {
-	MapJSON: ['$schema', 'view', 'frame', 'meta', 'elements'],
-	// the view, which has no definition of its own
-	view: ['center', 'radius', 'turnable', 'bearing', 'pitch'],
+	MapJSON: ['$schema', 'frame', 'meta', 'elements'],
 	StateFrame: ['bounds', 'bearing', 'pitch', 'lockBearing', 'lockPitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom', 'mapOnTop'],
@@ -133,7 +129,6 @@ export function unknownMapJSONFields(json: unknown): string[] {
 
 	const root = check(json, MAPJSON_FIELDS.MapJSON, '');
 	if (!root) return unknown;
-	check(root.view, MAPJSON_FIELDS.view, 'view');
 	check(root.frame, MAPJSON_FIELDS.StateFrame, 'frame');
 	const meta = check(root.meta, MAPJSON_FIELDS.StateMetadata, 'meta');
 	if (meta) {

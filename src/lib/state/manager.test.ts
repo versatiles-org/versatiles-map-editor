@@ -9,17 +9,9 @@ describe('StateManager', () => {
 	let mapDocument: MapDocumentInteractive;
 	let stateManager: StateManager;
 	const state1: MapState = {
-		view: {
-			center: [1, 2],
-			radius: 16
-		},
 		elements: [{ type: 'marker', point: [3, 4], label: 'test' }]
 	};
 	const state2: MapState = {
-		view: {
-			center: [3, 4],
-			radius: 1024
-		},
 		elements: [
 			{
 				type: 'line',
@@ -58,7 +50,7 @@ describe('StateManager', () => {
 			mapDocument.setState(state1);
 			const hash = stateManager.getHash();
 			expect(mapDocument.getState).toHaveBeenCalled();
-			expect(hash).toBe('IAQDDvlmyltoWglEICJkLCYHhqA4agG');
+			expect(hash).toBe('IAQDDvlmykGMgOQAHY');
 		});
 	});
 
@@ -74,13 +66,12 @@ describe('StateManager', () => {
 			stateManager.log();
 			expect(getStatus()).toStrictEqual([true, false, 3, 0, 3, 0]);
 
-			// the viewport is not part of the history
 			stateManager.undo();
-			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state1, view: undefined });
+			expect(mapDocument.setState).toHaveBeenCalledWith(state1);
 			expect(getStatus()).toStrictEqual([true, true, 3, 1, 3, 1]);
 
 			stateManager.redo();
-			expect(mapDocument.setState).toHaveBeenCalledWith({ ...state2, view: undefined });
+			expect(mapDocument.setState).toHaveBeenCalledWith(state2);
 			expect(getStatus()).toStrictEqual([true, false, 3, 0, 3, 2]);
 		});
 

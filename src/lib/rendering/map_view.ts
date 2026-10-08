@@ -1,5 +1,5 @@
 import type * as maplibregl from 'maplibre-gl';
-import { boundsOf, type Bounds, type MapState, type StateElement } from '@versatiles/map-state';
+import { boundsOf, type Bounds, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/index.js';
 import { clampLatitude, lat2mercator, MAX_LATITUDE, mercator2lat, type GeoPoint } from '../geometry.js';
 import { ELEMENT_LAYERS, ElementRenderer, elementIdOf, layerIdsOf, type Role } from './element_renderer.js';
@@ -13,7 +13,10 @@ import { MapStyleLoader } from './map_style_loader.js';
 import { fitTurned, overlapsBox, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
-export type Viewport = NonNullable<MapState['view']>;
+export interface Viewport {
+	center: [number, number];
+	radius: number;
+}
 
 /** Elements prepared for `elementAt`, e.g. to reuse them for every mouse move. */
 export interface ElementIndex {
@@ -45,6 +48,12 @@ export interface Turn {
 	bearing?: number;
 	pitch?: number;
 }
+
+/**
+ * Where the editor looks, and how its author turned its map. Not part of a map: the editor keeps
+ * it with the session of the map in the browser storage, e.g. for a reload.
+ */
+export type Camera = Viewport & Turn;
 
 /** The field of view of MapLibre's camera in degrees, if the map does not tell it. */
 const DEFAULT_FOV = 36.87;

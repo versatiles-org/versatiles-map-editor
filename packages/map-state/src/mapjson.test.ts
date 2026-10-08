@@ -45,7 +45,8 @@ describe('.mapjson files', () => {
 
 	it('keep only what is valid, since they may contain anything', () => {
 		const json = {
-			view: { center: [13.4, 'north'], radius: 1000 },
+			// the camera of the editor, which is not part of a map
+			view: { center: [13.4, 52.5], radius: 1000 },
 			frame: { bounds: [10, 50, 5, 55], pitch: 'steep' },
 			meta: { title: 'Map', viewer: { search: 'middle' }, labels: { minZoom: 99 }, background: 'osm' },
 			elements: [
@@ -91,7 +92,8 @@ describe('.mapjson files', () => {
 		const json = {
 			$schema: MAPJSON_SCHEMA_URL,
 			future: true,
-			view: { center: [13.4, 52.5], radius: 1000, tilt: 30 },
+			// e.g. the camera of the editor, which was part of a map once
+			view: { center: [13.4, 52.5], radius: 1000 },
 			meta: {
 				title: 'T',
 				theme: 'x',
@@ -117,7 +119,7 @@ describe('.mapjson files', () => {
 		};
 		expect(unknownMapJSONFields(json)).toStrictEqual([
 			'future',
-			'view.tilt',
+			'view',
 			'meta.theme',
 			'meta.background.glow',
 			'meta.background.colors.gamma',
@@ -130,6 +132,7 @@ describe('.mapjson files', () => {
 			'elements[2].strokeStyle.glow',
 			'elements[2].popup.image'
 		]);
+		expect(stateFromMapJSON(json)).not.toHaveProperty('view');
 		// and none of the examples has any
 		for (const file of globSync('examples/*.mapjson')) {
 			expect(unknownMapJSONFields(JSON.parse(readFileSync(file, 'utf-8'))), file).toStrictEqual([]);

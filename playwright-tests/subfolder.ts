@@ -58,7 +58,7 @@ test('the editor and the viewer start also without the slash at the end of their
 	expect(new URL(page.url()).pathname).toBe(SUBFOLDER + '/');
 
 	// the viewer, with the map in the hash
-	const state = encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, elements: [] });
+	const state = encodeState({ elements: [] });
 	await page.goto(SUBFOLDER + '/view#' + state);
 	await waitForMapIsReady(page);
 	expect(page.url()).toBe(new URL(SUBFOLDER + '/view/#' + state, page.url()).href);
@@ -70,7 +70,7 @@ test('the editor and the viewer start also without the slash at the end of their
 
 test('a shared link opens the viewer in a subfolder directly', async ({ page }) => {
 	const requests = await serveInSubfolder(page);
-	const state = encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, elements: [] });
+	const state = encodeState({ elements: [] });
 	await page.goto(SUBFOLDER + '/view/#' + state);
 	await waitForMapIsReady(page);
 	expect(requests.outside).toStrictEqual([]);

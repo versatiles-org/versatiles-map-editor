@@ -1,14 +1,22 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
 import { encodeState, type MapState } from '../packages/map-state/src/index.js';
-import { drawElement, drawnElements, menuItem, storedState, waitForMapIsReady } from './lib/utils.js';
+import {
+	drawElement,
+	drawnElements,
+	mapCenter,
+	menuItem,
+	showView,
+	storedCamera,
+	storedState,
+	waitForMapIsReady
+} from './lib/utils.js';
 
 // The editor keeps its maps in the browser storage (IndexedDB), each tab its own map, instead of
 // the URL. Each test starts with an empty storage.
 
 /** A map with one marker at the longitude, and its title. */
 const mapAt = (lng: number, title?: string): MapState => ({
-	view: { center: [lng, 52.5], radius: 10000 },
 	...(title ? { meta: { title } } : {}),
 	elements: [{ type: 'marker', point: [lng, 52.5] }]
 });
@@ -32,7 +40,6 @@ test('the stored map keeps the elements while the map is loading', async ({ page
 		await route.fallback();
 	});
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -48,7 +55,6 @@ test('the stored map keeps the elements while the map is loading', async ({ page
 
 test('the editor keeps its map, history and camera in the browser, not in the URL', async ({ page }) => {
 	const state: MapState = {
-		view: { center: [13.4, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [13.4, 52.5] }]
 	};
 	await page.goto('/#' + encodeState(state));
@@ -59,14 +65,18 @@ test('the editor keeps its map, history and camera in the browser, not in the UR
 
 	await drawElement(page, 'Marker');
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(2);
-	const camera = (await storedState(page)).view;
+	// somewhere else: where the editor looks is kept with the map, not in it
+	await showView(page, { center: [13.45, 52.48], radius: 20000 });
+	await expect.poll(async () => (await storedCamera(page))?.center[0]).toBeCloseTo(13.45, 3);
+	const camera = await storedCamera(page);
 
 	// a reload continues the map, with its camera and the step to undo
 	await page.reload();
 	await waitForMapIsReady(page);
 	expect(new URL(page.url()).hash).toBe('');
 	await expect.poll(() => drawnElements(page).then((drawn) => drawn.symbol.length)).toBe(2);
-	expect((await storedState(page)).view).toStrictEqual(camera);
+	expect(await storedCamera(page)).toStrictEqual(camera);
+	expect((await mapCenter(page))[0]).toBeCloseTo(13.45, 3);
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(async () => (await storedState(page)).elements.length).toBe(1);
 	await page.getByRole('button', { name: 'Redo' }).click();
@@ -75,7 +85,6 @@ test('the editor keeps its map, history and camera in the browser, not in the UR
 
 test('each tab edits its own map, and a reload keeps it', async ({ page, context }) => {
 	const mapOf = (lng: number): MapState => ({
-		view: { center: [lng, 52.5], radius: 10000 },
 		elements: [{ type: 'marker', point: [lng, 52.5] }]
 	});
 	const lng = async (page: Page) => {

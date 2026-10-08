@@ -41,14 +41,6 @@ describe('frame', () => {
 		expect(area.every((value) => Number(value.toFixed(5)) === value)).toBe(true);
 	});
 
-	it('is kept next to the camera, which has a center of its own', () => {
-		const withCamera: MapState = { ...state, view: { center: [10, 50], radius: 1000 } };
-		const decoded = decodeState(encodeState(withCamera));
-		expect(decoded.frame).toStrictEqual(frame);
-		expect(decoded.view?.center).toStrictEqual([10, 50]);
-		expect(decoded.elements).toStrictEqual(state.elements);
-	});
-
 	it('is never empty, and an invalid one is left out', () => {
 		const tiny = decodeState(encodeState({ elements: [], frame: { bounds: [13.4, 52.5, 13.400001, 52.500001] } }));
 		const area = tiny.frame!.bounds!;
@@ -59,7 +51,7 @@ describe('frame', () => {
 		).toBeUndefined();
 	});
 
-	it('makes links short without a camera: the coordinates start near the elements', () => {
+	it('is not needed for a short link: the coordinates start near the elements', () => {
 		// the elements far from 0°, 0°: the origin is their center, not 0°, 0°
 		const far = encodeState({ elements: state.elements });
 		const near = encodeState({
@@ -132,44 +124,10 @@ describe('frame: how the map is turned', () => {
 	it('is kept in GeoJSON, KML and .mapjson files', () => {
 		expect(stateFromGeoJSON(stateToGeoJSON({ ...state, frame: turned })).frame).toStrictEqual(turned);
 		expect(stateFromKML(stateToKML({ ...state, frame: turned })).frame).toStrictEqual(turned);
-		// KML looks at the area, and at the camera without one
-		expect(stateToKML({ ...state, frame: { bearing: 90 } })).not.toContain('<LookAt>');
-	});
-});
-
-describe('view: how the author turned the map in the editor', () => {
-	const view = { center: [10, 50] as [number, number], radius: 1024 };
-
-	it('is kept in a link, in whole degrees, if the map can be turned', () => {
-		const turned = { ...view, turnable: true, bearing: -75, pitch: 40 };
-		expect(decodeState(encodeState({ ...state, view: turned })).view).toStrictEqual(turned);
-		expect(decodeState(encodeState({ ...state, view: { ...view, turnable: true } })).view).toStrictEqual({
-			...view,
-			turnable: true
-		});
-		const rounded = decodeState(encodeState({ ...state, view: { ...view, turnable: true, bearing: 29.6, pitch: 99 } }));
-		expect(rounded.view).toStrictEqual({ ...view, turnable: true, bearing: 30, pitch: 60 });
-	});
-
-	it('is left out of a map that cannot be turned, which costs a link nothing', () => {
-		const flat = encodeState({ ...state, view });
-		expect(encodeState({ ...state, view: { ...view, bearing: 30, pitch: 20 } })).toBe(flat);
-		expect(decodeState(flat).view).toStrictEqual(view);
-		expect(
-			encodeState({ ...state, view: { ...view, turnable: true, bearing: 30 } }).length - flat.length
-		).toBeLessThanOrEqual(3);
-	});
-
-	it('is kept in GeoJSON and KML, next to the frame, which is turned on its own', () => {
-		const both: MapState = {
-			...state,
-			view: { ...view, turnable: true, bearing: 10 },
-			frame: { bounds, bearing: -120, pitch: 45 }
-		};
-		expect(stateFromGeoJSON(stateToGeoJSON(both)).view).toStrictEqual(both.view);
-		expect(stateFromGeoJSON(stateToGeoJSON(both)).frame).toStrictEqual(both.frame);
-		expect(stateFromKML(stateToKML(both)).view).toStrictEqual(both.view);
-		expect(decodeState(encodeState(both))).toStrictEqual(both);
+		// KML looks at the area, else at the elements, and nowhere without both
+		expect(stateToKML({ ...state, frame: turned })).toContain('<LookAt>');
+		expect(stateToKML({ ...state, frame: { bearing: 90 } })).toContain('<LookAt>');
+		expect(stateToKML({ elements: [], frame: { bearing: 90 } })).not.toContain('<LookAt>');
 	});
 });
 
@@ -182,8 +140,8 @@ describe('flat markers', () => {
 			flat: true,
 			rotation: 45
 		});
-		// upright is the default
-		expect(encodeState(marker({ flat: false }))).toHaveLength(encodeState(marker()).length);
+		// upright is the default: no more than a style without anything
+		expect(encodeState(marker({ flat: false }))).toBe(encodeState(marker({})));
 		expect(decodeState(encodeState(marker({ flat: false }))).elements[0].style?.flat).toBeUndefined();
 	});
 

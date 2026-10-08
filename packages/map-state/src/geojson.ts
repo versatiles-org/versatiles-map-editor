@@ -16,7 +16,6 @@ import {
 	removeViewerDefaults,
 	sanitizeBoolean,
 	sanitizeLabels,
-	sanitizeView,
 	sanitizeNumber,
 	sanitizeFrame,
 	sanitizeMetadata,
@@ -32,11 +31,10 @@ import {
 } from './profile.js';
 
 /**
- * A GeoJSON FeatureCollection extended with the editor's `view` (`center` + `radius` in
- * meters, and how the author turned the map) and the `frame`: what a shared map shows, e.g. its visible area (`bounds`).
+ * A GeoJSON FeatureCollection extended with the `frame`: what a shared map shows, e.g. its
+ * visible area (`bounds`).
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
-	view?: MapState['view'];
 	frame?: StateFrame;
 	/** Properties of the whole map, e.g. its background. */
 	meta?: StateMetadata;
@@ -119,8 +117,6 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	});
 
 	const doc: GeoJSONDocument = { type: 'FeatureCollection', features };
-	const view = sanitizeView(state.view);
-	if (view) doc.view = view;
 	const frame = sanitizeFrame(state.frame);
 	if (frame) doc.frame = frame;
 	const meta: StateMetadata = {};
@@ -257,10 +253,6 @@ export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapSta
 	}
 
 	const state: MapState = { elements };
-	if (doc.type === 'FeatureCollection' && 'view' in doc) {
-		const view = sanitizeView(doc.view);
-		if (view) state.view = view;
-	}
 	if (doc.type === 'FeatureCollection' && 'frame' in doc) {
 		const frame = sanitizeFrame(doc.frame);
 		if (frame) state.frame = frame;

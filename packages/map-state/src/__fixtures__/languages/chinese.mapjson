@@ -1,9 +1,5 @@
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"view": {
-		"center": [116.2171, 40.1195],
-		"radius": 37216
-	},
 	"meta": {
 		"title": "北京名胜古迹"
 	},

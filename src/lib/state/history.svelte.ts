@@ -64,7 +64,7 @@ export class StateHistory {
 	/** Add a state to the history. Returns false if it equals the current state. */
 	public push(state: MapState): boolean {
 		// The viewport is not part of the history, so panning the map is not undoable
-		const json = JSON.stringify({ ...state, view: undefined });
+		const json = JSON.stringify(state);
 
 		// Nothing changed (e.g. a click without drag), so there is nothing to undo
 		const current = this.history[this.index];

@@ -18,7 +18,7 @@
 	// the shared map, again after each change: the viewer follows a new hash without a reload
 	$effect(() => {
 		if (!open) return;
-		const update = () => (src = `${baseUrl}#${doc.state.getHash({ camera: false })}`);
+		const update = () => (src = `${baseUrl}#${doc.state.getHash()}`);
 		update();
 		const id = doc.state.events.on('change', update);
 		return () => doc.state.events.off('change', id);

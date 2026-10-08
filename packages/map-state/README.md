@@ -1,7 +1,7 @@
 # @versatiles/map-state
 
 Encode and decode maps of the [VersaTiles map editor](https://github.com/versatiles-org/versatiles-map-editor):
-a viewport, markers, lines, polygons and circles with their styles and popups, and map properties
+markers, lines, polygons and circles with their styles and popups, and map properties
 like the background map and a legend.
 
 - as a **compact base64 string**, which the editor keeps in the URL hash of a map, so a map can be
@@ -30,7 +30,6 @@ npm install @versatiles/map-state
 import { encodeState, decodeState, stateToGeoJSON, type MapState } from '@versatiles/map-state';
 
 const state: MapState = {
-	view: { center: [13.4, 52.5], radius: 5000 },
 	elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Berlin', style: { color: '#0000ff' } }]
 };
 
@@ -98,7 +97,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.
 
-`MapState` is the canonical model: a viewport, map properties (`meta`) and a list of typed
+`MapState` is the canonical model: what a shared map shows (`frame`), map properties (`meta`) and a list of typed
 elements whose styles omit default values. The types are exported too (`StateElement`,
 `MarkerStyle`, `LineStyle`, `AreaStyle`, `OutlineStyle`, `StateLegend`, …).
 
@@ -110,10 +109,10 @@ which are internal: only the exports above are the public API.
 
 | Representation | Source                      | Notes                                                                              |
 | -------------- | --------------------------- | ---------------------------------------------------------------------------------- |
-| `MapState`     | canonical                   | view (`center` + `radius` m), `meta`, `elements[]` with a style per role           |
+| `MapState`     | canonical                   | `frame`, `meta`, `elements[]` with a style per role                                |
 | `.mapjson`     | `mapjson.ts`                | the map state as JSON, the file format of the editor; see [MAPJSON.md](MAPJSON.md) |
 | base64         | `writer.ts` / `reader.ts`   | bespoke bit-packed format, versioned                                               |
-| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `view` and `meta` foreign members                            |
+| GeoJSON        | `geojson.ts` + `profile.ts` | `FeatureCollection` + `frame` and `meta` foreign members                           |
 | KML            | `kml.ts`                    | through the GeoJSON profile, lossless with `<ExtendedData>`                        |
 
 ## GeoJSON profile (`profile.ts`)
@@ -127,7 +126,6 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- viewport → `view: { center, radius, turnable, bearing, pitch }` (mirrors the state; lossless round-trip)
 - what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, lockBearing, lockPitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
@@ -169,7 +167,7 @@ properties:
   (colors as `aabbggrr`, line width, opacity, marker size and rotation), its label as `<name>` and
   its popup as `<description>`. Circles are drawn as polygons.
 - All GeoJSON properties are also stored in the Placemark's `<ExtendedData>` (and the circle
-  center, the viewport and `meta` in the Document's), so importing an exported file restores the
+  center, the frame and `meta` in the Document's), so importing an exported file restores the
   exact map state.
 - Files of other tools: Placemarks (also in folders and `MultiGeometry`) become markers, lines and
   polygons, with the colors and widths of their styles (inline, `styleUrl`, `StyleMap`). HTML in
@@ -181,8 +179,7 @@ A small XML parser (`xml.ts`) keeps the codec free of DOM dependencies.
 
 The base64 starts with a 3-bit format version, `CODEC_VERSION` (`constants.ts`), which is 1. Only
 this version is read; a later version can be told apart by it. Then come the palette, the string
-table, the view (`view`, optional: where the author's editor looks, and how its map is turned if
-the author can turn it), the resolution, the origin
+table, the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
 relative, the frame (optional: the visible area of a shared map, and how it is turned), the metadata, 1 bit whether an
 element has a popup (without one, the elements have no bit for it) and the elements.
@@ -215,7 +212,7 @@ To keep hashes short:
   label of a marker is a field of the element (1 bit, then the string), so markers that differ
   only in their labels still repeat their style;
 - the coordinates of the frame and the elements are whole steps from an origin near them (the center
-  of the frame, else of the view, else of the elements, rounded to 1/100 degree), with a global
+  of the frame, else of the elements, rounded to 1/100 degree), with a global
   step of 0.00001° × 2^n, n in 4 bits (#3, `grid.ts`). Steps by powers of 2 halve with each zoom
   level, like the pixels, so a link can be as coarse as what it shows needs; and as multiples of
   0.00001°, decoded coordinates have at most 5 decimal places. `encodeState(state, { resolution })`
@@ -227,8 +224,8 @@ To keep hashes short:
   parameter each (1 bit), e.g. for points sorted by latitude, whose latitude steps are small and
   longitude steps large. The order of the elements is never changed;
 
-The viewport radius is log-quantized, and coordinates are rounded to the resolution, so base64
-round-trips are lossy at the resolution by design.
+Coordinates are rounded to the resolution, so base64 round-trips are lossy at the resolution by
+design.
 
 ### Size of a link
 

@@ -15,7 +15,7 @@ import {
 	type StateMetadata,
 	type StateViewer
 } from '@versatiles/map-state';
-import { MapView, type ElementIndex } from '../rendering/index.js';
+import { MapView, type Camera, type ElementIndex } from '../rendering/index.js';
 import { getSettings, sameBackground } from '../background/index.js';
 
 /** How a shared map is turned and whether viewers can turn it: a frame without its area. */
@@ -249,16 +249,15 @@ export class MapDocument {
 	}
 
 	/**
-	 * Open a map. The editor looks where its camera was (`view`), which a session of the browser
+	 * Open a map. `camera`: where the editor looked at it last, which a session of the browser
 	 * storage has, e.g. after a reload. Without one, the viewer shows the frame of the map, else its
 	 * elements; the editor all its elements, so none is overlooked, and an empty map where it is.
 	 * `keepView`: without a camera, the map stays where it is, e.g. for a new map.
 	 */
-	public async loadState(state: MapState, { keepView = false } = {}) {
+	public async loadState(state: MapState, { camera, keepView = false }: { camera?: Camera; keepView?: boolean } = {}) {
 		this.clear();
-		const camera = this.isInteractive() ? state.view : undefined;
 		// a map without a camera is not turned by one
-		if (!camera) this.applyCamera(undefined);
+		this.applyCamera(camera);
 		// the viewer keeps showing it when its size changes, e.g. a growing embed
 		if (!camera && !keepView) {
 			// north-up and seen from straight above, unless it has elements to show
@@ -269,7 +268,7 @@ export class MapDocument {
 				this.view.fitArea(state.frame?.bounds, state.elements, { keep: true, turn });
 			}
 		}
-		await this.setState({ ...state, view: camera });
+		await this.setState(state);
 	}
 
 	public async setState(state: MapState) {
@@ -288,7 +287,6 @@ export class MapDocument {
 
 		this.deselectAll();
 
-		if (state.view) this.applyCamera(state.view);
 		this.frame = state.frame?.bounds;
 		this.frameTurn = turnOf(state.frame);
 		this.applyMetadata(state.meta);
@@ -322,8 +320,8 @@ export class MapDocument {
 		this.elements = next;
 	}
 
-	/** Look where the camera of a map looks; the editor also turns its map like it, see there. */
-	protected applyCamera(camera: MapState['view']) {
+	/** Look where a camera looks; the editor also turns its map like it, see there. */
+	protected applyCamera(camera: Camera | undefined) {
 		if (camera) this.view.fitViewport(camera);
 	}
 

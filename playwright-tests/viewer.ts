@@ -18,7 +18,7 @@ test.describe('small screens', () => {
 	test.use({ viewport: { width: 500, height: 500 } });
 
 	test('show the map read-only with a hint', async ({ page }) => {
-		await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 10000 }, elements: [] }));
+		await page.goto('/#' + encodeState({ elements: [] }));
 		await waitForMapIsReady(page);
 		const hint = page.getByText('Open this page on a larger screen to edit the map.');
 		await expect(hint).toBeVisible();
@@ -35,7 +35,6 @@ test.describe('small screens', () => {
 test.describe('view page', () => {
 	test('shows the map read-only, also on a large screen', async ({ page }) => {
 		const hash = encodeState({
-			view: { center: [13.4, 52.5], radius: 10000 },
 			elements: [{ type: 'marker', point: [13.4, 52.5] }]
 		});
 		await page.goto('/view/#' + hash);
@@ -54,7 +53,6 @@ test.describe('viewer', () => {
 
 	test('opens popups on click', { tag: '@cross-browser' }, async ({ page }) => {
 		const state: MapState = {
-			view: { center: [13.4, 52.5], radius: 10000 },
 			elements: [
 				{
 					type: 'polygon',
@@ -144,7 +142,6 @@ test('precision of a shared map', async ({ page }) => {
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center: [13.4, 52.5], radius: 10000 },
 				// about 11 × 11 km
 				frame: { bounds: [13.33, 52.45, 13.49, 52.55] },
 				elements: [{ type: 'marker', point }]
@@ -249,7 +246,6 @@ test.describe('overlays of the viewer on a phone', () => {
 			for (const position of ['top-left', 'top', 'top-right'] as const) {
 				await test.step(`a legend at ${position}${search ? ', with search' : ''}`, async () => {
 					const state: MapState = {
-						view: { center: [13.4, 52.5], radius: 10000 },
 						meta: {
 							viewer: { search: search ? 'top-left' : 'none', legend: position },
 							legend: {
@@ -333,9 +329,9 @@ test('the sidebar can be hidden, without moving the map content', async ({ page 
 });
 
 test('a marker with an opacity fades together with its halo', async ({ page }) => {
-	const view = { center: [13.4, 52.5] as [number, number], radius: 3000 };
+	const view = { center: [13.4, 52.5] as [number, number] };
 	const marker = (color: string) =>
-		encodeState({ view, elements: [{ type: 'marker', point: view.center, style: { color, size: 4, haloWidth: 2 } }] });
+		encodeState({ elements: [{ type: 'marker', point: view.center, style: { color, size: 4, haloWidth: 2 } }] });
 
 	/** The pixels around the marker, with the opacity of its symbols set to `opacity` if given. */
 	async function pixels(state: string, opacity?: number): Promise<number[]> {
@@ -382,7 +378,6 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 		await page.goto(
 			'/view/#' +
 				encodeState({
-					view: { center: a, radius: 2000 },
 					elements: [
 						{ type: 'marker', point: a, label: labelOfA, style: { color: '#0000ff', size: 2, labelPosition: 'right' } },
 						{ type: 'marker', point: b, label: 'B', style: { color: '#ff0000', size: 2, labelPosition: 'right' } }
@@ -413,7 +408,7 @@ test('a marker in front covers the label of a marker behind it', { tag: '@cross-
 
 test('a legend hidden in the viewer stays in the editor, to be edited', async ({ page }) => {
 	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
+	await page.goto('/#' + encodeState({ meta: { legend }, elements: [] }));
 	await waitForMapIsReady(page);
 	await page.getByRole('button', { name: /^Share/ }).click();
 	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
@@ -443,7 +438,7 @@ test('a legend hidden in the viewer stays in the editor, to be edited', async ({
 
 test('the place of the legend is set in its panel and in the panel of the shared map alike', async ({ page }) => {
 	const legend = { entries: [{ type: 'area' as const, style: { color: '#ff0000' }, label: 'Park' }] };
-	await page.goto('/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] }));
+	await page.goto('/#' + encodeState({ meta: { legend }, elements: [] }));
 	await waitForMapIsReady(page);
 	const viewer = async () => (await storedState(page)).meta?.viewer;
 	// the legend panel
@@ -481,7 +476,6 @@ test('the preview shows the map as visitors see it, over the editor', { tag: '@c
 	await page.goto(
 		'/#' +
 			encodeState({
-				view: { center: point, radius: 3000 },
 				elements: [{ type: 'marker', point, label: 'Cafe', popup: { text: 'A café' } }]
 			})
 	);
@@ -590,7 +584,7 @@ test('an area in front of a marker covers it', { tag: '@cross-browser' }, async 
 	};
 	/** The red pixels of the marker. */
 	async function redOfMarker(elements: MapState['elements']): Promise<number> {
-		await page.goto('/view/#' + encodeState({ view: { center: point, radius: 2000 }, elements }));
+		await page.goto('/view/#' + encodeState({ elements }));
 		await page.reload();
 		await waitForMapIsReady(page);
 		const [x, y] = await project(page, point);
@@ -631,7 +625,7 @@ test('areas keep their order under the labels of the background map', { tag: '@c
 	const marker: StateElementMarker = { type: 'marker', point, style: { color: '#ff0000', size: 2 } };
 	async function colors(elements: MapState['elements']) {
 		const meta = { labels: { mapOnTop: true } };
-		await page.goto('/view/#' + encodeState({ view: { center: point, radius: 2000 }, meta, elements }));
+		await page.goto('/view/#' + encodeState({ meta, elements }));
 		await page.reload();
 		await waitForMapIsReady(page);
 		const [x, y] = await project(page, point);
@@ -656,7 +650,6 @@ test('with many labels, the marker in front keeps its label where labels overlap
 		label: `L${i}`
 	}));
 	const state: MapState = {
-		view: { center: point, radius: 2000 },
 		meta: { labels: { overlap: 'hide' } },
 		elements: [
 			...many,
@@ -698,9 +691,7 @@ test.describe('the texts of the legend', { tag: '@cross-browser' }, () => {
 		for (const font of ['sans-serif', 'serif', 'monospace'] as const) {
 			for (const layout of ['vertical', 'horizontal', 'inline'] as const) {
 				const legend = { font, layout, bold: font === 'serif', entries };
-				await page.goto(
-					'/view/#' + encodeState({ view: { center: [13.4, 52.5], radius: 3000 }, meta: { legend }, elements: [] })
-				);
+				await page.goto('/view/#' + encodeState({ meta: { legend }, elements: [] }));
 				// at four times the resolution, the canvas of the map is too large for MapLibre
 				await waitForMapIsReady(page, { expectedMessages: [/The canvas is larger than maxCanvasSize/] });
 				const rows = page.getByRole('list', { name: 'Legend' }).getByRole('listitem');
