@@ -68,7 +68,7 @@ describe('the coder of the string table', () => {
 		const empty = encodeStrings([options, 'noto_sans_bold']).length;
 		expect(primed).toBeLessThan(empty / 2);
 		// a change of the primer changes these bits: links written before cannot be read
-		expect(primed).toMatchInlineSnapshot(`139`);
+		expect(primed).toMatchInlineSnapshot(`137`);
 	});
 
 	it('keeps the words of the format and the other strings', () => {

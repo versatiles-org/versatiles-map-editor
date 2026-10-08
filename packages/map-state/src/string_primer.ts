@@ -1,8 +1,8 @@
 /**
  * The words of the format, which the model of the string table learns before the strings of a
  * map, without bits: the options of `@versatiles/style` that a background map can have next to its
- * settings (`StateBackground.options`), the glyph names of the fonts, the ids of the color schemes
- * and the beginnings of symbol names. So a map pays less for the first `"exaggeration"` or
+ * settings (`StateBackground.options`), the glyph names of the fonts and the beginnings of symbol
+ * names. Nothing of the editor, e.g. not the ids of its color schemes. So a map pays less for the first `"exaggeration"` or
  * `noto_sans_bold`. No natural language, so no language is favored.
  *
  * The settings of the background map themselves are no strings: a link stores them as bits. The
@@ -29,13 +29,6 @@ export const STRING_PRIMER: readonly string[] = [
 	'pt_sans_regular',
 	'roboto_regular',
 	'source_sans_3_regular',
-	// the color schemes
-	'bright',
-	'muted',
-	'okabe-ito',
-	'set1',
-	'dark2',
-	'pastel1',
 	// the beginnings of the names of symbols
 	'base:icon-',
 	'icons:'
