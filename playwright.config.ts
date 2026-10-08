@@ -3,10 +3,14 @@ import os from 'node:os';
 
 // macOS has a GPU, so render WebGL with Metal. Elsewhere (Linux CI, Docker) fall back to
 // SwiftShader, which renders on the CPU and is several times slower and less stable.
-const chromiumArgs =
+const gpuArgs =
 	process.platform === 'darwin'
 		? ['--enable-gpu', '--use-angle=metal', '--ignore-gpu-blocklist']
 		: ['--enable-unsafe-swiftshader'];
+
+// A test embeds the viewer in a page of another site, which Chromium does not let reach the local
+// server of the tests ("local network access checks").
+const chromiumArgs = [...gpuArgs, '--disable-features=LocalNetworkAccessChecks'];
 
 // Most tests check the editor itself, the same in every browser. Locally, Firefox runs only the
 // tests tagged @cross-browser, where the browsers differ: input, dialogs and focus, clipboard,

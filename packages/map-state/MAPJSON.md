@@ -292,12 +292,13 @@ Where shared maps show the legend is a setting of the viewer.
 What shared and embedded maps show over the map: a control at a place or `"none"`, a button with
 the zoom buttons or not. Controls in the same corner are stacked.
 
-| Field        | Values                                                                                                   | Default         |
-| ------------ | -------------------------------------------------------------------------------------------------------- | --------------- |
-| `search`     | the address search: `"top-left"`, `"top-right"`                                                          | `"none"`        |
-| `navigation` | the zoom buttons: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                         | `"top-right"`   |
-| `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"` | `"bottom-left"` |
-| `reset`      | a button that shows the map as it opened, with the zoom buttons or where they would be: `true`           | `false`         |
+| Field        | Values                                                                                                                                                                                                        | Default         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `search`     | the address search: `"top-left"`, `"top-right"`                                                                                                                                                               | `"none"`        |
+| `navigation` | the zoom buttons: `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                                                                                                              | `"top-right"`   |
+| `legend`     | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                      | `"bottom-left"` |
+| `reset`      | a button that shows the map as it opened, with the zoom buttons or where they would be: `true`                                                                                                                | `false`         |
+| `fullscreen` | a button that shows the map on the whole screen, and back, with the zoom buttons or where they would be: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has. | `false`         |
 
 ## Checking a file
 

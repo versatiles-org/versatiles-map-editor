@@ -55,6 +55,7 @@ import {
 	sanitizeBounds,
 	sanitizeFrame,
 	sanitizeLabelMinZoom,
+	VIEWER_BUTTONS,
 	VIEWER_CHOICES
 } from './profile.js';
 import { LocalGrid } from './grid.js';
@@ -631,8 +632,9 @@ export class StateReader {
 			while (true) {
 				const key = this.readInteger(4);
 				if (key === END_KEY) return viewer as StateViewer;
-				if (key === VIEWER_KEYS.reset) {
-					viewer.reset = true;
+				const button = VIEWER_BUTTONS.find((name) => VIEWER_KEYS[name] === key);
+				if (button) {
+					viewer[button] = true;
 					continue;
 				}
 				const name = controls.find((control) => VIEWER_KEYS[control] === key);

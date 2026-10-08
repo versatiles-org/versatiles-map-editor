@@ -159,7 +159,9 @@
 	}
 
 	function getEmbedCode() {
-		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh; border:0"></iframe>`;
+		// what the buttons of the map need from the page around it
+		const allow = stateManager.mapDocument.controls.fullscreen ? ' allow="fullscreen"' : '';
+		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh; border:0"${allow}></iframe>`;
 	}
 
 	function update(delay: number = 500) {

@@ -26,6 +26,7 @@ import {
 	sanitizeBackground,
 	sanitizeFrame,
 	sanitizeLabels,
+	VIEWER_BUTTONS,
 	VIEWER_CHOICES,
 	withoutUnusedFields
 } from './profile.js';
@@ -550,7 +551,9 @@ export class StateWriter {
 			this.writeInteger(VIEWER_KEYS[name as keyof typeof VIEWER_CHOICES], 4);
 			this.writeVarint((choices as readonly string[]).indexOf(choice));
 		}
-		if (viewer.reset) this.writeInteger(VIEWER_KEYS.reset, 4);
+		for (const button of VIEWER_BUTTONS) {
+			if (viewer[button]) this.writeInteger(VIEWER_KEYS[button], 4);
+		}
 		this.writeInteger(END_KEY, 4);
 	}
 

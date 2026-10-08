@@ -726,7 +726,13 @@ describe('viewer', () => {
 	});
 
 	it('does not store the defaults, like missing metadata', () => {
-		const defaults: StateViewer = { search: 'none', navigation: 'top-right', legend: 'bottom-left', reset: false };
+		const defaults: StateViewer = {
+			search: 'none',
+			navigation: 'top-right',
+			legend: 'bottom-left',
+			reset: false,
+			fullscreen: false
+		};
 		expect(encodeState({ meta: { viewer: defaults }, elements: [] })).toBe(encodeState({ elements: [] }));
 		expect(
 			decodeState(encodeState({ meta: { viewer: { search: 'top-left', legend: 'bottom-left' } }, elements: [] }))
@@ -738,6 +744,10 @@ describe('viewer', () => {
 		expect(decodeState(encodeState(state({ reset: true })))).toStrictEqual(state({ reset: true }));
 		expect(decodeState(encodeState(state({ navigation: 'none', reset: true })))).toStrictEqual(
 			state({ navigation: 'none', reset: true })
+		);
+		expect(decodeState(encodeState(state({ fullscreen: true })))).toStrictEqual(state({ fullscreen: true }));
+		expect(decodeState(encodeState(state({ reset: true, fullscreen: true })))).toStrictEqual(
+			state({ reset: true, fullscreen: true })
 		);
 		// 4 bits more than another setting of the viewer
 		const bits = (viewer: StateViewer) => {

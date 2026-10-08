@@ -290,7 +290,8 @@ describe('MapDocument', () => {
 			search: 'top-right',
 			navigation: 'top-right',
 			legend: 'none',
-			reset: true
+			reset: true,
+			fullscreen: false
 		});
 		mapDocument.viewer = { search: 'none', reset: false };
 		expect(mapDocument.viewer).toBeUndefined();
@@ -298,7 +299,8 @@ describe('MapDocument', () => {
 			search: 'none',
 			navigation: 'top-right',
 			legend: 'bottom-left',
-			reset: false
+			reset: false,
+			fullscreen: false
 		});
 	});
 

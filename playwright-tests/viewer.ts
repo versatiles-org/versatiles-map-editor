@@ -871,3 +871,71 @@ test('the reset button of a shared map is switched on in the panel, where the ma
 	await page.getByRole('button', { name: 'Undo' }).click();
 	await expect.poll(async () => (await storedState(page)).meta?.viewer).toBeUndefined();
 });
+
+test('a shared map can have a button for the whole screen, which an embedded map needs the permission for', async ({
+	page
+}) => {
+	const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+	const state = encodeState({ meta: { viewer: { reset: true, fullscreen: true } }, elements });
+	const onWholeScreen = () => page.evaluate(() => document.fullscreenElement !== null);
+
+	// the viewer: below the button that resets the view; it switches, and tells its state
+	await page.goto('/view/#' + state);
+	await waitForMapIsReady(page);
+	const button = page.getByRole('button', { name: 'Fullscreen', exact: true });
+	const reset = (await page.getByRole('button', { name: 'Reset view' }).boundingBox())!;
+	expect((await button.boundingBox())!.y).toBeGreaterThan(reset.y);
+	await expect(button).toHaveAttribute('aria-pressed', 'false');
+	await button.click();
+	await expect.poll(onWholeScreen).toBe(true);
+	const exit = page.getByRole('button', { name: 'Exit fullscreen' });
+	await expect(exit).toHaveAttribute('aria-pressed', 'true');
+	await exit.click();
+	await expect.poll(onWholeScreen).toBe(false);
+	await expect(button).toBeVisible();
+
+	// not without the setting
+	await page.goto('about:blank');
+	await page.goto('/view/#' + encodeState({ elements }));
+	await waitForMapIsReady(page);
+	await expect(button).toHaveCount(0);
+
+	// embedded in a page of another site: only with the permission of that page, which the embed
+	// code of the editor asks for (a page of the same site may without)
+	const origin = new URL(page.url()).origin;
+	for (const [allow, count] of [
+		['', 0],
+		[' allow="fullscreen"', 1]
+	] as const) {
+		const iframe = `<iframe src="${origin}/view/#${state}" style="width:700px;height:500px"${allow}></iframe>`;
+		await page.route('https://other-site.test/', (route) =>
+			route.fulfill({ contentType: 'text/html', body: `<!doctype html><title>Embed</title>${iframe}` })
+		);
+		await page.goto('https://other-site.test/');
+		await waitForMapIsReady(page);
+		const frame = page.frameLocator('iframe');
+		await expect(frame.getByRole('button', { name: 'Reset view' })).toBeVisible();
+		await expect(frame.getByRole('button', { name: 'Fullscreen', exact: true })).toHaveCount(count);
+		await page.unroute('https://other-site.test/');
+	}
+
+	// the editor: the checkbox, the embed code with the permission, and the preview with the button
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Shared map…')).click();
+	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen button' }).check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ fullscreen: true });
+	await expect(button).toBeVisible();
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog.getByLabel('Embed code')).toHaveValue(/ allow="fullscreen"><\/iframe>$/);
+	await expect(
+		page.frameLocator('iframe[title=preview]').getByRole('button', { name: 'Fullscreen', exact: true })
+	).toBeVisible({ timeout: PREVIEW_TIMEOUT });
+	// without the button, the embed code asks for nothing
+	await page.keyboard.press('Escape');
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await page.getByRole('button', { name: /^Share/ }).click();
+	await expect(dialog.getByLabel('Embed code')).toHaveValue(/border:0"><\/iframe>$/);
+});

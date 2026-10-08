@@ -181,6 +181,7 @@ export {
 	LEGEND_DEFAULTS,
 	removeLegendDefaults,
 	VIEWER_DEFAULTS,
+	VIEWER_BUTTONS,
 	VIEWER_CHOICES,
 	removeViewerDefaults,
 	BACKGROUND_DEFAULTS,

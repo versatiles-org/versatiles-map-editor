@@ -29,6 +29,9 @@
 		front: ['M12 20V8', 'M7 13l5-5 5 5', 'M5 4h14'],
 		// a handle to drag, e.g. a row of a list
 		grip: ['M7 9h10M7 15h10'],
+		// the corners of the screen, outwards and inwards: the map on the whole screen, and back
+		fullscreen: ['M4 9V4h5', 'M15 4h5v5', 'M20 15v5h-5', 'M9 20H4v-5'],
+		'fullscreen-exit': ['M9 4v5H4', 'M20 9h-5V4', 'M15 20v-5h5', 'M4 15h5v5'],
 		// a house: back to how the map opened
 		home: ['M4 11l8-7 8 7', 'M6.5 9.5V19h11V9.5', 'M10 19v-5h4v5'],
 		// a letter "A": a marker that is only a label, without symbol

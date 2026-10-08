@@ -50,7 +50,8 @@
 		<Button onclick={onreload}>Reload</Button>
 	</div>
 	<div class="stage">
-		<iframe title="preview" bind:this={iframe} class={'aspect-' + ratio}></iframe>
+		<!-- with what the embed code allows the map, e.g. its fullscreen button -->
+		<iframe title="preview" bind:this={iframe} class={'aspect-' + ratio} allow="fullscreen"></iframe>
 	</div>
 </div>
 

@@ -27,7 +27,7 @@
 	}
 
 	/** Show a button of the viewer with its zoom buttons, or not; one undo step. */
-	function setButton(key: 'reset', shown: boolean) {
+	function setButton(key: 'reset' | 'fullscreen', shown: boolean) {
 		doc.viewer = { ...doc.viewer, [key]: shown };
 		doc.state.log();
 	}
@@ -63,6 +63,12 @@
 				</Checkbox>
 			</div>
 			<Hint>Shows the map as it opened, after a visitor moved or turned it.</Hint>
+			<div class="control">
+				<Checkbox checked={doc.controls.fullscreen} onchange={(e) => setButton('fullscreen', e.currentTarget.checked)}>
+					Fullscreen button
+				</Checkbox>
+			</div>
+			<Hint>Shows the map on the whole screen. An embedded map needs the embed code of “Share” for it.</Hint>
 		{/if}
 	{/if}
 {/each}

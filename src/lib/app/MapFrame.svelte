@@ -164,14 +164,33 @@
 		return position === 'none' ? undefined : position;
 	});
 
-	// The other buttons of the viewer, e.g. to reset the view: with the buttons for zooming, or
-	// where they would be. The editor shows them only while the shared map is edited.
+	// The other buttons of the viewer: to reset the view, and for the whole screen. With the buttons
+	// for zooming, or where they would be. The editor shows them only while the shared map is edited.
+	// The whole screen: not where the browser does not allow it, e.g. in an embed without the
+	// permission of its page (`allow="fullscreen"` on its iframe).
+	const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled === true;
 	const showsReset = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.reset);
+	const showsFullscreen = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.fullscreen && canFullscreen);
 	const buttonsCorner: Corner | undefined = $derived.by(() => {
-		if (!mapDocument || !showsReset) return undefined;
+		if (!mapDocument || !(showsReset || showsFullscreen)) return undefined;
 		const position = mapDocument.controls.navigation;
 		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
 	});
+
+	// whether the page is on the whole screen, also after the browser left it, e.g. with Escape
+	let onWholeScreen = $state(false);
+	$effect(() => {
+		const update = () => (onWholeScreen = document.fullscreenElement !== null);
+		update();
+		document.addEventListener('fullscreenchange', update);
+		return () => document.removeEventListener('fullscreenchange', update);
+	});
+
+	function toggleFullscreen() {
+		// e.g. not allowed without a click: the button stays as it is
+		const done = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+		done.catch((error) => console.warn('Fullscreen failed', error));
+	}
 
 	// The editor's own button that shows all elements, with the buttons for zooming; while the
 	// shared map is edited without them, where they would be.
@@ -442,15 +461,28 @@
 				class="maplibregl-ctrl-group map-button"
 				use:cornerControl={{ map: doc.view.map, corner: buttonsCorner, order: CONTROL_ORDER.buttons }}
 			>
-				<!-- as the map opened; in the viewer it also stays so when its size changes -->
-				<button
-					type="button"
-					aria-label="Reset view"
-					title="Show the map as it opened"
-					onclick={() => doc.showStart({ keep: !editor })}
-				>
-					<Icon name="home" />
-				</button>
+				{#if showsReset}
+					<!-- as the map opened; in the viewer it also stays so when its size changes -->
+					<button
+						type="button"
+						aria-label="Reset view"
+						title="Show the map as it opened"
+						onclick={() => doc.showStart({ keep: !editor })}
+					>
+						<Icon name="home" />
+					</button>
+				{/if}
+				{#if showsFullscreen}
+					<button
+						type="button"
+						aria-label={onWholeScreen ? 'Exit fullscreen' : 'Fullscreen'}
+						title={onWholeScreen ? 'Exit fullscreen' : 'Show the map on the whole screen'}
+						aria-pressed={onWholeScreen}
+						onclick={toggleFullscreen}
+					>
+						<Icon name={onWholeScreen ? 'fullscreen-exit' : 'fullscreen'} />
+					</button>
+				{/if}
 			</div>
 		</div>
 	{/if}

@@ -528,6 +528,12 @@ export interface StateViewer {
 	 * buttons for zooming, or where they would be. Default: false.
 	 */
 	reset?: boolean;
+	/**
+	 * A button that shows the map on the whole screen, and back. With the buttons for zooming, or
+	 * where they would be. An embedded map needs the permission of its page: `allow="fullscreen"`
+	 * on its iframe. Default: false.
+	 */
+	fullscreen?: boolean;
 }
 
 /** @category Legend */

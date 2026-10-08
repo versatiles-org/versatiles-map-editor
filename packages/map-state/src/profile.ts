@@ -681,8 +681,16 @@ export const VIEWER_DEFAULTS = {
 	search: 'none',
 	navigation: 'top-right',
 	legend: 'bottom-left',
-	reset: false
+	reset: false,
+	fullscreen: false
 } as const;
+
+/**
+ * The buttons of the viewer that are with its buttons for zooming: each is shown or not.
+ * @category Viewer
+ * @internal
+ */
+export const VIEWER_BUTTONS = ['reset', 'fullscreen'] as const;
 
 /**
  * The choices of each control of the viewer that has a position: "none", or one of its positions.
@@ -717,7 +725,9 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 		const choice = (value as Record<string, unknown>)[key];
 		if ((choices as readonly unknown[]).includes(choice)) viewer[key] = choice as string;
 	}
-	if ((value as Record<string, unknown>).reset === true) viewer.reset = true;
+	for (const button of VIEWER_BUTTONS) {
+		if ((value as Record<string, unknown>)[button] === true) viewer[button] = true;
+	}
 	return removeViewerDefaults(viewer as StateViewer);
 }
 
