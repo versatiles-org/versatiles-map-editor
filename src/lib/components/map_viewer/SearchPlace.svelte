@@ -221,6 +221,8 @@
 		padding: var(--space-1);
 		list-style: none;
 		background: var(--color-bg);
+		/* its own, not the color of the map around it, which is dark also on the dark background of the dark mode */
+		color: var(--color-text);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		box-shadow: var(--shadow-lg);

@@ -150,6 +150,26 @@ test.describe('dark mode and reduced motion', { tag: '@cross-browser' }, () => {
 		// the zoom buttons too: dark, with light icons
 		expect(await style('.maplibregl-ctrl-group', 'background-color')).toBe('rgb(27, 27, 31)');
 		expect(await style('.maplibregl-ctrl-zoom-in .maplibregl-ctrl-icon', 'filter')).toBe('invert(1)');
+
+		// the results of the address search, which are on the map: light text on their dark background
+		await page.route('https://geocode.versatiles.org/**', (route) =>
+			route.fulfill({
+				json: {
+					type: 'FeatureCollection',
+					features: [
+						{
+							type: 'Feature',
+							properties: { name: 'Brandenburger Tor', city: 'Berlin', country: 'Deutschland' },
+							geometry: { type: 'Point', coordinates: [13.3777, 52.5163] }
+						}
+					]
+				}
+			})
+		);
+		await page.getByRole('combobox', { name: 'Search address or place' }).fill('Brandenburger');
+		await expect(page.getByRole('listbox', { name: 'Search results' }).getByRole('option')).toHaveCount(1);
+		expect(await style('[role=listbox]', 'background-color')).toBe('rgb(27, 27, 31)');
+		expect(await style('[role=listbox] [role=option]', 'color')).toBe('rgb(255, 255, 255)');
 	});
 
 	test('the viewer keeps the colors of the map', async ({ page }) => {
