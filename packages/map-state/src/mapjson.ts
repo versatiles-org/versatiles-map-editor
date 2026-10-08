@@ -262,6 +262,9 @@ export function changedMapJSONValues(json: unknown): string[] {
 			} else if (Array.isArray(value)) {
 				// positions are kept or their owner is not; the lists of entries and elements are compared below
 				if (result === undefined && !['entries', 'elements'].includes(key)) changed.push(at);
+				// a position beyond a pole is at the pole
+				const positions = key === 'point' ? [value] : key === 'points' ? value : [];
+				if (positions.some((p: unknown) => Array.isArray(p) && Math.abs(Number(p[1])) > 90)) changed.push(at);
 			} else if (result === undefined) {
 				if (!isNeutral(kind, key, value, input)) changed.push(at);
 			} else if (

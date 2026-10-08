@@ -451,6 +451,9 @@ export const COORDINATE_DIGITS = 5;
 
 const COORDINATE_STEPS = 10 ** COORDINATE_DIGITS;
 
+/** The map ends at this latitude, north and south. */
+const MAX_LATITUDE = 90;
+
 /**
  * A longitude or a latitude with `COORDINATE_DIGITS` decimal places.
  * @category Map state
@@ -789,13 +792,15 @@ export function sanitizeViewer(value: unknown): StateViewer | undefined {
 
 /**
  * A 2D position with finite coordinates (any altitude is dropped), or undefined. Its coordinates
- * have `COORDINATE_DIGITS` decimal places.
+ * have `COORDINATE_DIGITS` decimal places, and its latitude is between -90 and 90.
  */
 export function sanitizePosition(value: unknown): Position | undefined {
 	if (!Array.isArray(value) || value.length < 2) return undefined;
 	const [x, y] = value;
 	if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
-	return [roundCoordinate(x), roundCoordinate(y)];
+	// The latitude on the map: beyond a pole is the pole. The longitude as it is: a line across
+	// the date line goes on beyond 180°, and bringing it back would tear the line.
+	return [roundCoordinate(x), roundCoordinate(Math.min(MAX_LATITUDE, Math.max(-MAX_LATITUDE, y)))];
 }
 
 /** All positions, or undefined if any of them is invalid. */

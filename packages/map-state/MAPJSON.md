@@ -85,7 +85,8 @@ its elements, on the editor's default background map.
 - **Coordinates** are `[longitude, latitude]` in degrees (WGS 84), like in GeoJSON: first east,
   then north. Areas (the `bounds` of the `frame`) are `[west, south, east, north]`.
   They have 5 decimal places, about 1 m: the editor keeps all positions on this grid, and rounds
-  finer coordinates of a file that it opens.
+  finer coordinates of a file that it opens. A latitude is between -90 and 90; one beyond a pole
+  is read as the pole. A longitude may be beyond 180, e.g. of a line that crosses the date line.
 - **Colors** are hex codes: `"#rrggbb"`, or `"#rrggbbaa"` with an opacity (alpha), e.g.
   `"#009e7380"` is half transparent. The editor writes them in lower case.
 - **Distances** are in meters (the radius of a circle), **widths** and **halos**

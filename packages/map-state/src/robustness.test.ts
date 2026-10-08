@@ -1,7 +1,7 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 import { parseColor } from './color.js';
-import { decodeState, encodeState, stateFromMapJSON, type Bounds, type MapState } from './index.js';
+import { decodeState, encodeState, stateFromGeoJSON, stateFromMapJSON, type Bounds, type MapState } from './index.js';
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
@@ -235,6 +235,44 @@ describe('the writer writes only what the reader reads', () => {
 				checkDrawable(result);
 			}
 		}
+	});
+
+	it('reads a latitude beyond a pole as the pole, from a file of any format, and keeps longitudes', () => {
+		const marker = { type: 'marker', point: [500, 95] };
+		const line = {
+			type: 'line',
+			points: [
+				[170, -91],
+				[190, 10]
+			]
+		};
+		const expected = [
+			{ type: 'marker', point: [500, 90] },
+			{
+				type: 'line',
+				points: [
+					[170, -90],
+					[190, 10]
+				]
+			}
+		];
+		expect(stateFromMapJSON({ elements: [marker, line] }).elements).toStrictEqual(expected);
+		const geojson = {
+			type: 'FeatureCollection',
+			features: [
+				{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: marker.point } },
+				{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line.points } }
+			]
+		};
+		const read = stateFromGeoJSON(geojson as never).elements;
+		expect(read.map((element) => ('point' in element ? element.point : element.points))).toStrictEqual([
+			[500, 90],
+			[
+				[170, -90],
+				[190, 10]
+			]
+		]);
+		checkDrawable(decodeState(encodeState({ elements: read })));
 	});
 
 	it('refuses a number that does not fit its bits instead of writing another one', () => {

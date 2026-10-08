@@ -201,6 +201,15 @@ describe('.mapjson files', () => {
 				},
 				{ type: 'line', points: [[0, 0]] },
 				{ type: 'circle', point: [0, 0], radius: 0 },
+				// beyond the north pole: at the pole; the longitude is kept
+				{ type: 'marker', point: [500, 95] },
+				{
+					type: 'line',
+					points: [
+						[170, 0],
+						[190, -91]
+					]
+				},
 				{ type: 'circle', point: [0, 0], radius: 50, style: 'red', outlineStyle: { width: -1, visible: 'no' } }
 			]
 		};
@@ -226,9 +235,11 @@ describe('.mapjson files', () => {
 			'elements[0].popup.text',
 			'elements[1]',
 			'elements[2]',
-			'elements[3].style',
-			'elements[3].outlineStyle.width',
-			'elements[3].outlineStyle.visible'
+			'elements[3].point',
+			'elements[4].points',
+			'elements[5].style',
+			'elements[5].outlineStyle.width',
+			'elements[5].outlineStyle.visible'
 		]);
 	});
 
