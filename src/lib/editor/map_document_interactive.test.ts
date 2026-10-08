@@ -605,10 +605,13 @@ describe('MapDocument', () => {
 		});
 
 		it('keeps how the shared map is turned, with and without a visible area', async () => {
-			const turn = { bearing: 30, pitch: 45, canTilt: true };
-			await doc.loadState({ frame: { bounds: frame, ...turn }, elements });
+			const turn = { bearing: 30, pitch: 45 };
+			await doc.loadState({ frame: { bounds: frame, ...turn }, meta: { viewer: { canTilt: true } }, elements });
 			expect(doc.frame).toStrictEqual(frame);
 			expect(doc.frameTurn).toStrictEqual(turn);
+			// what its visitors can do is kept with the viewer
+			expect(doc.getState().meta?.viewer).toStrictEqual({ canTilt: true });
+			expect(decodeState(doc.state.getHash()).meta?.viewer).toStrictEqual({ canTilt: true });
 			expect(doc.getState().frame).toStrictEqual({ bounds: frame, ...turn });
 			expect(decodeState(doc.state.getHash()).frame).toStrictEqual({ bounds: frame, ...turn });
 			// without an area, e.g. after "Fit to elements"

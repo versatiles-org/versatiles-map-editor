@@ -19,7 +19,7 @@
  * │  ├─ polygon   points, smooth, style, outlineStyle, popup
  * │  └─ circle    point, radius, style, outlineStyle, popup
  * ├─ frame        what a shared map shows when it opens:
- * │               bounds, bearing, pitch, canPan, canZoom, …
+ * │               bounds, bearing, pitch
  * └─ meta         title, background, legend, viewer, labels,
  *                 colorScheme
  * ```
@@ -86,7 +86,7 @@
  * | see what makes a link long | {@link measureLink} |
  * | read or write a `.mapjson` file | {@link stateFromMapJSON}, {@link stateToMapJSON} |
  * | exchange a map with other tools | {@link stateToGeoJSON}, {@link stateFromGeoJSON}, {@link stateToKML}, {@link stateFromKML} |
- * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeFrame}, {@link sanitizeBounds} |
+ * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeFrame}, {@link sanitizeViewer}, {@link sanitizeBounds} |
  * | know the values a field can have | the tables of names, e.g. {@link DASH_NAMES}, {@link BACKGROUND_THEMES}, {@link LEGEND_POSITIONS} |
  * | know the default of a field | the defaults, e.g. {@link LINE_DEFAULTS}, {@link MARKER_DEFAULTS}, {@link LEGEND_DEFAULTS} |
  *
@@ -154,7 +154,7 @@ export {
 } from './grid.js';
 export { boundsOf } from './bounds.js';
 export { LINK_KINDS, measureLink, measureState, type LinkKind, type LinkMeasure } from './measure.js';
-export { COORDINATE_DIGITS, roundCoordinate, sanitizeBounds, sanitizeFrame } from './profile.js';
+export { COORDINATE_DIGITS, roundCoordinate, sanitizeBounds, sanitizeFrame, sanitizeViewer } from './profile.js';
 export {
 	MAPJSON_SCHEMA_URL,
 	MAPJSON_VERSION,
@@ -182,7 +182,6 @@ export {
 	VIEWER_DEFAULTS,
 	VIEWER_BUTTONS,
 	VIEWER_CHOICES,
-	removeViewerDefaults,
 	BACKGROUND_DEFAULTS,
 	BACKGROUND_COLOR_DEFAULTS,
 	BACKGROUND_HALO_WIDTHS,

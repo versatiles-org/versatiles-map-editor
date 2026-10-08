@@ -454,8 +454,7 @@ export function sanitizeBearing(value: unknown): number | undefined {
 
 /**
  * A valid frame, with its valid parts: without an invalid area, and without the parts that have
- * their default value (north at the top, looking straight down; viewers can move the map and zoom,
- * but not rotate or tilt it; an embedded map leaves the wheel to its page).
+ * their default value (north at the top, looking straight down).
  * Undefined if nothing is left, which is the frame of a map without one.
  * @category Map state
  */
@@ -469,21 +468,6 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (bearing) frame.bearing = bearing;
 	const pitch = sanitizeNumber(v.pitch, 0, MAX_PITCH);
 	if (pitch) frame.pitch = pitch;
-	if (v.canPan === false) frame.canPan = false;
-	if (v.canZoom === false) frame.canZoom = false;
-	if (sanitizeBoolean(v.canRotate)) frame.canRotate = true;
-	if (sanitizeBoolean(v.canTilt)) frame.canTilt = true;
-	if (sanitizeBoolean(v.confine)) frame.confine = true;
-	// in steps of 0.5; a least zoom above the largest one is the largest one
-	const zoom = (value: unknown) => {
-		const level = sanitizeNumber(value, 0, MAX_ZOOM);
-		return level === undefined ? undefined : Math.round(level * 2) / 2;
-	};
-	const maxZoom = zoom(v.maxZoom);
-	const minZoom = zoom(v.minZoom);
-	if (minZoom !== undefined) frame.minZoom = maxZoom === undefined ? minZoom : Math.min(minZoom, maxZoom);
-	if (maxZoom !== undefined) frame.maxZoom = maxZoom;
-	if (v.scrollZoom === 'free') frame.scrollZoom = 'free';
 	return Object.keys(frame).length > 0 ? frame : undefined;
 }
 
@@ -679,7 +663,9 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 
 /**
  * What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the
- * legend at the bottom left, no scale bar, no other buttons.
+ * legend at the bottom left, no scale bar, no other buttons; its viewers can move the map and
+ * zoom, but not rotate or tilt it, without limits (`minZoom` and `maxZoom` have no default); an
+ * embedded map leaves the wheel to its page.
  * @category Viewer
  */
 export const VIEWER_DEFAULTS = {
@@ -690,7 +676,13 @@ export const VIEWER_DEFAULTS = {
 	scale: 'none',
 	reset: false,
 	fullscreen: false,
-	locate: false
+	locate: false,
+	canPan: true,
+	canZoom: true,
+	canRotate: false,
+	canTilt: false,
+	confine: false,
+	scrollZoom: 'protected'
 } as const;
 
 /**
@@ -722,24 +714,45 @@ export const VIEWER_CHOICES = {
 export function removeViewerDefaults(viewer: StateViewer | undefined): StateViewer | undefined {
 	if (!viewer) return undefined;
 	const result: StateViewer = { ...viewer };
-	for (const key of Object.keys(VIEWER_DEFAULTS) as (keyof StateViewer)[]) {
+	for (const key of Object.keys(VIEWER_DEFAULTS) as (keyof typeof VIEWER_DEFAULTS)[]) {
 		if (result[key] === undefined || result[key] === VIEWER_DEFAULTS[key]) delete result[key];
 	}
 	return Object.keys(result).length > 0 ? result : undefined;
 }
 
-/** Valid settings of the viewer, without defaults, or undefined. Invalid values are left out. */
+/**
+ * Valid settings of the viewer, without those that have their default value, or undefined if
+ * none is left. Invalid values are left out.
+ * @category Viewer
+ */
 export function sanitizeViewer(value: unknown): StateViewer | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const viewer: Record<string, string | boolean> = {};
+	const v = value as Record<string, unknown>;
+	const viewer: Record<string, string | boolean | number> = {};
 	for (const [key, choices] of Object.entries(VIEWER_CHOICES)) {
-		const choice = (value as Record<string, unknown>)[key];
+		const choice = v[key];
 		if ((choices as readonly unknown[]).includes(choice)) viewer[key] = choice as string;
 	}
 	for (const button of VIEWER_BUTTONS) {
-		if ((value as Record<string, unknown>)[button] === true) viewer[button] = true;
+		if (v[button] === true) viewer[button] = true;
 	}
-	if ((value as Record<string, unknown>).zoomButtons === false) viewer.zoomButtons = false;
+	if (v.zoomButtons === false) viewer.zoomButtons = false;
+	// what its viewers can do
+	if (v.canPan === false) viewer.canPan = false;
+	if (v.canZoom === false) viewer.canZoom = false;
+	if (sanitizeBoolean(v.canRotate)) viewer.canRotate = true;
+	if (sanitizeBoolean(v.canTilt)) viewer.canTilt = true;
+	if (sanitizeBoolean(v.confine)) viewer.confine = true;
+	// in steps of 0.5; a least zoom above the largest one is the largest one
+	const zoom = (value: unknown) => {
+		const level = sanitizeNumber(value, 0, MAX_ZOOM);
+		return level === undefined ? undefined : Math.round(level * 2) / 2;
+	};
+	const maxZoom = zoom(v.maxZoom);
+	const minZoom = zoom(v.minZoom);
+	if (minZoom !== undefined) viewer.minZoom = maxZoom === undefined ? minZoom : Math.min(minZoom, maxZoom);
+	if (maxZoom !== undefined) viewer.maxZoom = maxZoom;
+	if (v.scrollZoom === 'free') viewer.scrollZoom = 'free';
 	return removeViewerDefaults(viewer as StateViewer);
 }
 

@@ -23,10 +23,10 @@ import {
 import { boundsOf, centerOf } from './bounds.js';
 import {
 	LEGEND_DEFAULTS,
-	removeViewerDefaults,
 	sanitizeBackground,
 	sanitizeFrame,
 	sanitizeState,
+	sanitizeViewer,
 	sanitizeLabels,
 	VIEWER_BUTTONS,
 	VIEWER_CHOICES,
@@ -326,21 +326,6 @@ export class StateWriter {
 			// 7 bits: up to 127°, more than a map can be tilted (MapLibre: 85°), not only `MAX_PITCH`
 			this.writeInteger(frame.pitch, 7);
 		}
-		if (frame.canPan === false) key('noPan');
-		if (frame.canZoom === false) key('noZoom');
-		if (frame.canRotate === true) key('rotate');
-		if (frame.canTilt === true) key('tilt');
-		if (frame.confine === true) key('confine');
-		// zoom levels in steps of 0.5: 6 bits, up to 22
-		if (frame.minZoom !== undefined) {
-			key('minZoom');
-			this.writeInteger(Math.round(frame.minZoom * 2), 6);
-		}
-		if (frame.maxZoom !== undefined) {
-			key('maxZoom');
-			this.writeInteger(Math.round(frame.maxZoom * 2), 6);
-		}
-		if (frame.scrollZoom === 'free') key('scrollFree');
 		this.writeKey(END_KEY, KEY_PARAMETERS.frame);
 	}
 
@@ -417,7 +402,7 @@ export class StateWriter {
 			(linkBackground(metadata.background) ||
 				metadata.legend ||
 				metadata.colorScheme ||
-				removeViewerDefaults(metadata.viewer) ||
+				sanitizeViewer(metadata.viewer) ||
 				sanitizeLabels(metadata.labels) ||
 				metadata.title);
 		if (!stored) {
@@ -453,7 +438,7 @@ export class StateWriter {
 			// in tenths of a zoom level
 			this.writeVarint(Math.round(labels.minZoom * 10));
 		}
-		const viewer = removeViewerDefaults(metadata.viewer);
+		const viewer = sanitizeViewer(metadata.viewer);
 		if (viewer) {
 			this.writeKey(METADATA_KEYS.viewer, KEY_PARAMETERS.metadata);
 			this.writeViewer(viewer);
@@ -573,7 +558,24 @@ export class StateWriter {
 		for (const button of VIEWER_BUTTONS) {
 			if (viewer[button]) this.writeKey(VIEWER_KEYS[button], KEY_PARAMETERS.viewer);
 		}
-		if (viewer.zoomButtons === false) this.writeKey(VIEWER_KEYS.noZoom, KEY_PARAMETERS.viewer);
+		const key = (name: keyof typeof VIEWER_KEYS) => this.writeKey(VIEWER_KEYS[name], KEY_PARAMETERS.viewer);
+		if (viewer.zoomButtons === false) key('noZoomButtons');
+		// what viewers can do other than by default
+		if (viewer.canPan === false) key('noPan');
+		if (viewer.canZoom === false) key('noZoom');
+		if (viewer.canRotate === true) key('rotate');
+		if (viewer.canTilt === true) key('tilt');
+		if (viewer.confine === true) key('confine');
+		// zoom levels in steps of 0.5: 6 bits, up to 22
+		if (viewer.minZoom !== undefined) {
+			key('minZoom');
+			this.writeInteger(Math.round(viewer.minZoom * 2), 6);
+		}
+		if (viewer.maxZoom !== undefined) {
+			key('maxZoom');
+			this.writeInteger(Math.round(viewer.maxZoom * 2), 6);
+		}
+		if (viewer.scrollZoom === 'free') key('scrollFree');
 		this.writeKey(END_KEY, KEY_PARAMETERS.viewer);
 	}
 

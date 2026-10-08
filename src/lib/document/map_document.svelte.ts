@@ -4,7 +4,7 @@ import type { MapDocumentInteractive } from '../editor/index.js';
 import {
 	boundsOf,
 	removeLegendDefaults,
-	removeViewerDefaults,
+	sanitizeViewer,
 	VIEWER_DEFAULTS,
 	type Bounds,
 	type StateBackground,
@@ -18,7 +18,11 @@ import {
 import { MapView, type Camera, type ElementIndex } from '../rendering/index.js';
 import { getSettings, sameBackground } from '../background/index.js';
 
-/** How a shared map is turned and whether viewers can turn it: a frame without its area. */
+/** The settings of the viewer with their defaults; the zoom limits have none: undefined is no limit. */
+export type ViewerSettings = Required<Omit<StateViewer, 'minZoom' | 'maxZoom'>> &
+	Pick<StateViewer, 'minZoom' | 'maxZoom'>;
+
+/** How a shared map is turned when it opens: a frame without its area. */
 export type FrameTurn = Omit<StateFrame, 'bounds'>;
 
 /** The turn of a frame, or undefined if it has none, e.g. only an area. */
@@ -35,17 +39,18 @@ export class MapDocument {
 	public readonly view: MapView;
 	/**
 	 * What a shared or embedded map shows over it, and where: the search, the zoom buttons, the
-	 * legend. Without the defaults, as links store it; undefined if all have their default.
+	 * legend; and what its viewers can do with it, e.g. rotate it. Without the defaults, as links
+	 * store it; undefined if all have their default.
 	 */
 	get viewer(): StateViewer | undefined {
 		return this.#viewer;
 	}
 	set viewer(value: StateViewer | undefined) {
-		this.#viewer = removeViewerDefaults(value);
+		this.#viewer = sanitizeViewer(value);
 	}
 	#viewer: StateViewer | undefined = $state.raw(undefined);
 	/** The settings of the viewer, with the defaults, e.g. `controls.search` is "none" without a search. */
-	public get controls(): Required<StateViewer> {
+	public get controls(): ViewerSettings {
 		return { ...VIEWER_DEFAULTS, ...this.#viewer };
 	}
 	/** The title of the map, e.g. for the title of the page and file names. Empty without one. */

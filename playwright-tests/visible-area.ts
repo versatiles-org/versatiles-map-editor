@@ -5,6 +5,9 @@ import {
 	menuItem,
 	project,
 	storedCamera,
+	sharedMap,
+	storedSharedSettings,
+	type SharedSettings,
 	storedState,
 	waitForMapIsIdle,
 	showView,
@@ -133,9 +136,9 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		await page.mouse.move(400 + dx, 300 + dy, { steps: 5 });
 		await page.mouse.up({ button: 'right' });
 	};
-	const open = async (frame: MapState['frame']) => {
+	const open = async (settings: SharedSettings) => {
 		await page.goto('about:blank');
-		await page.goto('/view/#' + encodeState({ frame, elements }));
+		await page.goto('/view/#' + encodeState({ ...sharedMap(settings), elements }));
 		await waitForMapIsReady(page);
 	};
 	const compass = page.getByRole('button', { name: 'Reset rotation and tilt' });
@@ -186,8 +189,8 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		await page.goto(
 			'/view/#' +
 				encodeState({
-					frame: { bounds: frame, canRotate: true, canTilt: true },
-					meta: { viewer: { zoomButtons: false, reset: true } },
+					frame: { bounds: frame },
+					meta: { viewer: { zoomButtons: false, reset: true, canRotate: true, canTilt: true } },
 					elements
 				})
 		);
@@ -398,7 +401,7 @@ test('the rotation and the tilt of a shared map are set in the visible area mode
 		});
 		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
 	};
-	const stored = async () => (await storedState(page)).frame;
+	const stored = () => storedSharedSettings(page);
 	const bar = sidebar(page).getByRole('region', { name: 'Visible area' });
 	await (await menuItem(page, 'Shared map…')).click();
 
@@ -780,7 +783,7 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 	expect((await place()).west).toBeLessThan(start.west - 0.05);
 
 	// confined: not zoomed out, not moved; zoomed in, it moves, but not beyond what it showed
-	await open({ frame: { bounds: frame, confine: true }, elements });
+	await open({ frame: { bounds: frame }, meta: { viewer: { confine: true } }, elements });
 	start = await place();
 	await page.mouse.move(400, 300);
 	await page.mouse.wheel(0, 600);
@@ -802,7 +805,10 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 	expect(moved.east).toBeLessThan(start.east);
 
 	// without a visible area, in what the elements make the map show
-	await open({ frame: { confine: true }, elements: [...elements, { type: 'marker', point: [13.5, 52.55] }] });
+	await open({
+		meta: { viewer: { confine: true } },
+		elements: [...elements, { type: 'marker', point: [13.5, 52.55] }]
+	});
 	start = await place();
 	await page.mouse.move(400, 300);
 	await page.mouse.wheel(0, 600);
@@ -817,7 +823,7 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 	await waitForMapIsReady(page);
 	await (await menuItem(page, 'Shared map…')).click();
 	await sidebar(page).getByRole('checkbox', { name: 'Visitors stay in the area' }).check();
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, confine: true });
+	await expect.poll(() => storedSharedSettings(page)).toStrictEqual({ bounds: frame, confine: true });
 	await waitForMapIsIdle(page);
 	const before = await place();
 	await page.mouse.move(500, 350);
@@ -827,7 +833,7 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 
 test('the zoom of visitors of a shared map can be limited', async ({ page }) => {
 	const zoom = () => page.evaluate(() => (window as unknown as MapWindow).map.getZoom());
-	const stored = async () => (await storedState(page)).frame;
+	const stored = () => storedSharedSettings(page);
 	const wheel = async (delta: number) => {
 		await page.waitForTimeout(600);
 		await page.mouse.move(400, 300);
@@ -838,7 +844,9 @@ test('the zoom of visitors of a shared map can be limited', async ({ page }) => 
 
 	// the viewer: the map of a frame of about 14 × 11 km opens at a zoom of about 11
 	await page.setViewportSize({ width: 800, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame: { bounds: frame, minZoom: 10.5, maxZoom: 12 }, elements }));
+	await page.goto(
+		'/view/#' + encodeState({ frame: { bounds: frame }, meta: { viewer: { minZoom: 10.5, maxZoom: 12 } }, elements })
+	);
 	await waitForMapIsReady(page);
 	const start = await zoom();
 	expect(start).toBeGreaterThan(10.5);
@@ -940,7 +948,7 @@ test('an embedded map leaves the wheel to the page around it, unless its author 
 		.toBeGreaterThan(start + 0.5);
 
 	// set free by its author: the wheel zooms the embedded map
-	inner = await embed({ frame: { bounds: frame, scrollZoom: 'free' }, elements });
+	inner = await embed({ frame: { bounds: frame }, meta: { viewer: { scrollZoom: 'free' } }, elements });
 	const free = await zoomOf(inner);
 	await page.mouse.move(350, 250);
 	await page.mouse.wheel(0, -600);
@@ -956,13 +964,13 @@ test('an embedded map leaves the wheel to the page around it, unless its author 
 	const option = page.getByRole('dialog').getByRole('checkbox', { name: 'Scrolling the page does not zoom the map' });
 	await expect(option).toBeChecked();
 	await option.uncheck();
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame, scrollZoom: 'free' });
+	await expect.poll(() => storedSharedSettings(page)).toStrictEqual({ bounds: frame, scrollZoom: 'free' });
 	const link = await page.getByRole('dialog').getByLabel('Link', { exact: true }).inputValue();
 	// in the link too, which is what the embed code embeds
-	expect(decodeState(new URL(link).hash.slice(1)).frame?.scrollZoom).toBe('free');
+	expect(decodeState(new URL(link).hash.slice(1)).meta?.viewer?.scrollZoom).toBe('free');
 	await page.keyboard.press('Escape');
 	await page.getByRole('button', { name: 'Undo' }).click();
-	await expect.poll(async () => (await storedState(page)).frame).toStrictEqual({ bounds: frame });
+	await expect.poll(() => storedSharedSettings(page)).toStrictEqual({ bounds: frame });
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await expect(option).toBeChecked();
 });

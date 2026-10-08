@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Bounds, MapState, StateFrame } from './types.js';
+import type { Bounds, MapState, StateFrame, StateViewer } from './types.js';
+import { sanitizeViewer } from './profile.js';
 import {
 	boundsOf,
 	decodeState,
@@ -102,15 +103,7 @@ describe('frame', () => {
 });
 
 describe('frame: how the map is turned', () => {
-	const turned: StateFrame = {
-		bounds,
-		bearing: -120,
-		pitch: 45,
-		canPan: false,
-		canZoom: false,
-		canRotate: true,
-		canTilt: true
-	};
+	const turned: StateFrame = { bounds, bearing: -120, pitch: 45 };
 
 	it('is kept in a link, with and without an area', () => {
 		expect(decodeState(encodeState({ ...state, frame: turned })).frame).toStrictEqual(turned);
@@ -118,17 +111,7 @@ describe('frame: how the map is turned', () => {
 			{ bearing: 90 },
 			{ pitch: 60 },
 			{ bearing: 180, pitch: 1 },
-			{ canRotate: true },
-			{ canTilt: true },
-			{ canPan: false },
-			{ canZoom: false },
-			{ bounds, canTilt: true, canZoom: false },
-			{ confine: true },
-			{ minZoom: 3.5 },
-			{ scrollZoom: 'free' },
-			{ maxZoom: 0 },
-			{ bounds, minZoom: 8, maxZoom: 22 },
-			{ bounds, confine: true }
+			{ bounds, pitch: 20 }
 		] as StateFrame[]) {
 			expect(decodeState(encodeState({ ...state, frame })).frame).toStrictEqual(frame);
 		}
@@ -147,10 +130,9 @@ describe('frame: how the map is turned', () => {
 		const longer = (frame: StateFrame) => encodeState({ ...state, frame }).length - plain.length;
 		// only an area: 1 bit says that no settings follow, as before the settings were a list
 		expect(longer({ bounds })).toBe(0);
-		expect(longer({ bounds, canRotate: true })).toBeLessThanOrEqual(2);
 		expect(longer({ bounds, bearing: -120 })).toBeLessThanOrEqual(3);
-		// all six settings: a key each, which is the price for settings that can be added later
-		expect(longer(turned)).toBeLessThanOrEqual(8);
+		// both settings: a key each, which is the price for settings that can be added later
+		expect(longer(turned)).toBeLessThanOrEqual(4);
 	});
 
 	it('refuses a setting that this version does not know', () => {
@@ -179,8 +161,8 @@ describe('frame: how the map is turned', () => {
 			writer.writeRoot({ elements: [], frame });
 			return writer.bits.length;
 		};
-		// "visitors can rotate" is the key 2 of 3 bits
-		expect(bits({ bounds, canRotate: true }) - bits({ bounds })).toBe(3);
+		// the rotation: its key of 3 bits, and 9 bits of degrees
+		expect(bits({ bounds, bearing: 90 }) - bits({ bounds })).toBe(12);
 	});
 
 	it('is kept in GeoJSON, KML and .mapjson files', () => {
@@ -247,28 +229,10 @@ describe('sanitizeFrame', () => {
 	it('keeps the valid parts, without those that have their default value', () => {
 		expect(sanitizeFrame({ bounds: [-10, -20, 10, 20] })).toStrictEqual({ bounds: [-10, -20, 10, 20] });
 		expect(sanitizeFrame({ bounds: [10, -20, -10, 20], bearing: 45 })).toStrictEqual({ bearing: 45 });
-		// viewers can move the map and zoom, but not rotate or tilt it
-		expect(
-			sanitizeFrame({ bearing: 0, pitch: 0, canPan: true, canZoom: true, canRotate: false, canTilt: false })
-		).toBeUndefined();
-		expect(sanitizeFrame({ canPan: false, canZoom: false, canRotate: true, canTilt: true })).toStrictEqual({
-			canPan: false,
-			canZoom: false,
-			canRotate: true,
-			canTilt: true
-		});
-		expect(sanitizeFrame({ bearing: 'east', pitch: null, canTilt: 'yes', canPan: 0 })).toBeUndefined();
-		// zoom limits: from 0 to 22 in steps of 0.5, the least one not above the largest one
-		expect(sanitizeFrame({ minZoom: 3.3, maxZoom: 12.76 })).toStrictEqual({ minZoom: 3.5, maxZoom: 13 });
-		expect(sanitizeFrame({ minZoom: 14, maxZoom: 10 })).toStrictEqual({ minZoom: 10, maxZoom: 10 });
-		// beyond the levels of a map: the nearest level; no number: no limit
-		expect(sanitizeFrame({ minZoom: -1, maxZoom: 23 })).toStrictEqual({ minZoom: 0, maxZoom: 22 });
-		expect(sanitizeFrame({ minZoom: 'far', maxZoom: null })).toBeUndefined();
-		expect(sanitizeFrame({ minZoom: 0 })).toStrictEqual({ minZoom: 0 });
-		// an embedded map leaves the wheel to its page, unless the frame says that it is free
-		expect(sanitizeFrame({ scrollZoom: 'protected' })).toBeUndefined();
-		expect(sanitizeFrame({ scrollZoom: 'locked' })).toBeUndefined();
-		expect(sanitizeFrame({ scrollZoom: 'free' })).toStrictEqual({ scrollZoom: 'free' });
+		expect(sanitizeFrame({ bearing: 0, pitch: 0 })).toBeUndefined();
+		expect(sanitizeFrame({ bearing: 'east', pitch: null })).toBeUndefined();
+		// what viewers can do is a setting of the viewer, not of the frame
+		expect(sanitizeFrame({ canRotate: true, confine: true, maxZoom: 12 })).toBeUndefined();
 		expect(sanitizeFrame({})).toBeUndefined();
 		expect(sanitizeFrame([-10, -20, 10, 20])).toBeUndefined();
 		expect(sanitizeFrame(undefined)).toBeUndefined();
@@ -281,6 +245,62 @@ describe('sanitizeFrame', () => {
 		expect(sanitizeFrame({ bearing: 12.5, pitch: 33.3 })).toStrictEqual({ bearing: 12.5, pitch: 33.3 });
 		expect(sanitizeFrame({ pitch: 80 })).toStrictEqual({ pitch: 60 });
 		expect(sanitizeFrame({ pitch: -5 })).toBeUndefined();
+	});
+});
+
+describe('what viewers can do', () => {
+	const viewing = (viewer: StateViewer): MapState => ({ ...state, meta: { viewer } });
+
+	it('is kept in a link, GeoJSON, KML and .mapjson files', () => {
+		for (const viewer of [
+			{ canRotate: true },
+			{ canTilt: true },
+			{ canPan: false },
+			{ canZoom: false },
+			{ canTilt: true, canZoom: false, search: 'top-left' },
+			{ confine: true },
+			{ minZoom: 3.5 },
+			{ scrollZoom: 'free' },
+			{ maxZoom: 0 },
+			{ minZoom: 8, maxZoom: 22 },
+			{ canPan: false, canZoom: false, canRotate: true, canTilt: true, confine: true, reset: true }
+		] as StateViewer[]) {
+			expect(decodeState(encodeState(viewing(viewer))).meta?.viewer).toStrictEqual(viewer);
+			expect(stateFromGeoJSON(stateToGeoJSON(viewing(viewer))).meta?.viewer).toStrictEqual(viewer);
+			expect(stateFromKML(stateToKML(viewing(viewer))).meta?.viewer).toStrictEqual(viewer);
+		}
+	});
+
+	it('costs a link little: that viewers can rotate the map is a key of 5 bits', () => {
+		const bits = (viewer: StateViewer) => {
+			const writer = new StateWriter();
+			writer.writeRoot(viewing(viewer));
+			return writer.bits.length;
+		};
+		expect(bits({ reset: true, canRotate: true }) - bits({ reset: true })).toBe(5);
+	});
+
+	it('has only its valid parts, without those that have their default value', () => {
+		// viewers can move the map and zoom, but not rotate or tilt it
+		expect(sanitizeViewer({ canPan: true, canZoom: true, canRotate: false, canTilt: false })).toBeUndefined();
+		expect(sanitizeViewer({ canPan: false, canZoom: false, canRotate: true, canTilt: true })).toStrictEqual({
+			canPan: false,
+			canZoom: false,
+			canRotate: true,
+			canTilt: true
+		});
+		expect(sanitizeViewer({ canTilt: 'yes', canPan: 0 })).toBeUndefined();
+		// zoom limits: from 0 to 22 in steps of 0.5, the least one not above the largest one
+		expect(sanitizeViewer({ minZoom: 3.3, maxZoom: 12.76 })).toStrictEqual({ minZoom: 3.5, maxZoom: 13 });
+		expect(sanitizeViewer({ minZoom: 14, maxZoom: 10 })).toStrictEqual({ minZoom: 10, maxZoom: 10 });
+		// beyond the levels of a map: the nearest level; no number: no limit
+		expect(sanitizeViewer({ minZoom: -1, maxZoom: 23 })).toStrictEqual({ minZoom: 0, maxZoom: 22 });
+		expect(sanitizeViewer({ minZoom: 'far', maxZoom: null })).toBeUndefined();
+		expect(sanitizeViewer({ minZoom: 0 })).toStrictEqual({ minZoom: 0 });
+		// an embedded map leaves the wheel to its page, unless the map says that it is free
+		expect(sanitizeViewer({ scrollZoom: 'protected' })).toBeUndefined();
+		expect(sanitizeViewer({ scrollZoom: 'locked' })).toBeUndefined();
+		expect(sanitizeViewer({ scrollZoom: 'free' })).toStrictEqual({ scrollZoom: 'free' });
 	});
 });
 

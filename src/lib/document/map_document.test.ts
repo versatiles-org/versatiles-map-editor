@@ -286,6 +286,15 @@ describe('MapDocument', () => {
 			meta: { viewer: { search: 'top-right', navigation: 'top-right', legend: 'none', reset: true } }
 		});
 		expect(mapDocument.viewer).toStrictEqual({ search: 'top-right', legend: 'none', reset: true });
+		// its visitors can move the map and zoom, not rotate or tilt it; no zoom limits
+		const can = {
+			canPan: true,
+			canZoom: true,
+			canRotate: false,
+			canTilt: false,
+			confine: false,
+			scrollZoom: 'protected'
+		};
 		expect(mapDocument.controls).toStrictEqual({
 			search: 'top-right',
 			navigation: 'top-right',
@@ -294,7 +303,8 @@ describe('MapDocument', () => {
 			scale: 'none',
 			reset: true,
 			fullscreen: false,
-			locate: false
+			locate: false,
+			...can
 		});
 		mapDocument.viewer = { search: 'none', reset: false };
 		expect(mapDocument.viewer).toBeUndefined();
@@ -306,8 +316,13 @@ describe('MapDocument', () => {
 			scale: 'none',
 			reset: false,
 			fullscreen: false,
-			locate: false
+			locate: false,
+			...can
 		});
+		// what its visitors can do is among them
+		mapDocument.viewer = { canRotate: true, canPan: true, maxZoom: 12.2 };
+		expect(mapDocument.viewer).toStrictEqual({ canRotate: true, maxZoom: 12 });
+		expect(mapDocument.controls).toMatchObject({ canRotate: true, canPan: true, maxZoom: 12 });
 	});
 
 	it('should identify as non-interactive', () => {

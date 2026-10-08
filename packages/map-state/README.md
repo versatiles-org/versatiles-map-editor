@@ -78,12 +78,8 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json`.
 - `frame` in the state is what a shared map shows when it opens (the type `StateFrame`): its
   visible area `bounds`, `[west, south, east, north]` (the type `Bounds`), which it shows completely
-  whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees; and
-  what viewers can do with the map: `canPan` and `canZoom` (unless `false`), `canRotate` and
-  `canTilt` (if `true`), whether they stay in the area that the map opens with (`confine`), how
-  far they can zoom (`minZoom`, `maxZoom`), and whether an embedded map leaves the wheel to its
-  page (`scrollZoom`, unless `"free"`). `sanitizeFrame`
-  checks one, `sanitizeBounds` an area;
+  whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees.
+  `sanitizeFrame` checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius).
 - The style vocabulary (`AREA_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `MARKER_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
   style are names, listed in `FILL_PATTERN_NAMES`, `DASH_NAMES`, `ARROW_NAMES` and
@@ -95,7 +91,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   of a pattern.
   `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend that names none, and
   `removeLegendDefaults` leaves them out, as the base64 string does;
-  `VIEWER_DEFAULTS` and `removeViewerDefaults` do the same for the settings of the viewer.
+  `VIEWER_DEFAULTS` and `sanitizeViewer` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.
 
@@ -128,7 +124,7 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   joined straight)
 - polygon → `Polygon` (closed ring) with `fill-*` + `stroke-*`, and `smooth` like a line
 - circle → `Point` with `fill-*` + `stroke-*` + `subType: "Circle"` + `radius`
-- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom }`
+- what a shared map shows → `frame: { bounds: [west, south, east, north], bearing, pitch }`
 - popup text (all element types) → `description`, as in simplestyle and KML
 - map metadata → `meta` (e.g. `meta.background`: the settings of the background map, e.g. its base
   map, theme, labels and colors, and `options` of `@versatiles/style` for what they cannot say;
@@ -139,7 +135,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   `meta.colorScheme`: the id of the color scheme offered in the color picker;
   `meta.viewer`: what the read-only viewer shows over the map, and where: the search, the legend,
   a scale bar, and the navigation buttons (their place, and which of them: to zoom, to reset the
-  view, for the whole screen and for the viewer's location);
+  view, for the whole screen and for the viewer's location), and what its viewers can do with the
+  map (`canPan`, `canZoom`, `canRotate`, `canTilt`, `confine`, `minZoom`, `maxZoom`, `scrollZoom`);
   `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, from
   which zoom level they are shown, and whether the labels of the background map are on top)
 
@@ -185,7 +182,7 @@ The base64 starts with the format version, `CODEC_VERSION` (`constants.ts`), whi
 this version is read; a later version can be told apart by it. Then come the palette, the string
 table, the resolution, the origin
 of the coordinates, the parameters of the code of the element coordinates, whether points are
-relative, the frame (optional: the visible area of a shared map, and its settings as key/value pairs, so settings can be added: how it is turned, and what its viewers can do), the metadata, 1 bit whether an
+relative, the frame (optional: the visible area of a shared map, and its settings as key/value pairs, so settings can be added: how it is turned), the metadata, 1 bit whether an
 element has fields besides its geometry and styles (today the text of its popup; without any, the
 elements have no bit for them) and the elements, with an
 explicit end: a link that was cut off, or that has anything after its end, is refused instead of

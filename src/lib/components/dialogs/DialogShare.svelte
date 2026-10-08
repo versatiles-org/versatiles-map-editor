@@ -7,8 +7,7 @@
 		exponentForResolution,
 		measureLink,
 		resolutionForArea,
-		resolutionOfExponent,
-		sanitizeFrame
+		resolutionOfExponent
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
 	import ShareCode from './ShareCode.svelte';
@@ -161,9 +160,7 @@
 	 */
 	function setScrollProtected(on: boolean) {
 		const doc = stateManager.mapDocument;
-		const { bounds: _bounds, ...turn } =
-			sanitizeFrame({ ...doc.frameTurn, scrollZoom: on ? 'protected' : 'free' }) ?? {};
-		doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+		doc.viewer = { ...doc.viewer, scrollZoom: on ? 'protected' : 'free' };
 		stateManager.log();
 		update(0);
 	}
@@ -214,7 +211,7 @@
 				{#snippet embedOptions()}
 					<!-- a setting of the map for where it is embedded: kept with the map, on unless switched off -->
 					<Checkbox
-						checked={stateManager.mapDocument.frameTurn?.scrollZoom !== 'free'}
+						checked={stateManager.mapDocument.controls.scrollZoom !== 'free'}
 						onchange={(e) => setScrollProtected(e.currentTarget.checked)}
 						title="The wheel scrolls the page, also over the map, which zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers"
 					>

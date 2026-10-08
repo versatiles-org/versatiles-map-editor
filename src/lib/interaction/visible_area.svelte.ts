@@ -1,8 +1,8 @@
-import { sanitizeFrame, type Bounds } from '@versatiles/map-state';
+import { sanitizeFrame, type Bounds, type StateViewer } from '@versatiles/map-state';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import { HANDLES, handlePosition, type Handle, type Turn } from '../rendering/index.js';
 import { lat2mercator, MAX_LATITUDE, mercator2lat, snapBounds } from '../geometry.js';
-import type { FrameTurn } from '../document/index.js';
+import type { FrameTurn, ViewerSettings } from '../document/index.js';
 import {
 	claimEvent,
 	isClaimed,
@@ -46,6 +46,9 @@ export function handleCursor(handle: Handle, bearing = 0): string {
  * Created before the drawing and the selection, so its listeners run first and can claim the
  * events of the map.
  */
+/** The settings of the viewer for what its visitors can do, which this mode sets with how the map is turned. */
+type Can = 'canPan' | 'canZoom' | 'canRotate' | 'canTilt' | 'confine' | 'minZoom' | 'maxZoom' | 'scrollZoom';
+
 export class VisibleAreaMode {
 	/** Whether the visible area is edited now. */
 	public active = $state(false);
@@ -142,11 +145,10 @@ export class VisibleAreaMode {
 	 * defaults: north at the top, seen from straight above; they can move it and zoom, but not
 	 * rotate or tilt it.
 	 */
-	public get turn(): Required<Omit<FrameTurn, 'minZoom' | 'maxZoom'>> & Pick<FrameTurn, 'minZoom' | 'maxZoom'> {
-		const { bearing = 0, pitch = 0, ...can } = this.#doc.frameTurn ?? {};
-		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
+	public get turn(): Required<FrameTurn> & Pick<ViewerSettings, Can> {
+		const { bearing = 0, pitch = 0 } = this.#doc.frameTurn ?? {};
+		const { canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom } = this.#doc.controls;
 		// the zoom limits have no default: undefined is no limit
-		const { minZoom, maxZoom, scrollZoom = 'protected' } = can;
 		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom };
 	}
 
@@ -154,9 +156,11 @@ export class VisibleAreaMode {
 	 * Change how a shared map is turned, e.g. its rotation while a slider is dragged; the map shows
 	 * it at once. `log` makes the changes since the last one an undo step.
 	 */
-	public setTurn(change: FrameTurn) {
-		const { bounds: _bounds, ...turn } = sanitizeFrame({ ...this.turn, ...change }) ?? {};
-		this.#doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+	public setTurn(change: FrameTurn & Pick<StateViewer, Can>) {
+		const { bearing, pitch, ...can } = { ...this.turn, ...change };
+		this.#doc.frameTurn = sanitizeFrame({ bearing, pitch });
+		// what viewers can do is a setting of the viewer, with what it shows over the map
+		this.#doc.viewer = { ...this.#doc.viewer, ...can };
 		this.render();
 	}
 
@@ -171,9 +175,8 @@ export class VisibleAreaMode {
 		const [bearing, pitch] = [Math.round(map.bearing), Math.round(map.pitch)];
 		const now = this.turn;
 		if (bearing === Math.round(now.bearing) && pitch === Math.round(now.pitch)) return;
-		const { bounds: _bounds, ...turn } = sanitizeFrame({ ...now, bearing, pitch }) ?? {};
 		// without turning the map, which its author is turning
-		this.#doc.frameTurn = Object.keys(turn).length > 0 ? turn : undefined;
+		this.#doc.frameTurn = sanitizeFrame({ bearing, pitch });
 		this.#turnedByHand = true;
 	}
 

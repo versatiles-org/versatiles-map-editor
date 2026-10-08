@@ -48,48 +48,9 @@
 					"description": "The tilt of the map, in degrees: 0 looks straight down, more looks towards the horizon. Default: 0.",
 					"minimum": 0,
 					"maximum": 60
-				},
-				"canPan": {
-					"type": "boolean",
-					"description": "Viewers can move the map. Default: true."
-				},
-				"canZoom": {
-					"type": "boolean",
-					"description": "Viewers can zoom in and out. Default: true."
-				},
-				"canRotate": {
-					"type": "boolean",
-					"description": "Viewers can rotate the map. Default: false."
-				},
-				"canTilt": {
-					"type": "boolean",
-					"description": "Viewers can tilt the map. Default: false."
-				},
-				"confine": {
-					"type": "boolean",
-					"description": "Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor move the map beyond it. Default: false."
-				},
-				"minZoom": {
-					"type": "number",
-					"description": "The least zoom level that viewers can zoom out to, in steps of 0.5. What a zoom level shows depends on the size of the window, so `confine` is the better way to keep viewers from zooming out. Default: none.",
-					"minimum": 0,
-					"maximum": 22,
-					"multipleOf": 0.5
-				},
-				"maxZoom": {
-					"type": "number",
-					"description": "The largest zoom level that viewers can zoom in to, in steps of 0.5, e.g. if the map is not meant to be looked at more closely. Not less than `minZoom`. Default: none.",
-					"minimum": 0,
-					"maximum": 22,
-					"multipleOf": 0.5
-				},
-				"scrollZoom": {
-					"type": "string",
-					"enum": ["protected", "free"],
-					"description": "What the wheel does over the map when it is embedded in a page: \"protected\" scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers; \"free\" zooms the map. A map in a window of its own is always free. Default: \"protected\"."
 				}
 			},
-			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction, and what its viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if that is switched on."
+			"description": "What a shared or embedded map shows when it opens: an area, seen from a direction. What its viewers can do from there is a setting of the viewer, see `StateViewer`."
 		},
 		"Bounds": {
 			"type": "array",
@@ -591,9 +552,48 @@
 				"locate": {
 					"type": "boolean",
 					"description": "A button that shows where the viewer is, if they allow it, and follows them until it is switched off. One of the navigation buttons. An embedded map needs the permission of its page: `allow=\"geolocation\"` on its iframe. Default: false."
+				},
+				"canPan": {
+					"type": "boolean",
+					"description": "Viewers can move the map. Default: true."
+				},
+				"canZoom": {
+					"type": "boolean",
+					"description": "Viewers can zoom in and out. Default: true."
+				},
+				"canRotate": {
+					"type": "boolean",
+					"description": "Viewers can rotate the map. Default: false."
+				},
+				"canTilt": {
+					"type": "boolean",
+					"description": "Viewers can tilt the map. Default: false."
+				},
+				"confine": {
+					"type": "boolean",
+					"description": "Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor move the map beyond it. Default: false."
+				},
+				"minZoom": {
+					"type": "number",
+					"description": "The least zoom level that viewers can zoom out to, in steps of 0.5. What a zoom level shows depends on the size of the window, so `confine` is the better way to keep viewers from zooming out. Default: none.",
+					"minimum": 0,
+					"maximum": 22,
+					"multipleOf": 0.5
+				},
+				"maxZoom": {
+					"type": "number",
+					"description": "The largest zoom level that viewers can zoom in to, in steps of 0.5, e.g. if the map is not meant to be looked at more closely. Not less than `minZoom`. Default: none.",
+					"minimum": 0,
+					"maximum": 22,
+					"multipleOf": 0.5
+				},
+				"scrollZoom": {
+					"type": "string",
+					"enum": ["protected", "free"],
+					"description": "What the wheel does over the map when it is embedded in a page: \"protected\" scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers; \"free\" zooms the map. A map in a window of its own is always free. Default: \"protected\"."
 				}
 			},
-			"description": "What the viewer shows over the map, and where: a control at a position, or \"none\"; the navigation buttons at a position, each of them shown or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
+			"description": "How a shared or embedded map is used. What the viewer shows over the map, and where: a control at a position, or \"none\"; the navigation buttons at a position, each of them shown or not. Controls in the same corner are stacked. And what its viewers can do with the map: move it and zoom, unless that is switched off; rotate and tilt it, if that is switched on. Defaults in `VIEWER_DEFAULTS`."
 		},
 		"StateLabels": {
 			"type": "object",

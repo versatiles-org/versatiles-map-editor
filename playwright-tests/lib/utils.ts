@@ -4,9 +4,32 @@ import {
 	decodeState,
 	type MapState,
 	type StateElement,
+	type StateFrame,
 	type StateLegendEntry,
-	type StateStyle
+	type StateStyle,
+	type StateViewer
 } from '../../packages/map-state/src/index.js';
+
+/** What a shared map shows and what its visitors can do, as the settings of the "Shared map" panel. */
+export type SharedSettings = StateFrame & StateViewer;
+
+/**
+ * The frame and the viewer of a map with these settings: the area, the rotation and the tilt are
+ * its frame, the others are settings of its viewer.
+ */
+export function sharedMap({ bounds, bearing, pitch, ...viewer }: SharedSettings): Pick<MapState, 'frame' | 'meta'> {
+	const frame = JSON.parse(JSON.stringify({ bounds, bearing, pitch })) as StateFrame;
+	return {
+		...(Object.keys(frame).length > 0 ? { frame } : {}),
+		...(Object.keys(viewer).length > 0 ? { meta: { viewer } } : {})
+	};
+}
+
+/** The settings of the stored map, see `sharedMap`. */
+export async function storedSharedSettings(page: Page): Promise<SharedSettings> {
+	const state = await storedState(page);
+	return { ...state.frame, ...state.meta?.viewer };
+}
 import { createHash, randomBytes } from 'crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs';
 import { dirname, join } from 'path';

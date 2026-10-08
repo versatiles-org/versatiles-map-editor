@@ -31,7 +31,7 @@ its elements, on the editor's default background map.
 ```json
 {
 	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
-	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30, "confine": true, "maxZoom": 17 },
+	"frame": { "bounds": [13.36, 52.5, 13.42, 52.525], "bearing": 20, "pitch": 30 },
 	"meta": {
 		"title": "A walk through Berlin",
 		"background": { "theme": "gray", "labels": "fewer", "colors": { "black": 0.2 } },
@@ -41,7 +41,14 @@ its elements, on the editor's default background map.
 				{ "type": "line", "style": { "color": "#d55e00", "width": 4, "dash": "dashed" }, "label": "Boat route" }
 			]
 		},
-		"viewer": { "search": "top-left", "legend": "top-right", "scale": "bottom-left", "reset": true }
+		"viewer": {
+			"search": "top-left",
+			"legend": "top-right",
+			"scale": "bottom-left",
+			"reset": true,
+			"confine": true,
+			"maxZoom": 17
+		}
 	},
 	"elements": [
 		{
@@ -105,22 +112,14 @@ elements in the window, and keeps its own view with the map in the browser.
 
 ### The frame
 
-What a shared or embedded map shows when it opens, and what its viewers can do with it. All fields are
-optional.
+What a shared or embedded map shows when it opens. All fields are optional. What its viewers can
+do from there, e.g. rotate the map, is a setting of the [viewer](#viewer).
 
-| Field        | Description                                                                                                                                                                                                                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bounds`     | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.                                                                                                                                                            |
-| `bearing`    | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top.                                                                                                                                                  |
-| `pitch`      | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                                                                                                                                                                      |
-| `canPan`     | `false`: viewers cannot move the map. Default: `true`.                                                                                                                                                                                                                                      |
-| `canZoom`    | `false`: viewers cannot zoom in or out. Default: `true`.                                                                                                                                                                                                                                    |
-| `canRotate`  | `true`: viewers can rotate the map. Default: `false`.                                                                                                                                                                                                                                       |
-| `canTilt`    | `true`: viewers can tilt the map. Default: `false`.                                                                                                                                                                                                                                         |
-| `confine`    | `true`: viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor move the map beyond it. Default: `false`.                                                                                                                                              |
-| `minZoom`    | The least zoom level that viewers can zoom out to, 0 to 22 in steps of 0.5. What a level shows depends on the window, so `confine` is the better way to keep viewers from zooming out. Default: none.                                                                                       |
-| `maxZoom`    | The largest zoom level that viewers can zoom in to, 0 to 22 in steps of 0.5, not less than `minZoom`. Default: none.                                                                                                                                                                        |
-| `scrollZoom` | What the wheel does over the map when it is embedded in a page: `"protected"` scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers; `"free"` zooms the map. A map in a window of its own is always free. Default: `"protected"`. |
+| Field     | Description                                                                                                                                |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bounds`  | The visible area, `[west, south, east, north]`: what the map shows completely, on any screen. Without it, it shows all elements.           |
+| `bearing` | The rotation: the compass direction at the top of the window, in degrees clockwise from north (-180 to 180). Default: 0, north at the top. |
+| `pitch`   | The tilt, in degrees: 0 looks straight down, up to 60 towards the horizon. Default: 0.                                                     |
 
 ## Elements
 
@@ -289,19 +288,28 @@ Where shared maps show the legend is a setting of the viewer.
 
 ### Viewer
 
-What shared and embedded maps show over the map: a control at a place or `"none"`; the navigation
-buttons at a place, each of them shown or not. Controls in the same corner are stacked.
+How shared and embedded maps are used. What they show over the map: a control at a place or
+`"none"`; the navigation buttons at a place, each of them shown or not. Controls in the same corner
+are stacked. And what their viewers can do with the map.
 
-| Field         | Values                                                                                                                                                                                                                             | Default         |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `search`      | the address search: `"top-left"`, `"top-right"`                                                                                                                                                                                    | `"none"`        |
-| `navigation`  | the place of the navigation buttons (those for zooming, the compass, and the buttons below, as far as the map has them): `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                            | `"top-right"`   |
-| `zoomButtons` | the buttons to zoom in and out, of the navigation buttons, with the compass of a map that viewers can turn: `false` hides them                                                                                                     | `true`          |
-| `legend`      | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                                           | `"bottom-left"` |
-| `scale`       | a scale bar, in meters or kilometers: `"bottom-left"`, `"bottom-right"`                                                                                                                                                            | `"none"`        |
-| `reset`       | one of the navigation buttons, which shows the map as it opened: `true`                                                                                                                                                            | `false`         |
-| `fullscreen`  | one of the navigation buttons, which shows the map on the whole screen, and back: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has.                                             | `false`         |
-| `locate`      | one of the navigation buttons, which shows where the viewer is, if they allow it, and follows them until it is switched off: `true`. An embedded map needs `allow="geolocation"` on its iframe, which the editor's embed code has. | `false`         |
+| Field         | Values                                                                                                                                                                                                                                                              | Default         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `search`      | the address search: `"top-left"`, `"top-right"`                                                                                                                                                                                                                     | `"none"`        |
+| `navigation`  | the place of the navigation buttons (those for zooming, the compass, and the buttons below, as far as the map has them): `"top-left"`, `"top-right"`, `"bottom-left"`, `"bottom-right"`                                                                             | `"top-right"`   |
+| `zoomButtons` | the buttons to zoom in and out, of the navigation buttons, with the compass of a map that viewers can turn: `false` hides them                                                                                                                                      | `true`          |
+| `legend`      | the legend, if the map has one: a corner, or a side (centered): `"top"`, `"right"`, `"bottom"`, `"left"`                                                                                                                                                            | `"bottom-left"` |
+| `scale`       | a scale bar, in meters or kilometers: `"bottom-left"`, `"bottom-right"`                                                                                                                                                                                             | `"none"`        |
+| `reset`       | one of the navigation buttons, which shows the map as it opened: `true`                                                                                                                                                                                             | `false`         |
+| `fullscreen`  | one of the navigation buttons, which shows the map on the whole screen, and back: `true`. An embedded map needs `allow="fullscreen"` on its iframe, which the editor's embed code has.                                                                              | `false`         |
+| `locate`      | one of the navigation buttons, which shows where the viewer is, if they allow it, and follows them until it is switched off: `true`. An embedded map needs `allow="geolocation"` on its iframe, which the editor's embed code has.                                  | `false`         |
+| `canPan`      | viewers can move the map: `false`                                                                                                                                                                                                                                   | `true`          |
+| `canZoom`     | viewers can zoom in and out: `false`                                                                                                                                                                                                                                | `true`          |
+| `canRotate`   | viewers can rotate the map: `true`                                                                                                                                                                                                                                  | `false`         |
+| `canTilt`     | viewers can tilt the map: `true`                                                                                                                                                                                                                                    | `false`         |
+| `confine`     | viewers stay in the area that the map shows when it opens, they cannot zoom out further, nor move the map beyond it: `true`                                                                                                                                         | `false`         |
+| `minZoom`     | the least zoom level that viewers can zoom out to, 0 to 22 in steps of 0.5. What a level shows depends on the window, so `confine` is the better way to keep viewers from zooming out.                                                                              | none            |
+| `maxZoom`     | the largest zoom level that viewers can zoom in to, 0 to 22 in steps of 0.5, not less than `minZoom`                                                                                                                                                                | none            |
+| `scrollZoom`  | what the wheel does over the map when it is embedded in a page: `"protected"` scrolls the page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two fingers; `"free"` zooms the map. A map in a window of its own is always free. | `"protected"`   |
 
 ## Checking a file
 

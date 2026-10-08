@@ -120,35 +120,33 @@ export const LEGEND_KEYS = { entries: 1, theme: 2, layout: 3, font: 4, bold: 5, 
 export const LEGEND_ENTRY_KEYS = { type: 1, style: 2, label: 3, outlineStyle: 4 } as const;
 
 /**
- * The settings of a frame besides its area: how the map is turned when it opens, and what its
- * viewers can do. Each only if it differs from its default; a flag is its key alone.
+ * The settings of a frame besides its area: how the map is turned when it opens. Each only if it
+ * differs from its default.
  */
-export const FRAME_KEYS = {
-	bearing: 1,
-	rotate: 2,
-	pitch: 3,
-	tilt: 4,
-	confine: 5,
-	scrollFree: 6,
-	noZoom: 7,
-	noPan: 8,
-	maxZoom: 9,
-	minZoom: 10
-} as const;
+export const FRAME_KEYS = { bearing: 1, pitch: 2 } as const;
 
 /**
- * The settings of the viewer: of a control the index of its choice follows (see `VIEWER_CHOICES`),
- * a button is its key alone, and so is that the buttons for zooming are hidden.
+ * The settings of the viewer. Of a control the index of its choice follows (see `VIEWER_CHOICES`),
+ * of a zoom limit its level; the others are flags, their key alone: a button that is shown, the
+ * buttons for zooming hidden, and what viewers can do other than by default.
  */
 export const VIEWER_KEYS = {
 	legend: 1,
 	search: 2,
 	navigation: 3,
-	noZoom: 4,
-	scale: 5,
-	reset: 6,
-	fullscreen: 7,
-	locate: 8
+	rotate: 4,
+	noZoomButtons: 5,
+	scale: 6,
+	tilt: 7,
+	reset: 8,
+	fullscreen: 9,
+	confine: 10,
+	scrollFree: 11,
+	locate: 12,
+	maxZoom: 13,
+	noZoom: 14,
+	noPan: 15,
+	minZoom: 16
 } as const;
 
 /**

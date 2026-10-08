@@ -293,9 +293,8 @@
 	// editor is not turned. By its values, so the same frame does not set it up again.
 	const turn = $derived.by(() => {
 		if (editor || !mapDocument) return undefined;
-		const { bearing = 0, pitch = 0, ...can } = mapDocument.frameTurn ?? {};
-		const { canPan = true, canZoom = true, canRotate = false, canTilt = false, confine = false } = can;
-		const { minZoom, maxZoom, scrollZoom = 'protected' } = can;
+		const { bearing = 0, pitch = 0 } = mapDocument.frameTurn ?? {};
+		const { canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom } = mapDocument.controls;
 		return { bearing, pitch, canPan, canZoom, canRotate, canTilt, confine, minZoom, maxZoom, scrollZoom };
 	});
 	const turnKey = $derived(JSON.stringify(turn));

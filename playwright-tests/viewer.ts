@@ -798,9 +798,10 @@ test('the share dialog warns about a link that is too long to work everywhere', 
 test('a shared map can have a button that shows it as it opened', async ({ page }) => {
 	const frame = {
 		bounds: [13.3, 52.45, 13.5, 52.55] as [number, number, number, number],
-		bearing: 30,
-		canRotate: true
+		bearing: 30
 	};
+	// its visitors can rotate it, so they can leave how it opened
+	const canRotate = true;
 	const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
 	const reset = page.getByRole('button', { name: 'Reset view' });
 	const camera = () =>
@@ -812,14 +813,14 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	await page.setViewportSize({ width: 800, height: 600 });
 
 	// not without the setting
-	await page.goto('/view/#' + encodeState({ frame, elements }));
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { canRotate } }, elements }));
 	await waitForMapIsReady(page);
 	await expect(page.getByRole('button', { name: 'Zoom in' })).toBeVisible();
 	await expect(reset).toHaveCount(0);
 
 	// with it: below the zoom buttons; back to the area, the rotation and the tilt
 	await page.goto('about:blank');
-	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true } }, elements }));
+	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, canRotate } }, elements }));
 	await waitForMapIsReady(page);
 	const start = await camera();
 	const zoom = (await page.getByRole('button', { name: 'Zoom out' }).boundingBox())!;
@@ -844,7 +845,9 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	// without zoom buttons, the button is where they would be
 	await page.goto('about:blank');
 	await page.setViewportSize({ width: 800, height: 600 });
-	await page.goto('/view/#' + encodeState({ frame, meta: { viewer: { reset: true, zoomButtons: false } }, elements }));
+	await page.goto(
+		'/view/#' + encodeState({ frame, meta: { viewer: { reset: true, zoomButtons: false, canRotate } }, elements })
+	);
 	await waitForMapIsReady(page);
 	await expect(page.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
 	const alone = (await reset.boundingBox())!;
@@ -855,7 +858,11 @@ test('a shared map can have a button that shows it as it opened', async ({ page 
 	await page.goto('about:blank');
 	await page.goto(
 		'/view/#' +
-			encodeState({ frame, meta: { viewer: { reset: true, zoomButtons: false, navigation: 'bottom-left' } }, elements })
+			encodeState({
+				frame,
+				meta: { viewer: { reset: true, zoomButtons: false, navigation: 'bottom-left', canRotate } },
+				elements
+			})
 	);
 	await waitForMapIsReady(page);
 	const moved = (await reset.boundingBox())!;

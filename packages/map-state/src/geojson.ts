@@ -13,7 +13,7 @@ import {
 	fillPropsFromStyle,
 	fillStyleFromProps,
 	popupFromProps,
-	removeViewerDefaults,
+	sanitizeViewer,
 	sanitizeBoolean,
 	sanitizeBackground,
 	sanitizeLabels,
@@ -130,7 +130,7 @@ export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	if (background) meta.background = background;
 	if (state.meta?.legend) meta.legend = state.meta.legend;
 	if (state.meta?.colorScheme) meta.colorScheme = state.meta.colorScheme;
-	const viewer = removeViewerDefaults(state.meta?.viewer);
+	const viewer = sanitizeViewer(state.meta?.viewer);
 	if (viewer) meta.viewer = viewer;
 	const labels = sanitizeLabels(state.meta?.labels);
 	if (labels) meta.labels = labels;

@@ -47,18 +47,15 @@ describe('VisibleAreaMode', () => {
 			expect(map.getBearing()).toBe(40);
 			doc.visibleArea.setTurn({ pitch: 50, canTilt: true, canPan: false });
 			doc.visibleArea.log();
-			expect(doc.getState().frame).toStrictEqual({
-				bounds: [1, 2, 3, 4],
-				bearing: 40,
-				pitch: 50,
-				canPan: false,
-				canTilt: true
-			});
+			expect(doc.getState().frame).toStrictEqual({ bounds: [1, 2, 3, 4], bearing: 40, pitch: 50 });
+			// what visitors can do is a setting of the viewer
+			expect(doc.getState().meta?.viewer).toStrictEqual({ canPan: false, canTilt: true });
 			expect(map.getPitch()).toBe(50);
 
 			// one step per logged change, and the map follows
 			await doc.state.undo();
 			expect(doc.frameTurn).toStrictEqual({ bearing: 40 });
+			expect(doc.viewer).toBeUndefined();
 			expect(map.getPitch()).toBe(0);
 			await doc.state.undo();
 			expect(doc.frameTurn).toBeUndefined();
@@ -68,9 +65,13 @@ describe('VisibleAreaMode', () => {
 		it('is kept without its defaults, and within its limits', () => {
 			doc.visibleArea.open();
 			doc.visibleArea.setTurn({ bearing: 270, pitch: 99, canRotate: true, canZoom: false });
-			expect(doc.frameTurn).toStrictEqual({ bearing: -90, pitch: 60, canZoom: false, canRotate: true });
+			expect(doc.frameTurn).toStrictEqual({ bearing: -90, pitch: 60 });
+			expect(doc.viewer).toStrictEqual({ canZoom: false, canRotate: true });
+			// with what the viewer shows, which stays
+			doc.viewer = { ...doc.viewer, search: 'top-left' };
 			doc.visibleArea.setTurn({ bearing: 0, pitch: 0, canRotate: false, canZoom: true });
 			expect(doc.frameTurn).toBeUndefined();
+			expect(doc.viewer).toStrictEqual({ search: 'top-left' });
 		});
 
 		it('turns the map only in the mode: as the frame says when it opens, back when it closes', () => {

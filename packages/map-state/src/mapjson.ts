@@ -73,19 +73,7 @@ export function stateFromMapJSON(json: unknown): MapState {
  */
 export const MAPJSON_FIELDS = {
 	MapJSON: ['$schema', 'frame', 'meta', 'elements'],
-	StateFrame: [
-		'bounds',
-		'bearing',
-		'pitch',
-		'canPan',
-		'canZoom',
-		'canRotate',
-		'canTilt',
-		'confine',
-		'minZoom',
-		'maxZoom',
-		'scrollZoom'
-	],
+	StateFrame: ['bounds', 'bearing', 'pitch'],
 	StateMetadata: ['background', 'legend', 'colorScheme', 'viewer', 'labels', 'title'],
 	StateLabels: ['overlap', 'minZoom'],
 	StateBackground: [
@@ -110,7 +98,24 @@ export const MAPJSON_FIELDS = {
 	StateLegendMarker: ['type', 'style', 'label'],
 	StateLegendLine: ['type', 'style', 'label'],
 	StateLegendArea: ['type', 'style', 'outlineStyle', 'label'],
-	StateViewer: ['search', 'navigation', 'zoomButtons', 'legend', 'scale', 'reset', 'fullscreen', 'locate'],
+	StateViewer: [
+		'search',
+		'navigation',
+		'zoomButtons',
+		'legend',
+		'scale',
+		'reset',
+		'fullscreen',
+		'locate',
+		'canPan',
+		'canZoom',
+		'canRotate',
+		'canTilt',
+		'confine',
+		'minZoom',
+		'maxZoom',
+		'scrollZoom'
+	],
 	StatePopup: ['text'],
 	MarkerStyle: STYLE_ROLE_FIELDS.marker,
 	LineStyle: STYLE_ROLE_FIELDS.line,

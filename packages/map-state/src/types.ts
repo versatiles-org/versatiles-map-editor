@@ -24,7 +24,7 @@ export type HexColor = string;
 export const MAX_PITCH = 60;
 
 /**
- * What the wheel does over a shared map that is embedded in a page, see `StateFrame.scrollZoom`.
+ * What the wheel does over a shared map that is embedded in a page, see `StateViewer.scrollZoom`.
  * @category Map state
  */
 export const SCROLL_ZOOMS = ['protected', 'free'] as const;
@@ -36,9 +36,8 @@ export const SCROLL_ZOOMS = ['protected', 'free'] as const;
 export const MAX_ZOOM = 22;
 
 /**
- * What a shared or embedded map shows when it opens: an area, seen from a direction, and what its
- * viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if
- * that is switched on.
+ * What a shared or embedded map shows when it opens: an area, seen from a direction. What its
+ * viewers can do from there is a setting of the viewer, see `StateViewer`.
  * @category Map state
  */
 export interface StateFrame {
@@ -61,43 +60,6 @@ export interface StateFrame {
 	 * @maximum 60
 	 */
 	pitch?: number;
-	/** Viewers can move the map. Default: true. */
-	canPan?: boolean;
-	/** Viewers can zoom in and out. Default: true. */
-	canZoom?: boolean;
-	/** Viewers can rotate the map. Default: false. */
-	canRotate?: boolean;
-	/** Viewers can tilt the map. Default: false. */
-	canTilt?: boolean;
-	/**
-	 * Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor
-	 * move the map beyond it. Default: false.
-	 */
-	confine?: boolean;
-	/**
-	 * The least zoom level that viewers can zoom out to, in steps of 0.5. What a zoom level shows
-	 * depends on the size of the window, so `confine` is the better way to keep viewers from zooming
-	 * out. Default: none.
-	 * @minimum 0
-	 * @maximum 22
-	 * @multipleOf 0.5
-	 */
-	minZoom?: number;
-	/**
-	 * The largest zoom level that viewers can zoom in to, in steps of 0.5, e.g. if the map is not
-	 * meant to be looked at more closely. Not less than `minZoom`. Default: none.
-	 * @minimum 0
-	 * @maximum 22
-	 * @multipleOf 0.5
-	 */
-	maxZoom?: number;
-	/**
-	 * What the wheel does over the map when it is embedded in a page: "protected" scrolls the
-	 * page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two
-	 * fingers; "free" zooms the map. A map in a window of its own is always free.
-	 * Default: "protected".
-	 */
-	scrollZoom?: (typeof SCROLL_ZOOMS)[number];
 }
 
 /**
@@ -512,8 +474,11 @@ export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bo
 export const SCALE_POSITIONS = ['bottom-left', 'bottom-right'] as const;
 
 /**
- * What the viewer shows over the map, and where: a control at a position, or "none"; the
- * navigation buttons at a position, each of them shown or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
+ * How a shared or embedded map is used. What the viewer shows over the map, and where: a control
+ * at a position, or "none"; the navigation buttons at a position, each of them shown or not.
+ * Controls in the same corner are stacked. And what its viewers can do with the map: move it and
+ * zoom, unless that is switched off; rotate and tilt it, if that is switched on.
+ * Defaults in `VIEWER_DEFAULTS`.
  * @category Viewer
  */
 export interface StateViewer {
@@ -551,6 +516,43 @@ export interface StateViewer {
 	 * permission of its page: `allow="geolocation"` on its iframe. Default: false.
 	 */
 	locate?: boolean;
+	/** Viewers can move the map. Default: true. */
+	canPan?: boolean;
+	/** Viewers can zoom in and out. Default: true. */
+	canZoom?: boolean;
+	/** Viewers can rotate the map. Default: false. */
+	canRotate?: boolean;
+	/** Viewers can tilt the map. Default: false. */
+	canTilt?: boolean;
+	/**
+	 * Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor
+	 * move the map beyond it. Default: false.
+	 */
+	confine?: boolean;
+	/**
+	 * The least zoom level that viewers can zoom out to, in steps of 0.5. What a zoom level shows
+	 * depends on the size of the window, so `confine` is the better way to keep viewers from zooming
+	 * out. Default: none.
+	 * @minimum 0
+	 * @maximum 22
+	 * @multipleOf 0.5
+	 */
+	minZoom?: number;
+	/**
+	 * The largest zoom level that viewers can zoom in to, in steps of 0.5, e.g. if the map is not
+	 * meant to be looked at more closely. Not less than `minZoom`. Default: none.
+	 * @minimum 0
+	 * @maximum 22
+	 * @multipleOf 0.5
+	 */
+	maxZoom?: number;
+	/**
+	 * What the wheel does over the map when it is embedded in a page: "protected" scrolls the
+	 * page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two
+	 * fingers; "free" zooms the map. A map in a window of its own is always free.
+	 * Default: "protected".
+	 */
+	scrollZoom?: (typeof SCROLL_ZOOMS)[number];
 }
 
 /** @category Legend */

@@ -55,6 +55,7 @@ import {
 	sanitizeBackground,
 	sanitizeBounds,
 	sanitizeFrame,
+	sanitizeViewer,
 	sanitizeLabelMinZoom,
 	VIEWER_BUTTONS,
 	VIEWER_CHOICES
@@ -350,30 +351,6 @@ export class StateReader {
 					case FRAME_KEYS.pitch:
 						frame.pitch = this.readInteger(7);
 						break;
-					case FRAME_KEYS.noPan:
-						frame.canPan = false;
-						break;
-					case FRAME_KEYS.noZoom:
-						frame.canZoom = false;
-						break;
-					case FRAME_KEYS.rotate:
-						frame.canRotate = true;
-						break;
-					case FRAME_KEYS.tilt:
-						frame.canTilt = true;
-						break;
-					case FRAME_KEYS.confine:
-						frame.confine = true;
-						break;
-					case FRAME_KEYS.minZoom:
-						frame.minZoom = this.readInteger(6) / 2;
-						break;
-					case FRAME_KEYS.maxZoom:
-						frame.maxZoom = this.readInteger(6) / 2;
-						break;
-					case FRAME_KEYS.scrollFree:
-						frame.scrollZoom = 'free';
-						break;
 					default:
 						throw new Error(`Unknown key of the frame: ${key}`);
 				}
@@ -633,19 +610,45 @@ export class StateReader {
 	/** The settings of the viewer, see `StateWriter.writeViewer`. */
 	readViewer(): StateViewer {
 		try {
-			const viewer: Record<string, string | boolean> = {};
+			const viewer: Record<string, string | boolean | number> = {};
 			const controls = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
 			while (true) {
 				const key = this.readKey(KEY_PARAMETERS.viewer);
-				if (key === END_KEY) return viewer as StateViewer;
+				// as the writer writes it, e.g. a least zoom not above the largest one
+				if (key === END_KEY) return sanitizeViewer(viewer) ?? {};
 				const button = VIEWER_BUTTONS.find((name) => VIEWER_KEYS[name] === key);
 				if (button) {
 					viewer[button] = true;
 					continue;
 				}
-				if (key === VIEWER_KEYS.noZoom) {
-					viewer.zoomButtons = false;
-					continue;
+				switch (key) {
+					case VIEWER_KEYS.noZoomButtons:
+						viewer.zoomButtons = false;
+						continue;
+					case VIEWER_KEYS.noPan:
+						viewer.canPan = false;
+						continue;
+					case VIEWER_KEYS.noZoom:
+						viewer.canZoom = false;
+						continue;
+					case VIEWER_KEYS.rotate:
+						viewer.canRotate = true;
+						continue;
+					case VIEWER_KEYS.tilt:
+						viewer.canTilt = true;
+						continue;
+					case VIEWER_KEYS.confine:
+						viewer.confine = true;
+						continue;
+					case VIEWER_KEYS.minZoom:
+						viewer.minZoom = this.readInteger(6) / 2;
+						continue;
+					case VIEWER_KEYS.maxZoom:
+						viewer.maxZoom = this.readInteger(6) / 2;
+						continue;
+					case VIEWER_KEYS.scrollFree:
+						viewer.scrollZoom = 'free';
+						continue;
 				}
 				const name = controls.find((control) => VIEWER_KEYS[control] === key);
 				if (!name) throw new Error(`Invalid viewer key: ${key}`);

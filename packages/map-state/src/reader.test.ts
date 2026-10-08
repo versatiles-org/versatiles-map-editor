@@ -777,13 +777,13 @@ describe('viewer', () => {
 		expect(decodeState(encodeState(state({ reset: true, fullscreen: true })))).toStrictEqual(
 			state({ reset: true, fullscreen: true })
 		);
-		// only the bits of its key more than another setting of the viewer: 5, as one of the rarer ones
+		// only the bits of its key more than another setting of the viewer: 7, as one of the rarer ones
 		const bits = (viewer: StateViewer) => {
 			const writer = new StateWriter();
 			writer.writeRoot(state(viewer));
 			return writer.bits.length;
 		};
-		expect(bits({ zoomButtons: false, reset: true }) - bits({ zoomButtons: false })).toBe(5);
+		expect(bits({ zoomButtons: false, reset: true }) - bits({ zoomButtons: false })).toBe(7);
 		// a file may say anything: only `true` switches it on
 		expect(stateFromMapJSON(state({ reset: 'yes' } as unknown as StateViewer)).meta).toBeUndefined();
 	});
