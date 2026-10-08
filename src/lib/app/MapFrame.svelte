@@ -203,12 +203,9 @@
 		done.catch((error) => console.warn('Fullscreen failed', error));
 	}
 
-	// The editor's own button that shows all elements, with the buttons for zooming; while the
-	// shared map is edited without them, where they would be.
-	const fitCorner: Corner | undefined = $derived.by(() => {
-		if (!editor || !mapDocument) return undefined;
-		return navigationCorner;
-	});
+	// The editor's own button that shows all elements, with its buttons for zooming. Not while the
+	// shared map is edited, where the map shows the buttons of its visitors.
+	const fitCorner: Corner | undefined = $derived(ownPlaces && mapDocument ? navigationCorner : undefined);
 
 	let pageWidth = $state(0);
 	let pageHeight = $state(0);
@@ -334,9 +331,10 @@
 		const corner = navigationCorner;
 		const m = mapDocument?.view.map;
 		if (!m || !corner) return;
-		// of a shared map: the buttons for zooming unless it hides them or its visitors cannot zoom
-		const shownZoom = ownPlaces || (mapDocument?.controls.zoom ?? true);
-		const [zoom, compass] = turn ? [shownZoom && turn.canZoom, turn.canRotate || turn.canTilt] : [shownZoom, true];
+		// Of a shared map: none of them if it hides the buttons for zooming, which the compass belongs
+		// to; else those unless its visitors cannot zoom, and the compass if they can turn the map.
+		if (!ownPlaces && mapDocument?.controls.zoom === false) return;
+		const [zoom, compass] = turn ? [turn.canZoom, turn.canRotate || turn.canTilt] : [true, true];
 		if (!zoom && !compass) return;
 		// Back to how the map opened. In the editor to north at the top, seen from straight above,
 		// which while the shared map is edited is how it opens then, see `VisibleAreaMode`.

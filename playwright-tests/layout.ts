@@ -241,20 +241,22 @@ test('the editor has places of its own for its controls; while the shared map is
 			expect((await box(zoom)).top).toBeCloseTo(edges.top, -1);
 			expect((await box(attribution)).left).toBeGreaterThan(middle);
 
-			// while the shared map is edited: as its visitors see them
+			// the editor's own button that shows all elements is below its zoom buttons
+			await expect(showAll).toBeVisible();
+			expect((await box(showAll)).top).toBeCloseTo((await box(zoom)).bottom + 10, -1);
+
+			// while the shared map is edited: as its visitors see them, without the editor's own button
 			await (await menuItem(page, 'Shared map…')).click();
+			await expect(showAll).toHaveCount(0);
 			await expect(legendList).toContainClass(`position-${position}`);
 			const [vertical, horizontal] = position.split('-') as ['top' | 'bottom', 'left' | 'right'];
 			// at most 10px from the edge of the map between the bars, e.g. of the tools
 			await expect.poll(async () => (await box(legendList))[horizontal]).toBeCloseTo(edges[horizontal], -1);
 			const legend = await box(legendList);
 			if (vertical === 'top') {
-				// below the search (top left), or the zoom buttons and the button that shows all elements
-				// under them (top right) of the editor
-				const first = await box(horizontal === 'left' ? search : zoom);
-				const above = horizontal === 'left' ? first : await box(showAll);
-				expect(first.top).toBeCloseTo(edges.top, -1);
-				if (horizontal === 'right') expect(above.top).toBeCloseTo(first.bottom + 10, -1);
+				// below the search (top left) or the zoom buttons (top right)
+				const above = await box(horizontal === 'left' ? search : zoom);
+				expect(above.top).toBeCloseTo(edges.top, -1);
 				expect(legend.top).toBeCloseTo(above.bottom + 10, -1);
 			} else {
 				expect(legend.bottom).toBeCloseTo(edges.bottom, -1);

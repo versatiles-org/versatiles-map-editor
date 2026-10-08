@@ -148,7 +148,7 @@ What a shared map shows is set on the map itself, in **Shared map…** of the me
 - **Visible area**: the area that the map shows completely, on every screen; its handles are on the map.
 - **Rotation and tilt**: how the map is turned when it opens.
 - **Visitors**: whether they can move the map and zoom (both by default), and rotate and tilt it (neither by default); whether they stay in the area that the map shows when it opens; and how far they can zoom out and in.
-- **Navigation buttons**: one stack with its place on the map, and which buttons it has: those for zooming, one that shows the map as it opened, one for the whole screen, and one that shows where the visitor is and follows them. A compass joins them if visitors can rotate or tilt the map.
+- **Navigation buttons**: one stack with its place on the map, and which buttons it has: those for zooming, one that shows the map as it opened, one for the whole screen, and one that shows where the visitor is and follows them. The buttons for zooming come with a compass if visitors can rotate or tilt the map.
 - **Controls**: the address search, with which visitors can find a place, e.g. their street; the legend; and a scale bar, each with its place on the map.
 
 These settings are stored in the map.

@@ -531,7 +531,10 @@ export interface StateViewer {
 	 * them. Default: "top-right".
 	 */
 	navigation?: (typeof NAVIGATION_POSITIONS)[number];
-	/** The buttons for zooming in and out, of the navigation buttons. Default: true. */
+	/**
+	 * The buttons for zooming in and out, of the navigation buttons, and with them the compass of
+	 * a map that its viewers can turn. Default: true.
+	 */
 	zoom?: boolean;
 	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';

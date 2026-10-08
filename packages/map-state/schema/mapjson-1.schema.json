@@ -563,7 +563,7 @@
 				},
 				"zoom": {
 					"type": "boolean",
-					"description": "The buttons for zooming in and out, of the navigation buttons. Default: true."
+					"description": "The buttons for zooming in and out, of the navigation buttons, and with them the compass of a map that its viewers can turn. Default: true."
 				},
 				"legend": {
 					"type": "string",

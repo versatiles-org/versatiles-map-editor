@@ -181,6 +181,25 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		expect(turned.pitch).toBe(40);
 	});
 
+	await test.step('a map without the buttons for zooming has no compass either', async () => {
+		await page.goto('about:blank');
+		await page.goto(
+			'/view/#' +
+				encodeState({
+					frame: { bounds: frame, canRotate: true, canTilt: true },
+					meta: { viewer: { zoom: false, reset: true } },
+					elements
+				})
+		);
+		await waitForMapIsReady(page);
+		await expect(page.getByRole('button', { name: 'Reset view' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Zoom in' })).toHaveCount(0);
+		await expect(compass).toHaveCount(0);
+		// the map still turns
+		await turn(120, -60);
+		expect((await camera()).bearing).not.toBe(0);
+	});
+
 	await test.step('by default the map is not turned by its visitors, and has no compass', async () => {
 		await open({ bounds: frame, bearing: -45 });
 		await turn(120, -60);

@@ -6,8 +6,8 @@
 
 	/**
 	 * The navigation buttons of a shared map: where they are, and which of them it has. They are
-	 * one stack: the buttons for zooming, the compass (which comes with a map that its visitors can
-	 * rotate or tilt), and the buttons to reset the view, for the whole screen and for the
+	 * one stack: the buttons for zooming with the compass (which comes with a map that its visitors
+	 * can rotate or tilt), and the buttons to reset the view, for the whole screen and for the
 	 * visitor's location.
 	 */
 	const { doc }: { doc: MapDocumentInteractive } = $props();
@@ -15,7 +15,11 @@
 	const uid = $props.id();
 
 	const BUTTONS: { key: 'zoom' | 'reset' | 'fullscreen' | 'locate'; label: string; hint: string }[] = [
-		{ key: 'zoom', label: 'Zoom', hint: 'Buttons to zoom in and out.' },
+		{
+			key: 'zoom',
+			label: 'Zoom',
+			hint: 'Buttons to zoom in and out, with a compass if visitors can rotate or tilt the map.'
+		},
 		{ key: 'reset', label: 'Reset view', hint: 'Shows the map as it opened, after a visitor moved or turned it.' },
 		{
 			key: 'fullscreen',
@@ -53,7 +57,6 @@
 	</div>
 	<Hint>{hint}</Hint>
 {/each}
-<Hint>A compass is added if visitors can rotate or tilt the map.</Hint>
 
 <style>
 	.button {
