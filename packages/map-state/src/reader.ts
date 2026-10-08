@@ -348,7 +348,7 @@ export class StateReader {
 						frame.bearing = this.readInteger(9);
 						break;
 					case FRAME_KEYS.pitch:
-						frame.pitch = this.readInteger(6);
+						frame.pitch = this.readInteger(7);
 						break;
 					case FRAME_KEYS.noPan:
 						frame.canPan = false;
@@ -420,7 +420,7 @@ export class StateReader {
 						background.borders = false;
 						break;
 					case BACKGROUND_KEYS.labels: {
-						const labels = BACKGROUND_LABELS[this.readInteger(2)];
+						const labels = BACKGROUND_LABELS[this.readVarint()];
 						if (!labels) throw new Error('Invalid labels of the background');
 						background.labels = labels;
 						break;

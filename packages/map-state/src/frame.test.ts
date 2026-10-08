@@ -14,7 +14,7 @@ import {
 import { centerOf } from './bounds.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
-import { KEY_PARAMETERS } from './constants.js';
+import { END_KEY, FRAME_KEYS, KEY_PARAMETERS } from './constants.js';
 
 const bounds: Bounds = [13.3, 52.45, 13.5, 52.55];
 const frame: StateFrame = { bounds };
@@ -161,6 +161,16 @@ describe('frame: how the map is turned', () => {
 		expect(() => new StateReader(writer.bits).readFrame()).toThrow(
 			expect.objectContaining({ cause: expect.objectContaining({ message: 'Unknown key of the frame: 99' }) })
 		);
+	});
+
+	it('reads a tilt beyond the one of this version as its largest, e.g. of a later version', () => {
+		const writer = new StateWriter();
+		writer.writeBit(true); // a frame
+		writer.writeBit(false); // without an area
+		writer.writeKey(FRAME_KEYS.pitch, KEY_PARAMETERS.frame);
+		writer.writeInteger(85, 7);
+		writer.writeKey(END_KEY, KEY_PARAMETERS.frame);
+		expect(new StateReader(writer.bits).readFrame()).toStrictEqual({ pitch: 60 });
 	});
 
 	it('costs 1 bit for its settings if it is only an area', () => {

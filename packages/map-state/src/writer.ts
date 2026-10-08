@@ -293,7 +293,7 @@ export class StateWriter {
 	 * The frame, each part only if the map has it. Its area: the south-west corner on the grid, and
 	 * the width and height in steps of the grid. Then its settings as
 	 * key/value pairs (`FRAME_KEYS`), so settings can be added later: the rotation (9 bits, whole degrees from 0 to 359), the tilt
-	 * (6 bits, whole degrees), and a flag for each thing that viewers can do other than by default.
+	 * (7 bits, whole degrees), and a flag for each thing that viewers can do other than by default.
 	 */
 	writeFrame(frame: StateFrame | undefined) {
 		if (!frame) return this.writeBit(false);
@@ -323,7 +323,8 @@ export class StateWriter {
 		}
 		if (frame.pitch) {
 			key('pitch');
-			this.writeInteger(frame.pitch, 6);
+			// 7 bits: up to 127°, more than a map can be tilted (MapLibre: 85°), not only `MAX_PITCH`
+			this.writeInteger(frame.pitch, 7);
 		}
 		if (frame.canPan === false) key('noPan');
 		if (frame.canZoom === false) key('noZoom');
@@ -489,7 +490,8 @@ export class StateWriter {
 		if (background.borders === false) key('noBorders');
 		if (background.labels !== undefined) {
 			key('labels');
-			this.writeInteger(BACKGROUND_LABELS.indexOf(background.labels), 2);
+			// a varint like every index of a name, so the list can grow
+			this.writeVarint(BACKGROUND_LABELS.indexOf(background.labels));
 		}
 		if (background.language !== undefined) {
 			key('language');
