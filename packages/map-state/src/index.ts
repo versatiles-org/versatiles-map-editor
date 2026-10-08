@@ -1,3 +1,58 @@
+/**
+ * Reads and writes the maps of the [VersaTiles map editor](https://github.com/versatiles-org/versatiles-map-editor):
+ * markers, lines, polygons and circles with their styles and popups, and the properties of a map
+ * like its background map and its legend.
+ *
+ * ```sh
+ * npm install @versatiles/map-state
+ * ```
+ *
+ * ## A map
+ *
+ * A map is a {@link MapState}: plain data, without classes. Its `elements` are in drawing order;
+ * its `frame` says what a shared map shows when it opens; its `meta` holds the title, the
+ * background map, the legend and what the viewer shows.
+ *
+ * ```ts
+ * import { encodeState, decodeState, type MapState } from '@versatiles/map-state';
+ *
+ * const state: MapState = {
+ * 	elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Berlin', style: { color: '#0000ff' } }]
+ * };
+ * const link = 'https://versatiles.org/versatiles-map-editor/view/#' + encodeState(state);
+ * const again = decodeState(link.split('#')[1]);
+ * ```
+ *
+ * ## What to use
+ *
+ * | To … | use |
+ * | --- | --- |
+ * | make or read the link of a map | {@link encodeState}, {@link decodeState} |
+ * | make a link shorter, with coarser positions | `encodeState(state, { resolution })`, {@link resolutionForArea} |
+ * | see what makes a link long | {@link measureLink} |
+ * | read or write a `.mapjson` file | {@link stateFromMapJSON}, {@link stateToMapJSON} |
+ * | exchange a map with other tools | {@link stateToGeoJSON}, {@link stateFromGeoJSON}, {@link stateToKML}, {@link stateFromKML} |
+ * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeFrame}, {@link sanitizeBounds} |
+ * | know the values a field can have | the tables of names, e.g. {@link STROKE_STYLE_NAMES}, {@link BACKGROUND_THEMES}, {@link LEGEND_POSITIONS} |
+ * | know the default of a field | the defaults, e.g. {@link LINE_DEFAULTS}, {@link SYMBOL_DEFAULTS}, {@link LEGEND_DEFAULTS} |
+ *
+ * ## Good to know
+ *
+ * - **Defaults are left out.** A field that is missing has its default value, so a state holds only
+ *   what differs. The readers of this package return states without defaults.
+ * - **Coordinates** are `[longitude, latitude]` in degrees with 5 decimal places, about 1 m.
+ * - **Links are compact, not stable yet.** The package is a release candidate: a later version may
+ *   not read the links of an earlier one. `.mapjson` files name the version of their format.
+ * - **No dependencies.** It is an ES module for browsers and for Node.js 18 or newer.
+ *
+ * The file format is explained field by field in
+ * [MAPJSON.md](https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/MAPJSON.md),
+ * the formats of links, GeoJSON and KML in the
+ * [README](https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/README.md).
+ * Below, everything the package exports, by what it is for.
+ *
+ * @packageDocumentation
+ */
 import { StateWriter } from './writer.js';
 import { StateReader } from './reader.js';
 import type { MapState } from './types.js';
