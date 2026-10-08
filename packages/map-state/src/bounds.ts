@@ -6,6 +6,7 @@ const METERS_PER_DEGREE = 111320;
 /**
  * The bounds of the elements: all points of markers, lines and polygons, and circles with their
  * radius. Undefined without elements. A single marker has bounds of zero size.
+ * @category Map state
  */
 export function boundsOf(elements: StateElement[]): Bounds | undefined {
 	let west = Infinity;
@@ -39,7 +40,10 @@ export function boundsOf(elements: StateElement[]): Bounds | undefined {
 	return [west, Math.max(-90, south), east, Math.min(90, north)];
 }
 
-/** The center of bounds. */
+/**
+ * The center of bounds.
+ * @category Map state
+ */
 export function centerOf([west, south, east, north]: Bounds): [number, number] {
 	return [(west + east) / 2, (south + north) / 2];
 }

@@ -38,7 +38,10 @@ function viewOfFrame([west, south, east, north]: Bounds): { center: [number, num
 	return { center, radius: Math.max(width / 2, height / 2, MIN_RADIUS) };
 }
 
-/** The map state as a KML document. */
+/**
+ * The map state as a KML document.
+ * @category Files
+ */
 export function stateToKML(state: MapState): string {
 	const doc = stateToGeoJSON(state);
 	const documentData: Record<string, string> = {};
@@ -181,7 +184,10 @@ function kmlColor(color: unknown, opacity = 1): string {
 // Import
 // ---------------------------------------------------------------------------
 
-/** A KML document as map state. Throws if it is no KML. */
+/**
+ * A KML document as map state. Throws if it is no KML.
+ * @category Files
+ */
 export function stateFromKML(kml: string): MapState {
 	const root = parseXml(kml);
 	const kmlElement = child(root, 'kml');

@@ -1,4 +1,7 @@
-/** A color with channels 0…255 and an alpha of 0…1. */
+/**
+ * A color with channels 0…255 and an alpha of 0…1.
+ * @category Colors
+ */
 export interface RGBA {
 	r: number;
 	g: number;
@@ -10,6 +13,7 @@ export interface RGBA {
  * Parse a CSS color: "#rgb", "#rgba", "#rrggbb", "#rrggbbaa", "rgb()", "rgba()", "hsl()",
  * "hsla()" (with commas or spaces, and "/ alpha") or "transparent". Returns undefined otherwise,
  * e.g. for named colors.
+ * @category Colors
  */
 export function parseColor(value: string): RGBA | undefined {
 	const text = value.trim().toLowerCase();
@@ -66,7 +70,10 @@ function hslToRgb(h: number, s: number, l: number): [number, number, number] {
 	return [f(0), f(8), f(4)];
 }
 
-/** "#rrggbb", or "#rrggbbaa" for a transparent color. */
+/**
+ * "#rrggbb", or "#rrggbbaa" for a transparent color.
+ * @category Colors
+ */
 export function formatHex({ r, g, b, alpha }: RGBA): string {
 	const hex = (v: number) => Math.round(clamp(v, 255)).toString(16).padStart(2, '0');
 	const a = Math.round(clamp(alpha, 1) * 255);

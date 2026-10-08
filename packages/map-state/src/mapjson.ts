@@ -8,19 +8,31 @@ import {
 	type StateLegendEntry
 } from './types.js';
 
-/** The version of the format of .mapjson files, in the name of its JSON Schema. */
+/**
+ * The version of the format of .mapjson files, in the name of its JSON Schema.
+ * @category Files
+ */
 export const MAPJSON_VERSION = 1;
 
-/** The JSON Schema of .mapjson files of this version: `$schema` of every file, e.g. for editors. */
+/**
+ * The JSON Schema of .mapjson files of this version: `$schema` of every file, e.g. for editors.
+ * @category Files
+ */
 export const MAPJSON_SCHEMA_URL = `https://versatiles.org/versatiles-map-editor/schema/mapjson-${MAPJSON_VERSION}.schema.json`;
 
-/** The content of a .mapjson file: a map state with the URL of its schema. */
+/**
+ * The content of a .mapjson file: a map state with the URL of its schema.
+ * @category Files
+ */
 export type MapJSON = {
 	/** The URL of the JSON Schema of the format version of the file, `MAPJSON_SCHEMA_URL`. */
 	$schema: string;
 } & MapState;
 
-/** A .mapjson file of a newer version than this one can read. */
+/**
+ * A .mapjson file of a newer version than this one can read.
+ * @category Files
+ */
 export class MapJSONVersionError extends Error {
 	constructor(public readonly version: number) {
 		super(`The map is of version ${version} of the format; this version reads up to ${MAPJSON_VERSION}.`);
@@ -31,6 +43,7 @@ export class MapJSONVersionError extends Error {
 /**
  * The map state as the content of a .mapjson file, with the URL of its schema first. Its
  * coordinates have `COORDINATE_DIGITS` decimal places.
+ * @category Files
  */
 export function stateToMapJSON(state: MapState): MapJSON {
 	const point = ([x, y]: Position): Position => [roundCoordinate(x), roundCoordinate(y)];
@@ -48,6 +61,7 @@ export function stateToMapJSON(state: MapState): MapJSON {
  * `MapJSONVersionError`, and one without elements an error. A file may contain anything, so only
  * its valid parts are kept, as of an imported GeoJSON: e.g. an element that cannot be drawn is
  * left out, and so is a style field with an invalid value.
+ * @category Files
  */
 export function stateFromMapJSON(json: unknown): MapState {
 	if (typeof json !== 'object' || json === null || Array.isArray(json)) throw new Error('The file contains no map');
@@ -128,6 +142,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * (e.g. from a newer version, which may add fields), but `stateFromMapJSON` does not keep them, so
  * the editor warns about them. The `options` of the background map are those of `@versatiles/style`,
  * which are not checked here.
+ * @category Files
  */
 export function unknownMapJSONFields(json: unknown): string[] {
 	const unknown: string[] = [];

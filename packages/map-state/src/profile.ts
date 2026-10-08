@@ -50,28 +50,40 @@ import {
 
 type Defaults<K extends keyof StateStyle> = Readonly<Required<Pick<StateStyle, K>>>;
 
+/** @category Styles */
 export const FILL_DEFAULTS: Defaults<'color' | 'pattern' | 'patternScale' | 'patternCoverage'> = {
 	color: '#ff0000',
 	pattern: 'solid',
 	patternScale: 1,
 	patternCoverage: 0.5
 };
-/** The range of the size of a pattern, a factor (`patternScale`). */
+/**
+ * The range of the size of a pattern, a factor (`patternScale`).
+ * @category Styles
+ */
 export const PATTERN_SCALE_RANGE = [0.5, 4] as const;
-/** The range of the share of an area that a pattern covers (`patternCoverage`). */
+/**
+ * The range of the share of an area that a pattern covers (`patternCoverage`).
+ * @category Styles
+ */
 export const PATTERN_COVERAGE_RANGE = [0.05, 0.95] as const;
+/** @category Styles */
 export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
 	color: '#ff0000',
 	dash: 'solid',
 	visible: true,
 	width: 2
 };
-/** The arrowheads of lines, apart from `LINE_DEFAULTS`, which outlines share. */
+/**
+ * The arrowheads of lines, apart from `LINE_DEFAULTS`, which outlines share.
+ * @category Styles
+ */
 export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> = {
 	arrowStart: 'none',
 	arrowEnd: 'none',
 	arrowSize: 3
 };
+/** @category Styles */
 export const SYMBOL_DEFAULTS: Defaults<
 	| 'color'
 	| 'rotation'
@@ -198,12 +210,18 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	return Object.keys(used).length > 0 ? (used as RoleStyles[R]) : undefined;
 }
 
-/** Whether a style has an arrowhead at an end of the line. */
+/**
+ * Whether a style has an arrowhead at an end of the line.
+ * @category Styles
+ */
 export function hasArrow(style: StateStyle | undefined): boolean {
 	return (style?.arrowStart ?? 'none') !== 'none' || (style?.arrowEnd ?? 'none') !== 'none';
 }
 
-/** Whether a style fills its area with a pattern, not solid. */
+/**
+ * Whether a style fills its area with a pattern, not solid.
+ * @category Styles
+ */
 export function hasPattern(style: StateStyle | undefined): boolean {
 	return (style?.pattern ?? 'solid') !== 'solid';
 }
@@ -211,6 +229,7 @@ export function hasPattern(style: StateStyle | undefined): boolean {
 /**
  * A style without the fields that have no effect: the size of arrowheads without one, and the
  * size and the coverage of a pattern without one.
+ * @category Styles
  */
 export function withoutUnusedFields(style: StateStyle): StateStyle {
 	let used = style;
@@ -234,6 +253,7 @@ function set<K extends keyof StateStyle>(style: StateStyle, key: K, value: State
  * Remove fields whose value equals the corresponding default (or is undefined).
  * Returns undefined when nothing remains, so `StateElement.style` stays absent
  * for fully-default styles.
+ * @category Styles
  */
 export function removeDefaultFields(value: StateStyle, def: StateStyle): StateStyle | undefined {
 	const entries = Object.entries(value).filter(([k, v]) => {
@@ -387,12 +407,16 @@ export function popupFromProps(p: GeoJSON.GeoJsonProperties): StatePopup | undef
 /**
  * The decimal places of a coordinate, in degrees: 0.00001° is about 1 m, and the finest step of
  * the coordinates of a link. A map has no finer coordinates, in none of its forms.
+ * @category Map state
  */
 export const COORDINATE_DIGITS = 5;
 
 const COORDINATE_STEPS = 10 ** COORDINATE_DIGITS;
 
-/** A longitude or a latitude with `COORDINATE_DIGITS` decimal places. */
+/**
+ * A longitude or a latitude with `COORDINATE_DIGITS` decimal places.
+ * @category Map state
+ */
 export function roundCoordinate(value: number): number {
 	// + 0: not -0, e.g. of -0.000001
 	return Math.round(value * COORDINATE_STEPS) / COORDINATE_STEPS + 0;
@@ -401,6 +425,7 @@ export function roundCoordinate(value: number): number {
 /**
  * A valid area: four numbers, west < east and south < north, within the latitudes of the map. Its
  * sides have `COORDINATE_DIGITS` decimal places.
+ * @category Map state
  */
 export function sanitizeBounds(value: unknown): Bounds | undefined {
 	if (!Array.isArray(value) || value.length !== 4) return undefined;
@@ -423,6 +448,7 @@ export function sanitizeBearing(value: unknown): number | undefined {
  * their default value (north at the top, looking straight down; viewers can move the map and zoom,
  * but not rotate or tilt it).
  * Undefined if nothing is left, which is the frame of a map without one.
+ * @category Map state
  */
 export function sanitizeFrame(value: unknown): StateFrame | undefined {
 	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
@@ -443,10 +469,16 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 
 // ----- background map -----
 
-/** The width of the halo of the labels of each base map, if the background does not set one. */
+/**
+ * The width of the halo of the labels of each base map, if the background does not set one.
+ * @category Background map
+ */
 export const BACKGROUND_HALO_WIDTHS = { vector: 2, satellite: 1 } as const;
 
-/** The settings of the background map that have the same default on both base maps. */
+/**
+ * The settings of the background map that have the same default on both base maps.
+ * @category Background map
+ */
 export const BACKGROUND_DEFAULTS = {
 	base: 'vector',
 	theme: 'colorful',
@@ -461,13 +493,17 @@ export const BACKGROUND_DEFAULTS = {
 	buildings: 'flat'
 } as const;
 
-/** The colors of the background map as they are: no change. */
+/**
+ * The colors of the background map as they are: no change.
+ * @category Background map
+ */
 export const BACKGROUND_COLOR_DEFAULTS = { saturation: 0, black: 0, white: 1 } as const;
 
 /**
  * A valid background with its valid settings, without those that have their default value.
  * Undefined if nothing is left, which is the default background. The `options` are not checked,
  * since they belong to `@versatiles/style`.
+ * @category Background map
  */
 export function sanitizeBackground(value: unknown): StateBackground | undefined {
 	if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
@@ -542,6 +578,7 @@ function sanitizeLegendEntry(
 	}
 }
 
+/** @category Legend */
 export const LEGEND_DEFAULTS = {
 	layout: 'vertical',
 	font: 'sans-serif',
@@ -553,6 +590,7 @@ export const LEGEND_DEFAULTS = {
 /**
  * The legend without the fields that have their default value, as the base64 string stores it, so
  * a legend is the same whether it comes from a link, a file or the editor.
+ * @category Legend
  */
 export function removeLegendDefaults(legend: StateLegend): StateLegend {
 	const result = { ...legend };
@@ -617,17 +655,26 @@ export function sanitizeLabels(value: unknown): StateLabels | undefined {
 
 // ----- viewer -----
 
-/** What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left. */
+/**
+ * What the viewer shows if the map does not say: no search, the zoom buttons at the top right, the legend at the bottom left.
+ * @category Viewer
+ */
 export const VIEWER_DEFAULTS = { search: 'none', navigation: 'top-right', legend: 'bottom-left' } as const;
 
-/** The choices of each control of the viewer: "none", or one of its positions. */
+/**
+ * The choices of each control of the viewer: "none", or one of its positions.
+ * @category Viewer
+ */
 export const VIEWER_CHOICES = {
 	search: ['none', ...SEARCH_POSITIONS],
 	navigation: ['none', ...NAVIGATION_POSITIONS],
 	legend: ['none', ...LEGEND_POSITIONS]
 } as const;
 
-/** The settings of the viewer without those with their default value, or undefined if all have it. */
+/**
+ * The settings of the viewer without those with their default value, or undefined if all have it.
+ * @category Viewer
+ */
 export function removeViewerDefaults(viewer: StateViewer | undefined): StateViewer | undefined {
 	if (!viewer) return undefined;
 	const result: StateViewer = { ...viewer };

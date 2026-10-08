@@ -28,6 +28,7 @@ export function bitsToBase64(bits: boolean[]): string {
 /**
  * The version of the format, at the start of every hash. Only this version is read. (Version 0,
  * the original format, is not supported any more.)
+ * @category Links
  */
 export const CODEC_VERSION = 1;
 

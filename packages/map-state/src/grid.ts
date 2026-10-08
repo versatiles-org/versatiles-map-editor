@@ -7,12 +7,16 @@ const METERS_PER_DEGREE = 111320;
 const BASE_STEP = 1e-5;
 const STEPS_PER_DEGREE = 1e5;
 
-/** The coarsest step is the finest one times 2^15: 0.32768°, about 36 km. Stored in 4 bits. */
+/**
+ * The coarsest step is the finest one times 2^15: 0.32768°, about 36 km. Stored in 4 bits.
+ * @category Links
+ */
 export const MAX_EXPONENT = 15;
 
 /**
  * The exponent of the step (`BASE_STEP` × 2^exponent degrees) that is nearest to this resolution in
  * meters: 0 ≈ 1.1 m, 1 ≈ 2.2 m, 2 ≈ 4.5 m, …, 15 ≈ 36 km.
+ * @category Links
  */
 export function exponentForResolution(meters: number): number {
 	const exponent = Math.round(Math.log2(meters / resolutionOfExponent(0)));
@@ -29,6 +33,7 @@ function largerSide([west, south, east, north]: Bounds): number {
  * A resolution in meters fine enough for what a map shows (its frame, else the bounds of its
  * elements), e.g. for sharing: a thousandth of the larger side of the area, about a pixel of an
  * embed 1000 pixels wide.
+ * @category Links
  */
 export function resolutionForArea(bounds: Bounds): number {
 	return largerSide(bounds) / 1000;
@@ -38,12 +43,16 @@ export function resolutionForArea(bounds: Bounds): number {
  * The coarsest resolution in meters that is still sensible for what a map shows, e.g. the end of
  * the slider of the share dialog: a hundredth of the larger side of the area, about 10 pixels of an
  * embed 1000 pixels wide.
+ * @category Links
  */
 export function coarsestResolutionForArea(bounds: Bounds): number {
 	return largerSide(bounds) / 100;
 }
 
-/** The resolution in meters of a step with this exponent (in latitude). */
+/**
+ * The resolution in meters of a step with this exponent (in latitude).
+ * @category Links
+ */
 export function resolutionOfExponent(exponent: number): number {
 	return BASE_STEP * 2 ** exponent * METERS_PER_DEGREE;
 }

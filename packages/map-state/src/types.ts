@@ -1,22 +1,33 @@
-/** A geographic area: west, south, east and north, in degrees (WGS 84). */
+/**
+ * A geographic area: west, south, east and north, in degrees (WGS 84).
+ * @category Map state
+ */
 export type Bounds = [west: number, south: number, east: number, north: number];
 
-/** A position on the map: longitude and latitude, in degrees (WGS 84). */
+/**
+ * A position on the map: longitude and latitude, in degrees (WGS 84).
+ * @category Map state
+ */
 export type Position = [longitude: number, latitude: number];
 
 /**
  * A color as hex code: "#rrggbb", or "#rrggbbaa" with its opacity (alpha). Written in lower case.
  * @pattern ^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$
+ * @category Colors
  */
 export type HexColor = string;
 
-/** The largest tilt of a map, in degrees from looking straight down. */
+/**
+ * The largest tilt of a map, in degrees from looking straight down.
+ * @category Map state
+ */
 export const MAX_PITCH = 60;
 
 /**
  * What a shared or embedded map shows when it opens: an area, seen from a direction, and what its
  * viewers can do from there: move it and zoom, unless that is switched off; rotate and tilt it, if
  * that is switched on.
+ * @category Map state
  */
 export interface StateFrame {
 	/**
@@ -51,6 +62,7 @@ export interface StateFrame {
 /**
  * A map: what a shared map shows of it, its properties and its elements. Where its author looks in
  * the editor is not part of it.
+ * @category Map state
  */
 export interface MapState {
 	/** What a shared or embedded map shows when it opens, and how its viewers can turn it. */
@@ -60,9 +72,13 @@ export interface MapState {
 	elements: StateElement[];
 }
 
+/** @category Elements */
 export type StateElement = StateElementMarker | StateElementLine | StateElementPolygon | StateElementCircle;
 
-/** A symbol at a point, with an optional label. */
+/**
+ * A symbol at a point, with an optional label.
+ * @category Elements
+ */
 export interface StateElementMarker {
 	type: 'marker';
 	point: Position;
@@ -76,7 +92,10 @@ export interface StateElementMarker {
 	popup?: StatePopup;
 }
 
-/** A line through points. */
+/**
+ * A line through points.
+ * @category Elements
+ */
 export interface StateElementLine {
 	type: 'line';
 	/** @minItems 2 */
@@ -91,7 +110,10 @@ export interface StateElementLine {
 	popup?: StatePopup;
 }
 
-/** An area within points; the last point connects to the first one. */
+/**
+ * An area within points; the last point connects to the first one.
+ * @category Elements
+ */
 export interface StateElementPolygon {
 	type: 'polygon';
 	/** @minItems 3 */
@@ -108,7 +130,10 @@ export interface StateElementPolygon {
 	popup?: StatePopup;
 }
 
-/** A circle around a point. */
+/**
+ * A circle around a point.
+ * @category Elements
+ */
 export interface StateElementCircle {
 	type: 'circle';
 	point: Position;
@@ -132,11 +157,18 @@ export interface StateElementCircle {
 // - a variant adds a word to the name of its base ("diagonal-up", "long-dash", a later "triangle-open");
 // - positions name the vertical side first ("top-right"), as the legend and the viewer do.
 
-/** The arrowheads at the ends of a line; "none" is a plain end. */
+/**
+ * The arrowheads at the ends of a line; "none" is a plain end.
+ * @category Styles
+ */
 export const ARROW_NAMES = ['none', 'triangle', 'chevron', 'circle'] as const;
+/** @category Styles */
 export type ArrowName = (typeof ARROW_NAMES)[number];
 
-/** The positions of the label of a marker around its symbol. */
+/**
+ * The positions of the label of a marker around its symbol.
+ * @category Styles
+ */
 export const LABEL_POSITION_NAMES = [
 	'auto',
 	'right',
@@ -148,11 +180,13 @@ export const LABEL_POSITION_NAMES = [
 	'bottom-right',
 	'bottom-left'
 ] as const;
+/** @category Styles */
 export type LabelPositionName = (typeof LABEL_POSITION_NAMES)[number];
 
 /**
  * The patterns of the fill of an area: solid, lines in a direction ("diagonal-up" is "/"), lines in
  * two directions, or dots in rows or diagonally. Their size and coverage are fields of their own.
+ * @category Styles
  */
 export const FILL_PATTERN_NAMES = [
 	'solid',
@@ -165,13 +199,21 @@ export const FILL_PATTERN_NAMES = [
 	'dots',
 	'diagonal-dots'
 ] as const;
+/** @category Styles */
 export type FillPatternName = (typeof FILL_PATTERN_NAMES)[number];
 
-/** The dashes of a line or an outline. */
+/**
+ * The dashes of a line or an outline.
+ * @category Styles
+ */
 export const STROKE_STYLE_NAMES = ['solid', 'dashed', 'dotted', 'long-dash', 'dash-dot'] as const;
+/** @category Styles */
 export type DashName = (typeof STROKE_STYLE_NAMES)[number];
 
-/** The style of a marker: its symbol, and the look of its label. Missing fields have their default. */
+/**
+ * The style of a marker: its symbol, and the look of its label. Missing fields have their default.
+ * @category Styles
+ */
 export interface MarkerStyle {
 	/** The image of the symbol, e.g. "icons:anchor", or "" for none. Default: a flag. */
 	symbol?: string;
@@ -238,7 +280,10 @@ export interface MarkerStyle {
 	flat?: boolean;
 }
 
-/** The style of a line: its color, width and dashes, and its arrowheads. Missing fields have their default. */
+/**
+ * The style of a line: its color, width and dashes, and its arrowheads. Missing fields have their default.
+ * @category Styles
+ */
 export interface LineStyle {
 	/**
 	 * The color of the line, with its opacity.
@@ -275,7 +320,10 @@ export interface LineStyle {
 	arrowSize?: number;
 }
 
-/** The style of an area (of a polygon or a circle): its color and pattern. Missing fields have their default. */
+/**
+ * The style of an area (of a polygon or a circle): its color and pattern. Missing fields have their default.
+ * @category Styles
+ */
 export interface AreaStyle {
 	/**
 	 * The color of the area, with its opacity.
@@ -305,7 +353,10 @@ export interface AreaStyle {
 	patternCoverage?: number;
 }
 
-/** The style of the outline of an area. Missing fields have their default. */
+/**
+ * The style of the outline of an area. Missing fields have their default.
+ * @category Styles
+ */
 export interface OutlineStyle {
 	/**
 	 * Whether the outline is drawn.
@@ -330,13 +381,22 @@ export interface OutlineStyle {
 	dash?: DashName;
 }
 
-/** All fields of the styles of all roles, e.g. for the codec, which writes any style alike. */
+/**
+ * All fields of the styles of all roles, e.g. for the codec, which writes any style alike.
+ * @category Styles
+ */
 export type StateStyle = MarkerStyle & LineStyle & AreaStyle & OutlineStyle;
 
-/** What a style styles: a marker, a line, an area, or the outline of an area. */
+/**
+ * What a style styles: a marker, a line, an area, or the outline of an area.
+ * @category Styles
+ */
 export type StyleRoleName = 'marker' | 'line' | 'area' | 'outline';
 
-/** The fields of the style of each role, e.g. to check the style of a file (a test compares them with the types). */
+/**
+ * The fields of the style of each role, e.g. to check the style of a file (a test compares them with the types).
+ * @category Styles
+ */
 export const STYLE_ROLE_FIELDS = {
 	marker: [
 		'symbol',
@@ -361,6 +421,7 @@ export const STYLE_ROLE_FIELDS = {
 	outline: readonly (keyof OutlineStyle)[];
 };
 
+/** @category Map state */
 export interface StateMetadata {
 	/** The background map. Without it, the map has the editor's default background. */
 	background?: StateBackground;
@@ -376,7 +437,10 @@ export interface StateMetadata {
 	title?: string;
 }
 
-/** How the labels are shown: those of markers, and those of the background map. */
+/**
+ * How the labels are shown: those of markers, and those of the background map.
+ * @category Map state
+ */
 export interface StateLabels {
 	/**
 	 * Labels of markers that would overlap other labels: "show" them all, also on top of each
@@ -400,6 +464,7 @@ export interface StateLabels {
 	mapOnTop?: boolean;
 }
 
+/** @category Legend */
 export const LEGEND_POSITIONS = [
 	'bottom-left',
 	'bottom',
@@ -410,20 +475,34 @@ export const LEGEND_POSITIONS = [
 	'top-left',
 	'left'
 ] as const;
+/** @category Legend */
 export const LEGEND_LAYOUTS = ['vertical', 'horizontal', 'inline'] as const;
-/** The background and the border of the legend: white, black, or a blurred glass over the map. */
+/**
+ * The background and the border of the legend: white, black, or a blurred glass over the map.
+ * @category Legend
+ */
 export const LEGEND_THEMES = ['light', 'dark', 'glass'] as const;
-/** Generic CSS font families, which every browser has, unlike the glyph fonts of the map. */
+/**
+ * Generic CSS font families, which every browser has, unlike the glyph fonts of the map.
+ * @category Legend
+ */
 export const LEGEND_FONTS = ['sans-serif', 'serif', 'monospace'] as const;
 
-/** The places of the address search: at the top, since its results open downwards. */
+/**
+ * The places of the address search: at the top, since its results open downwards.
+ * @category Viewer
+ */
 export const SEARCH_POSITIONS = ['top-left', 'top-right'] as const;
-/** The places of the buttons for zooming: the corners. */
+/**
+ * The places of the buttons for zooming: the corners.
+ * @category Viewer
+ */
 export const NAVIGATION_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const;
 
 /**
  * What the viewer shows over the map, and where: each at a position, or "none". Controls in the
  * same corner are stacked. Defaults in `VIEWER_DEFAULTS`.
+ * @category Viewer
  */
 export interface StateViewer {
 	/** The address search. Default: "none". */
@@ -434,6 +513,7 @@ export interface StateViewer {
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
 }
 
+/** @category Legend */
 export interface StateLegend {
 	/** How the entries are arranged. "inline" flows like text. Default: "vertical". */
 	layout?: (typeof LEGEND_LAYOUTS)[number];
@@ -448,16 +528,23 @@ export interface StateLegend {
 	entries: StateLegendEntry[];
 }
 
-/** What a legend entry shows: a marker, a line, or an area (e.g. of a polygon or a circle). */
+/**
+ * What a legend entry shows: a marker, a line, or an area (e.g. of a polygon or a circle).
+ * @category Legend
+ */
 export const LEGEND_ENTRY_TYPES = ['marker', 'line', 'area'] as const;
 
 /**
  * A row of the legend: a small copy of an element, and a text. Its styles are those of an element
  * of its kind, with the same defaults (see the elements).
+ * @category Legend
  */
 export type StateLegendEntry = StateLegendMarker | StateLegendLine | StateLegendArea;
 
-/** A legend entry with a marker. */
+/**
+ * A legend entry with a marker.
+ * @category Legend
+ */
 export interface StateLegendMarker {
 	type: 'marker';
 	style?: MarkerStyle;
@@ -465,7 +552,10 @@ export interface StateLegendMarker {
 	label: string;
 }
 
-/** A legend entry with a line. */
+/**
+ * A legend entry with a line.
+ * @category Legend
+ */
 export interface StateLegendLine {
 	type: 'line';
 	style?: LineStyle;
@@ -473,7 +563,10 @@ export interface StateLegendLine {
 	label: string;
 }
 
-/** A legend entry with an area, e.g. of a polygon or a circle. */
+/**
+ * A legend entry with an area, e.g. of a polygon or a circle.
+ * @category Legend
+ */
 export interface StateLegendArea {
 	type: 'area';
 	style?: AreaStyle;
@@ -483,12 +576,16 @@ export interface StateLegendArea {
 	label: string;
 }
 
-/** The base maps: the vector map of OpenStreetMap, or satellite imagery. */
+/**
+ * The base maps: the vector map of OpenStreetMap, or satellite imagery.
+ * @category Background map
+ */
 export const BACKGROUND_BASES = ['vector', 'satellite'] as const;
 
 /**
  * The themes of the vector map, as `@versatiles/style` names them. A link stores a theme as its
  * index here, so new ones are added at the end; a theme that is not listed is stored as text.
+ * @category Background map
  */
 export const BACKGROUND_THEMES = [
 	'colorful',
@@ -517,13 +614,17 @@ export const BACKGROUND_THEMES = [
 	'bingo'
 ] as const;
 
-/** How many labels the background map shows. */
+/**
+ * How many labels the background map shows.
+ * @category Background map
+ */
 export const BACKGROUND_LABELS = ['normal', 'fewer', 'none'] as const;
 
 /**
  * The languages of the labels of the background map: of the browser ("user"), the local names
  * ("local"), or a language of the names in the tiles. A link stores a language as its index here;
  * one that is not listed is stored as text.
+ * @category Background map
  */
 export const BACKGROUND_LANGUAGES = [
 	'user',
@@ -541,13 +642,17 @@ export const BACKGROUND_LANGUAGES = [
 	'uk'
 ] as const;
 
-/** The buildings of the vector map: their outlines, or raised to their heights. */
+/**
+ * The buildings of the vector map: their outlines, or raised to their heights.
+ * @category Background map
+ */
 export const BACKGROUND_BUILDINGS = ['flat', 'extruded'] as const;
 
 /**
  * The background map, as its author set it: the base map, its theme, its labels, its colors and
  * its relief. The editor builds the map from these settings, with `@versatiles/style`. Missing
  * fields have their default; the background with only defaults is not stored at all.
+ * @category Background map
  */
 export interface StateBackground {
 	/**
@@ -627,7 +732,10 @@ export interface StateBackground {
 	options?: Record<string, unknown>;
 }
 
-/** Changes of the colors of the background map; without them, its colors are as they are. */
+/**
+ * Changes of the colors of the background map; without them, its colors are as they are.
+ * @category Background map
+ */
 export interface StateBackgroundColors {
 	/**
 	 * From -1 (gray) to 1.
@@ -652,7 +760,10 @@ export interface StateBackgroundColors {
 	white?: number;
 }
 
-/** A popup that opens when the element is clicked or tapped in the viewer. */
+/**
+ * A popup that opens when the element is clicked or tapped in the viewer.
+ * @category Elements
+ */
 export interface StatePopup {
 	/** Plain text with simple formatting: **bold**, line breaks and links. */
 	text: string;

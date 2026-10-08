@@ -1,5 +1,6 @@
 import { formatHex, parseColor } from './color.js';
 
+/** @category Colors */
 export interface ColorScheme {
 	id: string;
 	name: string;
@@ -13,6 +14,7 @@ export interface ColorScheme {
  *
  * Their colors are part of the format (see `BUILT_IN_COLORS`): schemes may be added at the end,
  * but not changed, reordered or removed, else links written before show other colors.
+ * @category Colors
  */
 export const COLOR_SCHEMES: ColorScheme[] = [
 	{

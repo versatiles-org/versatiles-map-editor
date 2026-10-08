@@ -33,6 +33,7 @@ import {
 /**
  * A GeoJSON FeatureCollection extended with the `frame`: what a shared map shows, e.g. its
  * visible area (`bounds`).
+ * @category Files
  */
 export type GeoJSONDocument = GeoJSON.FeatureCollection & {
 	frame?: StateFrame;
@@ -101,7 +102,10 @@ function circleToFeature(el: StateElementCircle): GeoJSON.Feature {
 	};
 }
 
-/** Convert a map state document into a GeoJSON FeatureCollection. */
+/**
+ * Convert a map state document into a GeoJSON FeatureCollection.
+ * @category Files
+ */
 export function stateToGeoJSON(state: MapState): GeoJSONDocument {
 	const features = state.elements.map((el): GeoJSON.Feature => {
 		switch (el.type) {
@@ -244,6 +248,7 @@ function toFeatures(doc: GeoJSON.GeoJSON): GeoJSON.Feature[] {
  * Convert GeoJSON into a map state document. Accepts a FeatureCollection (optionally
  * with the editor's `map` viewport), a single Feature or a bare Geometry. Features
  * with missing or invalid geometry are skipped.
+ * @category Files
  */
 export function stateFromGeoJSON(doc: GeoJSONDocument | GeoJSON.GeoJSON): MapState {
 	const elements: StateElement[] = [];

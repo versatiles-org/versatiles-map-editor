@@ -13,10 +13,12 @@ import type { MapState } from './types.js';
  * - `background`: the background map;
  * - `structure`: all others, e.g. the types of the elements, flags, keys, counts, and the bits
  *   that fill the last character.
+ * @category Links
  */
 export type LinkKind =
 	'strings' | 'stringRefs' | 'coordinates' | 'styles' | 'colors' | 'frame' | 'background' | 'structure';
 
+/** @category Links */
 export const LINK_KINDS: LinkKind[] = [
 	'strings',
 	'stringRefs',
@@ -28,7 +30,10 @@ export const LINK_KINDS: LinkKind[] = [
 	'structure'
 ];
 
-/** The size of a link, and where its bits go. */
+/**
+ * The size of a link, and where its bits go.
+ * @category Links
+ */
 export interface LinkMeasure {
 	/** The length of the link's base64 string, each character 6 bits. */
 	characters: number;
@@ -57,6 +62,7 @@ const KIND_OF_READ: Record<string, LinkKind> = {
 /**
  * Where the bits of a link go, e.g. to tell an author what makes a link long. Throws like
  * `decodeState` if the link cannot be read.
+ * @category Links
  */
 export function measureLink(base64: string): LinkMeasure {
 	const reader = StateReader.fromBase64(base64);
@@ -93,7 +99,10 @@ export function measureLink(base64: string): LinkMeasure {
 	return { characters: base64.length, bits: total, kinds };
 }
 
-/** Where the bits of the link of a map go, see `measureLink`. `resolution`: as for `encodeState`. */
+/**
+ * Where the bits of the link of a map go, see `measureLink`. `resolution`: as for `encodeState`.
+ * @category Links
+ */
 export function measureState(state: MapState, options: { resolution?: number } = {}): LinkMeasure {
 	const writer = new StateWriter(options);
 	writer.writeRoot(state);

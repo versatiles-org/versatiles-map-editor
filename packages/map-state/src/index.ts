@@ -57,6 +57,7 @@ export {
  * Encode a map state document into the compact base64 representation.
  * `resolution`: the precision of the element coordinates in meters. Coarser is shorter,
  * e.g. for sharing. Default: 1 m.
+ * @category Links
  */
 export function encodeState(state: MapState, options: { resolution?: number } = {}): string {
 	const writer = new StateWriter(options);
@@ -64,17 +65,26 @@ export function encodeState(state: MapState, options: { resolution?: number } = 
 	return writer.asBase64();
 }
 
-/** Decode the compact base64 representation back into a map state document. */
+/**
+ * Decode the compact base64 representation back into a map state document.
+ * @category Links
+ */
 export function decodeState(base64: string): MapState {
 	return StateReader.fromBase64(base64).readRoot();
 }
 
-/** Compress a GeoJSON FeatureCollection into the compact base64 representation. */
+/**
+ * Compress a GeoJSON FeatureCollection into the compact base64 representation.
+ * @category Links
+ */
 export function encodeGeoJSON(doc: GeoJSONDocument): string {
 	return encodeState(stateFromGeoJSON(doc));
 }
 
-/** Decompress the base64 representation back into a GeoJSON FeatureCollection. */
+/**
+ * Decompress the base64 representation back into a GeoJSON FeatureCollection.
+ * @category Links
+ */
 export function decodeGeoJSON(base64: string): GeoJSONDocument {
 	return stateToGeoJSON(decodeState(base64));
 }
