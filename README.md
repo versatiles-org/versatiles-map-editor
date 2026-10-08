@@ -152,7 +152,9 @@ These settings are stored in the map.
 
 How a map is encoded (URL hash, GeoJSON, KML) is published as its own npm package,
 [`@versatiles/map-state`](packages/map-state), e.g. to render shared maps in other apps or to
-create links on a server. The editor uses it from `packages/map-state/src`.
+create links on a server. The editor uses it from `packages/map-state/src`. Its API documentation is
+generated from its sources (`npm run doc-api` writes it to `build/api`) and published with the editor
+at <https://versatiles.org/versatiles-map-editor/api/>.
 
 The file format of the editor, `.mapjson`, is explained in
 [`packages/map-state/MAPJSON.md`](packages/map-state/MAPJSON.md), with its JSON Schema in

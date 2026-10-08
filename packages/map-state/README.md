@@ -40,6 +40,10 @@ const geojson = stateToGeoJSON(decoded);
 
 ## API
 
+All exports, with their types and comments, are documented at
+<https://versatiles.org/versatiles-map-editor/api/>, generated from the sources. The most
+important ones:
+
 ```ts
 encodeState(state: MapState, options?: { resolution?: number }): string // → compact base64
 decodeState(base64: string): MapState

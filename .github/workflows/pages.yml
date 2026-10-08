@@ -45,6 +45,10 @@ jobs:
       - name: Build the project
         run: npm run build
 
+      # the API of @versatiles/map-state, generated from its sources, at /api/ of the site
+      - name: Build the API documentation of the package
+        run: npm run doc-api
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v5
         with:

@@ -47,6 +47,10 @@ jobs:
       - name: Build the npm package @versatiles/map-state
         run: npm run build --workspaces
 
+      # that it can still be generated; the Pages workflow publishes it
+      - name: Build the API documentation of the package
+        run: npm run doc-api
+
       - name: Check the files of the npm package
         run: npm pack --dry-run --workspace packages/map-state
 
