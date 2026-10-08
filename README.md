@@ -237,14 +237,18 @@ with the changes, and asks for confirmation before it changes anything (`--dry-r
    to its release. If no workflow started, it can be started by hand for the tag:
    `gh workflow run release-editor.yml -f tag=v3.1.0`.
 
-**Release candidates.** The editor and the package are release candidates: the format of the maps
-(links and `.mapjson` files) may still change, and maps of an earlier candidate may not open in a
-later one. `npm run release -- --rc` releases candidates: versions like `4.0.0-rc.1`, counted up
+**Release candidates.** `npm run release -- --rc` releases candidates: versions like `4.0.0-rc.1`, counted up
 with every candidate, the editor as a prerelease on GitHub, the package on npm under the tag
 `next`, so `latest` stays the last release. A release without `--rc` after candidates gets their
-version, e.g. `4.0.0`, also without new commits. From that release on, the format is kept readable:
-every change of the links raises their format version, and newer editors open the links of older
-ones.
+version, e.g. `4.0.0`, also without new commits.
+
+**The formats of the maps are frozen.** From version 4.0.0 of the editor on, with its release
+candidates, every later version opens the links and the `.mapjson` files of an earlier one, as the
+same map. What that covers, what can still be added, and its limits are in the
+[README of the package](packages/map-state/README.md#compatibility). Tests keep it: sample links
+and files of version 1 that are never written again (`npm run freeze-samples` only adds samples,
+e.g. for a new field), and the tables of the formats as literals. A change that would break it
+fails them; do not adapt the samples or the literals to the code.
 
 The package `@versatiles/map-state` has releases of its own, with its own
 [changelog](packages/map-state/CHANGELOG.md) and tags, see above. The editor continues the

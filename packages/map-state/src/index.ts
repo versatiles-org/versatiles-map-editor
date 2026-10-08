@@ -102,8 +102,12 @@
  * - **Defaults are left out.** A field that is missing has its default value, so a state holds only
  *   what differs. The readers of this package return states without defaults.
  * - **Coordinates** are `[longitude, latitude]` in degrees with 5 decimal places, about 1 m.
- * - **Links are compact, not stable yet.** The package is a release candidate: a later version may
- *   not read the links of an earlier one. `.mapjson` files name the version of their format.
+ * - **The formats are frozen.** Every later version of the package reads the links and the
+ *   `.mapjson` files of an earlier one (from 2.0.0 on), as the same map; an older version refuses
+ *   a link of a newer format with a {@link LinkVersionError}, a file with a
+ *   {@link MapJSONVersionError}. The
+ *   [README](https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/README.md#compatibility)
+ *   has the promise and its limits.
  * - **No dependencies.** It is an ES module for browsers and for Node.js 18 or newer.
  *
  * The file format is explained field by field in

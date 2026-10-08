@@ -338,9 +338,10 @@ their path, e.g. `elements[2].style.color`; the editor warns about them when it 
 
 ## Versions
 
-The format is a release candidate: it may still change without a new version, and the editor may
-not open a file of an earlier candidate completely. From the first release of the editor after
-its candidates, the rules below hold.
+The format is frozen at version 1: a file that the editor wrote (from its version 4.0.0 on, with
+its release candidates) is opened by every later version of the editor, as the same map. The
+package has the promise in full, with its limits, in its
+[README](README.md#compatibility).
 
 The version of the format is the field `version` of a file, a whole number: `1` now. A file
 without it is read as version 1. A file of a newer version than the editor knows is refused,
@@ -348,10 +349,12 @@ instead of being read wrongly. The schema of a version has it in its name:
 `mapjson-1.schema.json`; the address in `$schema` is for editors and validators, and does not
 tell the version to a reader.
 
-New fields and new names of the choices do not change the version: an older editor reads such a
-file, warns about the fields it does not know and uses the defaults of the names it does not know.
+New fields, new types of elements and new names of the choices do not change the version: an older
+editor reads such a file, warns about the fields and the elements it does not know, and uses the
+defaults of the names it does not know. It does not keep them, so saving the map again loses them.
 Only a change that an older editor would read wrongly makes a new version, e.g. a field that
-changes its meaning.
+changes its meaning; and a default never changes, since a file leaves out what has its default.
+A later editor still reads the files of version 1.
 
 ## Other forms
 

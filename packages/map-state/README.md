@@ -13,12 +13,11 @@ It has no runtime dependencies (`@types/geojson` only provides the TypeScript ty
 module and works in browsers and in Node.js 18 or newer, e.g. to render shared maps in other apps
 or to create links on a server.
 
-> **Release candidate.** The formats of this package (the base64 string and `.mapjson`) may still
-> change, and a later version may not read the maps of an earlier one. Version 1.0.0 was published
-> before they were settled. Candidates are published under the npm tag `next`:
-> `npm install @versatiles/map-state@next`. From the first release after them, the formats stay
-> readable: a change of the base64 string raises its format version, and newer versions of the
-> package read the strings of older ones.
+> **The formats are frozen.** From version 2.0.0 of this package on, including its release
+> candidates, every later version reads the links and the `.mapjson` files that an earlier one
+> wrote, and gives the same map, see [Compatibility](#compatibility). Version 1.0.0 was published
+> before the formats were settled, and is deprecated: its links and files are not read. Release
+> candidates are published under the npm tag `next`: `npm install @versatiles/map-state@next`.
 
 ```sh
 npm install @versatiles/map-state
@@ -265,3 +264,54 @@ piece is needed. It encodes at the precision of the share dialog (`resolutionFor
 coordinates, styles, colors, the background map and so on. `--json` prints both as JSON, e.g. to
 compare two versions of the format with `diff`. Test maps with labels and popups in other
 languages and scripts are in `src/__fixtures__/languages/`.
+
+## Compatibility
+
+Both formats, the base64 string of links and `.mapjson` files, are at version 1, and frozen.
+
+**The promise.** A link or a file that a released version of this package wrote (from 2.0.0 on,
+with its release candidates) is read by every later version, as the same map. That holds for
+later versions of the formats too: a version of the package that writes version 2 still reads
+version 1.
+
+**What can be added without a new version of a format**, since a reader of today is made for it:
+
+- a field: a new key in the list of the metadata, the background, the frame, the viewer, the
+  legend, an entry of the legend or an element, or at the end of the fields of a style;
+- a type of element;
+- a name at the end of a list of choices, e.g. another dash or another theme.
+
+**What never changes within a version:**
+
+- the meaning and the coding of what there is: the keys and their numbers, the names and their
+  order, the codes of the numbers;
+- the defaults: a map leaves out what has its default, so another default would be another map;
+- the string coder: its model, its parameters and the words that it knows, since each of them
+  changes the bits of every string.
+
+A change of any of these is a new version of the format, which later packages read beside
+version 1.
+
+**The limits of the promise**, which are accepted:
+
+- **It looks back, not ahead.** An older version does not read what it does not know. A link
+  with a field, a type or a name of a later version is refused by it (a damaged link is too, so
+  it cannot tell them apart), and one of a later version of the format with a `LinkVersionError`.
+  A viewer that is hosted somewhere and not updated shows an error for a map of a newer editor.
+  A `.mapjson` file is read without the fields that the reader does not know
+  (`unknownMapJSONFields` lists them), and with the default in place of a name that it does not
+  know; saving it again does not keep them.
+- **A link has no checksum.** One that is cut off, or has something after its end, is refused. One
+  with a changed character is refused in most cases, but can be read as another map.
+- **A polygon is one ring**, without holes and without several parts.
+- **Coordinates have 5 decimal places**, about 1 m, and the grid of a link has 16 steps, from
+  about 1 m to about 36 km.
+- **The visible area of a shared map does not cross the date line.**
+- **The limits of the coding are part of version 1:** e.g. how many styles a style can refer back
+  to (`STYLE_HISTORY_SIZE`), and the limits of the string coder.
+- **Only the formats.** How the editor keeps maps in the storage of the browser is not a format
+  of this package.
+
+Two tests keep the promise: `frozen_samples.test.ts` reads links and files of version 1 that are
+never written again (`src/__fixtures__/frozen`), and `frozen_tables.test.ts` has the tables of
+version 1 as literals, which may only grow at their end.
