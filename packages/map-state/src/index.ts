@@ -178,7 +178,7 @@ export { stateFromKML, stateToKML } from './kml.js';
 export {
 	AREA_DEFAULTS,
 	LINE_DEFAULTS,
-	ARROW_DEFAULTS,
+	OUTLINE_DEFAULTS,
 	MARKER_DEFAULTS,
 	hasArrow,
 	PATTERN_SCALE_RANGE,

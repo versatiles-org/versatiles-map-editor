@@ -23,10 +23,10 @@ import {
 	sanitizeMetadata,
 	sanitizePosition,
 	sanitizePositions,
-	strokePropsFromStyle,
+	outlinePropsFromStyle,
 	linePropsFromStyle,
 	lineStyleFromProps,
-	strokeStyleFromProps,
+	outlineStyleFromProps,
 	labelOf,
 	symbolPropsFromStyle,
 	symbolStyleFromProps
@@ -82,7 +82,7 @@ function polygonToFeature(el: StateElementPolygon): GeoJSON.Feature {
 		type: 'Feature',
 		properties: clean({
 			...fillPropsFromStyle(el.style),
-			...strokePropsFromStyle(el.outlineStyle),
+			...outlinePropsFromStyle(el.outlineStyle),
 			smooth: el.smooth || undefined,
 			description: el.popup?.text
 		}),
@@ -95,7 +95,7 @@ function circleToFeature(el: StateElementCircle): GeoJSON.Feature {
 		type: 'Feature',
 		properties: clean({
 			...fillPropsFromStyle(el.style),
-			...strokePropsFromStyle(el.outlineStyle),
+			...outlinePropsFromStyle(el.outlineStyle),
 			subType: 'Circle',
 			radius: el.radius,
 			description: el.popup?.text
@@ -197,7 +197,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 					point,
 					radius,
 					style: fillStyleFromProps(p),
-					outlineStyle: strokeStyleFromProps(p)
+					outlineStyle: outlineStyleFromProps(p)
 				};
 			}
 			return { type: 'marker', point, ...labelOf(sanitizeString(p?.['symbol-label'])), style: symbolStyleFromProps(p) };
@@ -219,7 +219,7 @@ function featureToElementWithoutPopup(feature: GeoJSON.Feature): StateElement | 
 				type: 'polygon',
 				points,
 				style: fillStyleFromProps(p),
-				outlineStyle: strokeStyleFromProps(p),
+				outlineStyle: outlineStyleFromProps(p),
 				...smoothOf(p)
 			};
 		}

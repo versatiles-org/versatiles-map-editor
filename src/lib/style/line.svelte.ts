@@ -1,6 +1,13 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type ArrowName, type DashName, type StateStyle, LINE_DEFAULTS, hasArrow } from '@versatiles/map-state';
+import {
+	type ArrowName,
+	type DashName,
+	type StateStyle,
+	LINE_DEFAULTS,
+	OUTLINE_DEFAULTS,
+	hasArrow
+} from '@versatiles/map-state';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
 /**
@@ -30,14 +37,14 @@ export interface ArrowProperties {
 }
 
 export class LineStyle extends StylePart {
-	static readonly defaultStyle = LINE_DEFAULTS;
+	static readonly defaultStyle = OUTLINE_DEFAULTS;
 	protected readonly defaults: StateStyle;
 	/** A line, with arrowheads, or the outline of an area. */
 	readonly role: StyleRole;
 
 	#color: string = $state(LINE_DEFAULTS.color);
 	#dash: DashName = $state(LINE_DEFAULTS.dash);
-	#visible: boolean = $state(LINE_DEFAULTS.visible);
+	#visible: boolean = $state(OUTLINE_DEFAULTS.visible);
 	#width: number = $state(LINE_DEFAULTS.width);
 	#arrowStart: ArrowName = $state(ROLE_DEFAULTS.line.arrowStart);
 	#arrowEnd: ArrowName = $state(ROLE_DEFAULTS.line.arrowEnd);
@@ -143,7 +150,9 @@ export class LineStyle extends StylePart {
 	}
 
 	getState(): StateStyle | undefined {
-		const style: StateStyle = { color: this.color, dash: this.dash, visible: this.visible, width: this.width };
+		const style: StateStyle = { color: this.color, dash: this.dash, width: this.width };
+		// a line is always visible, and has no field for it
+		if (this.canHide) style.visible = this.visible;
 		if (this.canHaveArrows) {
 			style.arrowStart = this.arrowStart;
 			style.arrowEnd = this.arrowEnd;

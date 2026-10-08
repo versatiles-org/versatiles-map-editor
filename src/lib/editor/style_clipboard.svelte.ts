@@ -29,10 +29,14 @@ export class StyleClipboard {
 	public copy(element: AbstractElement) {
 		const style: CopiedStyle = {};
 		for (const [role, layer] of Object.entries(layersOf(element)) as [Role, StylePart][]) {
-			// with the defaults, so pasting also resets the properties that are not set; a stroke with
-			// those of the arrowheads of a line, which outlines ignore, so pasting a line without
-			// arrowheads removes them
-			style[role] = completeStyle(role === 'stroke' ? 'line' : role, layer.getState());
+			// With the defaults, so pasting also resets the properties that are not set. A stroke with
+			// those of a line and of an outline: the arrowheads, which outlines ignore, so pasting a
+			// line without arrowheads removes them; and visible, which lines ignore, so pasting a line
+			// shows a hidden outline.
+			style[role] =
+				role === 'stroke'
+					? { ...completeStyle('outline'), ...completeStyle('line', layer.getState()) }
+					: completeStyle(role, layer.getState());
 		}
 		this.style = style;
 	}

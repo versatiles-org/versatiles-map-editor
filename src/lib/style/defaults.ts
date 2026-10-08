@@ -1,7 +1,7 @@
 import {
-	ARROW_DEFAULTS,
 	AREA_DEFAULTS,
 	LINE_DEFAULTS,
+	OUTLINE_DEFAULTS,
 	MARKER_DEFAULTS,
 	removeDefaultFields,
 	withoutUnusedFields,
@@ -18,8 +18,8 @@ export type StyleRole = 'symbol' | 'fill' | 'line' | 'outline';
 export const ROLE_DEFAULTS = {
 	symbol: MARKER_DEFAULTS,
 	fill: AREA_DEFAULTS,
-	line: { ...LINE_DEFAULTS, ...ARROW_DEFAULTS },
-	outline: LINE_DEFAULTS
+	line: LINE_DEFAULTS,
+	outline: OUTLINE_DEFAULTS
 } as const;
 
 type Complete<R extends StyleRole> = StateStyle & (typeof ROLE_DEFAULTS)[R];
@@ -31,13 +31,18 @@ export function completeStyle<R extends StyleRole>(role: R, style?: StateStyle):
 
 /**
  * The style as it is stored: without the fields that have their default, and without those that
- * have no effect (the size of arrowheads without one, and arrowheads on an outline). Undefined if no
- * field is left.
+ * have no effect (the size of arrowheads without one, arrowheads on an outline, and whether a
+ * line is visible). Undefined if no field is left.
  */
 export function storedStyle(role: StyleRole, style: StateStyle): StateStyle | undefined {
 	let used = withoutUnusedFields(style);
 	if (role === 'outline') {
 		const { arrowStart: _start, arrowEnd: _end, arrowSize: _size, ...rest } = used;
+		used = rest;
+	}
+	// a line is always visible: only an outline has the field
+	if (role === 'line') {
+		const { visible: _visible, ...rest } = used;
 		used = rest;
 	}
 	return removeDefaultFields(used, ROLE_DEFAULTS[role]);

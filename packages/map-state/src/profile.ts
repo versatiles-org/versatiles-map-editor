@@ -71,21 +71,27 @@ export const PATTERN_SCALE_RANGE = [0.5, 4] as const;
  * @category Styles
  */
 export const PATTERN_COVERAGE_RANGE = [0.05, 0.95] as const;
-/** @category Styles */
-export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
-	color: '#ff0000',
-	dash: 'solid',
-	visible: true,
-	width: 2
-};
 /**
- * The arrowheads of lines, apart from `LINE_DEFAULTS`, which outlines share.
+ * A line, with its arrowheads. It is always visible: only the outline of an area can be hidden.
  * @category Styles
  */
-export const ARROW_DEFAULTS: Defaults<'arrowStart' | 'arrowEnd' | 'arrowSize'> = {
+export const LINE_DEFAULTS: Defaults<'color' | 'dash' | 'width' | 'arrowStart' | 'arrowEnd' | 'arrowSize'> = {
+	color: '#ff0000',
+	dash: 'solid',
+	width: 2,
 	arrowStart: 'none',
 	arrowEnd: 'none',
 	arrowSize: 3
+};
+/**
+ * The outline of an area: drawn like a line, without arrowheads, and it can be hidden.
+ * @category Styles
+ */
+export const OUTLINE_DEFAULTS: Defaults<'color' | 'dash' | 'visible' | 'width'> = {
+	color: LINE_DEFAULTS.color,
+	dash: LINE_DEFAULTS.dash,
+	visible: true,
+	width: LINE_DEFAULTS.width
 };
 /** @category Styles */
 export const MARKER_DEFAULTS: Defaults<
@@ -336,35 +342,37 @@ export function fillStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 	return removeDefaultFields(withoutUnusedFields(s), AREA_DEFAULTS);
 }
 
-// ----- stroke / line (line, polygon stroke, circle stroke) -----
+// ----- the outline of an area, and a line: both are strokes in GeoJSON -----
 
-export function strokePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
+/** What a line and an outline share. */
+function strokeProps(s: Pick<StateStyle, 'color' | 'dash' | 'width'>): GeoJSON.GeoJsonProperties {
+	return { 'stroke-color': s.color, 'stroke-style': s.dash, 'stroke-width': s.width };
+}
+
+function strokeFromProps(s: StateStyle, p: GeoJSON.GeoJsonProperties) {
+	if (!p) return;
+	set(s, 'color', sanitizeColor(p['stroke-color']));
+	set(s, 'dash', oneOf(DASH_NAMES, p['stroke-style']));
+	set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
+}
+
+export function outlinePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
+	const s = { ...OUTLINE_DEFAULTS, ...style };
+	return { ...strokeProps(s), 'stroke-visibility': s.visible };
+}
+
+export function outlineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
+	const s: StateStyle = { ...OUTLINE_DEFAULTS };
+	strokeFromProps(s, p);
+	if (p) set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
+	return removeDefaultFields(s, OUTLINE_DEFAULTS);
+}
+
+/** A line has no `stroke-visibility`: it is always visible. */
+export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
 	const s = { ...LINE_DEFAULTS, ...style };
 	return {
-		'stroke-color': s.color,
-		'stroke-style': s.dash,
-		'stroke-width': s.width,
-		'stroke-visibility': s.visible
-	};
-}
-
-export function strokeStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
-	const s: StateStyle = { ...LINE_DEFAULTS };
-	if (p) {
-		set(s, 'color', sanitizeColor(p['stroke-color']));
-		set(s, 'dash', oneOf(DASH_NAMES, p['stroke-style']));
-		set(s, 'width', sanitizeNumber(p['stroke-width'], 0));
-		set(s, 'visible', sanitizeBoolean(p['stroke-visibility']));
-	}
-	return removeDefaultFields(s, LINE_DEFAULTS);
-}
-
-// ----- line: the stroke and the arrowheads -----
-
-export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
-	const s = { ...ARROW_DEFAULTS, ...style };
-	return {
-		...strokePropsFromStyle(style),
+		...strokeProps(s),
 		'stroke-arrow-start': s.arrowStart,
 		'stroke-arrow-end': s.arrowEnd,
 		// only with an arrowhead
@@ -373,14 +381,15 @@ export function linePropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonPropertie
 }
 
 export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | undefined {
-	const s: StateStyle = { ...strokeStyleFromProps(p) };
+	const s: StateStyle = { ...LINE_DEFAULTS };
+	strokeFromProps(s, p);
 	if (p) {
 		set(s, 'arrowStart', oneOf(ARROW_NAMES, p['stroke-arrow-start']));
 		set(s, 'arrowEnd', oneOf(ARROW_NAMES, p['stroke-arrow-end']));
 		const arrowSize = sanitizeNumber(p['stroke-arrow-size'], 0);
 		if (arrowSize) s.arrowSize = arrowSize;
 	}
-	return removeDefaultFields(withoutUnusedFields(s), ARROW_DEFAULTS);
+	return removeDefaultFields(withoutUnusedFields(s), LINE_DEFAULTS);
 }
 
 // ----- symbol (marker) -----

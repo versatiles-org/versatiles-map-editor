@@ -337,6 +337,45 @@ describe('legend', () => {
 	});
 });
 
+describe('a line is always visible', () => {
+	const points: [number, number][] = [
+		[0, 0],
+		[1, 1]
+	];
+	const ring: [number, number][] = [...points, [1, 0]];
+
+	it('has no visibility in GeoJSON, which only the outline of an area has', () => {
+		const doc = stateToGeoJSON({
+			elements: [
+				{ type: 'line', points, style: { width: 3 } },
+				{ type: 'polygon', points: ring, outlineStyle: { visible: false } }
+			]
+		});
+		expect(doc.features[0].properties).not.toHaveProperty('stroke-visibility');
+		expect(doc.features[1].properties).toMatchObject({ 'stroke-visibility': false });
+		expect(stateFromGeoJSON(doc).elements).toStrictEqual([
+			{ type: 'line', points, style: { width: 3 } },
+			{ type: 'polygon', points: ring, outlineStyle: { visible: false } }
+		]);
+	});
+
+	it('stays visible if a GeoJSON says that it is not', () => {
+		const doc = {
+			type: 'FeatureCollection',
+			features: [
+				{
+					type: 'Feature',
+					properties: { 'stroke-visibility': false, 'stroke-width': 3 },
+					geometry: { type: 'LineString', coordinates: points }
+				}
+			]
+		};
+		expect(stateFromGeoJSON(doc as GeoJSONDocument).elements).toStrictEqual([
+			{ type: 'line', points, style: { width: 3 } }
+		]);
+	});
+});
+
 describe('color scheme', () => {
 	it('round-trips as the meta member', () => {
 		const doc = stateToGeoJSON({ meta: { colorScheme: 'dark2' }, elements: [] });

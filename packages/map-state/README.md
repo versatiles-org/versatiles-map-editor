@@ -82,7 +82,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   whatever the size of its window; its rotation `bearing` and its tilt `pitch` in degrees.
   `sanitizeFrame` checks one, `sanitizeBounds` an area;
   `boundsOf(elements)` gives the bounds of elements (circles with their radius).
-- The style vocabulary (`AREA_DEFAULTS`, `LINE_DEFAULTS`, `ARROW_DEFAULTS`, `MARKER_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
+- The style vocabulary (`AREA_DEFAULTS`, `OUTLINE_DEFAULTS`, `LINE_DEFAULTS`, `MARKER_DEFAULTS`) helps to render the elements the way the editor does. The choices of a
   style are names, listed in `FILL_PATTERN_NAMES`, `DASH_NAMES`, `ARROW_NAMES` and
   `LABEL_POSITION_NAMES`, with the types `FillPatternName`, `DashName`, `ArrowName` and
   `LabelPositionName`; the fields and their names are listed in [MAPJSON.md](MAPJSON.md#styles).
