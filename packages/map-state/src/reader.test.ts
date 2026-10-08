@@ -732,7 +732,8 @@ describe('viewer', () => {
 			legend: 'bottom-left',
 			scale: 'none',
 			reset: false,
-			fullscreen: false
+			fullscreen: false,
+			locate: false
 		};
 		expect(encodeState({ meta: { viewer: defaults }, elements: [] })).toBe(encodeState({ elements: [] }));
 		expect(
@@ -747,6 +748,7 @@ describe('viewer', () => {
 			state({ navigation: 'none', reset: true })
 		);
 		expect(decodeState(encodeState(state({ fullscreen: true })))).toStrictEqual(state({ fullscreen: true }));
+		expect(decodeState(encodeState(state({ locate: true })))).toStrictEqual(state({ locate: true }));
 		// and a control with its place
 		expect(decodeState(encodeState(state({ scale: 'bottom-right', reset: true })))).toStrictEqual(
 			state({ scale: 'bottom-right', reset: true })

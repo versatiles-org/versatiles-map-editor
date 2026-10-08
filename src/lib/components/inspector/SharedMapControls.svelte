@@ -33,7 +33,7 @@
 	}
 
 	/** Show a button of the viewer with its zoom buttons, or not; one undo step. */
-	function setButton(key: 'reset' | 'fullscreen', shown: boolean) {
+	function setButton(key: 'reset' | 'fullscreen' | 'locate', shown: boolean) {
 		doc.viewer = { ...doc.viewer, [key]: shown };
 		doc.state.log();
 	}
@@ -75,6 +75,15 @@
 				</Checkbox>
 			</div>
 			<Hint>Shows the map on the whole screen. An embedded map needs the embed code of “Share” for it.</Hint>
+			<div class="control">
+				<Checkbox checked={doc.controls.locate} onchange={(e) => setButton('locate', e.currentTarget.checked)}>
+					My location button
+				</Checkbox>
+			</div>
+			<Hint>
+				Shows where the visitor is, if they allow it, and follows them until it is switched off. The position stays in
+				their browser. An embedded map needs the embed code of “Share” for it.
+			</Hint>
 		{/if}
 	{/if}
 {/each}

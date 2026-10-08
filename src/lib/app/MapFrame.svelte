@@ -28,8 +28,10 @@
 	import type { SessionSync } from '#lib/sessions/index.js';
 	import {
 		addAttribution,
+		addLocate,
 		addNavigation,
 		addScale,
+		canLocate,
 		CONTROL_ORDER,
 		cornerControl,
 		CORNERS,
@@ -172,10 +174,23 @@
 	const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled === true;
 	const showsReset = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.reset);
 	const showsFullscreen = $derived(!!mapDocument && !ownPlaces && mapDocument.controls.fullscreen && canFullscreen);
-	const buttonsCorner: Corner | undefined = $derived.by(() => {
-		if (!mapDocument || !(showsReset || showsFullscreen)) return undefined;
-		const position = mapDocument.controls.navigation;
+	/** Where the other buttons are: with the buttons for zooming, or where they would be. */
+	const besideZoom = (doc: MapDocument): Corner => {
+		const position = doc.controls.navigation;
 		return position === 'none' ? VIEWER_DEFAULTS.navigation : position;
+	};
+	const buttonsCorner: Corner | undefined = $derived(
+		mapDocument && (showsReset || showsFullscreen) ? besideZoom(mapDocument) : undefined
+	);
+	// The button that shows where the visitor is, below them: MapLibre's own. Not where the page may
+	// not ask, e.g. in an embed without the permission of its page.
+	const locateCorner: Corner | undefined = $derived(
+		mapDocument && !ownPlaces && mapDocument.controls.locate && canLocate() ? besideZoom(mapDocument) : undefined
+	);
+	$effect(() => {
+		const corner = locateCorner;
+		const m = mapDocument?.view.map;
+		if (m && corner) return addLocate(m, corner);
 	});
 
 	// whether the page is on the whole screen, also after the browser left it, e.g. with Escape

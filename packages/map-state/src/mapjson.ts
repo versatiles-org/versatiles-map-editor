@@ -114,7 +114,7 @@ export const MAPJSON_FIELDS = {
 	StateLegendMarker: ['type', 'style', 'label'],
 	StateLegendLine: ['type', 'style', 'label'],
 	StateLegendArea: ['type', 'style', 'strokeStyle', 'label'],
-	StateViewer: ['search', 'navigation', 'legend', 'scale', 'reset', 'fullscreen'],
+	StateViewer: ['search', 'navigation', 'legend', 'scale', 'reset', 'fullscreen', 'locate'],
 	StatePopup: ['text'],
 	MarkerStyle: STYLE_ROLE_FIELDS.marker,
 	LineStyle: STYLE_ROLE_FIELDS.line,

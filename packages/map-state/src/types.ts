@@ -541,6 +541,12 @@ export interface StateViewer {
 	 * on its iframe. Default: false.
 	 */
 	fullscreen?: boolean;
+	/**
+	 * A button that shows where the viewer is, if they allow it, and follows them until it is
+	 * switched off. With the buttons for zooming, or where they would be. An embedded map needs the
+	 * permission of its page: `allow="geolocation"` on its iframe. Default: false.
+	 */
+	locate?: boolean;
 }
 
 /** @category Legend */

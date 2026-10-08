@@ -51,7 +51,7 @@
 	</div>
 	<div class="stage">
 		<!-- with what the embed code allows the map, e.g. its fullscreen button -->
-		<iframe title="preview" bind:this={iframe} class={'aspect-' + ratio} allow="fullscreen"></iframe>
+		<iframe title="preview" bind:this={iframe} class={'aspect-' + ratio} allow="fullscreen; geolocation"></iframe>
 	</div>
 </div>
 

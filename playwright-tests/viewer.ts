@@ -991,3 +991,76 @@ test('a shared map can have a scale bar, in meters or kilometers', async ({ page
 	await sidebar(page).getByRole('button', { name: 'Back to the map' }).click();
 	await expect(scale).toHaveCount(0);
 });
+
+test('a shared map can show where its visitor is, and follow them until that is switched off', async ({
+	page,
+	context
+}) => {
+	const elements: MapState['elements'] = [{ type: 'marker', point: [13.4, 52.5] }];
+	const state = encodeState({ meta: { viewer: { reset: true, locate: true } }, elements });
+	const locate = page.getByRole('button', { name: 'Find my location' });
+	const center = () =>
+		page.evaluate(() => {
+			const { lng, lat } = (window as unknown as MapWindow).map.getCenter();
+			return [Math.round(lng * 1000) / 1000, Math.round(lat * 1000) / 1000];
+		});
+	await context.grantPermissions(['geolocation']);
+	await context.setGeolocation({ longitude: 9.993, latitude: 53.551 });
+
+	// not without the setting
+	await page.goto('/view/#' + encodeState({ elements }));
+	await waitForMapIsReady(page);
+	await expect(locate).toHaveCount(0);
+
+	// below the button that resets the view; switched on, the map shows the visitor and follows them
+	await page.goto('about:blank');
+	await page.goto('/view/#' + state);
+	await waitForMapIsReady(page);
+	const reset = (await page.getByRole('button', { name: 'Reset view' }).boundingBox())!;
+	expect((await locate.boundingBox())!.y).toBeGreaterThan(reset.y);
+	await expect(locate).toHaveAttribute('aria-pressed', 'false');
+	await locate.click();
+	await expect(locate).toHaveAttribute('aria-pressed', 'true');
+	await expect.poll(center).toStrictEqual([9.993, 53.551]);
+	await expect(page.locator('.maplibregl-user-location-dot')).toBeVisible();
+	await context.setGeolocation({ longitude: 10.02, latitude: 53.56 });
+	await expect.poll(center, { timeout: 15_000 }).toStrictEqual([10.02, 53.56]);
+	// switched off: the position is gone, and the map stays
+	await locate.click();
+	await expect(locate).toHaveAttribute('aria-pressed', 'false');
+	await expect(page.locator('.maplibregl-user-location-dot')).toHaveCount(0);
+	await context.setGeolocation({ longitude: 11, latitude: 54 });
+	await page.waitForTimeout(1500);
+	expect(await center()).toStrictEqual([10.02, 53.56]);
+
+	// embedded in a page of another site: only with the permission of that page
+	const origin = new URL(page.url()).origin;
+	for (const [allow, count] of [
+		['', 0],
+		[' allow="geolocation"', 1]
+	] as const) {
+		const iframe = `<iframe src="${origin}/view/#${state}" style="width:700px;height:500px"${allow}></iframe>`;
+		await page.route('https://other-site.test/', (route) =>
+			route.fulfill({ contentType: 'text/html', body: `<!doctype html><title>Embed</title>${iframe}` })
+		);
+		await page.goto('https://other-site.test/');
+		await waitForMapIsReady(page);
+		const frame = page.frameLocator('iframe');
+		await expect(frame.getByRole('button', { name: 'Reset view' })).toBeVisible();
+		await expect(frame.getByRole('button', { name: 'Find my location' })).toHaveCount(count);
+		await page.unroute('https://other-site.test/');
+	}
+
+	// the editor: the checkbox, and the embed code with all permissions that the buttons need
+	await page.goto('about:blank');
+	await page.goto('/#' + encodeState({ elements }));
+	await waitForMapIsReady(page);
+	await (await menuItem(page, 'Shared map…')).click();
+	await sidebar(page).getByRole('checkbox', { name: 'My location button' }).check();
+	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ locate: true });
+	await expect(locate).toBeVisible();
+	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen button' }).check();
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog.getByLabel('Embed code')).toHaveValue(/ allow="fullscreen; geolocation"><\/iframe>$/);
+});

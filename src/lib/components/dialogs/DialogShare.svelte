@@ -160,7 +160,9 @@
 
 	function getEmbedCode() {
 		// what the buttons of the map need from the page around it
-		const allow = stateManager.mapDocument.controls.fullscreen ? ' allow="fullscreen"' : '';
+		const { fullscreen, locate } = stateManager.mapDocument.controls;
+		const needs = [fullscreen && 'fullscreen', locate && 'geolocation'].filter((need) => need !== false);
+		const allow = needs.length > 0 ? ` allow="${needs.join('; ')}"` : '';
 		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh; border:0"${allow}></iframe>`;
 	}
 

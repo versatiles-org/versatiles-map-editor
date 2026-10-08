@@ -684,7 +684,8 @@ export const VIEWER_DEFAULTS = {
 	legend: 'bottom-left',
 	scale: 'none',
 	reset: false,
-	fullscreen: false
+	fullscreen: false,
+	locate: false
 } as const;
 
 /**
@@ -692,7 +693,7 @@ export const VIEWER_DEFAULTS = {
  * @category Viewer
  * @internal
  */
-export const VIEWER_BUTTONS = ['reset', 'fullscreen'] as const;
+export const VIEWER_BUTTONS = ['reset', 'fullscreen', 'locate'] as const;
 
 /**
  * The choices of each control of the viewer that has a position: "none", or one of its positions.

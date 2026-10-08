@@ -18,7 +18,16 @@ export function isCorner(position: string | undefined): position is Corner {
  * that shows all elements, and the legend; at the bottom the attribution, the scale bar, the buttons
  * and the legend.
  */
-export const CONTROL_ORDER = { search: 0, attribution: 0, scale: 1, navigation: 2, buttons: 3, fit: 4, legend: 5 };
+export const CONTROL_ORDER = {
+	search: 0,
+	attribution: 0,
+	scale: 1,
+	navigation: 2,
+	buttons: 3,
+	locate: 4,
+	fit: 5,
+	legend: 6
+};
 
 /** The size of the controls in a corner, with their margins. */
 export interface StackSize {
@@ -101,6 +110,31 @@ function addOrdered(map: maplibre.Map, control: maplibre.IControl, corner: Corne
 export function addScale(map: maplibre.Map, corner: AttributionCorner): () => void {
 	const control = new maplibre.ScaleControl({ maxWidth: 100, unit: 'metric' });
 	return addOrdered(map, control, corner, CONTROL_ORDER.scale);
+}
+
+/**
+ * Whether the page may ask where its visitor is: on a secure page, and embedded in a page of
+ * another site only with its permission (`allow="geolocation"` on the iframe).
+ */
+export function canLocate(): boolean {
+	if (typeof navigator === 'undefined' || !('geolocation' in navigator) || !window.isSecureContext) return false;
+	// only some browsers tell; the others refuse when the button is used, which MapLibre shows
+	const policy = (document as { featurePolicy?: { allowsFeature?: (feature: string) => boolean } }).featurePolicy;
+	return policy?.allowsFeature?.('geolocation') ?? true;
+}
+
+/**
+ * Add a button that shows where the visitor is, if they allow it: switched on, the map follows
+ * them, until they move the map (the position stays shown) or switch the button off. Returns a
+ * function that removes it again.
+ */
+export function addLocate(map: maplibre.Map, corner: Corner): () => void {
+	const control = new maplibre.GeolocateControl({
+		positionOptions: { enableHighAccuracy: true },
+		trackUserLocation: true,
+		showUserLocation: true
+	});
+	return addOrdered(map, control, corner, CONTROL_ORDER.locate);
 }
 
 /** The label of the compass, which turns the map back. */

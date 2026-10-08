@@ -292,7 +292,8 @@ describe('MapDocument', () => {
 			legend: 'none',
 			scale: 'none',
 			reset: true,
-			fullscreen: false
+			fullscreen: false,
+			locate: false
 		});
 		mapDocument.viewer = { search: 'none', reset: false };
 		expect(mapDocument.viewer).toBeUndefined();
@@ -302,7 +303,8 @@ describe('MapDocument', () => {
 			legend: 'bottom-left',
 			scale: 'none',
 			reset: false,
-			fullscreen: false
+			fullscreen: false,
+			locate: false
 		});
 	});
 

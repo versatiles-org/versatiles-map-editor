@@ -578,6 +578,10 @@
 				"fullscreen": {
 					"type": "boolean",
 					"description": "A button that shows the map on the whole screen, and back. With the buttons for zooming, or where they would be. An embedded map needs the permission of its page: `allow=\"fullscreen\"` on its iframe. Default: false."
+				},
+				"locate": {
+					"type": "boolean",
+					"description": "A button that shows where the viewer is, if they allow it, and follows them until it is switched off. With the buttons for zooming, or where they would be. An embedded map needs the permission of its page: `allow=\"geolocation\"` on its iframe. Default: false."
 				}
 			},
 			"description": "What the viewer shows over the map, and where: a control at a position, or \"none\"; a button (e.g. `reset`) with the buttons for zooming, or not. Controls in the same corner are stacked. Defaults in `VIEWER_DEFAULTS`."
