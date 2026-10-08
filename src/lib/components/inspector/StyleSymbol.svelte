@@ -4,7 +4,7 @@
 	import { LABEL_POSITION_NAMES, type LabelPositionName } from '@versatiles/map-state';
 	import { SymbolStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
-	import { Checkbox, InputRow, ChoiceGroup, Slider, TextField } from '#lib/components/ui/index.js';
+	import { Checkbox, InputRow, ChoiceGroup, Slider, TextArea } from '#lib/components/ui/index.js';
 	import { ColorPicker, FontSelect, SymbolSelector } from '#lib/components/pickers/index.js';
 
 	/** The symbol layers of all selected markers, which are edited together. */
@@ -107,7 +107,21 @@
 
 <InspectorSection title="Label">
 	<InputRow id="{uid}-label" label="Label" mixed={label.mixed}>
-		<TextField id="{uid}-label" bind:value={label.value} onchange={log} />
+		<!-- Mostly one line, so Enter is done with it, as in a line field; Shift and Enter adds a
+		     line. As high as its lines, up to a few. -->
+		<TextArea
+			id="{uid}-label"
+			class="label"
+			rows={Math.min(4, Math.max(1, (label.value ?? '').split('\n').length))}
+			title="Shift and Enter adds a line"
+			bind:value={label.value}
+			onchange={log}
+			onkeydown={(e) => {
+				if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+				e.preventDefault();
+				log();
+			}}
+		/>
 	</InputRow>
 
 	<InputRow id="{uid}-labelColor" label="Text color" mixed={labelColor.mixed}>
@@ -156,3 +170,16 @@
 		<ColorPicker id="{uid}-haloColor" bind:value={haloColor.value} onchange={log} palette={doc.colors} />
 	</InputRow>
 </InspectorSection>
+
+<style>
+	/* the label of a marker: a text area that looks like a line field while it has one line */
+	:global(textarea.field.label) {
+		flex: 1;
+		min-width: 0;
+		height: auto;
+		min-height: var(--size-md);
+		padding-block: 5px;
+		line-height: 1.3;
+		resize: none;
+	}
+</style>

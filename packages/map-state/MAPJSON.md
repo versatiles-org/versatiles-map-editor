@@ -127,7 +127,8 @@ optional.
 Every element has a `type`, its geometry, a `style`, and optionally a `popup`: `{ "text": "…" }`,
 shown when the element is clicked in a shared map. Its `text` is plain, with `**bold**`, line
 breaks and links (`[label](https://…)` or a bare URL). A marker can also have a `label`, the text
-next to its symbol, which its style styles.
+next to its symbol, which its style styles. A label can have several lines (`\n`); the map breaks
+its lines only there.
 
 | `type`    | Geometry                                                                                | Styles                                        |
 | --------- | --------------------------------------------------------------------------------------- | --------------------------------------------- |

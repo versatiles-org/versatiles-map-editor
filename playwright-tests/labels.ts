@@ -286,3 +286,49 @@ test('labels of markers: overlapping ones hidden, and shown from a zoom level', 
 	await page.locator('body').press('ControlOrMeta+z');
 	await expect.poll(meta).toStrictEqual({ labels: { overlap: 'hide', minZoom: 14.5 } });
 });
+
+test('the label of a marker can have several lines, which the map does not break itself', async ({ page }) => {
+	const long = 'A label that is much longer than MapLibre would leave on one line';
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5], label: long }] }));
+	await waitForMapIsReady(page);
+	const stored = async () => {
+		const marker = (await storedState(page)).elements[0];
+		return marker?.type === 'marker' ? marker.label : undefined;
+	};
+	/** How the layer of the marker lays out its label. */
+	const layout = () =>
+		page.evaluate(() => {
+			const { map } = window as unknown as MapWindow;
+			const layer = map
+				.getStyle()
+				.layers.find((l) => l.type === 'symbol' && l.layout?.['text-variable-anchor-offset'] !== undefined)!;
+			return [map.getLayoutProperty(layer.id, 'text-max-width'), map.getLayoutProperty(layer.id, 'text-justify')];
+		});
+	// its lines are the author's, aligned to the side of the symbol
+	expect(await layout()).toStrictEqual([1000, 'auto']);
+
+	const [x, y] = await project(page, [13.4, 52.5]);
+	await page.mouse.click(x + 6, y - 8);
+	const field = page.getByRole('textbox', { name: 'Label' });
+	await expect(field).toHaveValue(long);
+	await expect(field).toHaveAttribute('rows', '1');
+	// Shift and Enter adds a line; Enter is done with the label, as in a line field
+	await field.fill('Town hall');
+	await field.press('Shift+Enter');
+	await page.keyboard.type('Mon to Fri');
+	await expect(field).toHaveAttribute('rows', '2');
+	await field.press('Enter');
+	await expect(field).toHaveValue('Town hall\nMon to Fri');
+	await expect.poll(stored).toBe('Town hall\nMon to Fri');
+	// one undo step
+	await page.getByRole('button', { name: 'Undo' }).click();
+	await expect.poll(stored).toBe(long);
+	await page.getByRole('button', { name: 'Redo' }).click();
+
+	// the list of the elements has it in one line
+	await page.keyboard.press('Escape');
+	await page.keyboard.press('e');
+	await expect(page.getByRole('listbox', { name: 'Elements' }).getByRole('option')).toHaveText([
+		/Marker: Town hall Mon to Fri/
+	]);
+});

@@ -6,7 +6,11 @@ import {
 	stateFromMapJSON,
 	stateToMapJSON,
 	unknownMapJSONFields,
-	type MapState
+	type MapState,
+	decodeState,
+	encodeState,
+	stateFromGeoJSON,
+	stateToGeoJSON
 } from './index.js';
 
 describe('.mapjson files', () => {
@@ -81,6 +85,16 @@ describe('.mapjson files', () => {
 		// as text: no long tails, e.g. of 0.1 + 0.2
 		const text = JSON.stringify(stateToMapJSON({ elements: [{ type: 'marker', point: [0.1 + 0.2, 1.1 + 2.2] }] }));
 		expect(text).toContain('[0.3,3.3]');
+	});
+
+	it('keep the lines of a label, in files, links and GeoJSON, also of a text of Windows', () => {
+		const state: MapState = { elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Town hall\nMon to Fri' }] };
+		const { $schema: _schema, ...written } = stateToMapJSON(state);
+		expect(stateFromMapJSON(written)).toStrictEqual(state);
+		expect(decodeState(encodeState(state))).toStrictEqual(state);
+		expect(stateFromGeoJSON(stateToGeoJSON(state))).toStrictEqual(state);
+		const windows = { elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Town hall\r\nMon to Fri' }] };
+		expect(stateFromMapJSON(windows)).toStrictEqual(state);
 	});
 
 	it('keep only what is valid, since they may contain anything', () => {

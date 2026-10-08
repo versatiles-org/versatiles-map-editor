@@ -274,6 +274,9 @@ export interface LabelOptions {
 export const DEFAULT_LABEL_OPTIONS: LabelOptions = { overlap: 'show', minZoom: 0 };
 
 /** The layout properties of the labels of markers for the options, see `LabelOptions`. */
+/** A width of a label in letters that none reaches, so MapLibre does not break its lines. */
+const NO_LINE_BREAKS = 1000;
+
 export function labelLayout({ overlap, minZoom }: LabelOptions) {
 	// a property, so "{…}" in a label is not replaced with feature properties
 	const label: ExpressionSpecification = ['get', 'label'];
@@ -383,7 +386,11 @@ function symbolLayer(font: string, id: string): LayerSpecification {
 			// marker labels use the font of the map labels
 			'text-font': ['literal', [font]],
 			'text-size': ['*', ['get', 'labelSize'], 16],
-			'text-justify': 'left',
+			// A label has the lines that its author gave it: MapLibre would break a long one itself,
+			// wherever it sees fit. Its lines are aligned to the side of the symbol: left beside it at
+			// the right, right at the left, centered above and below.
+			'text-max-width': NO_LINE_BREAKS,
+			'text-justify': 'auto',
 			'text-variable-anchor-offset': labelOffsets()
 		},
 		paint: {

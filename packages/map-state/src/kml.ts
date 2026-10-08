@@ -122,7 +122,8 @@ function featureToPlacemark(feature: GeoJSON.Feature): string {
 
 	const label = typeof p['symbol-label'] === 'string' ? p['symbol-label'] : '';
 	return xml('Placemark', [
-		label ? xml('name', label) : undefined,
+		// a name is one line in other programs; the label with its lines is in the data below
+		label ? xml('name', label.replace(/\s*\n\s*/g, ' ').trim()) : undefined,
 		typeof p.description === 'string' ? xml('description', p.description) : undefined,
 		xml('Style', style),
 		extendedData(data),

@@ -105,6 +105,13 @@ describe('stateToKML', () => {
 		expect(lookAt({ elements: [] })).toBeUndefined();
 	});
 
+	it('keeps a label of several lines, whose name for other programs is one line', () => {
+		const lines: MapState = { elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Town hall\nMon to Fri' }] };
+		const kml = stateToKML(lines);
+		expect(kml).toContain('<name>Town hall Mon to Fri</name>');
+		expect(stateFromKML(kml)).toStrictEqual(lines);
+	});
+
 	it('writes no camera of the editor', () => {
 		expect(kml).not.toContain('versatiles:view');
 		expect(kml).toContain('versatiles:meta');

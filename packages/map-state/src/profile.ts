@@ -355,9 +355,12 @@ export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
 
 // ----- symbol (marker) -----
 
-/** The label of a marker, as a field of the element: `{ label }`, or nothing for none. */
+/**
+ * The label of a marker, as a field of the element: `{ label }`, or nothing for none. It can have
+ * several lines, each ended by a line feed (also in a text of Windows).
+ */
 export function labelOf(value: unknown): { label?: string } {
-	const label = sanitizeString(value);
+	const label = sanitizeString(value)?.replace(/\r\n?/g, '\n');
 	return label ? { label } : {};
 }
 
