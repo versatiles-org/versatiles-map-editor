@@ -105,8 +105,8 @@ export const MARKER_DEFAULTS: Defaults<
 	size: 1,
 	labelSize: 1,
 	haloWidth: 1,
-	// the flag: the symbol of markers that name none (new markers of the editor get a pin)
-	symbol: 'base:icon-embassy',
+	// a pin: the symbol of markers that name none, e.g. the new markers of the editor
+	symbol: 'extras:pin-teardrop',
 	labelPosition: 'auto',
 	labelColor: '#000000',
 	// the font of the labels of the background map

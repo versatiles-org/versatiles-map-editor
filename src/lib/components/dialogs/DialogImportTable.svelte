@@ -20,7 +20,6 @@
 	} from '#lib/components/table_import/index.js';
 	import { getColorScheme, config } from '#lib/background/index.js';
 	import { ROLE_DEFAULTS } from '#lib/style/index.js';
-	import { NEW_MARKER_SYMBOL } from '#lib/element/index.js';
 	import { formatCount } from '#lib/components/common/index.js';
 
 	const { doc }: { doc: MapDocumentInteractive } = $props();
@@ -34,7 +33,7 @@
 	let hasHeader = $state(true);
 	const table: Table | undefined = $derived(text.trim() ? parseTable(text, hasHeader) : undefined);
 
-	let settings: ImportSettings = $state(defaultSettings(ROLE_DEFAULTS.symbol.color, NEW_MARKER_SYMBOL));
+	let settings: ImportSettings = $state(defaultSettings(ROLE_DEFAULTS.symbol.color, ROLE_DEFAULTS.symbol.symbol));
 	// the colors of the categories, from the map's color scheme
 	const colors = $derived(getColorScheme(doc.colors.scheme, config.current.colorSchemes).colors);
 

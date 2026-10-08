@@ -218,7 +218,7 @@ export type DashName = (typeof DASH_NAMES)[number];
  * @category Styles
  */
 export interface MarkerStyle {
-	/** The image of the symbol, e.g. "icons:anchor", or "" for none. Default: a flag. */
+	/** The image of the symbol, e.g. "icons:anchor", or "" for none. Default: a pin, "extras:pin-teardrop". */
 	symbol?: string;
 	/**
 	 * The color of the symbol, with its opacity.

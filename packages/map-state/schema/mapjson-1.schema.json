@@ -288,7 +288,7 @@
 			"properties": {
 				"symbol": {
 					"type": "string",
-					"description": "The image of the symbol, e.g. \"icons:anchor\", or \"\" for none. Default: a flag."
+					"description": "The image of the symbol, e.g. \"icons:anchor\", or \"\" for none. Default: a pin, \"extras:pin-teardrop\"."
 				},
 				"color": {
 					"$ref": "#/definitions/HexColor",

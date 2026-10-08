@@ -59,7 +59,7 @@ test('searching a place', { tag: '@cross-browser' }, async ({ page }) => {
 	await page.getByRole('button', { name: 'Add marker here' }).click();
 	await expect
 		.poll(async () => (await storedState(page)).elements)
-		.toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163], style: { symbol: 'extras:pin-teardrop' } }]);
+		.toStrictEqual([{ type: 'marker', point: [13.3777, 52.5163] }]);
 	await expect(page.getByRole('button', { name: 'Add marker here' })).toBeHidden();
 
 	// errors are shown

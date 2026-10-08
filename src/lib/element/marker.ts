@@ -5,14 +5,11 @@ import type { StateElement, StateElementMarker } from '@versatiles/map-state';
 import { type GeoPoint, movePoint, snapPoint } from '../geometry.js';
 
 /**
- * The symbol of the markers that the editor creates: a pin. A marker without a symbol, e.g. in an
- * imported file, has the flag of the format (MARKER_DEFAULTS).
+ * The state of a new marker of the editor at the point, e.g. drawn or at a found place: with the
+ * default style, a pin.
  */
-export const NEW_MARKER_SYMBOL = 'extras:pin-teardrop';
-
-/** The state of a new marker of the editor at the point, e.g. drawn or at a found place. */
 export function newMarkerState(point: GeoPoint): StateElementMarker {
-	return { type: 'marker', point, style: { symbol: NEW_MARKER_SYMBOL } };
+	return { type: 'marker', point };
 }
 
 export class MarkerElement extends AbstractElement {

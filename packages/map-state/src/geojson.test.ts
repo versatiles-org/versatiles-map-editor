@@ -12,7 +12,7 @@ describe('stateToGeoJSON', () => {
 		const doc = stateToGeoJSON({ elements: [{ type: 'marker', point: [13.4, 52.5] }] });
 		const f = doc.features[0];
 		expect(f.geometry).toEqual({ type: 'Point', coordinates: [13.4, 52.5] });
-		expect(f.properties).toMatchObject({ 'symbol-pattern': 'base:icon-embassy', 'symbol-color': '#ff0000' });
+		expect(f.properties).toMatchObject({ 'symbol-pattern': 'extras:pin-teardrop', 'symbol-color': '#ff0000' });
 	});
 
 	it('maps a line to a LineString feature with stroke properties', () => {

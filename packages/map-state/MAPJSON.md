@@ -23,7 +23,7 @@ defaults, and published at the address that every file names in `$schema`:
 }
 ```
 
-A marker at the Brandenburg Gate in Berlin, with the default style: a red flag. The map shows
+A marker at the Brandenburg Gate in Berlin, with the default style: a red pin. The map shows
 its elements, on the editor's default background map.
 
 ## A fuller file
@@ -151,7 +151,7 @@ other kinds are unknown fields (see [Basics](#basics)).
 | Field           | Meaning                                                                                                                                                                                                                       |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `color`         | the symbol, default `"#ff0000"`                                                                                                                                                                                               |
-| `symbol`        | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a flag                                                                                                                                                   |
+| `symbol`        | the image, e.g. `"icons:anchor"` (see below), `""` for none; default a pin                                                                                                                                                    |
 | `size`          | a factor of the symbol, default `1`                                                                                                                                                                                           |
 | `rotation`      | the symbol, in whole degrees clockwise, −180 to 180, default `0`                                                                                                                                                              |
 | `haloWidth`     | around the symbol and the label, in pixels, default `1`                                                                                                                                                                       |
@@ -273,7 +273,7 @@ something. The editor keeps them, but does not write them itself.
 small copy of an element and a text: `{ "type", "style", "outlineStyle", "label" }`. The `type` is
 `"marker"`, `"line"` or `"area"` (of a polygon or a circle), and `style` and `outlineStyle` are
 styles like those of such an element (see [Styles](#styles)), with the same defaults: e.g. a marker
-entry without a style is a red flag. Only areas have an `outlineStyle`, for their outline. The
+entry without a style is a red pin. Only areas have an `outlineStyle`, for their outline. The
 entry's `label` is its text.
 
 | Field    | Values                                                                           | Default        |

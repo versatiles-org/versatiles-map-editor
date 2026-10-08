@@ -34,7 +34,7 @@ describe('SymbolStyle', () => {
 		expect(layer.rotation).toBe(0);
 		expect(layer.size).toBe(1);
 		expect(layer.haloWidth).toBe(1);
-		expect(layer.symbol).toBe('base:icon-embassy');
+		expect(layer.symbol).toBe('extras:pin-teardrop');
 		expect(layer.label).toBe('');
 	});
 
@@ -205,7 +205,7 @@ describe('SymbolStyle', () => {
 		// the label is a field of the marker, not of its style
 		expect(layer.label).toBe('Label');
 		expect(layer.getState()).toStrictEqual({ color: '#00ff00' });
-		expect(layer.symbol).toBe('base:icon-embassy');
+		expect(layer.symbol).toBe('extras:pin-teardrop');
 	});
 
 	it('should restore falsy values', () => {
