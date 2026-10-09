@@ -19,8 +19,10 @@ async function useOwnTileServer(page: Page): Promise<{ own: string[]; versatiles
 	const requests = { own: [] as string[], versatiles: [] as string[] };
 	page.on('request', (request) => {
 		const url = request.url();
-		if (url.startsWith(OWN_SERVER)) requests.own.push(url);
-		if (url.startsWith('https://tiles.versatiles.org')) requests.versatiles.push(url);
+		// by the server, not by the start of the address, which another host could have too
+		const { origin } = new URL(url);
+		if (origin === OWN_SERVER) requests.own.push(url);
+		if (origin === 'https://tiles.versatiles.org') requests.versatiles.push(url);
 	});
 	return requests;
 }
