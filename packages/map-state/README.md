@@ -13,7 +13,7 @@ It has no runtime dependencies (`@types/geojson` only provides the TypeScript ty
 module and works in browsers and in Node.js 18 or newer, e.g. to render shared maps in other apps
 or to create links on a server.
 
-> **The formats are frozen.** From version 2.0.0 of this package on, including its release
+> **The formats are frozen.** From version 1.0.1 of this package on, including its release
 > candidates, every later version reads the links and the `.mapjson` files that an earlier one
 > wrote, and gives the same map, see [Compatibility](#compatibility). Version 1.0.0 was published
 > before the formats were settled, and is deprecated: its links and files are not read. Release
@@ -282,7 +282,7 @@ languages and scripts are in `src/__fixtures__/languages/`.
 
 Both formats, the base64 string of links and `.mapjson` files, are at version 1, and frozen.
 
-**The promise.** A link or a file that a released version of this package wrote (from 2.0.0 on,
+**The promise.** A link or a file that a released version of this package wrote (from 1.0.1 on,
 with its release candidates) is read by every later version, as the same map. That holds for
 later versions of the formats too: a version of the package that writes version 2 still reads
 version 1.

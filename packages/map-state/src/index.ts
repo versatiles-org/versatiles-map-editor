@@ -103,7 +103,7 @@
  *   what differs. The readers of this package return states without defaults.
  * - **Coordinates** are `[longitude, latitude]` in degrees with 5 decimal places, about 1 m.
  * - **The formats are frozen.** Every later version of the package reads the links and the
- *   `.mapjson` files of an earlier one (from 2.0.0 on), as the same map; an older version refuses
+ *   `.mapjson` files of an earlier one (from 1.0.1 on), as the same map; an older version refuses
  *   a link of a newer format with a {@link LinkVersionError}, a file with a
  *   {@link MapJSONVersionError}. The
  *   [README](https://github.com/versatiles-org/versatiles-map-editor/blob/main/packages/map-state/README.md#compatibility)

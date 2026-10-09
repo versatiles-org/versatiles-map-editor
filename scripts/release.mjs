@@ -6,7 +6,8 @@
  * nothing; `--yes` releases it without asking, e.g. where no one can answer. `--rc` releases
  * release candidates, e.g. "4.0.0-rc.1": the package on npm under the tag "next" instead of
  * "latest", the editor as a prerelease on GitHub. A release without `--rc` after candidates is
- * their version.
+ * their version. `--package-version 1.0.1-rc.1` releases the package as this version instead of the
+ * one that its commits lead to, e.g. to stay below the next major version.
  *
  * - The editor: the commits since the tag of its version ("v…"). The tag starts the workflow
  *   release-editor.yml, which adds the ZIP archive to the GitHub release.
@@ -36,6 +37,9 @@ const REPO_URL = 'https://github.com/versatiles-org/versatiles-map-editor';
 const dryRun = process.argv.includes('--dry-run') || process.argv.includes('-n');
 const yes = process.argv.includes('--yes') || process.argv.includes('-y');
 const candidate = process.argv.includes('--rc');
+// the version of the package, instead of the one that its commits lead to
+const packageVersionAt = process.argv.indexOf('--package-version');
+const packageVersion = packageVersionAt < 0 ? undefined : process.argv[packageVersionAt + 1];
 
 /** Stops the release with a message. */
 function fail(message) {
@@ -117,7 +121,14 @@ if (!published) {
 	const base = tagExists(`map-state-v${last}`) ? `map-state-v${last}` : npmView([`${PACKAGE}@${last}`, 'gitHead']);
 	if (!base) fail(`neither the tag map-state-v${last} nor npm knows the commit of ${PACKAGE} ${last}`);
 	const commits = commitsSince(base, MAP_STATE_PATHS);
-	const version = nextVersion(last, commits, { candidate });
+	if (packageVersion !== undefined) {
+		if (!/^\d+\.\d+\.\d+(-rc\.\d+)?$/.test(packageVersion))
+			fail(`"${packageVersion}" is no version like 1.0.1 or 1.0.1-rc.1`);
+		if (isCandidate(packageVersion) !== candidate) fail('a release candidate is released with --rc, and only then');
+		if (npmView([`${PACKAGE}@${packageVersion}`, 'version'])) fail(`${PACKAGE} ${packageVersion} is on npm already`);
+		if (tagExists(`map-state-v${packageVersion}`)) fail(`the tag map-state-v${packageVersion} exists already`);
+	}
+	const version = packageVersion ?? nextVersion(last, commits, { candidate });
 	if (version) {
 		releases.push({
 			name: PACKAGE,

@@ -240,7 +240,11 @@ with the changes, and asks for confirmation before it changes anything (`--dry-r
 **Release candidates.** `npm run release -- --rc` releases candidates: versions like `4.0.0-rc.1`, counted up
 with every candidate, the editor as a prerelease on GitHub, the package on npm under the tag
 `next`, so `latest` stays the last release. A release without `--rc` after candidates gets their
-version, e.g. `4.0.0`, also without new commits.
+version, e.g. `4.0.0`, also without new commits. `--package-version 1.0.1-rc.1` gives the package
+this version instead of the one that its commits lead to: the package stays at 1.0.x for version 1
+of the formats, although its changes since 1.0.0, which was never used, would make it 2.0.0. So
+its candidates and its release are `npm run release -- --rc --package-version 1.0.1-rc.1` (then
+`-rc.2`, …) and `npm run release -- --package-version 1.0.1`.
 
 **The formats of the maps are frozen.** From version 4.0.0 of the editor on, with its release
 candidates, every later version opens the links and the `.mapjson` files of an earlier one, as the
