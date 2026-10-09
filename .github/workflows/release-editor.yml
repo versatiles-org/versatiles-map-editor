@@ -195,4 +195,5 @@ jobs:
             *-*) tag=next ;;
             *) tag=latest ;;
           esac
-          npm publish "publish/versatiles-map-editor-$VERSION.tgz" --provenance --access public --tag "$tag"
+          # "./" first: "publish/…" alone is read as a repository on GitHub, "user/repository"
+          npm publish "./publish/versatiles-map-editor-$VERSION.tgz" --provenance --access public --tag "$tag"
