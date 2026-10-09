@@ -65,7 +65,12 @@ export default defineConfig({
 		{
 			name: 'firefox',
 			use: { ...devices['Desktop Firefox'] },
-			grep: allTests ? undefined : /@cross-browser/
+			grep: allTests ? undefined : /@cross-browser/,
+			// On the runners of CI, Firefox draws the map without a graphics card: its tests take twice
+			// as long as those of Chromium in the middle, and the ones with terrain, a preview or many
+			// pages ran into the 60 s of a test, and into the 5 s of waiting for a state. So it gets
+			// three times as long for both there.
+			...(process.env.CI ? { timeout: 180_000, expect: { timeout: 15_000 } } : {})
 		}
 	]
 });
