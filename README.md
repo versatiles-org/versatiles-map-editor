@@ -211,7 +211,9 @@ A missing file leaves the defaults. An invalid field gets its default, so one mi
 Every change on `main` is deployed to GitHub Pages once CI has passed. For running the editor on
 another web server, it has releases: each is a ZIP archive of the build on the
 [releases page](https://github.com/versatiles-org/versatiles-map-editor/releases), with the notes of
-its changes. The version is in `package.json`, and the editor shows it as the tooltip of its title
+its changes, and the same build as the npm package
+[`@versatiles/map-editor`](https://www.npmjs.com/package/@versatiles/map-editor), for projects that
+get the editor like their other dependencies. The version is in `package.json`, and the editor shows it as the tooltip of its title
 and in the `generator` of its pages.
 
 To release, run `npm run release` on `main`, with everything committed and the
@@ -233,9 +235,29 @@ with the changes, and asks for confirmation before it changes anything (`--dry-r
    `map-state-v1.1.0`), pushes the commit with only these tags, and creates the GitHub releases
    with the changes.
 4. The tag `v…` starts the workflow `release-editor.yml`, which checks that the tag matches the
-   version, runs the unit tests, builds the editor, and adds `versatiles-map-editor-<version>.zip`
-   to its release. If no workflow started, it can be started by hand for the tag:
-   `gh workflow run release-editor.yml -f tag=v3.1.0`.
+   version, runs the unit tests, builds the editor, adds `versatiles-map-editor-<version>.zip`
+   to its release, and publishes the package `@versatiles/map-editor` of the same version to npm.
+   If no workflow started, it can be started by hand for the tag:
+   `gh workflow run release-editor.yml -f tag=v3.1.0`; a version that is on npm already is left
+   as it is.
+
+**The npm package of the editor.** `@versatiles/map-editor` is the built site in `dist/`, with a
+small `package.json` of the version of the editor and no dependencies. It is made for a release
+and not committed: `npm run build && npm run pack-editor` writes it to `release/npm/`
+(`scripts/release/pack_editor.mjs`; its README is `scripts/release/editor_package_readme.md`), and
+`npm pack --dry-run ./release/npm` shows what would be published. It has the default
+`map-editor.config.jsonc`, with `tiles.versatiles.org` as its tile server, like the archive: a
+site with a tile server of its own replaces the file by one with `"tileServer": "/"`.
+
+**Publishing to npm** needs no token: npm knows the two workflows as trusted publishers of their
+packages. That is set once per package on npmjs.com, under Settings → Trusted Publisher, GitHub
+Actions: the organization `versatiles-org`, the repository `versatiles-map-editor`, the workflow
+`release-editor.yml` for `@versatiles/map-editor` (`release-map-state.yml` for
+`@versatiles/map-state`), no environment, and "Allow npm publish". npm offers this only for a
+package that exists, so the first version of a package is published by hand:
+`npm publish ./release/npm --access public` for the editor. Until then its job warns and
+publishes nothing. Without a trusted publisher npm answers a publish with 404, with one that may
+not publish with 403 ("OIDC permission denied for this action").
 
 **Release candidates.** `npm run release -- --rc` releases candidates: versions like `4.0.0-rc.1`, counted up
 with every candidate, the editor as a prerelease on GitHub, the package on npm under the tag

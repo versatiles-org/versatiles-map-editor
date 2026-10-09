@@ -29,6 +29,13 @@ The editor is then at `https://example.org/map-editor/`, and the viewer of share
 without the slash at the end of its folder, e.g. `https://example.org/map-editor`, as some web
 servers and CDNs serve it, the editor goes on to the address with the slash.
 
+**With npm.** The same site is the package
+[`@versatiles/map-editor`](https://www.npmjs.com/package/@versatiles/map-editor), for a project
+that gets the editor like its other dependencies, e.g. to be told about updates:
+`npm install @versatiles/map-editor`, then copy `node_modules/@versatiles/map-editor/dist/` to your
+web server. It has no code to import. Its `map-editor.config.jsonc` is the default file, as in
+the archive.
+
 To try it on your computer, run a small web server in the folder, e.g.
 `npx serve versatiles-map-editor` or `python3 -m http.server --directory versatiles-map-editor`,
 and open the address it prints.
@@ -166,7 +173,11 @@ than the editor, it must allow requests from the editor's pages (CORS).
 
 ## Updating
 
-Download the new release and replace the files of the editor, but **keep your
-`map-editor.config.jsonc`**: the archive contains the default file, which would replace yours. Check the
-notes of the release for changes of the map format: after one, older links and maps in the browser
-storage may not open any more.
+Download the new release (or update the npm package) and replace the files of the editor, but
+**keep your `map-editor.config.jsonc`**: the archive and the package contain the default file,
+which would replace yours.
+
+Shared maps keep working: from version 4.0.0 on, every later version of the editor opens the
+links and the files of an earlier one, as the same map. The other direction does not hold: an
+older editor does not open a map that uses something it does not know yet, e.g. a `.mapjson`
+file that was saved with a newer editor elsewhere. So keep the editor that you host up to date.
