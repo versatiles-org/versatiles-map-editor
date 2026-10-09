@@ -135,7 +135,7 @@ describe('the JSON Schema of .mapjson files', () => {
 	it('agrees with the reader about what is valid', () => {
 		const withLabels = (minZoom: number) => ({ meta: { labels: { minZoom } }, elements: [] });
 		// every zoom level of the labels with one decimal place, which a division of floats would not
-		for (let tenths = 1; tenths <= 240; tenths++) {
+		for (let tenths = 1; tenths <= 220; tenths++) {
 			const file = withLabels(tenths / 10);
 			expect(validate(file), `${tenths / 10}: ${errors().join(', ')}`).toBe(true);
 			expect(stateFromMapJSON(file).meta?.labels?.minZoom).toBe(tenths / 10);

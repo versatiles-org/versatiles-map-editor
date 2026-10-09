@@ -61,6 +61,7 @@ export interface StateFrame {
 	 * clockwise from north, e.g. 90 with east at the top. Default: 0, north at the top.
 	 * @exclusiveMinimum -180
 	 * @maximum 180
+	 * @default 0
 	 */
 	bearing?: number;
 	/**
@@ -68,6 +69,7 @@ export interface StateFrame {
 	 * Default: 0.
 	 * @minimum 0
 	 * @maximum 60
+	 * @default 0
 	 */
 	pitch?: number;
 }
@@ -448,9 +450,9 @@ export interface StateLabels {
 	overlap?: 'show' | 'hide';
 	/**
 	 * The zoom level from which the labels of markers are shown, with one decimal place, above 0 and
-	 * up to 24, e.g. 12.5. Without it, at every zoom level.
+	 * up to 22 (`MAX_ZOOM`), e.g. 12.5. Without it, at every zoom level.
 	 * @exclusiveMinimum 0
-	 * @maximum 24
+	 * @maximum 22
 	 */
 	minZoom?: number;
 }
@@ -504,51 +506,78 @@ export const SCALE_POSITIONS = ['bottom-left', 'bottom-right'] as const;
  * @category Viewer
  */
 export interface StateViewer {
-	/** The address search. Default: "none". */
+	/**
+	 * The address search. Default: "none".
+	 * @default "none"
+	 */
 	search?: (typeof SEARCH_POSITIONS)[number] | 'none';
 	/**
 	 * The place of the navigation buttons: those for zooming, the compass, and the buttons to
 	 * reset the view, for the whole screen and for the viewer's location, as far as the map has
 	 * them. Default: "top-right".
+	 * @default "top-right"
 	 */
 	navigation?: (typeof NAVIGATION_POSITIONS)[number];
 	/**
 	 * The buttons for zooming in and out, of the navigation buttons, and with them the compass of
 	 * a map that its viewers can turn. Default: true.
+	 * @default true
 	 */
 	zoomButtons?: boolean;
-	/** The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left". */
+	/**
+	 * The legend, if the map has one: a side (centered) or a corner. Default: "bottom-left".
+	 * @default "bottom-left"
+	 */
 	legend?: (typeof LEGEND_POSITIONS)[number] | 'none';
-	/** A bar with the length that it stands for on the map, in meters or kilometers. Default: "none". */
+	/**
+	 * A bar with the length that it stands for on the map, in meters or kilometers. Default: "none".
+	 * @default "none"
+	 */
 	scale?: (typeof SCALE_POSITIONS)[number] | 'none';
 	/**
 	 * A button that shows the map as it opened: its area, its rotation and its tilt. One of the
 	 * navigation buttons. Default: false.
+	 * @default false
 	 */
 	reset?: boolean;
 	/**
 	 * A button that shows the map on the whole screen, and back. One of the navigation buttons. An
 	 * embedded map needs the permission of its page: `allow="fullscreen"`
 	 * on its iframe. Default: false.
+	 * @default false
 	 */
 	fullscreen?: boolean;
 	/**
 	 * A button that shows where the viewer is, if they allow it, and follows them until it is
 	 * switched off. One of the navigation buttons. An embedded map needs the
 	 * permission of its page: `allow="geolocation"` on its iframe. Default: false.
+	 * @default false
 	 */
 	locate?: boolean;
-	/** Viewers can move the map. Default: true. */
+	/**
+	 * Viewers can move the map. Default: true.
+	 * @default true
+	 */
 	canPan?: boolean;
-	/** Viewers can zoom in and out. Default: true. */
+	/**
+	 * Viewers can zoom in and out. Default: true.
+	 * @default true
+	 */
 	canZoom?: boolean;
-	/** Viewers can rotate the map. Default: false. */
+	/**
+	 * Viewers can rotate the map. Default: false.
+	 * @default false
+	 */
 	canRotate?: boolean;
-	/** Viewers can tilt the map. Default: false. */
+	/**
+	 * Viewers can tilt the map. Default: false.
+	 * @default false
+	 */
 	canTilt?: boolean;
 	/**
 	 * Viewers stay in the area that the map shows when it opens: they cannot zoom out further, nor
 	 * move the map beyond it. Default: false.
+	 * @default false
 	 */
 	confine?: boolean;
 	/**
@@ -573,21 +602,37 @@ export interface StateViewer {
 	 * page, and the map zooms with Ctrl (or ⌘) and the wheel, and moves on touch screens with two
 	 * fingers; "free" zooms the map. A map in a window of its own is always free.
 	 * Default: "protected".
+	 * @default "protected"
 	 */
 	scrollZoom?: (typeof SCROLL_ZOOMS)[number];
 }
 
 /** @category Legend */
 export interface StateLegend {
-	/** How the entries are arranged. "inline" flows like text. Default: "vertical". */
+	/**
+	 * How the entries are arranged. "inline" flows like text. Default: "vertical".
+	 * @default "vertical"
+	 */
 	layout?: (typeof LEGEND_LAYOUTS)[number];
-	/** Default: "sans-serif". */
+	/**
+	 * Default: "sans-serif".
+	 * @default "sans-serif"
+	 */
 	font?: (typeof LEGEND_FONTS)[number];
-	/** The texts of all entries in bold. Default: false. */
+	/**
+	 * The texts of all entries in bold. Default: false.
+	 * @default false
+	 */
 	bold?: boolean;
-	/** The texts of all entries in italic. Default: false. */
+	/**
+	 * The texts of all entries in italic. Default: false.
+	 * @default false
+	 */
 	italic?: boolean;
-	/** The background and the border of the legend. Default: "light". */
+	/**
+	 * The background and the border of the legend. Default: "light".
+	 * @default "light"
+	 */
 	theme?: (typeof LEGEND_THEMES)[number];
 	entries: StateLegendEntry[];
 }

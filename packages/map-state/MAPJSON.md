@@ -243,7 +243,7 @@ and their images at `…/sprites/<sheet>.json`. An unknown name is drawn as noth
 | Field     | Values                                                                                                                                 | Default       |
 | --------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | `overlap` | labels of markers that would overlap other labels: `"show"` them all, also on top of each other, or `"hide"` them (their symbols stay) | `"show"`      |
-| `minZoom` | the zoom level from which the labels of markers are shown, above 0 and up to 24, with one decimal place, e.g. `12.5`                   | at every zoom |
+| `minZoom` | the zoom level from which the labels of markers are shown, above 0 and up to 22, with one decimal place, e.g. `12.5`                   | at every zoom |
 
 ### Background map
 

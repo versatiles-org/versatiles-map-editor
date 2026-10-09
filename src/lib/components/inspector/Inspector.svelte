@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { addLegendEntry, type MapDocumentInteractive } from '#lib/editor/index.js';
+	import { MAX_ZOOM } from '@versatiles/map-state';
 	import StyleEditor from './StyleEditor.svelte';
 	import {
 		Icon,
@@ -81,7 +82,7 @@
 		// rounded down to one decimal place, so the labels show at this zoom
 		setLabelMinZoom(Math.min(MAX_LABEL_ZOOM, Math.max(0.1, Math.floor(zoom * 10) / 10)));
 	}
-	const MAX_LABEL_ZOOM = 22;
+	const MAX_LABEL_ZOOM = MAX_ZOOM;
 
 	function addLegend() {
 		addLegendEntry(doc);

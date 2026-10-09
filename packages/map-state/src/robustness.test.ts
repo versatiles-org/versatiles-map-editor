@@ -401,6 +401,26 @@ describe('the writer writes only what the reader reads', () => {
 		expect(read(read(state))).toStrictEqual(read(state));
 	});
 
+	it('has the line breaks of every text alike, also of one written on Windows', () => {
+		const state: MapState = {
+			meta: { legend: { entries: [{ type: 'line', label: 'A\r\nB' }] } },
+			elements: [{ type: 'marker', point: [0, 0], label: 'A\r\nB', popup: { text: 'A\r\nB\rC' } }]
+		};
+		const expected: MapState = {
+			meta: { legend: { entries: [{ type: 'line', label: 'A\nB' }] } },
+			elements: [{ type: 'marker', point: [0, 0], label: 'A\nB', popup: { text: 'A\nB\nC' } }]
+		};
+		expect(read(state)).toStrictEqual(expected);
+		expect(stateFromMapJSON(state)).toStrictEqual(expected);
+	});
+
+	it('shows the labels of markers from a zoom level that a map has', () => {
+		const labels = (minZoom: number) => ({ elements: [], meta: { labels: { minZoom } } });
+		expect(read(labels(22)).meta).toStrictEqual({ labels: { minZoom: 22 } });
+		expect(read(labels(22.1)).meta).toBeUndefined();
+		expect(stateFromMapJSON(labels(23)).meta).toBeUndefined();
+	});
+
 	it('refuses a number that does not fit its bits instead of writing another one', () => {
 		expect(() => new StateWriter().writeInteger(64, 6)).toThrow('64 does not fit 6 bits');
 		expect(() => new StateWriter().writeInteger(-1, 6)).toThrow();

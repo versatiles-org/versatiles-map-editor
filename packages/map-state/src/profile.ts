@@ -701,7 +701,7 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	for (const entry of entries) {
 		if (typeof entry !== 'object' || entry === null) continue;
 		const e = entry as Record<string, unknown>;
-		const label = strictString(e.label) ?? '';
+		const label = strictString(e.label)?.replace(/\r\n?/g, '\n') ?? '';
 		const type = LEGEND_ENTRY_TYPES.find((t) => t === e.type);
 		if (!type) continue;
 		legend.entries.push(sanitizeLegendEntry(type, e.style, e.outlineStyle, label));
@@ -713,12 +713,13 @@ export function sanitizeLegend(value: unknown): StateLegend | undefined {
 
 /**
  * A zoom level from which the labels of markers are shown, with one decimal place, above 0 and up
- * to 24, else undefined. Other numbers are rounded to one decimal place.
+ * to the largest of a map (`MAX_ZOOM`), else undefined. Other numbers are rounded to one decimal
+ * place.
  */
 export function sanitizeLabelMinZoom(value: unknown): number | undefined {
 	if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
 	const zoom = Math.round(value * 10) / 10;
-	return zoom > 0 && zoom <= 24 ? zoom : undefined;
+	return zoom > 0 && zoom <= MAX_ZOOM ? zoom : undefined;
 }
 
 /** The settings of the labels that differ from the defaults, or undefined if none does. */
@@ -897,7 +898,8 @@ export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
 /** A popup with a text that is not blank, or undefined. */
 function sanitizePopup(value: unknown): StatePopup | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
-	const text = strictString((value as Record<string, unknown>).text);
+	// with the line breaks of every text of a map, also of one written on Windows
+	const text = strictString((value as Record<string, unknown>).text)?.replace(/\r\n?/g, '\n');
 	return text?.trim() ? { text } : undefined;
 }
 
