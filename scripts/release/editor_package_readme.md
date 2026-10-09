@@ -15,7 +15,9 @@ your web server serves it, e.g. to `/editor/`:
 
 - `index.html` is the editor, `view/` the read-only viewer that shared maps open in;
 - the site works in any folder and under any address, without a rebuild;
-- it needs no server of its own: maps are kept in the browser and in the links that share them.
+- it needs no server of its own: maps are kept in the browser and in the links that share them;
+- `THIRD_PARTY_LICENSES.txt` has the licenses of the code of other projects in it, e.g. MapLibre
+  GL, which go with every copy.
 
 ## Configuration
 

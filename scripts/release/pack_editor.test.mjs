@@ -38,7 +38,14 @@ afterEach(() => {
 });
 
 describe('the npm package of the built editor', () => {
-	const site = ['index.html', 'view/index.html', '_app/immutable/a.js', '_app/version.json', 'favicon.ico'];
+	const site = [
+		'index.html',
+		'view/index.html',
+		'_app/immutable/a.js',
+		'_app/version.json',
+		'favicon.ico',
+		'THIRD_PARTY_LICENSES.txt'
+	];
 
 	it('has the site in dist/, with its configuration file, without the test page and the schemas', () => {
 		const build = fakeBuild([
@@ -82,8 +89,11 @@ describe('the npm package of the built editor', () => {
 		expect(existsSync(join(out, 'dist/old.html'))).toBe(false);
 	});
 
-	it('needs a build', () => {
+	it('needs a build, with the licenses of the packages in it', () => {
 		expect(() => packEditor({ build: fakeBuild(['other.txt']), out: outFolder() })).toThrow('No build of the editor');
+		expect(() => packEditor({ build: fakeBuild(['index.html']), out: outFolder() })).toThrow(
+			'The build has no THIRD_PARTY_LICENSES.txt'
+		);
 	});
 
 	it('is packed by npm with exactly its files', () => {

@@ -36,6 +36,9 @@ that gets the editor like its other dependencies, e.g. to be told about updates:
 web server. It has no code to import. Its `map-editor.config.jsonc` is the default file, as in
 the archive.
 
+The folder also has `THIRD_PARTY_LICENSES.txt`: the licenses of the code of other projects that
+the editor contains, e.g. MapLibre GL, which ask to go with every copy of it.
+
 To try it on your computer, run a small web server in the folder, e.g.
 `npx serve versatiles-map-editor` or `python3 -m http.server --directory versatiles-map-editor`,
 and open the address it prints.

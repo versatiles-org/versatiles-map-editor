@@ -7,6 +7,7 @@ import { join, resolve } from 'path';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { encodeState, stateFromMapJSON } from './packages/map-state/src/index.js';
+import { thirdPartyLicenses } from './scripts/release/third_party_licenses.mjs';
 
 /**
  * Provides the URL of maplibre-gl's worker as `virtual:maplibre-worker-url`.
@@ -125,6 +126,8 @@ export default defineConfig({
 	plugins: [
 		maplibreWorker(),
 		examples(),
+		// the licenses of the packages in the build, as THIRD_PARTY_LICENSES.txt of the site
+		thirdPartyLicenses(),
 		sveltekit({
 			preprocess: vitePreprocess(),
 			adapter: staticAdapter(),

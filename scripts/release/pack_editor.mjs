@@ -11,6 +11,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { LICENSES_FILE } from './third_party_licenses.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -57,6 +58,8 @@ export function packEditor({ root = ROOT, build = join(root, 'build'), out = joi
 	if (!existsSync(join(build, 'index.html'))) {
 		throw new Error(`No build of the editor in ${build}: run "npm run build" first`);
 	}
+	// the notices that the licenses of the bundled packages ask to go with every copy
+	if (!existsSync(join(build, LICENSES_FILE))) throw new Error(`The build has no ${LICENSES_FILE}`);
 	rmSync(out, { recursive: true, force: true });
 	mkdirSync(out, { recursive: true });
 
