@@ -155,12 +155,14 @@
 					"type": "number",
 					"description": "The size of the labels, as a factor.",
 					"exclusiveMinimum": 0,
+					"maximum": 100,
 					"default": 1
 				},
 				"haloWidth": {
 					"type": "number",
 					"description": "The width of the halo around the labels, in pixels. Default: 2 on the vector map, 1 over the imagery.",
-					"minimum": 0
+					"minimum": 0,
+					"maximum": 1000
 				},
 				"labelsOnTop": {
 					"type": "boolean",
@@ -307,6 +309,7 @@
 					"type": "number",
 					"description": "The size of the symbol, as a factor.",
 					"exclusiveMinimum": 0,
+					"maximum": 100,
 					"default": 1
 				},
 				"rotation": {
@@ -320,6 +323,7 @@
 					"type": "number",
 					"description": "The width of the halo around the symbol and the label, in pixels.",
 					"minimum": 0,
+					"maximum": 1000,
 					"default": 1
 				},
 				"haloColor": {
@@ -336,6 +340,7 @@
 					"type": "number",
 					"description": "The size of the label, as a factor of 16 pixels.",
 					"exclusiveMinimum": 0,
+					"maximum": 100,
 					"default": 1
 				},
 				"labelFont": {
@@ -396,6 +401,7 @@
 					"type": "number",
 					"description": "The width, in pixels.",
 					"minimum": 0,
+					"maximum": 1000,
 					"default": 2
 				},
 				"dash": {
@@ -417,6 +423,7 @@
 					"type": "number",
 					"description": "The width of the arrowheads across the line, as a factor of the width of the line. Only with an arrowhead.",
 					"exclusiveMinimum": 0,
+					"maximum": 100,
 					"default": 3
 				}
 			},
@@ -514,6 +521,7 @@
 					"type": "number",
 					"description": "The width, in pixels.",
 					"minimum": 0,
+					"maximum": 1000,
 					"default": 2
 				},
 				"dash": {
@@ -770,7 +778,8 @@
 				"radius": {
 					"type": "number",
 					"description": "The radius, in meters.",
-					"exclusiveMinimum": 0
+					"exclusiveMinimum": 0,
+					"maximum": 20000000
 				},
 				"style": {
 					"$ref": "#/definitions/AreaStyle",

@@ -1,4 +1,4 @@
-import type { Bounds } from './types.js';
+import { LIMITS, type Bounds } from './types.js';
 
 /** Meters per degree of latitude, and of longitude at the equator. */
 const METERS_PER_DEGREE = 111320;
@@ -72,7 +72,7 @@ export class LocalGrid {
 
 	constructor(center: [number, number], exponent: number) {
 		this.factor = 2 ** exponent;
-		this.origin = [this.steps(center[0]), this.steps(center[1], MAX_LATITUDE)];
+		this.origin = [this.steps(center[0], LIMITS.longitude), this.steps(center[1], MAX_LATITUDE)];
 	}
 
 	/**
@@ -86,12 +86,12 @@ export class LocalGrid {
 	}
 
 	/**
-	 * A position in steps from the origin. Its latitude stays on the map; `inside`: its longitude
-	 * too, between -180° and 180°, as the sides of a frame are.
+	 * A position in steps from the origin. Its latitude stays on the map, its longitude within
+	 * `LIMITS.longitude`; `inside`: between -180° and 180°, as the sides of a frame are.
 	 */
 	toGrid([lng, lat]: [number, number], inside = false): [number, number] {
 		return [
-			this.steps(lng, inside ? MAX_LONGITUDE : Infinity) - this.origin[0],
+			this.steps(lng, inside ? MAX_LONGITUDE : LIMITS.longitude) - this.origin[0],
 			this.steps(lat, MAX_LATITUDE) - this.origin[1]
 		];
 	}

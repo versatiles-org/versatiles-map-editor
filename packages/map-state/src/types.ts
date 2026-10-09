@@ -30,10 +30,20 @@ export const MAX_PITCH = 60;
 export const SCROLL_ZOOMS = ['protected', 'free'] as const;
 
 /**
- * The largest zoom level of a map, and so of the limits of a frame.
+ * The largest zoom level of a map, and so of the zoom limits of the viewer.
  * @category Map state
  */
 export const MAX_ZOOM = 22;
+
+/**
+ * The largest numbers that a map has, far beyond what is drawn sensibly, so that every number has
+ * an end: a size that is a factor (`size`, `labelSize`, `arrowSize`, the size of the labels of the
+ * background), a width in pixels (`width`, `haloWidth`), the radius of a circle in meters (half
+ * around the Earth), and a longitude in degrees (ten times around it; a line across the date line
+ * goes on beyond 180°).
+ * @category Map state
+ */
+export const LIMITS = { size: 100, width: 1000, radius: 20_000_000, longitude: 3600 } as const;
 
 /**
  * What a shared or embedded map shows when it opens: an area, seen from a direction. What its
@@ -143,6 +153,7 @@ export interface StateElementCircle {
 	/**
 	 * The radius, in meters.
 	 * @exclusiveMinimum 0
+	 * @maximum 20000000
 	 */
 	radius: number;
 	/** The area: its color (with its opacity) and pattern. */
@@ -231,6 +242,7 @@ export interface MarkerStyle {
 	/**
 	 * The size of the symbol, as a factor.
 	 * @exclusiveMinimum 0
+	 * @maximum 100
 	 * @default 1
 	 */
 	size?: number;
@@ -245,6 +257,7 @@ export interface MarkerStyle {
 	/**
 	 * The width of the halo around the symbol and the label, in pixels.
 	 * @minimum 0
+	 * @maximum 1000
 	 * @default 1
 	 */
 	haloWidth?: number;
@@ -261,6 +274,7 @@ export interface MarkerStyle {
 	/**
 	 * The size of the label, as a factor of 16 pixels.
 	 * @exclusiveMinimum 0
+	 * @maximum 100
 	 * @default 1
 	 */
 	labelSize?: number;
@@ -299,6 +313,7 @@ export interface LineStyle {
 	/**
 	 * The width, in pixels.
 	 * @minimum 0
+	 * @maximum 1000
 	 * @default 2
 	 */
 	width?: number;
@@ -321,6 +336,7 @@ export interface LineStyle {
 	 * The width of the arrowheads across the line, as a factor of the width of the line. Only with
 	 * an arrowhead.
 	 * @exclusiveMinimum 0
+	 * @maximum 100
 	 * @default 3
 	 */
 	arrowSize?: number;
@@ -377,6 +393,7 @@ export interface OutlineStyle {
 	/**
 	 * The width, in pixels.
 	 * @minimum 0
+	 * @maximum 1000
 	 * @default 2
 	 */
 	width?: number;
@@ -753,6 +770,7 @@ export interface StateBackground {
 	/**
 	 * The size of the labels, as a factor.
 	 * @exclusiveMinimum 0
+	 * @maximum 100
 	 * @default 1
 	 */
 	labelSize?: number;
@@ -760,6 +778,7 @@ export interface StateBackground {
 	 * The width of the halo around the labels, in pixels. Default: 2 on the vector map, 1 over the
 	 * imagery.
 	 * @minimum 0
+	 * @maximum 1000
 	 */
 	haloWidth?: number;
 	/**

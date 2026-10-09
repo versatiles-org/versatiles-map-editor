@@ -329,6 +329,16 @@ describe('the tables of version 1 of the formats', () => {
 		}
 	});
 
+	it('have limits that are not lowered: a map within them stays one', () => {
+		// a limit may be raised: an older reader then refuses what is beyond its own
+		const least = { MAX_PITCH: 60, MAX_ZOOM: 22 };
+		for (const [name, limit] of Object.entries(least)) expect(now[name], name).toBeGreaterThanOrEqual(limit);
+		const limits = { size: 100, width: 1000, radius: 20_000_000, longitude: 3600 };
+		for (const [name, limit] of Object.entries(limits)) {
+			expect((now.LIMITS as Record<string, number>)[name], name).toBeGreaterThanOrEqual(limit);
+		}
+	});
+
 	it('have the words that the string coder knows, which no word may be added to', () => {
 		// every word changes what the coder has learned, and with it the bits of every string
 		expect(STRING_PRIMER.length).toBe(16);

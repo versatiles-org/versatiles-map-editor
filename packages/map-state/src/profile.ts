@@ -16,6 +16,7 @@ import {
 	SCALE_POSITIONS,
 	SEARCH_POSITIONS,
 	DASH_NAMES,
+	LIMITS,
 	MAX_PITCH,
 	MAX_ZOOM,
 	type Bounds,
@@ -247,23 +248,23 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	set(s, 'color', strictColor(v.color));
 	set(s, 'labelColor', strictColor(v.labelColor));
 	set(s, 'haloColor', strictColor(v.haloColor));
-	set(s, 'haloWidth', strictNumber(v.haloWidth, 0));
+	set(s, 'haloWidth', strictNumber(v.haloWidth, 0, LIMITS.width));
 	set(s, 'pattern', oneOf(FILL_PATTERN_NAMES, v.pattern));
 	set(s, 'patternScale', strictNumber(v.patternScale, ...PATTERN_SCALE_RANGE));
 	set(s, 'patternCoverage', strictNumber(v.patternCoverage, ...PATTERN_COVERAGE_RANGE));
 	set(s, 'dash', oneOf(DASH_NAMES, v.dash));
 	set(s, 'rotation', strictRotation(v.rotation));
-	const size = strictNumber(v.size, 0);
+	const size = strictNumber(v.size, 0, LIMITS.size);
 	if (size) s.size = size;
-	const labelSize = strictNumber(v.labelSize, 0);
+	const labelSize = strictNumber(v.labelSize, 0, LIMITS.size);
 	if (labelSize) s.labelSize = labelSize;
-	set(s, 'width', strictNumber(v.width, 0));
+	set(s, 'width', strictNumber(v.width, 0, LIMITS.width));
 	set(s, 'labelPosition', oneOf(LABEL_POSITION_NAMES, v.labelPosition));
 	set(s, 'visible', strictBoolean(v.visible));
 	set(s, 'flat', strictBoolean(v.flat));
 	set(s, 'arrowStart', oneOf(ARROW_NAMES, v.arrowStart));
 	set(s, 'arrowEnd', oneOf(ARROW_NAMES, v.arrowEnd));
-	const arrowSize = strictNumber(v.arrowSize, 0);
+	const arrowSize = strictNumber(v.arrowSize, 0, LIMITS.size);
 	if (arrowSize) s.arrowSize = arrowSize;
 	set(s, 'symbol', sanitizeSymbol(v.symbol));
 	set(s, 'labelFont', strictString(v.labelFont));
@@ -598,9 +599,9 @@ export function sanitizeBackground(value: unknown): StateBackground | undefined 
 	if (language && language !== D.language) background.language = language;
 	const font = strictString(v.font);
 	if (font && font !== D.font) background.font = font;
-	const labelSize = strictNumber(v.labelSize, 0);
+	const labelSize = strictNumber(v.labelSize, 0, LIMITS.size);
 	if (labelSize && labelSize !== D.labelSize) background.labelSize = labelSize;
-	const haloWidth = strictNumber(v.haloWidth, 0);
+	const haloWidth = strictNumber(v.haloWidth, 0, LIMITS.width);
 	if (haloWidth !== undefined && haloWidth !== BACKGROUND_HALO_WIDTHS[base]) background.haloWidth = haloWidth;
 	if (strictBoolean(v.labelsOnTop)) background.labelsOnTop = true;
 
@@ -837,7 +838,9 @@ export function sanitizePosition(value: unknown): Position | undefined {
 	if (typeof x !== 'number' || typeof y !== 'number' || !Number.isFinite(x) || !Number.isFinite(y)) return undefined;
 	// The latitude on the map: beyond a pole is the pole. The longitude as it is: a line across
 	// the date line goes on beyond 180°, and bringing it back would tear the line.
-	return [roundCoordinate(x), roundCoordinate(Math.min(MAX_LATITUDE, Math.max(-MAX_LATITUDE, y)))];
+	// and not beyond the largest longitude, so that every number of a map has an end
+	const clamp = (value: number, limit: number) => Math.min(limit, Math.max(-limit, value));
+	return [roundCoordinate(clamp(x, LIMITS.longitude)), roundCoordinate(clamp(y, MAX_LATITUDE))];
 }
 
 /** All positions, or undefined if any of them is invalid. */
@@ -930,7 +933,7 @@ export function sanitizeElement(value: unknown): StateElement | undefined {
 		}
 		case 'circle': {
 			const point = sanitizePosition(v.point);
-			const radius = strictNumber(v.radius);
+			const radius = strictNumber(v.radius, -Infinity, LIMITS.radius);
 			if (!point || radius === undefined || radius <= 0) return undefined;
 			element = {
 				type: 'circle',

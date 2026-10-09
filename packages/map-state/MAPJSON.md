@@ -88,7 +88,12 @@ its elements, on the default background map: the vector map of OpenStreetMap.
   then north. Areas (the `bounds` of the `frame`) are `[west, south, east, north]`.
   They have 5 decimal places, about 1 m: the editor keeps all positions on this grid, and rounds
   finer coordinates of a file that it opens. A latitude is between -90 and 90; one beyond a pole
-  is read as the pole. A longitude may be beyond 180, e.g. of a line that crosses the date line.
+  is read as the pole. A longitude may be beyond 180, e.g. of a line that crosses the date line,
+  up to 3600.
+- **Numbers have an end**, far beyond what is drawn sensibly: a size that is a factor (`size`,
+  `labelSize`, `arrowSize`) is at most 100, a width in pixels (`width`, `haloWidth`) at most 1000,
+  the radius of a circle at most 20 000 km. A number beyond its range is read as the nearest one
+  in it.
 - **Colors** are hex codes: `"#rrggbb"`, or `"#rrggbbaa"` with an opacity (alpha), e.g.
   `"#009e7380"` is half transparent. The editor writes them in lower case.
 - **Distances** are in meters (the radius of a circle), **widths** and **halos**

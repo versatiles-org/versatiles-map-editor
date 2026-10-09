@@ -16,7 +16,14 @@ import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
 import { styleFields, styleRemoveKey } from './style_history.js';
 import { BACKGROUND_KEYS, END_KEY, KEY_PARAMETERS, LEGEND_KEYS, METADATA_KEYS, VIEWER_KEYS } from './constants.js';
-import { FILL_PATTERN_NAMES, LABEL_POSITION_NAMES, DASH_NAMES, type Position, type StateStyle } from './types.js';
+import {
+	FILL_PATTERN_NAMES,
+	LABEL_POSITION_NAMES,
+	LIMITS,
+	DASH_NAMES,
+	type Position,
+	type StateStyle
+} from './types.js';
 
 // Links that are cut off, changed or made up must either be refused quickly, or give a map that the
 // editor can draw and the writer can write again: what a corrupt or hostile link can do.
@@ -548,6 +555,68 @@ describe('the reader refuses what the writer never writes', () => {
 		};
 		expect(decodeState(encodeState(blank))).toStrictEqual({ elements: [{ type: 'marker', point: [0, 0] }] });
 		expect(stateFromMapJSON(blank)).toStrictEqual({ elements: [{ type: 'marker', point: [0, 0] }] });
+	});
+
+	it('a number beyond the largest one, which the writer brings into its range', () => {
+		const huge: MapState = {
+			meta: { background: { labelSize: 1e20, haloWidth: 1e20 } },
+			elements: [
+				{ type: 'marker', point: [4.4e10, 10], label: 'A', style: { size: 1e300, labelSize: 1e9, haloWidth: 1e12 } },
+				{
+					type: 'line',
+					points: [
+						[-1e6, 0],
+						[10, 10]
+					],
+					style: { width: 1e20, arrowEnd: 'triangle', arrowSize: 1e9 }
+				},
+				{ type: 'circle', point: [0, 0], radius: 1e20, outlineStyle: { width: 5000 } }
+			]
+		};
+		const limited: MapState = {
+			meta: { background: { labelSize: LIMITS.size, haloWidth: LIMITS.width } },
+			elements: [
+				{
+					type: 'marker',
+					point: [LIMITS.longitude, 10],
+					label: 'A',
+					style: { size: LIMITS.size, labelSize: LIMITS.size, haloWidth: LIMITS.width }
+				},
+				{
+					type: 'line',
+					points: [
+						[-LIMITS.longitude, 0],
+						[10, 10]
+					],
+					style: { width: LIMITS.width, arrowEnd: 'triangle', arrowSize: LIMITS.size }
+				},
+				{ type: 'circle', point: [0, 0], radius: LIMITS.radius, outlineStyle: { width: LIMITS.width } }
+			]
+		};
+		expect(decodeState(encodeState(huge))).toStrictEqual(limited);
+		expect(stateFromMapJSON(huge)).toStrictEqual(limited);
+		// on a coarse grid too, where rounding must not leave the range
+		for (const resolution of [100, 5000, 20000, 40000]) {
+			const state = decodeState(encodeState(huge, { resolution }));
+			expect(state.elements).toHaveLength(3);
+			checkDrawable(state);
+		}
+		// and the reader refuses them
+		const style = (name: 'size' | 'width' | 'haloWidth', role: 'marker' | 'line', tenths: number) =>
+			refusal(
+				(writer) => {
+					writer.writeExpGolomb(0, 0); // no reference
+					writer.writeExpGolomb(styleFields(role).find((field) => field.name === name)!.key, 0);
+					writer.writeVarint(tenths);
+					writer.writeExpGolomb(END_KEY, 0);
+				},
+				(reader) => reader.readStyle(role)
+			);
+		expect(style('size', 'marker', LIMITS.size * 10)).toBe('read');
+		expect(style('size', 'marker', LIMITS.size * 10 + 1)).toBe('A size beyond the largest one: 100.1');
+		expect(style('width', 'line', LIMITS.width * 10)).toBe('read');
+		expect(style('width', 'line', LIMITS.width * 10 + 1)).toBe('A width beyond the largest one: 1000.1');
+		expect(style('haloWidth', 'marker', LIMITS.width * 10 + 1)).toBe('A width beyond the largest one: 1000.1');
 	});
 
 	it('a symbol that is no name of an image', () => {

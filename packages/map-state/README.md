@@ -288,7 +288,8 @@ version 1.
 - a field: a new key in the list of the metadata, the background, the frame, the viewer, the
   legend, an entry of the legend or an element, or at the end of the fields of a style;
 - a type of element;
-- a name at the end of a list of choices, e.g. another dash or another theme.
+- a name at the end of a list of choices, e.g. another dash or another theme;
+- a larger limit of a number (`LIMITS`, `MAX_PITCH`, `MAX_ZOOM`): never a smaller one.
 
 **What never changes within a version:**
 

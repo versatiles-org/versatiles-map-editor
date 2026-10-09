@@ -25,6 +25,7 @@ import {
 	type StateStyle,
 	type StyleRoleName,
 	type StateViewer,
+	LIMITS,
 	MAX_PITCH,
 	MAX_ZOOM
 } from './types.js';
@@ -316,6 +317,7 @@ export class StateReader {
 		// the origin of the coordinates of the frame and the elements
 		const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
 		if (Math.abs(origin[1]) > 90) throw new Error(`Invalid latitude of the origin: ${origin[1]}`);
+		if (Math.abs(origin[0]) > LIMITS.longitude) throw new Error(`Invalid longitude of the origin: ${origin[0]}`);
 		this.grid = new LocalGrid(origin, exponent);
 		// whether longitude and latitude have parameters of their own
 		const perAxis = this.readBit();
@@ -456,9 +458,11 @@ export class StateReader {
 						break;
 					case BACKGROUND_KEYS.labelSize:
 						background.labelSize = steps(this.readVarint(), labelSize);
+						if (background.labelSize > LIMITS.size) throw new Error('A size of the labels beyond the largest one');
 						break;
 					case BACKGROUND_KEYS.haloWidth:
 						background.haloWidth = steps(this.readVarint(), haloWidth);
+						if (background.haloWidth > LIMITS.width) throw new Error('A halo beyond the largest width');
 						break;
 					case BACKGROUND_KEYS.labelsOnTop:
 						background.labelsOnTop = true;
@@ -598,6 +602,7 @@ export class StateReader {
 			const point = this.readElementPoint();
 			const radius = this.readVarint();
 			if (radius < 1) throw new Error('A circle without a radius');
+			if (radius > LIMITS.radius) throw new Error(`A radius beyond the largest one: ${radius}`);
 			const element: StateElementCircle = { type: 'circle', point, radius };
 			this.readElementStyles(element, previous);
 			this.readElementFields(element);
@@ -801,10 +806,18 @@ export class StateReader {
 		return zoom;
 	}
 
+	/** A width in pixels, in tenths, up to the largest one. */
+	readWidth(): number {
+		const width = this.readVarint() / 10;
+		if (width > LIMITS.width) throw new Error(`A width beyond the largest one: ${width}`);
+		return width;
+	}
+
 	/** A size that is a factor, in tenths: above 0, as the writer writes it (`sizeTenths`). */
 	readSize(): number {
 		const tenths = this.readVarint();
 		if (tenths < 1) throw new Error('A size of 0');
+		if (tenths > LIMITS.size * 10) throw new Error(`A size beyond the largest one: ${tenths / 10}`);
 		return tenths / 10;
 	}
 
@@ -862,7 +875,7 @@ export class StateReader {
 			if (!field) throw new Error(`Invalid state key: ${key}`);
 			switch (field.name) {
 				case 'haloWidth':
-					style.haloWidth = this.readVarint() / 10;
+					style.haloWidth = this.readWidth();
 					break;
 				case 'pattern':
 					style.pattern = this.readName(FILL_PATTERN_NAMES);
@@ -879,7 +892,7 @@ export class StateReader {
 					style.size = this.readSize();
 					break;
 				case 'width':
-					style.width = this.readVarint() / 10;
+					style.width = this.readWidth();
 					break;
 				case 'labelPosition':
 					style.labelPosition = this.readName(LABEL_POSITION_NAMES);
@@ -1014,8 +1027,9 @@ export class StateReader {
 	}
 }
 
-/** A position whose latitude is on the map, as the writer writes it, which MapLibre needs. */
+/** A position whose latitude is on the map and whose longitude is within its limit, as the writer writes it. */
 function checkLatitude(position: [number, number]): [number, number] {
 	if (!(Math.abs(position[1]) <= 90)) throw new Error(`Invalid latitude: ${position[1]}`);
+	if (!(Math.abs(position[0]) <= LIMITS.longitude)) throw new Error(`Invalid longitude: ${position[0]}`);
 	return position;
 }

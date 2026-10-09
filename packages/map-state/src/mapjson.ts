@@ -10,6 +10,7 @@ import {
 } from './profile.js';
 import {
 	LEGEND_ENTRY_TYPES,
+	LIMITS,
 	type MapState,
 	type StateElement,
 	type StateLegendEntry,
@@ -307,7 +308,9 @@ export function changedMapJSONValues(json: unknown): string[] {
 				if (result === undefined && !['entries', 'elements'].includes(key)) changed.push(at);
 				// a position beyond a pole is at the pole
 				const positions = key === 'point' ? [value] : key === 'points' ? value : [];
-				if (positions.some((p: unknown) => Array.isArray(p) && Math.abs(Number(p[1])) > 90)) changed.push(at);
+				const beyond = (p: unknown) =>
+					Array.isArray(p) && (Math.abs(Number(p[1])) > 90 || Math.abs(Number(p[0])) > LIMITS.longitude);
+				if (positions.some(beyond)) changed.push(at);
 			} else if (result === undefined) {
 				if (!isNeutral(kind, key, value, input)) changed.push(at);
 			} else if (!sameValue(value, result)) {

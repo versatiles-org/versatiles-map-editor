@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
-import { decodeState, encodeState } from './index.js';
+import { decodeState, encodeState, LIMITS } from './index.js';
 
 function roundTrip(value: number, signed?: true): number {
 	const writer = new StateWriter();
@@ -50,8 +50,11 @@ describe('large values in a map', () => {
 		expect(decodeState(encodeState(state, { resolution: 0.01 })).elements).toStrictEqual(state.elements);
 	});
 
-	it('keep large style values', () => {
-		const state = { elements: [{ type: 'marker' as const, point: [1, 2] as [number, number], style: { size: 1e9 } }] };
-		expect(decodeState(encodeState(state)).elements).toStrictEqual(state.elements);
+	it('keep style values up to the largest ones, and none beyond', () => {
+		const marker = (size: number) => ({
+			elements: [{ type: 'marker' as const, point: [1, 2] as [number, number], style: { size } }]
+		});
+		expect(decodeState(encodeState(marker(LIMITS.size))).elements).toStrictEqual(marker(LIMITS.size).elements);
+		expect(decodeState(encodeState(marker(1e9))).elements).toStrictEqual(marker(LIMITS.size).elements);
 	});
 });
