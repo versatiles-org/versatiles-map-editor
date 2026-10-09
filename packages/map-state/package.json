@@ -1,6 +1,6 @@
 {
   "name": "@versatiles/map-state",
-  "version": "1.0.1-rc.1",
+  "version": "1.0.1",
   "description": "Encode and decode maps of the VersaTiles map editor: as compact URL hash, GeoJSON and KML.",
   "license": "MIT",
   "author": "Michael Kreil <versatiles@michael-kreil.de>",

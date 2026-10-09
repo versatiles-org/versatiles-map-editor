@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-10-09
+
+### Tests
+
+- tell the tile servers apart by their origin, not by the start of the address ([d27ce88](https://github.com/versatiles-org/versatiles-map-editor/commit/d27ce888505f2d1a038c56c9884a1175e9cac118))
+- wait for the drag to end before the wheel, and turn it again until the map has zoomed ([a28bdae](https://github.com/versatiles-org/versatiles-map-editor/commit/a28bdaea65548da88cc2226b7ea8c3cc0a9129de))
+- run the editor part of the fullscreen test in a tab of its own, and wait longer after the terrain is switched on, for Firefox on the runners ([33acb80](https://github.com/versatiles-org/versatiles-map-editor/commit/33acb80ab42a40e84769cc23e643a9f589b0270a))
+- adjust worker count for non-CI environments to improve performance ([68c06d9](https://github.com/versatiles-org/versatiles-map-editor/commit/68c06d925231f1d4022086c772bc3eaf4535a698))
+- accept the few pixels beside the middle where the map shows a position, and click again until the reordered marker is in front ([bb5a6b7](https://github.com/versatiles-org/versatiles-map-editor/commit/bb5a6b74f6ecf6fe3c8cd58dfff97d33683bee27))
+
+### CI/CD
+
+- **pages:** build only commits of this repository, also if a fork's branch is named main ([b4e6e6b](https://github.com/versatiles-org/versatiles-map-editor/commit/b4e6e6b178cb217e528690e7ee0db78b23e17eb0))
+- **test:** give the Firefox tests three times as long on the runners, where it draws the map without a graphics card ([bb7d99e](https://github.com/versatiles-org/versatiles-map-editor/commit/bb7d99eff668957db6af446f8e3fa2d861f64cbc))
+- run the Playwright tests in 3 Chromium and 6 Firefox jobs of about 5 minutes each ([322b0e4](https://github.com/versatiles-org/versatiles-map-editor/commit/322b0e49c7f7c2bf269fb0556bffab2d6a1f0a19))
+- run the Playwright tests in 5 jobs that share them one by one, since only 5 macOS jobs run at a time ([d9777ee](https://github.com/versatiles-org/versatiles-map-editor/commit/d9777ee9a8c30bd87e7f0d81aa94f27087dc80f0))
+
 ## [4.0.0-rc.1] - 2026-10-09
 
 ### Breaking Changes
