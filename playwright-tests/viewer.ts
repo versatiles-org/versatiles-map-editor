@@ -946,24 +946,27 @@ test('a shared map can have a button for the whole screen, which an embedded map
 		await page.unroute('https://other-site.test/');
 	}
 
-	// the editor: the checkbox, the embed code with the permission, and the preview with the button
-	await page.goto('about:blank');
-	await page.goto('/#' + encodeState({ elements }));
-	await waitForMapIsReady(page);
-	await (await menuItem(page, 'Shared map…')).click();
-	await sidebar(page).getByRole('checkbox', { name: 'Fullscreen' }).check();
-	await expect.poll(async () => (await storedState(page)).meta?.viewer).toStrictEqual({ fullscreen: true });
-	await expect(button).toBeVisible();
-	await page.getByRole('button', { name: /^Share/ }).click();
-	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	// The editor: the checkbox, the embed code with the permission, and the preview with the button.
+	// In a tab of its own: after the frames of another site above, Firefox on the runners of CI did
+	// not answer for the frame of the preview any more, although the page showed it (the test hung
+	// until its time was over).
+	const editor = await page.context().newPage();
+	await editor.goto('/#' + encodeState({ elements }));
+	await waitForMapIsReady(editor);
+	await (await menuItem(editor, 'Shared map…')).click();
+	await sidebar(editor).getByRole('checkbox', { name: 'Fullscreen' }).check();
+	await expect.poll(async () => (await storedState(editor)).meta?.viewer).toStrictEqual({ fullscreen: true });
+	await expect(editor.getByRole('button', { name: 'Fullscreen', exact: true })).toBeVisible();
+	await editor.getByRole('button', { name: /^Share/ }).click();
+	const dialog = editor.getByRole('dialog', { name: 'Share or embed the map' });
 	await expect(dialog.getByLabel('Embed code')).toHaveValue(/ allow="fullscreen"><\/iframe>$/);
 	await expect(
-		page.frameLocator('iframe[title=preview]').getByRole('button', { name: 'Fullscreen', exact: true })
+		editor.frameLocator('iframe[title=preview]').getByRole('button', { name: 'Fullscreen', exact: true })
 	).toBeVisible({ timeout: PREVIEW_TIMEOUT });
 	// without the button, the embed code asks for nothing
-	await page.keyboard.press('Escape');
-	await page.getByRole('button', { name: 'Undo' }).click();
-	await page.getByRole('button', { name: /^Share/ }).click();
+	await editor.keyboard.press('Escape');
+	await editor.getByRole('button', { name: 'Undo' }).click();
+	await editor.getByRole('button', { name: /^Share/ }).click();
 	await expect(dialog.getByLabel('Embed code')).toHaveValue(/border:0"><\/iframe>$/);
 });
 

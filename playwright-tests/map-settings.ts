@@ -143,14 +143,17 @@ test('the relief of the background map: shaded, and raised as terrain, on both m
 	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: undefined });
 	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: false });
 	await terrain.check();
-	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
-	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
+	// Patiently: where the browser draws without a graphics card, e.g. Firefox on the runners of CI,
+	// the raised terrain keeps the page busy for a long time, and it answers late.
+	const patient = { timeout: 60_000 };
+	await expect.poll(features, patient).toStrictEqual({ hillshade: true, terrain: true });
+	await expect.poll(relief, patient).toStrictEqual({ hillshade: true, terrain: true });
 
 	// the satellite map keeps it
 	await page.getByRole('radio', { name: 'Satellite' }).click();
-	await expect.poll(async () => (await storedState(page)).meta?.background?.base).toBe('satellite');
-	await expect.poll(features).toStrictEqual({ hillshade: true, terrain: true });
-	await expect.poll(relief).toStrictEqual({ hillshade: true, terrain: true });
+	await expect.poll(async () => (await storedState(page)).meta?.background?.base, patient).toBe('satellite');
+	await expect.poll(features, patient).toStrictEqual({ hillshade: true, terrain: true });
+	await expect.poll(relief, patient).toStrictEqual({ hillshade: true, terrain: true });
 	await expect(hillshade).toBeChecked();
 
 	// each is an undo step
