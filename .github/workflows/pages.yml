@@ -19,9 +19,14 @@ concurrency:
 jobs:
   build:
     name: Build Svelte
+    # Only commits of this repository are built here: a CI run of a push to its main branch. Not one
+    # of a pull request, also not from a fork whose branch is named "main" (which "branches" above
+    # would let through), since this job runs with the rights of the default branch.
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
