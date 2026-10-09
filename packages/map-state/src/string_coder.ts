@@ -42,22 +42,68 @@ const TOP = 2 ** 32 - 1;
 const HALF = 2 ** 31;
 const QUARTER = 2 ** 30;
 
+/** The frequency of a symbol seen `count` times, by escape method D. */
+const weight = (count: number) => 2 * count - 1;
+
 /**
  * The symbols seen after a context, with how often, in the order they were first seen there (the
- * order of their cumulative frequencies).
+ * order of their cumulative frequencies). With an index of the symbols and a tree of the sums of
+ * their frequencies (a Fenwick tree), so a symbol is found and its cumulative frequency known
+ * without going through all of them: a context can have many thousands, e.g. of a text in a
+ * script of many characters. Only for speed: the frequencies are the same as of plain lists.
  */
 class Context {
 	symbols: number[] = [];
 	counts: number[] = [];
 	total = 0;
+	private readonly index = new Map<number, number>();
+	// tree[n]: the sum of the frequencies of the symbols n - lowbit(n) to n - 1
+	private tree: number[] = [0];
+
+	/** The position of the symbol, or -1. */
+	indexOf(symbol: number): number {
+		return this.index.get(symbol) ?? -1;
+	}
+
+	/** The sum of the frequencies of all symbols. */
+	get sum(): number {
+		return 2 * this.total - this.symbols.length;
+	}
+
+	/** The sum of the frequencies of the first `n` symbols. */
+	prefix(n: number): number {
+		let sum = 0;
+		for (; n > 0; n -= n & -n) sum += this.tree[n];
+		return sum;
+	}
+
+	/** The position of the symbol that the frequency `target` (below `sum`) falls into. */
+	find(target: number): number {
+		let position = 0;
+		let step = 1;
+		while (step * 2 < this.tree.length) step *= 2;
+		for (; step > 0; step >>= 1) {
+			const next = position + step;
+			if (next < this.tree.length && this.tree[next] <= target) {
+				position = next;
+				target -= this.tree[next];
+			}
+		}
+		return position;
+	}
 
 	add(symbol: number) {
-		const index = this.symbols.indexOf(symbol);
-		if (index < 0) {
+		const index = this.index.get(symbol);
+		if (index === undefined) {
+			const n = this.symbols.length + 1;
+			this.index.set(symbol, n - 1);
 			this.symbols.push(symbol);
 			this.counts.push(1);
+			this.tree.push(weight(1) + this.prefix(n - 1) - this.prefix(n - (n & -n)));
 		} else {
 			this.counts[index]++;
+			// from 2n − 1 to 2(n + 1) − 1
+			for (let n = index + 1; n < this.tree.length; n += n & -n) this.tree[n] += 2;
 		}
 		this.total++;
 		if (this.total + this.symbols.length > MAX_TOTAL) {
@@ -65,6 +111,11 @@ class Context {
 			for (let i = 0; i < this.counts.length; i++) {
 				this.counts[i] = Math.ceil(this.counts[i] / 2);
 				this.total += this.counts[i];
+			}
+			this.tree = [0, ...this.counts.map(weight)];
+			for (let n = 1; n < this.tree.length; n++) {
+				const parent = n + (n & -n);
+				if (parent < this.tree.length) this.tree[parent] += this.tree[n];
 			}
 		}
 	}
@@ -127,22 +178,36 @@ function key(before: number[], order: number): string {
 	return before.slice(ORDER - order).join(',');
 }
 
-/** The frequency of a symbol seen `count` times, by escape method D. */
-const weight = (count: number) => 2 * count - 1;
-
 /**
- * The frequencies of a context without the excluded symbols: the symbols left, with the escape
- * after them, whose frequency is their number. Undefined if no symbol is left.
+ * The frequencies of a context without the excluded symbols: the sum of those of the symbols left,
+ * and the escape after them, whose frequency is their number; and the excluded symbols that the
+ * context has, by their position with their frequency, e.g. to leave them out of a cumulative
+ * frequency. Undefined if no symbol is left. The excluded symbols are those of the longer
+ * contexts, which are few, so it goes through them and not through the context.
  */
-function frequencies(context: Context, excluded: Set<number>): { sum: number; escape: number } | undefined {
-	let sum = 0;
-	let escape = 0;
-	for (let i = 0; i < context.symbols.length; i++) {
-		if (excluded.has(context.symbols[i])) continue;
-		sum += weight(context.counts[i]);
-		escape++;
+function frequencies(
+	context: Context,
+	excluded: Set<number>
+): { sum: number; escape: number; left: [position: number, frequency: number][] } | undefined {
+	const left: [number, number][] = [];
+	let sum = context.sum;
+	for (const symbol of excluded) {
+		const position = context.indexOf(symbol);
+		if (position < 0) continue;
+		const frequency = weight(context.counts[position]);
+		left.push([position, frequency]);
+		sum -= frequency;
 	}
-	return escape > 0 ? { sum, escape } : undefined;
+	const escape = context.symbols.length - left.length;
+	if (escape === 0) return undefined;
+	left.sort((a, b) => a[0] - b[0]);
+	return { sum, escape, left };
+}
+
+/** Exclude the symbols of a context from the shorter ones. Not of the shortest one, which none follows. */
+function exclude(excluded: Set<number>, context: Context, order: number) {
+	if (order === 0) return;
+	for (const seen of context.symbols) excluded.add(seen);
 }
 
 /** The size of a code point that no context has seen: the index of its kind in `NEW_SYMBOL_BITS`. */
@@ -294,16 +359,19 @@ export function encodeStrings(strings: string[], formatCount = 0): boolean[] {
 				const frequency = frequencies(context, excluded);
 				if (!frequency) continue;
 				const total = frequency.sum + frequency.escape;
-				let from = 0;
-				const index = context.symbols.indexOf(symbol);
+				const index = context.indexOf(symbol);
 				if (index >= 0 && !excluded.has(symbol)) {
-					for (let i = 0; i < index; i++) if (!excluded.has(context.symbols[i])) from += weight(context.counts[i]);
+					// the frequencies of the symbols before it, without the excluded ones
+					let from = context.prefix(index);
+					for (const [position, excludedFrequency] of frequency.left) {
+						if (position < index) from -= excludedFrequency;
+					}
 					encoder.encode(from, from + weight(context.counts[index]), total);
 					found = order;
 					break;
 				}
 				encoder.encode(frequency.sum, total, total);
-				for (const seen of context.symbols) excluded.add(seen);
+				exclude(excluded, context, order);
 			}
 			if (found === undefined) {
 				// a symbol that no context has seen: its kind, then its code point
@@ -357,20 +425,24 @@ export function decodeStringBlock(
 				if (!frequency) continue;
 				const total = frequency.sum + frequency.escape;
 				const target = decoder.target(total);
-				let from = 0;
-				for (let i = 0; i < context.symbols.length && symbol === undefined; i++) {
-					if (excluded.has(context.symbols[i])) continue;
-					if (target < from + weight(context.counts[i])) {
-						symbol = context.symbols[i];
-						decoder.decode(from, from + weight(context.counts[i]), total);
-						found = order;
-					} else {
-						from += weight(context.counts[i]);
+				if (target < frequency.sum) {
+					// The symbol whose frequencies the target falls into, among those that are not
+					// excluded: up to the first excluded symbol whose start is beyond the target, the
+					// frequencies of the excluded ones before are skipped.
+					let skipped = 0;
+					for (const [position, excludedFrequency] of frequency.left) {
+						if (target < context.prefix(position) - skipped) break;
+						skipped += excludedFrequency;
 					}
+					const index = context.find(target + skipped);
+					const from = context.prefix(index) - skipped;
+					symbol = context.symbols[index];
+					decoder.decode(from, from + weight(context.counts[index]), total);
+					found = order;
+					break;
 				}
-				if (symbol !== undefined) break;
 				decoder.decode(frequency.sum, total, total);
-				for (const seen of context.symbols) excluded.add(seen);
+				exclude(excluded, context, order);
 			}
 			if (symbol === undefined) {
 				const kind = Math.min(decoder.target(NEW_SYMBOL_BITS.length), NEW_SYMBOL_BITS.length - 1);

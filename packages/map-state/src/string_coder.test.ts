@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 import { decodeStringBlock, encodeStrings } from './string_coder.js';
@@ -189,5 +190,32 @@ describe('the coder of the string table', () => {
 		decodeStrings(block, strings.length);
 		// a few milliseconds; generous for slow test machines
 		expect(performance.now() - start).toBeLessThan(500);
+	});
+
+	it('is fast with a text of many different characters, which a hostile link could have', () => {
+		// 60,000 characters of 20,000 different ones: took 15 s when each context was searched as a list
+		let seed = 7;
+		const random = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32;
+		const text = Array.from({ length: 60_000 }, () =>
+			String.fromCodePoint(0x4e00 + Math.floor(random() * 20_000))
+		).join('');
+		const start = performance.now();
+		const block = encodeStrings([text]);
+		expect(decodeStrings(block, 1)).toStrictEqual([text]);
+		// a fraction of a second; generous for slow test machines
+		expect(performance.now() - start).toBeLessThan(5000);
+	});
+
+	it('writes the same bits as before its contexts had an index, also when the counts are halved', () => {
+		// a context halves its counts beyond 65,536, and has excluded symbols in every position
+		const sha256 = (bits: boolean[]) =>
+			createHash('sha256')
+				.update(bits.map((bit) => (bit ? '1' : '0')).join(''))
+				.digest('hex')
+				.slice(0, 16);
+		const repeated = 'The quick brown fox jumps over the lazy dog. '.repeat(9000);
+		expect(sha256(encodeStrings([repeated]))).toBe('f2f3377cc3b38fd8');
+		const many = Array.from({ length: 20_000 }, (_, i) => 'a' + String.fromCodePoint(0x4e00 + (i % 3000))).join('');
+		expect(decodeStrings(encodeStrings([many]), 1)).toStrictEqual([many]);
 	});
 });
