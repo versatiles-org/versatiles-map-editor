@@ -3,7 +3,7 @@ import { elementFromState, type AbstractElement } from '../element/index.js';
 import type { MapDocumentInteractive } from '../editor/index.js';
 import {
 	boundsOf,
-	removeLegendDefaults,
+	sanitizeLegend,
 	sanitizeViewer,
 	VIEWER_DEFAULTS,
 	type Bounds,
@@ -81,7 +81,7 @@ export class MapDocument {
 		return this.#legend;
 	}
 	set legend(value: StateLegend | undefined) {
-		this.#legend = value && removeLegendDefaults(value);
+		this.#legend = sanitizeLegend(value);
 	}
 	#legend: StateLegend | undefined = $state.raw(undefined);
 	private destroyed = false;

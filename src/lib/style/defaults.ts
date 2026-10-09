@@ -3,8 +3,7 @@ import {
 	LINE_DEFAULTS,
 	OUTLINE_DEFAULTS,
 	MARKER_DEFAULTS,
-	removeDefaultFields,
-	withoutUnusedFields,
+	sanitizeStyle,
 	type StateStyle
 } from '@versatiles/map-state';
 
@@ -35,15 +34,6 @@ export function completeStyle<R extends StyleRole>(role: R, style?: StateStyle):
  * line is visible). Undefined if no field is left.
  */
 export function storedStyle(role: StyleRole, style: StateStyle): StateStyle | undefined {
-	let used = withoutUnusedFields(style);
-	if (role === 'outline') {
-		const { arrowStart: _start, arrowEnd: _end, arrowSize: _size, ...rest } = used;
-		used = rest;
-	}
-	// a line is always visible: only an outline has the field
-	if (role === 'line') {
-		const { visible: _visible, ...rest } = used;
-		used = rest;
-	}
-	return removeDefaultFields(used, ROLE_DEFAULTS[role]);
+	// as the format has a style of the role, which names the roles of markers and areas otherwise
+	return sanitizeStyle(role === 'symbol' ? 'marker' : role === 'fill' ? 'area' : role, style);
 }

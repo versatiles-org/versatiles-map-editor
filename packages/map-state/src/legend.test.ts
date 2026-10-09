@@ -3,7 +3,7 @@ import {
 	decodeState,
 	encodeState,
 	LEGEND_DEFAULTS,
-	removeLegendDefaults,
+	sanitizeLegend,
 	stateFromGeoJSON,
 	stateToGeoJSON
 } from './index.js';
@@ -14,16 +14,18 @@ describe('the defaults of a legend', () => {
 	const explicit: StateLegend = { ...LEGEND_DEFAULTS, entries };
 
 	it('are left out', () => {
-		expect(removeLegendDefaults(explicit)).toStrictEqual({ entries });
+		expect(sanitizeLegend(explicit)).toStrictEqual({ entries });
 		const other: StateLegend = {
-			position: 'top-left',
 			layout: 'inline',
 			font: 'serif',
 			bold: true,
 			italic: true,
 			entries
 		};
-		expect(removeLegendDefaults(other)).toStrictEqual(other);
+		expect(sanitizeLegend(other)).toStrictEqual(other);
+		// and what is no setting of a legend
+		const { bold: _bold, ...plain } = other;
+		expect(sanitizeLegend({ ...other, position: 'top-left', bold: 'yes' })).toStrictEqual(plain);
 	});
 
 	it('are left out alike by a link and by GeoJSON', () => {

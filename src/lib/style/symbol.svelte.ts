@@ -1,6 +1,7 @@
 import { StylePart } from './abstract.svelte.js';
 import { cssColor } from './css_color.js';
-import { type LabelPositionName, type StateStyle, MARKER_DEFAULTS, removeDefaultFields } from '@versatiles/map-state';
+import { type LabelPositionName, type StateStyle, MARKER_DEFAULTS } from '@versatiles/map-state';
+import { storedStyle } from './defaults.js';
 import { getSymbol, type SymbolInfo } from '../background/index.js';
 import { splitOpacity } from './opacity.js';
 
@@ -269,22 +270,19 @@ export class SymbolStyle extends StylePart {
 	}
 
 	getState(): StateStyle | undefined {
-		return removeDefaultFields(
-			{
-				color: this.color,
-				rotation: this.rotation,
-				size: this.size,
-				labelSize: this.labelSize,
-				haloWidth: this.haloWidth,
-				symbol: this.symbol,
-				labelPosition: this.labelPosition,
-				labelColor: this.labelColor,
-				labelFont: this.labelFont,
-				haloColor: this.haloColor,
-				flat: this.flat
-			},
-			SymbolStyle.defaultStyle
-		);
+		return storedStyle('symbol', {
+			color: this.color,
+			rotation: this.rotation,
+			size: this.size,
+			labelSize: this.labelSize,
+			haloWidth: this.haloWidth,
+			symbol: this.symbol,
+			labelPosition: this.labelPosition,
+			labelColor: this.labelColor,
+			labelFont: this.labelFont,
+			haloColor: this.haloColor,
+			flat: this.flat
+		});
 	}
 
 	patch(style: StateStyle) {

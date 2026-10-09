@@ -92,7 +92,7 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
   `PATTERN_SCALE_RANGE` and `PATTERN_COVERAGE_RANGE` are the ranges of the size and the coverage
   of a pattern.
   `LEGEND_DEFAULTS` are the layout, font, bold, italic and theme of a legend that names none, and
-  `removeLegendDefaults` leaves them out, as the base64 string does;
+  `sanitizeLegend` leaves them out, as the base64 string does;
   `VIEWER_DEFAULTS` and `sanitizeViewer` do the same for the settings of the viewer.
 - The symbol of a marker is the name of its image in the sprite sheets of the tile server, as
   `sheet:name`, e.g. `icons:anchor`, or `""` for none.

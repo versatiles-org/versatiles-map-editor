@@ -93,7 +93,7 @@
  * | see what makes a link long | {@link measureLink} |
  * | read or write a `.mapjson` file | {@link stateFromMapJSON}, {@link stateToMapJSON} |
  * | exchange a map with other tools | {@link stateToGeoJSON}, {@link stateFromGeoJSON}, {@link stateToKML}, {@link stateFromKML} |
- * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeFrame}, {@link sanitizeViewer}, {@link sanitizeBounds} |
+ * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeState} does the same for a state, and {@link sanitizeStyle}, {@link sanitizeFrame}, {@link sanitizeViewer}, {@link sanitizeLegend}, {@link sanitizeBackground}, {@link sanitizeBounds} for its parts |
  * | know the values a field can have | the tables of names, e.g. {@link DASH_NAMES}, {@link BACKGROUND_THEMES}, {@link LEGEND_POSITIONS} |
  * | know the default of a field | the defaults, e.g. {@link LINE_DEFAULTS}, {@link MARKER_DEFAULTS}, {@link LEGEND_DEFAULTS} |
  *
@@ -186,19 +186,18 @@ export {
 	OUTLINE_DEFAULTS,
 	MARKER_DEFAULTS,
 	hasArrow,
+	hasPattern,
 	PATTERN_SCALE_RANGE,
 	PATTERN_COVERAGE_RANGE,
-	withoutUnusedFields,
-	removeDefaultFields,
 	LEGEND_DEFAULTS,
-	removeLegendDefaults,
 	VIEWER_DEFAULTS,
-	VIEWER_BUTTONS,
-	VIEWER_CHOICES,
 	BACKGROUND_DEFAULTS,
 	BACKGROUND_COLOR_DEFAULTS,
 	BACKGROUND_HALO_WIDTHS,
-	sanitizeBackground
+	sanitizeBackground,
+	sanitizeLegend,
+	sanitizeState,
+	sanitizeStyle
 } from './profile.js';
 
 /**

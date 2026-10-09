@@ -240,6 +240,7 @@ export interface RoleStyles {
  * that differ from their default (`STYLE_DEFAULTS`)
  * of that role, or undefined if none is. Fields of other roles are left out, e.g. `arrowStart` of
  * a marker.
+ * @category Styles
  */
 export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown): RoleStyles[R] | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
@@ -277,7 +278,6 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 /**
  * Whether a style has an arrowhead at an end of the line.
  * @category Styles
- * @internal
  */
 export function hasArrow(style: StateStyle | undefined): boolean {
 	return (style?.arrowStart ?? 'none') !== 'none' || (style?.arrowEnd ?? 'none') !== 'none';
@@ -546,7 +546,6 @@ export function sanitizeFrame(value: unknown): StateFrame | undefined {
 /**
  * The width of the halo of the labels of each base map, if the background does not set one.
  * @category Background map
- * @internal
  */
 export const BACKGROUND_HALO_WIDTHS = { vector: 2, satellite: 1 } as const;
 
@@ -677,7 +676,11 @@ export function removeLegendDefaults(legend: StateLegend): StateLegend {
 	return result;
 }
 
-/** A valid legend, or undefined. Invalid entries (e.g. without a type or a color) are skipped. */
+/**
+ * A valid legend, without the settings that have their default value and with the valid styles of
+ * its entries, or undefined if it is none. Entries without a valid type are left out.
+ * @category Legend
+ */
 export function sanitizeLegend(value: unknown): StateLegend | undefined {
 	if (typeof value !== 'object' || value === null) return undefined;
 	const { layout, font, bold, italic, theme, entries } = value as Record<string, unknown>;
@@ -857,7 +860,9 @@ export function sanitizePositions(value: unknown): Position[] | undefined {
 
 /**
  * The valid parts of a map: its elements that can be drawn, with the valid fields of their styles,
- * a valid frame and valid properties. What a file and a link keep.
+ * a valid frame and valid properties. What a file and a link keep: the one form of a map, e.g.
+ * to compare two of them.
+ * @category Map state
  */
 export function sanitizeState(value: { elements: unknown[]; frame?: unknown; meta?: unknown }): MapState {
 	const state: MapState = { elements: value.elements.map(sanitizeElement).filter((element) => element !== undefined) };
