@@ -273,7 +273,7 @@ describe('StateReader', () => {
 					{
 						type: 'marker',
 						point: [3, 4],
-						style: { haloWidth: 1.2, size: 3.4, color: '#ff0000' }
+						style: { haloWidth: 1.2, size: 3.4, color: '#aa0000' }
 					},
 					{
 						type: 'line',
@@ -300,7 +300,7 @@ describe('StateReader', () => {
 			const writer = new StateWriter();
 			writer.writeRoot(root);
 			expect(writer.asBase64()).toBe(
-				'pT_AAAAAD_sj__wAERERCIiIgAGzhUwlDhAA_XLwABKCZ_U4oQliIQACbyvAAEPvHwAYbAAAYbAARoAD9AiAAEoIWmNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisWkziPdNoFEigBPKgAAb3Q_mGxonRZg'
+				'pSqAAAAAD_sj__wAERERCIiIgAGzhUwlDhAA_XLwABKCZ_U4oQliIQACbyvAAEPvHwAYbAAAYbAARoAD9AiAAEoIWmNKZDs1Z9Oy4bxH4Dfu5nJpr3Uo_qXUQ9VEisWkziPdNoFEigBPKgAAb3Q_mGxonRZg'
 			);
 			const reader = new StateReader(writer.bits);
 			expect(reader.readRoot()).toStrictEqual(root);

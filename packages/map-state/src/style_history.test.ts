@@ -101,7 +101,8 @@ describe('style references', () => {
 				type: 'marker' as const,
 				point: [0, 0] as [number, number],
 				label: 'x',
-				style: { rotation: i % (STYLE_HISTORY_SIZE + 5) }
+				// from 1: a rotation of 0 is the default, which no style has
+				style: { rotation: 1 + (i % (STYLE_HISTORY_SIZE + 5)) }
 			}))
 		};
 		expect(decode(encode(state))).toStrictEqual(state);

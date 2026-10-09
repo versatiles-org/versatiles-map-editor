@@ -5,9 +5,17 @@ import {
 	LEGEND_DEFAULTS,
 	sanitizeElement,
 	sanitizeState,
+	STYLE_DEFAULTS,
 	VIEWER_DEFAULTS
 } from './profile.js';
-import { LEGEND_ENTRY_TYPES, type MapState, type StateElement, type StateLegendEntry } from './types.js';
+import {
+	LEGEND_ENTRY_TYPES,
+	type MapState,
+	type StateElement,
+	type StateLegendEntry,
+	type StyleRoleName
+} from './types.js';
+import { formatHex, parseColor } from './color.js';
 import { STYLE_ROLE_FIELDS } from './style_roles.js';
 
 /**
@@ -258,9 +266,21 @@ export function changedMapJSONValues(json: unknown): string[] {
 
 	// a color in upper case, the line breaks of Windows
 	const sameText = (a: string, b: string) => a.replace(/\r\n?/g, '\n').toLowerCase() === b.toLowerCase();
+	/** The same value, also if it is written in another way: a color in upper case or with an alpha of ff. */
+	const sameValue = (a: unknown, b: unknown): boolean => {
+		if (a === b) return true;
+		if (typeof a !== 'string' || typeof b !== 'string') return false;
+		if (sameText(a, b)) return true;
+		const [x, y] = [parseColor(a), parseColor(b)];
+		return a.startsWith('#') && !!x && !!y && formatHex(x) === formatHex(y);
+	};
 	/** Whether leaving the value out loses nothing. */
 	const isNeutral = (kind: string, key: string, value: unknown, owner: Record<string, unknown>): boolean => {
-		if (kind === 'style') return UNUSED_STYLE_FIELDS.includes(key) && typeof value === 'number';
+		if (kind.startsWith('style:')) {
+			const defaults = STYLE_DEFAULTS[kind.slice(6) as StyleRoleName] as Record<string, unknown>;
+			if (UNUSED_STYLE_FIELDS.includes(key) && typeof value === 'number') return true;
+			return key in defaults && sameValue(value, defaults[key]);
+		}
 		if (kind === 'popup') return key === 'text' && typeof value === 'string' && value.trim() === '';
 		if (kind === 'meta.background' && key === 'haloWidth') {
 			return value === BACKGROUND_HALO_WIDTHS[owner.base === 'satellite' ? 'satellite' : 'vector'];
@@ -277,7 +297,10 @@ export function changedMapJSONValues(json: unknown): string[] {
 			// the options of the background are those of @versatiles/style, which are not checked
 			if (value === undefined || at === 'meta.background.options') continue;
 			if (isObject(value)) {
-				const inner = ['style', 'outlineStyle', 'popup'].includes(key) ? key.replace('outlineStyle', 'style') : at;
+				// the role of a style, for its defaults
+				const role = input.type === 'marker' ? 'marker' : input.type === 'line' ? 'line' : 'area';
+				const inner =
+					key === 'style' ? `style:${role}` : key === 'outlineStyle' ? 'style:outline' : key === 'popup' ? key : at;
 				compare(value, result, at, inner);
 			} else if (Array.isArray(value)) {
 				// positions are kept or their owner is not; the lists of entries and elements are compared below
@@ -287,10 +310,7 @@ export function changedMapJSONValues(json: unknown): string[] {
 				if (positions.some((p: unknown) => Array.isArray(p) && Math.abs(Number(p[1])) > 90)) changed.push(at);
 			} else if (result === undefined) {
 				if (!isNeutral(kind, key, value, input)) changed.push(at);
-			} else if (
-				result !== value &&
-				!(typeof value === 'string' && typeof result === 'string' && sameText(value, result))
-			) {
+			} else if (!sameValue(value, result)) {
 				changed.push(at);
 			}
 		}

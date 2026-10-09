@@ -55,6 +55,7 @@ import {
 	sanitizeBackground,
 	sanitizeBounds,
 	sanitizeFrame,
+	sanitizeState,
 	sanitizeViewer,
 	sanitizeLabelMinZoom,
 	VIEWER_BUTTONS,
@@ -266,7 +267,9 @@ export class StateReader {
 				switch (key) {
 					case ELEMENT_END:
 						this.readEnd();
-						return root;
+						// As every map state: without what is the default, e.g. a size that a link has
+						// rounded to it. So a link is read as the map that it is written from again.
+						return sanitizeState(root);
 					case ELEMENT_KEYS.marker:
 						previous = this.readElementMarker(before);
 						break;

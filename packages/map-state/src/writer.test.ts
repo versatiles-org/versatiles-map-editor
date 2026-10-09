@@ -103,7 +103,7 @@ describe('StateWriter', () => {
 				{
 					type: 'marker',
 					point: [3, 4],
-					style: { haloWidth: 1.5, size: 0.8, color: '#ff0000' }
+					style: { haloWidth: 1.5, size: 0.8, color: '#aa0000' }
 				},
 				{
 					type: 'line',
@@ -133,7 +133,7 @@ describe('StateWriter', () => {
 			]
 		});
 		expect(writer.asBase64()).toBe(
-			'pD_AAAAP8AAAA_z__wAACOIUPoSYWk9_aT3_U6Al6IRQ0_1DT_4agOGoBpN4gUQaAAAgAAOGoDhqA4agOGoBpsrojQJFaT4BpPgIthdiT'
+			'pCqAAAAP8AAAA_z__wAACOIUPoSYWk9_aT3_U6Al6IRQ0_1DT_4agOGoBpN4gUQaAAAgAAOGoDhqA4agOGoBpsrojQJFaT4BpPgIthdiT'
 		);
 	});
 

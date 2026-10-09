@@ -8,7 +8,7 @@ const state: MapState = {
 	meta: {
 		background: { theme: 'gray' },
 		legend: {
-			entries: [{ type: 'marker', style: { color: '#ff0000', symbol: 'icons:anchor' }, label: 'Cafés & <shops>' }]
+			entries: [{ type: 'marker', style: { color: '#aa0000', symbol: 'icons:anchor' }, label: 'Cafés & <shops>' }]
 		},
 		colorScheme: 'dark2',
 		viewer: { search: 'top-left', legend: 'top' }

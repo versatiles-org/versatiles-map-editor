@@ -133,7 +133,7 @@ describe('.mapjson files', () => {
 					// only the types of the schema: no number or flag as text, no short or named color
 					style: {
 						rotation: 45.5,
-						color: '#FF0000',
+						color: '#00FF00',
 						labelColor: 'red',
 						haloColor: '#fff',
 						size: 'big',
@@ -168,7 +168,7 @@ describe('.mapjson files', () => {
 		expect(stateFromMapJSON(json)).toStrictEqual({
 			meta: { title: 'Map' },
 			elements: [
-				{ type: 'marker', point: [1, 2], style: { rotation: 46, color: '#ff0000' } },
+				{ type: 'marker', point: [1, 2], style: { rotation: 46, color: '#00ff00' } },
 				{ type: 'circle', point: [0, 0], radius: 50, outlineStyle: { width: 0 } }
 			]
 		});
@@ -179,7 +179,11 @@ describe('.mapjson files', () => {
 			frame: { bounds: [13.123456789, 52, 14, 53], bearing: 0, pitch: 80 },
 			meta: { viewer: { search: 'none', canRotate: true }, legend: { layout: 'vertical', entries: [] } },
 			elements: [
-				{ type: 'marker', point: [13.4000001, 52.5], style: { color: '#FF0000', rotation: 180, size: 'big' } },
+				{
+					type: 'marker',
+					point: [13.4000001, 52.5],
+					style: { color: '#00FF00', rotation: 180, size: 'big', haloWidth: 1 }
+				},
 				{ type: 'line', points: [[0, 0]] }
 			]
 		} as unknown as MapState;
@@ -189,7 +193,7 @@ describe('.mapjson files', () => {
 			version: 1,
 			frame: { bounds: [13.12346, 52, 14, 53], pitch: 60 },
 			meta: { viewer: { canRotate: true }, legend: { entries: [] } },
-			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#ff0000', rotation: 180 } }]
+			elements: [{ type: 'marker', point: [13.4, 52.5], style: { color: '#00ff00', rotation: 180 } }]
 		});
 		// in this order, and read again as the same map
 		expect(Object.keys(json)).toStrictEqual(['$schema', 'version', 'frame', 'meta', 'elements']);
@@ -295,7 +299,8 @@ describe('.mapjson files', () => {
 					type: 'marker',
 					point: [13.4000001, 52.5],
 					label: 'Line 1\r\nLine 2',
-					style: { color: '#FF0000', haloColor: '#FFFFFF80', colour: 'x' },
+					// the default color in upper case, and one with the alpha of an opaque color
+					style: { color: '#FF0000', haloColor: '#FFFFFF80', labelColor: '#112233ff', size: 1, colour: 'x' },
 					popup: { text: '  ' }
 				},
 				{

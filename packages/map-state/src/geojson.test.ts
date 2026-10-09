@@ -290,7 +290,7 @@ describe('background', () => {
 describe('legend', () => {
 	it('round-trips as the meta member', () => {
 		const legend = {
-			entries: [{ type: 'marker' as const, style: { color: '#ff0000', symbol: 'extras:pin-teardrop' }, label: 'A' }]
+			entries: [{ type: 'marker' as const, style: { color: '#aa0000', symbol: 'icons:anchor' }, label: 'A' }]
 		};
 		const doc = stateToGeoJSON({ meta: { legend }, elements: [] });
 		expect(doc.meta).toStrictEqual({ legend });
@@ -307,7 +307,7 @@ describe('legend', () => {
 					layout: 'inline',
 					font: 'monospace',
 					entries: [
-						{ type: 'line', style: { color: '#FF0000', width: 3, dash: 7, size: -1, extra: 1 }, label: 5 },
+						{ type: 'line', style: { color: '#AA0000', width: 3, dash: 7, size: -1, extra: 1 }, label: 5 },
 						// a short color and a number as text are not what a map state has
 						{ type: 'line', style: { color: '#F00', width: '3' }, label: 'w' },
 						// only areas have an outline
@@ -327,7 +327,7 @@ describe('legend', () => {
 				font: 'monospace',
 				entries: [
 					// only valid fields; a symbol is the name of its image, e.g. no short name
-					{ type: 'line', style: { color: '#ff0000', width: 3 }, label: '' },
+					{ type: 'line', style: { color: '#aa0000', width: 3 }, label: '' },
 					{ type: 'line', label: 'w' },
 					{ type: 'marker', label: 'y' },
 					{ type: 'area', outlineStyle: { visible: false }, label: 'z' }

@@ -123,6 +123,14 @@ export const MARKER_DEFAULTS: Defaults<
 	flat: false
 };
 
+/** The defaults of the style of each role: what a style of the role is without any field. */
+export const STYLE_DEFAULTS: Record<StyleRoleName, StateStyle> = {
+	marker: MARKER_DEFAULTS,
+	line: LINE_DEFAULTS,
+	area: AREA_DEFAULTS,
+	outline: OUTLINE_DEFAULTS
+};
+
 /** The value, if it is one of the names of the table; undefined for anything else. */
 function oneOf<T extends string>(table: readonly T[], value: unknown): T | undefined {
 	return (table as readonly unknown[]).includes(value) ? (value as T) : undefined;
@@ -228,6 +236,7 @@ export interface RoleStyles {
 
 /**
  * A style of the role as a map state has it, e.g. in a .mapjson file: only its valid fields
+ * that differ from their default (`STYLE_DEFAULTS`)
  * of that role, or undefined if none is. Fields of other roles are left out, e.g. `arrowStart` of
  * a marker.
  */
@@ -260,8 +269,8 @@ export function sanitizeStyle<R extends StyleRoleName>(role: R, value: unknown):
 	set(s, 'labelFont', strictString(v.labelFont));
 	const fields: readonly string[] = STYLE_ROLE_FIELDS[role];
 	const own: StateStyle = Object.fromEntries(Object.entries(s).filter(([key]) => fields.includes(key)));
-	const used = withoutUnusedFields(own);
-	return Object.keys(used).length > 0 ? (used as RoleStyles[R]) : undefined;
+	// without what has no effect, and without what is the default: a state has only what differs
+	return removeDefaultFields(withoutUnusedFields(own), STYLE_DEFAULTS[role]) as RoleStyles[R] | undefined;
 }
 
 /**

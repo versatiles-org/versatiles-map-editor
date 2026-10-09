@@ -26,10 +26,10 @@ describe('elements that repeat the one before', () => {
 
 	it('store their type and styles once, also with other labels', () => {
 		const elements = [
-			marker(13.1, { color: '#ff0000', size: 2 }, 'Boots'),
-			marker(13.2, { color: '#ff0000', size: 2 }, 'Superdrug'),
-			marker(13.3, { color: '#ff0000', size: 2 }),
-			marker(13.4, { color: '#ff0000', size: 2 }, 'Boots')
+			marker(13.1, { color: '#aa0000', size: 2 }, 'Boots'),
+			marker(13.2, { color: '#aa0000', size: 2 }, 'Superdrug'),
+			marker(13.3, { color: '#aa0000', size: 2 }),
+			marker(13.4, { color: '#aa0000', size: 2 }, 'Boots')
 		];
 		expect(roundTrip(elements)).toStrictEqual(elements);
 		expect(stylesRead(elements)).toBe(1);
@@ -52,7 +52,7 @@ describe('elements that repeat the one before', () => {
 				[13.1, 52.1]
 			],
 			style: { color: '#00ff00' },
-			outlineStyle: { width: 2 }
+			outlineStyle: { width: 3 }
 		};
 		const circle: StateElement = { type: 'circle', point: [13, 52], radius: 100, outlineStyle: { visible: false } };
 		const elements = [line, { ...line }, polygon, { ...polygon }, circle, { ...circle }];
@@ -62,7 +62,7 @@ describe('elements that repeat the one before', () => {
 	});
 
 	it('repeat elements without a style', () => {
-		const elements = [marker(13.1), marker(13.2), marker(13.3, { color: '#ff0000' }), marker(13.4)];
+		const elements = [marker(13.1), marker(13.2), marker(13.3, { color: '#aa0000' }), marker(13.4)];
 		expect(roundTrip(elements)).toStrictEqual(elements);
 		expect(stylesRead(elements)).toBe(1);
 	});
@@ -74,7 +74,7 @@ describe('elements that repeat the one before', () => {
 			[13.1, 52.1]
 		];
 		const elements: StateElement[] = [
-			{ type: 'polygon', points: square, style: { color: '#00ff00' }, outlineStyle: { width: 2 } },
+			{ type: 'polygon', points: square, style: { color: '#00ff00' }, outlineStyle: { width: 4 } },
 			{ type: 'polygon', points: square, style: { color: '#00ff00' }, outlineStyle: { width: 3 } },
 			{ type: 'line', points: square, style: { color: '#00ff00' } },
 			marker(13, { color: '#00ff00' })
@@ -95,7 +95,7 @@ describe('the label of a marker', () => {
 	it('is kept, also without a style; an empty one is none', () => {
 		const elements = [
 			marker(13.2, undefined, 'Only a label'),
-			marker(13.3, { color: '#ff0000' }, 'A'),
+			marker(13.3, { color: '#aa0000' }, 'A'),
 			marker(13.4, {})
 		];
 		// a style without fields is none

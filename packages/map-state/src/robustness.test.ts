@@ -1,7 +1,16 @@
 import { globSync, readFileSync } from 'fs';
 import { describe, expect, it } from 'vitest';
 import { parseColor } from './color.js';
-import { decodeState, encodeState, stateFromGeoJSON, stateFromMapJSON, type Bounds, type MapState } from './index.js';
+import {
+	decodeState,
+	encodeState,
+	stateFromGeoJSON,
+	stateFromMapJSON,
+	type Bounds,
+	type MapState,
+	stateToGeoJSON,
+	stateToMapJSON
+} from './index.js';
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
@@ -326,6 +335,62 @@ describe('the writer writes only what the reader reads', () => {
 				expect.objectContaining({ cause: expect.objectContaining({ message: 'A size of 0' }) })
 			);
 		}
+	});
+
+	it('has no field of a style with its default, whatever a map is read from', () => {
+		const state: MapState = {
+			meta: {
+				legend: {
+					entries: [{ type: 'area', style: { color: '#ff000040' }, outlineStyle: { visible: true }, label: 'A' }]
+				}
+			},
+			elements: [
+				{
+					type: 'marker',
+					point: [0, 0],
+					style: { color: '#ff0000', size: 1, flat: false, symbol: 'extras:pin-teardrop' }
+				},
+				{ type: 'marker', point: [0, 0], style: { color: '#FF0000', size: 2 } },
+				// rounded to its default by a link
+				{ type: 'marker', point: [0, 0], style: { size: 1.04 } },
+				{
+					type: 'line',
+					points: [
+						[0, 0],
+						[1, 1]
+					],
+					style: { width: 2, dash: 'solid', arrowEnd: 'none' }
+				},
+				{ type: 'circle', point: [0, 0], radius: 5, style: { pattern: 'solid' }, outlineStyle: { visible: true } }
+			]
+		};
+		const expected: MapState = {
+			meta: { legend: { entries: [{ type: 'area', label: 'A' }] } },
+			elements: [
+				{ type: 'marker', point: [0, 0] },
+				{ type: 'marker', point: [0, 0], style: { size: 2 } },
+				{ type: 'marker', point: [0, 0] },
+				{
+					type: 'line',
+					points: [
+						[0, 0],
+						[1, 1]
+					]
+				},
+				{ type: 'circle', point: [0, 0], radius: 5 }
+			]
+		};
+		expect(read(state)).toStrictEqual(expected);
+		// a file keeps the size that a link rounds
+		const file = stateFromMapJSON(stateToMapJSON(state));
+		expect(file.elements[2]).toStrictEqual({ type: 'marker', point: [0, 0], style: { size: 1.04 } });
+		expect({
+			...file,
+			elements: file.elements.map((element, i) => (i === 2 ? expected.elements[2] : element))
+		}).toStrictEqual(expected);
+		expect(stateFromGeoJSON(stateToGeoJSON(state)).elements).toStrictEqual(file.elements);
+		// and what is read is written as the same again
+		expect(read(read(state))).toStrictEqual(read(state));
 	});
 
 	it('refuses a number that does not fit its bits instead of writing another one', () => {
