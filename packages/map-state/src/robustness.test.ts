@@ -14,7 +14,8 @@ import {
 import { sanitizeFrame } from './profile.js';
 import { StateReader } from './reader.js';
 import { StateWriter } from './writer.js';
-import { styleFields } from './style_history.js';
+import { styleFields, styleRemoveKey } from './style_history.js';
+import { BACKGROUND_KEYS, END_KEY, KEY_PARAMETERS, LEGEND_KEYS, METADATA_KEYS, VIEWER_KEYS } from './constants.js';
 import { FILL_PATTERN_NAMES, LABEL_POSITION_NAMES, DASH_NAMES, type Position, type StateStyle } from './types.js';
 
 // Links that are cut off, changed or made up must either be refused quickly, or give a map that the
@@ -397,5 +398,172 @@ describe('the writer writes only what the reader reads', () => {
 		expect(() => new StateWriter().writeInteger(64, 6)).toThrow('64 does not fit 6 bits');
 		expect(() => new StateWriter().writeInteger(-1, 6)).toThrow();
 		expect(() => new StateWriter().writeInteger(63, 6)).not.toThrow();
+	});
+});
+
+// One way to write a map: what the writer does not write, the reader does not read. Anything that
+// it read would have to be read for good.
+describe('the reader refuses what the writer never writes', () => {
+	/** The innermost error of reading what `write` wrote with a writer and reads with a reader. */
+	function refusal(write: (writer: StateWriter) => void, read: (reader: StateReader) => unknown): string {
+		const writer = new StateWriter();
+		write(writer);
+		try {
+			read(new StateReader(writer.bits));
+		} catch (error) {
+			let inner = error as Error;
+			while (inner.cause instanceof Error) inner = inner.cause;
+			return inner.message;
+		}
+		return 'read';
+	}
+	const key = (writer: StateWriter, list: keyof typeof KEY_PARAMETERS, value: number) =>
+		writer.writeKey(value, KEY_PARAMETERS[list]);
+
+	it('a number with a group that adds nothing', () => {
+		// 0 and 5, each with a second group of zeros
+		for (const value of [0, 5]) {
+			const padded = (writer: StateWriter) => {
+				writer.writeInteger(value, 5);
+				writer.writeBit(true);
+				writer.writeInteger(0, 5);
+				writer.writeBit(false);
+			};
+			expect(refusal(padded, (reader) => reader.readVarint())).toBe('Varint with a needless group');
+		}
+		expect(() => decodeState('oAAAgAAAw')).toThrow();
+		// what the writer writes is read, also numbers with several groups
+		for (const value of [0, 31, 32, 1023, 1024, 2 ** 40]) {
+			expect(
+				refusal(
+					(writer) => writer.writeVarint(value),
+					(reader) => reader.readVarint()
+				)
+			).toBe('read');
+		}
+	});
+
+	it('a key twice in a list', () => {
+		const twice = (list: keyof typeof KEY_PARAMETERS, flag: number, read: (reader: StateReader) => unknown) =>
+			refusal((writer) => {
+				key(writer, list, flag);
+				key(writer, list, flag);
+				key(writer, list, END_KEY);
+			}, read);
+		expect(twice('viewer', VIEWER_KEYS.reset, (reader) => reader.readViewer())).toBe(
+			`The key ${VIEWER_KEYS.reset} twice in the viewer`
+		);
+		expect(twice('legend', LEGEND_KEYS.bold, (reader) => reader.readLegend())).toBe(
+			`The key ${LEGEND_KEYS.bold} twice in the legend`
+		);
+		expect(twice('background', BACKGROUND_KEYS.hillshade, (reader) => reader.readBackground())).toBe(
+			`The key ${BACKGROUND_KEYS.hillshade} twice in the background`
+		);
+		// a field of a style, set twice or removed without being there
+		const flat = styleFields('marker').find(({ name }) => name === 'flat')!.key;
+		const style = (keys: number[]) =>
+			refusal(
+				(writer) => {
+					writer.writeExpGolomb(0, 0); // no reference
+					for (const k of [...keys, END_KEY]) writer.writeExpGolomb(k, 0);
+				},
+				(reader) => reader.readStyle('marker')
+			);
+		expect(style([flat])).toBe('read');
+		expect(style([flat, flat])).toBe(`The key ${flat} twice in a style`);
+		expect(style([styleRemoveKey('marker'), flat])).toBe('A field removed that the style has not: flat');
+	});
+
+	it('a frame, metadata, a viewer or a style without anything, and a legend without its entries', () => {
+		const empty = (list: keyof typeof KEY_PARAMETERS, read: (reader: StateReader) => unknown, bits = 0) =>
+			refusal((writer) => {
+				for (let i = 0; i < bits; i++) writer.writeBit(i === 0);
+				key(writer, list, END_KEY);
+			}, read);
+		// the bit "a frame", the bit "no area"
+		expect(empty('frame', (reader) => reader.readFrame(), 2)).toBe('A frame without anything');
+		expect(empty('metadata', (reader) => reader.readMetadata(), 1)).toBe('Metadata without anything');
+		expect(empty('viewer', (reader) => reader.readViewer())).toBe('A viewer without settings');
+		expect(empty('legend', (reader) => reader.readLegend())).toBe('A legend without its entries');
+		const style = refusal(
+			(writer) => {
+				writer.writeExpGolomb(0, 0); // no reference
+				writer.writeExpGolomb(END_KEY, 0);
+			},
+			(reader) => reader.readStyle('line')
+		);
+		expect(style).toBe('A style without fields');
+	});
+
+	it('a zoom limit beyond the levels, or a least one above the largest one', () => {
+		const limits = (min: number, max: number) =>
+			refusal(
+				(writer) => {
+					key(writer, 'viewer', VIEWER_KEYS.minZoom);
+					writer.writeInteger(min * 2, 6);
+					key(writer, 'viewer', VIEWER_KEYS.maxZoom);
+					writer.writeInteger(max * 2, 6);
+					key(writer, 'viewer', END_KEY);
+				},
+				(reader) => reader.readViewer()
+			);
+		expect(limits(3, 22)).toBe('read');
+		expect(limits(3, 22.5)).toBe('Invalid zoom level: 22.5');
+		expect(limits(12, 10)).toBe('A least zoom above the largest one');
+	});
+
+	it('an empty text, e.g. a title, a label or a popup of spaces', () => {
+		const text = (value: string, read: (reader: StateReader) => unknown, write: (writer: StateWriter) => void) =>
+			refusal(
+				(writer) => {
+					writer.writeStringTable([value]);
+					write(writer);
+				},
+				(reader) => {
+					reader.readStringTable();
+					return read(reader);
+				}
+			);
+		for (const [value, result] of [
+			['', 'An empty title'],
+			['  ', 'An empty title'],
+			['A', 'read']
+		]) {
+			const title = text(
+				value,
+				(reader) => reader.readMetadata(),
+				(writer) => {
+					writer.writeBit(true);
+					key(writer, 'metadata', METADATA_KEYS.title);
+					writer.writeStringRef(value);
+					key(writer, 'metadata', END_KEY);
+				}
+			);
+			expect(title, JSON.stringify(value)).toBe(result);
+		}
+		// and the writer leaves them out
+		const blank: MapState = {
+			meta: { title: '  ' },
+			elements: [{ type: 'marker', point: [0, 0], label: ' \n ', popup: { text: '\t' } }]
+		};
+		expect(decodeState(encodeState(blank))).toStrictEqual({ elements: [{ type: 'marker', point: [0, 0] }] });
+		expect(stateFromMapJSON(blank)).toStrictEqual({ elements: [{ type: 'marker', point: [0, 0] }] });
+	});
+
+	it('a symbol that is no name of an image', () => {
+		const symbol = (name: string) =>
+			refusal(
+				(writer) => {
+					writer.writeStringTable([], [name]);
+					writer.writeStyle('marker', { symbol: name });
+				},
+				(reader) => {
+					reader.readStringTable();
+					return reader.readStyle('marker');
+				}
+			);
+		expect(symbol('icons:anchor')).toBe('read');
+		expect(symbol('')).toBe('read');
+		expect(symbol('anchor')).toBe('Invalid symbol: anchor');
 	});
 });

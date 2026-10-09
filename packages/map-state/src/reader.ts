@@ -24,7 +24,9 @@ import {
 	type MapState,
 	type StateStyle,
 	type StyleRoleName,
-	type StateViewer
+	type StateViewer,
+	MAX_PITCH,
+	MAX_ZOOM
 } from './types.js';
 import {
 	COLOR_INDEX_K,
@@ -156,11 +158,15 @@ export class StateReader {
 		try {
 			let value = 0;
 			let factor = 1;
+			let group: number;
 			do {
 				if (factor > Number.MAX_SAFE_INTEGER) throw new Error('Varint too long');
-				value += this.readInteger(5) * factor;
+				group = this.readInteger(5);
+				value += group * factor;
 				factor *= 32;
 			} while (this.readBit());
+			// one way to write a number: no group of zeros at its end, which adds nothing
+			if (group === 0 && factor > 32) throw new Error('Varint with a needless group');
 			// the last group can still go beyond them, which the writer never writes
 			if (!Number.isSafeInteger(value)) throw new Error('Varint beyond the safe integers');
 			if (!signed) return value;
@@ -309,6 +315,7 @@ export class StateReader {
 		const exponent = this.readInteger(4);
 		// the origin of the coordinates of the frame and the elements
 		const origin: [number, number] = [this.readVarint(true) / ORIGIN_SCALE, this.readVarint(true) / ORIGIN_SCALE];
+		if (Math.abs(origin[1]) > 90) throw new Error(`Invalid latitude of the origin: ${origin[1]}`);
 		this.grid = new LocalGrid(origin, exponent);
 		// whether longitude and latitude have parameters of their own
 		const perAxis = this.readBit();
@@ -336,6 +343,19 @@ export class StateReader {
 		if (rest.length >= 6 || rest.some((bit) => bit)) throw new Error('Data after the end of the map');
 	}
 
+	/**
+	 * For the keys of a list: each of them once, as the writer writes them. A key twice would be a
+	 * second way to write a map, and which of the two values counts would be a rule of the format.
+	 */
+	private keysOnce(list: string): (key: number) => number {
+		const seen = new Set<number>();
+		return (key) => {
+			if (seen.has(key)) throw new Error(`The key ${key} twice in ${list}`);
+			seen.add(key);
+			return key;
+		};
+	}
+
 	/** A key of a list of fields, the type of an element or the version, see `StateWriter.writeKey`. */
 	readKey(parameter: number): number {
 		return this.readExpGolomb(parameter);
@@ -360,20 +380,26 @@ export class StateReader {
 				frame.bounds = bounds;
 			}
 			// its settings, see `StateWriter.writeFrame`
+			const once = this.keysOnce('the frame');
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.frame);
+				const key = once(this.readKey(KEY_PARAMETERS.frame));
 				if (key === END_KEY) break;
 				switch (key) {
+					// Beyond their range they are refused, not brought into it: a later version that
+					// allows more must not be read as another map by this one.
 					case FRAME_KEYS.bearing:
 						frame.bearing = this.readInteger(9);
+						if (frame.bearing >= 360) throw new Error(`Invalid rotation of the frame: ${frame.bearing}`);
 						break;
 					case FRAME_KEYS.pitch:
 						frame.pitch = this.readInteger(7);
+						if (frame.pitch > MAX_PITCH) throw new Error(`Invalid tilt of the frame: ${frame.pitch}`);
 						break;
 					default:
 						throw new Error(`Unknown key of the frame: ${key}`);
 				}
 			}
+			if (Object.keys(frame).length === 0) throw new Error('A frame without anything');
 			// without the parts that have their default value, and with the rotation up to 180°
 			return sanitizeFrame(frame);
 		} catch (cause) {
@@ -394,8 +420,9 @@ export class StateReader {
 			};
 			const { labelSize, haloWidth, colors } = BACKGROUND_STEPS;
 			const steps = (value: number, per: number) => Math.round((value / per) * 1e4) / 1e4;
+			const once = this.keysOnce('the background');
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.background);
+				const key = once(this.readKey(KEY_PARAMETERS.background));
 				switch (key) {
 					case END_KEY: {
 						// without the settings that have their default value, as the writer writes it
@@ -438,9 +465,16 @@ export class StateReader {
 						break;
 					case BACKGROUND_KEYS.colors: {
 						// 1 bit each whether it is changed, then from its lowest value in steps
-						const read = (lowest: number) =>
-							this.readBit() ? steps(this.readInteger(6) + lowest * colors, colors) : undefined;
-						const [saturation, black, white] = [read(-1), read(-1), read(0)];
+						const read = (lowest: number, highest: number) => {
+							if (!this.readBit()) return undefined;
+							const value = steps(this.readInteger(6) + lowest * colors, colors);
+							if (value > highest) throw new Error(`Invalid change of the colors: ${value}`);
+							return value;
+						};
+						const [saturation, black, white] = [read(-1, 1), read(-1, 1), read(0, 2)];
+						if (saturation === undefined && black === undefined && white === undefined) {
+							throw new Error('Colors of the background without a change');
+						}
 						background.colors = {
 							...(saturation === undefined ? {} : { saturation }),
 							...(black === undefined ? {} : { black }),
@@ -479,10 +513,12 @@ export class StateReader {
 			if (!this.readBit()) return undefined;
 
 			const metadata: StateMetadata = {};
+			const once = this.keysOnce('the metadata');
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.metadata);
+				const key = once(this.readKey(KEY_PARAMETERS.metadata));
 				switch (key) {
 					case END_KEY:
+						if (Object.keys(metadata).length === 0) throw new Error('Metadata without anything');
 						return metadata;
 					case METADATA_KEYS.background:
 						metadata.background = this.readBackground();
@@ -494,7 +530,7 @@ export class StateReader {
 						metadata.colorScheme = this.readStringRef(true);
 						break;
 					case METADATA_KEYS.title:
-						metadata.title = this.readStringRef();
+						metadata.title = this.readText('title');
 						break;
 					case METADATA_KEYS.viewer:
 						metadata.viewer = this.readViewer();
@@ -523,7 +559,7 @@ export class StateReader {
 		try {
 			const element: StateElementMarker = { type: 'marker', point: this.readElementPoint() };
 			this.readElementStyles(element, previous);
-			if (this.readBit()) element.label = this.readStringRef();
+			if (this.readBit()) element.label = this.readText('label');
 			this.readElementFields(element);
 			return element;
 		} catch (cause) {
@@ -591,10 +627,14 @@ export class StateReader {
 	readLegend(): StateLegend {
 		try {
 			const legend: StateLegend = { entries: [] };
+			const once = this.keysOnce('the legend');
+			let hasEntries = false;
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.legend);
+				const key = once(this.readKey(KEY_PARAMETERS.legend));
 				switch (key) {
 					case END_KEY:
+						// the writer always writes them, also if there are none
+						if (!hasEntries) throw new Error('A legend without its entries');
 						return legend;
 					case LEGEND_KEYS.layout:
 						legend.layout = LEGEND_LAYOUTS[this.readVarint()];
@@ -602,6 +642,7 @@ export class StateReader {
 						break;
 					case LEGEND_KEYS.entries:
 						legend.entries = this.readArray(() => this.readLegendEntry());
+						hasEntries = true;
 						break;
 					case LEGEND_KEYS.font:
 						legend.font = LEGEND_FONTS[this.readVarint()];
@@ -631,10 +672,18 @@ export class StateReader {
 		try {
 			const viewer: Record<string, string | boolean | number> = {};
 			const controls = Object.keys(VIEWER_CHOICES) as (keyof typeof VIEWER_CHOICES)[];
+			const once = this.keysOnce('the viewer');
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.viewer);
-				// as the writer writes it, e.g. a least zoom not above the largest one
-				if (key === END_KEY) return sanitizeViewer(viewer) ?? {};
+				const key = once(this.readKey(KEY_PARAMETERS.viewer));
+				if (key === END_KEY) {
+					if (Object.keys(viewer).length === 0) throw new Error('A viewer without settings');
+					const { minZoom, maxZoom } = viewer as StateViewer;
+					if (minZoom !== undefined && maxZoom !== undefined && minZoom > maxZoom) {
+						throw new Error('A least zoom above the largest one');
+					}
+					// without the settings that have their default value
+					return sanitizeViewer(viewer) ?? {};
+				}
 				const button = VIEWER_BUTTONS.find((name) => VIEWER_KEYS[name] === key);
 				if (button) {
 					viewer[button] = true;
@@ -660,10 +709,10 @@ export class StateReader {
 						viewer.confine = true;
 						continue;
 					case VIEWER_KEYS.minZoom:
-						viewer.minZoom = this.readInteger(6) / 2;
+						viewer.minZoom = this.readZoomLimit();
 						continue;
 					case VIEWER_KEYS.maxZoom:
-						viewer.maxZoom = this.readInteger(6) / 2;
+						viewer.maxZoom = this.readZoomLimit();
 						continue;
 					case VIEWER_KEYS.scrollFree:
 						viewer.scrollZoom = 'free';
@@ -686,8 +735,9 @@ export class StateReader {
 		let style: StateStyle | undefined;
 		let outlineStyle: StateStyle | undefined;
 		let label = '';
+		const once = this.keysOnce('a legend entry');
 		while (true) {
-			const key = this.readKey(KEY_PARAMETERS.legendEntry);
+			const key = once(this.readKey(KEY_PARAMETERS.legendEntry));
 			switch (key) {
 				case END_KEY:
 					if (!type) throw new Error('Legend entry without type');
@@ -718,14 +768,14 @@ export class StateReader {
 	readElementFields(element: StateElement) {
 		if (!this.hasFields) return;
 		try {
+			const once = this.keysOnce('the fields of an element');
 			while (true) {
-				const key = this.readKey(KEY_PARAMETERS.elementFields);
+				const key = once(this.readKey(KEY_PARAMETERS.elementFields));
 				switch (key) {
 					case END_KEY:
 						return;
 					case ELEMENT_FIELD_KEYS.popupText: {
-						const text = this.readStringRef();
-						if (text) element.popup = { text };
+						element.popup = { text: this.readText('popup') };
 						break;
 					}
 					default:
@@ -735,6 +785,20 @@ export class StateReader {
 		} catch (cause) {
 			throw new Error(`Error reading the fields of an element`, { cause });
 		}
+	}
+
+	/** A text that is there: not empty or blank, which the writer leaves out. */
+	readText(what: string): string {
+		const text = this.readStringRef();
+		if (text.trim() === '') throw new Error(`An empty ${what}`);
+		return text;
+	}
+
+	/** A limit of the zoom of viewers, in steps of 0.5 up to `MAX_ZOOM`. */
+	readZoomLimit(): number {
+		const zoom = this.readInteger(6) / 2;
+		if (zoom > MAX_ZOOM) throw new Error(`Invalid zoom level: ${zoom}`);
+		return zoom;
 	}
 
 	/** A size that is a factor, in tenths: above 0, as the writer writes it (`sizeTenths`). */
@@ -750,6 +814,8 @@ export class StateReader {
 			const ref = this.readExpGolomb(STYLE_REFERENCE_PARAMETER);
 			if (ref > this.styleHistory.count(role)) throw new Error(`Invalid style reference: ${ref}`);
 			const style = this.readStylePatch(role, { ...this.styleHistory.get(ref, role) });
+			// a style of its own has a field: without any, an element has no style
+			if (ref === 0 && Object.keys(style).length === 0) throw new Error('A style without fields');
 			// the writer leaves it out without an arrowhead
 			if (style.arrowSize !== undefined && !hasArrow(style)) throw new Error('Arrow size without an arrowhead');
 			if ((style.patternScale !== undefined || style.patternCoverage !== undefined) && !hasPattern(style))
@@ -777,16 +843,20 @@ export class StateReader {
 	readStylePatch(role: StyleRoleName, style: StateStyle): StateStyle {
 		const fields = styleFields(role);
 		const removeKey = styleRemoveKey(role);
+		// each field once: set or removed
+		const once = this.keysOnce('a style');
 		while (true) {
 			const key = this.readStyleKey();
 			if (key === END_KEY) return style;
 			if (key === removeKey) {
-				const removed = this.readStyleKey();
+				const removed = once(this.readStyleKey());
 				const field = fields.find((f) => f.key === removed);
 				if (!field) throw new Error(`Invalid state key: ${removed}`);
+				if (!(field.name in style)) throw new Error(`A field removed that the style has not: ${field.name}`);
 				delete style[field.name];
 				continue;
 			}
+			once(key);
 			// the keys of the fields as the writer has them
 			const field = fields.find((f) => f.key === key);
 			if (!field) throw new Error(`Invalid state key: ${key}`);
@@ -847,6 +917,8 @@ export class StateReader {
 					break;
 				case 'symbol':
 					style.symbol = this.readStringRef(true);
+					// "" for none, else the sheet and the name of an image
+					if (style.symbol !== '' && !style.symbol.includes(':')) throw new Error(`Invalid symbol: ${style.symbol}`);
 					break;
 				case 'labelSize':
 					style.labelSize = this.readSize();

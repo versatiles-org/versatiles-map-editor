@@ -147,14 +147,22 @@ describe('frame: how the map is turned', () => {
 		);
 	});
 
-	it('reads a tilt beyond the one of this version as its largest, e.g. of a later version', () => {
-		const writer = new StateWriter();
-		writer.writeBit(true); // a frame
-		writer.writeBit(false); // without an area
-		writer.writeKey(FRAME_KEYS.pitch, KEY_PARAMETERS.frame);
-		writer.writeInteger(85, 7);
-		writer.writeKey(END_KEY, KEY_PARAMETERS.frame);
-		expect(new StateReader(writer.bits).readFrame()).toStrictEqual({ pitch: 60 });
+	it('refuses a tilt or a rotation beyond those of this version, e.g. of a later one', () => {
+		// not read as the largest one: that would be another map than the link has
+		const frame = (key: number, value: number, bits: number) => {
+			const writer = new StateWriter();
+			writer.writeBit(true); // a frame
+			writer.writeBit(false); // without an area
+			writer.writeKey(key, KEY_PARAMETERS.frame);
+			writer.writeInteger(value, bits);
+			writer.writeKey(END_KEY, KEY_PARAMETERS.frame);
+			return () => new StateReader(writer.bits).readFrame();
+		};
+		const error = (message: string) => expect.objectContaining({ cause: expect.objectContaining({ message }) });
+		expect(frame(FRAME_KEYS.pitch, 60, 7)()).toStrictEqual({ pitch: 60 });
+		expect(frame(FRAME_KEYS.pitch, 85, 7)).toThrow(error('Invalid tilt of the frame: 85'));
+		expect(frame(FRAME_KEYS.bearing, 359, 9)()).toStrictEqual({ bearing: -1 });
+		expect(frame(FRAME_KEYS.bearing, 400, 9)).toThrow(error('Invalid rotation of the frame: 400'));
 	});
 
 	it('costs 1 bit for its settings if it is only an area', () => {

@@ -425,7 +425,8 @@ export function lineStyleFromProps(p: GeoJSON.GeoJsonProperties): StateStyle | u
  */
 export function labelOf(value: unknown): { label?: string } {
 	const label = strictString(value)?.replace(/\r\n?/g, '\n');
-	return label ? { label } : {};
+	// not blank: a label of spaces is none
+	return label?.trim() ? { label } : {};
 }
 
 export function symbolPropsFromStyle(style?: StateStyle): GeoJSON.GeoJsonProperties {
@@ -879,8 +880,9 @@ export function sanitizeMetadata(value: unknown): StateMetadata | undefined {
 	if (viewer) meta.viewer = viewer;
 	const labels = sanitizeLabels(v.labels);
 	if (labels) meta.labels = labels;
+	// not blank: a title of spaces is none
 	const title = strictString(v.title);
-	if (title) meta.title = title;
+	if (title?.trim()) meta.title = title;
 	return Object.keys(meta).length > 0 ? meta : undefined;
 }
 

@@ -190,6 +190,15 @@ elements have no bit for them) and the elements, with an
 explicit end: a link that was cut off, or that has anything after its end, is refused instead of
 read as a smaller map.
 
+The reader is strict: it reads what the writer writes, and refuses the rest, so nothing else
+becomes part of the format. A number has one way to be written (no group of a varint that adds
+nothing); a key is in its list once; a value beyond its range is an error and not brought into
+it (e.g. a tilt above 60°, a zoom limit above 22); a frame, the metadata, a viewer and a style of
+its own have at least one field; a title, a label and a popup are not empty. What a writer is
+free in, since any choice is read alike: the order of the colors and the strings in their tables,
+whether an element repeats the styles of the one before or refers to them, the origin and the
+parameters of the code of the coordinates.
+
 The fields of the metadata, the background, the frame, the viewer, the legend and an element are
 key/value pairs, each list with an end key. A key is an Exp-Golomb code, and so are the type of
 an element and the version (`KEY_PARAMETERS`): the numbers have no limit, so a field can always
