@@ -905,8 +905,16 @@ test('moving elements to the front and to the back', { tag: '@cross-browser' }, 
 	await expect(list.getByRole('option')).toHaveText([/Marker: A/, /Marker: B/]);
 	await expect(list.getByRole('option', { selected: true })).toHaveText(/: B/);
 	await page.keyboard.press('Escape');
-	await clickMarker();
-	await expect(label).toHaveValue('A');
+	// A click finds the element that the map has drawn in front, so the new order must be drawn
+	// first; on a busy machine it was not yet, and the click still got B. So the click is repeated
+	// until it gets A.
+	await waitForMapIsIdle(page);
+	await expect
+		.poll(async () => {
+			await clickMarker();
+			return label.inputValue();
+		})
+		.toBe('A');
 
 	// with the keyboard: A one step backward, and back to the front
 	await page.locator('body').press('ControlOrMeta+ArrowDown');

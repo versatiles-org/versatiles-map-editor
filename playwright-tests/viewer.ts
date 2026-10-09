@@ -1034,6 +1034,14 @@ test('a shared map can show where its visitor is, and follow them until that is 
 			const { lng, lat } = (window as unknown as MapWindow).map.getCenter();
 			return [Math.round(lng * 1000) / 1000, Math.round(lat * 1000) / 1000];
 		});
+	/**
+	 * Whether the map is centered there, within 0.002°: it shows the position with its accuracy in
+	 * the middle of what its padding leaves, which is a few pixels beside the middle of the window.
+	 */
+	const centeredAt = (lng: number, lat: number) => async () => {
+		const [x, y] = await center();
+		return Math.abs(x - lng) <= 0.002 && Math.abs(y - lat) <= 0.002;
+	};
 	await context.grantPermissions(['geolocation']);
 	await context.setGeolocation({ longitude: 9.993, latitude: 53.551 });
 
@@ -1051,17 +1059,17 @@ test('a shared map can show where its visitor is, and follow them until that is 
 	await expect(locate).toHaveAttribute('aria-pressed', 'false');
 	await locate.click();
 	await expect(locate).toHaveAttribute('aria-pressed', 'true');
-	await expect.poll(center).toStrictEqual([9.993, 53.551]);
+	await expect.poll(centeredAt(9.993, 53.551)).toBe(true);
 	await expect(page.locator('.maplibregl-user-location-dot')).toBeVisible();
 	await context.setGeolocation({ longitude: 10.02, latitude: 53.56 });
-	await expect.poll(center, { timeout: 15_000 }).toStrictEqual([10.02, 53.56]);
+	await expect.poll(centeredAt(10.02, 53.56), { timeout: 15_000 }).toBe(true);
 	// switched off: the position is gone, and the map stays
 	await locate.click();
 	await expect(locate).toHaveAttribute('aria-pressed', 'false');
 	await expect(page.locator('.maplibregl-user-location-dot')).toHaveCount(0);
 	await context.setGeolocation({ longitude: 11, latitude: 54 });
 	await page.waitForTimeout(1500);
-	expect(await center()).toStrictEqual([10.02, 53.56]);
+	expect(await centeredAt(10.02, 53.56)()).toBe(true);
 
 	// embedded in a page of another site: only with the permission of that page
 	const origin = new URL(page.url()).origin;
