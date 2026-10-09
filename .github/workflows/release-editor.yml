@@ -87,12 +87,12 @@ jobs:
           mkdir -p release/publish
           npm pack ./release/npm --pack-destination release/publish
 
-      # In a folder of its own, so unpacking the archive does not spread the files
+      # The site of the npm package, so both have the same files (without what is only for GitHub
+      # Pages, see pack_editor.mjs); in a folder of its own, so unpacking the archive does not
+      # spread the files
       - name: Pack the archive
         run: |
-          cp -r build release/versatiles-map-editor
-          # the page of the Playwright tests of embedded maps, not for a web server of the editor
-          rm -r release/versatiles-map-editor/iframe-test
+          cp -r release/npm/dist release/versatiles-map-editor
           (cd release && zip -r -q "publish/versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
 
       # for the two jobs that publish: versatiles-map-editor-<version>.zip and .tgz

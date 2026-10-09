@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Makes the npm package of the built editor, `@versatiles/map-editor`: a folder with the static
- * site in `dist/`, as the ZIP archive of a release has it, and a small package.json with the
+ * site in `dist/`, which the ZIP archive of a release has too, and a small package.json with the
  * version of the editor. The workflow release-editor.yml publishes the folder; nothing of it is
  * committed, so the editor has one version number, in the package.json of the repository.
  *
@@ -17,8 +17,13 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 /** The name of the package on npm. */
 export const EDITOR_PACKAGE = '@versatiles/map-editor';
 
-/** Of the build, what is no part of the site: the page of the Playwright tests of embedded maps. */
-const NOT_PUBLISHED = ['iframe-test'];
+/**
+ * Of the build, what is only for the site on GitHub Pages, not for one on another server: the
+ * page of the Playwright tests of embedded maps, and the JSON Schemas of .mapjson files, which
+ * files name at the address of that site (`MAPJSON_SCHEMA_URL`), so a copy elsewhere is never
+ * read. (The package @versatiles/map-state has them for tools.)
+ */
+export const NOT_PUBLISHED = ['iframe-test', 'schema'];
 
 /**
  * The package.json of the package, from the one of the repository: its version, license and

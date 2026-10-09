@@ -38,10 +38,16 @@ afterEach(() => {
 });
 
 describe('the npm package of the built editor', () => {
-	const site = ['index.html', 'view/index.html', '_app/immutable/a.js', 'schema/mapjson-1.schema.json', 'favicon.ico'];
+	const site = ['index.html', 'view/index.html', '_app/immutable/a.js', '_app/version.json', 'favicon.ico'];
 
-	it('has the site in dist/, with its configuration file and without the page of the tests', () => {
-		const build = fakeBuild([...site, 'map-editor.config.jsonc', 'iframe-test/index.html', 'iframe-test/a/b.js']);
+	it('has the site in dist/, with its configuration file, without the test page and the schemas', () => {
+		const build = fakeBuild([
+			...site,
+			'map-editor.config.jsonc',
+			'iframe-test/index.html',
+			'iframe-test/a/b.js',
+			'schema/mapjson-1.schema.json'
+		]);
 		const out = packEditor({ build, out: outFolder() });
 		expect(filesOf(out)).toStrictEqual(
 			[
