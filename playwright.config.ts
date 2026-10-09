@@ -42,6 +42,10 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
 	reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : 'list',
+	// In CI, the jobs share the tests one by one, not file by file, so each job has about the same
+	// work: the files are of very different sizes (see the matrix of ci.yml). With the one worker of
+	// a job there, the tests still run one after the other.
+	fullyParallel: !!process.env.CI,
 	testDir: 'playwright-tests',
 	testMatch: /\.ts$/,
 	testIgnore: ['**/lib/**'],
