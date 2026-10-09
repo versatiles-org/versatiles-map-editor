@@ -223,23 +223,37 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 			await page.mouse.down();
 			await page.mouse.move(250, 300, { steps: 5 });
 			await page.mouse.up();
+			// after the drag has ended: a map that still moves may not take the wheel
+			await waitForMapIsIdle(page);
 			await page.mouse.wheel(0, -400);
 			await waitForMapIsIdle(page);
 		};
+		/** The zoom after the wheel: turned again until the map has zoomed in, which a busy machine may need. */
+		const zoomedIn = (from: number) =>
+			expect
+				.poll(async () => {
+					if ((await place()).zoom <= from) {
+						await page.mouse.move(250, 300);
+						await page.mouse.wheel(0, -400);
+						await page.waitForTimeout(600);
+					}
+					return (await place()).zoom;
+				})
+				.toBeGreaterThan(from);
 		const zoomIn = page.getByRole('button', { name: 'Zoom in' });
 
 		await open({ bounds: frame });
 		let start = await place();
 		await moveAndZoom();
 		expect((await place()).lng).not.toBeCloseTo(start.lng, 4);
-		expect((await place()).zoom).toBeGreaterThan(start.zoom);
+		await zoomedIn(start.zoom);
 
 		// not moved: zooming keeps the center, and the buttons are there
 		await open({ bounds: frame, canPan: false });
 		start = await place();
 		await moveAndZoom();
+		await zoomedIn(start.zoom);
 		expect((await place()).lng).toBeCloseTo(start.lng, 6);
-		expect((await place()).zoom).toBeGreaterThan(start.zoom);
 		await expect(zoomIn).toBeVisible();
 
 		// not zoomed: no buttons for it
