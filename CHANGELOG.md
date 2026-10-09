@@ -5,6 +5,146 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0-rc.1] - 2026-10-09
+
+### Breaking Changes
+
+- store the background map as its settings, from which the editor builds the map ([1bef4de](https://github.com/versatiles-org/versatiles-map-editor/commit/1bef4de63fb11b7ffac1de9c8164cc844534d1ec))
+- let authors decide whether visitors can pan and zoom, and rotate and tilt only if switched on ([9550ad4](https://github.com/versatiles-org/versatiles-map-editor/commit/9550ad42c2d990b861dc0fe7be0bb22b60709460))
+- store the settings of a frame as key/value pairs in links, so settings can be added ([77aac0e](https://github.com/versatiles-org/versatiles-map-editor/commit/77aac0eb04727bb1c5dd0a3045a048c5bac4b1fd))
+- leave the wheel to the page around an embedded map, unless its author sets it free ([330afaa](https://github.com/versatiles-org/versatiles-map-editor/commit/330afaa3fe62beae91aa1b1e7353651d0fd30686))
+- give the navigation buttons of a shared map a section of their own, with one place for all ([81a6a6a](https://github.com/versatiles-org/versatiles-map-editor/commit/81a6a6a3202928be0e833a0c371a2a0be2a663ee))
+- write keys, element types and the version as Exp-Golomb codes, and end the elements explicitly so a cut-off link is refused ([430072a](https://github.com/versatiles-org/versatiles-map-editor/commit/430072a3f00241826cf15592b1d58da25c8d798f))
+- store the popup of an element in a list of its fields, so elements can get fields later ([a1d7c70](https://github.com/versatiles-org/versatiles-map-editor/commit/a1d7c70975f7ee5ff2e7330a03c8241e787636ce))
+- give only black and white a short code in the palette of a link, and move the color schemes to the editor ([b55d15c](https://github.com/versatiles-org/versatiles-map-editor/commit/b55d15c392a91f89ac22ead2a0762781a7b63127))
+- give the tilt of a frame 7 bits and write the label density of the background as a varint, so both can grow ([8887e42](https://github.com/versatiles-org/versatiles-map-editor/commit/8887e42b8cc25516e64cd7c27c3e331c4c596224))
+- rename strokeStyle of polygons, circles and legend entries to outlineStyle ([d60d6d4](https://github.com/versatiles-org/versatiles-map-editor/commit/d60d6d45b8e3dba060da4597a56f1fc2152eb2b8))
+- rename the font of a marker's label to labelFont ([dffadaf](https://github.com/versatiles-org/versatiles-map-editor/commit/dffadaf80a21e1bb3c1d663aa8736997c11f404a))
+- rename the viewer's zoom setting to zoomButtons ([1b8cfb9](https://github.com/versatiles-org/versatiles-map-editor/commit/1b8cfb9468044976a4787a9ea9365a7cdf8bf8f2))
+- move the labels of the background over the elements from meta.labels.mapOnTop to meta.background.labelsOnTop ([57ce23a](https://github.com/versatiles-org/versatiles-map-editor/commit/57ce23a3ad18e359618be6ab0fdc62427e67fc28))
+- rename STROKE_STYLE_NAMES to DASH_NAMES, FILL_DEFAULTS to AREA_DEFAULTS and SYMBOL_DEFAULTS to MARKER_DEFAULTS ([27175db](https://github.com/versatiles-org/versatiles-map-editor/commit/27175db66a50fde9a4a000c0d54b7399275133cf))
+- move what visitors can do (pan, zoom, rotate, tilt, confine, zoom limits, scroll protection) from the frame to the viewer settings ([34eb0c0](https://github.com/versatiles-org/versatiles-map-editor/commit/34eb0c0694ede178c0289616ccc7052ddb6a06d8))
+- make the pin the default symbol of a marker, so new markers cost a link nothing ([e454b1a](https://github.com/versatiles-org/versatiles-map-editor/commit/e454b1a2b516f970ae80d5adb85fdebf579fe3f1))
+- make the default fill of an area translucent ([3b189db](https://github.com/versatiles-org/versatiles-map-editor/commit/3b189db50c7e46f1f83ef4a3d48fa1b8e5a0983a))
+- read the values of a map state only with the types of its schema, e.g. no numbers or flags as text ([64e7adc](https://github.com/versatiles-org/versatiles-map-editor/commit/64e7adcc7bb6ab454380c74d777e51e779ada8a8))
+- keep the rotation of a symbol above -180° and up to 180°, like the rotation of the map ([cd387df](https://github.com/versatiles-org/versatiles-map-editor/commit/cd387dfac25aea272962bb74a606ebc61b08aa07))
+- give lines and outlines their own defaults, so a line has no visibility and GeoJSON cannot hide one ([9cf3784](https://github.com/versatiles-org/versatiles-map-editor/commit/9cf37847034ad6f7cbfa07f939f22e1054606b3d))
+- tell the format version of a .mapjson file in a field "version", not by the name of its schema ([e7be279](https://github.com/versatiles-org/versatiles-map-editor/commit/e7be279faa6f3bd6e43dadc728a289d80891975d))
+- remove the ids of the editor's color schemes from the words that the string coder knows ([0093113](https://github.com/versatiles-org/versatiles-map-editor/commit/0093113c398b8158924c4fa2668694aec5e886f2))
+- write a small size as the smallest one instead of 0, which a link no longer has ([a31c5a3](https://github.com/versatiles-org/versatiles-map-editor/commit/a31c5a384bc289b1307d952c267e548a74be983a))
+- leave out the fields of a style that have their default, in files and links alike, so a map has one form ([d06ee4c](https://github.com/versatiles-org/versatiles-map-editor/commit/d06ee4cc5629bfb5763ed00b33717d239b6846f1))
+- refuse links that the writer never writes, e.g. padded numbers, repeated keys and values beyond their range, instead of repairing them ([1ef41ee](https://github.com/versatiles-org/versatiles-map-editor/commit/1ef41eea8031f6bdde7a0c9b9c88558306579c96))
+- give every number of a map an upper limit, which files and the writer keep and the reader of links checks ([a101c24](https://github.com/versatiles-org/versatiles-map-editor/commit/a101c24d46f8486f79f4ebb0c6406254ee3a4171))
+- export the sanitizers of a state, a style and a legend instead of the internal helpers behind them ([923cdac](https://github.com/versatiles-org/versatiles-map-editor/commit/923cdac4d4493f2399d39a1a5cc3207a8a01389f))
+- add the sheet "extras:" to the words that the string coder knows ([51aff63](https://github.com/versatiles-org/versatiles-map-editor/commit/51aff631c808ed889a5bd04a79f06d22e9fe55ad))
+
+### Features
+
+- **arrow-heads:** enhance arrow direction handling with zoom levels and add headDirection function ([e90b273](https://github.com/versatiles-org/versatiles-map-editor/commit/e90b2737f7e732f99b83efcc9d3692466dde03b6))
+- **arrow-heads:** enhance chevron arrowhead handling with dynamic sizing and thickness adjustments ([f2b840f](https://github.com/versatiles-org/versatiles-map-editor/commit/f2b840fa19ad0a342828ce2cbd77063539f98c08))
+- **arrow-heads:** enhance headDirection logic for sharper bends and hooks ([20ca235](https://github.com/versatiles-org/versatiles-map-editor/commit/20ca23571172676b1b5f95101384595cb9b27345))
+- **format:** turn the frame into an object with bounds, bearing, pitch and locks for the viewer ([869630e](https://github.com/versatiles-org/versatiles-map-editor/commit/869630ed752b318100066de72c70255eab457b50))
+- **viewer:** open a shared map at the rotation and tilt of its frame ([52fd00c](https://github.com/versatiles-org/versatiles-map-editor/commit/52fd00cf381ab2549b266f66116ffef52a2e921d))
+- **viewer:** let visitors rotate and tilt the map, with a compass back to the start and locks from the frame ([018b803](https://github.com/versatiles-org/versatiles-map-editor/commit/018b803af947582524a8945c19e4abbbc6f113f1))
+- **editor:** set the rotation and tilt of a shared map in the visible area mode, with a live preview ([d6e9efc](https://github.com/versatiles-org/versatiles-map-editor/commit/d6e9efcce9d29beeb3b1e5fb2cfa727b02f22ceb))
+- **format:** keep in the view whether the author can turn the editor's map, and how it is turned ([85ce3e7](https://github.com/versatiles-org/versatiles-map-editor/commit/85ce3e7e12b9200c51648bf31d6f5562057c7cf5))
+- **editor:** let the author rotate and tilt the map while editing, with a switch that is kept with the view ([105202f](https://github.com/versatiles-org/versatiles-map-editor/commit/105202fdf3a07cce03f33b1342c711c202786754))
+- **editor:** turn the shared map by hand while editing the visible area, if the author can turn the map ([1baffe5](https://github.com/versatiles-org/versatiles-map-editor/commit/1baffe519f1fc8618d2f756877fb88d76c1735a0))
+- **markers:** lay a marker flat on the map, its symbol and its label, so it turns and tilts with the map ([0697b25](https://github.com/versatiles-org/versatiles-map-editor/commit/0697b25c255d2a00bc993793e58638c6028b0b6b))
+- **background:** shade the relief and raise the terrain of the background map, close #37 ([59dd985](https://github.com/versatiles-org/versatiles-map-editor/commit/59dd985d5deeaf23a0d78a3e3deeb11af83f95d8))
+- **background:** raise the buildings of the vector map to their heights, close #38 ([68f153d](https://github.com/versatiles-org/versatiles-map-editor/commit/68f153d9564bf1870371c73d0665d8609e1a2c35))
+- **release:** implement support for release candidates in versioning and publishing ([a53c830](https://github.com/versatiles-org/versatiles-map-editor/commit/a53c83034d0e8a6455394796a3081bf31e13e8cc))
+- **format:** store the background map as bits in links, instead of as text ([9e77da7](https://github.com/versatiles-org/versatiles-map-editor/commit/9e77da74cb23090d74744f82ee616a1865ba9be9))
+- **format:** prime the string coder with options of the background instead of its former JSON ([4494f79](https://github.com/versatiles-org/versatiles-map-editor/commit/4494f79acb922827bcc26a63ed697f0f0dc3e7f0))
+- **editor:** edit the shared map in a panel of the sidebar instead of a bar on the map ([6cee47b](https://github.com/versatiles-org/versatiles-map-editor/commit/6cee47b6a57d14cd2ae47b9d947a53375debeb03))
+- **share:** set the controls of shared maps in the sidebar panel only, the share dialog leads there ([b8d7ebb](https://github.com/versatiles-org/versatiles-map-editor/commit/b8d7ebb9e687626154fb419ae2e1893de0b497a3))
+- **editor:** show the controls on the map as visitors see them while the shared map is edited ([b399692](https://github.com/versatiles-org/versatiles-map-editor/commit/b3996929ed594565fb56b6c2eb9740997c57d829))
+- **editor:** show all elements when a map is opened, instead of where its author looked last ([cb7d887](https://github.com/versatiles-org/versatiles-map-editor/commit/cb7d88723d7ec39b923784364a83b1bce43717ad))
+- **editor:** add a button and the key 0 that show all elements ([664ac45](https://github.com/versatiles-org/versatiles-map-editor/commit/664ac45d80c73fb59c1b0ad238142aa4d386c251))
+- **editor:** rotate and tilt the map at any time, with a compass that is faded while it is not turned ([786215d](https://github.com/versatiles-org/versatiles-map-editor/commit/786215d2c8c8bf7f4abe67f222e1bc8c2852bccd))
+- **format:** remove the editor's view from maps, which the editor keeps with its session instead ([1180c50](https://github.com/versatiles-org/versatiles-map-editor/commit/1180c5011b31137f31debe7a84721224dbcc3645))
+- **map:** update Berlin low-emission zone map with new polygon points and improved styling ([c014044](https://github.com/versatiles-org/versatiles-map-editor/commit/c0140447591b3b37ad23a79f54ddf6b0f2c04879))
+- **format:** keep all coordinates on a grid of 5 decimal places, in the editor and in .mapjson files ([1aaccb7](https://github.com/versatiles-org/versatiles-map-editor/commit/1aaccb7fda539169d17b756ae7059824ef539bc8))
+- **editor:** keep the editor's controls at places of its own, whatever the shared map says ([55d99d5](https://github.com/versatiles-org/versatiles-map-editor/commit/55d99d56a4da2fcc47e0d384276fede15b6df8ea))
+- **share:** run the accuracy slider like a quality slider from low to exact, and show the length of the link ([89dd73e](https://github.com/versatiles-org/versatiles-map-editor/commit/89dd73e7b90db40838c9c36a69de8f1aec6b580b))
+- **map-state:** measure where the bits of a link go, with measureLink and measureState ([f43551b](https://github.com/versatiles-org/versatiles-map-editor/commit/f43551b7bda7e46cd0dbf31c83b656737c66c249))
+- **share:** show what the link holds, as the shares of its texts, geometry, styles and settings ([b511067](https://github.com/versatiles-org/versatiles-map-editor/commit/b5110673af069e5a05cae89443ae26819ef3d5b5))
+- **format:** write color and string indexes of links as Exp-Golomb codes, which are shorter ([9d599d9](https://github.com/versatiles-org/versatiles-map-editor/commit/9d599d95270ffa2e7e892688830ffb61836e9021))
+- **share-dialog:** add warning for links exceeding 2000 characters and suggestions for shortening ([c676a06](https://github.com/versatiles-org/versatiles-map-editor/commit/c676a06bbed9943a18aacda4aeb44a3f0b70f693))
+- **share:** put the link first in the share dialog, with each warning next to what it is about ([1deca1f](https://github.com/versatiles-org/versatiles-map-editor/commit/1deca1f82ead89fb6178a03927babceaaba3daf8))
+- **viewer:** add an optional button that shows a shared map as it opened ([a69b1d7](https://github.com/versatiles-org/versatiles-map-editor/commit/a69b1d757f4cc376a13935cb8e650f5bead373a7))
+- **viewer:** let authors keep visitors in the area that a shared map shows when it opens ([a6bbe87](https://github.com/versatiles-org/versatiles-map-editor/commit/a6bbe87c06a0fc873019a4cad50376448ac9c15c))
+- **viewer:** let authors limit how far visitors of a shared map can zoom out and in ([ec0d493](https://github.com/versatiles-org/versatiles-map-editor/commit/ec0d49335ce203449463a195b971b1282f6b8324))
+- **viewer:** let authors leave the wheel to the page around a shared map ([75e37a4](https://github.com/versatiles-org/versatiles-map-editor/commit/75e37a42f175a8ab4f4e27860b911f6f145168a9))
+- **viewer:** add an optional fullscreen button, with the permission for it in the embed code ([80d19f8](https://github.com/versatiles-org/versatiles-map-editor/commit/80d19f8237e8b2d5c55814bb25fa0a588a84e0c8))
+- **viewer:** add an optional scale bar to shared maps ([6a75a60](https://github.com/versatiles-org/versatiles-map-editor/commit/6a75a602a460c6eb9ae3ed7c2320a1a6bd22fde9))
+- **viewer:** add an optional button that shows where the visitor is and follows them ([1784ef3](https://github.com/versatiles-org/versatiles-map-editor/commit/1784ef363084c78aba40445e18b339291e7476d4))
+- **share:** leave the title, the color scheme and a hidden legend out of links, which are for viewing ([94a48b2](https://github.com/versatiles-org/versatiles-map-editor/commit/94a48b26e922fd0b20d165784fb303eb85a14040))
+- **labels:** let the label of a marker have several lines, which only its author breaks ([70b7782](https://github.com/versatiles-org/versatiles-map-editor/commit/70b77822408e9529670f87135db184337d861ce4))
+- **tools:** show what a link holds with analyse-bits --content, and move the script to the repository ([2f692af](https://github.com/versatiles-org/versatiles-map-editor/commit/2f692af96a5d4564e0e6a306d4bd90a72cabf98a))
+- **map-state:** tell which values of a .mapjson file were left out or corrected, and warn about them when a file is opened ([4dfb0c8](https://github.com/versatiles-org/versatiles-map-editor/commit/4dfb0c8a7f162b231a0cc3cddc34080fce5d16d8))
+- **map-state:** tell a link of a newer format version apart from a damaged one, and say that a newer editor made it ([66f1a9f](https://github.com/versatiles-org/versatiles-map-editor/commit/66f1a9f37f64993b91f80b0539f9278f4b877b11))
+- **release:** let the version of the package be given, to release it as 1.0.1 for version 1 of the formats ([b0f9546](https://github.com/versatiles-org/versatiles-map-editor/commit/b0f95462aadd5cfeb9d0a2a36ce6e8112feadc7e))
+
+### Bug Fixes
+
+- **config:** set reuseExistingServer to false for consistent server behavior ([d86c280](https://github.com/versatiles-org/versatiles-map-editor/commit/d86c2807c78cc2eea8407b6bc7d8558a074112a4))
+- **dependencies:** update @versatiles/style to 6.3.0 and maplibre-gl to 6.13.0 ([8e28ec8](https://github.com/versatiles-org/versatiles-map-editor/commit/8e28ec8aba928ad682631e086d388468513a1f0b))
+- **dependencies:** update @versatiles/style to 6.3.1 ([662eb83](https://github.com/versatiles-org/versatiles-map-editor/commit/662eb837001f09c75994f36b650af9356885f382))
+- **style:** increase maximum stroke width in StyleStroke component ([c7060fe](https://github.com/versatiles-org/versatiles-map-editor/commit/c7060fe6437027d07d09022be1d2d524ffff6d41))
+- **editor:** do not turn the editor's map with two fingers or the keyboard ([7baa5b7](https://github.com/versatiles-org/versatiles-map-editor/commit/7baa5b7e835a46773d9ac0ce923b95da9f92c571))
+- **viewer:** keep a turned visible area clear of the legend by its real shape, close #36 ([381aea9](https://github.com/versatiles-org/versatiles-map-editor/commit/381aea90ac0366735e74874282154c503dbbc8d4))
+- **scripts:** read and write the frame as an object in the analysis and the London example scripts ([9af6288](https://github.com/versatiles-org/versatiles-map-editor/commit/9af6288568233df19d48a75b62280ba11f60a07e))
+- **tests:** update expected stroke width for polygon in color picker test ([d50090e](https://github.com/versatiles-org/versatiles-map-editor/commit/d50090eb595c8242c5a3e8bb37c8c9f11ab67c3e))
+- **viewer:** start the attribution as its button where its text would cover the legend ([de88105](https://github.com/versatiles-org/versatiles-map-editor/commit/de8810556097ee5cc240e2009e0959fd3f26af4b))
+- **editor:** end the shared map mode when a map is opened or created ([1c701b9](https://github.com/versatiles-org/versatiles-map-editor/commit/1c701b957f80d917035aad199be45f5724e1687b))
+- **search:** show the results of the address search in the text color of the theme, also in dark mode ([7af4e21](https://github.com/versatiles-org/versatiles-map-editor/commit/7af4e2171562da31970519963b284be274c6cca1))
+- **share:** put the places of the address search and the scale bar below their checkbox ([77cc429](https://github.com/versatiles-org/versatiles-map-editor/commit/77cc429ab8741dba160ac9e6ec8348d9b23b86cf))
+- **share:** hide the compass with the zoom buttons, and the editor's own button while the shared map is edited ([cb0d572](https://github.com/versatiles-org/versatiles-map-editor/commit/cb0d5724e6ce298eb72545df65eaf894408da13e))
+- **map-state:** write only what the reader reads: sanitize the map, keep rounded coordinates on the map, and refuse numbers that do not fit their bits ([17170ee](https://github.com/versatiles-org/versatiles-map-editor/commit/17170eeed3a62d55805c9597af776d02674d1c30))
+- **map-state:** write a .mapjson file as it is read: only valid values, without defaults ([28cf02d](https://github.com/versatiles-org/versatiles-map-editor/commit/28cf02d4284d21b0b9892e9fb693300c60ced5eb))
+- **map-state:** read a latitude beyond a pole as the pole, and keep longitudes as they are ([0fba50a](https://github.com/versatiles-org/versatiles-map-editor/commit/0fba50a487ba9b21ee0e171582d476f314ea02cf))
+- **map-state:** keep the rotation of a map as it is written, instead of changing its last digits ([03042ba](https://github.com/versatiles-org/versatiles-map-editor/commit/03042bab7837f0da65012a2b58c77416714a7f2c))
+- **map-state:** keep of the options of a background only what JSON can hold, so its link can always be read ([b99d307](https://github.com/versatiles-org/versatiles-map-editor/commit/b99d307e3c478cbed20a0db87768b057055714b4))
+- **map-state:** make the schema of .mapjson files agree with the reader about label zoom levels, the version and positions ([0c8a82b](https://github.com/versatiles-org/versatiles-map-editor/commit/0c8a82bf2f80f7f547c552b0a739aad2b5fe482b))
+- **map-state:** treat line breaks alike in all texts, put the defaults of the frame, the viewer and the legend into the schema, and end the zoom of labels at the largest zoom of a map ([3c3a660](https://github.com/versatiles-org/versatiles-map-editor/commit/3c3a66052ab9e7267f1b2010ae2d8b02099dab29))
+
+### Performance Improvements
+
+- **map-state:** find the symbols of the string coder's contexts by an index and a sum tree, with the same bits, so a text of many different characters decodes fast ([3695707](https://github.com/versatiles-org/versatiles-map-editor/commit/36957072ada9aaff1f494d7e500ea393f527ee3d))
+
+### Code Refactoring
+
+- **map-state:** remove encodeGeoJSON and decodeGeoJSON, and keep helpers of the format internal ([762f8ca](https://github.com/versatiles-org/versatiles-map-editor/commit/762f8caea303b2af8b7b5e63f86aabe9d99beb68))
+
+### Documentation
+
+- update diagramms ([31155b4](https://github.com/versatiles-org/versatiles-map-editor/commit/31155b48f29cdd782d815948ec9b771db07d8b4e))
+- update graph ([001983c](https://github.com/versatiles-org/versatiles-map-editor/commit/001983cd56d031e10c41c1426e0b9ed1630d709c))
+- describe the background settings in the README and what links round ([508682e](https://github.com/versatiles-org/versatiles-map-editor/commit/508682e257b08d338f4a63e97da2d8fcac353e4d))
+- **map-state:** generate the API documentation from the sources and publish it with the editor ([432213a](https://github.com/versatiles-org/versatiles-map-editor/commit/432213af2b2e4d2caf7059644953378d2fa133d9))
+- **map-state:** group the exports of the API documentation by what they are for ([98fcbc6](https://github.com/versatiles-org/versatiles-map-editor/commit/98fcbc611f0a2e6fa3661f7fdec6e4b6e45173d2))
+- **map-state:** open the API documentation with a guide to what the package is for and what to use ([829c26a](https://github.com/versatiles-org/versatiles-map-editor/commit/829c26a5bc4852e0933d5c9afd5bc03f7c289882))
+- **map-state:** explain the categories, show the shape of a map and more examples on the start page ([ca95dd9](https://github.com/versatiles-org/versatiles-map-editor/commit/ca95dd9bef7f8dd9647728b48906af3a53096a2d))
+- describe what authors can set for the visitors of a shared map ([e31d529](https://github.com/versatiles-org/versatiles-map-editor/commit/e31d529c8302050253386822cdd85896ac8db175))
+- **share:** tell in the share dialog that the map is in the link itself, not on a server ([9ae2530](https://github.com/versatiles-org/versatiles-map-editor/commit/9ae2530eadcd57b69fbb7e5c58155e24c0969d57))
+- **examples:** leave the label language of the examples at its default, the language of the reader ([9425eb5](https://github.com/versatiles-org/versatiles-map-editor/commit/9425eb552334967382512066252eeeab6efc080c))
+- **map-state:** fix stale comments, name the default background, and let the schema allow what the reader reads (no label of a legend entry, no $schema) ([3fdda59](https://github.com/versatiles-org/versatiles-map-editor/commit/3fdda5981ae8518a7c85b8b318f14aafa5a00663))
+- **map-state:** state the compatibility promise of the formats, what may be added without a new version, and its limits ([fbbe264](https://github.com/versatiles-org/versatiles-map-editor/commit/fbbe2642ac982d88871575bcd4c4a3b86ecde2a8))
+- update the dependency graph ([c29945c](https://github.com/versatiles-org/versatiles-map-editor/commit/c29945c0a1c2238503f2c2568893c9f460c4fa1b))
+- **map-state:** correct comments and texts that would mislead a second implementation of the link format ([31ce204](https://github.com/versatiles-org/versatiles-map-editor/commit/31ce204ef666e2feda9bf8940bf37a4968fda940))
+
+### Tests
+
+- wait for the embedded map itself in the scroll protection test, which raced with the page around it ([983ccb9](https://github.com/versatiles-org/versatiles-map-editor/commit/983ccb9b21f5c640a543990b0de42c7fd34ba9c3))
+- **map-state:** freeze sample links and files of version 1, which every later version must still read ([f124688](https://github.com/versatiles-org/versatiles-map-editor/commit/f1246883167ba3fb6a8813ab4c7ecec4f77ae544))
+- **map-state:** freeze the tables of version 1 of the formats, which may only grow at their end ([32a1c64](https://github.com/versatiles-org/versatiles-map-editor/commit/32a1c64e7cdcf10c21b800f6616904f6cf0a5f54))
+
+### Chores
+
+- **package:** add the GitHub repository, homepage and issue URLs ([785fa1c](https://github.com/versatiles-org/versatiles-map-editor/commit/785fa1ce4c76d753f901ae1ef1d3d4c465950659))
+- remove temporary swap file for berlin low emission zone map ([c64f7f7](https://github.com/versatiles-org/versatiles-map-editor/commit/c64f7f7cb8fecbc2ac461b667994d79fe3fdc90c))
+
 ## [3.1.1] - 2026-10-06
 
 ### Bug Fixes
