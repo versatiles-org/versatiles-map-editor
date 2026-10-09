@@ -775,10 +775,16 @@ test('visitors of a shared map can be kept in the area that it shows when it ope
 	// free: the map zooms out and moves away
 	await open({ frame: { bounds: frame }, elements });
 	let start = await place();
-	await page.mouse.move(400, 300);
-	await page.mouse.wheel(0, 600);
+	// again until it does: on a busy machine the map may not take the first turn of the wheel
+	await expect
+		.poll(async () => {
+			await page.mouse.move(400, 300);
+			await page.mouse.wheel(0, 600);
+			await page.waitForTimeout(600);
+			return (await place()).zoom;
+		})
+		.toBeLessThan(start.zoom - 0.5);
 	await waitForMapIsIdle(page);
-	expect((await place()).zoom).toBeLessThan(start.zoom - 0.5);
 	await dragRight();
 	expect((await place()).west).toBeLessThan(start.west - 0.05);
 

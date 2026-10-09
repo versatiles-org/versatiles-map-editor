@@ -31,5 +31,6 @@ export const STRING_PRIMER: readonly string[] = [
 	'source_sans_3_regular',
 	// the beginnings of the names of symbols
 	'base:icon-',
-	'icons:'
+	'icons:',
+	'extras:'
 ];

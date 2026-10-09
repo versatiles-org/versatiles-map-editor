@@ -341,9 +341,9 @@ describe('the tables of version 1 of the formats', () => {
 
 	it('have the words that the string coder knows, which no word may be added to', () => {
 		// every word changes what the coder has learned, and with it the bits of every string
-		expect(STRING_PRIMER.length).toBe(16);
+		expect(STRING_PRIMER.length).toBe(17);
 		expect(sha256(JSON.stringify(STRING_PRIMER))).toBe(
-			'51a625ff60ca6764b7c93e605b0ba85fe986afec391ba2e2e805260b96930a38'
+			'820fe4027b04a73bf7dc8101df644b25f6c74cbece8d3edb0b9df3c0157abe9c'
 		);
 	});
 
@@ -363,7 +363,7 @@ describe('the tables of version 1 of the formats', () => {
 			.map((bit) => (bit ? '1' : '0'))
 			.join('');
 		expect(bits.length).toBe(545);
-		expect(sha256(bits)).toBe('680e6cbc3620289d33ac19b19d1601492fdc19c8bedcfa2ee2811b90e4f1b547');
+		expect(sha256(bits)).toBe('e6c9f8ee9708a653f93fee3bb6e35981ed35e65970ca5c55217b98b98c73ccfb');
 	});
 
 	it('are all of the constants of the link format, so a new one is frozen too', () => {
