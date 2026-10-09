@@ -104,7 +104,7 @@
 				},
 				"labels": {
 					"$ref": "#/definitions/StateLabels",
-					"description": "How the labels are shown: those of markers, and those of the background map."
+					"description": "How the labels of markers are shown. Those of the background map are settings of the background."
 				},
 				"title": {
 					"type": "string",
@@ -630,7 +630,7 @@
 					"maximum": 24
 				}
 			},
-			"description": "How the labels are shown: those of markers, and those of the background map."
+			"description": "How the labels of markers are shown: whether they may overlap, and from which zoom level."
 		},
 		"StateElement": {
 			"anyOf": [

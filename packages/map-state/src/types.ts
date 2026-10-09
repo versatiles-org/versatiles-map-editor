@@ -429,14 +429,14 @@ export interface StateMetadata {
 	colorScheme?: string;
 	/** What a shared or embedded map shows over it, and where: the search, the zoom buttons, the legend. */
 	viewer?: StateViewer;
-	/** How the labels are shown: those of markers, and those of the background map. */
+	/** How the labels of markers are shown. Those of the background map are settings of the background. */
 	labels?: StateLabels;
 	/** The title of the map, e.g. for the list of maps, the title of the page and file names. */
 	title?: string;
 }
 
 /**
- * How the labels are shown: those of markers, and those of the background map.
+ * How the labels of markers are shown: whether they may overlap, and from which zoom level.
  * @category Map state
  */
 export interface StateLabels {

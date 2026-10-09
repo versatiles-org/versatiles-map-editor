@@ -99,8 +99,8 @@ export class StateWriter {
 	private readonly resolution: number;
 
 	/**
-	 * `resolution`: the precision of the element coordinates in meters, rounded to decimal places of
-	 * degrees. Coarser is shorter. Default: 1 m.
+	 * `resolution`: the precision of the element coordinates in meters, which the nearest step of
+	 * the grid has: 0.00001° × 2^n, see `LocalGrid`. Coarser is shorter. Default: 1 m.
 	 */
 	constructor({ resolution = 1 }: { resolution?: number } = {}) {
 		if (!(resolution > 0) || !Number.isFinite(resolution)) throw new Error(`Invalid resolution: ${resolution}`);
@@ -292,9 +292,10 @@ export class StateWriter {
 
 	/**
 	 * The frame, each part only if the map has it. Its area: the south-west corner on the grid, and
-	 * the width and height in steps of the grid. Then its settings as
-	 * key/value pairs (`FRAME_KEYS`), so settings can be added later: the rotation (9 bits, whole degrees from 0 to 359), the tilt
-	 * (7 bits, whole degrees), and a flag for each thing that viewers can do other than by default.
+	 * the width and height in steps of the grid. Then its settings as key/value pairs
+	 * (`FRAME_KEYS`), so settings can be added later: the rotation (9 bits, whole degrees from 1 to
+	 * 359) and the tilt (7 bits, whole degrees up to `MAX_PITCH`), then the end key. What viewers
+	 * can do is a setting of the viewer, see `writeViewer`.
 	 */
 	writeFrame(frame: StateFrame | undefined) {
 		if (!frame) return this.writeBit(false);
@@ -373,12 +374,6 @@ export class StateWriter {
 	}
 
 	/**
-	 * An integer as an Exp-Golomb code with the parameter `k`: `value + 2^k` in binary, after as many
-	 * zeros as it has bits beyond `k + 1`. Values below about 2^k cost `k + 1` bits, and
-	 * each doubling 2 bits more. Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic
-	 * instead of bit operators, which would cut the values to 32 bits.
-	 */
-	/**
 	 * A key of a list of fields, the type of an element or the version: an Exp-Golomb code with the
 	 * parameter of its list (`KEY_PARAMETERS`), so the numbers have no limit.
 	 */
@@ -386,6 +381,12 @@ export class StateWriter {
 		this.writeExpGolomb(key, parameter);
 	}
 
+	/**
+	 * An integer as an Exp-Golomb code with the parameter `k`: `value + 2^k` in binary, after as many
+	 * zeros as it has bits beyond `k + 1`. Values below about 2^k cost `k + 1` bits, and
+	 * each doubling 2 bits more. Signed values are zigzag encoded (0, -1, 1, -2, …). Arithmetic
+	 * instead of bit operators, which would cut the values to 32 bits.
+	 */
 	writeExpGolomb(value: number, k: number, signed?: true) {
 		if (!Number.isSafeInteger(value)) throw new Error(`value must be a safe integer: ${value}`);
 		if (signed) value = zigzag(value);

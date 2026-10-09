@@ -139,8 +139,8 @@ Only **known fields** are encoded; unrecognized GeoJSON properties are dropped
   a scale bar, and the navigation buttons (their place, and which of them: to zoom, to reset the
   view, for the whole screen and for the viewer's location), and what its viewers can do with the
   map (`canPan`, `canZoom`, `canRotate`, `canTilt`, `confine`, `minZoom`, `maxZoom`, `scrollZoom`);
-  `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, from
-  which zoom level they are shown, and whether the labels of the background map are on top)
+  `meta.title`: the title of the map; `meta.labels`: whether labels of markers may overlap, and from
+  which zoom level they are shown)
 
 The opacity of every color is its alpha (`#rrggbbaa`), also of a fill. GeoJSON has the fill's
 apart, as simplestyle does: `fill-color` without alpha and `fill-opacity`; on import, `fill-opacity`
@@ -188,7 +188,10 @@ relative, the frame (optional: the visible area of a shared map, and its setting
 element has fields besides its geometry and styles (today the text of its popup; without any, the
 elements have no bit for them) and the elements, with an
 explicit end: a link that was cut off, or that has anything after its end, is refused instead of
-read as a smaller map.
+read as a smaller map. Each element after the first starts with 1 bit whether it repeats the type
+and the styles of the one before; unless it does, the key of its type follows. The end of the
+elements is the key `ELEMENT_END` in place of a type, after a repeat bit of 0 if the map has
+elements.
 
 The reader is strict: it reads what the writer writes, and refuses the rest, so nothing else
 becomes part of the format. A number has one way to be written (no group of a varint that adds
@@ -208,14 +211,15 @@ To keep hashes short:
 
 - the colors of all styles and of the legend are stored once in a palette, most frequent first,
   and referenced by index (#5), which is an Exp-Golomb code, so the most frequent color costs
-  1 bit; black and white, which maps of any design have, cost 2 bits in the palette instead of
-  25;
+  1 bit; in the palette, black and white, which maps of any design have, cost 3 bits instead of
+  the 26 of another color (1 bit which kind, then 1 bit or 24, then 1 bit whether an opacity of 8
+  bits follows);
 - the strings are stored once in a string table of 2 sections, each in the order they are written:
   the words of the format (the font, the options and an unlisted theme or language of the
   background, the color scheme, the names of the symbols and
   the label fonts), then the others (the title, the labels, the legend labels, the popups). A field
-  refers to a string of its section by 1 bit for the next new one, else by its index (an
-  Exp-Golomb code, 3 bits for the first four). The table is
+  refers to a string of its section by 1 bit for the next new one, else by that bit and its index
+  (an Exp-Golomb code, 3 bits for the first four, so 4 bits together). The table is
   one block of bits (`string_coder.ts`), without a length: the decoder knows where it ends. An
   adaptive model predicts each character from the four before it (PPM of order 4 over code points,
   with escape method D and update exclusion), and an arithmetic coder spends fewer bits on likelier
