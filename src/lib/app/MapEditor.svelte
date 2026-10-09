@@ -50,7 +50,9 @@
 	function removeHash() {
 		void tick().then(() => {
 			const url = location.pathname + location.search;
-			// only the fragment of the current URL is removed
+			// only the fragment of the current URL is removed: the URL as it is, with the base path of
+			// the site already, which resolve() would add again
+			// eslint-disable-next-line svelte/no-navigation-without-resolve
 			if (location.hash) replaceState(url, {});
 		});
 	}
