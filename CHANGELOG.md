@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.1] - 2026-10-09
+
+### Bug Fixes
+
+- **lint:** mark the removal of the hash from the current URL, which has its base path already ([8012aee](https://github.com/versatiles-org/versatiles-map-editor/commit/8012aeeff7e3981085c6c8d0a7028eefae78b73c))
+- **build:** carry the licenses of the bundled packages, which the site lacked, as THIRD_PARTY_LICENSES.txt in the site, the archive and the npm package ([11a79ab](https://github.com/versatiles-org/versatiles-map-editor/commit/11a79ab56c1e9aa7d570456077302e62d01df15d))
+
+### Documentation
+
+- describe the npm package of the built editor, how it is published, and that updates keep shared maps working ([6ba05a8](https://github.com/versatiles-org/versatiles-map-editor/commit/6ba05a8e2b02a6470085ea4624bc525d03d33282))
+
+### Build System
+
+- **release:** make the npm package of the built editor, @versatiles/map-editor, with the site in dist/ ([8a0a909](https://github.com/versatiles-org/versatiles-map-editor/commit/8a0a909e3309ce3cbad5a2363cf71b37f6fe72d3))
+- **release:** leave the JSON Schemas out of the npm package and the archive, which only GitHub Pages serves, and pack both from the same site ([2aa15d4](https://github.com/versatiles-org/versatiles-map-editor/commit/2aa15d45b123e710fb1c1441f639757e9d9ecb91))
+
+### CI/CD
+
+- **release:** publish the built editor to npm as @versatiles/map-editor, in a job of its own with only the right to publish ([90561cf](https://github.com/versatiles-org/versatiles-map-editor/commit/90561cfc35e8ab8820348abf394f8f4e40f77ebc))
+
+### Chores
+
+- update dependencies to latest versions ([b2666c6](https://github.com/versatiles-org/versatiles-map-editor/commit/b2666c660be3e14d9c7eb14465d891fa8ab94dfd))
+
 ## [4.0.0] - 2026-10-09
 
 ### Tests
