@@ -57,6 +57,15 @@ export default [
 		}
 	},
 	{
-		ignores: ['coverage/', 'build/', '.svelte-kit/', 'dist/', 'packages/*/dist/', '.github/', 'node_modules/']
+		ignores: [
+			'coverage/',
+			'build/',
+			'release/',
+			'.svelte-kit/',
+			'dist/',
+			'packages/*/dist/',
+			'.github/',
+			'node_modules/'
+		]
 	}
 ];

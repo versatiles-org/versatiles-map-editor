@@ -38,5 +38,12 @@ export default {
 		'declaration-empty-line-before': null,
 		'at-rule-empty-line-before': null
 	},
-	ignoreFiles: ['build/**', 'coverage/**', 'playwright-report/**', 'test-results/**', 'packages/*/dist/**']
+	ignoreFiles: [
+		'build/**',
+		'release/**',
+		'coverage/**',
+		'playwright-report/**',
+		'test-results/**',
+		'packages/*/dist/**'
+	]
 };

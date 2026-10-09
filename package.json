@@ -31,6 +31,7 @@
     "doc": "npm run doc-graph && npm run doc-bundle",
     "doc-api": "npm run doc-api --workspace @versatiles/map-state",
     "doc-bundle": "scripts/doc_bundle.sh",
+    "pack-editor": "node scripts/release/pack_editor.mjs",
     "doc-graph": "svelte-kit sync && vrt deps-graph --svg docs/dependency-graph.svg | vrt doc-insert README.md '### Dependency Graph' && prettier --write --log-level warn README.md",
     "format": "prettier --write --log-level warn .",
     "format:check": "prettier --check .",

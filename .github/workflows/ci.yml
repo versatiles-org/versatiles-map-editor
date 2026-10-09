@@ -54,6 +54,10 @@ jobs:
       - name: Check the files of the npm package
         run: npm pack --dry-run --workspace packages/map-state
 
+      # the built editor as the package @versatiles/map-editor, which a release publishes
+      - name: Check the files of the npm package of the editor
+        run: npm run pack-editor && npm pack --dry-run ./release/npm
+
       - name: Test Code with coverage
         run: npm run test-coverage
 

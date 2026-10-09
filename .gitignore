@@ -6,6 +6,8 @@
 /build
 /coverage
 /dist
+# the npm package and the archive of the built editor, made for a release
+/release
 node_modules
 /screenshots
 /playwright-tests/.request-cache
