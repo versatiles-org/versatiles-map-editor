@@ -9,7 +9,10 @@
 		"types": ["node"],
 		"strict": true,
 		"skipLibCheck": true,
-		"noEmit": true
+		"noEmit": true,
+		// The package from its source, as the app has it (see tsconfig.json and vite.config.ts): its
+		// dist is not built in a fresh checkout, e.g. when a release is tested.
+		"paths": { "@versatiles/map-state": ["../packages/map-state/src/index.ts"] }
 	},
 	"include": ["**/*.ts", "../playwright.config.ts"]
 }
