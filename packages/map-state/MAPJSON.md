@@ -322,7 +322,10 @@ are stacked. And what their viewers can do with the map.
 
 ## Checking a file
 
-The schema checks a file, e.g. with [ajv](https://ajv.js.org) or any JSON Schema validator.
+The schema checks a file, e.g. with [ajv](https://ajv.js.org) or any JSON Schema validator. It
+is the schema of what version 1 has now: a later editor may add fields, types of elements and
+names of the choices without a new version (see [Versions](#versions)), and the schema at this
+address then has them too. So a file of a newer editor can fail an older copy of the schema.
 Editors like VS Code use it on their own: the `$schema` of a file gives completion and warnings
 while it is written by hand.
 

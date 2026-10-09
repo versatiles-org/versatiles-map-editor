@@ -209,7 +209,7 @@ describe('.mapjson files', () => {
 			frame: { bounds: [170, 50, -170, 55], pitch: 80, bearing: 20 },
 			meta: {
 				title: 7,
-				background: { theme: 'gray', labels: 'many', labelSize: '2', colors: { black: 5, white: 1 } },
+				background: { theme: 'gray', labels: 'many', labelSize: '2', colors: { black: 5, white: 1 }, options: [1] },
 				viewer: { search: 'middle', canPan: 'no', minZoom: 14, maxZoom: 10, reset: true },
 				labels: { overlap: 'sometimes', minZoom: 99 },
 				legend: {
@@ -230,6 +230,8 @@ describe('.mapjson files', () => {
 				{ type: 'circle', point: [0, 0], radius: 0 },
 				// beyond the north pole: at the pole; the longitude is kept
 				{ type: 'marker', point: [500, 95] },
+				// with an altitude, which a map has not
+				{ type: 'marker', point: [1, 2, 30] },
 				{
 					type: 'line',
 					points: [
@@ -247,6 +249,7 @@ describe('.mapjson files', () => {
 			'meta.background.labels',
 			'meta.background.labelSize',
 			'meta.background.colors.black',
+			'meta.background.options',
 			'meta.viewer.search',
 			'meta.viewer.canPan',
 			'meta.viewer.minZoom',
@@ -263,10 +266,11 @@ describe('.mapjson files', () => {
 			'elements[1]',
 			'elements[2]',
 			'elements[3].point',
-			'elements[4].points',
-			'elements[5].style',
-			'elements[5].outlineStyle.width',
-			'elements[5].outlineStyle.visible'
+			'elements[4].point',
+			'elements[5].points',
+			'elements[6].style',
+			'elements[6].outlineStyle.width',
+			'elements[6].outlineStyle.visible'
 		]);
 	});
 

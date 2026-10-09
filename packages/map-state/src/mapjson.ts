@@ -45,6 +45,7 @@ export type MapJSON = {
 	 * The version of the format of the file: 1. A file without it is of version 1.
 	 * @asType integer
 	 * @minimum 1
+	 * @maximum 1
 	 * @default 1
 	 */
 	version?: number;
@@ -296,7 +297,12 @@ export function changedMapJSONValues(json: unknown): string[] {
 			const at = path ? `${path}.${key}` : key;
 			const result = kept[key];
 			// the options of the background are those of @versatiles/style, which are not checked
-			if (value === undefined || at === 'meta.background.options') continue;
+			if (value === undefined) continue;
+			if (at === 'meta.background.options') {
+				// only that they are an object: e.g. a list is left out
+				if (!isObject(value)) changed.push(at);
+				continue;
+			}
 			if (isObject(value)) {
 				// the role of a style, for its defaults
 				const role = input.type === 'marker' ? 'marker' : input.type === 'line' ? 'line' : 'area';
@@ -308,8 +314,10 @@ export function changedMapJSONValues(json: unknown): string[] {
 				if (result === undefined && !['entries', 'elements'].includes(key)) changed.push(at);
 				// a position beyond a pole is at the pole
 				const positions = key === 'point' ? [value] : key === 'points' ? value : [];
+				// or one with more than a longitude and a latitude, e.g. an altitude, which is left out
 				const beyond = (p: unknown) =>
-					Array.isArray(p) && (Math.abs(Number(p[1])) > 90 || Math.abs(Number(p[0])) > LIMITS.longitude);
+					Array.isArray(p) &&
+					(p.length > 2 || Math.abs(Number(p[1])) > 90 || Math.abs(Number(p[0])) > LIMITS.longitude);
 				if (positions.some(beyond)) changed.push(at);
 			} else if (result === undefined) {
 				if (!isNeutral(kind, key, value, input)) changed.push(at);

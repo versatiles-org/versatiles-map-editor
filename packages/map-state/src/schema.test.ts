@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { Ajv } from 'ajv';
 // @ts-expect-error a script without types
 import { mapJsonSchema, SCHEMA_FILE } from '../schema/generate.mjs';
-import { MAPJSON_SCHEMA_URL, stateFromMapJSON, stateToMapJSON, type MapState } from './index.js';
+import { changedMapJSONValues, MAPJSON_SCHEMA_URL, stateFromMapJSON, stateToMapJSON, type MapState } from './index.js';
 import { MAPJSON_FIELDS } from './mapjson.js';
 
 const committed = JSON.parse(readFileSync(SCHEMA_FILE, 'utf-8'));
@@ -130,6 +130,25 @@ describe('the JSON Schema of .mapjson files', () => {
 		};
 		validate(stateToMapJSON(state));
 		expect(errors()).toStrictEqual([]);
+	});
+
+	it('agrees with the reader about what is valid', () => {
+		const withLabels = (minZoom: number) => ({ meta: { labels: { minZoom } }, elements: [] });
+		// every zoom level of the labels with one decimal place, which a division of floats would not
+		for (let tenths = 1; tenths <= 240; tenths++) {
+			const file = withLabels(tenths / 10);
+			expect(validate(file), `${tenths / 10}: ${errors().join(', ')}`).toBe(true);
+			expect(stateFromMapJSON(file).meta?.labels?.minZoom).toBe(tenths / 10);
+		}
+		// only the version of this schema, and of this reader
+		expect(validate({ version: 1, elements: [] })).toBe(true);
+		expect(validate({ version: 2, elements: [] })).toBe(false);
+		expect(() => stateFromMapJSON({ version: 2, elements: [] })).toThrow();
+		// a position is a longitude and a latitude: the reader leaves out what is more, and tells it
+		const high = { elements: [{ type: 'marker', point: [1, 2, 30] }] };
+		expect(validate(high)).toBe(false);
+		expect(stateFromMapJSON(high).elements).toStrictEqual([{ type: 'marker', point: [1, 2] }]);
+		expect(changedMapJSONValues(high)).toStrictEqual(['elements[0].point']);
 	});
 
 	it('finds mistakes, e.g. an unknown pattern, a color name or a line of one point', () => {

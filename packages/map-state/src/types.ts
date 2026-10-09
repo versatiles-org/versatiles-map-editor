@@ -451,7 +451,6 @@ export interface StateLabels {
 	 * up to 24, e.g. 12.5. Without it, at every zoom level.
 	 * @exclusiveMinimum 0
 	 * @maximum 24
-	 * @multipleOf 0.1
 	 */
 	minZoom?: number;
 }
