@@ -35,7 +35,7 @@ export default defineConfig({
 	// CI runners have fewer cores, and Linux renders on the CPU, so they keep 2. A machine that is
 	// already busy (more waiting work than cores, e.g. other test runs) also gets 2: with 4, the
 	// starved browsers ran into the test timeout at random steps.
-	workers: process.platform === 'darwin' && !process.env.CI && !busy ? 4 : 2,
+	workers: !process.env.CI && !busy ? 4 : 1,
 	timeout: 60_000,
 	// In CI: a forgotten test.only fails the run, a failed test gets one more try, and the results
 	// are also written as an HTML report
