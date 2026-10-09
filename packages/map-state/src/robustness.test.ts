@@ -125,7 +125,11 @@ describe('corrupt links', { timeout: 60_000 }, () => {
 
 	it('cut off anywhere are refused: no map loses its last elements unnoticed', () => {
 		for (const link of links) {
-			for (let length = 0; length < link.length; length++) {
+			// Every length of a short link; of a long one about 300 of them and its last 60, where the
+			// elements end: each cut is a whole decoding, and every length of a link of 4500
+			// characters took a minute on the runners of CI.
+			const step = Math.max(1, Math.floor(link.length / 300));
+			for (let length = 0; length < link.length; length += length < link.length - 60 ? step : 1) {
 				expect(() => decodeState(link.slice(0, length)), `${length} of ${link.length}`).toThrow();
 			}
 		}
