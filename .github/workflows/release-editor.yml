@@ -1,12 +1,16 @@
 name: Release the editor
 
-# Builds the editor when a tag like "v3.1.0" is pushed by "npm run release", and adds the build as a
-# ZIP archive to its GitHub release, for others to run on their own web server. The tag must match
-# the version in package.json; a release candidate has a tag like "v4.0.0-rc.1". ("map-state-v…" tags release the package; the tags v1.x and v2.x
-# come from the history of node-versatiles-svelte, before the editor was extracted.)
+# Builds the editor when a tag like "v3.1.0" is pushed by "npm run release", and publishes the build
+# in two forms, for others to run on their own web server: as a ZIP archive in its GitHub release,
+# and as the npm package @versatiles/map-editor (see scripts/release/pack_editor.mjs). The tag must
+# match the version in package.json; a release candidate has a tag like "v4.0.0-rc.1", is a
+# prerelease on GitHub and has the npm tag "next", so "latest" stays the last release.
+# ("map-state-v…" tags release the package @versatiles/map-state; the tags v1.x and v2.x come from
+# the history of node-versatiles-svelte, before the editor was extracted.)
 #
 # It can also be started by hand for a tag, e.g. when the push of the tag started no workflow:
-# GitHub starts none for a push of more than three tags at once.
+# GitHub starts none for a push of more than three tags at once. What is published already is
+# replaced (the archive) or left as it is (the version on npm).
 on:
   push:
     tags: ['v*', '!v1.*', '!v2.*']
@@ -17,16 +21,21 @@ on:
         required: true
         type: string
 
+# Three jobs, each with the rights it needs: the build runs the code of the repository and may
+# only read it; the two that publish run none of it, and get what the build made.
+permissions:
+  contents: read
+
+env:
+  # the pushed tag, or the one given by hand; only used through the environment, as it is typed
+  TAG: ${{ inputs.tag || github.ref_name }}
+
 jobs:
-  release:
-    name: Build and publish the archive
+  build:
+    name: Build the editor
     runs-on: ubuntu-latest
-    permissions:
-      # to create the release
-      contents: write
-    env:
-      # the pushed tag, or the one given by hand; only used through the environment, as it is typed
-      TAG: ${{ inputs.tag || github.ref_name }}
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Check the tag
         run: |
@@ -50,6 +59,7 @@ jobs:
           package-manager-cache: false
 
       - name: Check that the tag matches the version
+        id: version
         run: |
           version="$(node -p "require('./package.json').version")"
           if [ "${TAG#v}" != "$version" ]; then
@@ -57,6 +67,7 @@ jobs:
             exit 1
           fi
           echo "VERSION=$version" >> "$GITHUB_ENV"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: npm ci
@@ -68,20 +79,53 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The package of npm, as the file that "npm publish" sends: release/npm/ with the site in
+      # dist/, packed
+      - name: Pack the npm package
+        run: |
+          npm run pack-editor
+          mkdir -p release/publish
+          npm pack ./release/npm --pack-destination release/publish
+
       # In a folder of its own, so unpacking the archive does not spread the files
       - name: Pack the archive
         run: |
-          mkdir release
           cp -r build release/versatiles-map-editor
           # the page of the Playwright tests of embedded maps, not for a web server of the editor
           rm -r release/versatiles-map-editor/iframe-test
-          (cd release && zip -r -q "versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
+          (cd release && zip -r -q "publish/versatiles-map-editor-$VERSION.zip" versatiles-map-editor)
+
+      # for the two jobs that publish: versatiles-map-editor-<version>.zip and .tgz
+      - name: Keep the archive and the package for the next jobs
+        uses: actions/upload-artifact@v7
+        with:
+          name: editor
+          path: release/publish/
+          if-no-files-found: error
+          retention-days: 7
+
+  archive:
+    name: Publish the archive in the release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      # to create the release, and to add the archive to it
+      contents: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+    steps:
+      - name: Get the archive
+        uses: actions/download-artifact@v8
+        with:
+          name: editor
+          path: publish
 
       # "npm run release" creates the release with its notes right after pushing the tag, so usually
       # before this job gets here; if not, the job creates it, and the release tool adds the notes
       - name: Publish the archive in the release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           if ! gh release view "$TAG" > /dev/null 2>&1; then
             # a release candidate as a prerelease
@@ -90,4 +134,65 @@ jobs:
             gh release create "$TAG" --verify-tag --notes "" --prerelease="$prerelease"
           fi
           gh release edit "$TAG" --title "Map Editor $VERSION"
-          gh release upload "$TAG" "release/versatiles-map-editor-$VERSION.zip" --clobber
+          gh release upload "$TAG" "publish/versatiles-map-editor-$VERSION.zip" --clobber
+
+  npm:
+    name: Publish the package to npm
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # npm trusted publishing and provenance: npm knows this workflow as a publisher of the
+      # package (see "Releases" in the README), so there is no token to keep
+      id-token: write
+    env:
+      VERSION: ${{ needs.build.outputs.version }}
+      PACKAGE: '@versatiles/map-editor'
+    steps:
+      - name: Get the package
+        uses: actions/download-artifact@v8
+        with:
+          name: editor
+          path: publish
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          # npm 11.5.1 or newer is needed for trusted publishing
+          node-version: 24
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      # Asked of the registry itself, with its answers told apart: only "not found" means that a
+      # package or a version is not there, anything else stops the job.
+      - name: Publish
+        run: |
+          status() { curl --silent --output /dev/null --write-out '%{http_code}' "https://registry.npmjs.org/$1"; }
+          name="${PACKAGE/\//%2f}"
+
+          # The first version is published by hand: npm sets up trusted publishing only for a
+          # package that exists.
+          case "$(status "$name")" in
+            200) ;;
+            404)
+              echo "::warning::$PACKAGE is not on npm yet, so $VERSION is not published. Publish the first version by hand, and add this workflow as its trusted publisher (see the README)."
+              exit 0 ;;
+            *)
+              echo "::error::npm does not tell whether $PACKAGE exists"
+              exit 1 ;;
+          esac
+          # e.g. when the workflow is started again for a tag: a version is published once
+          case "$(status "$name/$VERSION")" in
+            200)
+              echo "::notice::$PACKAGE $VERSION is on npm already"
+              exit 0 ;;
+            404) ;;
+            *)
+              echo "::error::npm does not tell whether $PACKAGE $VERSION exists"
+              exit 1 ;;
+          esac
+          case "$VERSION" in
+            *-*) tag=next ;;
+            *) tag=latest ;;
+          esac
+          npm publish "publish/versatiles-map-editor-$VERSION.tgz" --provenance --access public --tag "$tag"
