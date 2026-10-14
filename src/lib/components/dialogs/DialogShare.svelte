@@ -9,7 +9,6 @@
 		measureTexts,
 		resolutionForArea,
 		resolutionOfExponent,
-		TEXT_GROUPS,
 		type TextGroup
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
@@ -126,12 +125,20 @@
 		}, 50);
 	}
 
-	const TEXT_LABELS: Record<TextGroup, string> = { title: 'Title', label: 'Labels', popup: 'Popups', legend: 'Legend' };
+	/**
+	 * The groups of the texts in the bar, in its order. A shared map has no title (see
+	 * `sharedState`); if it had one, its bits would be part of the rest.
+	 */
+	const TEXT_PARTS: [TextGroup, string][] = [
+		['label', 'Labels'],
+		['popup', 'Popups'],
+		['legend', 'Legend']
+	];
 
 	/**
 	 * What the link holds, as the shares of its parts in percent, which add up to 100: the rest
 	 * (styles, colors, the background map, the legend's and the map's settings), the texts (labels,
-	 * popups, the title, the legend), and the geometry (the positions of the elements and the visible
+	 * popups, the legend), and the geometry (the positions of the elements and the visible
 	 * area). So its author sees what makes it long, and what a lower accuracy can save: only the
 	 * geometry. The texts are split into their groups once they are measured; what is left of their
 	 * bits, the words of the format and the number of strings, is part of the rest.
@@ -150,9 +157,9 @@
 		const total = Object.values(kinds).reduce((sum, bits) => sum + bits, 0);
 		// the groups of the texts that the map has
 		const groups = texts
-			? TEXT_GROUPS.filter((group) => texts![group] > 0).map((group) => ({
+			? TEXT_PARTS.filter(([group]) => texts![group] > 0).map(([group, label]) => ({
 					id: `text-${group}`,
-					label: TEXT_LABELS[group],
+					label,
 					text: true,
 					bits: texts![group]
 				}))
@@ -193,8 +200,6 @@
 			case 'texts': {
 				const group = parts.list.filter(({ text }) => text).reduce((a, b) => (b.bits > a.bits ? b : a));
 				switch (group.id) {
-					case 'text-title':
-						return 'A shorter title makes it shorter.';
 					case 'text-label':
 						return 'Shorter labels make it shorter.';
 					case 'text-popup':
@@ -356,8 +361,9 @@
 						role="img"
 						aria-label="The link holds: {parts.list.map(({ label, percent }) => `${label} ${percent} %`).join(', ')}"
 					>
-						{#each parts.list as { id, bits } (id)}
-							<span class={id} style:flex-grow={bits}></span>
+						{#each parts.list as { id, label, bits, percent } (id)}
+							<!-- its name on hover, for a part too small to match with its swatch -->
+							<span class={id} style:flex-grow={bits} title="{label} {percent} %"></span>
 						{/each}
 					</div>
 					<ul class="parts" aria-hidden="true">
@@ -426,8 +432,9 @@
 	/* what the link holds: a bar of its parts, and their names below */
 	.bar {
 		display: flex;
-		height: 6px;
-		gap: 1px;
+		height: 10px;
+		/* the background between the parts, so that neighbors never touch */
+		gap: 2px;
 		border-radius: var(--radius-sm);
 		overflow: hidden;
 
@@ -460,27 +467,28 @@
 		border-radius: 50%;
 	}
 
-	/* the texts in the accent, their groups in lighter shades of it */
-	.texts,
-	.text-title {
+	/*
+	 * the texts before they are measured in the accent; then each group and the geometry in a hue of
+	 * their own, which neighbors can tell apart, also with a color vision deficiency
+	 */
+	.texts {
 		background: var(--color-accent);
 	}
 
 	.text-label {
-		background: color-mix(in srgb, var(--color-accent) 75%, var(--color-bg));
+		background: var(--color-chart-1);
 	}
 
 	.text-popup {
-		background: color-mix(in srgb, var(--color-accent) 55%, var(--color-bg));
+		background: var(--color-chart-2);
 	}
 
 	.text-legend {
-		background: color-mix(in srgb, var(--color-accent) 38%, var(--color-bg));
+		background: var(--color-chart-3);
 	}
 
 	.geometry {
-		/* apart from the accent in both themes: darker on a light background, lighter on a dark one */
-		background: color-mix(in srgb, var(--color-accent) 50%, var(--color-text));
+		background: var(--color-chart-4);
 	}
 
 	.rest {

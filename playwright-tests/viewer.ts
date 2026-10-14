@@ -257,6 +257,8 @@ test('the share dialog tells what the texts of the link are', async ({ page }) =
 		Object.entries(shares).map(([name, percent]) => `${name} ${percent} %`)
 	);
 	await expect(bar.locator('span')).toHaveCount(5);
+	// each part tells its name on hover
+	await expect(bar.locator('span').nth(2)).toHaveAttribute('title', `Popups ${shares.Popups} %`);
 });
 
 test('a copy shows its check mark for 2 s after the last copy', async ({ page, context, browserName }) => {

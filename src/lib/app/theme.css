@@ -68,6 +68,14 @@
 	--color-error: #b00020;
 	--color-warning: #a40;
 	--color-success: #006636;
+	/*
+	 * the parts of a chart, in this order: hues that neighbors can tell apart, also with a color
+	 * vision deficiency (checked with OKLab ΔE); the purple is near the accent
+	 */
+	--color-chart-1: #eb6834;
+	--color-chart-2: #9e52d6;
+	--color-chart-3: #eda100;
+	--color-chart-4: #2a78d6;
 
 	/* small parts on the map, e.g. a button next to a node */
 	--shadow-sm: 0 1px 3px rgb(15 15 20 / 20%);
@@ -173,6 +181,11 @@
 		/* the amber and the green of versatiles.org */
 		--color-warning: #c9850a;
 		--color-success: #3da660;
+		/* the same hues, with at least 3:1 against the background */
+		--color-chart-1: #d95926;
+		--color-chart-2: #a46ee0;
+		--color-chart-3: #c98500;
+		--color-chart-4: #3987e5;
 		--shadow-sm: 0 1px 3px rgb(0 0 0 / 50%);
 		--shadow-lg: 0 1px 2px rgb(0 0 0 / 40%), 0 6px 22px rgb(0 0 0 / 45%);
 		--chevron-down: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
