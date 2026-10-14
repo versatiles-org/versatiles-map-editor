@@ -6,8 +6,11 @@
 		coarsestResolutionForArea,
 		exponentForResolution,
 		measureLink,
+		measureTexts,
 		resolutionForArea,
-		resolutionOfExponent
+		resolutionOfExponent,
+		TEXT_GROUPS,
+		type TextGroup
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
 	import ShareCode from './ShareCode.svelte';
@@ -32,6 +35,7 @@
 		// so Escape would not close the dialog
 		code?.focus();
 		update(1);
+		splitTexts();
 	}
 
 	// The precision of the shared map: automatic (from what it shows), or the exponent of the step
@@ -101,10 +105,36 @@
 	}
 
 	/**
-	 * What the link holds, as the shares of its three parts in percent, which add up to 100: the
-	 * texts (labels, popups, the title), the geometry (the positions of the elements and the visible
-	 * area), and the rest (styles, colors, the background map, the legend's and the map's settings).
-	 * So its author sees what makes it long, and what a lower accuracy can save: only the geometry.
+	 * The bits of the texts of the link by their group (see `measureTexts`): the title, the labels,
+	 * the popups and the legend. They do not depend on the accuracy, and the texts are not edited
+	 * while the dialog is open, so they are measured once when it opens, after its first paint,
+	 * which they would delay for a map of hundreds of texts.
+	 */
+	let texts: Record<TextGroup, number> | undefined = $state();
+	let textsTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function splitTexts() {
+		texts = undefined;
+		clearTimeout(textsTimer);
+		textsTimer = setTimeout(() => {
+			const hash = linkCode.split('#')[1];
+			try {
+				if (hash) texts = measureTexts(hash);
+			} catch {
+				// the bar keeps the texts as one part
+			}
+		}, 50);
+	}
+
+	const TEXT_LABELS: Record<TextGroup, string> = { title: 'Title', label: 'Labels', popup: 'Popups', legend: 'Legend' };
+
+	/**
+	 * What the link holds, as the shares of its parts in percent, which add up to 100: the rest
+	 * (styles, colors, the background map, the legend's and the map's settings), the texts (labels,
+	 * popups, the title, the legend), and the geometry (the positions of the elements and the visible
+	 * area). So its author sees what makes it long, and what a lower accuracy can save: only the
+	 * geometry. The texts are split into their groups once they are measured; what is left of their
+	 * bits, the words of the format and the number of strings, is part of the rest.
 	 */
 	const parts = $derived.by(() => {
 		const hash = linkCode.split('#')[1];
@@ -115,13 +145,23 @@
 		} catch {
 			return undefined;
 		}
-		const texts = kinds.strings + kinds.stringRefs;
+		const textBits = kinds.strings + kinds.stringRefs;
 		const geometry = kinds.coordinates + kinds.frame;
 		const total = Object.values(kinds).reduce((sum, bits) => sum + bits, 0);
+		// the groups of the texts that the map has
+		const groups = texts
+			? TEXT_GROUPS.filter((group) => texts![group] > 0).map((group) => ({
+					id: `text-${group}`,
+					label: TEXT_LABELS[group],
+					text: true,
+					bits: texts![group]
+				}))
+			: [{ id: 'texts', label: 'Texts', text: true, bits: textBits }];
+		const inGroups = groups.reduce((sum, { bits }) => sum + bits, 0);
 		const list = [
-			{ id: 'rest', label: 'Meta', bits: total - texts - geometry },
-			{ id: 'texts', label: 'Texts', bits: texts },
-			{ id: 'geometry', label: 'Geometry', bits: geometry }
+			{ id: 'rest', label: 'Meta', text: false, bits: total - inGroups - geometry },
+			...groups,
+			{ id: 'geometry', label: 'Geometry', text: false, bits: geometry }
 		];
 		// whole percents that add up to 100: rounded down, the rest to the largest remainders
 		const exact = list.map(({ bits }) => (100 * bits) / total);
@@ -129,7 +169,7 @@
 		const byRemainder = exact.map((value, i) => ({ i, rest: value - percents[i] })).sort((a, b) => b.rest - a.rest);
 		const left = 100 - percents.reduce((sum, p) => sum + p, 0);
 		for (let k = 0; k < left; k++) percents[byRemainder[k].i]++;
-		return list.map((part, i) => ({ ...part, percent: percents[i] }));
+		return { textBits, list: list.map((part, i) => ({ ...part, percent: percents[i] })) };
 	});
 
 	/**
@@ -139,12 +179,32 @@
 	 */
 	const LONG_LINK = 2000;
 
-	/** What would make a link that is too long shorter: by what it holds most of. */
+	/**
+	 * What would make a link that is too long shorter: by what it holds most of, the rest, the texts
+	 * or the geometry; of the texts, by their largest group once they are measured.
+	 */
 	const shorterBy = $derived.by(() => {
-		const largest = parts?.reduce((a, b) => (b.bits > a.bits ? b : a));
-		switch (largest?.id) {
-			case 'texts':
-				return 'Shorter labels and popups make it shorter.';
+		if (!parts) return undefined;
+		const geometry = parts.list.find(({ id }) => id === 'geometry')!.bits;
+		const rest = parts.list.find(({ id }) => id === 'rest')!.bits;
+		const largest = Math.max(parts.textBits, geometry, rest);
+		const id = largest === parts.textBits ? 'texts' : largest === geometry ? 'geometry' : 'rest';
+		switch (id) {
+			case 'texts': {
+				const group = parts.list.filter(({ text }) => text).reduce((a, b) => (b.bits > a.bits ? b : a));
+				switch (group.id) {
+					case 'text-title':
+						return 'A shorter title makes it shorter.';
+					case 'text-label':
+						return 'Shorter labels make it shorter.';
+					case 'text-popup':
+						return 'Shorter popups make it shorter.';
+					case 'text-legend':
+						return 'Shorter legend entries make it shorter.';
+					default:
+						return 'Shorter labels and popups make it shorter.';
+				}
+			}
 			case 'geometry':
 				return exponent < maxExponent
 					? 'A lower accuracy makes it shorter, and so do fewer points of lines and polygons.'
@@ -191,7 +251,15 @@
 	}
 </script>
 
-<Dialog bind:this={dialog} size="fullscreen" title="Share or embed the map" onclose={() => preview?.stop()}>
+<Dialog
+	bind:this={dialog}
+	size="fullscreen"
+	title="Share or embed the map"
+	onclose={() => {
+		preview?.stop();
+		clearTimeout(textsTimer);
+	}}
+>
 	<div class="layout">
 		<SharePreview bind:this={preview} onreload={() => update(0)} />
 
@@ -286,14 +354,14 @@
 					<div
 						class="bar"
 						role="img"
-						aria-label="The link holds: {parts.map(({ label, percent }) => `${label} ${percent} %`).join(', ')}"
+						aria-label="The link holds: {parts.list.map(({ label, percent }) => `${label} ${percent} %`).join(', ')}"
 					>
-						{#each parts as { id, bits } (id)}
+						{#each parts.list as { id, bits } (id)}
 							<span class={id} style:flex-grow={bits}></span>
 						{/each}
 					</div>
 					<ul class="parts" aria-hidden="true">
-						{#each parts as { id, label, percent } (id)}
+						{#each parts.list as { id, label, percent } (id)}
 							<li><span class="swatch {id}"></span>{label} {percent} %</li>
 						{/each}
 					</ul>
@@ -355,7 +423,7 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	/* what the link holds: a bar of its three parts, and their names below */
+	/* what the link holds: a bar of its parts, and their names below */
 	.bar {
 		display: flex;
 		height: 6px;
@@ -392,8 +460,22 @@
 		border-radius: 50%;
 	}
 
-	.texts {
+	/* the texts in the accent, their groups in lighter shades of it */
+	.texts,
+	.text-title {
 		background: var(--color-accent);
+	}
+
+	.text-label {
+		background: color-mix(in srgb, var(--color-accent) 75%, var(--color-bg));
+	}
+
+	.text-popup {
+		background: color-mix(in srgb, var(--color-accent) 55%, var(--color-bg));
+	}
+
+	.text-legend {
+		background: color-mix(in srgb, var(--color-accent) 38%, var(--color-bg));
 	}
 
 	.geometry {

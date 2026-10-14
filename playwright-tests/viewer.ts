@@ -190,23 +190,19 @@ test('precision of a shared map', async ({ page }) => {
 	expect((await shared()).length).toBeLessThan(auto.length);
 	expect(auto.length).toBeLessThanOrEqual(exact.length);
 	await expect(result).toHaveText(`Round to 71 m · Link: ${(await shared()).length} characters`);
-	// what the link holds, in three parts that add up: a marker without text is styles and settings,
-	// and its position
+	// what the link holds, in parts that add up: a marker without text is styles and settings, and
+	// its position; once the texts are measured, it has none
 	const bar = page.getByRole('dialog').getByRole('img', { name: /^The link holds:/ });
 	const shares = async () =>
 		[...(await bar.getAttribute('aria-label'))!.matchAll(/(\d+) %/g)].map((match) => Number(match[1]));
-	const [meta, texts, geometry] = await shares();
-	expect(texts + geometry + meta).toBe(100);
+	await expect(bar).toHaveAttribute('aria-label', /^The link holds: Meta \d+ %, Geometry \d+ %$/);
+	const [meta, geometry] = await shares();
+	expect(geometry + meta).toBe(100);
 	expect(geometry).toBeGreaterThan(0);
-	expect(meta).toBeGreaterThan(texts);
-	await expect(page.getByRole('dialog').locator('.parts li')).toHaveText([
-		`Meta ${meta} %`,
-		`Texts ${texts} %`,
-		`Geometry ${geometry} %`
-	]);
+	await expect(page.getByRole('dialog').locator('.parts li')).toHaveText([`Meta ${meta} %`, `Geometry ${geometry} %`]);
 	// a higher accuracy is more geometry
 	await page.keyboard.press('End');
-	await expect.poll(async () => (await shares())[2]).toBeGreaterThan(geometry);
+	await expect.poll(async () => (await shares())[1]).toBeGreaterThan(geometry);
 	// one step finer than what is too fine to be seen
 	await precision.fill('3');
 	await expect(precision).toHaveAttribute('aria-valuetext', 'Medium, 18 m');
@@ -218,6 +214,49 @@ test('precision of a shared map', async ({ page }) => {
 
 	// the map in the editor keeps its precision
 	expect(((await storedState(page)).elements[0] as StateElementMarker).point).toStrictEqual([13.41234, 52.51234]);
+});
+
+test('the share dialog tells what the texts of the link are', async ({ page }) => {
+	await page.goto(
+		'/#' +
+			encodeState({
+				meta: {
+					title: 'Markets',
+					legend: { entries: [{ type: 'marker', label: 'Christmas market' }] }
+				},
+				elements: [
+					{
+						type: 'marker',
+						point: [13.4, 52.5],
+						label: 'Old Town',
+						popup: { text: 'Open daily from 10 am to 9 pm, with mulled wine, a carousel and a nativity scene' }
+					}
+				]
+			})
+	);
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const bar = page.getByRole('dialog').getByRole('img', { name: /^The link holds:/ });
+	// at first the texts as one part, then by their groups, between the rest and the geometry; a
+	// shared map has no title (see `sharedState`)
+	await expect(bar).toHaveAttribute(
+		'aria-label',
+		/^The link holds: Meta \d+ %, Labels \d+ %, Popups \d+ %, Legend \d+ %, Geometry \d+ %$/
+	);
+	const shares = Object.fromEntries(
+		[...(await bar.getAttribute('aria-label'))!.matchAll(/(\w+) (\d+) %/g)].map(([, name, percent]) => [
+			name,
+			Number(percent)
+		])
+	);
+	expect(Object.values(shares).reduce((sum, percent) => sum + percent, 0)).toBe(100);
+	// the long popup costs the most of the texts
+	expect(shares.Popups).toBeGreaterThan(shares.Labels);
+	expect(shares.Popups).toBeGreaterThan(shares.Legend);
+	await expect(page.getByRole('dialog').locator('.parts li')).toHaveText(
+		Object.entries(shares).map(([name, percent]) => `${name} ${percent} %`)
+	);
+	await expect(bar.locator('span')).toHaveCount(5);
 });
 
 test('a copy shows its check mark for 2 s after the last copy', async ({ page, context, browserName }) => {
@@ -790,7 +829,8 @@ test('the share dialog warns about a link that is too long to work everywhere', 
 	await waitForMapIsReady(page, { count: 1 });
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await expect(warning).toBeVisible();
-	await expect(warning).toContainText('Shorter labels and popups make it shorter.');
+	// once the texts are measured, by their largest group
+	await expect(warning).toContainText('Shorter popups make it shorter.');
 	const link = await page.getByLabel('Link', { exact: true }).inputValue();
 	expect(link.length).toBeGreaterThan(2000);
 });
