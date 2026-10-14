@@ -1,4 +1,5 @@
 import { StateReader } from './reader.js';
+import { encodeStrings } from './string_coder.js';
 import { StateWriter } from './writer.js';
 import type { MapState } from './types.js';
 
@@ -62,9 +63,11 @@ const KIND_OF_READ: Record<string, LinkKind> = {
 /**
  * The groups of the texts of a map, by where they are used. The words of the format (e.g. the names
  * of symbols and fonts) are none of them.
+ * @category Links
  */
 export type TextGroup = 'title' | 'label' | 'popup' | 'legend';
 
+/** @category Links */
 export const TEXT_GROUPS: TextGroup[] = ['title', 'label', 'popup', 'legend'];
 
 /**
@@ -180,4 +183,52 @@ export function measureState(state: MapState, options: { resolution?: number } =
 	const writer = new StateWriter(options);
 	writer.writeRoot(state);
 	return measureLink(writer.asBase64());
+}
+
+/**
+ * The bits of the texts of a link, by their group, e.g. to tell an author which texts make a link
+ * long: of each group the bits of its references, and its share of the block of the strings.
+ *
+ * The block is compressed by a model that learns while it codes, so what a string costs depends on
+ * the strings before it, and no split of the block is exact. This one is fair: the Shapley value.
+ * The block is encoded with the texts of each subset of the groups; the share of a group is what
+ * adding it saves, averaged over all the orders in which the groups could be added. The shares add
+ * up to the bits of all texts; what two groups have in common, e.g. words that both use, is split
+ * evenly between them; a text used in two groups is in a subset if one of them is.
+ *
+ * The groups add up to less than the kinds `strings` and `stringRefs` of {@link measureLink}: the
+ * rest are the words of the format (e.g. the names of symbols and fonts), the number of strings
+ * and the end of the block. Shares are fractions of bits. A map with up to 4 groups encodes the
+ * block up to 16 times, which takes some milliseconds for a map of hundreds of texts. Throws like
+ * `decodeState` if the link cannot be read.
+ * @category Links
+ */
+export function measureTexts(base64: string): Record<TextGroup, number> {
+	const { format, strings, groups, references } = readMeasured(base64).texts;
+	const result = { ...references };
+
+	// the groups that the map uses, and the bits of the block with the texts of each subset of them
+	const used = TEXT_GROUPS.filter((group) => groups.some((of) => of.has(group)));
+	const blockOf = (subset: number) => {
+		const present = new Set(used.filter((_, i) => subset & (1 << i)));
+		// a string that no group uses would be in each subset; the writer writes none
+		const texts = strings.filter((_, i) => groups[i].size === 0 || [...groups[i]].some((group) => present.has(group)));
+		return encodeStrings([...format, ...texts], format.length).length;
+	};
+	const count = used.length;
+	const sizes = Array.from({ length: 1 << count }, (_, subset) => blockOf(subset));
+
+	// the share of a group: its savings with each subset of the others, weighted by how many of the
+	// orders of all groups add it right after this subset
+	const factorial = (n: number): number => (n <= 1 ? 1 : n * factorial(n - 1));
+	used.forEach((group, i) => {
+		for (let subset = 0; subset < sizes.length; subset++) {
+			if (subset & (1 << i)) continue;
+			let size = 0;
+			for (let rest = subset; rest > 0; rest &= rest - 1) size++;
+			const weight = (factorial(size) * factorial(count - size - 1)) / factorial(count);
+			result[group] += weight * (sizes[subset | (1 << i)] - sizes[subset]);
+		}
+	});
+	return result;
 }

@@ -90,7 +90,7 @@
  * | --- | --- |
  * | make or read the link of a map | {@link encodeState}, {@link decodeState} |
  * | make a link shorter, with coarser positions | `encodeState(state, { resolution })`, {@link resolutionForArea} |
- * | see what makes a link long | {@link measureLink} |
+ * | see what makes a link long | {@link measureLink}, and which texts: {@link measureTexts} |
  * | read or write a `.mapjson` file | {@link stateFromMapJSON}, {@link stateToMapJSON} |
  * | exchange a map with other tools | {@link stateToGeoJSON}, {@link stateFromGeoJSON}, {@link stateToKML}, {@link stateFromKML} |
  * | check data that comes from elsewhere | {@link stateFromMapJSON} keeps only what is valid; {@link sanitizeState} does the same for a state, and {@link sanitizeStyle}, {@link sanitizeFrame}, {@link sanitizeViewer}, {@link sanitizeLegend}, {@link sanitizeBackground}, {@link sanitizeBounds} for its parts |
@@ -165,7 +165,16 @@ export {
 	MAX_EXPONENT
 } from './grid.js';
 export { boundsOf } from './bounds.js';
-export { LINK_KINDS, measureLink, measureState, type LinkKind, type LinkMeasure } from './measure.js';
+export {
+	LINK_KINDS,
+	measureLink,
+	measureState,
+	measureTexts,
+	TEXT_GROUPS,
+	type LinkKind,
+	type LinkMeasure,
+	type TextGroup
+} from './measure.js';
 export { COORDINATE_DIGITS, roundCoordinate, sanitizeBounds, sanitizeFrame, sanitizeViewer } from './profile.js';
 export {
 	MAPJSON_SCHEMA_URL,

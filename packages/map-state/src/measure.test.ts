@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { encodeState, LINK_KINDS, measureLink, measureState, type MapState, type StateElement } from './index.js';
+import {
+	encodeState,
+	LINK_KINDS,
+	measureLink,
+	measureState,
+	measureTexts,
+	type MapState,
+	type StateElement
+} from './index.js';
 import { readMeasured, TEXT_GROUPS, type TextGroup } from './measure.js';
+import { encodeStrings } from './string_coder.js';
 
 const state: MapState = {
 	frame: { bounds: [13.3, 52.45, 13.5, 52.55] },
@@ -112,5 +121,79 @@ describe('readMeasured', () => {
 		const { texts } = readMeasured(encodeState({ elements: [] }));
 		expect(texts.strings).toStrictEqual([]);
 		expect(texts.references).toStrictEqual(Object.fromEntries(TEXT_GROUPS.map((group: TextGroup) => [group, 0])));
+	});
+});
+
+describe('measureTexts', () => {
+	const popups: MapState = {
+		meta: { title: 'Markets' },
+		elements: [
+			{
+				type: 'marker',
+				point: [13.4, 52.5],
+				label: 'Old Town',
+				popup: { text: 'Open daily from 10 to 21, with mulled wine' }
+			},
+			{
+				type: 'marker',
+				point: [13.5, 52.5],
+				label: 'Castle',
+				popup: { text: 'Open daily from 11 to 20, with an ice rink' }
+			}
+		]
+	};
+
+	/** The bits of the block of the texts, without those of the words of the format. */
+	const blockOfTexts = (link: string) => {
+		const { format, strings } = readMeasured(link).texts;
+		return encodeStrings([...format, ...strings], format.length).length - encodeStrings(format, format.length).length;
+	};
+
+	it('splits the bits of the texts into their groups, which add up', () => {
+		const link = encodeState(popups);
+		const texts = measureTexts(link);
+		const { references } = readMeasured(link).texts;
+		const sum = TEXT_GROUPS.reduce((total, group) => total + texts[group], 0);
+		const refs = TEXT_GROUPS.reduce((total, group) => total + references[group], 0);
+		expect(sum).toBeCloseTo(blockOfTexts(link) + refs, 9);
+		// the block is encoded as in the link, which holds the number of strings before it
+		const { kinds } = measureLink(link);
+		const { format, strings } = readMeasured(link).texts;
+		const header = kinds.strings - encodeStrings([...format, ...strings], format.length).length;
+		expect(header).toBeGreaterThan(0);
+		expect(header).toBeLessThan(20);
+		// the long popups cost the most, the short title the least, and the map has no legend
+		expect(texts.popup).toBeGreaterThan(texts.label);
+		expect(texts.label).toBeGreaterThan(texts.title);
+		expect(texts.title).toBeGreaterThan(0);
+		expect(texts.legend).toBe(0);
+	});
+
+	it('gives all to a group alone', () => {
+		const only: MapState = { elements: popups.elements.map(({ label: _, ...element }) => element as StateElement) };
+		const link = encodeState(only);
+		const { references } = readMeasured(link).texts;
+		expect(measureTexts(link)).toStrictEqual({
+			title: 0,
+			label: 0,
+			popup: blockOfTexts(link) + references.popup,
+			legend: 0
+		});
+	});
+
+	it('splits a text of two groups evenly', () => {
+		const link = encodeState({
+			meta: { title: 'Christmas markets in Berlin' },
+			elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Christmas markets in Berlin' }]
+		});
+		const texts = measureTexts(link);
+		const { references } = readMeasured(link).texts;
+		expect(texts.title - references.title).toBeCloseTo(blockOfTexts(link) / 2, 9);
+		expect(texts.label - references.label).toBeCloseTo(blockOfTexts(link) / 2, 9);
+	});
+
+	it('has nothing for a map without texts, and refuses what is no link', () => {
+		expect(measureTexts(encodeState({ elements: [] }))).toStrictEqual({ title: 0, label: 0, popup: 0, legend: 0 });
+		expect(() => measureTexts('not a link!')).toThrow();
 	});
 });
