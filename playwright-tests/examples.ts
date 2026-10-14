@@ -18,7 +18,8 @@ const EXAMPLES = [
 	'chernobyl-exclusion-zone',
 	'london-pharmacies',
 	'warsaw-christmas-markets-2025',
-	'napoleon-russia-1812'
+	'napoleon-russia-1812',
+	'mont-blanc-first-ascent-1786'
 ];
 
 for (const name of EXAMPLES) {

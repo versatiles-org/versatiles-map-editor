@@ -19,7 +19,8 @@ const EXAMPLES: Record<string, { types: Record<string, number>; legend: number; 
 	'chernobyl-exclusion-zone': { types: { circle: 2, marker: 4 }, legend: 2, base: 'satellite' },
 	'london-pharmacies': { types: { marker: 557 }, legend: 1, base: 'vector' },
 	'warsaw-christmas-markets-2025': { types: { marker: 23 }, legend: 3, base: 'vector' },
-	'napoleon-russia-1812': { types: { line: 2, marker: 3 }, legend: 3, base: 'vector' }
+	'napoleon-russia-1812': { types: { line: 2, marker: 3 }, legend: 3, base: 'vector' },
+	'mont-blanc-first-ascent-1786': { types: { line: 1, marker: 6 }, legend: 2, base: 'satellite' }
 };
 
 const read = (name: string): MapState => JSON.parse(readFileSync(`examples/${name}.mapjson`, 'utf-8'));

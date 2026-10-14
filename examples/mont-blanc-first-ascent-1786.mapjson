@@ -1,0 +1,145 @@
+{
+	"$schema": "https://versatiles.org/versatiles-map-editor/schema/mapjson-1.schema.json",
+	"version": 1,
+	"frame": { "bounds": [6.81977, 45.69836, 6.90672, 45.90874], "bearing": -163, "pitch": 60 },
+	"meta": {
+		"background": {
+			"base": "satellite",
+			"streets": false,
+			"labels": "none",
+			"colors": { "black": -0.2 },
+			"hillshade": true,
+			"terrain": true
+		},
+		"legend": {
+			"entries": [
+				{
+					"type": "line",
+					"style": { "color": "#56b4e9", "width": 4, "arrowEnd": "triangle" },
+					"label": "Balmat and Paccard, 7-8 August 1786"
+				},
+				{ "type": "marker", "style": { "color": "#56b4e9", "symbol": "base:icon-campsite" }, "label": "Bivouac" }
+			],
+			"theme": "dark"
+		},
+		"viewer": { "reset": true, "fullscreen": true, "canRotate": true, "canTilt": true },
+		"labels": { "overlap": "hide" },
+		"title": "First ascent of Mont Blanc, 1786"
+	},
+	"elements": [
+		{
+			"type": "line",
+			"points": [
+				[6.8447, 45.8987],
+				[6.8495, 45.894],
+				[6.8522, 45.8883],
+				[6.8555, 45.883],
+				[6.858, 45.8784],
+				[6.8606, 45.871],
+				[6.8613, 45.8666],
+				[6.858, 45.86],
+				[6.857, 45.853],
+				[6.8591, 45.8442],
+				[6.8655, 45.8405],
+				[6.8695, 45.8375],
+				[6.869, 45.8342],
+				[6.8652, 45.8327]
+			],
+			"style": { "color": "#56b4e9", "width": 4, "arrowEnd": "triangle" },
+			"smooth": true,
+			"popup": {
+				"text": "**The route**\nUp the Montagne de la Côte, over the glacier at the Jonction, past the Grands Mulets to the Grand Plateau, and up the north face. Without ropes, ice axes or crampons. The route was given up in 1820 as too dangerous."
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.8447, 45.8987],
+			"label": "Les Bossons",
+			"style": {
+				"color": "#56b4e9",
+				"labelColor": "#56b4e9",
+				"haloColor": "#000000",
+				"labelPosition": "top",
+				"symbol": "extras:symbol-dot",
+				"labelFont": "noto_sans_bold"
+			},
+			"popup": {
+				"text": "**Les Bossons**\nJacques Balmat, a crystal hunter, and Michel-Gabriel Paccard, the doctor of Chamonix, set off quietly on 7 August 1786. They came back on 9 August, Paccard snow-blind and led by Balmat."
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.858, 45.8784],
+			"label": "Bivouac",
+			"style": {
+				"color": "#56b4e9",
+				"labelColor": "#56b4e9",
+				"haloColor": "#000000",
+				"labelPosition": "left",
+				"symbol": "base:icon-campsite",
+				"labelFont": "noto_sans_bold"
+			},
+			"popup": {
+				"text": "**Gîte à Balmat**\nThe two spent the night of 7 August at the top of the Montagne de la Côte, at the edge of the ice, and started at 4 in the morning."
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.8606, 45.871],
+			"label": "La Jonction",
+			"style": {
+				"color": "#56b4e9",
+				"labelColor": "#56b4e9",
+				"haloColor": "#000000",
+				"labelPosition": "right",
+				"symbol": "extras:symbol-dot",
+				"labelFont": "noto_sans_bold"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.8613, 45.8666],
+			"label": "Grands Mulets",
+			"style": {
+				"color": "#56b4e9",
+				"labelColor": "#56b4e9",
+				"haloColor": "#000000",
+				"labelPosition": "left",
+				"symbol": "extras:symbol-dot",
+				"labelFont": "noto_sans_bold"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.8591, 45.8442],
+			"label": "Grand Plateau",
+			"style": {
+				"color": "#56b4e9",
+				"labelColor": "#56b4e9",
+				"haloColor": "#000000",
+				"labelPosition": "left",
+				"symbol": "extras:symbol-dot",
+				"labelFont": "noto_sans_bold"
+			}
+		},
+		{
+			"type": "marker",
+			"point": [6.8652, 45.8327],
+			"label": "Mont Blanc, 4,807 m",
+			"style": {
+				"color": "#ffffff",
+				"labelColor": "#ffffff",
+				"haloColor": "#000000",
+				"haloWidth": 1.5,
+				"size": 1.3,
+				"labelSize": 1.3,
+				"labelPosition": "top",
+				"symbol": "icons:mountain",
+				"labelFont": "noto_sans_bold"
+			},
+			"popup": {
+				"text": "**Summit**\nBalmat and Paccard stood on top on 8 August 1786 at 18:23, and stayed for 33 minutes. The climb won the prize that Horace-Bénédict de Saussure had offered in 1760, and is seen as the start of modern mountaineering."
+			}
+		}
+	]
+}
