@@ -13,6 +13,9 @@
 				location.replace(location.pathname + '/' + location.search + location.hash);
 			}
 		</script>
+		<!-- relative to the page, so they are found also in a subfolder; the SVG where browsers can draw it -->
+		<link rel="icon" href="%sveltekit.assets%/favicon.ico" sizes="16x16 24x24" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
 		%sveltekit.head%
 		<style>
 			.wrapper {

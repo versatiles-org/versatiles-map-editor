@@ -44,6 +44,7 @@ describe('the npm package of the built editor', () => {
 		'_app/immutable/a.js',
 		'_app/version.json',
 		'favicon.ico',
+		'favicon.svg',
 		'THIRD_PARTY_LICENSES.txt'
 	];
 

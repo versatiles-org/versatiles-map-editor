@@ -51,6 +51,24 @@ test('the editor and the viewer work in a subfolder of a web server', async ({ p
 	expect(requests.outside).toStrictEqual([]);
 });
 
+test('the editor and the viewer have the icon of VersaTiles, also in a subfolder', async ({ page }) => {
+	await serveInSubfolder(page);
+	for (const path of ['/', '/view/']) {
+		await page.goto(SUBFOLDER + path);
+		const icons = await page.evaluate(() =>
+			[...document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')].map((link) => new URL(link.href).pathname)
+		);
+		// in the folder of the editor, whichever page links them
+		expect(icons).toStrictEqual([SUBFOLDER + '/favicon.ico', SUBFOLDER + '/favicon.svg']);
+		for (const icon of icons) {
+			// as the web server has them: the files of the build, without the subfolder
+			const response = await page.request.get(icon.slice(SUBFOLDER.length));
+			expect(response.ok()).toBe(true);
+			expect(response.headers()['content-type']).toMatch(icon.endsWith('.svg') ? /^image\/svg\+xml/ : /^image\//);
+		}
+	}
+});
+
 test('the editor and the viewer start also without the slash at the end of their folder', async ({ page }) => {
 	const requests = await serveInSubfolder(page);
 	await page.goto(SUBFOLDER);
