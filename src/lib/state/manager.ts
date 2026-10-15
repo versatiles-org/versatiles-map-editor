@@ -4,7 +4,7 @@ import { StateHistory } from './history.svelte.js';
 import { EventHandler } from '../event_handler.js';
 import { followStyleChanges } from './legend_looks.js';
 import { notify } from '../notify.svelte.js';
-import { sharedState } from './shared_state.js';
+import { sharedState, type SharedOptions } from './shared_state.js';
 
 export class StateManager {
 	public mapDocument: MapDocumentInteractive;
@@ -22,11 +22,11 @@ export class StateManager {
 
 	/**
 	 * The map as a link for viewing, e.g. to share or to embed it: without what only its author
-	 * needs, see `sharedState`. `resolution`: the precision of the coordinates in meters, e.g.
-	 * coarser for a shorter link.
+	 * needs, see `sharedState`, and with what its author chooses to leave out, e.g. the popups.
+	 * `resolution`: the precision of the coordinates in meters, e.g. coarser for a shorter link.
 	 */
-	public getHash({ resolution }: { resolution?: number } = {}): string {
-		return encodeState(sharedState(this.mapDocument.getState()), { resolution });
+	public getHash({ resolution, ...shared }: { resolution?: number } & SharedOptions = {}): string {
+		return encodeState(sharedState(this.mapDocument.getState(), shared), { resolution });
 	}
 
 	public log() {

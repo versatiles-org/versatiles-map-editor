@@ -261,6 +261,50 @@ test('the share dialog tells what the texts of the link are', async ({ page }) =
 	await expect(bar.locator('span').nth(2)).toHaveAttribute('title', `Popups ${shares.Popups} %`);
 });
 
+test('a shared link can leave out the popups, which the map keeps', async ({ page }) => {
+	const popup = { text: 'Open daily from 10 am to 9 pm, with mulled wine, a carousel and a nativity scene' };
+	await page.goto(
+		'/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Old Town', popup }] })
+	);
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	const bar = dialog.getByRole('img', { name: /^The link holds:/ });
+	const linkField = page.getByLabel('Link', { exact: true });
+	const sharedElement = async () => decodeState(new URL(await linkField.inputValue()).hash.slice(1)).elements[0];
+
+	// with them by default
+	const switchPopups = dialog.getByRole('checkbox', { name: 'Include popups' });
+	await expect(switchPopups).toBeChecked();
+	await expect(bar).toHaveAttribute('aria-label', /Popups \d+ %/);
+	expect(await sharedElement()).toHaveProperty('popup', popup);
+	const withPopups = (await linkField.inputValue()).length;
+
+	// without them, the link is shorter, and its texts are only the label
+	await switchPopups.uncheck();
+	expect(await sharedElement()).not.toHaveProperty('popup');
+	expect(await sharedElement()).toHaveProperty('label', 'Old Town');
+	expect((await linkField.inputValue()).length).toBeLessThan(withPopups);
+	await expect(bar).toHaveAttribute('aria-label', /^The link holds: Meta \d+ %, Labels \d+ %, Geometry \d+ %$/);
+	// the embed code too
+	expect(await dialog.getByLabel('Embed code', { exact: true }).inputValue()).toContain(
+		`src="${await linkField.inputValue()}"`
+	);
+
+	// the map keeps them
+	await page.keyboard.press('Escape');
+	expect((await storedState(page)).elements[0]).toHaveProperty('popup', popup);
+});
+
+test('the share dialog offers to leave out popups only for a map that has some', async ({ page }) => {
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Old Town' }] }));
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+	await expect(dialog.getByRole('checkbox', { name: /^Automatic/ })).toBeVisible();
+	await expect(dialog.getByRole('checkbox', { name: 'Include popups' })).toHaveCount(0);
+});
+
 test('a copy shows its check mark for 2 s after the last copy', async ({ page, context, browserName }) => {
 	if (browserName === 'chromium') await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 	await page.clock.install();
@@ -832,7 +876,7 @@ test('the share dialog warns about a link that is too long to work everywhere', 
 	await page.getByRole('button', { name: /^Share/ }).click();
 	await expect(warning).toBeVisible();
 	// once the texts are measured, by their largest group
-	await expect(warning).toContainText('Shorter popups make it shorter.');
+	await expect(warning).toContainText('Shorter popups make it shorter, or a link without them.');
 	const link = await page.getByLabel('Link', { exact: true }).inputValue();
 	expect(link.length).toBeGreaterThan(2000);
 });

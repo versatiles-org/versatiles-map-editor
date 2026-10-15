@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StateManager } from '#lib/state/index.js';
+	import { hasPopups, type StateManager } from '#lib/state/index.js';
 	import { Dialog, Button, Checkbox, Hint, InputRow, Slider } from '#lib/components/ui/index.js';
 	import {
 		boundsOf,
@@ -43,6 +43,11 @@
 	let autoExponent = $state(0);
 	let maxExponent = $state(0);
 	const exponent = $derived(precision === 'auto' ? autoExponent : Math.min(precision, maxExponent));
+
+	// Whether the link has the popups of the elements, which can make it much longer; the map keeps
+	// them either way. Offered only for a map that has popups.
+	let popups = $state(true);
+	let mapHasPopups = $state(false);
 
 	/**
 	 * Fine enough for what the shared map shows, its frame or else its elements, and the coarsest
@@ -203,7 +208,9 @@
 					case 'text-label':
 						return 'Shorter labels make it shorter.';
 					case 'text-popup':
-						return 'Shorter popups make it shorter.';
+						return popups
+							? 'Shorter popups make it shorter, or a link without them.'
+							: 'Shorter popups make it shorter.';
 					case 'text-legend':
 						return 'Shorter legend entries make it shorter.';
 					default:
@@ -231,7 +238,7 @@
 	}
 
 	function getLinkCode() {
-		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent) })}`;
+		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent), popups })}`;
 	}
 
 	function getEmbedCode() {
@@ -246,6 +253,7 @@
 		if (!dialog?.isOpen()) return;
 		updateExponents();
 		updateNotice();
+		mapHasPopups = hasPopups(stateManager.mapDocument.getState());
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
 		preview?.show(linkCode, delay);
@@ -349,6 +357,20 @@
 						update(0);
 					}}>Automatic, fine enough for the visible area</Checkbox
 				>
+				{#if mapHasPopups}
+					<!-- for this link only, like the accuracy: the map keeps its popups -->
+					<Checkbox
+						checked={popups}
+						onchange={(e) => {
+							popups = e.currentTarget.checked;
+							update(0);
+							// the texts of the link are others now
+							splitTexts();
+						}}
+						title="Without them, a click on an element of the shared map opens nothing, and the link is shorter. The map keeps its popups."
+						>Include popups</Checkbox
+					>
+				{/if}
 				<!-- What the word of the slider means. No live region: it would be announced at every step
 				     of the slider, which tells its value itself. -->
 				<p class="result">
@@ -372,7 +394,7 @@
 						{/each}
 					</ul>
 				{/if}
-				<Hint>A lower accuracy makes a shorter link.</Hint>
+				<Hint>A lower accuracy makes a shorter link{mapHasPopups ? ', and so does leaving out the popups' : ''}.</Hint>
 			</section>
 		</div>
 	</div>
