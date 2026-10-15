@@ -57,6 +57,11 @@ export type Camera = Viewport & Turn;
 
 /** The field of view of MapLibre's camera in degrees, if the map does not tell it. */
 const DEFAULT_FOV = 36.87;
+/**
+ * How often an area shown on terrain is shown again as the heights of the ground are loaded: once
+ * with those of the map as it was, once more with the finer ones of the map as it then is.
+ */
+const SETTLE_FITS = 2;
 
 /**
  * The map on the screen: it draws the elements over the background map, and knows where things
@@ -72,6 +77,11 @@ export class MapView {
 	#kept: { frame: Bounds | undefined; elements: StateElement[]; turn: Turn } | undefined;
 	/** Whether the view itself moves the map, which does not end keeping the area. */
 	#fitting = false;
+	/**
+	 * A turned area, which is shown again once the map has loaded the heights of the ground there,
+	 * if it has terrain: at most `left` times, until the map is moved.
+	 */
+	#settling: { frame: Bounds | undefined; elements: StateElement[]; turn: Turn; left: number } | undefined;
 	/** The part of the map that e.g. the legend covers, which a fitted area keeps clear of. */
 	#covered: Box | undefined;
 	/** Whether the center and the zoom are kept, see `hold`, and where: as the map last showed an area. */
@@ -137,8 +147,22 @@ export class MapView {
 			// a map that its visitor can neither move nor zoom stays as it is, whatever the gesture
 			if (this.#fitting || (this.#held.center && this.#held.zoom)) return;
 			queueMicrotask(() => {
-				if (!resized) this.#kept = undefined;
+				if (resized) return;
+				this.#kept = undefined;
+				this.#settling = undefined;
 			});
+		});
+		// all is loaded, e.g. the style with its terrain, and the heights of the ground that the map
+		// shows: a turned area again, with them
+		map.on('idle', () => {
+			const settling = this.#settling;
+			if (!settling) return;
+			if (!map.getTerrain?.()) {
+				this.#settling = undefined;
+				return;
+			}
+			this.#settling = settling.left > 1 ? { ...settling, left: settling.left - 1 } : undefined;
+			this.#fit(settling.frame, settling.elements, settling.turn, false);
 		});
 		// e.g. a growing embed, or a rotated phone
 		map.on('resize', () => {
@@ -270,13 +294,22 @@ export class MapView {
 		if (this.#kept) this.#fit(this.#kept.frame, this.#kept.elements, this.#kept.turn);
 	}
 
-	#fit(frame: Bounds | undefined, elements: StateElement[], turn: Turn) {
+	/**
+	 * `settle`: a turned area again once the heights of the ground are loaded, if the map has terrain;
+	 * it may get it only later, e.g. the viewer shows the area before it loads the background map.
+	 */
+	#fit(frame: Bounds | undefined, elements: StateElement[], turn: Turn, settle = true) {
+		if (settle) this.#settling = undefined;
 		// free to show the area, which is then what the map stays in, see `#anchor`
 		if (this.#confined) this.#limit(false);
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
 		if (turn.bearing || turn.pitch) {
 			const area: Bounds = [bounds[0], clampLatitude(bounds[1]), bounds[2], clampLatitude(bounds[3])];
-			return this.#fitTurned(area, turn, frame ? FRAME_PADDING : ELEMENTS_PADDING, frame ? undefined : MAX_ZOOM);
+			this.#fitTurned(area, turn, frame ? FRAME_PADDING : ELEMENTS_PADDING, frame ? undefined : MAX_ZOOM);
+			// the heights of the ground there may be loaded only now that the map shows it, and more
+			// precise ones once it is closer
+			if (settle) this.#settling = { frame, elements, turn, left: SETTLE_FITS };
+			return;
 		}
 		const target: [[number, number], [number, number]] = [
 			[bounds[0], clampLatitude(bounds[1])],
@@ -301,16 +334,18 @@ export class MapView {
 		}
 	}
 
-	/** The window of the map, turned, for `fitTurned`. */
+	/** The window of the map, turned, for `fitTurned`; with the heights of the ground if the map has terrain. */
 	#window(turn: Turn): TurnedWindow {
-		const { clientWidth: width, clientHeight: height } = this.map.getContainer();
-		const { top = 0, right = 0, bottom = 0, left = 0 } = this.map.getPadding();
+		const map = this.map;
+		const { clientWidth: width, clientHeight: height } = map.getContainer();
+		const { top = 0, right = 0, bottom = 0, left = 0 } = map.getPadding();
 		return {
 			bearing: turn.bearing ?? 0,
 			pitch: turn.pitch ?? 0,
-			fov: this.map.getVerticalFieldOfView?.() ?? DEFAULT_FOV,
+			fov: map.getVerticalFieldOfView?.() ?? DEFAULT_FOV,
 			height,
-			focus: [(left + width - right) / 2, (top + height - bottom) / 2]
+			focus: [(left + width - right) / 2, (top + height - bottom) / 2],
+			...(map.getTerrain?.() ? { heightOf: (point: GeoPoint) => map.queryTerrainElevation(point) ?? 0 } : {})
 		};
 	}
 

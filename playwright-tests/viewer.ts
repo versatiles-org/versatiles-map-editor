@@ -837,6 +837,50 @@ test('the share dialog warns about a link that is too long to work everywhere', 
 	expect(link.length).toBeGreaterThan(2000);
 });
 
+test('a shared map on terrain opens with its visible area in the middle, at any size', async ({ page }) => {
+	// around Mont Blanc, seen from the north-east and tilted, as in the example: the ground there is
+	// 1,000 to 4,800 m high, which the camera of a flat map shows too low
+	const bounds: [number, number, number, number] = [6.81977, 45.69836, 6.90672, 45.90874];
+	const hash = encodeState({
+		frame: { bounds, bearing: -163, pitch: 60 },
+		meta: { background: { base: 'satellite', streets: false, labels: 'none', terrain: true } },
+		elements: []
+	});
+	/** How far the middle of the visible area is from the one of the window, by its sides on the ground. */
+	const offset = () =>
+		page.evaluate(([west, south, east, north]) => {
+			const map = (window as unknown as MapWindow).map;
+			const points: [number, number][] = [];
+			for (let i = 0; i <= 16; i++) {
+				const [lon, lat] = [west + ((east - west) * i) / 16, south + ((north - south) * i) / 16];
+				points.push([lon, south], [lon, north], [west, lat], [east, lat]);
+			}
+			const shown = points.map((point) => map.project(point));
+			const [xs, ys] = [shown.map(({ x }) => x), shown.map(({ y }) => y)];
+			const { clientWidth, clientHeight } = map.getContainer();
+			return [
+				Math.round((Math.min(...xs) + Math.max(...xs)) / 2 - clientWidth / 2),
+				Math.round((Math.min(...ys) + Math.max(...ys)) / 2 - clientHeight / 2)
+			];
+		}, bounds);
+
+	for (const [width, height] of [
+		[1000, 500],
+		[500, 1000]
+	]) {
+		await test.step(`${width} × ${height}`, async () => {
+			await page.setViewportSize({ width, height });
+			await page.goto('about:blank');
+			await page.goto('/view/#' + hash);
+			await waitForMapIsReady(page);
+			// shown again once the heights of the ground are loaded
+			await expect
+				.poll(async () => (await offset()).map((pixels) => Math.abs(pixels) <= 2), { timeout: 15_000 })
+				.toStrictEqual([true, true]);
+		});
+	}
+});
+
 test('a shared map can have a button that shows it as it opened', async ({ page }) => {
 	const frame = {
 		bounds: [13.3, 52.45, 13.5, 52.55] as [number, number, number, number],

@@ -161,6 +161,49 @@ describe('MapView', () => {
 			expect(camera().zoom).toBeLessThan(free);
 		});
 
+		describe('on terrain', () => {
+			/** The map gets terrain, e.g. with its background map after it showed the area. */
+			const addTerrain = () =>
+				Object.assign(map, {
+					getTerrain: vi.fn(() => ({ source: 'terrain' })),
+					queryTerrainElevation: vi.fn(([lon]: [number, number]) => 1000 + 20_000 * (lon - 13.3))
+				});
+
+			it('shows the area again once the heights of the ground are loaded, twice', () => {
+				view.fitArea(area, [], { keep: true, turn: { bearing: 30, pitch: 60 } });
+				const flat = camera();
+				addTerrain();
+				map.jumpTo.mockClear();
+				map.emit('idle');
+				expect(map.jumpTo).toHaveBeenCalledTimes(1);
+				expect(camera().center).not.toStrictEqual(flat.center);
+				// finer heights, once the map shows the area closer
+				map.emit('idle');
+				expect(map.jumpTo).toHaveBeenCalledTimes(2);
+				map.emit('idle');
+				expect(map.jumpTo).toHaveBeenCalledTimes(2);
+			});
+
+			it('stays as it is on a map without terrain', () => {
+				view.fitArea(area, [], { keep: true, turn: { pitch: 60 } });
+				map.jumpTo.mockClear();
+				map.emit('idle');
+				addTerrain();
+				map.emit('idle');
+				expect(map.jumpTo).not.toHaveBeenCalled();
+			});
+
+			it('stays where the visitor moved it', async () => {
+				view.fitArea(area, [], { keep: true, turn: { pitch: 60 } });
+				addTerrain();
+				map.jumpTo.mockClear();
+				map.emit('movestart');
+				await Promise.resolve();
+				map.emit('idle');
+				expect(map.jumpTo).not.toHaveBeenCalled();
+			});
+		});
+
 		it('stays as large next to a covered part that the turned area does not reach', () => {
 			// rotated by an eighth turn, the area is a diamond in the window, with empty corners
 			view.fitArea(area, [], { keep: true, turn: { bearing: 45 } });

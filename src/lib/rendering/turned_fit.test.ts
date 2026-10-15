@@ -133,6 +133,50 @@ describe('fitTurned', () => {
 		expect(box.bottom).toBeLessThanOrEqual(part.bottom + 0.1);
 	});
 
+	describe('on terrain', () => {
+		// around Mont Blanc, an area seen from the north-east, as in the example; a mountain in it,
+		// 4,800 m high, on ground 1,000 m high
+		const alps: Bounds = [6.81977, 45.69836, 6.90672, 45.90874];
+		const heightOf = ([lon, lat]: [number, number]) =>
+			1000 + 3800 * Math.exp(-(((lon - 6.865) / 0.03) ** 2 + ((lat - 45.833) / 0.04) ** 2));
+		/** The rectangle around the sides of the area in the window, which go up and down with the ground. */
+		const sides = (camera: { center: [number, number]; zoom: number }, turned: TurnedWindow): Box => {
+			const [west, south, east, north] = alps;
+			const points: [number, number][] = [];
+			for (let i = 0; i <= 32; i++) {
+				const [lon, lat] = [west + ((east - west) * i) / 32, south + ((north - south) * i) / 32];
+				points.push([lon, south], [lon, north], [west, lat], [east, lat]);
+			}
+			const shownPoints = points.map((point) => projectTurned(point, camera, turned)!);
+			const [xs, ys] = [shownPoints.map(([x]) => x), shownPoints.map(([, y]) => y)];
+			return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) };
+		};
+
+		it('shows the area in the middle, as the map shows it with its center on the ground', () => {
+			// the whole window, and a part of it above a legend
+			for (const part of [rect, { ...rect, bottom: 500 }]) {
+				const turned = window({ bearing: -163, pitch: 60, heightOf });
+				const camera = fitTurned(alps, turned, part);
+				// `projectTurned` puts the center on the ground, as MapLibre does
+				const box = sides(camera, turned);
+				const name = JSON.stringify(part);
+				expect(box.left - part.left, name).toBeCloseTo(part.right - box.right, 0);
+				expect(box.top - part.top, name).toBeCloseTo(part.bottom - box.bottom, 0);
+				expect(box.left, name).toBeGreaterThanOrEqual(part.left - 0.5);
+				expect(box.top, name).toBeGreaterThanOrEqual(part.top - 0.5);
+				// as large as possible
+				expect(Math.min(box.left - part.left, box.top - part.top), name).toBeLessThan(1);
+			}
+		});
+
+		it('is not the camera of the flat map, which shows the area too low', () => {
+			const flat = window({ bearing: -163, pitch: 60 });
+			const camera = fitTurned(alps, flat, rect);
+			const box = sides(camera, window({ bearing: -163, pitch: 60, heightOf }));
+			expect((box.top + box.bottom) / 2).toBeGreaterThan(310);
+		});
+	});
+
 	it('is not closer than the maximum zoom, e.g. for a single point', () => {
 		const camera = fitTurned([5, 6, 5, 6], window({ bearing: 30, pitch: 20 }), rect, { maxZoom: 15 });
 		expect(camera.zoom).toBe(15);
