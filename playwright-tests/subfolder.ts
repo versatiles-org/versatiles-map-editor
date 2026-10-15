@@ -56,10 +56,16 @@ test('the editor and the viewer have the icon of VersaTiles, also in a subfolder
 	for (const path of ['/', '/view/']) {
 		await page.goto(SUBFOLDER + path);
 		const icons = await page.evaluate(() =>
-			[...document.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')].map((link) => new URL(link.href).pathname)
+			[...document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="apple-touch-icon"]')].map(
+				(link) => new URL(link.href).pathname
+			)
 		);
 		// in the folder of the editor, whichever page links them
-		expect(icons).toStrictEqual([SUBFOLDER + '/favicon.ico', SUBFOLDER + '/favicon.svg']);
+		expect(icons).toStrictEqual([
+			SUBFOLDER + '/favicon.ico',
+			SUBFOLDER + '/favicon.svg',
+			SUBFOLDER + '/apple-touch-icon.png'
+		]);
 		for (const icon of icons) {
 			// as the web server has them: the files of the build, without the subfolder
 			const response = await page.request.get(icon.slice(SUBFOLDER.length));

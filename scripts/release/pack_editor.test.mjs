@@ -45,6 +45,7 @@ describe('the npm package of the built editor', () => {
 		'_app/version.json',
 		'favicon.ico',
 		'favicon.svg',
+		'apple-touch-icon.png',
 		'THIRD_PARTY_LICENSES.txt'
 	];
 
