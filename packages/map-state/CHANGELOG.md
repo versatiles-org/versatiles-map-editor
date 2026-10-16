@@ -5,6 +5,13 @@ All notable changes to `@versatiles/map-state` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-16
+
+### Features
+
+- **map-state:** tell the group of each text of a link (title, label, popup, legend) and the bits of its references ([e5a8236](https://github.com/versatiles-org/versatiles-map-editor/commit/e5a82364d7c56adad946fce3c5e5170ec7ea6abf))
+- **map-state:** split the bits of the texts of a link into title, labels, popups and legend by their Shapley values ([9416859](https://github.com/versatiles-org/versatiles-map-editor/commit/94168595403b7412218d61e5de80cc6aa6c0ae22))
+
 ## [1.0.1] - 2026-10-09
 
 ## [1.0.1-rc.1] - 2026-10-09

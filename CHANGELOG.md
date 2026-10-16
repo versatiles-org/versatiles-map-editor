@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-10-16
+
+### Features
+
+- **examples:** add Mont Blanc first ascent map and update examples list ([147648d](https://github.com/versatiles-org/versatiles-map-editor/commit/147648d1e0b1c4a2fc42fb9056d7f908473f9324))
+- **map-state:** tell the group of each text of a link (title, label, popup, legend) and the bits of its references ([e5a8236](https://github.com/versatiles-org/versatiles-map-editor/commit/e5a82364d7c56adad946fce3c5e5170ec7ea6abf))
+- **map-state:** split the bits of the texts of a link into title, labels, popups and legend by their Shapley values ([9416859](https://github.com/versatiles-org/versatiles-map-editor/commit/94168595403b7412218d61e5de80cc6aa6c0ae22))
+- **share:** split the texts in the bar of the link size into labels, popups and legend, and name the largest when the link is too long ([25176b2](https://github.com/versatiles-org/versatiles-map-editor/commit/25176b290c14d0fadaa294234d8b61f44c9bd5dd))
+- give the editor and the viewer the icon of VersaTiles, as SVG and ICO, found also in a subfolder, close #40 ([aee7c1f](https://github.com/versatiles-org/versatiles-map-editor/commit/aee7c1fd45bb31b234f3a626fd1ec0d991f0488e))
+- **share:** let the author leave the popups out of a shared link, which the map keeps, close #42 ([e909a76](https://github.com/versatiles-org/versatiles-map-editor/commit/e909a760005bec1ef816bce87ccb74bfe2ae149b))
+- give the editor and the viewer an icon for the home screen of phones, the logo of VersaTiles on white ([ea723c5](https://github.com/versatiles-org/versatiles-map-editor/commit/ea723c5da1beb486bbfff80e41b02ed055121295))
+
+### Bug Fixes
+
+- **release:** publish the package from "./publish/…", which npm otherwise reads as a repository on GitHub ([44d00c3](https://github.com/versatiles-org/versatiles-map-editor/commit/44d00c3e2720a99af528f172cc8910be230a4589))
+- **share:** give each part of the link size bar a hue of its own, with wider gaps and its name on hover, so that neighbors can be told apart ([5a73be6](https://github.com/versatiles-org/versatiles-map-editor/commit/5a73be68eb006787368f7e46a66fc402da581088))
+- **viewer:** center the visible area of a tilted map on terrain, with the heights of the ground along its sides, and show it again once they are loaded ([03fc350](https://github.com/versatiles-org/versatiles-map-editor/commit/03fc3505787d2b13638bd908c0aa8b160f0f4370))
+- **deps:** update @sveltejs/kit to version 3.1.0 ([3994ee8](https://github.com/versatiles-org/versatiles-map-editor/commit/3994ee8470085b4f6c594107c95fab58d276dffd))
+- **deps:** update @versatiles/style and vitest to latest versions ([9890119](https://github.com/versatiles-org/versatiles-map-editor/commit/989011934eef540e618ac2366b5c3ea90a7afc90))
+
+### Documentation
+
+- update deps graph ([3e0cf98](https://github.com/versatiles-org/versatiles-map-editor/commit/3e0cf9811097adc1b26a9678ac4702e3cde79756))
+
+### Chores
+
+- update dependencies to latest versions ([a64a5a2](https://github.com/versatiles-org/versatiles-map-editor/commit/a64a5a20e5ec72e26872641d230f1319c0770e71))
+
 ## [4.0.1] - 2026-10-09
 
 ### Bug Fixes
