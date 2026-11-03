@@ -86,7 +86,7 @@ Every field is optional. A field with an invalid value gets its default, and the
 | Field                   | What it does                                                                                                                                                                         | Default                                  |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- |
 | `tileServer`            | The tile server of the background map, the satellite imagery, the symbols and the fonts (see below), absolute or relative.                                                           | `"https://tiles.versatiles.org"`         |
-| `landcover`             | Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The vector tiles must have it (see below); `false` for tiles that do not.                           | `true`                                   |
+| `landcover`             | Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The tile server must have landcover tiles (see below); `false` for a server without them.           | `true`                                   |
 | `elevation`             | Whether the background map can show its relief: shaded, and as terrain on a tilted map. The tile server must have elevation tiles (see below); `false` for a server without them.    | `true`                                   |
 | `geocoder`              | The geocoder of the address search (see below), absolute or relative.                                                                                                                | `"https://geocode.versatiles.org/api"`   |
 | `startView`             | What a new map shows: `[west, south, east, north]` in degrees.                                                                                                                       | the country of the user*, else the world |
@@ -136,7 +136,8 @@ labels, and offers its colors first:
 The tile server must offer the same as `tiles.versatiles.org`, from its address (`tileServer`):
 
 - `tiles/osm/tiles.json` and its vector tiles, in the [Shortbread](https://shortbread-tiles.org)
-  schema, for the background map, with the landcover of low zoom levels of the VersaTiles tiles
+  schema, for the background map;
+- `tiles/landcover-vectors/tiles.json` and its vector tiles, for the landcover of low zoom levels
   (or `"landcover": false` in the configuration);
 - `tiles/satellite/tiles.json` and its raster tiles, for the satellite background;
 - `tiles/elevation/tiles.json` and its elevation tiles, for the shaded relief and the terrain (or

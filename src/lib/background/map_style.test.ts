@@ -58,16 +58,17 @@ describe('src/lib/background/map_style.ts', () => {
 		});
 
 		it('shows the landcover of low zoom levels as the configuration says, not the options', () => {
-			const landcoverFrom0 = (style: ReturnType<typeof getMapStyle>) =>
-				style.layers.filter((layer) => layer.id.startsWith('land-') && layer.minzoom === undefined).length;
+			const landcoverLayers = (style: ReturnType<typeof getMapStyle>) =>
+				style.layers.filter((layer) => 'source' in layer && layer.source === 'versatiles-landcover').length;
 			const withLandcover = getMapStyle({ options: { features: { landcover: false } } });
 			expect(osm).toHaveBeenLastCalledWith(vector);
 			config.current = { ...DEFAULT_CONFIG, landcover: false };
 			try {
 				const without = getMapStyle({ options: { features: { landcover: true } } });
 				expect(osm).toHaveBeenLastCalledWith({ ...vector, features: { landcover: false } });
-				// the fills of the landcover from zoom level 0
-				expect(landcoverFrom0(withLandcover)).toBeGreaterThan(landcoverFrom0(without));
+				// the fills drawn from the landcover tiles of low zoom levels
+				expect(landcoverLayers(withLandcover)).toBeGreaterThan(0);
+				expect(landcoverLayers(without)).toBe(0);
 			} finally {
 				config.current = DEFAULT_CONFIG;
 			}

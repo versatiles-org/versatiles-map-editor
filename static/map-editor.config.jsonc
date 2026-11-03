@@ -14,9 +14,9 @@
 	// Default: "https://tiles.versatiles.org"
 	// "tileServer": "https://tiles.versatiles.org",
 
-	// Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The vector
-	// tiles of the tile server must have it, like those of tiles.versatiles.org; turn it off for
-	// tiles that do not.
+	// Whether the vector map shows the landcover of low zoom levels (forests, ice, …). The tile
+	// server must have landcover tiles, like tiles.versatiles.org; turn it off for a server
+	// without them.
 	// Default: true
 	// "landcover": true,
 

@@ -114,15 +114,16 @@ jobs:
         run: npx playwright install ${{ matrix.project }}
 
       # Responses of the tile server and the geocoder, so the tests do not depend on them; one cache
-      # per job, whose tests request other tiles
+      # per job, whose tests request other tiles. Entries never expire: raise the number in the key
+      # when the tile server changes, e.g. its TileJSON (2: land cover moved to its own tiles)
       - name: Cache server responses
         uses: actions/cache@v6
         with:
           path: playwright-tests/.request-cache
-          key: playwright-requests-${{ matrix.project }}-${{ strategy.job-index }}-${{ github.run_id }}
+          key: playwright-requests-2-${{ matrix.project }}-${{ strategy.job-index }}-${{ github.run_id }}
           restore-keys: |
-            playwright-requests-${{ matrix.project }}-${{ strategy.job-index }}-
-            playwright-requests-
+            playwright-requests-2-${{ matrix.project }}-${{ strategy.job-index }}-
+            playwright-requests-2-
 
       - name: Test Playwright
         run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}

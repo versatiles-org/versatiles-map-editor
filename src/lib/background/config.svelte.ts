@@ -28,8 +28,8 @@ export interface ConfigFile {
 	 */
 	tileServer?: string;
 	/**
-	 * Whether the vector map shows the landcover of low zoom levels (forests, ice, …), which the
-	 * vector tiles of the tile server must have, like those of tiles.versatiles.org.
+	 * Whether the vector map shows the landcover of low zoom levels (forests, ice, …), which needs
+	 * the landcover tiles of the tile server, like those of tiles.versatiles.org.
 	 */
 	landcover?: boolean;
 	/**
