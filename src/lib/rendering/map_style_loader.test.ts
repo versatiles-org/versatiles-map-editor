@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
-import { inlineSources } from '@versatiles/style';
+import { afterEach, describe, expect, it, beforeEach, vi } from 'vitest';
+import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { deferInlineSources } from '../__mocks__/inline_sources.js';
 import { MapStyleLoader } from './map_style_loader.js';
 import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
@@ -65,6 +65,58 @@ describe('MapStyleLoader', () => {
 			loader.destroy();
 			expect(signal?.aborted).toBe(true);
 			vi.unstubAllGlobals();
+		});
+	});
+
+	describe('a tile server without landcover tiles', () => {
+		const landcover = 'versatiles-landcover';
+		type Style = { sources: Record<string, unknown>; layers: { source?: string }[] };
+		const styleOf = (call: unknown) => (call as [Style])[0];
+
+		// a new loader, on a map of its own, whose TileJSON downloads fail for the styles that `fails` names
+		async function loadWith(fails: (style: StyleSpecification) => boolean) {
+			await vi.waitFor(() => expect(map.setStyle).toHaveBeenCalledTimes(1));
+			vi.mocked(inlineSources).mockClear();
+			vi.mocked(inlineSources).mockImplementation(async (style) => {
+				if (fails(style)) throw new Error('Failed to load TileJSON: 404');
+				return style;
+			});
+			const other = new MockMap();
+			const loader = new MapStyleLoader(other as unknown as MaplibreMap, renderer);
+			await vi.waitFor(() => expect(other.setStyle).toHaveBeenCalledTimes(1));
+			return { other, loader };
+		}
+
+		afterEach(() => {
+			vi.mocked(inlineSources).mockImplementation(async (style) => style);
+			vi.restoreAllMocks();
+		});
+
+		it('shows the map without the landcover, also for the next backgrounds', async () => {
+			const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+			const { other, loader } = await loadWith((style) => landcover in style.sources);
+			const style = styleOf(other.setStyle.mock.lastCall);
+			expect(style.sources).toHaveProperty('versatiles-shortbread');
+			expect(style.sources).not.toHaveProperty(landcover);
+			expect(style.layers.filter((layer) => layer.source === landcover)).toStrictEqual([]);
+			expect(warn).toHaveBeenCalledOnce();
+			expect(warn.mock.lastCall?.[0]).toContain('"landcover": false');
+
+			// the next background does not try again
+			vi.mocked(inlineSources).mockClear();
+			other.setStyle.mockImplementation(() => {});
+			await loader.setBackground({ theme: 'gray' }, 'noto_sans_regular');
+			expect(inlineSources).toHaveBeenCalledOnce();
+			expect(vi.mocked(inlineSources).mock.lastCall?.[0].sources).not.toHaveProperty(landcover);
+			expect(warn).toHaveBeenCalledOnce();
+		});
+		it('keeps the uninlined style if the other sources fail too', async () => {
+			const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+			const { other } = await loadWith(() => true);
+			// with the landcover, and without
+			expect(inlineSources).toHaveBeenCalledTimes(2);
+			expect(styleOf(other.setStyle.mock.lastCall).sources).toHaveProperty(landcover);
+			expect(error).toHaveBeenCalledWith('Failed to inline map style sources', expect.any(Error));
 		});
 	});
 

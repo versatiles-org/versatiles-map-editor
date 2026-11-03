@@ -1,12 +1,23 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
-import { inlineSources } from '@versatiles/style';
+import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer, type LabelOptions } from './element_renderer.js';
 import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
 import { themeColor } from './theme_color.js';
 import { addArrowImage } from './arrow_heads.js';
 import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets, configReady } from '../background/index.js';
+
+/** The source of the landcover of low zoom levels, which the vector map loads from tiles of its own. */
+const LANDCOVER_SOURCE = 'versatiles-landcover';
+
+/** The style without a source and the layers that draw it. */
+function withoutSource(style: StyleSpecification, id: string): StyleSpecification {
+	const sources = { ...style.sources };
+	delete sources[id];
+	const layers = style.layers.filter((layer) => !('source' in layer) || layer.source !== id);
+	return { ...style, sources, layers };
+}
 
 /**
  * Loads the style of the map: the background map with the editor's layers, the font of the labels
@@ -24,6 +35,8 @@ export class MapStyleLoader {
 	#loaded = false;
 	#request = 0;
 	#destroyed = false;
+	/** Whether the tile server has no landcover tiles, so the styles from now on leave them out. */
+	#noLandcover = false;
 	readonly #abortController = new AbortController();
 
 	constructor(map: maplibregl.Map, renderer: ElementRenderer) {
@@ -122,12 +135,9 @@ export class MapStyleLoader {
 		const style = buildStyle(background, this.#font, this.#mapLabelsOnTop, editorColor);
 		style.sprite = spriteSheets();
 
-		// The tile server's TileJSON uses relative tile URLs, which MapLibre cannot resolve itself.
-		// The download is aborted and its result ignored once the loader is destroyed.
-		const signal = this.#abortController.signal;
 		let inlined = style;
 		try {
-			inlined = await inlineSources(style, { fetch: (input, init) => fetch(input, { ...init, signal }) });
+			inlined = await this.#inline(style);
 		} catch (error) {
 			if (this.#destroyed) return; // includes the AbortError caused by destroy()
 			console.error('Failed to inline map style sources', error);
@@ -157,5 +167,30 @@ export class MapStyleLoader {
 			return;
 		}
 		await loaded;
+	}
+
+	/**
+	 * The style with the TileJSON of its sources: the tile server's TileJSON uses relative tile URLs,
+	 * which MapLibre cannot resolve itself. One source that fails fails them all, so a tile server
+	 * without landcover tiles (the configuration shows them by default) gets the map without them,
+	 * instead of a map whose other sources cannot load either. The download is aborted once the
+	 * loader is destroyed.
+	 */
+	async #inline(style: StyleSpecification): Promise<StyleSpecification> {
+		const signal = this.#abortController.signal;
+		const options = { fetch: (input: RequestInfo | URL, init?: RequestInit) => fetch(input, { ...init, signal }) };
+		if (this.#noLandcover) style = withoutSource(style, LANDCOVER_SOURCE);
+		try {
+			return await inlineSources(style, options);
+		} catch (error) {
+			if (this.#destroyed || !(LANDCOVER_SOURCE in style.sources)) throw error;
+			const inlined = await inlineSources(withoutSource(style, LANDCOVER_SOURCE), options);
+			this.#noLandcover = true;
+			console.warn(
+				'The tile server has no landcover tiles, so the map shows none. Set "landcover": false in the configuration.',
+				error
+			);
+			return inlined;
+		}
 	}
 }
