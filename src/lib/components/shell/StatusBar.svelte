@@ -96,6 +96,9 @@
 		>
 	</span>
 	<span class="position">{position}</span>
+	<a class="support" href="https://versatiles.org/donate/" target="_blank" rel="noopener noreferrer">
+		Please support us<span class="sr-only"> (opens in a new tab)</span>
+	</a>
 </div>
 
 <style>
@@ -132,6 +135,12 @@
 	.position {
 		flex: none;
 		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.support {
+		flex: none;
+		color: inherit;
 		white-space: nowrap;
 	}
 </style>
