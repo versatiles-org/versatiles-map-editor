@@ -916,7 +916,9 @@ test('a shared map on terrain opens with its visible area in the middle, at any 
 			await page.setViewportSize({ width, height });
 			await page.goto('about:blank');
 			await page.goto('/view/#' + hash);
-			await waitForMapIsReady(page);
+			// satellite imagery on terrain, tilted: Firefox in CI renders it on the CPU, where loading
+			// took more than 30 s (passing runs needed 44 to 72 s for both sizes)
+			await waitForMapIsReady(page, { timeout: 60_000 });
 			// shown again once the heights of the ground are loaded
 			await expect
 				.poll(async () => (await offset()).map((pixels) => Math.abs(pixels) <= 2), { timeout: 15_000 })

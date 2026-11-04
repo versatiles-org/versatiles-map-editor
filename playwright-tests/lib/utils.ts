@@ -310,10 +310,15 @@ export const PREVIEW_TIMEOUT = 30_000;
  * Wait until `count` maps (in the page and its iframes) are ready. The page sets `window.mapReady`,
  * which is polled, so the moment cannot be missed, e.g. when it happens before `page.goto` returns.
  * `expectedMessages` are console messages that the test triggers on purpose, which are not printed.
+ * `timeout` is longer for maps that are slow to load, such as satellite imagery on terrain.
  */
 export async function waitForMapIsReady(
 	page: Page,
-	{ count = 1, expectedMessages = [] }: { count?: number; expectedMessages?: RegExp[] } = {}
+	{
+		count = 1,
+		expectedMessages = [],
+		timeout = 30_000
+	}: { count?: number; expectedMessages?: RegExp[]; timeout?: number } = {}
 ): Promise<void> {
 	expectedConsoleMessages.get(page)?.push(...expectedMessages);
 	const readyMaps = async () => {
@@ -326,7 +331,6 @@ export async function waitForMapIsReady(
 		}
 		return ready;
 	};
-	const timeout = 30_000;
 	const start = Date.now();
 	while ((await readyMaps()) < count) {
 		if (Date.now() - start > timeout) throw new Error(`Only ${await readyMaps()} of ${count} maps are ready`);
