@@ -162,10 +162,15 @@ test('the groups of the menu open as submenus beside it, by hover, click and key
 		const exportRow = await box(menu.getByRole('menuitem', { name: 'Export', exact: true }));
 		await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
 		const target = { x: to.x + 20, y: Math.min(to.y + to.height - 4, exportRow.y + exportRow.height * 2) };
+		// The page's time stands still, so the pointer moves fast, as a hand does. Else it moves as
+		// fast as the page renders, and on a slow runner a single step can take as long as a pause.
+		await page.clock.install();
+		await page.clock.pauseAt(Date.now() + 1000);
 		await page.mouse.move(target.x, target.y, { steps: 12 });
 		await expect(importMenu).toBeVisible();
 		await expect(exportMenu).toBeHidden();
 		await expect(importItem).toHaveAttribute('aria-expanded', 'true');
+		await page.clock.resume();
 	});
 
 	await test.step('the keyboard opens it with the focus inside, and goes back', async () => {
