@@ -135,13 +135,13 @@ labels, and offers its colors first:
 
 The tile server must offer the same as `tiles.versatiles.org`, from its address (`tileServer`):
 
-- `tiles/osm/tiles.json` and its vector tiles, in the [Shortbread](https://shortbread-tiles.org)
+- `tiles/osm-vector/tiles.json` and its vector tiles, in the [Shortbread](https://shortbread-tiles.org)
   schema, for the background map;
-- `tiles/landcover-vectors/tiles.json` and its vector tiles, for the landcover of low zoom levels
+- `tiles/landcover-vector/tiles.json` and its vector tiles, for the landcover of low zoom levels
   (or `"landcover": false` in the configuration);
-- `tiles/satellite/tiles.json` and its raster tiles, for the satellite background;
-- `tiles/elevation/tiles.json` and its elevation tiles, for the shaded relief and the terrain (or
-  `"elevation": false` in the configuration);
+- `tiles/satellite-raster/tiles.json` and its raster tiles, for the satellite background;
+- `tiles/elevation-raster/tiles.json` and its elevation tiles, for the shaded relief and the terrain
+  (or `"elevation": false` in the configuration);
 - `assets/sprites/index.json` and the sprite sheets it names, for the symbols of markers;
 - `assets/glyphs/font_families.json` and the glyphs of the fonts, for the labels.
 
