@@ -47,12 +47,12 @@
     "upgrade": "vrt deps-upgrade"
   },
   "dependencies": {
-    "@versatiles/style": "^8.1.1",
-    "maplibre-gl": "^6.16.0"
+    "@versatiles/style": "^9.0.0",
+    "maplibre-gl": "^6.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.64.1",
+    "@playwright/test": "^1.65.0",
     "@sveltejs/adapter-static": "^4.0.1",
     "@sveltejs/kit": "^3.1.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -63,16 +63,16 @@
     "ajv": "^8.20.0",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.24.0",
+    "eslint-plugin-svelte": "^3.24.1",
     "fake-indexeddb": "^6.2.7",
     "globals": "^17.14.0",
     "happy-dom": "^21.0.4",
     "npm-check-updates": "^23.1.1",
-    "playwright": "^1.64.1",
+    "playwright": "^1.65.0",
     "postcss-html": "^2.0.0",
     "prettier": "^3.9.10",
     "prettier-plugin-svelte": "^4.1.1",
-    "sass-embedded": "^1.107.1",
+    "sass-embedded": "^1.108.1",
     "stylelint": "^17.16.0",
     "stylelint-config-html": "^2.0.0",
     "stylelint-config-standard": "^40.0.0",
@@ -83,7 +83,7 @@
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vitest": "^5.1.0"
   },
   "allowScripts": {
