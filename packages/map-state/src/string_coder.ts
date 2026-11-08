@@ -126,7 +126,8 @@ class Context {
  * those before it). Encoder and decoder update them identically.
  */
 class Model {
-	private byOrder: Map<string, Context>[] = Array.from({ length: ORDER + 1 }, () => new Map());
+	/** The context of order 0, and through it all others: a tree, not a map by text keys, which took most of the time of long strings. */
+	private root = new ContextNode();
 
 	/** A model that has learned `primer`, as if it were coded before (see `STRING_PRIMER`), in all its contexts. */
 	constructor(primer: readonly string[] = []) {
@@ -144,22 +145,35 @@ class Model {
 	/** The contexts of a symbol after the symbols `before`, the longest first, with their order; those not seen so far are missing. */
 	contexts(before: number[]): { order: number; context: Context }[] {
 		const found: { order: number; context: Context }[] = [];
-		for (let order = ORDER; order >= 0; order--) {
-			const context = this.byOrder[order].get(key(before, order));
-			if (context) found.push({ order, context });
+		let node: ContextNode | undefined = this.root;
+		for (let order = 0; node; order++) {
+			if (node.context) found.push({ order, context: node.context });
+			node = order < ORDER ? node.longer.get(before[ORDER - 1 - order]) : undefined;
 		}
-		return found;
+		return found.reverse();
 	}
 
 	/** Learn the symbol in the contexts of order `from` to `ORDER`: update exclusion, see above. */
 	update(before: number[], symbol: number, from: number) {
-		for (let order = from; order <= ORDER; order++) {
-			const k = key(before, order);
-			let context = this.byOrder[order].get(k);
-			if (!context) this.byOrder[order].set(k, (context = new Context()));
-			context.add(symbol);
+		let node = this.root;
+		for (let order = 0; ; order++) {
+			if (order >= from) (node.context ??= new Context()).add(symbol);
+			if (order === ORDER) return;
+			const previous = before[ORDER - 1 - order];
+			let longer = node.longer.get(previous);
+			if (!longer) node.longer.set(previous, (longer = new ContextNode()));
+			node = longer;
 		}
 	}
+}
+
+/**
+ * The context of some symbols before, if one was seen, and the nodes of those one symbol longer,
+ * by the symbol before them. A node can exist without its context, on the way to a longer one.
+ */
+class ContextNode {
+	context?: Context;
+	readonly longer = new Map<number, ContextNode>();
 }
 
 /** The symbols before the first of a string: END. */
@@ -171,11 +185,6 @@ function start(): number[] {
 function shift(before: number[], symbol: number) {
 	before.shift();
 	before.push(symbol);
-}
-
-/** The key of the context of the last `order` symbols. */
-function key(before: number[], order: number): string {
-	return before.slice(ORDER - order).join(',');
 }
 
 /**
