@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-11-08
+
+### Features
+
+- add initial documentation for the VersaTiles Map Editor ([8784a0c](https://github.com/versatiles-org/versatiles-map-editor/commit/8784a0c4f32cf43af51cb6e502aaad93c5a86033))
+- add support link to the status bar ([9aede94](https://github.com/versatiles-org/versatiles-map-editor/commit/9aede943480d018995099ee487497421ad460af5))
+
+### Bug Fixes
+
+- **deps:** update happy-dom and sass-embedded to latest versions ([0b44927](https://github.com/versatiles-org/versatiles-map-editor/commit/0b449276f8a7b143ce21a72d3c7ed92986f0ef63))
+- follow @versatiles/style 8, which loads the land cover from its own tiles ([773e780](https://github.com/versatiles-org/versatiles-map-editor/commit/773e780d4422c973e7d216e7e8d97a1cffbcf034))
+- load the land cover of @versatiles/style 8 from its own tiles, and skip it on servers without them, closes #48 ([02b0584](https://github.com/versatiles-org/versatiles-map-editor/commit/02b0584102ef5b24260d6f4dd2da8d3b68e1ecc8))
+- name the tilesets of @versatiles/style 9 (osm-vector, landcover-vector, satellite-raster, elevation-raster) in the self-hosting guide and the tests ([33c4524](https://github.com/versatiles-org/versatiles-map-editor/commit/33c452451141064bd04f88f9bf77678acd5a5fe7))
+
+### Performance Improvements
+
+- **map-state:** find the contexts of the string coder in a tree instead of by text keys, with the same bits ([aaf943d](https://github.com/versatiles-org/versatiles-map-editor/commit/aaf943d5e960902b01a3ae1fda43efc1e35bdcde))
+
+### Tests
+
+- **viewer:** give the map on terrain 60 s to load, which Firefox in CI needs ([e08ad2f](https://github.com/versatiles-org/versatiles-map-editor/commit/e08ad2f013e269d10c1389249d3d2aecc74325da))
+- **viewer:** end the drag to the largest tilt inside the page and wait until the map stops, so its inertia cannot cancel the compass ([be080a6](https://github.com/versatiles-org/versatiles-map-editor/commit/be080a66aa7f6cbf4d82dd550aaee22d404a135a))
+- **editor:** pause the page's time while the pointer moves to a submenu, so a slow runner cannot turn the move into a rest ([c68c7e0](https://github.com/versatiles-org/versatiles-map-editor/commit/c68c7e0ba37bfef3042ff25c01493dc2553b5359))
+
+### Chores
+
+- update dependencies and devDependencies to latest versions ([35b6746](https://github.com/versatiles-org/versatiles-map-editor/commit/35b6746fffcfc34082c52781985099a89599383f))
+- update dependencies to latest versions ([95a45fb](https://github.com/versatiles-org/versatiles-map-editor/commit/95a45fb77b44b7884d178c0c3bdb438d1ece8986))
+- pin Playwright to 1.64.1, whose Firefox does not fire cancel before change when a test chooses a file ([64b56fa](https://github.com/versatiles-org/versatiles-map-editor/commit/64b56fa6ef35fc0536eb5e63d5f9b681cc6a5b56))
+
+### Other Changes
+
+- update graphs ([7a2ef4a](https://github.com/versatiles-org/versatiles-map-editor/commit/7a2ef4afa079eaf6bb99abd45a9caad3b9595957))
+
 ## [4.1.0] - 2026-10-16
 
 ### Features

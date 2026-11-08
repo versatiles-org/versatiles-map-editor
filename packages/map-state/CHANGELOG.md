@@ -5,6 +5,12 @@ All notable changes to `@versatiles/map-state` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2026-11-08
+
+### Performance Improvements
+
+- **map-state:** find the contexts of the string coder in a tree instead of by text keys, with the same bits ([aaf943d](https://github.com/versatiles-org/versatiles-map-editor/commit/aaf943d5e960902b01a3ae1fda43efc1e35bdcde))
+
 ## [1.1.0] - 2026-10-16
 
 ### Features
