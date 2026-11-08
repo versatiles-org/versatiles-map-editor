@@ -129,12 +129,17 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		});
 		return { bearing: Math.round(bearing), pitch: Math.round(pitch) };
 	};
-	/** Drag with the right mouse button, which turns the map: sideways rotates, up and down tilts. */
+	/**
+	 * Drag with the right mouse button, which turns the map: sideways rotates, up and down tilts.
+	 * Until the map has stopped: its inertia, which starts a frame after the drag, would otherwise
+	 * cancel what comes next, e.g. the compass turning it back.
+	 */
 	const turn = async (dx: number, dy: number) => {
 		await page.mouse.move(400, 300);
 		await page.mouse.down({ button: 'right' });
 		await page.mouse.move(400 + dx, 300 + dy, { steps: 5 });
 		await page.mouse.up({ button: 'right' });
+		await expect.poll(() => page.evaluate(() => (window as unknown as MapWindow).map.isMoving())).toBe(false);
 	};
 	const open = async (settings: SharedSettings) => {
 		await page.goto('about:blank');
@@ -151,8 +156,8 @@ test('visitors rotate and tilt a shared map, back with the compass, unless the a
 		const turned = await camera();
 		expect(turned.bearing).not.toBe(30);
 		expect(turned.pitch).toBeGreaterThan(20);
-		// not steeper than the largest tilt
-		await turn(0, -400);
+		// not steeper than the largest tilt; in the page, which gets no release of the button outside it
+		await turn(0, -290);
 		expect((await camera()).pitch).toBeLessThanOrEqual(60);
 		await compass.click();
 		await expect.poll(camera).toStrictEqual({ bearing: 30, pitch: 20 });
