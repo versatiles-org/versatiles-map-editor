@@ -93,6 +93,7 @@ export {
 	type RoleProperties
 } from './features.js';
 export { circle, clampLatitude, distance, EARTH_RADIUS, lat2mercator, MAX_LATITUDE, mercator2lat } from './geometry.js';
+export { buildMapStyle, mapStyle, type MapStyle, type MapStyleImage, type MapStyleOptions } from './map_style.js';
 export { iconBox, LABEL_PLACES, labelPlace, labelPlaceTable, type IconBox, type TextAnchor } from './label_places.js';
 export { splitOpacity } from './opacity.js';
 export {

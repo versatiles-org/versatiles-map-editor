@@ -108,7 +108,35 @@ it, without a browser, e.g. on a server for a preview image. The editor and its 
 maps with the same functions, so a map drawn elsewhere looks the same. The main entry never
 imports it, and stays without dependencies.
 
-It is being built up (issue #45). So far it has:
+`mapStyle(state, options)` gives the whole map: the style, the images that it uses beyond the
+sprites of the tile server, and where the viewer looks.
+
+```ts
+import { mapStyle } from '@versatiles/map-state/maplibre';
+
+const { style, images, camera } = await mapStyle(state, {
+	tileServer: 'https://tiles.versatiles.org',
+	language: 'en' // for a map in the language of its viewer
+});
+const { center, zoom, bearing, pitch } = camera({ width: 1200, height: 630 });
+// e.g. with MapLibre: new Map({ style, center, zoom, bearing, pitch }), then for each image
+// map.addImage(id, { width, height, data }, { pixelRatio, sdf })
+```
+
+- `style`: the background map with the sprite sheets of the tile server, and the layers of the
+  elements over it, with their features in GeoJSON sources. `mapStyle` loads the symbols of the tile
+  server (`options.symbols` takes them loaded already, e.g. for many maps) and puts the TileJSON of
+  the background's sources into the style, since the tile server's TileJSON has relative tile URLs.
+  `buildMapStyle(state, symbols, options)` builds it without loading anything, with the TileJSON
+  URLs.
+- `images`: the arrowheads (SDF) and fill patterns that the style uses, as
+  `{ id, width, height, data, pixelRatio, sdf }`.
+- `camera(size)`: see `mapCamera` below.
+
+The tests check this style against the one that the viewer draws: the same layers of the elements,
+in the same place between the layers of the background map, with the same features.
+
+Its parts are exported too:
 
 - the geometry of what is drawn: `circle` (the ring of a circle element), `smoothPath` and
   `curvePoint` (the curve of a smooth line or polygon, centripetal Catmull-Rom in Web Mercator),
@@ -161,7 +189,7 @@ const symbol = symbolLookup(await fetchSymbolCatalog({ tileServer: 'https://tile
 // the symbols and labels of the markers of a map
 const markers = state.elements.flatMap((element) => elementFeatures(element, 'symbol', symbol));
 // the background map, with English labels unless the map names a language
-const style = backgroundStyle(state.background, { tileServer: 'https://tiles.versatiles.org', language: 'en' });
+const style = backgroundStyle(state.meta?.background, { tileServer: 'https://tiles.versatiles.org', language: 'en' });
 ```
 
 ```ts
