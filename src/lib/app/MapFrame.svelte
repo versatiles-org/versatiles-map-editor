@@ -375,8 +375,11 @@
 		symbolLibrary.map = undefined;
 	}
 
-	// the map in the URL, in the viewer
-	const urlHash = new UrlHash(() => mapDocument);
+	// the map in the URL, in the viewer; in its query only on the viewer's page, which has no sessions
+	const urlHash = new UrlHash(
+		() => mapDocument,
+		() => !sessions
+	);
 	// the maps in the browser storage, in the editor
 	let sync: SessionSync | undefined;
 
@@ -412,7 +415,7 @@
 		// before the first view is set
 		map.setPadding(mapPadding(insets));
 
-		let hash = location.hash.slice(1);
+		let hash = urlHash.current();
 		if (!hash) hash = window.frameElement?.getAttribute('data') ?? '';
 
 		// the editor: the map of the link, else of the browser storage

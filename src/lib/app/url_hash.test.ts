@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { encodeState } from '@versatiles/map-state';
 import type { MapDocument } from '../document/map_document.svelte.js';
-import { UrlHash } from './url_hash.js';
+import { MAP_PARAMETER, UrlHash } from './url_hash.js';
 import { notify } from '../notify.svelte.js';
 
 vi.mock('../notify.svelte.js', () => ({ notify: vi.fn() }));
@@ -47,6 +47,51 @@ describe('UrlHash', () => {
 	it('reads nothing without a map', () => {
 		urlHash = new UrlHash(() => undefined);
 		expect(urlHash.read(encodeState(state))).toBe(false);
+	});
+
+	describe('the map of the URL', () => {
+		const inQuery = encodeState(state);
+		const inHash = encodeState({ elements: [] });
+		afterEach(() => history.replaceState(null, '', '/'));
+
+		it('is the one of the hash', () => {
+			history.replaceState(null, '', '/view/#' + inHash);
+			expect(urlHash.current()).toBe(inHash);
+			history.replaceState(null, '', '/view/');
+			expect(urlHash.current()).toBe('');
+		});
+
+		it('is the one of the query, which the server sees, before the one of the hash, where the query is read', () => {
+			urlHash = new UrlHash(
+				() => doc as unknown as MapDocument,
+				() => true
+			);
+			history.replaceState(null, '', `/view/?${MAP_PARAMETER}=${inQuery}#${inHash}`);
+			expect(urlHash.current()).toBe(inQuery);
+			// other parameters, and a query without a map
+			history.replaceState(null, '', `/view/?a=1&${MAP_PARAMETER}=${inQuery}&b=2`);
+			expect(urlHash.current()).toBe(inQuery);
+			history.replaceState(null, '', `/view/?a=1#${inHash}`);
+			expect(urlHash.current()).toBe(inHash);
+		});
+
+		it('is not the one of the query on the editor page', () => {
+			history.replaceState(null, '', `/?${MAP_PARAMETER}=${inQuery}#${inHash}`);
+			expect(urlHash.current()).toBe(inHash);
+		});
+
+		it('stays the one of the query when the hash changes', () => {
+			urlHash = new UrlHash(
+				() => doc as unknown as MapDocument,
+				() => true
+			);
+			history.replaceState(null, '', `/view/?${MAP_PARAMETER}=${inQuery}`);
+			urlHash.listen();
+			location.hash = inHash;
+			dispatchEvent(new HashChangeEvent('hashchange'));
+			expect(doc.loadState).not.toHaveBeenCalled();
+			urlHash.destroy();
+		});
 	});
 
 	it('loads the map of a new hash, until it is destroyed', () => {

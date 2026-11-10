@@ -29,6 +29,12 @@ The editor is then at `https://example.org/map-editor/`, and the viewer of share
 without the slash at the end of its folder, e.g. `https://example.org/map-editor`, as some web
 servers and CDNs serve it, the editor goes on to the address with the slash.
 
+The viewer also takes the map in the query, as `https://example.org/map-editor/view/?map=…`.
+Browsers never send the part after `#` to a server, but they do send the query, so your server can
+see which map a link shows, e.g. to describe it in the meta tags of a preview. A map in the query
+wins over one in the hash. Web servers limit the length of an address, often to about 8 KB, which
+the link of a large map can exceed; the hash has no such limit.
+
 **With npm.** The same site is the package
 [`@versatiles/map-editor`](https://www.npmjs.com/package/@versatiles/map-editor), for a project
 that gets the editor like its other dependencies, e.g. to be told about updates:

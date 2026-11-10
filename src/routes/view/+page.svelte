@@ -9,7 +9,7 @@
 	<meta name="description" content="A map made with the VersaTiles Map Editor." />
 </svelte:head>
 
-<!-- the read-only viewer of a shared or embedded map, from the URL hash -->
+<!-- the read-only viewer of a shared or embedded map, from the URL: its query or its hash -->
 <div class="wrapper">
 	<MapViewer
 		onMapLoad={(map) => {

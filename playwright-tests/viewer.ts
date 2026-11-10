@@ -46,6 +46,32 @@ test.describe('view page', () => {
 		await waitForMapIsIdle(page);
 		expect(new URL(page.url()).hash).toBe('#' + hash);
 	});
+
+	test('shows the map of the query, which a server sees, before the one of the hash', async ({ page }) => {
+		const map = (label: string) => encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5], label }] });
+		const labels = async () => {
+			await waitForMapIsIdle(page);
+			return page.evaluate(() =>
+				(window as unknown as MapWindow).map
+					.queryRenderedFeatures({ layers: ['elements_symbol'] })
+					.map((f) => f.properties.label)
+			);
+		};
+
+		await test.step('the query wins over the hash, also when the hash changes', async () => {
+			await page.goto(`/view/?map=${map('Query')}#${map('Hash')}`);
+			await waitForMapIsReady(page);
+			expect(await labels()).toStrictEqual(['Query']);
+			await page.evaluate((hash) => (location.hash = hash), map('Other'));
+			expect(await labels()).toStrictEqual(['Query']);
+		});
+
+		await test.step('the editor page opens only the map of the hash', async () => {
+			await page.goto(`/?map=${map('Query')}`);
+			await waitForMapIsReady(page);
+			expect(await labels()).toStrictEqual([]);
+		});
+	});
 });
 
 test.describe('viewer', () => {
