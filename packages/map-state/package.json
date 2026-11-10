@@ -28,6 +28,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./maplibre": {
+      "types": "./dist/maplibre/index.d.ts",
+      "import": "./dist/maplibre/index.js"
+    },
     "./schema/*.schema.json": "./schema/*.schema.json",
     "./package.json": "./package.json"
   },

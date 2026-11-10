@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-	circle,
 	circleArea,
 	coordinatesOf,
-	distance,
 	getMiddlePoint,
 	lat2mercator,
 	MAX_CIRCLE_RADIUS,
@@ -18,12 +16,6 @@ import {
 const EARTH_RADIUS = 6371008.8;
 
 describe('Geometry Utils', () => {
-	it('should convert latitude to Mercator projection correctly', () => {
-		expect(lat2mercator(0)).toBeCloseTo(0); // Equator should map to 0
-		expect(lat2mercator(85.051128)).toBeCloseTo(Math.PI);
-		expect(lat2mercator(-85.051128)).toBeCloseTo(-Math.PI);
-	});
-
 	it('should move a point in Mercator units, and back', () => {
 		expect(movePoint([10, 45], 0, 0)).toStrictEqual([10, expect.closeTo(45, 5)]);
 		const moved = movePoint([10, -30], 5, lat2mercator(45) - lat2mercator(-30));
@@ -40,26 +32,6 @@ describe('Geometry Utils', () => {
 		expect(middle[0]).toBeCloseTo(5);
 		// halfway on the map, i.e. in Mercator units
 		expect(lat2mercator(middle[1])).toBeCloseTo((lat2mercator(0) + lat2mercator(10)) / 2);
-	});
-
-	it('should calculate distance between two points correctly', () => {
-		const berlin: GeoPoint = [13.405, 52.52];
-		const paris: GeoPoint = [2.3522, 48.8566];
-		const d = distance(berlin, paris);
-		expect(d).toBeCloseTo(877464.54);
-	});
-
-	it('should generate a circle with correct number of steps', () => {
-		const center: GeoPoint = [0, 0];
-		const radius = 1000; // meters
-		const steps = 36;
-		const points = circle(center, radius, steps);
-		expect(points.length).toBe(steps);
-		// every point at the radius from the center, also away from the equator
-		for (const point of points) expect(distance(center, point)).toBeCloseTo(radius, 3);
-		for (const point of circle([13.4, 52.5], radius, steps)) {
-			expect(distance([13.4, 52.5], point)).toBeCloseTo(radius, 3);
-		}
 	});
 
 	it('should calculate the length of a path', () => {

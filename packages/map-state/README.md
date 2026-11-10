@@ -101,6 +101,23 @@ stateFromMapJSON(json: unknown): MapState // refuses files of newer versions
 elements whose styles omit default values. The types are exported too (`StateElement`,
 `MarkerStyle`, `LineStyle`, `AreaStyle`, `OutlineStyle`, `StateLegend`, …).
 
+## Drawing a map (`@versatiles/map-state/maplibre`)
+
+A second entry of the package has what MapLibre needs to draw a map as the editor's viewer shows
+it, without a browser, e.g. on a server for a preview image. The editor and its viewer draw their
+maps with the same functions, so a map drawn elsewhere looks the same. The main entry never
+imports it, and stays without dependencies.
+
+It is being built up (issue #45). So far it has the geometry of what is drawn: `circle` (the ring
+of a circle element), `smoothPath` and `curvePoint` (the curve of a smooth line or polygon,
+centripetal Catmull-Rom in Web Mercator), `distance`, `lat2mercator` and `mercator2lat`.
+
+```ts
+import { smoothPath } from '@versatiles/map-state/maplibre';
+
+const drawn = element.smooth ? smoothPath(element.points, element.type === 'polygon') : element.points;
+```
+
 ## Representations
 
 The following sections describe the formats in detail. File names refer to the sources in

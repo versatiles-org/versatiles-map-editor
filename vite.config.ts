@@ -136,8 +136,12 @@ export default defineConfig({
 		doc.plugin
 	],
 	resolve: {
-		// the map state codec, used from its source (packages/map-state), so it needs no build
-		alias: { '@versatiles/map-state': resolve('packages/map-state/src/index.ts') },
+		// the map state codec, used from its source (packages/map-state), so it needs no build; the
+		// entry of the package first, as the name of the package would also match it
+		alias: {
+			'@versatiles/map-state/maplibre': resolve('packages/map-state/src/maplibre/index.ts'),
+			'@versatiles/map-state': resolve('packages/map-state/src/index.ts')
+		},
 		// Component tests need Svelte's client build, which is only resolved with the browser condition
 		...(process.env.VITEST ? { conditions: ['browser'] } : {})
 	},

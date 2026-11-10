@@ -1,7 +1,7 @@
 import { AbstractElement } from './abstract.svelte.js';
 import type { ElementOwner, SelectionNode, SelectionNodeUpdater } from './types.js';
 import { getMiddlePoint, movePoint, snapPoint, type GeoPath, type GeoPoint } from '../geometry.js';
-import { curvePoint, smoothPath } from './smooth_path.js';
+import { curvePoint, smoothPath } from '@versatiles/map-state/maplibre';
 import type { StateElement, StateElementLine, StateElementPolygon } from '@versatiles/map-state';
 
 export abstract class AbstractPathElement extends AbstractElement {

@@ -12,7 +12,10 @@
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		// the map state codec from its source, as in vite.config.ts
-		"paths": { "@versatiles/map-state": ["./packages/map-state/src/index.ts"] }
+		"paths": {
+			"@versatiles/map-state": ["./packages/map-state/src/index.ts"],
+			"@versatiles/map-state/maplibre": ["./packages/map-state/src/maplibre/index.ts"]
+		}
 	},
 	"include": [
 		"src",

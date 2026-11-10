@@ -11,6 +11,5 @@ export * from './marker.js';
 export * from './polygon.js';
 export * from './popup_text.js';
 export * from './registry.js';
-export * from './smooth_path.js';
 export * from './type_names.js';
 export * from './types.js';

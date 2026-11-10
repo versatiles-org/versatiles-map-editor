@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { lat2mercator, mercator2lat, type GeoPath, type GeoPoint } from '../geometry.js';
+import type { Position } from '../types.js';
+import { lat2mercator, mercator2lat } from './geometry.js';
+
+type GeoPoint = Position;
+type GeoPath = Position[];
 import { curvePoint, smoothPath } from './smooth_path.js';
 
 /** Whether the curve has a point at the place, within a tiny rounding error. */
