@@ -141,6 +141,26 @@ describe('resolveConfig', () => {
 		expect(geocoder).toBe('https://maps.example.org/geocoder/api');
 	});
 
+	it('takes the form of share links, with the address before the map resolved against the file', () => {
+		const file = 'https://maps.example.org/editor/map-editor.config.jsonc';
+		const shareLink = (value: unknown) => resolveConfig({ shareLink: value }, undefined, file).shareLink;
+		expect(resolveConfig({}).shareLink).toBeUndefined();
+		// the viewer of this editor, with the map in the query; the rest of the address as it is
+		expect(shareLink('view/?map={map}')).toBe('https://maps.example.org/editor/view/?map={map}');
+		expect(shareLink('view/?map={map}&from=share')).toBe('https://maps.example.org/editor/view/?map={map}&from=share');
+		expect(shareLink('/v/#{map}')).toBe('https://maps.example.org/v/#{map}');
+		// another address, also with the map in its path, without escaping the braces
+		expect(shareLink('https://share.example.org/m/{map}')).toBe('https://share.example.org/m/{map}');
+
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		for (const value of ['view/', 'view/?a={map}&b={map}', 'ftp://example.org/{map}', 42, '']) {
+			expect(shareLink(value), String(value)).toBeUndefined();
+		}
+		// relative ones only with the address of the file
+		expect(resolveConfig({ shareLink: 'view/#{map}' }).shareLink).toBeUndefined();
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining('"shareLink"'), expect.anything());
+	});
+
 	it('ignores servers that are no http(s) URLs', () => {
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		// relative ones only with the address of the file
@@ -238,9 +258,11 @@ describe('the default configuration file', () => {
 			'replaceDefaultSchemes',
 			'defaultColorScheme',
 			'fonts',
-			'replaceDefaultFonts'
+			'replaceDefaultFonts',
+			'shareLink'
 		]);
-		resolveConfig(parseJsonc(uncommented));
+		// relative addresses as the editor resolves them, against the address of the file
+		resolveConfig(parseJsonc(uncommented), undefined, 'https://example.org/map-editor.config.jsonc');
 		expect(warn).not.toHaveBeenCalled();
 	});
 });

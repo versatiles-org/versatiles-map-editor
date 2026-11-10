@@ -58,7 +58,16 @@ export interface ConfigFile {
 	fonts?: string[];
 	/** Offer only the configured fonts. */
 	replaceDefaultFonts?: boolean;
+	/**
+	 * The form of the links that the share dialog makes: an address with `{map}` where the map
+	 * goes, absolute or relative to the configuration file, e.g. "view/?map={map}" for the viewer
+	 * with the map in the query, which reaches the server. The checked file has it absolute.
+	 */
+	shareLink?: string;
 }
+
+/** Where the map goes in `shareLink`. */
+export const SHARE_LINK_MAP = '{map}';
 
 export interface EditorConfig {
 	tileServer: string;
@@ -75,6 +84,8 @@ export interface EditorConfig {
 	colorSchemes: ColorScheme[];
 	/** The font faces offered for the map labels, grouped by family. */
 	fonts: FontFace[];
+	/** The form of share links, absolute, see `ConfigFile`; undefined for the viewer of this editor, with the map in the hash. */
+	shareLink: string | undefined;
 }
 
 export const DEFAULT_CONFIG: EditorConfig = {
@@ -85,7 +96,8 @@ export const DEFAULT_CONFIG: EditorConfig = {
 	startView: undefined,
 	startBackground: undefined,
 	colorSchemes: COLOR_SCHEMES,
-	fonts: FALLBACK_FONTS
+	fonts: FALLBACK_FONTS,
+	shareLink: undefined
 };
 
 /** The configuration of this editor instance: `config.current`. Holds the defaults until the file is loaded. */
@@ -158,7 +170,8 @@ const FIELDS: (keyof ConfigFile)[] = [
 	'replaceDefaultSchemes',
 	'defaultColorScheme',
 	'fonts',
-	'replaceDefaultFonts'
+	'replaceDefaultFonts',
+	'shareLink'
 ];
 
 /**
@@ -207,7 +220,8 @@ function checkConfig(file: unknown, url?: string): ConfigFile {
 		colorSchemes: read('colorSchemes', checkColorSchemes),
 		replaceDefaultSchemes: read('replaceDefaultSchemes', checkBoolean),
 		fonts: read('fonts', checkFonts),
-		replaceDefaultFonts: read('replaceDefaultFonts', checkBoolean)
+		replaceDefaultFonts: read('replaceDefaultFonts', checkBoolean),
+		shareLink: read('shareLink', (value) => checkShareLink(value, url))
 	};
 	// one of the schemes that are offered
 	checked.defaultColorScheme = read('defaultColorScheme', (value) => {
@@ -242,7 +256,8 @@ function buildConfig(file: ConfigFile, fonts?: FontFace[]): EditorConfig {
 		// the vector map, in the language of the browser: the editor's default background
 		startBackground: startingBackground(file.startBackground, file.defaultLanguage ?? 'user'),
 		colorSchemes: first ? [first, ...offered.filter((scheme) => scheme !== first)] : offered,
-		fonts: resolveFonts(configuredFonts, replaceFonts, fonts)
+		fonts: resolveFonts(configuredFonts, replaceFonts, fonts),
+		shareLink: file.shareLink
 	};
 }
 
@@ -263,6 +278,25 @@ function resolveUrl(value: unknown, base: string | undefined): string {
 	}
 	if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`"${value}" is not an http(s) URL`);
 	return url.href.replace(/\/+$/, '');
+}
+
+/**
+ * An http(s) address with `SHARE_LINK_MAP` once, made absolute: the part before the map is resolved
+ * against `base`, as in `resolveUrl`, and the rest is kept as it is, since a resolved path would
+ * have the braces escaped.
+ */
+function checkShareLink(value: unknown, base: string | undefined): string {
+	const example = `must be an address with ${SHARE_LINK_MAP} where the map goes, like "view/?map=${SHARE_LINK_MAP}"`;
+	if (typeof value !== 'string' || value.split(SHARE_LINK_MAP).length !== 2) throw new Error(example);
+	const [before, after] = value.split(SHARE_LINK_MAP);
+	let url: URL;
+	try {
+		url = new URL(before, base);
+	} catch {
+		throw new Error(`"${value}" ${example}`);
+	}
+	if (url.protocol !== 'https:' && url.protocol !== 'http:') throw new Error(`"${value}" is not an http(s) address`);
+	return url.href + SHARE_LINK_MAP + after;
 }
 
 function checkStartView(value: unknown): Bounds {

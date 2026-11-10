@@ -135,7 +135,7 @@ The read-only viewer at `/view/` (the folder `view/` next to the editor, so it n
 
 The state can alternatively be provided via the iframe's `data` attribute.
 
-The viewer also reads the map from the query, as `/view/?map=<state-hash>`. Unlike the hash, the query reaches the web server, which can then describe the map, e.g. in the meta tags of a preview in chats and social media. If a link has both, the viewer shows the map of the query. The Share dialog makes links with the hash, and the editor (`/`) reads only the hash.
+The viewer also reads the map from the query, as `/view/?map=<state-hash>`. Unlike the hash, the query reaches the web server, which can then describe the map, e.g. in the meta tags of a preview in chats and social media. If a link has both, the viewer shows the map of the query. The Share dialog makes links with the hash, unless the configuration's `shareLink` sets another form (see [Configuration](#configuration)), and the editor (`/`) reads only the hash.
 
 **A link is for viewing, and it is the map.** Nothing is stored on a server: all of the map is in the link itself, so a link shows the map as it was when the link was made. It holds what the viewer shows, and leaves out what only the author of a map needs: its title, the color scheme of the color picker, and a legend that shared maps do not show. To pass a map on for editing, download it as a `.mapjson` file, which has all of it. The editor (`/`) still takes a link, e.g. one made by another program: it opens the map as a new one in the browser storage and removes the hash from the URL.
 
@@ -196,7 +196,8 @@ An organisation running the editor can use its own tile server and geocoder, sta
 	"colorSchemes": [{ "id": "corporate", "name": "Corporate", "colors": ["#003366", "#e30613", "#f5a800"] }],
 	"replaceDefaultSchemes": false,
 	"fonts": ["open_sans_regular", "lato_bold"],
-	"replaceDefaultFonts": false
+	"replaceDefaultFonts": false,
+	"shareLink": "view/?map={map}"
 }
 ```
 
@@ -205,6 +206,7 @@ An organisation running the editor can use its own tile server and geocoder, sta
 - `defaultColorScheme` is the `id` of the scheme that the color picker offers by default (one of the configured or predefined schemes); without it, the first one.
 - `colorSchemes` are offered in the color picker before the predefined schemes. Each `id` may be used once; a scheme with the `id` of a predefined one replaces it. With `replaceDefaultSchemes`, only they are offered, and the first one is the default.
 - The editor offers all font faces of the tile server, from its list `assets/glyphs/font_families.json`, as a family and a style (e.g. "Lato" and "Bold"), for the labels of the map and of each marker. `fonts` are glyph names of faces (e.g. `lato_bold`) that are offered first, with their families. Faces that are not available as map glyphs are skipped with a warning in the browser console. With `replaceDefaultFonts`, only they are offered. Without the list of the tile server, a few regular faces are offered.
+- `shareLink` (default `"view/#{map}"`) is the form of the links that the Share dialog makes: an address with `{map}` where the map goes, absolute or relative to the file. `"view/?map={map}"` puts the map into the query, which reaches the web server, e.g. to describe the map in a preview in chats. Another viewer, e.g. `"https://maps.example.org/{map}"`, must show the map itself. The embed code always has the editor's own viewer, with the map in the hash, which works at any length.
 
 A missing file leaves the defaults. An invalid field gets its default, so one mistake does not discard the whole file; the browser console names it, and also an unknown field, e.g. a misspelled one. The legend uses a generic font (sans-serif, serif or monospace) instead, since the map's glyph fonts are usually not available as web fonts.
 

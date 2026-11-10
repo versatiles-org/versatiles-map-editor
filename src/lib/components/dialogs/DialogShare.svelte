@@ -12,6 +12,7 @@
 		type TextGroup
 	} from '@versatiles/map-state';
 	import { formatPrecision } from '#lib/components/common/index.js';
+	import { config, SHARE_LINK_MAP } from '#lib/background/index.js';
 	import ShareCode from './ShareCode.svelte';
 	import SharePreview from './SharePreview.svelte';
 
@@ -25,6 +26,8 @@
 	// the shared map opens in the read-only viewer, next to the editor
 	const baseUrl = new URL('view/', window.location.href.replace(/#.*$/, '')).href;
 
+	// the map, as a link has it, which is measured from it
+	let hash = $state('');
 	let linkCode = $state('');
 	let embedCode = $state('');
 
@@ -121,7 +124,6 @@
 		texts = undefined;
 		clearTimeout(textsTimer);
 		textsTimer = setTimeout(() => {
-			const hash = linkCode.split('#')[1];
 			try {
 				if (hash) texts = measureTexts(hash);
 			} catch {
@@ -149,7 +151,6 @@
 	 * bits, the words of the format and the number of strings, is part of the rest.
 	 */
 	const parts = $derived.by(() => {
-		const hash = linkCode.split('#')[1];
 		if (!hash) return undefined;
 		let kinds;
 		try {
@@ -186,8 +187,9 @@
 
 	/**
 	 * From this length on, a link may not work everywhere: some chat and mail programs cut long
-	 * links or do not make them clickable, and old browsers refuse them. The map is in the part
-	 * after the "#", which no server gets, so an embedded map works at any length.
+	 * links or do not make them clickable, and old browsers refuse them. The embed code has the map
+	 * in the part after the "#", which no server gets, so an embedded map works at any length; a
+	 * link may have it where a server gets it, see `getLinkCode`.
 	 */
 	const LONG_LINK = 2000;
 
@@ -237,8 +239,18 @@
 		update(0);
 	}
 
+	/** The map in the viewer next to the editor, in the hash: for the embed code and the preview. */
+	function getViewerLink() {
+		return `${baseUrl}#${hash}`;
+	}
+
+	/**
+	 * The link in the form of the configuration, e.g. with the map in the query, which reaches a
+	 * server, e.g. for a preview in chats; else as the embed code has it.
+	 */
 	function getLinkCode() {
-		return `${baseUrl}#${stateManager.getHash({ resolution: resolutionOfExponent(exponent), popups })}`;
+		const form = config.current.shareLink;
+		return form ? form.replace(SHARE_LINK_MAP, () => hash) : getViewerLink();
 	}
 
 	function getEmbedCode() {
@@ -246,7 +258,7 @@
 		const { fullscreen, locate } = stateManager.mapDocument.controls;
 		const needs = [fullscreen && 'fullscreen', locate && 'geolocation'].filter((need) => need !== false);
 		const allow = needs.length > 0 ? ` allow="${needs.join('; ')}"` : '';
-		return `<iframe src="${getLinkCode()}" style="width:100%; height:60vh; border:0"${allow}></iframe>`;
+		return `<iframe src="${getViewerLink()}" style="width:100%; height:60vh; border:0"${allow}></iframe>`;
 	}
 
 	function update(delay: number = 500) {
@@ -254,9 +266,11 @@
 		updateExponents();
 		updateNotice();
 		mapHasPopups = hasPopups(stateManager.mapDocument.getState());
+		hash = stateManager.getHash({ resolution: resolutionOfExponent(exponent), popups });
 		linkCode = getLinkCode();
 		embedCode = getEmbedCode();
-		preview?.show(linkCode, delay);
+		// as it is embedded: the viewer next to the editor, whatever the form of the link
+		preview?.show(getViewerLink(), delay);
 	}
 
 	export function close() {

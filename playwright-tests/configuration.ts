@@ -1,7 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Page } from '@playwright/test';
-import { encodeState } from '../packages/map-state/src/index.js';
-import { drawElement, settledStoredState, waitForMapIsReady, type MapWindow } from './lib/utils.js';
+import { decodeState, encodeState } from '../packages/map-state/src/index.js';
+import { drawElement, settledStoredState, waitForMapIsIdle, waitForMapIsReady, type MapWindow } from './lib/utils.js';
 
 const OWN_SERVER = 'https://tiles.example.test';
 
@@ -70,4 +70,38 @@ test('a new map starts in the configured view, with the starting background and 
 
 	await page.getByLabel('Color').first().click();
 	await expect(page.getByRole('combobox', { name: 'Color scheme' })).toHaveValue('dark2');
+});
+
+test('the share dialog makes links of the configured form, and keeps the hash in the embed code', async ({ page }) => {
+	await page.route('**/map-editor.config.jsonc', (route) =>
+		route.fulfill({ body: '{ "shareLink": "view/?map={map}&from=share" }' })
+	);
+	await page.goto('/#' + encodeState({ elements: [{ type: 'marker', point: [13.4, 52.5], label: 'Shared' }] }));
+	await waitForMapIsReady(page, { count: 1 });
+	await page.getByRole('button', { name: /^Share/ }).click();
+	const dialog = page.getByRole('dialog', { name: 'Share or embed the map' });
+
+	// the map in the query, which reaches the server; the rest of the address as configured
+	const link = new URL(await dialog.getByLabel('Link', { exact: true }).inputValue());
+	expect(link.pathname).toBe('/view/');
+	expect(link.hash).toBe('');
+	expect(link.searchParams.get('from')).toBe('share');
+	const map = link.searchParams.get('map')!;
+	expect(decodeState(map).elements).toMatchObject([{ label: 'Shared' }]);
+	// embedded in the hash of the editor's own viewer, which works at any length
+	const embed = await dialog.getByLabel('Embed code', { exact: true }).inputValue();
+	expect(embed).toContain(`src="${link.origin}/view/#${map}"`);
+	// the bar of what the link holds measures the map, wherever it is in the link
+	await expect(dialog.getByRole('img', { name: /^The link holds:/ })).toHaveAttribute('aria-label', /Labels \d+ %/);
+
+	// the link opens the map
+	await page.goto(link.href);
+	await waitForMapIsReady(page);
+	await waitForMapIsIdle(page);
+	const labels = await page.evaluate(() =>
+		(window as unknown as MapWindow).map
+			.queryRenderedFeatures({ layers: ['elements_symbol'] })
+			.map((f) => f.properties.label)
+	);
+	expect(labels).toStrictEqual(['Shared']);
 });

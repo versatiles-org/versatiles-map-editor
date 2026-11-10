@@ -76,5 +76,16 @@
 
 	// Offer only the fonts above.
 	// Default: false
-	// "replaceDefaultFonts": false
+	// "replaceDefaultFonts": false,
+
+	// ---- Sharing ----------------------------------------------------------------------------
+
+	// The form of the links that the Share dialog makes: an address with {map} where the map goes,
+	// absolute or relative to this file. Browsers never send the part after "#" to a server, but
+	// they do send the query: "view/?map={map}" lets the web server see the map of a link, e.g. to
+	// describe it in a preview in chats. Another viewer, e.g. "https://maps.example.org/{map}",
+	// must show the map itself. The embed code always has the viewer of this editor, with the map
+	// after "#", which works at any length.
+	// Default: "view/#{map}"
+	// "shareLink": "view/#{map}"
 }
