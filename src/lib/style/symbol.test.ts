@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { iconBox, LABEL_PLACES, labelPlaceTable, SymbolStyle } from './symbol.svelte.js';
-import { getSymbol, type SymbolInfo } from '../background/symbols_catalog.js';
+import { iconBox, LABEL_PLACES, labelPlaceTable, type SymbolInfo } from '@versatiles/map-state/maplibre';
+import { SymbolStyle } from './symbol.svelte.js';
+import { getSymbol } from '../background/symbols_catalog.js';
 
 describe('SymbolStyle', () => {
 	let onChange: Mock<() => void>;

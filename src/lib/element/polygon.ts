@@ -1,3 +1,4 @@
+import { polygonGeometry } from '@versatiles/map-state/maplibre';
 import { type GeoPath, polygonArea, snapPoint } from '../geometry.js';
 import { FillStyle, LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.svelte.js';
@@ -24,11 +25,11 @@ export class PolygonElement extends AbstractPathElement {
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
-		const ring = this.drawnPath;
 		return {
 			type: 'Feature',
 			properties: {},
-			geometry: { type: 'Polygon', coordinates: [[...ring, ring[0]]] }
+			// already smooth, if it is
+			geometry: polygonGeometry(this.drawnPath)
 		};
 	}
 

@@ -1,6 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
-import { type FillPatternName, type StateStyle, AREA_DEFAULTS, formatHex, parseColor } from '@versatiles/map-state';
-import { fillPatternName } from '@versatiles/map-state/maplibre';
+import { type FillPatternName, type StateStyle, AREA_DEFAULTS } from '@versatiles/map-state';
+import { fillProperties } from '@versatiles/map-state/maplibre';
 import { storedStyle } from './defaults.js';
 
 export class FillStyle extends StylePart {
@@ -52,14 +52,7 @@ export class FillStyle extends StylePart {
 	 * the colors of all opacities share one image.
 	 */
 	getProperties() {
-		const { r, g, b, alpha } = parseColor(this.color) ?? { r: 0, g: 0, b: 0, alpha: 1 };
-		const color = formatHex({ r, g, b, alpha: 1 });
-		// all solid fills of a color share one image
-		const image =
-			this.pattern === 'solid'
-				? { pattern: this.pattern, scale: 1, coverage: 1, color }
-				: { pattern: this.pattern, scale: this.patternScale, coverage: this.patternCoverage, color };
-		return { pattern: fillPatternName(image), opacity: alpha };
+		return fillProperties(this);
 	}
 
 	getState(): StateStyle | undefined {

@@ -1,4 +1,5 @@
 import type { ElementOwner, Measurement, SelectionNode, SelectionNodeUpdater, StyleLayers } from './types.js';
+import { circleGeometry } from '@versatiles/map-state/maplibre';
 import { type GeoPoint, circle, circleArea, distance, movePoint, snapPoint } from '../geometry.js';
 import { FillStyle, LineStyle } from '../style/index.js';
 import type { StateElement, StateElementCircle } from '@versatiles/map-state';
@@ -68,14 +69,7 @@ export class CircleElement extends AbstractElement {
 	}
 
 	getFeature(): GeoJSON.Feature<GeoJSON.Polygon> {
-		const coordinates = circle(this.point, this.radius, 72);
-		coordinates.push(coordinates[0]); // Close the circle
-
-		return {
-			type: 'Feature',
-			properties: {},
-			geometry: { type: 'Polygon', coordinates: [coordinates] }
-		};
+		return { type: 'Feature', properties: {}, geometry: circleGeometry(this.point, this.radius) };
 	}
 
 	protected getMeasurements(): Measurement[] {

@@ -1,3 +1,4 @@
+import { lineGeometry } from '@versatiles/map-state/maplibre';
 import { type GeoPath, pathLength, snapPoint } from '../geometry.js';
 import { LineStyle } from '../style/index.js';
 import { AbstractPathElement } from './abstract_path.svelte.js';
@@ -31,7 +32,8 @@ export class LineElement extends AbstractPathElement {
 		return {
 			type: 'Feature',
 			properties: {},
-			geometry: { type: 'LineString', coordinates: this.drawnPath }
+			// already smooth, if it is
+			geometry: lineGeometry(this.drawnPath)
 		};
 	}
 

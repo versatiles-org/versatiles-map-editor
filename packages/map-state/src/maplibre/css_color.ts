@@ -1,4 +1,4 @@
-import { parseColor } from '@versatiles/map-state';
+import { parseColor } from '../color.js';
 
 /**
  * A color as MapLibre takes it in a style: "rgb(r,g,b)", or "rgba(r,g,b,a)" with the alpha to three

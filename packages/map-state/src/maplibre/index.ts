@@ -35,6 +35,28 @@ export {
 	type FillPatternImage,
 	type PatternImage
 } from './fill_patterns.js';
+export { cssColor } from './css_color.js';
+export {
+	circleGeometry,
+	elementFeatures,
+	elementGeometry,
+	lineGeometry,
+	polygonGeometry,
+	type ElementFeature,
+	type ElementRole,
+	type RoleProperties
+} from './features.js';
 export { circle, distance, EARTH_RADIUS, lat2mercator, mercator2lat } from './geometry.js';
+export { iconBox, LABEL_PLACES, labelPlace, labelPlaceTable, type IconBox, type TextAnchor } from './label_places.js';
+export { splitOpacity } from './opacity.js';
+export {
+	arrowProperties,
+	fillProperties,
+	strokeProperties,
+	symbolProperties,
+	type FillProperties,
+	type StrokeProperties,
+	type SymbolProperties
+} from './properties.js';
 export { curvePoint, smoothPath } from './smooth_path.js';
-export type { StyleImage } from './types.js';
+export type { IconAnchor, StyleImage, SymbolInfo } from './types.js';

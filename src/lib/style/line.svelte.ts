@@ -1,14 +1,6 @@
 import { StylePart } from './abstract.svelte.js';
-import { cssColor } from './css_color.js';
-import {
-	type ArrowName,
-	type DashName,
-	type StateStyle,
-	LINE_DEFAULTS,
-	OUTLINE_DEFAULTS,
-	hasArrow
-} from '@versatiles/map-state';
-import type { ArrowProperties } from '@versatiles/map-state/maplibre';
+import { type ArrowName, type DashName, type StateStyle, LINE_DEFAULTS, OUTLINE_DEFAULTS } from '@versatiles/map-state';
+import { arrowProperties, strokeProperties, type ArrowProperties } from '@versatiles/map-state/maplibre';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
 /**
@@ -118,25 +110,12 @@ export class LineStyle extends StylePart {
 
 	/** The arrowheads to draw, or undefined if there are none. */
 	getArrowProperties(): ArrowProperties | undefined {
-		if (!hasArrow({ arrowStart: this.arrowStart, arrowEnd: this.arrowEnd })) return undefined;
-		return {
-			start: this.arrowStart,
-			end: this.arrowEnd,
-			size: this.arrowSize,
-			width: this.width,
-			color: cssColor(this.color)
-		};
+		return arrowProperties(this);
 	}
 
+	/** Undefined for a hidden outline, which is not drawn at all. */
 	getProperties() {
-		// a hidden outline is not drawn at all
-		if (!this.visible) return undefined;
-		return {
-			color: cssColor(this.color),
-			width: this.width,
-			// the layer looks up the dash array by the stroke style
-			dash: this.dash
-		};
+		return strokeProperties(this);
 	}
 
 	getState(): StateStyle | undefined {

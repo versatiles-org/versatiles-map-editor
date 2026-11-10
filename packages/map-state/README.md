@@ -121,7 +121,13 @@ It is being built up (issue #45). So far it has:
   a solid one. `fillPatternName` names it, e.g. `fill-pattern:dots:1.5:0.25:#ff0000`, and
   `patternImageOf(name)` gives the image that a style names, a `StyleImage` like the arrowheads.
   Together, `arrowImageOf(name) ?? patternImageOf(name)` gives every image of a map that the sprites
-  of the tile server do not have.
+  of the tile server do not have;
+- the features of the elements, as the layers of the editor's viewer draw them:
+  `elementFeatures(element, role, symbol)` gives the features of an element in a role (`fill`,
+  `stroke`, `arrow` or `symbol`), with the geometry that is drawn (`elementGeometry`: the curve of
+  a smooth line, the ring of a circle) and the properties that the layers read (`fillProperties`,
+  `strokeProperties`, `arrowProperties`, `symbolProperties`). `symbol` gives the size and the
+  anchor of a marker's symbol in the sprite sheets of the tile server, by its name.
 
 ```ts
 import { smoothPath } from '@versatiles/map-state/maplibre';

@@ -1,4 +1,4 @@
-import { parseColor } from '@versatiles/map-state';
+import { parseColor } from '../color.js';
 
 /**
  * A color without its opacity, as the layers read it, e.g. "rgb(255,0,0)", and its opacity (0…1)

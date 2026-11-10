@@ -19,7 +19,7 @@ export abstract class StylePart {
 	}
 
 	/** The feature properties that the layer of the role reads, or undefined if nothing is drawn. */
-	abstract getProperties(): Record<string, unknown> | undefined;
+	abstract getProperties(): object | undefined;
 	/** The style to store: without the fields that have their default. */
 	abstract getState(): StateStyle | undefined;
 
