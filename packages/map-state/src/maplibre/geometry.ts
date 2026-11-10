@@ -3,6 +3,14 @@ import type { Position } from '../types.js';
 /** The mean radius of the Earth, in meters. */
 export const EARTH_RADIUS = 6371008.8;
 
+/** The northernmost latitude of the Web Mercator projection. */
+export const MAX_LATITUDE = 85.051129;
+
+/** A latitude on the map, which MapLibre needs, e.g. of a viewport near a pole. */
+export function clampLatitude(lat: number): number {
+	return Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat));
+}
+
 /** The Mercator y of a latitude in degrees, in radians: 0 at the equator, π at 85.05°. */
 export function lat2mercator(lat: number): number {
 	return Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));

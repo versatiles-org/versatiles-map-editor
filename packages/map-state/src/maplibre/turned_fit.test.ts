@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Bounds } from '@versatiles/map-state';
+import type { Bounds } from '../types.js';
 import { fitTurned, overlapsBox, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 const area: Bounds = [13.3, 52.45, 13.5, 52.55];

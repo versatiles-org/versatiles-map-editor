@@ -2,7 +2,14 @@ import { roundCoordinate, type Bounds } from '@versatiles/map-state';
 import { distance, EARTH_RADIUS, lat2mercator, mercator2lat } from '@versatiles/map-state/maplibre';
 
 // what the map draws, from the package, so a server draws it alike
-export { circle, distance, lat2mercator, mercator2lat } from '@versatiles/map-state/maplibre';
+export {
+	circle,
+	clampLatitude,
+	distance,
+	lat2mercator,
+	MAX_LATITUDE,
+	mercator2lat
+} from '@versatiles/map-state/maplibre';
 
 /** A position as [longitude, latitude], in degrees. */
 export type GeoPoint = [number, number];
@@ -20,14 +27,6 @@ export function snapPoint([x, y]: GeoPoint): GeoPoint {
 /** An area whose sides are on the grid of the coordinates, see `snapPoint`. */
 export function snapBounds(bounds: Bounds): Bounds {
 	return bounds.map(roundCoordinate) as Bounds;
-}
-
-/** The northernmost latitude of the Web Mercator projection. */
-export const MAX_LATITUDE = 85.051129;
-
-/** A latitude on the map, which MapLibre needs, e.g. of a viewport near a pole. */
-export function clampLatitude(lat: number): number {
-	return Math.max(-MAX_LATITUDE, Math.min(MAX_LATITUDE, lat));
 }
 
 export function getMiddlePoint(p0: GeoPoint, p1: GeoPoint): GeoPoint {

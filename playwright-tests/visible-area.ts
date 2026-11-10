@@ -1,6 +1,7 @@
 import { expect, test } from './lib/test.js';
 import type { Frame, FrameLocator, Page } from '@playwright/test';
 import { decodeState, encodeState, type Bounds, type MapState } from '../packages/map-state/src/index.js';
+import { mapCamera } from '../packages/map-state/src/maplibre/index.js';
 import {
 	menuItem,
 	project,
@@ -324,6 +325,46 @@ test('without a frame, a shared map shows its elements, a single marker not clos
 	const [x, y] = await project(page, [13.4, 52.5]);
 	expect(x).toBeCloseTo(640, -1);
 	expect(y).toBeCloseTo(360, -1);
+});
+
+test('a shared map opens where mapCamera says, which a server computes without a map', async ({ page }) => {
+	const pair: MapState['elements'] = [
+		{ type: 'marker', point: [13.3, 52.45] },
+		{ type: 'marker', point: [13.5, 52.55] }
+	];
+	const maps: [string, MapState][] = [
+		['a frame', { frame: { bounds: frame }, elements }],
+		['elements', { elements: pair }],
+		['a single marker', { elements }],
+		['the whole world', { elements: [] }],
+		['a turned frame', { frame: { bounds: frame, bearing: 30, pitch: 45 }, elements }],
+		['turned elements', { frame: { bearing: -60, pitch: 20 }, elements: pair }],
+		['zoom limits', { elements, meta: { viewer: { maxZoom: 12 } } }]
+	];
+	for (const [width, height] of [
+		[1280, 720],
+		[500, 800]
+	]) {
+		await page.setViewportSize({ width, height });
+		for (const [name, state] of maps) {
+			// a page of its own, not a new hash of the one before
+			await page.goto('about:blank');
+			await page.goto('/view/#' + encodeState(state));
+			await waitForMapIsReady(page);
+			const shown = await page.evaluate(() => {
+				const { map } = window as unknown as MapWindow;
+				const { lng, lat } = map.getCenter();
+				return { center: [lng, lat], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
+			});
+			const camera = mapCamera(state, { width, height });
+			const label = `${name} in ${width} × ${height}`;
+			expect(shown.zoom, label).toBeCloseTo(camera.zoom, 2);
+			expect(shown.center[0], label).toBeCloseTo(camera.center[0], 4);
+			expect(shown.center[1], label).toBeCloseTo(camera.center[1], 4);
+			expect(shown.bearing, label).toBeCloseTo(camera.bearing, 6);
+			expect(shown.pitch, label).toBeCloseTo(camera.pitch, 6);
+		}
+	}
 });
 
 test('an empty shared map without a frame shows the whole world', async ({ page }) => {

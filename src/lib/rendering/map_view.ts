@@ -2,7 +2,18 @@ import type * as maplibregl from 'maplibre-gl';
 import { boundsOf, type Bounds, type StateElement } from '@versatiles/map-state';
 import type { AbstractElement } from '../element/index.js';
 import { clampLatitude, lat2mercator, MAX_LATITUDE, mercator2lat, type GeoPoint } from '../geometry.js';
-import { ELEMENT_LAYERS } from '@versatiles/map-state/maplibre';
+import {
+	DEFAULT_FOV,
+	ELEMENT_LAYERS,
+	ELEMENTS_MAX_ZOOM,
+	ELEMENTS_PADDING,
+	fitTurned,
+	FRAME_PADDING,
+	overlapsBox,
+	projectTurned,
+	type Box,
+	type TurnedWindow
+} from '@versatiles/map-state/maplibre';
 import { ElementRenderer, elementIdOf, layerIdsOf, type Role } from './element_renderer.js';
 
 /** The role of the first layer or the source of a role, e.g. "symbol" of `elements_symbol`. */
@@ -11,7 +22,6 @@ function roleOf(id: string): Role | undefined {
 }
 
 import { MapStyleLoader } from './map_style_loader.js';
-import { fitTurned, overlapsBox, projectTurned, type Box, type TurnedWindow } from './turned_fit.js';
 
 /** The part of the map that is shown: its center, and the radius of the largest circle in it, in meters. */
 export interface Viewport {
@@ -35,13 +45,6 @@ export function indexElements(elements: AbstractElement[]): ElementIndex {
 /** The circumference of the earth in meters, as the viewport measures it. */
 const EARTH_CIRCUMFERENCE = 40074000;
 
-/** The padding around a frame that the author set, in pixels. */
-const FRAME_PADDING = 10;
-/** The padding around the elements, which is larger, since the symbols of markers are larger than their points. */
-const ELEMENTS_PADDING = 30;
-/** The closest zoom for elements all at one place, e.g. a single marker (like the table import). */
-const MAX_ZOOM = 15;
-
 export type { Box };
 
 /** How the map is turned when it shows an area: rotated and tilted, in degrees. Not at all by default. */
@@ -56,8 +59,6 @@ export interface Turn {
  */
 export type Camera = Viewport & Turn;
 
-/** The field of view of MapLibre's camera in degrees, if the map does not tell it. */
-const DEFAULT_FOV = 36.87;
 /**
  * How often an area shown on terrain is shown again as the heights of the ground are loaded: once
  * with those of the map as it was, once more with the finer ones of the map as it then is.
@@ -306,7 +307,7 @@ export class MapView {
 		const bounds = frame ?? boundsOf(elements) ?? [-180, -MAX_LATITUDE, 180, MAX_LATITUDE];
 		if (turn.bearing || turn.pitch) {
 			const area: Bounds = [bounds[0], clampLatitude(bounds[1]), bounds[2], clampLatitude(bounds[3])];
-			this.#fitTurned(area, turn, frame ? FRAME_PADDING : ELEMENTS_PADDING, frame ? undefined : MAX_ZOOM);
+			this.#fitTurned(area, turn, frame ? FRAME_PADDING : ELEMENTS_PADDING, frame ? undefined : ELEMENTS_MAX_ZOOM);
 			// the heights of the ground there may be loaded only now that the map shows it, and more
 			// precise ones once it is closer
 			if (settle) this.#settling = { frame, elements, turn, left: SETTLE_FITS };
@@ -318,7 +319,7 @@ export class MapView {
 		];
 		const padding = frame ? FRAME_PADDING : ELEMENTS_PADDING;
 		// not `maxZoom: undefined`, which would replace MapLibre's default and make the zoom NaN
-		const limit = frame ? {} : { maxZoom: MAX_ZOOM };
+		const limit = frame ? {} : { maxZoom: ELEMENTS_MAX_ZOOM };
 		this.#fitting = true;
 		try {
 			// e.g. after a map that was turned

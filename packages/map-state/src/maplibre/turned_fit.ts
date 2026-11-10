@@ -1,5 +1,7 @@
-import type { Bounds } from '@versatiles/map-state';
-import { lat2mercator, mercator2lat, type GeoPoint } from '../geometry.js';
+import type { Bounds, Position } from '../types.js';
+import { lat2mercator, mercator2lat } from './geometry.js';
+
+type GeoPoint = Position;
 
 /*
  * Showing an area on a map that is rotated and tilted: where the camera must look, and how close,

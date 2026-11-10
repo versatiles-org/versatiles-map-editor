@@ -42,6 +42,7 @@
 		type StackSize
 	} from './overlay_layout.js';
 	import { MAX_PITCH, type StateLegend } from '@versatiles/map-state';
+	import { MAP_PADDING } from '@versatiles/map-state/maplibre';
 
 	/**
 	 * The map with what the viewer and the editor share: the map of the link or of the browser
@@ -105,7 +106,6 @@
 	const symbolLibrary = new SymbolLibrary();
 	setSymbolLibrary(symbolLibrary);
 	let triggeredMapReady = $state(false);
-	const MAP_PADDING = 10;
 
 	/** The padding of the map, which centers its content in the part that the bars leave free. */
 	function mapPadding({ top, right, bottom, left }: Insets): Required<maplibre.PaddingOptions> {

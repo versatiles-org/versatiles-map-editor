@@ -145,7 +145,16 @@ It is being built up (issue #45). So far it has:
   the default) has its labels in `language`, by default `"local"` (the local names), since a server
   has no viewer; a background that names a language keeps it. `landcover` and `elevation` say
   whether the tile server has those tiles, both by default `true`, as tiles.versatiles.org has
-  them. `@versatiles/style` (Node.js 20 or newer) is an optional peer dependency of this entry.
+  them. `@versatiles/style` (Node.js 20 or newer) is an optional peer dependency of this entry;
+- the camera: `mapCamera(state, { width, height })` gives where the viewer looks when it opens a
+  map in a window of that size (`{ center, zoom, bearing, pitch }`): its frame, else all its
+  elements, else the whole world, with the viewer's padding (`MAP_PADDING` and `FRAME_PADDING` or
+  `ELEMENTS_PADDING`), its closest zoom for elements (`ELEMENTS_MAX_ZOOM`) and the zoom limits of
+  the map, turned as the frame says, and in a single world as MapLibre keeps the viewer's map
+  (`constrainToWorld`). It returns the pitch of the frame; a renderer without pitch draws the map
+  flat, with its bearing. It fits on flat ground, so on a map with terrain the viewer may look a
+  little closer or farther. `fitFlat` and `fitTurned` fit an area in a part of a window, north up
+  from above like MapLibre's `cameraForBounds`, or rotated and tilted.
 
 ```ts
 const symbol = symbolLookup(await fetchSymbolCatalog({ tileServer: 'https://tiles.versatiles.org' }));
