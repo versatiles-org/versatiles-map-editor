@@ -9,5 +9,22 @@
  * @module
  */
 
+export {
+	arrowHeads,
+	arrowImage,
+	arrowImageName,
+	arrowImageOf,
+	drawArrowHead,
+	endDirection,
+	HEAD_WIDTH,
+	headDirection,
+	headReach,
+	ROTATE_ZOOMS,
+	rotateProperty,
+	type ArrowHead,
+	type ArrowHeadCanvas,
+	type ArrowProperties
+} from './arrow_heads.js';
 export { circle, distance, EARTH_RADIUS, lat2mercator, mercator2lat } from './geometry.js';
 export { curvePoint, smoothPath } from './smooth_path.js';
+export type { StyleImage } from './types.js';

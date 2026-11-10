@@ -158,6 +158,18 @@ describe('MapStyleLoader', () => {
 				pixelRatio: 2
 			});
 		});
+		it('makes the missing images of arrowheads, as SDF images, once', () => {
+			const resolver = map.setMissingStyleImageResolver.mock.lastCall![0] as (id: string) => void;
+			resolver('arrow-chevron-2.5');
+			expect(map.addImage).toHaveBeenCalledWith(
+				'arrow-chevron-2.5',
+				{ width: 112, height: 64, data: expect.any(Uint8Array) },
+				{ pixelRatio: 2, sdf: true }
+			);
+			map.hasImage.mockReturnValue(true);
+			resolver('arrow-chevron-2.5');
+			expect(map.addImage).toHaveBeenCalledTimes(1);
+		});
 	});
 
 	describe('labels of the background map on top', () => {

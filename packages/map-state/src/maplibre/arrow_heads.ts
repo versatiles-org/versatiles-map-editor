@@ -1,7 +1,20 @@
-import type * as maplibregl from 'maplibre-gl';
-import { ARROW_NAMES, type ArrowName } from '@versatiles/map-state';
-import { lat2mercator, type GeoPath, type GeoPoint } from '../geometry.js';
-import type { ArrowProperties } from '../style/index.js';
+import { ARROW_NAMES, type ArrowName, type Position } from '../types.js';
+import { lat2mercator } from './geometry.js';
+import type { StyleImage } from './types.js';
+
+type GeoPoint = Position;
+type GeoPath = Position[];
+
+/** The arrowheads of a line, which the layer of the arrowheads draws, see `arrowHeads`. */
+export interface ArrowProperties {
+	/** The arrowheads, "none" for none. */
+	start: ArrowName;
+	end: ArrowName;
+	/** The width of the arrowheads across the line, as a factor of `width`. */
+	size: number;
+	width: number;
+	color: string;
+}
 
 /**
  * The arrowheads at the ends of lines: one image per style, an SDF image (a distance field, which
@@ -133,16 +146,13 @@ export function arrowImage(arrow: ArrowName, size = DEFAULT_SIZE): { width: numb
 }
 
 /**
- * Add the image of an arrowhead, when the map asks for it (e.g. again after a new map style).
- * Returns false for other images.
+ * The image of an arrowhead by its name (see `arrowImageName`), as an SDF image, e.g. for
+ * `map.addImage` when the map asks for it; undefined for other images.
  */
-export function addArrowImage(map: maplibregl.Map, name: string): boolean {
+export function arrowImageOf(name: string): StyleImage | undefined {
 	const image = parseImageName(name);
-	if (!image) return false;
-	if (!map.hasImage(name)) {
-		map.addImage(name, arrowImage(image.arrow, image.size), { sdf: true, pixelRatio: PIXEL_RATIO });
-	}
-	return true;
+	if (!image) return undefined;
+	return { ...arrowImage(image.arrow, image.size), pixelRatio: PIXEL_RATIO, sdf: true };
 }
 
 /**
@@ -169,16 +179,34 @@ export function headReach(arrow: ArrowName, headWidth: number, lineWidth: number
 }
 
 /**
+ * What `drawArrowHead` uses of a 2D canvas context, such as `CanvasRenderingContext2D` of browsers,
+ * so this module needs no DOM.
+ */
+export interface ArrowHeadCanvas {
+	fillStyle: unknown;
+	strokeStyle: unknown;
+	lineWidth: number;
+	lineCap: string;
+	lineJoin: string;
+	save(): void;
+	restore(): void;
+	translate(x: number, y: number): void;
+	scale(x: number, y: number): void;
+	beginPath(): void;
+	lineTo(x: number, y: number): void;
+	closePath(): void;
+	arc(x: number, y: number, radius: number, startAngle: number, endAngle: number): void;
+	fill(): void;
+	stroke(): void;
+	setLineDash(segments: number[]): void;
+}
+
+/**
  * Draw an arrowhead on a canvas as the map draws it, e.g. in the legend: `headWidth` pixels wide,
  * at the end point of a line `lineWidth` wide, which is the origin of the context, pointing along
  * its x axis. In the color of `fillStyle`.
  */
-export function drawArrowHead(
-	context: CanvasRenderingContext2D,
-	arrow: ArrowName,
-	headWidth: number,
-	lineWidth: number
-) {
+export function drawArrowHead(context: ArrowHeadCanvas, arrow: ArrowName, headWidth: number, lineWidth: number) {
 	const scale = headWidth / HEAD_WIDTH;
 	context.save();
 	context.translate(headShift(arrow, lineWidth), 0);

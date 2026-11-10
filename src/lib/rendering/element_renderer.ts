@@ -3,7 +3,7 @@ import type { ExpressionSpecification, LayerSpecification, SourceSpecification }
 import type { AbstractElement, StyleLayers } from '../element/index.js';
 import { dashArrays, LABEL_PLACES, labelPlaceTable } from '../style/index.js';
 import { allSymbols } from '../background/index.js';
-import { arrowHeads, ROTATE_ZOOMS, rotateProperty } from './arrow_heads.js';
+import { arrowHeads, ROTATE_ZOOMS, rotateProperty } from '@versatiles/map-state/maplibre';
 
 /**
  * The parts of a style that elements have, each drawn by one layer for all elements, and the

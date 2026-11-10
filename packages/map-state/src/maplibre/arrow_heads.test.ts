@@ -1,15 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
-import type { ArrowProperties } from '../style/index.js';
 import {
-	addArrowImage,
 	arrowHeads,
 	arrowImage,
+	arrowImageOf,
 	endDirection,
 	headDirection,
 	HEAD_WIDTH,
 	ROTATE_ZOOMS,
-	rotateProperty
+	rotateProperty,
+	type ArrowProperties
 } from './arrow_heads.js';
 
 const arrows = (properties: Partial<ArrowProperties>): ArrowProperties => ({
@@ -246,23 +245,21 @@ describe('arrowImage', () => {
 		expect(alphaAt(wide, -9, 0)).toBe(0);
 	});
 
-	it('is added to the map as an SDF image when the map asks for it', () => {
-		const map = new MockMap();
-		expect(addArrowImage(map as unknown as MaplibreMap, 'fill-pattern:diagonal:#ff0000')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-none')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-star')).toBe(false);
+	it('is an SDF image by its name, for the map to add when it asks for it', () => {
+		for (const name of ['fill-pattern:diagonal:#ff0000', 'arrow-none', 'arrow-star']) {
+			expect(arrowImageOf(name), name).toBeUndefined();
+		}
 		// a chevron only with the size of its head
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron-x')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-triangle-3')).toBe(false);
-		expect(addArrowImage(map as unknown as MaplibreMap, 'arrow-chevron-2.5')).toBe(true);
-		expect(map.addImage).toHaveBeenCalledWith(
-			'arrow-chevron-2.5',
-			expect.objectContaining({ width: 112, height: 64 }),
-			{
-				sdf: true,
-				pixelRatio: 2
-			}
-		);
+		for (const name of ['arrow-chevron', 'arrow-chevron-x', 'arrow-triangle-3']) {
+			expect(arrowImageOf(name), name).toBeUndefined();
+		}
+		expect(arrowImageOf('arrow-chevron-2.5')).toStrictEqual({
+			...arrowImage('chevron', 2.5),
+			pixelRatio: 2,
+			sdf: true
+		});
+		expect(arrowImageOf('arrow-triangle')).toMatchObject({ width: 112, height: 64, pixelRatio: 2, sdf: true });
+		// the image of the default size, which the name of a triangle or a circle has not
+		expect(arrowImageOf('arrow-circle')!.data).toStrictEqual(arrowImage('circle').data);
 	});
 });

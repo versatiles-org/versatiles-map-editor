@@ -108,9 +108,15 @@ it, without a browser, e.g. on a server for a preview image. The editor and its 
 maps with the same functions, so a map drawn elsewhere looks the same. The main entry never
 imports it, and stays without dependencies.
 
-It is being built up (issue #45). So far it has the geometry of what is drawn: `circle` (the ring
-of a circle element), `smoothPath` and `curvePoint` (the curve of a smooth line or polygon,
-centripetal Catmull-Rom in Web Mercator), `distance`, `lat2mercator` and `mercator2lat`.
+It is being built up (issue #45). So far it has:
+
+- the geometry of what is drawn: `circle` (the ring of a circle element), `smoothPath` and
+  `curvePoint` (the curve of a smooth line or polygon, centripetal Catmull-Rom in Web Mercator),
+  `distance`, `lat2mercator` and `mercator2lat`;
+- the arrowheads of lines: `arrowHeads` (where they are and which way they point, also per zoom
+  level on a bend), and their images: `arrowImageOf(name)` gives the image that a style names, as a
+  `StyleImage` (`{ width, height, data, pixelRatio, sdf }`, the arguments of MapLibre's
+  `map.addImage`). `drawArrowHead` draws one on a 2D canvas, e.g. in a legend.
 
 ```ts
 import { smoothPath } from '@versatiles/map-state/maplibre';

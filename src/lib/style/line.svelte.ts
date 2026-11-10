@@ -8,6 +8,7 @@ import {
 	OUTLINE_DEFAULTS,
 	hasArrow
 } from '@versatiles/map-state';
+import type { ArrowProperties } from '@versatiles/map-state/maplibre';
 import { ROLE_DEFAULTS, storedStyle, type StyleRole } from './defaults.js';
 
 /**
@@ -24,17 +25,6 @@ export const dashArrays: Record<DashName, number[]> = {
 	// a dash of 3 widths, a gap of 2, a dot, a gap of 2
 	'dash-dot': [2, 3, 0, 3]
 };
-
-/** The arrowheads of a line, which the layer of the arrowheads draws, see `arrowHeadFeatures`. */
-export interface ArrowProperties {
-	/** The arrowheads, "none" for none. */
-	start: ArrowName;
-	end: ArrowName;
-	/** The width of the arrowheads across the line, as a factor of `width`. */
-	size: number;
-	width: number;
-	color: string;
-}
 
 export class LineStyle extends StylePart {
 	static readonly defaultStyle = OUTLINE_DEFAULTS;

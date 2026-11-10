@@ -7,7 +7,8 @@ import {
 	type StateStyle
 } from '@versatiles/map-state';
 import { completeStyle, dashArrays } from '../../style/index.js';
-import { drawArrowHead, headReach, patternImage } from '../../rendering/index.js';
+import { drawArrowHead, headReach } from '@versatiles/map-state/maplibre';
+import { patternImage } from '../../rendering/index.js';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
 export const MARK_WIDTH = 28;
