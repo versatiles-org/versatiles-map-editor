@@ -1,43 +1,29 @@
-import type { IconAnchor, SymbolInfo } from '@versatiles/map-state/maplibre';
+import {
+	fetchSymbolCatalog,
+	spriteSheets as sheetsOf,
+	symbolLookup,
+	type IconAnchor,
+	type SymbolCatalog,
+	type SymbolInfo
+} from '@versatiles/map-state/maplibre';
 import { config } from './config.svelte.js';
 
-export type { IconAnchor, SymbolInfo };
-
-/** An image of 32×32 pixels, centered on the point: the size of the symbols of the "base" sprite. */
-function centered(): Pick<SymbolInfo, 'anchor' | 'width' | 'height' | 'center'> {
-	return { anchor: 'center', width: 32, height: 32, center: [0.5, 0.5] };
-}
-
-/** The sprite sheets of the tile server, with their symbols. */
-export interface SymbolCatalog {
-	sheets: string[];
-	symbols: SymbolInfo[];
-}
-
-/** The folder of the sprite sheets on the tile server of the configuration. */
-function spritesUrl(): string {
-	return `${config.current.tileServer}/assets/sprites/`;
-}
+export type { IconAnchor, SymbolCatalog, SymbolInfo };
 
 // empty until the symbols of the server are loaded
 let catalog: SymbolCatalog = { sheets: [], symbols: [] };
-let byName = indexByName(catalog);
+let lookup = symbolLookup(catalog);
 let loading: Promise<SymbolCatalog> | undefined;
 
-function indexByName({ symbols }: SymbolCatalog): Map<string, SymbolInfo> {
-	return new Map(symbols.map((symbol) => [symbol.name, symbol]));
-}
-
 /**
- * Load the sprite sheets of the tile server once, with the titles and aliases of their symbols.
- * Patterns are no symbols: only images that can be recolored (SDF) are. Without the server, there
- * are no symbols.
+ * Load the sprite sheets of the configured tile server once, with the titles and aliases of their
+ * symbols (see `fetchSymbolCatalog`). Without the server, there are no symbols.
  */
 export function loadSymbols(): Promise<SymbolCatalog> {
-	loading ??= fetchCatalog().then(
+	loading ??= fetchSymbolCatalog({ tileServer: config.current.tileServer }).then(
 		(loaded) => {
 			catalog = loaded;
-			byName = indexByName(loaded);
+			lookup = symbolLookup(loaded);
 			return loaded;
 		},
 		(error) => {
@@ -48,72 +34,9 @@ export function loadSymbols(): Promise<SymbolCatalog> {
 	return loading;
 }
 
-async function fetchCatalog(): Promise<SymbolCatalog> {
-	const sheets = await fetchJSON<string[]>('index.json');
-	if (!Array.isArray(sheets) || sheets.some((sheet) => typeof sheet !== 'string')) throw new Error('Invalid index');
-	const images = await Promise.all(sheets.map((sheet) => fetchJSON<Record<string, SpriteImage>>(`${sheet}.json`)));
-	const symbols = sheets.flatMap((sheet, i) =>
-		Object.entries(images[i])
-			.filter(([, image]) => image.sdf)
-			.map(([name, image]): SymbolInfo => {
-				const pixelRatio = positive(image.pixelRatio) ?? 1;
-				const center = validCenter(image.center);
-				return {
-					name: `${sheet}:${name}`,
-					title: typeof image.title === 'string' ? image.title : name,
-					aliases: Array.isArray(image.aliases) ? image.aliases.filter((a) => typeof a === 'string') : [],
-					anchor: anchorOf(center),
-					width: (positive(image.width) ?? 32 * pixelRatio) / pixelRatio,
-					height: (positive(image.height) ?? 32 * pixelRatio) / pixelRatio,
-					center
-				};
-			})
-	);
-	return { sheets, symbols };
-}
-
-/** A positive number, or undefined. */
-function positive(value: unknown): number | undefined {
-	return typeof value === 'number' && value > 0 ? value : undefined;
-}
-
-/** The center of a sprite image, or the middle of the image without a valid one. */
-function validCenter(center: unknown): [number, number] {
-	if (!Array.isArray(center) || center.length !== 2) return [0.5, 0.5];
-	const [x, y] = center as unknown[];
-	return typeof x === 'number' && typeof y === 'number' ? [x, y] : [0.5, 0.5];
-}
-
-interface SpriteImage {
-	sdf?: boolean;
-	width?: unknown;
-	height?: unknown;
-	pixelRatio?: unknown;
-	title?: unknown;
-	aliases?: unknown[];
-	/** The point of the image on the point of the map, as fractions of its width and height. */
-	center?: unknown;
-}
-
-async function fetchJSON<T>(path: string): Promise<T> {
-	const response = await fetch(spritesUrl() + path);
-	if (!response.ok) throw new Error(`${response.status} for ${path}`);
-	return (await response.json()) as T;
-}
-
-/** The anchor of an image by its center, e.g. [0.5, 1] (a pin) is "bottom". */
-export function anchorOf(center: unknown): IconAnchor {
-	if (!Array.isArray(center) || center.length !== 2) return 'center';
-	const [x, y] = center as number[];
-	const horizontal = x <= 0.25 ? 'left' : x >= 0.75 ? 'right' : '';
-	const vertical = y <= 0.25 ? 'top' : y >= 0.75 ? 'bottom' : '';
-	if (horizontal && vertical) return `${vertical}-${horizontal}` as IconAnchor;
-	return (vertical || horizontal || 'center') as IconAnchor;
-}
-
 /** The sprite sheets for the map style, all with symbols. */
 export function spriteSheets(): { id: string; url: string }[] {
-	return catalog.sheets.map((id) => ({ id, url: spritesUrl() + id }));
+	return sheetsOf(catalog, config.current.tileServer);
 }
 
 /** All symbols, in the order of their sheets. */
@@ -149,6 +72,5 @@ export function filterSymbols(symbols: SymbolInfo[], filter: string): SymbolInfo
 
 /** The symbol of an image, or undefined for no symbol (""). An unknown image gets its name as title. */
 export function getSymbol(name: string): SymbolInfo | undefined {
-	if (!name) return undefined;
-	return byName.get(name) ?? { name, title: name.replace(/^.*:/, ''), aliases: [], ...centered() };
+	return lookup(name);
 }

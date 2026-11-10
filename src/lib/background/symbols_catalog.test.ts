@@ -93,18 +93,6 @@ describe('loadSymbols', () => {
 	});
 });
 
-describe('anchorOf', () => {
-	it('places the center of the image on the point, or the side that it names', async () => {
-		const { anchorOf } = await symbolsModule();
-		expect(anchorOf(undefined)).toBe('center');
-		expect(anchorOf([0.5, 0.5])).toBe('center');
-		expect(anchorOf([0.5, 1])).toBe('bottom');
-		expect(anchorOf([0, 0])).toBe('top-left');
-		expect(anchorOf([1, 0.5])).toBe('right');
-		expect(anchorOf('nope')).toBe('center');
-	});
-});
-
 describe('filterSymbols', () => {
 	const symbols = [
 		{

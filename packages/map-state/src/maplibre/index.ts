@@ -59,4 +59,12 @@ export {
 	type SymbolProperties
 } from './properties.js';
 export { curvePoint, smoothPath } from './smooth_path.js';
+export {
+	anchorOf,
+	fetchSymbolCatalog,
+	spriteSheets,
+	symbolLookup,
+	type FetchJSON,
+	type SymbolCatalog
+} from './symbols.js';
 export type { IconAnchor, StyleImage, SymbolInfo } from './types.js';

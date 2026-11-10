@@ -127,7 +127,17 @@ It is being built up (issue #45). So far it has:
   `stroke`, `arrow` or `symbol`), with the geometry that is drawn (`elementGeometry`: the curve of
   a smooth line, the ring of a circle) and the properties that the layers read (`fillProperties`,
   `strokeProperties`, `arrowProperties`, `symbolProperties`). `symbol` gives the size and the
-  anchor of a marker's symbol in the sprite sheets of the tile server, by its name.
+  anchor of a marker's symbol in the sprite sheets of the tile server, by its name;
+- the symbols of markers: `fetchSymbolCatalog({ tileServer, fetch })` loads the sprite sheets of a
+  tile server and keeps the images that can be recolored (SDF), with their sizes and anchors.
+  `symbolLookup(catalog)` is the `symbol` function of `elementFeatures`, and
+  `spriteSheets(catalog, tileServer)` the `sprite` of a map style.
+
+```ts
+const symbol = symbolLookup(await fetchSymbolCatalog({ tileServer: 'https://tiles.versatiles.org' }));
+// the symbols and labels of the markers of a map
+const markers = state.elements.flatMap((element) => elementFeatures(element, 'symbol', symbol));
+```
 
 ```ts
 import { smoothPath } from '@versatiles/map-state/maplibre';
