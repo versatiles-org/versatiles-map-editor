@@ -11,10 +11,10 @@ A static SvelteKit app: an editor at `/` and a read-only viewer at `/view/`, for
 - `playwright-tests/`: e2e tests. Every `.ts` file outside `lib/` is a test file, with no `.spec` suffix.
 - `examples/`: `.mapjson` maps, offered in the editor and encoded at build time.
 - `static/map-editor.config.jsonc`: lists every config field with its default. `docs/SELF_HOSTING.md` is the guide for operators.
-- `scripts/`: release, frozen samples, bit analysis, docs.
+- `scripts/`: release, frozen samples, bit analysis, docs. TypeScript that Node runs unbuilt, so only erasable syntax (no enums, no parameter properties), `import type` for types, and imports with their `.ts` extension. `scripts/tsconfig.json` checks them.
 - `*_PLAN.md` in the root: git-ignored working plans. They are not documentation and may be stale.
 
-`package.json` at the root is private and is not the published editor. `@versatiles/map-editor` is generated into `release/npm/` by `scripts/release/pack_editor.mjs`.
+`package.json` at the root is private and is not the published editor. `@versatiles/map-editor` is generated into `release/npm/` by `scripts/release/pack_editor.ts`.
 
 ## Commands
 
@@ -22,7 +22,7 @@ A static SvelteKit app: an editor at `/` and a read-only viewer at `/view/`, for
 npm run dev
 npm run check                  # lint, types, both builds, unit and Playwright tests, formatting
 npm run lint                   # ESLint and Stylelint
-npm run check-types            # svelte-check (warnings fail) and tsc for playwright-tests
+npm run check-types            # svelte-check (warnings fail) and tsc for playwright-tests and scripts
 npm run test-unit              # Vitest, including packages/map-state
 npm test --workspace packages/map-state
 npm run test-playwright        # Chromium all, Firefox only @cross-browser
@@ -36,7 +36,7 @@ npm run schema --workspace packages/map-state  # regenerate the JSON Schema from
 npm run release -- --dry-run   # show what a release would do, changes nothing
 ```
 
-`npm run check-types` covers two tools, so a clean svelte-check summary line says nothing about the Playwright types. Read the exit code.
+`npm run check-types` covers two tools, so a clean svelte-check summary line says nothing about the types of the Playwright tests and the scripts. Read the exit code.
 
 Playwright builds and serves the app itself (`vite build && vite preview`), so no dev server is needed. On a busy machine it drops to one worker. If Firefox tests time out under load, rerun only the failures before treating them as real.
 
@@ -48,12 +48,12 @@ Playwright builds and serves the app itself (`vite build && vite preview`), so n
 ## Imports
 
 - `.svelte` files import from another folder with `#lib/…`, and within their folder with `./`. There are no exceptions.
-- `.ts` files (including `.svelte.ts`, tests and `vi.mock` paths) always use relative paths.
+- `.ts` files (including `.svelte.ts`, tests and `vi.mock` paths) always use relative paths, with `.js` for `.ts` modules. Only `scripts/` imports with `.ts`.
 - `#lib` is a subpath import of the root `package.json`, so it doesn't work inside `packages/map-state`.
 - A folder with an `index.ts` is imported through it from outside, and its own modules import each other directly (`src/barrel_imports.test.ts`). Tests import the module they test directly.
 - Code that loads at different times gets no shared barrel. One barrel over viewer and editor components pulls editor code into the viewer's first load. Check the viewer's first load before adding a barrel to a folder with lazily loaded components.
 - A module lives next to its users: in their folder, or the nearest folder above all of them. There is no general `utils/`. The one exception is `files/`, kept together on purpose.
-- The app uses `@versatiles/map-state` from its source (aliases in `vite.config.ts` and both tsconfigs). Only `scripts/*.mjs` use its `dist`, which is why those npm scripts build it first.
+- The app uses `@versatiles/map-state` from its source (aliases in `vite.config.ts` and both tsconfigs). Only `scripts/*.ts` use its `dist`, which is why those npm scripts build it first.
 
 ## Model and view
 
@@ -93,7 +93,7 @@ Allowed without a new format version:
 
 Changing anything else needs a new format version that reads version 1 alongside it: key numbers, name order, number coding, defaults (a map omits defaults, so a new default is a different map), or anything in the string coder (model, parameters, word list).
 
-- A failing `frozen_samples.test.ts` or `frozen_tables.test.ts` means the code broke compatibility. Change the code back. Never adapt the samples or literals, and never run `scripts/freeze_samples.mjs --force`.
+- A failing `frozen_samples.test.ts` or `frozen_tables.test.ts` means the code broke compatibility. Change the code back. Never adapt the samples or literals, and never run `scripts/freeze_samples.ts --force`.
 - `CODEC_VERSION` and `MAPJSON_VERSION` stay at 1 unless a new format version is really being made.
 - Maps from before the freeze are not read. Don't write migration code for them.
 - The link reader refuses what the writer never writes, rather than clamping or guessing. A `.mapjson` reader is lenient: it warns about unknown fields and uses defaults for unknown names.
@@ -114,7 +114,7 @@ Don't document measured link sizes in READMEs or other docs, because they go sta
 
 Other release facts:
 
-- `scripts/release.mjs` derives both versions from commits: `feat`, `fix`, `perf`, reverts and `!` trigger a release. A commit touching the package's published files releases both.
+- `scripts/release.ts` derives both versions from commits: `feat`, `fix`, `perf`, reverts and `!` trigger a release. A commit touching the package's published files releases both.
 - The package version is separate from the format version. A normal release doesn't need `--package-version`.
 - A `push: tags` run uses the workflow file of the tagged commit. To apply a workflow fix to an existing tag, run `gh workflow run release-editor.yml -f tag=vX.Y.Z`, which uses `main`'s workflow and the tag's code. That only exists for the editor.
 - GitHub starts no workflow for a push of more than three tags at once.

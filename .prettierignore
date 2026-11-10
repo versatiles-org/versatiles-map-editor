@@ -9,5 +9,5 @@ packages/*/package.json
 # a file for people to read and edit: its blank lines between commented-out fields stay
 static/map-editor.config.jsonc
 
-# written once and never again, see scripts/freeze_samples.mjs
+# written once and never again, see scripts/freeze_samples.ts
 packages/map-state/src/__fixtures__/frozen/

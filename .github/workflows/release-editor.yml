@@ -2,7 +2,7 @@ name: Release the editor
 
 # Builds the editor when a tag like "v3.1.0" is pushed by "npm run release", and publishes the build
 # in two forms, for others to run on their own web server: as a ZIP archive in its GitHub release,
-# and as the npm package @versatiles/map-editor (see scripts/release/pack_editor.mjs). The tag must
+# and as the npm package @versatiles/map-editor (see scripts/release/pack_editor.ts). The tag must
 # match the version in package.json; a release candidate has a tag like "v4.0.0-rc.1", is a
 # prerelease on GitHub and has the npm tag "next", so "latest" stays the last release.
 # ("map-state-v…" tags release the package @versatiles/map-state; the tags v1.x and v2.x come from
@@ -88,7 +88,7 @@ jobs:
           npm pack ./release/npm --pack-destination release/publish
 
       # The site of the npm package, so both have the same files (without what is only for GitHub
-      # Pages, see pack_editor.mjs); in a folder of its own, so unpacking the archive does not
+      # Pages, see pack_editor.ts); in a folder of its own, so unpacking the archive does not
       # spread the files
       - name: Pack the archive
         run: |

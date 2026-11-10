@@ -262,7 +262,7 @@ with the bits of each kind (`LINK_KINDS`: `strings`, `stringRefs`, `coordinates`
 `colors`, `frame`, `background`, `structure`), which add up to `bits`.
 
 To see it in detail, as a tree of the reads with their bits, run this in the repository of the
-editor (the script is `scripts/analyse_bits.mjs` there):
+editor (the script is `scripts/analyse_bits.ts` there):
 
 ```sh
 npm run analyse-bits -- [--example name] [--content] [--depth n] [--min-percent p] [files…]

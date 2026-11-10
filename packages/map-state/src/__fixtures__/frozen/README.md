@@ -7,4 +7,4 @@ them all, so every later version of the package proves that it still reads what 
 **These files are written once and never again.** If the test fails, the reader has changed, not
 the samples: maps that people made would be read differently. A new field of the formats gets new
 samples (`npm run freeze-samples` writes the ones that are missing, see
-`scripts/freeze_samples.mjs`); the existing ones stay as they are.
+`scripts/freeze_samples.ts`); the existing ones stay as they are.

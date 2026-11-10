@@ -20,7 +20,7 @@ import { STYLE_KEYS, styleFields, styleRemoveKey } from './style_history.js';
 import type { StateStyle, StyleRoleName } from './types.js';
 
 // The frozen samples: links and files that an earlier version of the package wrote, each with the
-// map that it must be read as. They are written once (scripts/freeze_samples.mjs) and never again:
+// map that it must be read as. They are written once (scripts/freeze_samples.ts) and never again:
 // a sample that reads differently means that the maps of people do. A new field gets new samples.
 
 const FOLDER = 'packages/map-state/src/__fixtures__/frozen';

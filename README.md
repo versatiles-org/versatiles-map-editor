@@ -217,7 +217,7 @@ get the editor like their other dependencies. The version is in `package.json`, 
 and in the `generator` of its pages.
 
 To release, run `npm run release` on `main`, with everything committed and the
-[GitHub CLI](https://cli.github.com) logged in. `scripts/release.mjs` decides what to release, from
+[GitHub CLI](https://cli.github.com) logged in. `scripts/release.ts` decides what to release, from
 the [conventional commits](https://www.conventionalcommits.org) since the release before, shows it
 with the changes, and asks for confirmation before it changes anything (`--dry-run` only shows it,
 `--yes` releases it without asking, e.g. `npm run release -- --yes`):
@@ -244,7 +244,7 @@ with the changes, and asks for confirmation before it changes anything (`--dry-r
 **The npm package of the editor.** `@versatiles/map-editor` is the built site in `dist/`, with a
 small `package.json` of the version of the editor and no dependencies. It is made for a release
 and not committed: `npm run build && npm run pack-editor` writes it to `release/npm/`
-(`scripts/release/pack_editor.mjs`; its README is `scripts/release/editor_package_readme.md`), and
+(`scripts/release/pack_editor.ts`; its README is `scripts/release/editor_package_readme.md`), and
 `npm pack --dry-run ./release/npm` shows what would be published. It has the default
 `map-editor.config.jsonc`, with `tiles.versatiles.org` as its tile server, like the archive: a
 site with a tile server of its own replaces the file by one with `"tileServer": "/"`.

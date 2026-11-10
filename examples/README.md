@@ -34,4 +34,4 @@ vision deficiencies can tell apart.
 The pharmacies of London are data from [OpenStreetMap](https://www.openstreetmap.org/copyright),
 © OpenStreetMap contributors, available under the
 [Open Database License (ODbL)](https://opendatacommons.org/licenses/odbl/). The example is
-written by `scripts/fetch_london_pharmacies.mjs`, which can be run again to update it.
+written by `scripts/fetch_london_pharmacies.ts`, which can be run again to update it.
