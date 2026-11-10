@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type * as maplibregl from 'maplibre-gl';
 import { buildStyle, keepElements } from './editor_style.js';
-import { AREAS_TOP, ELEMENT_LAYERS, ELEMENTS_TOP } from './element_renderer.js';
+import { AREAS_TOP, ELEMENT_LAYERS, ELEMENTS_TOP } from '@versatiles/map-state/maplibre';
 
 describe('buildStyle', () => {
 	it('puts the layers of the editor over the background map, in their order', () => {

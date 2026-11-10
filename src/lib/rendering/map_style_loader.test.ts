@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, beforeEach, vi } from 'vitest';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { deferInlineSources } from '../__mocks__/inline_sources.js';
 import { MapStyleLoader } from './map_style_loader.js';
-import { ELEMENT_LAYERS, type ElementRenderer } from './element_renderer.js';
+import { ELEMENT_LAYERS } from '@versatiles/map-state/maplibre';
+import type { ElementRenderer } from './element_renderer.js';
 import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
 
 describe('MapStyleLoader', () => {

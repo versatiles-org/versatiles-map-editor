@@ -6,8 +6,8 @@ import {
 	type StateLegendEntry,
 	type StateStyle
 } from '@versatiles/map-state';
-import { completeStyle, dashArrays } from '../../style/index.js';
-import { drawArrowHead, headReach, patternImage } from '@versatiles/map-state/maplibre';
+import { completeStyle } from '../../style/index.js';
+import { dashArrays, drawArrowHead, headReach, patternImage } from '@versatiles/map-state/maplibre';
 
 /** The size of the mark of an entry in CSS pixels: a symbol, a short line or a small area. */
 export const MARK_WIDTH = 28;

@@ -1,8 +1,8 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
-import { arrowImageOf, patternImageOf } from '@versatiles/map-state/maplibre';
+import { arrowImageOf, ELEMENT_LAYERS, patternImageOf, type LabelOptions } from '@versatiles/map-state/maplibre';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
-import { ELEMENT_LAYERS, type ElementRenderer, type LabelOptions } from './element_renderer.js';
+import type { ElementRenderer } from './element_renderer.js';
 import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
 import { themeColor } from './theme_color.js';
 import { loadSymbols, spriteSheets, configReady } from '../background/index.js';

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
 	import { DASH_NAMES, type DashName } from '@versatiles/map-state';
-	import { dashArrays, LineStyle } from '#lib/style/index.js';
+	import { dashArrays } from '@versatiles/map-state/maplibre';
+	import { LineStyle } from '#lib/style/index.js';
 	import { group } from './group.js';
 	import { InputRow, ChoiceGroup, Slider } from '#lib/components/ui/index.js';
 	import { ColorPicker } from '#lib/components/pickers/index.js';

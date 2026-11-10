@@ -59,5 +59,16 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@maplibre/maplibre-gl-style-spec": "^26.6.0"
+  },
+  "peerDependencies": {
+    "@maplibre/maplibre-gl-style-spec": "^26.6.0"
+  },
+  "peerDependenciesMeta": {
+    "@maplibre/maplibre-gl-style-spec": {
+      "optional": true
+    }
   }
 }

@@ -37,6 +37,31 @@ export {
 } from './fill_patterns.js';
 export { cssColor } from './css_color.js';
 export {
+	AREAS_TOP,
+	dashArrays,
+	DEFAULT_LABEL_OPTIONS,
+	ELEMENT_LAYERS,
+	ELEMENT_ROLES,
+	elementLayer,
+	ELEMENTS_TOP,
+	elementStyle,
+	emptySource,
+	FLAT_LABELS_LAYER,
+	LABEL_LAYOUT_KEYS,
+	labelFont,
+	labelLayout,
+	LABELS_LAYER,
+	LABELS_LAYERS,
+	labelSortKey,
+	labelsLayer,
+	MAX_LAYERS,
+	planLayers,
+	symbolAlignment,
+	type Drawn,
+	type LabelOptions,
+	type LayerPlan
+} from './element_layers.js';
+export {
 	circleGeometry,
 	elementFeatures,
 	elementGeometry,

@@ -131,7 +131,13 @@ It is being built up (issue #45). So far it has:
 - the symbols of markers: `fetchSymbolCatalog({ tileServer, fetch })` loads the sprite sheets of a
   tile server and keeps the images that can be recolored (SDF), with their sizes and anchors.
   `symbolLookup(catalog)` is the `symbol` function of `elementFeatures`, and
-  `spriteSheets(catalog, tileServer)` the `sprite` of a map style.
+  `spriteSheets(catalog, tileServer)` the `sprite` of a map style;
+- the layers that draw the elements: one source per role (`ELEMENT_LAYERS`), and as few layers as
+  draw the elements in their order (`planLayers`, at most `MAX_LAYERS`). `elementLayer`,
+  `labelsLayer` and `elementStyle` make their layer specifications, `labelLayout`, `labelFont` and
+  `labelSortKey` the settings of the labels of markers, `dashArrays` the dashes of lines. Their
+  types are those of `@maplibre/maplibre-gl-style-spec`, an optional peer dependency of this
+  entry, for its types only.
 
 ```ts
 const symbol = symbolLookup(await fetchSymbolCatalog({ tileServer: 'https://tiles.versatiles.org' }));
