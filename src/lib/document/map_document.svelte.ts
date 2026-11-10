@@ -16,7 +16,8 @@ import {
 	type StateViewer
 } from '@versatiles/map-state';
 import { MapView, type Camera, type ElementIndex } from '../rendering/index.js';
-import { getSettings, sameBackground } from '../background/index.js';
+import { backgroundSettings } from '@versatiles/map-state/maplibre';
+import { sameBackground } from '../background/index.js';
 
 /** The settings of the viewer with their defaults; the zoom limits have none: undefined is no limit. */
 export type ViewerSettings = Required<Omit<StateViewer, 'minZoom' | 'maxZoom'>> &
@@ -58,7 +59,7 @@ export class MapDocument {
 	/** The background map. Undefined for the editor's default background. See `setBackground`. */
 	#background: StateBackground | undefined = $state.raw(undefined);
 	/** The glyph font of the labels of markers without a font of their own: the one of the background map. */
-	public readonly font: string = $derived(getSettings(this.#background).font);
+	public readonly font: string = $derived(backgroundSettings(this.#background).font);
 	/** Whether the labels of the background map are drawn over the areas and lines of the elements. */
 	#mapLabelsOnTop = $state(false);
 	/**

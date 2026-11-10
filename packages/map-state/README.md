@@ -137,12 +137,22 @@ It is being built up (issue #45). So far it has:
   `labelsLayer` and `elementStyle` make their layer specifications, `labelLayout`, `labelFont` and
   `labelSortKey` the settings of the labels of markers, `dashArrays` the dashes of lines. Their
   types are those of `@maplibre/maplibre-gl-style-spec`, an optional peer dependency of this
-  entry, for its types only.
+  entry, for its types only;
+- the background map: `backgroundSettings` (the settings of a map's background, with their
+  defaults), `backgroundOptions` (the options of `@versatiles/style` that draw it) and
+  `backgroundStyle(background, { tileServer, landcover, elevation, language })`, its style. The
+  tile server is the caller's, never the map's. A background in the viewer's language (`"user"`,
+  the default) has its labels in `language`, by default `"local"` (the local names), since a server
+  has no viewer; a background that names a language keeps it. `landcover` and `elevation` say
+  whether the tile server has those tiles, both by default `true`, as tiles.versatiles.org has
+  them. `@versatiles/style` (Node.js 20 or newer) is an optional peer dependency of this entry.
 
 ```ts
 const symbol = symbolLookup(await fetchSymbolCatalog({ tileServer: 'https://tiles.versatiles.org' }));
 // the symbols and labels of the markers of a map
 const markers = state.elements.flatMap((element) => elementFeatures(element, 'symbol', symbol));
+// the background map, with English labels unless the map names a language
+const style = backgroundStyle(state.background, { tileServer: 'https://tiles.versatiles.org', language: 'en' });
 ```
 
 ```ts

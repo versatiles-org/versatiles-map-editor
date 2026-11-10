@@ -1,8 +1,14 @@
 import type { LayerSpecification, SourceSpecification } from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
 import type { StyleSpecification } from '@versatiles/style';
-import { AREAS_TOP, ELEMENT_LAYERS, elementStyle, emptySource } from '@versatiles/map-state/maplibre';
-import { allSymbols, getMapStyle, getSettings } from '../background/index.js';
+import {
+	AREAS_TOP,
+	backgroundSettings,
+	ELEMENT_LAYERS,
+	elementStyle,
+	emptySource
+} from '@versatiles/map-state/maplibre';
+import { allSymbols, getMapStyle } from '../background/index.js';
 
 /** Whether the primary input is a finger (e.g. phone or tablet) instead of a mouse. */
 function hasCoarsePointer(): boolean {
@@ -47,7 +53,7 @@ export function buildStyle(
 	const coarse = hasCoarsePointer();
 	const parts = [
 		highlightLayers(),
-		elementStyle(font ?? getSettings(background).font, allSymbols()),
+		elementStyle(font ?? backgroundSettings(background).font, allSymbols()),
 		selectionLayers(coarse),
 		visibleAreaLayers(coarse, editorColor),
 		drawingLayers(coarse, editorColor)

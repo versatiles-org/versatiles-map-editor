@@ -1,16 +1,7 @@
 <script lang="ts">
 	import type { MapDocumentInteractive } from '#lib/editor/index.js';
-	import {
-		changeSettings,
-		config,
-		DEFAULT_COLORS,
-		getSettings,
-		LANGUAGES,
-		pushLevels,
-		THEMES,
-		type BackgroundSettings,
-		type MapColors
-	} from '#lib/background/index.js';
+	import { changeSettings, config, DEFAULT_COLORS, LANGUAGES, pushLevels, THEMES } from '#lib/background/index.js';
+	import { backgroundSettings, type BackgroundSettings, type MapColors } from '@versatiles/map-state/maplibre';
 	import {
 		InputRow,
 		ChoiceGroup,
@@ -28,7 +19,7 @@
 	const { doc }: { doc: MapDocumentInteractive } = $props();
 
 	const uid = $props.id();
-	const settings = $derived(getSettings(doc.background));
+	const settings = $derived(backgroundSettings(doc.background));
 
 	const languageNames = new Intl.DisplayNames([navigator.language, 'en'], { type: 'language' });
 	const languages = LANGUAGES.map((id) => ({ id, name: languageNames.of(id) ?? id })).sort((a, b) =>

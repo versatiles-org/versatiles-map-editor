@@ -61,13 +61,18 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@maplibre/maplibre-gl-style-spec": "^26.6.0"
+    "@maplibre/maplibre-gl-style-spec": "^26.6.0",
+    "@versatiles/style": "^9.1.0"
   },
   "peerDependencies": {
-    "@maplibre/maplibre-gl-style-spec": "^26.6.0"
+    "@maplibre/maplibre-gl-style-spec": "^26.6.0",
+    "@versatiles/style": "^9.1.0"
   },
   "peerDependenciesMeta": {
     "@maplibre/maplibre-gl-style-spec": {
+      "optional": true
+    },
+    "@versatiles/style": {
       "optional": true
     }
   }

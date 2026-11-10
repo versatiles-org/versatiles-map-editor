@@ -1,47 +1,20 @@
-import { osm, satellite, type OsmOptions, type SatelliteOptions, type StyleSpecification } from '@versatiles/style';
+import type { StyleSpecification } from '@versatiles/style';
 import type { StateBackground } from '@versatiles/map-state';
-import { backgroundOptions } from './background.js';
+import { backgroundStyle } from '@versatiles/map-state/maplibre';
 import { config } from './config.svelte.js';
 
 /**
- * The streets, borders and labels over the imagery, as the options have them, with borders and
- * motorways dimmed by `line-layer-opacity`, so where a line overlaps itself (e.g. the two
- * carriageways of a motorway) it does not show brighter. MapLibre GL JS has it from version 6;
- * MapLibre Native has not, but only the editor and its viewer draw these styles. `false`: the
- * imagery alone.
- */
-function overlayOf(options: SatelliteOptions): SatelliteOptions['osmOverlay'] {
-	const overlay = options.osmOverlay ?? true;
-	if (overlay === false) return false;
-	return { ...(overlay === true ? {} : overlay), layerOpacity: true };
-}
-
-/**
- * The style of the background map. The tile server (of the configuration, see `configReady`) and the
- * projection are set by the editor, never by the (shared) options, so a map cannot load tiles or
- * fonts from other servers; so are the
- * way the overlay of the imagery is drawn (see `overlayOf`), and whether the vector map shows the
- * landcover of low zoom levels, which it loads from the landcover tiles of the server (the style
- * loader leaves them out for a server without them). A server without elevation tiles shows no
- * relief, whatever the options say.
+ * The style of the background map, with the tile server of the configuration (see `configReady`)
+ * and what it has: landcover and elevation tiles. Labels in the language of the browser ("user")
+ * stay so: `@versatiles/style` picks it.
  */
 export function getMapStyle(background?: StateBackground): StyleSpecification {
-	const fixed = { urls: { base: config.current.tileServer }, projection: 'mercator' as const };
-	const { landcover, elevation } = config.current;
-	const flat = elevation ? {} : { terrain: false, hillshade: false };
-	const vector = (options: OsmOptions) =>
-		osm({ ...options, features: { ...options.features, landcover, ...flat }, ...fixed });
-	try {
-		const built = backgroundOptions(background);
-		if (built.builder === 'satellite') {
-			const options = built.options as SatelliteOptions;
-			const features = elevation ? {} : { features: { ...options.features, ...flat } };
-			return satellite({ ...options, ...features, osmOverlay: overlayOf(options), ...fixed });
-		}
-		return vector(built.options as OsmOptions);
-	} catch (error) {
-		// e.g. `options` of the background that this version of @versatiles/style does not have
-		console.error('Invalid background map options', error);
-		return vector(backgroundOptions().options as OsmOptions);
-	}
+	const { tileServer, landcover, elevation } = config.current;
+	return backgroundStyle(background, {
+		tileServer,
+		landcover,
+		elevation,
+		language: 'user',
+		onWarning: (message) => console.warn(message)
+	});
 }

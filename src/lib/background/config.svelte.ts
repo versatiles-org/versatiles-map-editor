@@ -3,8 +3,9 @@ import { fetchFontFaces, osm, satellite, type OsmOptions, type SatelliteOptions 
 import { COLOR_SCHEMES, type ColorScheme } from './color_schemes.js';
 import { FALLBACK_FONTS, fromFontFaceInfo, unknownFace, type FontFace } from './fonts.js';
 import { parseJsonc } from './jsonc.js';
-import { backgroundOptions, startingBackground } from './background.js';
+import { startingBackground } from './background.js';
 import { sanitizeBackground, sanitizeBounds, type Bounds, type StateBackground } from '@versatiles/map-state';
+import { backgroundOptions } from '@versatiles/map-state/maplibre';
 
 /**
  * An optional configuration file of an editor instance, in its root folder (next to the editor's
@@ -319,8 +320,8 @@ function checkBackground(value: unknown): StateBackground {
 		...(typeof language === 'string' ? { language } : {})
 	};
 	try {
-		// as getMapStyle builds it, which fails e.g. for `options` that @versatiles/style does not have
-		const { builder, options } = backgroundOptions(background);
+		// as backgroundStyle builds it, which fails e.g. for `options` that @versatiles/style does not have
+		const { builder, options } = backgroundOptions(background, (message) => console.warn(message));
 		if (builder === 'osm') osm(options as OsmOptions);
 		else satellite(options as SatelliteOptions);
 	} catch (error) {

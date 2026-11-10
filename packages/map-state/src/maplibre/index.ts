@@ -26,6 +26,16 @@ export {
 	type ArrowProperties
 } from './arrow_heads.js';
 export {
+	backgroundOptions,
+	backgroundSettings,
+	backgroundStyle,
+	type BackgroundOptions,
+	type BackgroundSettings,
+	type BackgroundStyleOptions,
+	type MapColors,
+	type OnWarning
+} from './background.js';
+export {
 	fillPatternName,
 	parseFillPatternName,
 	PATTERN_PIXEL_RATIO,
