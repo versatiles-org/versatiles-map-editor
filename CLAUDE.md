@@ -53,7 +53,7 @@ Playwright builds and serves the app itself (`vite build && vite preview`), so n
 - A folder with an `index.ts` is imported through it from outside, and its own modules import each other directly (`src/barrel_imports.test.ts`). Tests import the module they test directly.
 - Code that loads at different times gets no shared barrel. One barrel over viewer and editor components pulls editor code into the viewer's first load. Check the viewer's first load before adding a barrel to a folder with lazily loaded components.
 - A module lives next to its users: in their folder, or the nearest folder above all of them. There is no general `utils/`. The one exception is `files/`, kept together on purpose.
-- The app uses `@versatiles/map-state` from its source (aliases in `vite.config.ts` and both tsconfigs). Only `scripts/*.ts` use its `dist`, which is why those npm scripts build it first.
+- The app uses `@versatiles/map-state` and its entry `@versatiles/map-state/maplibre` from their source: each needs its alias in `vite.config.ts` and its path in `tsconfig.json` and `playwright-tests/tsconfig.json`. A missing one passes locally, where `dist` is built, and fails in CI. Only `scripts/*.ts` use its `dist`, which is why those npm scripts build it first.
 
 ## Model and view
 
