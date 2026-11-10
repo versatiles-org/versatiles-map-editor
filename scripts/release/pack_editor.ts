@@ -11,7 +11,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { LICENSES_FILE } from './third_party_licenses.mjs';
+import { LICENSES_FILE } from './third_party_licenses.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -29,9 +29,9 @@ export const NOT_PUBLISHED = ['iframe-test', 'schema'];
 /**
  * The package.json of the package, from the one of the repository: its version, license and
  * links. Without dependencies and scripts: the site contains all it needs.
- * @param {Record<string, unknown>} editor the package.json of the repository
+ * @param editor the package.json of the repository
  */
-export function packageJson(editor) {
+export function packageJson(editor: Record<string, unknown>): Record<string, unknown> {
 	return {
 		name: EDITOR_PACKAGE,
 		version: editor.version,
@@ -49,12 +49,15 @@ export function packageJson(editor) {
 /**
  * Writes the folder of the package to `out`, which is emptied first: package.json, README.md,
  * LICENSE and `dist/` with the site of `build`.
- * @param {{ root?: string, build?: string, out?: string }} [folders] the repository, its build
- * and where the package is written; by default the repository of this script, its `build/` and
- * `release/npm/`
- * @returns {string} the folder of the package
+ * @param folders the repository, its build and where the package is written; by default the
+ * repository of this script, its `build/` and `release/npm/`
+ * @returns the folder of the package
  */
-export function packEditor({ root = ROOT, build = join(root, 'build'), out = join(root, 'release/npm') } = {}) {
+export function packEditor({
+	root = ROOT,
+	build = join(root, 'build'),
+	out = join(root, 'release/npm')
+}: { root?: string; build?: string; out?: string } = {}): string {
 	if (!existsSync(join(build, 'index.html'))) {
 		throw new Error(`No build of the editor in ${build}: run "npm run build" first`);
 	}

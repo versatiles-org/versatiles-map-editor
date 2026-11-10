@@ -7,7 +7,7 @@ import { join, resolve } from 'path';
 import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { encodeState, stateFromMapJSON } from './packages/map-state/src/index.js';
-import { thirdPartyLicenses } from './scripts/release/third_party_licenses.mjs';
+import { thirdPartyLicenses } from './scripts/release/third_party_licenses.ts';
 
 /**
  * Provides the URL of maplibre-gl's worker as `virtual:maplibre-worker-url`.
@@ -143,7 +143,7 @@ export default defineConfig({
 	},
 	test: {
 		environment: 'happy-dom',
-		include: ['src/**/*.{test,spec}.{js,ts}', 'packages/*/src/**/*.{test,spec}.{js,ts}', 'scripts/**/*.test.mjs'],
+		include: ['src/**/*.{test,spec}.{js,ts}', 'packages/*/src/**/*.{test,spec}.{js,ts}', 'scripts/**/*.test.ts'],
 		setupFiles: ['src/vitest.setup.ts'],
 		coverage: {
 			provider: 'v8',

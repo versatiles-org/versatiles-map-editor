@@ -1,0 +1,22 @@
+{
+	// The scripts run in Node.js as they are, which strips their types: so only syntax that can be
+	// erased (no enums, no parameter properties), type imports marked as such, and imports with their
+	// ".ts" extension. "erasableSyntaxOnly" would check the first, but also the source of the package,
+	// which has parameter properties. Checked by "npm run check-types".
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"lib": ["ESNext"],
+		"types": ["node"],
+		"strict": true,
+		"skipLibCheck": true,
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		// The scripts import the built package from its dist/, which is not built in a fresh checkout:
+		// its types are taken from the source then, at the same path in src/.
+		"rootDirs": ["../packages/map-state/dist", "../packages/map-state/src"]
+	},
+	"include": ["**/*.ts"]
+}

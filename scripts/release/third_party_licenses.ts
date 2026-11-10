@@ -6,6 +6,7 @@
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { Plugin } from 'vite';
 
 /** The file in the site, beside index.html. */
 export const LICENSES_FILE = 'THIRD_PARTY_LICENSES.txt';
@@ -16,10 +17,9 @@ const LICENSE_NAME = /^(licen[cs]e|copying)([-.].*)?$/i;
 /**
  * The folder and the name of the npm package of a module, or undefined for one that is no part of
  * a package, e.g. of the editor itself.
- * @param {string} id the id of a module, a path with perhaps a query
- * @returns {{ name: string, dir: string } | undefined}
+ * @param id the id of a module, a path with perhaps a query
  */
-export function packageOf(id) {
+export function packageOf(id: string): { name: string; dir: string } | undefined {
 	const path = id.replace(/^\0/, '').split('?')[0].replaceAll('\\', '/');
 	const at = path.lastIndexOf('/node_modules/');
 	if (at < 0) return undefined;
@@ -32,11 +32,10 @@ export function packageOf(id) {
 /**
  * The text of the licenses of the packages of these modules, each once, sorted by name: the name,
  * the version and the license of each, with the text of its license file.
- * @param {Iterable<string>} ids the ids of the modules
+ * @param ids the ids of the modules
  */
-export function licensesText(ids) {
-	/** @type {Map<string, string>} */
-	const packages = new Map();
+export function licensesText(ids: Iterable<string>): string {
+	const packages = new Map<string, string>();
 	for (const id of ids) {
 		const found = packageOf(id);
 		if (found && !packages.has(found.name)) packages.set(found.name, found.dir);
@@ -62,15 +61,14 @@ export function licensesText(ids) {
 /**
  * The Vite plugin: writes `LICENSES_FILE` with the packages of the build of the browser (not of
  * the server build that prerenders the pages).
- * @returns {import('vite').Plugin}
  */
-export function thirdPartyLicenses() {
+export function thirdPartyLicenses(): Plugin {
 	return {
 		name: 'third-party-licenses',
 		apply: 'build',
 		generateBundle(_options, bundle) {
 			if (this.environment && this.environment.name !== 'client') return;
-			const ids = new Set();
+			const ids = new Set<string>();
 			for (const output of Object.values(bundle)) {
 				if (output.type === 'chunk') for (const id of output.moduleIds) ids.add(id);
 			}

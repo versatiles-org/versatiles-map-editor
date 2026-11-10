@@ -23,7 +23,10 @@ import {
 	measureLink,
 	resolutionForArea,
 	resolutionOfExponent,
-	stateFromMapJSON
+	stateFromMapJSON,
+	type LinkKind,
+	type MapState,
+	type StyleRoleName
 } from '../packages/map-state/dist/index.js';
 import { StateReader } from '../packages/map-state/dist/reader.js';
 import { decodeStringBlock } from '../packages/map-state/dist/string_coder.js';
@@ -40,7 +43,7 @@ import {
 } from '../packages/map-state/dist/constants.js';
 import { styleFields, styleRemoveKey } from '../packages/map-state/dist/style_history.js';
 
-const HELP = `Usage: analyse_bits.mjs [options] [files…]
+const HELP = `Usage: analyse_bits.ts [options] [files…]
 
 Without files, the examples of the repository.
 
@@ -58,36 +61,80 @@ Options:
   --help               this text`;
 
 // the kinds of bits of `measureLink` of the package, which the share dialog shows too, by their names here
-const KIND_TITLES = { stringRefs: 'string refs' };
+const KIND_TITLES: Partial<Record<LinkKind, string>> = { stringRefs: 'string refs' };
 const KIND_NAMES = LINK_KINDS.map((kind) => KIND_TITLES[kind] ?? kind);
 
 // the methods that read bits themselves: leaves of the tree, which also call each other
 const PRIMITIVES = new Set(['readBit', 'readInteger', 'readKey', 'readVarint', 'readExpGolomb', 'readBlock']);
 
-/** A reader that records each call of a read method: its name, and the bits it consumed. */
-class TracingReader extends StateReader {
-	constructor(bits) {
-		super(bits);
-		this.root = { name: 'total', start: 0, end: 0, children: [] };
-		this.stack = [this.root];
-	}
+/** A call of a read method: its name, its arguments, the bits it consumed, and what it read. */
+interface Span {
+	name: string;
+	method?: string;
+	args?: unknown[];
+	primitive?: boolean;
+	start: number;
+	end: number;
+	value?: unknown;
+	// with `--content`: what it read, as a text
+	content?: string;
+	children: Span[];
 }
 
+/** A node of the tree: the calls of the same method under the same node, unless they are expanded. */
+interface TreeNode {
+	name: string;
+	primitive?: boolean;
+	content?: string;
+	count: number;
+	bits: number;
+	children: Map<string | number, TreeNode>;
+	// bits that no call read
+	warning?: boolean;
+	// small nodes, merged into one
+	merged?: boolean;
+}
+
+interface Options {
+	depth: number;
+	expand: boolean;
+	content: boolean;
+	minPercent: number;
+	resolution: 'auto' | number;
+}
+
+/** The bits of a map, see `analyse`. */
+interface Analysis {
+	bits: number;
+	characters: number;
+	step: number;
+	elements: Record<string, number>;
+	kinds: Record<string, number>;
+	tree: TreeNode;
+}
+
+/** A reader that records each call of a read method: its name, and the bits it consumed. */
+class TracingReader extends StateReader {
+	root: Span = { name: 'total', start: 0, end: 0, children: [] };
+	stack: Span[] = [this.root];
+}
+
+const tracingMethods = TracingReader.prototype as unknown as Record<string, unknown>;
 for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
-	const descriptor = Object.getOwnPropertyDescriptor(StateReader.prototype, name);
+	const method: unknown = Object.getOwnPropertyDescriptor(StateReader.prototype, name)?.value;
 	// only methods, e.g. not the getter of the grid
-	if (!name.startsWith('read') || typeof descriptor.value !== 'function') continue;
-	const method = descriptor.value;
-	TracingReader.prototype[name] = function (...args) {
-		const parent = this.stack.at(-1);
+	if (!name.startsWith('read') || typeof method !== 'function') continue;
+	tracingMethods[name] = function (this: TracingReader, ...args: unknown[]): unknown {
+		const parent = this.stack.at(-1)!;
 		// the reads inside a primitive belong to it
 		if (parent.primitive) return method.apply(this, args);
-		const span = {
+		const span: Span = {
 			name: label(name, args),
 			method: name,
 			args,
 			primitive: PRIMITIVES.has(name),
 			start: this.offset,
+			end: this.offset,
 			children: []
 		};
 		parent.children.push(span);
@@ -108,7 +155,7 @@ for (const name of Object.getOwnPropertyNames(StateReader.prototype)) {
  * The name of a call in the tree: primitives with their arguments, e.g. `int(4)` or `varint±`, and
  * the keys of key/value pairs with the parameter of their Exp-Golomb code, e.g. `key(k=1)`.
  */
-function label(name, args) {
+function label(name: string, args: unknown[]): string {
 	switch (name) {
 		case 'readBit':
 			return 'bit';
@@ -128,7 +175,7 @@ function label(name, args) {
 }
 
 // the tables of the keys of key/value pairs, by the method that reads them
-const KEY_TABLES = {
+const KEY_TABLES: Record<string, Record<string, number>> = {
 	readMetadata: METADATA_KEYS,
 	readBackground: BACKGROUND_KEYS,
 	readLegend: LEGEND_KEYS,
@@ -139,14 +186,14 @@ const KEY_TABLES = {
 };
 
 /** The name of a key of a table, e.g. "3 = legend"; 0 ends a list of key/value pairs. */
-function keyName(table, key) {
+function keyName(table: Record<string, number>, key: number): string {
 	if (key === 0) return '0 = end';
 	const name = Object.keys(table).find((k) => table[k] === key);
 	return name ? `${key} = ${name}` : String(key);
 }
 
 /** A value as a short text: JSON, cut where it gets long. */
-function short(value, length = 72) {
+function short(value: unknown, length = 72): string {
 	if (value === undefined) return '';
 	if (Array.isArray(value) && value.length > 4 && Array.isArray(value[0])) {
 		return `${value.length} points, ${JSON.stringify(value[0])} … ${JSON.stringify(value.at(-1))}`;
@@ -159,7 +206,7 @@ function short(value, length = 72) {
  * What a call read, for `--content`: the name of a key, or the value, as far as it says
  * something. The calls that only gather what their children read, e.g. the whole map, say nothing.
  */
-function contentOf(span, parent) {
+function contentOf(span: Span, parent: Span): string {
 	const { method, args = [], value } = span;
 	switch (method) {
 		case undefined: // e.g. a string of the string table, whose name is its text
@@ -169,21 +216,23 @@ function contentOf(span, parent) {
 			return '';
 		case 'readKey': {
 			// of a list of key/value pairs; else the version, or the type of an element, which its call names
-			const table = KEY_TABLES[parent.method];
-			return table ? keyName(table, value) : String(value);
+			const table = KEY_TABLES[parent.method ?? ''];
+			return table ? keyName(table, value as number) : String(value);
 		}
 		case 'readStyleKey': {
 			if (parent.method !== 'readStylePatch') return String(value);
-			const role = parent.args[0];
+			const role = parent.args?.[0] as StyleRoleName;
 			if (value === 0) return '0 = end';
 			if (value === styleRemoveKey(role)) return `${value} = remove the field of the next key`;
 			const field = styleFields(role).find((f) => f.key === value);
 			return field ? `${value} = ${field.name}` : String(value);
 		}
 		case 'readElementType': {
-			if (value?.key === ELEMENT_END) return 'the end of the elements';
-			const type = Object.keys(ELEMENT_KEYS).find((k) => ELEMENT_KEYS[k] === value?.key);
-			return value?.repeat ? `as the element before${type ? ` (${type})` : ''}` : (type ?? short(value));
+			const element = value as { key: number; repeat: boolean } | undefined;
+			if (element?.key === ELEMENT_END) return 'the end of the elements';
+			const keys: Record<string, number> = ELEMENT_KEYS;
+			const type = Object.keys(keys).find((k) => keys[k] === element?.key);
+			return element?.repeat ? `as the element before${type ? ` (${type})` : ''}` : (type ?? short(value));
 		}
 		case 'readStyle':
 		case 'readStylePatch':
@@ -195,10 +244,10 @@ function contentOf(span, parent) {
 
 /** Merges the calls into a tree of nodes: the calls of the same method under the same node in one, unless `expand`. */
 function aggregate(
-	span,
-	expand,
-	node = { name: span.name, primitive: span.primitive, count: 0, bits: 0, children: new Map() }
-) {
+	span: Span,
+	expand: boolean,
+	node: TreeNode = { name: span.name, primitive: span.primitive, count: 0, bits: 0, children: new Map() }
+): TreeNode {
 	node.count++;
 	node.bits += span.end - span.start;
 	span.children.forEach((child, index) => {
@@ -222,10 +271,24 @@ function aggregate(
 	return node;
 }
 
-/** The lines of the tree, as `{ prefix, name, node }`, with the small nodes merged. */
-function treeLines(node, options, total, prefix = '', depth = 0, lines = []) {
+/** A line of the tree. */
+interface Line {
+	prefix: string;
+	node: TreeNode;
+	depth: number;
+}
+
+/** The lines of the tree, with the small nodes merged. */
+function treeLines(
+	node: TreeNode,
+	options: Options,
+	total: number,
+	prefix = '',
+	depth = 0,
+	lines: Line[] = []
+): Line[] {
 	if (depth >= options.depth) return lines;
-	let children = [...node.children.values()];
+	let children: TreeNode[] = [...node.children.values()];
 	// bits that no child read, which would be a gap in the tracing
 	const covered = children.reduce((sum, child) => sum + child.bits, 0);
 	if (children.length > 0 && covered < node.bits) {
@@ -251,25 +314,26 @@ function treeLines(node, options, total, prefix = '', depth = 0, lines = []) {
 }
 
 /** A bar of `width` characters, filled by `fraction`, in eighths of a character. */
-function bar(fraction, width) {
+function bar(fraction: number, width: number): string {
 	const eighths = Math.round(fraction * width * 8);
 	const full = '█'.repeat(Math.floor(eighths / 8));
 	const part = eighths % 8 > 0 ? ' ▏▎▍▌▋▊▉'[eighths % 8] : '';
 	return (full + part).padEnd(width);
 }
 
-const format = (n) => n.toLocaleString('en-US');
-const formatStep = (meters) => (meters < 1000 ? `${meters.toFixed(1)} m` : `${(meters / 1000).toFixed(1)} km`);
-const color = (style, text) => styleText(style, text);
+const format = (n: number): string => n.toLocaleString('en-US');
+const formatStep = (meters: number): string =>
+	meters < 1000 ? `${meters.toFixed(1)} m` : `${(meters / 1000).toFixed(1)} km`;
+const color = (style: Parameters<typeof styleText>[0], text: string): string => styleText(style, text);
 
 /** The resolution of the share dialog: fine enough for the frame, else the elements; 1 m without either. */
-function automaticResolution(state) {
+function automaticResolution(state: MapState): number {
 	const area = state.frame?.bounds ?? boundsOf(state.elements);
 	return (area && resolutionForArea(area)) || 1;
 }
 
-/** The bits of a map: the calls of its reader as a tree, and the bits of each kind (see `KINDS`). */
-function analyse(state, base64, options) {
+/** The bits of a map: the calls of its reader as a tree, and the bits of each kind (see `LINK_KINDS`). */
+function analyse(state: MapState, base64: string, options: Options & { step: number }): Analysis {
 	const bits = StateReader.fromBase64(base64).bits;
 	const reader = new TracingReader(bits);
 	reader.readRoot();
@@ -280,7 +344,7 @@ function analyse(state, base64, options) {
 
 	expandStringTables(reader.root, bits);
 
-	const elements = {};
+	const elements: Record<string, number> = {};
 	for (const element of state.elements) elements[element.type] = (elements[element.type] ?? 0) + 1;
 	const tree = aggregate(reader.root, options.expand);
 	return {
@@ -298,25 +362,27 @@ function analyse(state, base64, options) {
  * table reads the number of strings, the number of words of the format, and the block, which is
  * decoded again here.
  */
-function expandStringTables(span, bits) {
+function expandStringTables(span: Span, bits: boolean[]): void {
 	if (span.name === 'readStringTable') {
-		const [count, formatCount, block] = span.children;
+		const [countSpan, formatCountSpan, block] = span.children;
 		if (!block) return;
-		const decoded = decodeStringBlock(bits.slice(block.start), count.value, formatCount.value);
+		const count = countSpan.value as number;
+		const formatCount = formatCountSpan.value as number;
+		const decoded = decodeStringBlock(bits.slice(block.start), count, formatCount);
 		let offset = block.start;
-		const section = (name, from, to) => {
+		const section = (name: string, from: number, to: number): Span => {
 			const start = offset;
-			const children = decoded.strings.slice(from, to).map((string, i) => {
+			const children = decoded.strings.slice(from, to).map((string, i): Span => {
 				const end = offset + decoded.bits[from + i];
-				const child = { name: abbreviate(string), primitive: true, start: offset, end, children: [] };
+				const child: Span = { name: abbreviate(string), primitive: true, start: offset, end, children: [] };
 				offset = end;
 				return child;
 			});
 			return { name, start, end: offset, children };
 		};
 		block.children = [
-			section('words of the format', 0, formatCount.value),
-			section('other strings', formatCount.value, count.value)
+			section('words of the format', 0, formatCount),
+			section('other strings', formatCount, count)
 		].filter((child) => child.children.length > 0);
 		return;
 	}
@@ -324,12 +390,12 @@ function expandStringTables(span, bits) {
 }
 
 /** A string as a short name in the tree, in quotes. */
-function abbreviate(string) {
+function abbreviate(string: string): string {
 	const quoted = JSON.stringify(string);
 	return quoted.length > 40 ? quoted.slice(0, 38) + '…"' : quoted;
 }
 
-function printTree(title, analysis, options) {
+function printTree(title: string, analysis: Analysis, options: Options): void {
 	const { tree, bits: total, characters, step, elements } = analysis;
 	const lines = treeLines(tree, options, total);
 
@@ -377,7 +443,7 @@ function printTree(title, analysis, options) {
 }
 
 /** A line per map: its bits, characters and the share of each kind, the largest in bold. */
-function printSummary(analyses) {
+function printSummary(analyses: { title: string; analysis: Analysis }[]): void {
 	const width = Math.max(...analyses.map(({ title }) => title.length), 3);
 	const header = [
 		'map'.padEnd(width),
@@ -407,7 +473,15 @@ function printSummary(analyses) {
 }
 
 /** A node of the tree as JSON: its name, calls and bits, and its children. */
-function nodeJSON(node) {
+interface NodeJSON {
+	name: string;
+	count: number;
+	bits: number;
+	content?: string;
+	children?: NodeJSON[];
+}
+
+function nodeJSON(node: TreeNode): NodeJSON {
 	const children = [...node.children.values()].map(nodeJSON);
 	return {
 		name: node.name,
@@ -419,7 +493,7 @@ function nodeJSON(node) {
 	};
 }
 
-function main() {
+function main(): void {
 	const { values, positionals } = parseArgs({
 		allowPositionals: true,
 		options: {
@@ -436,7 +510,7 @@ function main() {
 	});
 	if (values.help) return console.log(HELP);
 
-	const options = {
+	const options: Options = {
 		depth: values.depth === undefined ? Infinity : Number(values.depth),
 		// what each call read is shown per call
 		expand: values.expand || values.content,

@@ -3,12 +3,12 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EDITOR_PACKAGE, packEditor, packageJson } from './pack_editor.mjs';
+import { EDITOR_PACKAGE, packEditor, packageJson } from './pack_editor.ts';
 
-const folders = [];
+const folders: string[] = [];
 
 /** A folder with a small build of the editor: the files by their path, with a text as content. */
-function fakeBuild(files) {
+function fakeBuild(files: string[]): string {
 	const build = mkdtempSync(join(tmpdir(), 'editor-build-'));
 	folders.push(build);
 	for (const file of files) {
@@ -19,14 +19,14 @@ function fakeBuild(files) {
 }
 
 /** A folder to write the package to. */
-function outFolder() {
+function outFolder(): string {
 	const out = mkdtempSync(join(tmpdir(), 'editor-package-'));
 	folders.push(out);
 	return out;
 }
 
 /** All files of a folder, by their path in it, sorted. */
-function filesOf(folder) {
+function filesOf(folder: string): string[] {
 	return readdirSync(folder, { recursive: true, withFileTypes: true })
 		.filter((entry) => entry.isFile())
 		.map((entry) => join(entry.parentPath, entry.name).slice(folder.length + 1))
@@ -106,6 +106,6 @@ describe('the npm package of the built editor', () => {
 		// a list in npm 11, an object by the name of the package in npm 12
 		const packed = Array.isArray(result) ? result[0] : Object.values(result)[0];
 		expect(packed.name).toBe(EDITOR_PACKAGE);
-		expect(packed.files.map((file) => file.path).sort()).toStrictEqual(filesOf(out));
+		expect(packed.files.map((file: { path: string }) => file.path).sort()).toStrictEqual(filesOf(out));
 	});
 });

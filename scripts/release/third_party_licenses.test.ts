@@ -3,10 +3,10 @@ import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { licensesText, packageOf } from './third_party_licenses.mjs';
+import { licensesText, packageOf } from './third_party_licenses.ts';
 
 const require = createRequire(import.meta.url);
-const folders = [];
+const folders: string[] = [];
 afterEach(() => {
 	for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true });
 });

@@ -33,7 +33,9 @@ import {
 	SCALE_POSITIONS,
 	SEARCH_POSITIONS,
 	stateFromMapJSON,
-	stateToMapJSON
+	stateToMapJSON,
+	type MapState,
+	type Position
 } from '../packages/map-state/dist/index.js';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -41,12 +43,12 @@ const force = process.argv.includes('--force');
 const linkFolder = join(root, `packages/map-state/src/__fixtures__/frozen/links-${CODEC_VERSION}`);
 const fileFolder = join(root, `packages/map-state/src/__fixtures__/frozen/files-${MAPJSON_VERSION}`);
 
-const readMap = (file) => stateFromMapJSON(JSON.parse(readFileSync(file, 'utf8')));
-const of = (list, index) => list[index % list.length];
+const readMap = (file: string): MapState => stateFromMapJSON(JSON.parse(readFileSync(file, 'utf8')));
+const of = <T>(list: readonly T[], index: number): T => list[index % list.length];
 
 // ----- maps with everything that a map can have -----
 
-const square = (x, y, size = 0.02) => [
+const square = (x: number, y: number, size = 0.02): Position[] => [
 	[x, y],
 	[x + size, y],
 	[x + size, y + size],
@@ -54,7 +56,7 @@ const square = (x, y, size = 0.02) => [
 ];
 
 /** Every field of every style and element, on the vector map with every setting of it. */
-const everythingVector = {
+const everythingVector: MapState = {
 	frame: { bounds: [13.2, 52.4, 13.6, 52.6], bearing: -30, pitch: 45 },
 	meta: {
 		title: 'Everything, on the vector map',
@@ -217,7 +219,7 @@ const everythingVector = {
 };
 
 /** The satellite imagery with what only it has, and names that the lists of the format do not have. */
-const everythingSatellite = {
+const everythingSatellite: MapState = {
 	frame: { bearing: 180, pitch: 60 },
 	meta: {
 		background: {
@@ -251,7 +253,7 @@ const everythingSatellite = {
 };
 
 /** A small map with the names of each list at this index, so that all maps together have every name. */
-function namesMap(index) {
+function namesMap(index: number): MapState {
 	const x = (index % 12) * 10 - 60;
 	return {
 		meta: {
@@ -299,8 +301,8 @@ function namesMap(index) {
 
 // ----- the samples -----
 
-/** `[name, about, map, options of the link]` */
-const samples = [
+/** `[name, about, map, resolution of the link]` */
+const samples: [name: string, about: string, map: MapState, resolution?: number][] = [
 	['everything-vector', 'Every field of every element, style and setting, on the vector map.', everythingVector],
 	['everything-satellite', 'The imagery, and names that the lists of the format do not have.', everythingSatellite],
 	['empty', 'A map without anything.', { elements: [] }],
@@ -331,7 +333,7 @@ for (let index = 0; index < count; index++) {
 
 let written = 0;
 let kept = 0;
-function write(file, content) {
+function write(file: string, content: object): void {
 	if (existsSync(file) && !force) return void kept++;
 	mkdirSync(dirname(file), { recursive: true });
 	writeFileSync(file, JSON.stringify(content) + '\n');

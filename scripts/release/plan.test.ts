@@ -1,8 +1,8 @@
 import { execFileSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
-import { MAP_STATE_PATHS, isCandidate, isReleaseCommit, nextVersion, parseLog } from './plan.mjs';
+import { MAP_STATE_PATHS, isCandidate, isReleaseCommit, nextVersion, parseLog } from './plan.ts';
 
-const commit = (message) => parseLog(`0123456\x1f${message}\x1e`)[0];
+const commit = (message: string) => parseLog(`0123456\x1f${message}\x1e`)[0];
 
 describe('parseLog', () => {
 	it('reads the commits of git log as conventional commits', () => {

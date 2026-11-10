@@ -1,16 +1,16 @@
 /**
  * What a release contains: the commits since the release before, and the version they lead to.
- * Pure functions, for scripts/release.mjs. Commits are read as conventional commits, the same way
+ * Pure functions, for scripts/release.ts. Commits are read as conventional commits, the same way
  * as `vrt release-npm` reads them.
  */
-import { getSuggestedBump, parseConventionalCommit } from '@versatiles/release-tool/dist/lib/git.js';
+import { getSuggestedBump, parseConventionalCommit, type ParsedCommit } from '@versatiles/release-tool/dist/lib/git.js';
 
 /**
  * The types of commits that change what is released: new features, bug fixes, faster code and
  * reverted commits. A breaking change of any type does too. Documentation, tests, CI, refactorings
  * and chores alone need no release.
  */
-export const RELEASE_TYPES = ['feat', 'fix', 'perf', 'revert'];
+export const RELEASE_TYPES: string[] = ['feat', 'fix', 'perf', 'revert'];
 
 /**
  * The files of @versatiles/map-state that are published, as git pathspecs: those of `files` in its
@@ -30,9 +30,8 @@ export const MAP_STATE_PATHS = [
 
 /**
  * The commits of `git log --format=%H%x1f%s%x1e`, the newest first, as conventional commits.
- * @param {string} log
  */
-export function parseLog(log) {
+export function parseLog(log: string): ParsedCommit[] {
 	return log
 		.split('\x1e')
 		.map((line) => line.trim())
@@ -43,23 +42,21 @@ export function parseLog(log) {
 		});
 }
 
-/**
- * Whether a commit changes what is released, see `RELEASE_TYPES`.
- * @param {{ type?: string, breaking: boolean }} commit
- */
-export function isReleaseCommit(commit) {
+/** Whether a commit changes what is released, see `RELEASE_TYPES`. */
+export function isReleaseCommit(commit: ParsedCommit): boolean {
 	return commit.breaking || RELEASE_TYPES.includes(commit.type ?? '');
 }
 
 /** Whether a version is a release candidate, e.g. "4.0.0-rc.2". */
-export function isCandidate(version) {
+export function isCandidate(version: string): boolean {
 	return /-rc\.\d+$/.test(version);
 }
 
-const LEVELS = ['patch', 'minor', 'major'];
+type Level = 'patch' | 'minor' | 'major';
+const LEVELS: Level[] = ['patch', 'minor', 'major'];
 
 /** A version raised at a level: major, minor or patch. */
-function raised([major, minor, patch], level) {
+function raised([major, minor, patch]: number[], level: Level): number[] {
 	if (level === 'major') return [major + 1, 0, 0];
 	if (level === 'minor') return [major, minor + 1, 0];
 	return [major, minor, patch + 1];
@@ -74,11 +71,12 @@ function raised([major, minor, patch], level) {
  * commits ask for more than the candidate raised, e.g. "4.0.0-rc.1" after "3.2.0-rc.1" and a
  * breaking change. Without `candidate`, a candidate is followed by its version, "4.0.0", also
  * without commits: the last candidate becomes the release.
- * @param {string} version
- * @param {{ type?: string, breaking: boolean }[]} commits
- * @param {{ candidate?: boolean }} [options]
  */
-export function nextVersion(version, commits, { candidate = false } = {}) {
+export function nextVersion(
+	version: string,
+	commits: ParsedCommit[],
+	{ candidate = false }: { candidate?: boolean } = {}
+): string | undefined {
 	const match = /^(\d+)\.(\d+)\.(\d+)(?:-rc\.(\d+))?$/.exec(version);
 	if (!match) throw new Error(`Invalid version "${version}"`);
 	const base = match.slice(1, 4).map(Number);

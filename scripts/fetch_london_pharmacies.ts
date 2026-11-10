@@ -4,7 +4,7 @@
  * (amenity=pharmacy), as markers with their names as labels. The data is © OpenStreetMap
  * contributors, available under the ODbL. Run it again to update the example:
  *
- *     node scripts/fetch_london_pharmacies.mjs
+ *     node scripts/fetch_london_pharmacies.ts
  *     npx prettier --write examples/london-pharmacies.mapjson
  *
  * and update the numbers in examples/README.md, src/examples.test.ts and playwright-tests.
@@ -66,7 +66,7 @@ async function query() {
 				console.log(`${elements.length} pharmacies from ${server}`);
 				return elements;
 			} catch (error) {
-				console.warn(`${server}: ${error.message}`);
+				console.warn(`${server}: ${error instanceof Error ? error.message : error}`);
 			}
 		}
 		await new Promise((resolve) => setTimeout(resolve, 10000));
@@ -74,7 +74,7 @@ async function query() {
 	throw new Error('No Overpass server answered');
 }
 
-const round = (value, digits) => Math.round(value * 10 ** digits) / 10 ** digits;
+const round = (value: number, digits: number): number => Math.round(value * 10 ** digits) / 10 ** digits;
 
 const pharmacies = (await query())
 	.map(({ lat, lon, center, tags }) => ({

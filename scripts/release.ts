@@ -28,7 +28,8 @@ import { stdin, stdout } from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { fileURLToPath } from 'node:url';
 import { generateChangelogEntry, updateChangelog } from '@versatiles/release-tool/dist/lib/changelog.js';
-import { MAP_STATE_PATHS, isCandidate, nextVersion, parseLog } from './release/plan.mjs';
+import type { ParsedCommit } from '@versatiles/release-tool/dist/lib/git.js';
+import { MAP_STATE_PATHS, isCandidate, nextVersion, parseLog } from './release/plan.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGE_DIR = resolve(ROOT, 'packages/map-state');
@@ -42,23 +43,23 @@ const packageVersionAt = process.argv.indexOf('--package-version');
 const packageVersion = packageVersionAt < 0 ? undefined : process.argv[packageVersionAt + 1];
 
 /** Stops the release with a message. */
-function fail(message) {
+function fail(message: string): never {
 	console.error(`Release stopped: ${message}`);
 	process.exit(1);
 }
 
 /** The output of a command, trimmed; its errors are shown. */
-function output(command, args) {
+function output(command: string, args: string[]): string {
 	return execFileSync(command, args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).trim();
 }
 
 /** Runs a command with its output shown. */
-function run(command, args) {
+function run(command: string, args: string[]): void {
 	execFileSync(command, args, { cwd: ROOT, stdio: 'inherit' });
 }
 
 /** The output of `npm view`, or undefined if the package or version is not on npm. */
-function npmView(args) {
+function npmView(args: string[]): string | undefined {
 	try {
 		return execFileSync('npm', ['view', ...args], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' }).trim() || undefined;
 	} catch {
@@ -66,7 +67,7 @@ function npmView(args) {
 	}
 }
 
-function tagExists(tag) {
+function tagExists(tag: string): boolean {
 	try {
 		output('git', ['rev-parse', '--verify', '--quiet', `refs/tags/${tag}^{commit}`]);
 		return true;
@@ -76,17 +77,17 @@ function tagExists(tag) {
 }
 
 /** The commits since `base` that change `paths` (all files without), the newest first. */
-function commitsSince(base, paths = []) {
+function commitsSince(base: string, paths: string[] = []): ParsedCommit[] {
 	return parseLog(output('git', ['log', '--format=%H%x1f%s%x1e', `${base}..HEAD`, '--', ...paths]));
 }
 
 /** The version in a package.json. */
-function versionOf(dir) {
+function versionOf(dir: string): string {
 	return JSON.parse(readFileSync(resolve(dir, 'package.json'), 'utf8')).version;
 }
 
 /** Sets the version in a package.json, keeping its formatting. */
-function setVersion(dir, version) {
+function setVersion(dir: string, version: string): void {
 	const path = resolve(dir, 'package.json');
 	const text = readFileSync(path, 'utf8');
 	const updated = text.replace(/^(\s*"version":\s*)"[^"]*"/m, `$1"${version}"`);
@@ -104,8 +105,18 @@ if (output('git', ['status', '--porcelain']) !== '') {
 run('git', dryRun ? ['fetch', '--tags'] : ['pull', '--ff-only', '--tags']);
 const start = output('git', ['rev-parse', 'HEAD']);
 
-/** @type {{ name: string, dir: string, tag: string, title: string, from: string, to: string, commits: ReturnType<typeof parseLog> }[]} */
-const releases = [];
+/** A part to release: the package or the editor. */
+interface Release {
+	name: string;
+	dir: string;
+	tag: string;
+	title: string;
+	from: string;
+	to: string;
+	commits: ParsedCommit[];
+}
+
+const releases: Release[] = [];
 
 // the package: since its version on npm, at its tag, or at the commit npm has recorded for it
 const published = npmView([PACKAGE, 'version']);
