@@ -47,9 +47,17 @@ jobs:
       - name: Build the npm package @versatiles/map-state
         run: npm run build --workspaces
 
-      # that it can still be generated; the Pages workflow publishes it
+      # that it can still be generated; the site has it at /api/
       - name: Build the API documentation of the package
         run: npm run doc-api
+
+      # The site of GitHub Pages, as built and tested here, with the API documentation: of a push to
+      # main, or a run by hand on main. The job "deploy" publishes it once all tests have passed.
+      - name: Upload the site for GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./build
 
       - name: Check the files of the npm package
         run: npm pack --dry-run --workspace packages/map-state
@@ -136,3 +144,27 @@ jobs:
             test-results
             playwright-report
           name: playwright-test-report-${{ strategy.job-index }}
+
+  # Every change on main is deployed once all its tests have passed: the site of the job "test".
+  # Here in CI rather than in a workflow of its own after CI, which would start, and skip, a run
+  # for every failed or cancelled CI run too. A newer push cancels this run as a whole, see
+  # "concurrency" above; the next one deploys.
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [test, playwright]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    # one deployment at a time
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
