@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { type FillPatternName } from '@versatiles/map-state';
-import { addFillPatternImage, PATTERN_PIXEL_RATIO, PATTERN_SPACING, patternImage } from './fill_patterns.js';
-import { fillPatternName } from '../style/index.js';
-import { MockMap, type MaplibreMap } from '../__mocks__/map.js';
+import type { FillPatternName } from '../types.js';
+import {
+	fillPatternName,
+	parseFillPatternName,
+	PATTERN_PIXEL_RATIO,
+	PATTERN_SPACING,
+	patternImage,
+	patternImageOf
+} from './fill_patterns.js';
 
 const SHAPES: FillPatternName[] = [
 	'diagonal-up',
@@ -79,47 +84,39 @@ describe('fill patterns', () => {
 });
 
 describe('fill pattern images', () => {
-	it('are made once per pattern and color, when the map needs them', () => {
-		const map = new MockMap();
+	it('are made by their name, in the color, with the coverage', () => {
 		const name = fillPatternName({ pattern: 'diagonal-up', scale: 1, coverage: 0.5, color: '#FF0000' });
-		expect(addFillPatternImage(map as unknown as MaplibreMap, name)).toBe(true);
-		expect(map.addImage).toHaveBeenCalledWith(name, expect.objectContaining({ width: 23, height: 23 }), {
-			pixelRatio: 2
-		});
-		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
+		const image = patternImageOf(name)!;
+		expect(image).toMatchObject({ width: 23, height: 23, pixelRatio: 2, sdf: false });
 		// red, half of it covered
-		expect([...data.slice(0, 3)]).toStrictEqual([255, 0, 0]);
-		const alphas = [...data].filter((_, i) => i % 4 === 3);
+		expect([...image.data.slice(0, 3)]).toStrictEqual([255, 0, 0]);
+		const alphas = [...image.data].filter((_, i) => i % 4 === 3);
 		expect(alphas.reduce((sum, a) => sum + a, 0) / alphas.length / 255).toBeCloseTo(0.5, 1);
-
-		map.hasImage.mockReturnValue(true);
-		addFillPatternImage(map as unknown as MaplibreMap, name);
-		expect(map.addImage).toHaveBeenCalledTimes(1);
 	});
 
 	it('have the size and the coverage of their name', () => {
-		const map = new MockMap();
-		const name = fillPatternName({ pattern: 'dots', scale: 2, coverage: 0.25, color: '#000000' });
-		addFillPatternImage(map as unknown as MaplibreMap, name);
-		expect(map.addImage).toHaveBeenCalledWith(name, expect.objectContaining({ width: 32, height: 32 }), {
-			pixelRatio: 2
-		});
-		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
-		const alphas = [...data].filter((_, i) => i % 4 === 3);
+		const image = patternImageOf(fillPatternName({ pattern: 'dots', scale: 2, coverage: 0.25, color: '#000000' }))!;
+		expect(image).toMatchObject({ width: 32, height: 32, pixelRatio: 2 });
+		const alphas = [...image.data].filter((_, i) => i % 4 === 3);
 		expect(alphas.reduce((sum, a) => sum + a, 0) / alphas.length / 255).toBeCloseTo(0.25, 1);
 	});
 
 	it('fill a solid area completely, with the transparency of the color', () => {
-		const map = new MockMap();
-		addFillPatternImage(
-			map as unknown as MaplibreMap,
-			fillPatternName({ pattern: 'solid', scale: 1, coverage: 1, color: '#0000ff80' })
-		);
-		const { data } = map.addImage.mock.calls[0][1] as { data: Uint8ClampedArray };
-		expect(new Set([...data].filter((_, i) => i % 4 === 3))).toStrictEqual(new Set([128]));
+		const image = patternImageOf(fillPatternName({ pattern: 'solid', scale: 1, coverage: 1, color: '#0000ff80' }))!;
+		expect(new Set([...image.data].filter((_, i) => i % 4 === 3))).toStrictEqual(new Set([128]));
 	});
 
-	it('ignore other images', () => {
-		expect(addFillPatternImage(new MockMap() as unknown as MaplibreMap, 'base:icon-airfield')).toBe(false);
+	it('are no other images', () => {
+		expect(patternImageOf('base:icon-airfield')).toBeUndefined();
+		expect(patternImageOf('arrow-triangle')).toBeUndefined();
+	});
+});
+
+describe('the names of fill pattern images', () => {
+	it('hold the pattern, its size and coverage, and the color, in lowercase', () => {
+		const name = fillPatternName({ pattern: 'dots', scale: 1.5, coverage: 0.25, color: '#FF0000' });
+		expect(name).toBe('fill-pattern:dots:1.5:0.25:#ff0000');
+		expect(parseFillPatternName(name)).toStrictEqual({ pattern: 'dots', scale: 1.5, coverage: 0.25, color: '#ff0000' });
+		expect(parseFillPatternName('base:icon-airfield')).toBeUndefined();
 	});
 });

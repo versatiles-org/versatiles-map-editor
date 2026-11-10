@@ -116,7 +116,12 @@ It is being built up (issue #45). So far it has:
 - the arrowheads of lines: `arrowHeads` (where they are and which way they point, also per zoom
   level on a bend), and their images: `arrowImageOf(name)` gives the image that a style names, as a
   `StyleImage` (`{ width, height, data, pixelRatio, sdf }`, the arguments of MapLibre's
-  `map.addImage`). `drawArrowHead` draws one on a 2D canvas, e.g. in a legend.
+  `map.addImage`). `drawArrowHead` draws one on a 2D canvas, e.g. in a legend;
+- the fill patterns of areas: every area is drawn with an image of its pattern in its color, also
+  a solid one. `fillPatternName` names it, e.g. `fill-pattern:dots:1.5:0.25:#ff0000`, and
+  `patternImageOf(name)` gives the image that a style names, a `StyleImage` like the arrowheads.
+  Together, `arrowImageOf(name) ?? patternImageOf(name)` gives every image of a map that the sprites
+  of the tile server do not have.
 
 ```ts
 import { smoothPath } from '@versatiles/map-state/maplibre';

@@ -5,7 +5,6 @@
  */
 export * from './editor_style.js';
 export * from './element_renderer.js';
-export * from './fill_patterns.js';
 export * from './map_style_loader.js';
 export * from './map_view.js';
 export * from './theme_color.js';

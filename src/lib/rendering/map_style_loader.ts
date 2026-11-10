@@ -1,28 +1,25 @@
 import type * as maplibregl from 'maplibre-gl';
 import type { StateBackground } from '@versatiles/map-state';
-import { arrowImageOf } from '@versatiles/map-state/maplibre';
+import { arrowImageOf, patternImageOf } from '@versatiles/map-state/maplibre';
 import { inlineSources, type StyleSpecification } from '@versatiles/style';
 import { ELEMENT_LAYERS, type ElementRenderer, type LabelOptions } from './element_renderer.js';
 import { buildStyle, EDITOR_COLOR, keepElements, LAYERS_UNDER_MAP_LABELS } from './editor_style.js';
 import { themeColor } from './theme_color.js';
-import { addFillPatternImage } from './fill_patterns.js';
 import { loadSymbols, spriteSheets, configReady } from '../background/index.js';
 
 /** The source of the landcover of low zoom levels, which the vector map loads from tiles of its own. */
 const LANDCOVER_SOURCE = 'versatiles-landcover';
 
 /**
- * Add the image of an arrowhead, when the map asks for it (e.g. again after a new map style).
- * Returns false for other images.
+ * Add an image that the style uses and the sprites do not have, an arrowhead or a fill pattern, when
+ * the map asks for it (e.g. again after a new map style). Other images stay missing.
  */
-function addArrowImage(map: maplibregl.Map, name: string): boolean {
-	const image = arrowImageOf(name);
-	if (!image) return false;
-	if (!map.hasImage(name)) {
-		const { pixelRatio, sdf, ...pixels } = image;
-		map.addImage(name, pixels, { pixelRatio, sdf });
-	}
-	return true;
+function addStyleImage(map: maplibregl.Map, name: string): void {
+	if (map.hasImage(name)) return;
+	const image = arrowImageOf(name) ?? patternImageOf(name);
+	if (!image) return;
+	const { pixelRatio, sdf, ...pixels } = image;
+	map.addImage(name, pixels, { pixelRatio, sdf });
 }
 
 /** The style without a source and the layers that draw it. */
@@ -65,7 +62,7 @@ export class MapStyleLoader {
 			this.#applyLayerOrder();
 		});
 		// the images of the fill patterns and arrowheads are made when the map needs them, e.g. again after a new style
-		map.setMissingStyleImageResolver((id) => void (addFillPatternImage(map, id) || addArrowImage(map, id)));
+		map.setMissingStyleImageResolver((id) => addStyleImage(map, id));
 		void this.#load(undefined);
 	}
 

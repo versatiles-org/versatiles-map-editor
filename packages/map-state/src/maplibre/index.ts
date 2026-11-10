@@ -25,6 +25,16 @@ export {
 	type ArrowHeadCanvas,
 	type ArrowProperties
 } from './arrow_heads.js';
+export {
+	fillPatternName,
+	parseFillPatternName,
+	PATTERN_PIXEL_RATIO,
+	PATTERN_SPACING,
+	patternImage,
+	patternImageOf,
+	type FillPatternImage,
+	type PatternImage
+} from './fill_patterns.js';
 export { circle, distance, EARTH_RADIUS, lat2mercator, mercator2lat } from './geometry.js';
 export { curvePoint, smoothPath } from './smooth_path.js';
 export type { StyleImage } from './types.js';

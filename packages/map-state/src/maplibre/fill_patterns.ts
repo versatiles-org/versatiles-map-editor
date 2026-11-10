@@ -1,6 +1,33 @@
-import type * as maplibregl from 'maplibre-gl';
-import { parseColor, type FillPatternName } from '@versatiles/map-state';
-import { parseFillPatternName } from '../style/index.js';
+import { parseColor } from '../color.js';
+import { FILL_PATTERN_NAMES, type FillPatternName } from '../types.js';
+import type { StyleImage } from './types.js';
+
+const PATTERN_PREFIX = 'fill-pattern:';
+
+/** A fill pattern with its size and coverage, in a color: what an image of a pattern shows. */
+export interface FillPatternImage {
+	pattern: FillPatternName;
+	scale: number;
+	coverage: number;
+	color: string;
+}
+
+/**
+ * The name of the image that fills an area with the pattern in the color, shared by all such
+ * areas, e.g. "fill-pattern:dots:1.5:0.25:#ff0000".
+ */
+export function fillPatternName({ pattern, scale, coverage, color }: FillPatternImage): string {
+	return `${PATTERN_PREFIX}${pattern}:${scale}:${coverage}:${color.toLowerCase()}`;
+}
+
+/** What an image of `fillPatternName` shows, or undefined for other images. */
+export function parseFillPatternName(name: string): FillPatternImage | undefined {
+	if (!name.startsWith(PATTERN_PREFIX)) return undefined;
+	const [value, scale, coverage, color] = name.slice(PATTERN_PREFIX.length).split(':');
+	const pattern = FILL_PATTERN_NAMES.find((pattern) => pattern === value);
+	if (!pattern || !color) return undefined;
+	return { pattern, scale: Number(scale), coverage: Number(coverage), color };
+}
 
 /** The distance between the lines (across them) or the dots of a pattern at scale 1, in CSS pixels. */
 export const PATTERN_SPACING = 8;
@@ -11,12 +38,11 @@ export const PATTERN_PIXEL_RATIO = 2;
 /** The samples per tile at most, for the antialiasing: fewer per pixel in large tiles. */
 const MAX_SAMPLES = 2 ** 16;
 
-/** An image of a fill pattern: one tile, which repeats without a seam. */
-export interface PatternImage {
-	width: number;
-	height: number;
+/** An image of a fill pattern: one tile, which repeats without a seam, in its color (not an SDF image). */
+export interface PatternImage extends StyleImage {
+	// as `ImageData` takes it, e.g. to draw the pattern in a legend
 	data: Uint8ClampedArray<ArrayBuffer>;
-	pixelRatio: number;
+	sdf: false;
 }
 
 const isDiagonal = (shape: FillPatternName) => shape.startsWith('diagonal');
@@ -133,20 +159,15 @@ export function patternImage(shape: FillPatternName, scale: number, coverage: nu
 	for (let p = 0; p < opacity.length; p++) {
 		data.set([r, g, b, 255 * alpha * opacity[p]], p * 4);
 	}
-	return { width: size, height: size, data, pixelRatio: PATTERN_PIXEL_RATIO };
+	return { width: size, height: size, data, pixelRatio: PATTERN_PIXEL_RATIO, sdf: false };
 }
 
 /**
- * Add the image of a fill pattern, when the map asks for it (e.g. again after a new map style).
- * Returns false for other images.
+ * The image of a fill pattern by its name (see `fillPatternName`), e.g. for `map.addImage` when the
+ * map asks for it; undefined for other images.
  */
-export function addFillPatternImage(map: maplibregl.Map, name: string): boolean {
+export function patternImageOf(name: string): PatternImage | undefined {
 	const parsed = parseFillPatternName(name);
-	if (!parsed) return false;
-	if (!map.hasImage(name)) {
-		const { pattern, scale, coverage, color } = parsed;
-		const { width, height, data, pixelRatio } = patternImage(pattern, scale, coverage, color);
-		map.addImage(name, { width, height, data }, { pixelRatio });
-	}
-	return true;
+	if (!parsed) return undefined;
+	return patternImage(parsed.pattern, parsed.scale, parsed.coverage, parsed.color);
 }

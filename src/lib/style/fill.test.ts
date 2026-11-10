@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest';
-import { fillPatternName, FillStyle, parseFillPatternName } from './fill.svelte.js';
+import { FillStyle } from './fill.svelte.js';
 
 describe('FillStyle', () => {
 	let onChange: Mock<() => void>;
@@ -82,14 +82,5 @@ describe('FillStyle', () => {
 
 		expect(layer.color).toBe('#0000ff');
 		expect(layer.pattern).toBe('solid');
-	});
-});
-
-describe('the names of fill pattern images', () => {
-	it('hold the pattern, its size and coverage, and the color, in lowercase', () => {
-		const name = fillPatternName({ pattern: 'dots', scale: 1.5, coverage: 0.25, color: '#FF0000' });
-		expect(name).toBe('fill-pattern:dots:1.5:0.25:#ff0000');
-		expect(parseFillPatternName(name)).toStrictEqual({ pattern: 'dots', scale: 1.5, coverage: 0.25, color: '#ff0000' });
-		expect(parseFillPatternName('base:icon-airfield')).toBeUndefined();
 	});
 });

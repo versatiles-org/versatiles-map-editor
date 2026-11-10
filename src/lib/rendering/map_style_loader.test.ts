@@ -154,9 +154,11 @@ describe('MapStyleLoader', () => {
 			resolver('base:icon-airfield');
 			expect(map.addImage).not.toHaveBeenCalled();
 			resolver('fill-pattern:diagonal-up:1:0.5:#ff0000');
-			expect(map.addImage).toHaveBeenCalledWith('fill-pattern:diagonal-up:1:0.5:#ff0000', expect.anything(), {
-				pixelRatio: 2
-			});
+			expect(map.addImage).toHaveBeenCalledWith(
+				'fill-pattern:diagonal-up:1:0.5:#ff0000',
+				{ width: 23, height: 23, data: expect.any(Uint8ClampedArray) },
+				{ pixelRatio: 2, sdf: false }
+			);
 		});
 		it('makes the missing images of arrowheads, as SDF images, once', () => {
 			const resolver = map.setMissingStyleImageResolver.mock.lastCall![0] as (id: string) => void;

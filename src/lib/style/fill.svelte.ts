@@ -1,40 +1,7 @@
 import { StylePart } from './abstract.svelte.js';
-import {
-	type FillPatternName,
-	type StateStyle,
-	AREA_DEFAULTS,
-	FILL_PATTERN_NAMES,
-	formatHex,
-	parseColor
-} from '@versatiles/map-state';
+import { type FillPatternName, type StateStyle, AREA_DEFAULTS, formatHex, parseColor } from '@versatiles/map-state';
+import { fillPatternName } from '@versatiles/map-state/maplibre';
 import { storedStyle } from './defaults.js';
-
-const PATTERN_PREFIX = 'fill-pattern:';
-
-/** A fill pattern with its size and coverage, in a color: what an image of a pattern shows. */
-export interface FillPatternImage {
-	pattern: FillPatternName;
-	scale: number;
-	coverage: number;
-	color: string;
-}
-
-/**
- * The name of the image that fills an area with the pattern in the color, shared by all such
- * areas, e.g. "fill-pattern:dots:1.5:0.25:#ff0000".
- */
-export function fillPatternName({ pattern, scale, coverage, color }: FillPatternImage): string {
-	return `${PATTERN_PREFIX}${pattern}:${scale}:${coverage}:${color.toLowerCase()}`;
-}
-
-/** What an image of `fillPatternName` shows, or undefined for other images. */
-export function parseFillPatternName(name: string): FillPatternImage | undefined {
-	if (!name.startsWith(PATTERN_PREFIX)) return undefined;
-	const [value, scale, coverage, color] = name.slice(PATTERN_PREFIX.length).split(':');
-	const pattern = FILL_PATTERN_NAMES.find((pattern) => pattern === value);
-	if (!pattern || !color) return undefined;
-	return { pattern, scale: Number(scale), coverage: Number(coverage), color };
-}
 
 export class FillStyle extends StylePart {
 	static readonly defaultStyle = AREA_DEFAULTS;
