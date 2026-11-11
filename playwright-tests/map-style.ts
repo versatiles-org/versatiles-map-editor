@@ -60,7 +60,8 @@ type Layer = { id: string; source?: string } & Record<string, unknown>;
 type Feature = { id?: unknown; geometry: unknown; properties: Record<string, unknown> };
 
 test('a server builds the style of a map as the viewer draws it', async ({ page }) => {
-	test.setTimeout(120_000);
+	// ten maps, twice the time of a test of this browser (Firefox in CI has three times as long)
+	test.setTimeout(test.info().timeout * 2);
 	await page.goto('/view/');
 	await waitForMapIsReady(page);
 	const symbols = await fetchSymbolCatalog({ tileServer: TILES, fetch: fetchInPage(page) });
@@ -71,7 +72,9 @@ test('a server builds the style of a map as the viewer draws it', async ({ page 
 			const state = decodeState(link);
 			await page.goto('about:blank');
 			await page.goto('/view/#' + link);
-			await waitForMapIsReady(page);
+			// satellite imagery on terrain, tilted (Mont Blanc): Firefox in CI renders it on the CPU,
+			// where loading takes more than 30 s
+			await waitForMapIsReady(page, { timeout: 60_000 });
 			const shown = await page.evaluate(() => {
 				const style = (window as unknown as MapWindow).map.getStyle();
 				const sources = Object.fromEntries(
