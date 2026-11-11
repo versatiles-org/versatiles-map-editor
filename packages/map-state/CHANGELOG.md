@@ -5,6 +5,24 @@ All notable changes to `@versatiles/map-state` are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this package adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-11
+
+### Features
+
+- **map-state:** add the entry @versatiles/map-state/maplibre, with the geometry of smooth lines and circles (#45) ([c0545f0](https://github.com/versatiles-org/versatiles-map-editor/commit/c0545f0188552c7517a327b617fd405d658cb4a9))
+- **map-state:** the arrowheads of lines and their images in @versatiles/map-state/maplibre (#45) ([7769447](https://github.com/versatiles-org/versatiles-map-editor/commit/776944773720402e026cd8b7db2c96d502e800f5))
+- **map-state:** the fill patterns of areas and their images in @versatiles/map-state/maplibre (#45) ([38376a3](https://github.com/versatiles-org/versatiles-map-editor/commit/38376a380f3735b9592f3b79c26c14f749f4168a))
+- **map-state:** the features of elements, with their geometry and properties, in @versatiles/map-state/maplibre (#45) ([5d9f188](https://github.com/versatiles-org/versatiles-map-editor/commit/5d9f188c7c56f11d4ff481fbc10c671f4866ce3b))
+- **map-state:** load the symbols of a tile server with @versatiles/map-state/maplibre (#45) ([78c384d](https://github.com/versatiles-org/versatiles-map-editor/commit/78c384de52a0ab820ece311a2b76a1d04d27464b))
+- **map-state:** the layers that draw the elements in @versatiles/map-state/maplibre (#45) ([841c7e1](https://github.com/versatiles-org/versatiles-map-editor/commit/841c7e1f5761f88dbcbe735de060c2f3d2cb67f1))
+- **map-state:** the style of the background map in @versatiles/map-state/maplibre (#45) ([44feb43](https://github.com/versatiles-org/versatiles-map-editor/commit/44feb43c2defb0df2f3e61531aeef1185f82d44d))
+- **map-state:** the camera of the viewer in @versatiles/map-state/maplibre (#45) ([70bef47](https://github.com/versatiles-org/versatiles-map-editor/commit/70bef47b26e7577d6010acf9158446a0df63254e))
+- **map-state:** mapStyle draws a whole map with @versatiles/map-state/maplibre (#45) ([e391f22](https://github.com/versatiles-org/versatiles-map-editor/commit/e391f224db9ae1dfbfba4d23d6ac33395a536c2f))
+
+### Documentation
+
+- name the scripts by their .ts files, and the rules for writing them ([b2644f2](https://github.com/versatiles-org/versatiles-map-editor/commit/b2644f274361d7faf91dab0d79a80b7ad69ec521))
+
 ## [1.1.1] - 2026-11-08
 
 ### Performance Improvements

@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-11-11
+
+### Features
+
+- **viewer:** read the map also from the query parameter "map", which wins over the hash (closes #43) ([74b9a6c](https://github.com/versatiles-org/versatiles-map-editor/commit/74b9a6ccdcc13684702d4b600d154f688aaa3027))
+- **editor:** a host chooses the form of share links with "shareLink" in the configuration (closes #44) ([d74dfc7](https://github.com/versatiles-org/versatiles-map-editor/commit/d74dfc79a610da51e07f475fbdff5af2059470d5))
+- **map-state:** add the entry @versatiles/map-state/maplibre, with the geometry of smooth lines and circles (#45) ([c0545f0](https://github.com/versatiles-org/versatiles-map-editor/commit/c0545f0188552c7517a327b617fd405d658cb4a9))
+- **map-state:** the arrowheads of lines and their images in @versatiles/map-state/maplibre (#45) ([7769447](https://github.com/versatiles-org/versatiles-map-editor/commit/776944773720402e026cd8b7db2c96d502e800f5))
+- **map-state:** the fill patterns of areas and their images in @versatiles/map-state/maplibre (#45) ([38376a3](https://github.com/versatiles-org/versatiles-map-editor/commit/38376a380f3735b9592f3b79c26c14f749f4168a))
+- **map-state:** the features of elements, with their geometry and properties, in @versatiles/map-state/maplibre (#45) ([5d9f188](https://github.com/versatiles-org/versatiles-map-editor/commit/5d9f188c7c56f11d4ff481fbc10c671f4866ce3b))
+- **map-state:** load the symbols of a tile server with @versatiles/map-state/maplibre (#45) ([78c384d](https://github.com/versatiles-org/versatiles-map-editor/commit/78c384de52a0ab820ece311a2b76a1d04d27464b))
+- **map-state:** the layers that draw the elements in @versatiles/map-state/maplibre (#45) ([841c7e1](https://github.com/versatiles-org/versatiles-map-editor/commit/841c7e1f5761f88dbcbe735de060c2f3d2cb67f1))
+- **map-state:** the style of the background map in @versatiles/map-state/maplibre (#45) ([44feb43](https://github.com/versatiles-org/versatiles-map-editor/commit/44feb43c2defb0df2f3e61531aeef1185f82d44d))
+- **map-state:** the camera of the viewer in @versatiles/map-state/maplibre (#45) ([70bef47](https://github.com/versatiles-org/versatiles-map-editor/commit/70bef47b26e7577d6010acf9158446a0df63254e))
+- **map-state:** mapStyle draws a whole map with @versatiles/map-state/maplibre (#45) ([e391f22](https://github.com/versatiles-org/versatiles-map-editor/commit/e391f224db9ae1dfbfba4d23d6ac33395a536c2f))
+
+### Code Refactoring
+
+- **scripts:** migrate the scripts from JavaScript to TypeScript, checked by check-types ([54277c0](https://github.com/versatiles-org/versatiles-map-editor/commit/54277c020031b069aab2e5e4362ec784eb409378))
+
+### Documentation
+
+- name the scripts by their .ts files, and the rules for writing them ([b2644f2](https://github.com/versatiles-org/versatiles-map-editor/commit/b2644f274361d7faf91dab0d79a80b7ad69ec521))
+- update dependency graph ([79b8cb8](https://github.com/versatiles-org/versatiles-map-editor/commit/79b8cb8eef14a614cb80c1b63d05e263f901ddb2))
+- update deps-graph ([cc4dbb7](https://github.com/versatiles-org/versatiles-map-editor/commit/cc4dbb76192fe38a36b067bcda0a46ea9f2880ec))
+
+### Tests
+
+- **map-state:** freeze the samples of the Mont Blanc example ([b1305b9](https://github.com/versatiles-org/versatiles-map-editor/commit/b1305b9e144d4ecf3d9199d10d6ec33059a88f8f))
+- resolve @versatiles/map-state/maplibre from its source in the types of the Playwright tests too (#45) ([483ef76](https://github.com/versatiles-org/versatiles-map-editor/commit/483ef7625bc0ba3fca7a2cf735d88547bc6c2759))
+- give the map-style test time for terrain in Firefox on CI (#45) ([2bdae36](https://github.com/versatiles-org/versatiles-map-editor/commit/2bdae36bf164191caea46e2ba0b4bf7849e9928f))
+
+### CI/CD
+
+- deploy GitHub Pages from CI once all tests have passed, instead of a workflow after CI ([e8927a2](https://github.com/versatiles-org/versatiles-map-editor/commit/e8927a2b2ae2d0874d52b2bbe85f18b622ff4b76))
+
+### Chores
+
+- update dependencies to latest versions ([22097f1](https://github.com/versatiles-org/versatiles-map-editor/commit/22097f13f8c73affde4d942b951f5a9b810801a8))
+- update @sveltejs/kit and @versatiles/release-tool to latest versions ([6e301c6](https://github.com/versatiles-org/versatiles-map-editor/commit/6e301c69d5e9318c920f6dd9664090ab985ab93a))
+- **deps:** update @versatiles/release-tool to v2.23.0, prettier to v3.10.0, sass-embedded to v1.108.2, and vite to v8.3.8 ([1b56610](https://github.com/versatiles-org/versatiles-map-editor/commit/1b566103c0ce43c4ecf46ef6f552fe943bcb4677))
+
 ## [4.2.0] - 2026-11-08
 
 ### Features
