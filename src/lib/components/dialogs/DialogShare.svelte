@@ -369,8 +369,10 @@
 					onchange={(e) => {
 						precision = e.currentTarget.checked ? 'auto' : autoExponent;
 						update(0);
-					}}>Automatic, fine enough for the visible area</Checkbox
+					}}
 				>
+					Automatic, fine enough for the visible area
+				</Checkbox>
 				{#if mapHasPopups}
 					<!-- for this link only, like the accuracy: the map keeps its popups -->
 					<Checkbox
@@ -382,8 +384,9 @@
 							splitTexts();
 						}}
 						title="Without them, a click on an element of the shared map opens nothing, and the link is shorter. The map keeps its popups."
-						>Include popups</Checkbox
 					>
+						Include popups
+					</Checkbox>
 				{/if}
 				<!-- What the word of the slider means. No live region: it would be announced at every step
 				     of the slider, which tells its value itself. -->

@@ -67,11 +67,12 @@
 		size="md"
 		title={previewing ? 'Back to editing (Escape)' : 'The map as visitors see it'}
 		onclick={() => (previewing = !previewing)}
-		>{#if previewing}<Icon name="edit" size={16} />Editor{:else}<Icon name="preview" size={16} />Preview{/if}</Button
 	>
-	<Button bind:element={share} class="whole" variant="primary" size="md" onclick={() => dialogShare?.open()}
-		><Icon name="share" size={16} />Share</Button
-	>
+		{#if previewing}<Icon name="edit" size={16} />Editor{:else}<Icon name="preview" size={16} />Preview{/if}
+	</Button>
+	<Button bind:element={share} class="whole" variant="primary" size="md" onclick={() => dialogShare?.open()}>
+		<Icon name="share" size={16} />Share
+	</Button>
 	<DialogShare bind:this={dialogShare} state={doc.state} />
 </header>
 

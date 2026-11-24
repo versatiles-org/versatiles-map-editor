@@ -282,9 +282,9 @@
 						<legend class="sr-only">Entry {i + 1}</legend>
 						<!-- closed: the handle to drag it, its look, its text, and the button to open it -->
 						<div class="row">
-							<span class="grip" aria-hidden="true" title="Drag to move" onpointerdown={(e) => onGripDown(e, i)}
-								><Icon name="grip" size={14} /></span
-							>
+							<span class="grip" aria-hidden="true" title="Drag to move" onpointerdown={(e) => onGripDown(e, i)}>
+								<Icon name="grip" size={14} />
+							</span>
 							<LegendMark {entry} />
 							<TextField
 								id="{uid}-{i}-label"

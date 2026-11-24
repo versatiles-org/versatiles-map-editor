@@ -141,10 +141,10 @@
 					: 'Shared maps show all elements. You can set the area that they show.'}
 			</Hint>
 			<ButtonGroup><Button onclick={() => doc.visibleArea.open()}>Edit shared map…</Button></ButtonGroup>
-			<Hint
-				>Its visible area, its rotation and tilt, and what visitors see over it: the search, the zoom buttons, the
-				legend.</Hint
-			>
+			<Hint>
+				Its visible area, its rotation and tilt, and what visitors see over it: the search, the zoom buttons, the
+				legend.
+			</Hint>
 		</InspectorSection>
 		<!-- its sections: the background map, its colors and its labels -->
 		<PanelBackground {doc} />

@@ -89,12 +89,14 @@
 		<Button
 			disabled={!canPasteStyleToEntry(doc)}
 			title="The style of an element, copied with “Copy style”"
-			onclick={() => pasteStyleToEntry(doc, index)}>Paste style</Button
+			onclick={() => pasteStyleToEntry(doc, index)}
 		>
+			Paste style
+		</Button>
 		<!-- a pipette: the next click on an element of the map; again to cancel -->
-		<Button aria-pressed={picking} title="Click an element on the map to take its style" onclick={onpick}
-			><Icon name="pipette" size={16} />Take style from…</Button
-		>
+		<Button aria-pressed={picking} title="Click an element on the map to take its style" onclick={onpick}>
+			<Icon name="pipette" size={16} />Take style from…
+		</Button>
 	</ButtonGroup>
 	{#if picking}
 		<div role="status"><Hint>Click an element on the map to take its style. Escape cancels.</Hint></div>

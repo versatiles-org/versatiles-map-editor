@@ -126,9 +126,9 @@
 				<!-- a small copy of the element: its symbol, its line or its area -->
 				<LegendMark {entry} />
 				<!-- the text in the color of its symbol, line or area -->
-				<span class="text" style:--entry-color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}
-					>{entry.label}</span
-				>
+				<span class="text" style:--entry-color={textColor(entry)} style:translate={shift ? `0 ${shift}px` : undefined}>
+					{entry.label}
+				</span>
 			</div>
 		{/each}
 	</div>

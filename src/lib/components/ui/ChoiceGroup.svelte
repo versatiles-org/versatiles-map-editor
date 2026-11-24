@@ -62,8 +62,9 @@
 			{#if layout === 'segmented'}
 				{option.label}
 			{:else}
-				{#if picture}{@render picture(option.value)}{:else if option.short}<span aria-hidden="true">{option.short}</span
-					>{/if}
+				{#if picture}{@render picture(option.value)}{:else if option.short}<span aria-hidden="true">
+						{option.short}
+					</span>{/if}
 				<span class="sr-only">{option.label}</span>
 			{/if}
 		</label>

@@ -92,8 +92,10 @@
 		<Button
 			variant="link"
 			title="Browsers can delete the maps they keep. A downloaded file keeps the map."
-			onclick={() => files.downloadFile()}>Download</Button
+			onclick={() => files.downloadFile()}
 		>
+			Download
+		</Button>
 	</span>
 	<span class="position">{position}</span>
 	<a class="support" href="https://versatiles.org/donate/" target="_blank" rel="noopener noreferrer">

@@ -232,10 +232,10 @@
 		</li>
 	{/each}
 </ul>
-<Hint
-	>Shift-click or Shift and arrow keys select a range, {TOGGLE_KEY}-click adds or removes one element. Drag them to
-	change the drawing order.</Hint
->
+<Hint>
+	Shift-click or Shift and arrow keys select a range, {TOGGLE_KEY}-click adds or removes one element. Drag them to
+	change the drawing order.
+</Hint>
 
 <style>
 	.elements {

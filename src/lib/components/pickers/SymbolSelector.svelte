@@ -115,10 +115,10 @@
 			{/if}
 			{#key theme}
 				{#each symbols as item (item.name)}
-					<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}
-						><canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
-						></canvas><br /><span class="title">{item.title}</span></button
-					>
+					<button class="item" title={item.name} onclick={() => selectSymbol(item.name)}>
+						<canvas width={listIconSize * retina} height={listIconSize * retina} use:drawIconHalo={item.name}
+						></canvas><br /><span class="title">{item.title}</span>
+					</button>
 				{/each}
 			{/key}
 		</div>

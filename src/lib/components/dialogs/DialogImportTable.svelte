@@ -129,9 +129,9 @@
 			/>
 			<label for="{uid}-paste">Or paste the table here:</label>
 			<TextArea id="{uid}-paste" class="table" rows={8} bind:value={text} />
-			<Button variant="primary" size="md" disabled={!text.trim()} onclick={() => startMapping(undefined)}
-				>Continue</Button
-			>
+			<Button variant="primary" size="md" disabled={!text.trim()} onclick={() => startMapping(undefined)}>
+				Continue
+			</Button>
 		{:else if step === 'mapping' && table}
 			<ImportMapping
 				{table}
