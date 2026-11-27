@@ -63,6 +63,18 @@ describe('the symbol catalog of a tile server', () => {
 		]);
 	});
 
+	it('strips any trailing slashes of the tile server, quickly even for a long run of them', () => {
+		const catalog = { sheets: ['base'], symbols: [] };
+		expect(spriteSheets(catalog, 'https://t.org///')[0].url).toBe('https://t.org/assets/sprites/base');
+		expect(spriteSheets(catalog, '/')[0].url).toBe('/assets/sprites/base');
+		const slashes = '/'.repeat(100_000);
+		const start = performance.now();
+		expect(spriteSheets(catalog, `https://t.org${slashes}x`)[0].url).toBe(
+			`https://t.org${slashes}x/assets/sprites/base`
+		);
+		expect(performance.now() - start).toBeLessThan(100);
+	});
+
 	it('is refused if the server does not answer', async () => {
 		await expect(
 			fetchSymbolCatalog({ tileServer: 'https://other.example.org', fetch: server('nowhere') })

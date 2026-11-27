@@ -16,7 +16,10 @@ export type FetchJSON = (url: string) => Promise<{ ok: boolean; status: number; 
 
 /** The folder of the sprite sheets on a tile server, e.g. "https://tiles.versatiles.org/assets/sprites/". */
 function spritesUrl(tileServer: string): string {
-	return `${tileServer.replace(/\/+$/, '')}/assets/sprites/`;
+	// Without a regular expression, which would backtrack on a long run of slashes.
+	let end = tileServer.length;
+	while (end > 0 && tileServer[end - 1] === '/') end--;
+	return `${tileServer.slice(0, end)}/assets/sprites/`;
 }
 
 interface SpriteImage {
